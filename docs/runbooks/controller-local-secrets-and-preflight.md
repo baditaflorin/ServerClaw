@@ -85,6 +85,17 @@ To exercise that path directly:
 make preflight WORKFLOW=configure-edge-publication
 ```
 
+Fresh worktrees now also repair the shared controller bootstrap key alias before
+the governed workflow continues. The canonical alias lives under the shared
+overlay as `.local/ssh/bootstrap.id_ed25519` and `.local/ssh/bootstrap.id_ed25519.pub`.
+
+To materialize or inspect that alias directly from any checkout:
+
+```bash
+./scripts/resolve_local_overlay_root.sh
+python3 scripts/materialize_bootstrap_key_alias.py
+```
+
 ## Blocked Paths
 
 `make preflight WORKFLOW=configure-backups` is expected to fail.
@@ -97,5 +108,9 @@ That workflow still points at the superseded ADR 0020 external CIFS secret set a
 - The bootstrap manifest owns worktree-generated artifacts and non-secret local helper-path checks for governed automation.
 - Keep `.local/` out of git and treat it as part of the real operating contract for the controller machine.
 - Use [config/examples/reference-controller-local-secrets.json](../../config/examples/reference-controller-local-secrets.json) as the public-safe starter contract for a new fork, then replace only the entries your environment actually needs.
+- The generic bootstrap alias is the stable contract for active automation. The
+  legacy `hetzner_llm_agents_ed25519` filenames may remain as source material on
+  older controllers, but new commands and docs should point at
+  `bootstrap.id_ed25519`.
 - If a new playbook or script needs local secret material, update the secret manifest and workflow catalog in the same change.
 - If a fresh worktree depends on generated local output or a non-secret controller path, update the bootstrap manifest catalog in the same change.

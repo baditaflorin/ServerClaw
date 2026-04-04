@@ -9,7 +9,8 @@ Access recovery succeeded on 2026-03-21.
 Confirmed working login:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes root@65.108.75.123
+LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@65.108.75.123
 ```
 
 Confirmed remote system:
@@ -66,9 +67,21 @@ installimage
 
 A repo-local SSH keypair was generated for LLM-assisted bootstrap work:
 
-- Private key: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
-- Public key: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519.pub`
+- Private key: `.local/ssh/bootstrap.id_ed25519`
+- Public key: `.local/ssh/bootstrap.id_ed25519.pub`
 - Fingerprint: `SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ`
+
+Canonical shared-overlay aliases:
+
+- Private key: `.local/ssh/bootstrap.id_ed25519`
+- Public key: `.local/ssh/bootstrap.id_ed25519.pub`
+
+If an older controller checkout still only has the legacy
+`hetzner_llm_agents_ed25519` filenames, materialize the canonical aliases once:
+
+```bash
+python3 scripts/materialize_bootstrap_key_alias.py
+```
 
 Public key value:
 
@@ -79,13 +92,15 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer
 Preferred login test with that key:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 root@65.108.75.123
+LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" root@65.108.75.123
 ```
 
 If your SSH agent is offering other keys first, force this key only:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes root@65.108.75.123
+LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@65.108.75.123
 ```
 
 ## Rejected path: VNC install
@@ -110,7 +125,8 @@ Once the installer is available over VNC:
 Preferred post-install test:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes root@65.108.75.123
+LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@65.108.75.123
 ```
 
 If the VNC installer does not clearly apply the SSH public key, plan to use Rescue or console immediately after install to place the public key into `/root/.ssh/authorized_keys`.

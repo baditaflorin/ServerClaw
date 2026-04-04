@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = REPO_ROOT / "scripts" / "validation_runner_contracts.py"
@@ -146,3 +148,35 @@ def test_repo_catalog_covers_current_gate_and_build_server_contracts(monkeypatch
     monkeypatch.setattr(module, "_validate_schema", lambda _catalog: None)
 
     module.validate_contract_catalog(catalog)
+
+
+def test_validate_contract_catalog_rejects_absolute_repo_local_build_server_key(monkeypatch) -> None:
+    module = load_module("validation_runner_contracts_absolute_build_server_key")
+    catalog = module.load_contract_catalog()
+    build_server_config = {
+        "ssh_key": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519",
+        "ssh_options": [],
+        "commands": {},
+    }
+
+    monkeypatch.setattr(module, "_validate_schema", lambda _catalog: None)
+    monkeypatch.setattr(module, "_load_validation_gate", lambda: {})
+
+    with pytest.raises(ValueError, match="must not embed an operator workstation path"):
+        module.validate_contract_catalog(catalog, build_server_config=build_server_config)
+
+
+def test_validate_contract_catalog_rejects_legacy_build_server_key_name(monkeypatch) -> None:
+    module = load_module("validation_runner_contracts_legacy_build_server_key_name")
+    catalog = module.load_contract_catalog()
+    build_server_config = {
+        "ssh_key": ".local/ssh/bootstrap.id_ed25519",
+        "ssh_options": ["-o", "ProxyCommand=ssh -i .local/ssh/hetzner_llm_agents_ed25519 -W %h:%p jump"],
+        "commands": {},
+    }
+
+    monkeypatch.setattr(module, "_validate_schema", lambda _catalog: None)
+    monkeypatch.setattr(module, "_load_validation_gate", lambda: {})
+
+    with pytest.raises(ValueError, match="legacy deployment-specific bootstrap key name"):
+        module.validate_contract_catalog(catalog, build_server_config=build_server_config)

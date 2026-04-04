@@ -111,3 +111,19 @@ def test_repo_path_prefers_shared_root_local_dir_from_worktree(tmp_path: Path, m
     resolved = repo_module.repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
 
     assert resolved == shared_secret
+
+
+def test_repo_path_routes_missing_dot_local_targets_to_shared_root_from_worktree(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    worktree_root = tmp_path / ".worktrees" / "ws-0333-live-apply"
+    shared_local_root = tmp_path / ".local"
+    worktree_root.mkdir(parents=True)
+    shared_local_root.mkdir(parents=True)
+
+    monkeypatch.setattr(repo_module, "REPO_ROOT", worktree_root)
+
+    resolved = repo_module.repo_path(".local", "ssh", "bootstrap.id_ed25519")
+
+    assert resolved == shared_local_root / "ssh" / "bootstrap.id_ed25519"

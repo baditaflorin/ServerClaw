@@ -76,6 +76,7 @@ rewriting one operator's workstation paths.
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `public_github_readiness` | `2026-04-04-adr-0330-public-github-readiness-mainline-live-apply` |
+| `private_overlay_contract` | `2026-04-04-adr-0333-private-overlay-mainline-live-apply` |
 | `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
@@ -92,9 +93,8 @@ rewriting one operator's workstation paths.
 | `operator_onboarding` | `2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply` |
 | `open_webui` | `2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply` |
 | `ntfy` | `2026-04-03-adr-0299-ntfy-mainline-live-apply` |
-| `label_studio` | `2026-04-03-adr-0289-label-studio-mainline-live-apply` |
 
-Showing 20 of 168 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 169 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -194,13 +194,14 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 293 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 294 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](docs/workstreams/ws-0332-resilience-predictability.md) |
 | `0337` | Re-verify fork-first workstream metadata from the latest origin/main | `live_applied` | [ws-0337-live-apply.md](docs/workstreams/ws-0337-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
+| `0333` | Finish the shared private-overlay bootstrap alias contract and verify it from a dedicated worktree | `live_applied` | [adr-0333-private-overlay-live-apply.md](docs/workstreams/adr-0333-private-overlay-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](docs/workstreams/ws-0330-main-closeout.md) |
 | `0328` | Implement size-budgeted root summaries and automatic rollover ledgers | `live_applied` | [ws-0328-live-apply.md](docs/workstreams/ws-0328-live-apply.md) |
 | `0327` | Live apply sectional agent discovery registries and generated onboarding packs from latest origin/main | `live_applied` | [ws-0327-live-apply.md](docs/workstreams/ws-0327-live-apply.md) |
@@ -222,7 +223,6 @@ Showing 25 of 293 merged or live-applied workstreams. Full history: [merged work
 | `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](docs/workstreams/adr-0178-dependency-wave-manifests.md) |
 | `0176` | Inventory sharding and host-scoped Ansible execution | `live_applied` | [adr-0176-inventory-sharding.md](docs/workstreams/adr-0176-inventory-sharding.md) |
 | `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
-| `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

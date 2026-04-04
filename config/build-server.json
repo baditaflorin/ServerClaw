@@ -1,6 +1,6 @@
 {
   "host": "ops@10.10.10.30",
-  "ssh_key": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519",
+  "ssh_key": ".local/ssh/bootstrap.id_ed25519",
   "ssh_options": [
     "-o",
     "IdentitiesOnly=yes",
@@ -8,8 +8,8 @@
     "StrictHostKeyChecking=accept-new",
     "-o",
     "UserKnownHostsFile=/dev/null",
-    "-o",
-    "ProxyCommand=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p"
+    "-J",
+    "ops@100.64.0.1"
   ],
   "workspace_root": "/home/ops/builds/proxmox_florin_server",
   "default_timeout_seconds": 900,

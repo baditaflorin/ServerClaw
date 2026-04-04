@@ -114,7 +114,7 @@ def test_provision_skip_email_verifies_existing_assignments(
     monkeypatch.setattr(
         provision_operator,
         "SSH_KEY_FILE",
-        tmp_path / ".local" / "ssh" / "hetzner_llm_agents_ed25519",
+        tmp_path / ".local" / "ssh" / "bootstrap.id_ed25519",
     )
 
     monkeypatch.setattr(provision_operator, "get_token", lambda _password: "token")

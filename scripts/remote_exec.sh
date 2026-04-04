@@ -200,6 +200,13 @@ PY
   [[ -n "$REMOTE_HOST" ]] || fail "remote host is empty in $BUILD_SERVER_CONFIG"
   [[ -n "$WORKSPACE_ROOT_BASE" ]] || fail "workspace_root is empty in $BUILD_SERVER_CONFIG"
   [[ -n "$TIMEOUT_SECONDS" ]] || TIMEOUT_SECONDS="$DEFAULT_TIMEOUT_SECONDS"
+  if [[ "$SSH_KEY_PATH" == .local/* ]]; then
+    local shared_local_root=""
+    shared_local_root="$("$REPO_ROOT/scripts/resolve_local_overlay_root.sh")"
+    SSH_KEY_PATH="$shared_local_root/${SSH_KEY_PATH#.local/}"
+  elif [[ -n "$SSH_KEY_PATH" && "$SSH_KEY_PATH" != /* ]]; then
+    SSH_KEY_PATH="$REPO_ROOT/$SSH_KEY_PATH"
+  fi
 }
 
 load_session_workspace() {
@@ -332,10 +339,48 @@ cleanup_snapshot_build_dir() {
   SNAPSHOT_BUILD_DIR=""
 }
 
-build_snapshot() {
-  [[ -n "${LV3_SNAPSHOT_ID:-}" ]] && [[ -n "${LV3_SNAPSHOT_ARCHIVE:-}" ]] && return 0
+ensure_snapshot_metadata_defaults() {
+  if [[ -z "${LV3_SNAPSHOT_GENERATED_AT:-}" ]]; then
+    LV3_SNAPSHOT_GENERATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  fi
+  if [[ -z "${LV3_SNAPSHOT_SOURCE_COMMIT:-}" ]]; then
+    LV3_SNAPSHOT_SOURCE_COMMIT="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || true)"
+    [[ -n "$LV3_SNAPSHOT_SOURCE_COMMIT" ]] || LV3_SNAPSHOT_SOURCE_COMMIT="unknown"
+  fi
+  if [[ -z "${LV3_SNAPSHOT_BRANCH:-}" ]]; then
+    LV3_SNAPSHOT_BRANCH="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+    [[ -n "$LV3_SNAPSHOT_BRANCH" ]] || LV3_SNAPSHOT_BRANCH="detached"
+  fi
+  if [[ -z "${LV3_SNAPSHOT_FILE_COUNT:-}" ]]; then
+    LV3_SNAPSHOT_FILE_COUNT="0"
+  fi
+}
 
+initialize_snapshot_remote_paths() {
+  local run_label="$1"
+
+  REMOTE_SNAPSHOT_ARCHIVE="$WORKSPACE_ROOT/.lv3-snapshots/${LV3_SNAPSHOT_ID}.tar.gz"
+  [[ -n "$run_label" ]] || run_label="run"
+  REMOTE_RUN_ROOT="$WORKSPACE_ROOT/.lv3-runs/$(date -u +%Y%m%dT%H%M%SZ)-${run_label}-${LV3_SNAPSHOT_ID:0:12}-$$"
+  RUN_WORKSPACE_ROOT="$REMOTE_RUN_ROOT/repo"
+  export LV3_SNAPSHOT_ID LV3_SNAPSHOT_ARCHIVE LV3_SNAPSHOT_GENERATED_AT \
+    LV3_SNAPSHOT_SOURCE_COMMIT LV3_SNAPSHOT_BRANCH LV3_SNAPSHOT_FILE_COUNT
+}
+
+build_snapshot() {
   local run_label="${COMMAND_LABEL//[^[:alnum:]._-]/-}"
+
+  if [[ -n "${LV3_SNAPSHOT_ID:-}" && -n "${LV3_SNAPSHOT_ARCHIVE:-}" ]]; then
+    [[ -f "$LV3_SNAPSHOT_ARCHIVE" ]] || fail "prebuilt snapshot archive not found: $LV3_SNAPSHOT_ARCHIVE"
+    ensure_snapshot_metadata_defaults
+    initialize_snapshot_remote_paths "$run_label"
+    if [[ "$VERBOSE" == "1" ]]; then
+      echo "remote_exec: reusing immutable snapshot ${LV3_SNAPSHOT_ID} from ${LV3_SNAPSHOT_BRANCH}@${LV3_SNAPSHOT_SOURCE_COMMIT}" >&2
+      echo "remote_exec: remote run namespace ${RUN_WORKSPACE_ROOT}" >&2
+    fi
+    return 0
+  fi
+
   SNAPSHOT_BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/lv3-repo-snapshot.XXXXXX")"
   eval "$(
     "$PYTHON_BIN" "$REPO_ROOT/scripts/repository_snapshot.py" build \
@@ -345,12 +390,7 @@ build_snapshot() {
       --format shell
   )"
 
-  REMOTE_SNAPSHOT_ARCHIVE="$WORKSPACE_ROOT/.lv3-snapshots/${LV3_SNAPSHOT_ID}.tar.gz"
-  [[ -n "$run_label" ]] || run_label="run"
-  REMOTE_RUN_ROOT="$WORKSPACE_ROOT/.lv3-runs/$(date -u +%Y%m%dT%H%M%SZ)-${run_label}-${LV3_SNAPSHOT_ID:0:12}-$$"
-  RUN_WORKSPACE_ROOT="$REMOTE_RUN_ROOT/repo"
-  export LV3_SNAPSHOT_ID LV3_SNAPSHOT_ARCHIVE LV3_SNAPSHOT_GENERATED_AT \
-    LV3_SNAPSHOT_SOURCE_COMMIT LV3_SNAPSHOT_BRANCH LV3_SNAPSHOT_FILE_COUNT
+  initialize_snapshot_remote_paths "$run_label"
 
   if [[ "$VERBOSE" == "1" ]]; then
     echo "remote_exec: built immutable snapshot ${LV3_SNAPSHOT_ID} from ${LV3_SNAPSHOT_BRANCH}@${LV3_SNAPSHOT_SOURCE_COMMIT}" >&2

@@ -9,7 +9,10 @@ from types import ModuleType
 DEFAULT_REPO_PATH = "/srv/proxmox_florin_server"
 PROXMOX_ENV_KEYS = ("TF_VAR_proxmox_endpoint", "TF_VAR_proxmox_api_token")
 REPO_LOCAL_PROXMOX_API_TOKEN_PAYLOAD = Path(".local/proxmox-api/lv3-automation-primary.json")
-REPO_LOCAL_BOOTSTRAP_PRIVATE_KEY = Path(".local/ssh/hetzner_llm_agents_ed25519")
+REPO_LOCAL_BOOTSTRAP_PRIVATE_KEYS = (
+    Path(".local/ssh/bootstrap.id_ed25519"),
+    Path(".local/ssh/hetzner_llm_agents_ed25519"),
+)
 
 
 def _hydrate_proxmox_env_from_runtime_env(
@@ -88,9 +91,12 @@ def main(repo_path: str | None = DEFAULT_REPO_PATH):
     fixture_manager.HOST_VARS_PATH = repo_root / "inventory" / "host_vars" / "proxmox_florin.yml"
     fixture_manager.CAPACITY_MODEL_PATH = repo_root / "config" / "capacity-model.json"
     fixture_manager.EPHEMERAL_POOL_CATALOG_PATH = repo_root / "config" / "ephemeral-capacity-pools.json"
-    worker_bootstrap_private_key = repo_root / REPO_LOCAL_BOOTSTRAP_PRIVATE_KEY
-    if worker_bootstrap_private_key.exists():
-        fixture_manager.bootstrap_private_key = lambda: worker_bootstrap_private_key
+    for worker_bootstrap_private_key in (
+        repo_root / candidate for candidate in REPO_LOCAL_BOOTSTRAP_PRIVATE_KEYS
+    ):
+        if worker_bootstrap_private_key.exists():
+            fixture_manager.bootstrap_private_key = lambda: worker_bootstrap_private_key
+            break
     return fixture_manager.reconcile_pools()
 
 

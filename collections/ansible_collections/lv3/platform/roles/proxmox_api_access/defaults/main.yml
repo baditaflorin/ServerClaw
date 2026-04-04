@@ -1,3 +1,9 @@
+# Purpose: Declare the canonical Proxmox automation identity, RBAC defaults, and shared overlay token export path.
+# Use case: Loaded whenever the proxmox_api_access role provisions or verifies the durable Proxmox API automation token contract.
+# Inputs: Proxmox hostname, automation-user defaults, token privilege defaults, and shared repo-local overlay paths.
+# Outputs: Resolved default variables for the automation user, token privileges, and exported controller-local credential file.
+# Idempotency: N/A for defaults file because it only declares variables that downstream tasks consume.
+# Dependencies: ADR 0165, ADR 0034, ADR 0167, and ADR 0333.
 ---
 proxmox_api_hostname: proxmox.lv3.org
 proxmox_api_automation_user: lv3-automation@pve
@@ -50,5 +56,5 @@ proxmox_api_token_role_privileges:
   - VM.Snapshot.Rollback
 proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
-proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
-proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
+proxmox_api_token_local_dir: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/proxmox-api"
+proxmox_api_token_local_file: "{{ proxmox_api_token_local_dir }}/lv3-automation-primary.json"

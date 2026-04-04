@@ -7,13 +7,11 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from controller_automation_toolkit import REPO_ROOT, emit_cli_error
+from controller_automation_toolkit import REPO_ROOT, emit_cli_error, repo_path
 from platform_context_corpus import build_chunks, build_manifest_from_chunks, filter_chunks_by_source_paths
 
 
-DEFAULT_TOKEN_FILE = Path(
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt"
-)
+DEFAULT_TOKEN_FILE = repo_path(".local", "platform-context", "api-token.txt")
 
 
 def read_token(path: Path) -> str:

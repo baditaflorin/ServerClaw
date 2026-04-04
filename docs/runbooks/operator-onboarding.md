@@ -28,7 +28,8 @@ This runbook documents the repo-managed onboarding path introduced by ADR 0108.
 Prefer the Windmill worker path for real onboarding:
 
 ```bash
-WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
+WINDMILL_TOKEN="$(tr -d '\n' < "${LOCAL_OVERLAY_ROOT}/windmill/superadmin-secret.txt")" \
 python3 scripts/windmill_run_wait_result.py \
   --base-url http://100.64.0.1:8005 \
   --workspace lv3 \
@@ -103,13 +104,14 @@ bootstrap credentials:
 If you need the controller-side script path, forward the guest-host OpenBao automation listener first:
 
 ```bash
+LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
 ssh -f -N \
-  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" \
   -o IdentitiesOnly=yes \
   -o ExitOnForwardFailure=yes \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
-  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' \
+  -J ops@100.64.0.1 \
   -L 18201:127.0.0.1:8201 \
   ops@10.10.10.20
 ```
@@ -126,7 +128,7 @@ python3 scripts/operator_manager.py onboard \
   --emit-json
 ```
 
-For direct guest-host fallback without Windmill, use the same explicit `ProxyCommand` form and run
+For direct guest-host fallback without Windmill, use the same explicit `ProxyJump` path and run
 the script on `ops@10.10.10.20` with `LV3_OPENBAO_URL=http://127.0.0.1:8201`.
 
 ## Direct Script Usage
@@ -214,7 +216,7 @@ make sync-operators
 - `make workflow-info WORKFLOW=sync-operators`
 - `curl -fsS https://sso.lv3.org/realms/lv3/.well-known/openid-configuration >/dev/null`
 - `curl -fsS http://100.64.0.1:8005/api/version`
-- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/quarterly_access_review_every_monday_0900")'`
+- `LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"; curl -s -H "Authorization: Bearer $(cat "${LOCAL_OVERLAY_ROOT}/windmill/superadmin-secret.txt")" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/quarterly_access_review_every_monday_0900")'`
 
 ## Notes
 

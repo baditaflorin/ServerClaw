@@ -31,7 +31,21 @@ debian_prereq_packages:
   - gpg
   - apt-transport-https
 
-bootstrap_authorized_key_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/keys/hetzner_llm_agents_ed25519.pub
+repo_shared_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ ((inventory_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+  }}
+repo_shared_local_root: "{{ repo_shared_root }}/.local"
+repo_shared_bootstrap_private_key_path: "{{ repo_shared_local_root }}/ssh/bootstrap.id_ed25519"
+repo_shared_bootstrap_public_key_path: "{{ repo_shared_local_root }}/ssh/bootstrap.id_ed25519.pub"
+bootstrap_authorized_key_path: >-
+  {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PUBLIC_KEY') | default(repo_shared_bootstrap_public_key_path, true) }}
 
 proxmox_vm_templates:
   lv3-debian-base:
@@ -60,11 +74,11 @@ proxmox_guest_ssh_connection_mode: tailscale_direct
 proxmox_guest_ssh_jump_host: >-
   {{ lookup('env', 'LV3_PROXMOX_HOST_ADDR') | default(hostvars['proxmox_florin'].ansible_host, true) }}
 proxmox_guest_ssh_bootstrap_key_path: >-
-  {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PRIVATE_KEY') | default('/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519', true) }}
+  {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PRIVATE_KEY') | default(repo_shared_bootstrap_private_key_path, true) }}
 proxmox_guest_ssh_proxy_command: >-
-  -o ProxyCommand="ssh -i {{ proxmox_guest_ssh_bootstrap_key_path }} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout={{ playbook_execution_preflight_connection_timeout }} -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }} -W %h:%p"
+  -o ProxyJump={{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }}
 proxmox_guest_ssh_public_proxy_command: >-
-  -o ProxyCommand="ssh -i {{ proxmox_guest_ssh_bootstrap_key_path }} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout={{ playbook_execution_preflight_connection_timeout }} -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].management_ipv4 }} -W %h:%p"
+  -o ProxyJump={{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].management_ipv4 }}
 proxmox_guest_ssh_common_args:
   tailscale_direct: "-o IdentitiesOnly=yes"
   proxmox_host_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_proxy_command }}"
@@ -144,20 +158,20 @@ proxmox_api_token_role_privileges:
   - VM.Snapshot.Rollback
 proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
-proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
-proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
-proxmox_tool_topology_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/topology.yaml
+proxmox_api_token_local_dir: "{{ repo_shared_local_root }}/proxmox-api"
+proxmox_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-api/lv3-automation-primary.json"
+proxmox_tool_topology_file: "{{ repo_shared_local_root }}/proxmox-api/topology.yaml"
 
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
 hetzner_dns_zone_name: lv3.org
 
-monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
+monitoring_local_artifact_dir: "{{ repo_shared_local_root }}/monitoring"
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
 monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
 monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
-monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
-monitoring_guest_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
-keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
+monitoring_proxmox_writer_token_local_file: "{{ repo_shared_local_root }}/monitoring/proxmox-writer.token"
+monitoring_guest_writer_token_local_file: "{{ repo_shared_local_root }}/monitoring/guest-writer.token"
+keycloak_agent_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/lv3-agent-hub-client-secret.txt"
 monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
 monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
 monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
@@ -176,12 +190,12 @@ mail_platform_domain: lv3.org
 mail_platform_mailbox_localpart: server
 mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
 mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
-mail_platform_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform
-mail_platform_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/stalwart-admin-password.txt
-mail_platform_mailbox_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
-mail_platform_metrics_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/metrics-password.txt
-mail_platform_gateway_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt
-mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/brevo-api-key.txt
+mail_platform_local_artifact_dir: "{{ repo_shared_local_root }}/mail-platform"
+mail_platform_admin_password_local_file: "{{ repo_shared_local_root }}/mail-platform/stalwart-admin-password.txt"
+mail_platform_mailbox_password_local_file: "{{ repo_shared_local_root }}/mail-platform/server-mailbox-password.txt"
+mail_platform_metrics_password_local_file: "{{ repo_shared_local_root }}/mail-platform/metrics-password.txt"
+mail_platform_gateway_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/gateway-api-key.txt"
+mail_platform_brevo_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/brevo-api-key.txt"
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
@@ -199,14 +213,14 @@ openbao_postgres_connect_role: lv3_openbao_connect_all
 openbao_postgres_database: postgres
 openbao_tls_enabled: true
 openbao_database_mount_path: database
-openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
-openbao_init_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
-openbao_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt
-openbao_breakglass_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/breakglass-password.txt
-openbao_postgres_rotator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
-openbao_controller_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
-openbao_atlas_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/atlas-approle.json
-openbao_mail_platform_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
+openbao_local_artifact_dir: "{{ repo_shared_local_root }}/openbao"
+openbao_init_local_file: "{{ repo_shared_local_root }}/openbao/init.json"
+openbao_ops_password_local_file: "{{ repo_shared_local_root }}/openbao/ops-password.txt"
+openbao_breakglass_password_local_file: "{{ repo_shared_local_root }}/openbao/breakglass-password.txt"
+openbao_postgres_rotator_password_local_file: "{{ repo_shared_local_root }}/openbao/postgres-rotator-password.txt"
+openbao_controller_approle_local_file: "{{ repo_shared_local_root }}/openbao/controller-automation-approle.json"
+openbao_atlas_approle_local_file: "{{ repo_shared_local_root }}/openbao/atlas-approle.json"
+openbao_mail_platform_approle_local_file: "{{ repo_shared_local_root }}/openbao/mail-platform-approle.json"
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 compose_runtime_secret_root: /run/lv3-secrets
 openbao_site_dir: /opt/openbao
@@ -222,7 +236,7 @@ ollama_default_model: llama3.2:3b
 one_api_image: "{{ container_image_catalog.images.one_api_runtime.ref }}"
 one_api_database_name: oneapi
 one_api_database_user: oneapi
-one_api_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api
+one_api_local_artifact_dir: "{{ repo_shared_local_root }}/one-api"
 one_api_database_password_local_file: "{{ one_api_local_artifact_dir }}/database-password.txt"
 one_api_session_secret_local_file: "{{ one_api_local_artifact_dir }}/session-secret.txt"
 one_api_root_access_token_local_file: "{{ one_api_local_artifact_dir }}/root-access-token.txt"
@@ -303,17 +317,17 @@ step_ca_remote_root_certificate_file: "{{ step_ca_home }}/certs/root_ca.crt"
 step_ca_remote_ssh_user_ca_file: "{{ step_ca_home }}/certs/ssh_user_ca_key.pub"
 step_ca_remote_ssh_host_ca_file: "{{ step_ca_home }}/certs/ssh_host_ca_key.pub"
 step_ca_services_password_file: "{{ step_ca_password_dir }}/services-password.txt"
-step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
+step_ca_local_artifact_dir: "{{ repo_shared_local_root }}/step-ca"
 mail_platform_site_dir: /opt/mail-platform
 mail_platform_secret_dir: /etc/lv3/mail-platform
 
-control_plane_recovery_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery
-control_plane_recovery_local_ssh_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh
-control_plane_recovery_local_controller_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller
-control_plane_recovery_runtime_ssh_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519
-control_plane_recovery_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
-control_plane_recovery_local_controller_bundle_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller/controller-recovery-bundle.tar.zst
-control_plane_recovery_local_controller_manifest_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller/control-plane-recovery-manifest.json
+control_plane_recovery_local_artifact_dir: "{{ repo_shared_local_root }}/control-plane-recovery"
+control_plane_recovery_local_ssh_dir: "{{ repo_shared_local_root }}/control-plane-recovery/ssh"
+control_plane_recovery_local_controller_dir: "{{ repo_shared_local_root }}/control-plane-recovery/controller"
+control_plane_recovery_runtime_ssh_private_key_local_file: "{{ repo_shared_local_root }}/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519"
+control_plane_recovery_runtime_ssh_public_key_local_file: "{{ repo_shared_local_root }}/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub"
+control_plane_recovery_local_controller_bundle_file: "{{ repo_shared_local_root }}/control-plane-recovery/controller/controller-recovery-bundle.tar.zst"
+control_plane_recovery_local_controller_manifest_file: "{{ repo_shared_local_root }}/control-plane-recovery/controller/control-plane-recovery-manifest.json"
 control_plane_recovery_backup_store_root: /srv/control-plane-recovery
 control_plane_recovery_backup_store_user: lv3-control-plane-backup
 control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
@@ -384,8 +398,8 @@ playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts
 playbook_execution_ntfy_publish_script: "{{ inventory_dir | dirname }}/scripts/ntfy_publish.py"
 playbook_execution_ntfy_topic_registry_path: "{{ inventory_dir | dirname }}/config/ntfy/topics.yaml"
 playbook_execution_ntfy_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ntfy', 'internal') }}"
-playbook_execution_ntfy_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/ansible-token.txt
-playbook_execution_ntfy_dedupe_state_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/state/ntfy/ansible-playbooks.json
+playbook_execution_ntfy_token_local_file: "{{ repo_shared_local_root }}/ntfy/ansible-token.txt"
+playbook_execution_ntfy_dedupe_state_file: "{{ repo_shared_local_root }}/state/ntfy/ansible-playbooks.json"
 playbook_execution_ntfy_start_topic: platform-ansible-warn
 playbook_execution_ntfy_success_topic: platform-ansible-info
 playbook_execution_ntfy_failure_topic: platform-ansible-critical

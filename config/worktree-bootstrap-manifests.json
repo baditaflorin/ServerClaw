@@ -3,6 +3,24 @@
   "manifests": {
     "controller-local-base": {
       "description": "Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.",
+      "generated_artifacts": [
+        {
+          "id": "bootstrap_private_key_alias",
+          "kind": "file",
+          "path": ".local/ssh/bootstrap.id_ed25519",
+          "resolve_repo_local": true,
+          "materialize_command": "python3 scripts/materialize_bootstrap_key_alias.py",
+          "description": "Generic shared-overlay bootstrap SSH private key alias for worktree-safe controller automation."
+        },
+        {
+          "id": "bootstrap_public_key_alias",
+          "kind": "file",
+          "path": ".local/ssh/bootstrap.id_ed25519.pub",
+          "resolve_repo_local": true,
+          "materialize_command": "python3 scripts/materialize_bootstrap_key_alias.py",
+          "description": "Generic shared-overlay bootstrap SSH public key alias for worktree-safe controller automation."
+        }
+      ],
       "optional_read_only_caches": [
         {
           "id": "ansible_validation_cache",
