@@ -1,3 +1,5 @@
 Agent standards validation (ADR 0163-0168)
+WARNING: Branch 'codex/ws-0336-live-apply' not found in workstreams.yaml (ADR 0167)
+  Add an entry: docs/adr/0167-agent-handoff-and-context-preservation.md
 Workstream surface ownership validation
-Generated status document validation
+Workstream surface ownership validation failed: branch 'codex/ws-0336-live-apply' is not registered in workstreams.yaml

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-04T13:07:44.288375+00:00",
+  "generated_at": "2026-04-04T14:35:58.234155+00:00",
   "repo_version": "0.178.3",
   "platform_version": "0.130.98",
   "release_blockers": {
@@ -89,9 +89,9 @@
     {
       "id": "service-ops_portal",
       "label": "Ops portal",
-      "status": "pending",
-      "detail": "pending (The read operation timed out)",
-      "met": false
+      "status": "met",
+      "detail": "HTTP 200",
+      "met": true
     },
     {
       "id": "service-status_page",
@@ -103,9 +103,9 @@
     {
       "id": "service-docs_portal",
       "label": "Docs site",
-      "status": "pending",
-      "detail": "pending (The read operation timed out)",
-      "met": false
+      "status": "met",
+      "detail": "HTTP 200",
+      "met": true
     },
     {
       "id": "dr-table-top-review",
@@ -116,9 +116,9 @@
     }
   ],
   "summary": {
-    "met": 2,
+    "met": 4,
     "total": 7,
-    "percent": 28.57,
+    "percent": 57.14,
     "ready": false
   }
 }

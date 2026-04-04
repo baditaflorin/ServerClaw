@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-04",
   "recorded_on": "2026-04-04",
-  "recorded_at": "2026-04-04T13:39:45Z",
+  "recorded_at": "2026-04-04T14:33:49Z",
   "recorded_by": "codex",
-  "source_commit": "20a66bbf088d1aa456d34f173fd8e2c8664f4c20",
+  "source_commit": "b980bb92e62c10c21678317120b07ef0ae98dea9",
   "repo_version_context": "0.178.3",
   "platform_version_context": "0.130.98",
   "workflow_id": "adr-0336-public-entrypoint-leakage-live-apply",
   "adr": "0336",
-  "summary": "Verified on the latest realistic origin/main that ADR 0336's public-entrypoint leakage validator is already implemented, that the exact-main branch remains portable after registering a repo-relative ws-0336 worktree, and that the repo automation paths stay green apart from one locally-fallbacked remote-validate ansible-syntax timeout that is preserved as runner evidence instead of being hidden.",
+  "summary": "Verified on the latest realistic origin/main at `b980bb92e62c10c21678317120b07ef0ae98dea9` that ADR 0336's public-entrypoint leakage validator is still implemented after ADR 0337 advanced mainline, refreshed the exact-main archive evidence, and confirmed that the rebased tree passes validator, focused test, model, receipt, and generated-doc checks while the remote-wrapper path still falls back locally and the terminal archived branch no longer owns `workstream-surfaces`.",
   "targets": [
     {
       "kind": "repository",
@@ -37,24 +37,24 @@
       "observed": "`python3 scripts/validate_public_entrypoints.py --check` passed and the focused pytest slice for `tests/test_validate_public_entrypoints.py`, `tests/test_validate_repo_cache.py`, and `tests/test_generate_discovery_artifacts.py` returned `27 passed in 1.50s`."
     },
     {
-      "check": "Branch registration and repository validation",
-      "result": "pass",
-      "observed": "After the new workstream claimed `docs/diagrams/agent-coordination-map.excalidraw` as a shared generated-truth surface and regenerated the diagram, `./scripts/validate_repo.sh agent-standards workstream-surfaces generated-docs`, `uv run --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, and `git diff --check` all passed."
+      "check": "Archived exact-main repository validation",
+      "result": "partial",
+      "observed": "On the rebased exact-main tree, `./scripts/validate_repo.sh agent-standards generated-docs`, `uv run --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`, and `git diff --check` all passed. `./scripts/validate_repo.sh agent-standards workstream-surfaces generated-docs` now fails only because `ws-0336` has already been archived out of the active registry, and that expected terminal-history ownership failure is preserved as explicit evidence instead of being treated as an ADR regression."
     },
     {
       "check": "Promotion-facing gate",
-      "result": "pass",
-      "observed": "`make pre-push-gate` passed with every selected blocking check green, including documentation, schema, generated-doc, Ansible, policy, security, and integration lanes."
+      "result": "partial",
+      "observed": "The final `make pre-push-gate` replay is run from detached `HEAD` on the finished archive commit so the gate does not falsely select the terminal `codex/ws-0336-live-apply` branch for active-branch ownership validation."
     },
     {
       "check": "Remote validation wrapper path",
       "result": "partial",
-      "observed": "`make remote-validate` exercised the remote-wrapper path, reported `remote command failed, falling back locally`, and then passed every selected fallback lane except `ansible-syntax`, which timed out after `902.79s`; this is preserved as runner evidence rather than treated as an ADR 0336 functional regression."
+      "observed": "`make remote-validate` exercised the remote-wrapper path, reported `remote command failed, falling back locally`, and then passed `agent-standards`, `alert-rule-validation`, `atlas-lint`, `dependency-graph`, `iac-policy-scan`, `policy-validation`, and `type-check`, while `workstream-surfaces` failed because the branch now maps to terminal history and `ansible-syntax` plus `schema-validation` timed out after `901.21s` and `601.47s`; this is preserved as runner evidence rather than treated as an ADR 0336 validator regression."
     },
     {
       "check": "Release readiness snapshot",
       "result": "partial",
-      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because three unrelated `controller_dependency_gap` waiver receipts remain open through `2026-04-06`."
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, `0 workstreams in progress`, and a blocked release cut because three unrelated `controller_dependency_gap` waiver receipts remain open through `2026-04-06`."
     }
   ],
   "evidence_refs": [
@@ -65,14 +65,13 @@
     "docs/diagrams/agent-coordination-map.excalidraw",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r2.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-generate-diagrams-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r4.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0336-pre-push-gate-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-release-status-r1.json"
   ],
   "notes": [

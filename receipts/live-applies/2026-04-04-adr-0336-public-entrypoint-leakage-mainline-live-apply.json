@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-04-04",
   "recorded_on": "2026-04-04",
-  "recorded_at": "2026-04-04T13:46:50Z",
+  "recorded_at": "2026-04-04T14:33:49Z",
   "recorded_by": "codex",
-  "source_commit": "b51f55a47dc978a712412aa6df1b560664f2e267",
+  "source_commit": "0cf8a06fbbfdda11928c8a4df1579877e9a47763",
   "repo_version_context": "0.178.3",
   "platform_version_context": "0.130.98",
   "workflow_id": "adr-0336-public-entrypoint-leakage-mainline-live-apply",
   "adr": "0336",
-  "summary": "Closed out ADR 0336 on the exact-main tree by archiving ws-0336 as merged history, regenerating the shard-backed compatibility registry plus the coordination diagram, refreshing canonical-truth history surfaces, and preserving both the successful promotion gate and the runner-specific remote-validate ansible-syntax timeout as explicit evidence instead of hidden operator knowledge.",
+  "summary": "Closed out ADR 0336 on the latest exact-main tree after `origin/main` advanced to `b980bb92e62c10c21678317120b07ef0ae98dea9` by archiving ws-0336 as merged history, regenerating the shard-backed compatibility registry plus the coordination diagram, refreshing canonical-truth history surfaces, and preserving the current remote-wrapper fallback behavior plus the terminal archived-branch ownership boundary as explicit evidence instead of hidden operator knowledge.",
   "targets": [
     {
       "kind": "repository",
@@ -38,7 +38,7 @@
     {
       "check": "Branch-local exact-main proof",
       "result": "pass",
-      "observed": "The branch-local receipt `2026-04-04-adr-0336-public-entrypoint-leakage-live-apply` already proved the validator, focused tests, repo validation, and promotion-facing gate on top of `origin/main@20a66bbf088d1aa456d34f173fd8e2c8664f4c20`."
+      "observed": "The branch-local receipt `2026-04-04-adr-0336-public-entrypoint-leakage-live-apply` already proves the validator, the focused `29 passed` regression slice, and the rebased exact-main repository validation on top of `origin/main@b980bb92e62c10c21678317120b07ef0ae98dea9`."
     },
     {
       "check": "Mainline registry and generated-surface refresh",
@@ -52,13 +52,13 @@
     },
     {
       "check": "Promotion-facing gate",
-      "result": "pass",
-      "observed": "`make pre-push-gate` passed before the archive move with every selected blocking lane green, establishing that the exact-main validation surface was healthy before the terminal-history closeout."
+      "result": "partial",
+      "observed": "The final `make pre-push-gate` replay is run from detached `HEAD` on the finished archive commit so the gate does not falsely select the terminal `codex/ws-0336-live-apply` branch for active-branch ownership validation."
     },
     {
       "check": "Remote validation wrapper path",
       "result": "partial",
-      "observed": "`make remote-validate` reported `remote command failed, falling back locally`; all selected fallback lanes passed except `ansible-syntax`, which timed out after `902.79s`. The timeout is preserved as runner evidence and did not reproduce in the successful `make pre-push-gate` lane set."
+      "observed": "`make remote-validate` reported `remote command failed, falling back locally`; the fallback runner passed `agent-standards`, `alert-rule-validation`, `atlas-lint`, `dependency-graph`, `iac-policy-scan`, `policy-validation`, and `type-check`, while `workstream-surfaces` failed because the branch now maps to terminal history and `ansible-syntax` plus `schema-validation` timed out after `901.21s` and `601.47s`. Those runner-specific outcomes are preserved as explicit evidence instead of being treated as an ADR 0336 validator regression."
     }
   ],
   "evidence_refs": [
@@ -77,7 +77,7 @@
     "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r1.txt",
-    "receipts/live-applies/evidence/2026-04-04-ws-0336-pre-push-gate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r4.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt"
   ],
   "notes": [
