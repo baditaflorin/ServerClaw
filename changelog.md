@@ -12,7 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- repairs the generated Keycloak topology contract so exact-main platform vars include the internal Keycloak URL and port consumed by Open WebUI OIDC, refreshes topology snapshot truth, and re-verifies ADR 0341 with a successful exact-main Open WebUI converge replay
 - recovers the remaining degraded public services after the runtime-pool stabilization merges by re-materializing OpenBao-backed runtime env files, preventing docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths safely
 - implements ADR 0325 by replacing the monolithic ADR metadata catalog with shard-backed discovery manifests, adding a committed ADR reservation ledger, and validating reservation-aware query and generator workflows from exact main
 - implements ADR 0327 by splitting the root agent-discovery registries into sectional source files, generating concise public-safe root entrypoints, tracking generated onboarding packs under build/onboarding, and validating the discovery artifacts plus public entrypoints through the rebased exact-main automation gates

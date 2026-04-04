@@ -1,5 +1,4 @@
 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0334-main-verify/scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py lint --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0334-main-verify
-Installed 7 packages in 34ms
 {
   "catalog_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0334-main-verify/config/atlas/catalog.json",
   "changed_files": [],
