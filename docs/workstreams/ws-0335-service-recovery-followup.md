@@ -2,7 +2,11 @@
 
 - ADR: [ADR 0319](../adr/0319-runtime-pools-as-the-service-partition-boundary.md), [ADR 0320](../adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md)
 - Title: Investigate and recover the remaining services that are still down or not responding properly after ws-0332 and ws-0333
-- Status: in_progress
+- Status: live_applied
+- Included In Repo Version: not yet
+- Branch-Local Receipt: `receipts/live-applies/2026-04-04-ws-0335-service-recovery-followup-live-apply.json`
+- Live Applied On: 2026-04-04
+- Latest Verified Base: `origin/main@0cd845578` (`repo 0.178.3`, `platform 0.130.98`)
 - Branch: `codex/ws-0335-service-recovery-followup`
 - Worktree: `.worktrees/ws-0335-service-recovery-followup`
 - Owner: codex
@@ -50,3 +54,9 @@
 - `uv run --with pytest --with pyyaml python -m pytest tests/test_docker_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_compose_runtime_secret_injection.py -q` passed with `31 passed`.
 - `git diff --check` passed after the role and test updates.
 - A final concurrent sweep of the public `lv3.org` SLO catalog returned `200` for every public route except the expected Woodpecker `204`, including `registry.lv3.org` and `vault.lv3.org`.
+
+## Exact-Main Integration Status
+
+- The ws-0335 recovery changes are integrated on `main` from `origin/main@0cd845578`, keeping the workstream active as `live_applied` exact-main truth rather than archiving it into a numbered release.
+- `VERSION` remains `0.178.3` and `Included In Repo Version` remains `not yet` because `uv run --with pyyaml python3 scripts/release_manager.py status` still reports the unrelated repeated `controller_dependency_gap` waiver blocker alongside the global readiness gaps.
+- `changelog.md`, `versions/stack.yaml`, and `workstreams.yaml` are expected to be regenerated from the workstream's canonical-truth metadata on the integration tree so a later release cut can promote this recovery without reconstructing the evidence trail.

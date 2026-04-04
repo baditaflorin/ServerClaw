@@ -42,7 +42,7 @@ live_apply_evidence:
     vaultwarden: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     windmill: 2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply
-    woodpecker: 2026-03-30-adr-0287-woodpecker-mainline-live-apply
+    woodpecker: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     self_correcting_automation_loops: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
     budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
@@ -87,7 +87,7 @@ live_apply_evidence:
     crawl4ai: 2026-03-31-adr-0288-crawl4ai-mainline-live-apply
     coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
     coolify_apps: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
-    outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
+    outline: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
     plane: 2026-03-28-adr-0193-plane-mainline-live-apply
     service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
@@ -138,22 +138,22 @@ live_apply_evidence:
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
     browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
     mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
-    plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-mainline-live-apply
+    plausible_analytics: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
     tika: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
     repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
     vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
     tesseract_ocr: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
-    directus: 2026-03-30-adr-0289-directus-mainline-live-apply
+    directus: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply
-    jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
+    jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
     piper: 2026-03-31-adr-0284-piper-mainline-live-apply
     redpanda: 2026-03-31-adr-0290-redpanda-mainline-live-apply
     serverclaw_skills: 2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply
     sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
-    paperless: 2026-03-31-adr-0285-paperless-live-apply
+    paperless: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
     postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
     typesense: 2026-03-31-adr-0277-typesense-mainline-live-apply

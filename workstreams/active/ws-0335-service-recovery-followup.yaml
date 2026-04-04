@@ -1,7 +1,7 @@
 id: ws-0335-service-recovery-followup
 adr: 0319
 title: Investigate and recover the remaining degraded services after the runtime-pool stabilization merges
-status: in_progress
+status: live_applied
 owner: codex
 branch: codex/ws-0335-service-recovery-followup
 worktree_path: .worktrees/ws-0335-service-recovery-followup
@@ -86,9 +86,24 @@ ownership_manifest:
     mode: shared_contract
     contract: live-apply-receipts-v1
 canonical_truth:
-  changelog_entry: null
-  release_bump: null
+  changelog_entry: recovers the remaining degraded public services after the runtime-pool
+    stabilization merges by re-materializing OpenBao-backed runtime env files,
+    preventing docker.socket shutdown from restarting a live Docker daemon on
+    runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths
+    safely
+  release_bump: patch
   included_in_repo_version: null
+  latest_receipts:
+    harbor: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    vaultwarden: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    woodpecker: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    paperless: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    plausible_analytics: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    directus: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    matrix_synapse: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    outline: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    grist: 2026-04-04-ws-0335-service-recovery-followup-live-apply
 blockers: []
-ready_to_merge: false
+ready_to_merge: true
 live_applied: true

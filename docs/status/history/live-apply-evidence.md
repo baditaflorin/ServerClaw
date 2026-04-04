@@ -8,6 +8,12 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
+| `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-03-ws-0332-homepage-triage-mainline-live-apply` |
@@ -47,26 +53,21 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `redpanda` | `2026-03-31-adr-0290-redpanda-mainline-live-apply` |
 | `postgres_audit` | `2026-03-31-adr-0303-pgaudit-mainline-live-apply` |
 | `piper` | `2026-03-31-adr-0284-piper-mainline-live-apply` |
-| `paperless` | `2026-03-31-adr-0285-paperless-live-apply` |
 | `minio` | `2026-03-31-adr-0274-minio-object-storage-mainline-live-apply` |
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |
 | `iac_policy_scanning` | `2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply` |
 | `crawl4ai` | `2026-03-31-adr-0288-crawl4ai-mainline-live-apply` |
-| `woodpecker` | `2026-03-30-adr-0287-woodpecker-mainline-live-apply` |
 | `vulnerability_budget_gate` | `2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply` |
 | `temporal` | `2026-03-30-adr-0293-temporal-mainline-live-apply` |
 | `repo_deploy_base_image_cache` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
-| `plausible_analytics` | `2026-03-30-adr-0283-plausible-analytics-mainline-live-apply` |
 | `openfga` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `openbao` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `nextcloud` | `2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
 | `nats_jetstream` | `2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply` |
 | `mailpit` | `2026-03-30-adr-0282-mailpit-mainline-live-apply` |
 | `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
-| `jupyterhub` | `2026-03-30-adr-0291-jupyterhub-mainline-live-apply` |
 | `flagsmith` | `2026-03-30-adr-0288-flagsmith-mainline-live-apply` |
 | `docker_publication` | `2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply` |
-| `directus` | `2026-03-30-adr-0289-directus-mainline-live-apply` |
 | `coolify` | `2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply` |
 | `changedetection` | `2026-03-30-adr-0280-changedetection-mainline-live-apply` |
 | `browser_runner` | `2026-03-30-adr-0261-playwright-browser-runners-live-apply` |
@@ -103,7 +104,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `provider_boundaries` | `2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply` |
 | `policy_validation` | `2026-03-28-adr-0230-policy-decisions-live-apply` |
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
-| `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
