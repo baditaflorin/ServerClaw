@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.143
-- Implemented In Platform Version: N/A
+- Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-04-02
 - Date: 2026-04-02
 - Tags: validation, public, guardrails, leakage, ci

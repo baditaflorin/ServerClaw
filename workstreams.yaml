@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 289
+  total_workstreams: 290
   by_year:
-    '2026': 289
+    '2026': 290
 workstreams:
 - id: ws-0332-resilience-predictability
   adr: '0346'
