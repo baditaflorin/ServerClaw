@@ -60,7 +60,7 @@ section_index:
     summary: Concern-oriented shortcuts that map common task areas to the most relevant repo surfaces.
     when_to_read: Use this section when you know the concern area but not the exact path yet.
     entry_counts:
-      concerns: 10
+      concerns: 11
 onboarding_packs:
   - id: agent-core
     title: Agent Core Onboarding

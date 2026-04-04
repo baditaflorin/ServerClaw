@@ -42,20 +42,18 @@ def iter_postgres_role_lists(playbook_path: Path) -> list[list[dict]]:
     return role_lists
 
 
-def test_postgres_guest_group_vars_allow_docker_runtime_bridge_sources() -> None:
+def test_postgres_guest_group_vars_use_bridge_fallback_cidrs() -> None:
     group_vars = yaml.safe_load(POSTGRES_GROUP_VARS_PATH.read_text())
-    extra_sources = group_vars["postgres_vm_client_allowed_sources_extra"]
-    bridge_sources = group_vars["postgres_vm_client_allowed_sources_extra_bridge"]
-
-    assert extra_sources == []
-    assert bridge_sources == [
+    assert group_vars["postgres_vm_client_allowed_sources_extra"] == []
+    assert group_vars["postgres_vm_client_allowed_sources_extra_bridge"] == [
         "172.16.0.0/12",
         "192.168.0.0/16",
         "10.200.0.0/16",
+        "10.10.10.0/24",
     ]
 
 
-def test_postgres_network_policy_allows_docker_runtime_bridge_sources() -> None:
+def test_postgres_network_policy_allows_runtime_control_and_docker_runtime_sources() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
     postgres_rules = host_vars["network_policy"]["guests"]["postgres"]["allowed_inbound"]
     postgres_5432_sources = {rule["source"] for rule in postgres_rules if 5432 in rule.get("ports", [])}
@@ -63,7 +61,7 @@ def test_postgres_network_policy_allows_docker_runtime_bridge_sources() -> None:
     assert {
         "runtime-control",
         "docker-runtime",
-        "runtime-control",
+        "10.10.10.0/24",
         "172.16.0.0/12",
         "192.168.0.0/16",
         "10.200.0.0/16",

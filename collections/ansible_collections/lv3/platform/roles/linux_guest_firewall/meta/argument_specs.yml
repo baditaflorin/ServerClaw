@@ -27,6 +27,18 @@ argument_specs:
         default: false
         description:
           - When true, restart the Docker service and re-run the bridge-chain helper if the guest firewall replay leaves the Docker nat or forward chains missing.
+      linux_guest_firewall_docker_bridge_chain_recovery_retries:
+        type: int
+        required: false
+        default: 30
+        description:
+          - Retry count to use for Docker bridge-chain verification after the guest firewall recovery path restarts Docker.
+      linux_guest_firewall_docker_bridge_chain_recovery_delay:
+        type: int
+        required: false
+        default: 5
+        description:
+          - Delay in seconds between Docker bridge-chain recovery checks after the guest firewall recovery path restarts Docker.
       network_policy:
         type: dict
         required: false

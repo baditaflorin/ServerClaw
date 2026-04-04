@@ -71,6 +71,7 @@ windmill_nats_password: >-
   }}
 windmill_ntfy_base_url: https://ntfy.{{ platform_domain }}
 windmill_ntfy_token_local_file: "{{ windmill_controller_repo_common_root }}/.local/ntfy/windmill-token.txt"
+windmill_resource_type_workspace: admins
 windmill_ntfy_resource_type_name: ntfy_platform_channel
 windmill_ntfy_resource_path: f/lv3/ntfy_platform
 windmill_ledger_postgres_user: patroni

@@ -841,12 +841,21 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Ensure the Windmill bootstrap workspace user is consistent" in tasks
     assert "INSERT INTO usr" in tasks
     assert "INSERT INTO usr_to_group" in tasks
-    assert "Authenticate the Windmill bootstrap admin session" in tasks
+    assert "Authenticate the Windmill bootstrap admin session when password login is available" in tasks
     assert "/api/auth/login" in tasks
     assert "windmill_bootstrap_session_token" in tasks
+    assert "Choose the Windmill bootstrap API token" in tasks
+    assert "else windmill_runtime_api_token" in tasks
+    assert "Verify the Windmill bootstrap API token can read the bootstrap identity" in tasks
+    assert "{{ windmill_runtime_api_base_url }}/api/users/whoami" in tasks
+    assert "Assert the Windmill bootstrap API token resolves to the managed bootstrap identity" in tasks
+    assert "Windmill bootstrap API token did not resolve to the managed bootstrap identity." in tasks
     assert "Read the durable Windmill runtime token from the rendered runtime env" in tasks
     assert 'awk -F= \'$1 == "LV3_WINDMILL_TOKEN"' in tasks
     assert "windmill_runtime_api_token" in tasks
+    assert defaults["windmill_workspace_id"] == "lv3"
+    assert defaults["windmill_resource_type_workspace"] == "admins"
+    assert defaults["windmill_ntfy_resource_path"] == "f/lv3/ntfy_platform"
     assert "Ensure the Windmill bootstrap admin login type matches the managed contract" in tasks
     assert "/api/users/set_login_type/" in tasks
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
@@ -861,9 +870,26 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "WINDMILL_TOKEN" in tasks
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
-    assert tasks.count("uv") >= 2
-    assert tasks.count("--with") >= 2
-    assert tasks.count("pyyaml") >= 2
+    assert "Create a remote manifest path for repo-managed Windmill scripts" in tasks
+    assert "Assert repo-managed Windmill script files resolve inside the synced worker checkout" in tasks
+    assert "Translate repo-managed Windmill script manifest paths for the runtime host" in tasks
+    assert "Render the repo-managed Windmill script manifest on the runtime host" in tasks
+    assert "windmill_seed_scripts_runtime_manifest" in tasks
+    assert "regex_replace" in tasks
+    assert "{{ windmill_seed_script_manifest_remote.path }}" in tasks
+    assert "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "Create a remote manifest path for repo-managed Windmill schedules" in tasks
+    assert "Render the repo-managed Windmill schedule manifest on the runtime host" in tasks
+    assert "{{ windmill_seed_schedule_manifest_remote.path }}" in tasks
+    assert "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_schedules.py" in tasks
+    assert "Create a remote manifest path for repo-managed Windmill resources" in tasks
+    assert "Render the repo-managed Windmill resource manifest on the runtime host" in tasks
+    assert "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_resources.py" in tasks
+    assert "--resource-type-workspace" in tasks
+    assert "{{ windmill_resource_type_workspace }}" in tasks
+    assert "{{ windmill_seed_resource_manifest_remote.path }}" in tasks
+    assert tasks.count("uv") >= 1
+    assert tasks.count("python3") >= 3
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert "--path {{ windmill_stage_smoke_suites_script_path | quote }}" in verify_tasks
     assert '$1 == "DATABASE_URL"' in tasks
@@ -1123,8 +1149,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_seed_app_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_checksum_file" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
-    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py" in tasks
-    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py" not in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" not in tasks
+    assert "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_schedules.py" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert (
         defaults["windmill_seed_app_repo_root_local_dir"]

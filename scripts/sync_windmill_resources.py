@@ -82,7 +82,7 @@ def resource_exists(*, base_url: str, workspace: str, token: str, path: str, tim
 def sync_resource_types(
     *,
     base_url: str,
-    workspace: str,
+    resource_type_workspace: str,
     token: str,
     resource_types: list[dict[str, Any]],
     timeout_s: float,
@@ -90,16 +90,23 @@ def sync_resource_types(
     results: list[dict[str, str]] = []
     for item in resource_types:
         name = item["name"]
-        if resource_type_exists(base_url=base_url, workspace=workspace, token=token, name=name, timeout_s=timeout_s):
+        if resource_type_exists(
+            base_url=base_url,
+            workspace=resource_type_workspace,
+            token=token,
+            name=name,
+            timeout_s=timeout_s,
+        ):
             request_json_or_text(
                 base_url=base_url,
-                workspace=workspace,
+                workspace=resource_type_workspace,
                 token=token,
                 path=f"resources/type/update/{urllib.parse.quote(name, safe='')}",
                 method="POST",
                 payload={
                     "schema": item.get("schema", {}),
                     "description": item.get("description", ""),
+                    "workspace_id": resource_type_workspace,
                 },
                 expected_statuses=(200,),
                 timeout_s=timeout_s,
@@ -108,7 +115,7 @@ def sync_resource_types(
             continue
         request_json_or_text(
             base_url=base_url,
-            workspace=workspace,
+            workspace=resource_type_workspace,
             token=token,
             path="resources/type/create",
             method="POST",
@@ -116,6 +123,7 @@ def sync_resource_types(
                 "name": name,
                 "schema": item.get("schema", {}),
                 "description": item.get("description", ""),
+                "workspace_id": resource_type_workspace,
             },
             expected_statuses=(200, 201),
             timeout_s=timeout_s,
@@ -172,6 +180,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Synchronize repo-managed Windmill resource types and resources.")
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--workspace", required=True)
+    parser.add_argument("--resource-type-workspace", default="admins")
     parser.add_argument("--token", required=True)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--http-timeout", type=float, default=DEFAULT_HTTP_TIMEOUT_S)
@@ -189,7 +198,7 @@ def main() -> int:
         results.extend(
             sync_resource_types(
                 base_url=args.base_url,
-                workspace=args.workspace,
+                resource_type_workspace=args.resource_type_workspace,
                 token=args.token,
                 resource_types=resource_types,
                 timeout_s=args.http_timeout,

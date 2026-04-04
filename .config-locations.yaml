@@ -60,7 +60,7 @@ section_index:
     file: docs/discovery/config-locations/service-configuration.yaml
     summary: Per-service configuration roots and the files that drive service runtime behavior.
     when_to_read: Use this section when changing a service-specific config file or template.
-    entry_count: 13
+    entry_count: 14
   - id: versioning
     title: Versioning And Releases
     file: docs/discovery/config-locations/versioning.yaml

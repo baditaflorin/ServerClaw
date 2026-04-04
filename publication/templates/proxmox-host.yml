@@ -1543,6 +1543,11 @@ network_policy:
           ports:
             - 5432
           description: Host-side PostgreSQL TCP proxy
+        - source: runtime-control-lv3
+          protocol: tcp
+          ports:
+            - 5432
+          description: Host-network control-plane applications such as Windmill and Gitea
         - source: docker-runtime-lv3
           protocol: tcp
           ports:

@@ -20,7 +20,13 @@ shared_surfaces:
 - docs/adr/.index.yaml
 - .repo-structure.yaml
 - .config-locations.yaml
+- build/onboarding/agent-core.yaml
+- build/onboarding/automation.yaml
+- build/onboarding/service-catalog.yaml
 - catalog/services/
+- docs/discovery/config-locations/service-configuration.yaml
+- docs/discovery/repo-structure/automation-and-infrastructure.yaml
+- docs/discovery/repo-structure/cross-cutting-concerns.yaml
 - config/service-capability-catalog.json
 - config/health-probe-catalog.json
 - config/service-completeness.json
@@ -83,6 +89,9 @@ ownership_manifest:
     - docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
     - .repo-structure.yaml
     - .config-locations.yaml
+    - docs/discovery/config-locations/service-configuration.yaml
+    - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+    - docs/discovery/repo-structure/cross-cutting-concerns.yaml
     - catalog/services/**
     - docs/schema/service-definition-bundle.schema.json
     - docs/schema/service-definition-completeness-fragment.schema.json
@@ -132,6 +141,9 @@ ownership_manifest:
   - id: ws0324_generated_truth
     paths:
     - docs/diagrams/agent-coordination-map.excalidraw
+    - build/onboarding/agent-core.yaml
+    - build/onboarding/automation.yaml
+    - build/onboarding/service-catalog.yaml
     mode: shared_contract
     contract: latest-main-generated-truth-v1
   - id: ws0324_live_apply_receipts

@@ -240,6 +240,13 @@ repo_structure_sections:
         automation:
           - playbooks/
           - collections/ansible_collections/lv3/platform/
+          - scripts/
+        service_metadata:
+          - catalog/services/
+          - config/service-capability-catalog.json
+          - config/health-probe-catalog.json
+          - scripts/service_definition_catalog.py
+          - docs/runbooks/service-capability-catalog.md
         state_tracking:
           - versions/stack.yaml
           - receipts/

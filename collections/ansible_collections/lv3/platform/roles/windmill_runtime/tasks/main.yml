@@ -1744,7 +1744,7 @@
     windmill_runtime_api_token: "{{ windmill_runtime_api_token_read.stdout | trim }}"
   no_log: true
 
-- name: Authenticate the Windmill bootstrap admin session
+- name: Authenticate the Windmill bootstrap admin session when password login is available
   ansible.builtin.uri:
     url: "{{ windmill_runtime_api_base_url }}/api/auth/login"
     method: POST
@@ -1753,17 +1753,57 @@
       email: "{{ windmill_bootstrap_identity_email }}"
       password: "{{ windmill_superadmin_secret }}"
     return_content: true
-    status_code: 200
+    status_code:
+      - 200
+      - 400
   register: windmill_bootstrap_session_login
-  retries: 6
-  delay: 5
-  until: windmill_bootstrap_session_login.status | default(0) == 200
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Choose the Windmill bootstrap API token
+  ansible.builtin.set_fact:
+    windmill_bootstrap_session_token: >-
+      {{
+        (
+          windmill_bootstrap_session_login.content
+          | default('')
+          | trim
+        )
+        if (
+          (windmill_bootstrap_session_login.status | default(0)) == 200
+          and (
+            windmill_bootstrap_session_login.content
+            | default('')
+            | trim
+            | length
+          ) > 0
+        )
+        else windmill_runtime_api_token
+      }}
+  no_log: true
+
+- name: Verify the Windmill bootstrap API token can read the bootstrap identity
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/users/whoami"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    return_content: true
+    status_code: 200
+  register: windmill_bootstrap_identity_whoami
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
+  until: windmill_bootstrap_identity_whoami.status == 200
   changed_when: false
   no_log: true
 
-- name: Record the Windmill bootstrap admin session token
-  ansible.builtin.set_fact:
-    windmill_bootstrap_session_token: "{{ windmill_bootstrap_session_login.content | trim }}"
+- name: Assert the Windmill bootstrap API token resolves to the managed bootstrap identity
+  ansible.builtin.assert:
+    that:
+      - (windmill_bootstrap_identity_whoami.json.email | default('')) == windmill_bootstrap_identity_email
+      - (windmill_bootstrap_identity_whoami.json.username | default('')) == windmill_bootstrap_identity_username
+    fail_msg: "Windmill bootstrap API token did not resolve to the managed bootstrap identity."
   no_log: true
 - name: Check whether the Windmill workspace already exists
   ansible.builtin.uri:
@@ -2207,29 +2247,60 @@
       - windmill_idempotency_schema_check.stdout | trim == 'platform.idempotency_records'
     fail_msg: "ADR 0165 live schema apply did not create platform.idempotency_records in the Windmill database."
 
-- name: Create a local manifest path for repo-managed Windmill scripts
+- name: Create a remote manifest path for repo-managed Windmill scripts
   ansible.builtin.tempfile:
     state: file
     suffix: .json
-  delegate_to: localhost
-  become: false
-  register: windmill_seed_script_manifest_local
+  register: windmill_seed_script_manifest_remote
 
-- name: Render the repo-managed Windmill script manifest locally
+- name: Assert repo-managed Windmill script files resolve inside the synced worker checkout
+  ansible.builtin.assert:
+    that:
+      - item.local_file is string
+      - item.local_file | regex_search('^' ~ (windmill_worker_checkout_repo_root_local_dir | regex_escape) ~ '(/|$)')
+    fail_msg: >-
+      Repo-managed Windmill script {{ item.path }} must resolve inside
+      {{ windmill_worker_checkout_repo_root_local_dir }} so the runtime host can
+      execute the mirrored checkout.
+  loop: "{{ windmill_seed_scripts }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Translate repo-managed Windmill script manifest paths for the runtime host
+  ansible.builtin.set_fact:
+    windmill_seed_scripts_runtime_manifest: >-
+      {{
+        (windmill_seed_scripts_runtime_manifest | default([]))
+        + [
+            item
+            | combine(
+                {
+                  'local_file': (
+                    item.local_file
+                    | regex_replace(
+                        '^' ~ (windmill_worker_checkout_repo_root_local_dir | regex_escape),
+                        windmill_worker_repo_checkout_host_path
+                      )
+                  ),
+                }
+              )
+          ]
+      }}
+  loop: "{{ windmill_seed_scripts }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Render the repo-managed Windmill script manifest on the runtime host
   ansible.builtin.copy:
-    dest: "{{ windmill_seed_script_manifest_local.path }}"
-    content: "{{ windmill_seed_scripts | to_nice_json }}"
+    dest: "{{ windmill_seed_script_manifest_remote.path }}"
+    content: "{{ windmill_seed_scripts_runtime_manifest | to_nice_json }}"
     mode: "0600"
-  delegate_to: localhost
-  become: false
 
 - name: Wait for the Windmill API before syncing repo-managed scripts
   ansible.builtin.uri:
-    url: "{{ windmill_base_url }}/api/version"
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
     method: GET
     status_code: 200
-  delegate_to: localhost
-  become: false
   register: windmill_seed_script_sync_api_wait
   retries: "{{ windmill_runtime_api_wait_retries }}"
   delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
@@ -2243,25 +2314,18 @@
     mutation_audit_emit_on_success: true
   ansible.builtin.command:
     argv:
-      - uv
-      - run
-      - --no-project
-      - --with
-      - pyyaml
       - python3
-      - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py"
+      - "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_scripts.py"
       - --base-url
-      - "{{ windmill_base_url }}"
+      - "{{ windmill_runtime_api_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --manifest
-      - "{{ windmill_seed_script_manifest_local.path }}"
+      - "{{ windmill_seed_script_manifest_remote.path }}"
       - --max-attempts
       - "20"
       - --settle-interval
       - "2.0"
-  delegate_to: localhost
-  become: false
   environment:
     WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
   register: windmill_seed_script_sync
@@ -2269,24 +2333,21 @@
   tags:
     - mutation
 
-- name: Remove the local repo-managed Windmill script manifest
+- name: Remove the remote repo-managed Windmill script manifest
   ansible.builtin.file:
-    path: "{{ windmill_seed_script_manifest_local.path }}"
+    path: "{{ windmill_seed_script_manifest_remote.path }}"
     state: absent
-  delegate_to: localhost
   become: false
 
-- name: Create a local manifest path for repo-managed Windmill resources
+- name: Create a remote manifest path for repo-managed Windmill resources
   ansible.builtin.tempfile:
     state: file
     suffix: .json
-  delegate_to: localhost
-  become: false
-  register: windmill_seed_resource_manifest_local
+  register: windmill_seed_resource_manifest_remote
 
-- name: Render the repo-managed Windmill resource manifest locally
+- name: Render the repo-managed Windmill resource manifest on the runtime host
   ansible.builtin.copy:
-    dest: "{{ windmill_seed_resource_manifest_local.path }}"
+    dest: "{{ windmill_seed_resource_manifest_remote.path }}"
     content: >-
       {{
         {
@@ -2295,8 +2356,6 @@
         } | to_nice_json
       }}
     mode: "0600"
-  delegate_to: localhost
-  become: false
   no_log: true
 
 - name: Sync repo-managed Windmill resources
@@ -2307,28 +2366,27 @@
   ansible.builtin.command:
     argv:
       - python3
-      - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_resources.py"
+      - "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_resources.py"
       - --base-url
-      - "{{ windmill_base_url }}"
+      - "{{ windmill_runtime_api_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
+      - --resource-type-workspace
+      - "{{ windmill_resource_type_workspace }}"
       - --token
       - "{{ windmill_runtime_api_token }}"
       - --manifest
-      - "{{ windmill_seed_resource_manifest_local.path }}"
-  delegate_to: localhost
-  become: false
+      - "{{ windmill_seed_resource_manifest_remote.path }}"
   register: windmill_seed_resource_sync
   changed_when: false
   no_log: true
   tags:
     - mutation
 
-- name: Remove the local repo-managed Windmill resource manifest
+- name: Remove the remote repo-managed Windmill resource manifest
   ansible.builtin.file:
-    path: "{{ windmill_seed_resource_manifest_local.path }}"
+    path: "{{ windmill_seed_resource_manifest_remote.path }}"
     state: absent
-  delegate_to: localhost
   become: false
 
 - name: Create a temporary Windmill seed app sync directory
@@ -2480,21 +2538,17 @@
   delegate_to: localhost
   become: false
 
-- name: Create a local manifest path for repo-managed Windmill schedules
+- name: Create a remote manifest path for repo-managed Windmill schedules
   ansible.builtin.tempfile:
     state: file
     suffix: .json
-  delegate_to: localhost
-  become: false
-  register: windmill_seed_schedule_manifest_local
+  register: windmill_seed_schedule_manifest_remote
 
-- name: Render the repo-managed Windmill schedule manifest locally
+- name: Render the repo-managed Windmill schedule manifest on the runtime host
   ansible.builtin.copy:
-    dest: "{{ windmill_seed_schedule_manifest_local.path }}"
+    dest: "{{ windmill_seed_schedule_manifest_remote.path }}"
     content: "{{ windmill_seed_schedules | to_nice_json }}"
     mode: "0600"
-  delegate_to: localhost
-  become: false
 
 - name: Sync repo-managed Windmill schedules
   vars:
@@ -2503,25 +2557,18 @@
     mutation_audit_emit_on_success: true
   ansible.builtin.command:
     argv:
-      - uv
-      - run
-      - --no-project
-      - --with
-      - pyyaml
       - python3
-      - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py"
+      - "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_schedules.py"
       - --base-url
-      - "{{ windmill_base_url }}"
+      - "{{ windmill_runtime_api_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --manifest
-      - "{{ windmill_seed_schedule_manifest_local.path }}"
+      - "{{ windmill_seed_schedule_manifest_remote.path }}"
       - --max-attempts
       - "8"
       - --settle-interval
       - "1.0"
-  delegate_to: localhost
-  become: false
   environment:
     WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
   register: windmill_seed_schedule_sync
@@ -2529,11 +2576,10 @@
   tags:
     - mutation
 
-- name: Remove the local repo-managed Windmill schedule manifest
+- name: Remove the remote repo-managed Windmill schedule manifest
   ansible.builtin.file:
-    path: "{{ windmill_seed_schedule_manifest_local.path }}"
+    path: "{{ windmill_seed_schedule_manifest_remote.path }}"
     state: absent
-  delegate_to: localhost
   become: false
 
 - name: Converge repo-managed Windmill schedule enabled flags
