@@ -46,12 +46,26 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
     - collections/ansible_collections/lv3/platform/playbooks/secret-rotation.yml
     mode: exclusive
-  - id: integration_truth
+  - id: release_management
     paths:
-    - README.md
     - VERSION
     - changelog.md
-    - versions/stack.yaml
-    mode: generated
+    - docs/release-notes/0.178.4.md
+    mode: shared_contract
+    contract: release-management-v1
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-range/*.yaml
+    - docs/adr/index/by-concern/*.yaml
+    - docs/adr/index/by-status/*.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v2
+  - id: generated_truth
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - build/platform-manifest.json
+    mode: shared_contract
+    contract: latest-main-generated-truth-v1
 ready_to_merge: true
 live_applied: true
