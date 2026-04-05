@@ -11,7 +11,7 @@ from pathlib import Path
 import requests
 import socketio
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json, load_operator_auth
 
 
 DEFAULT_AUTH_FILE = repo_path(".local", "uptime-kuma", "admin-session.json")
@@ -54,8 +54,6 @@ READ_ONLY_MONITOR_FIELDS = {
     "forceInactive",
     "cacheBust",
 }
-def load_auth_json(path: Path) -> dict:
-    return load_json(path, default={})
 
 
 def save_json(path: Path, payload: dict) -> None:
@@ -243,7 +241,7 @@ class UptimeKumaClient:
 
 def resolve_auth(args) -> tuple[Path, dict]:
     auth_file = Path(args.auth_file).expanduser()
-    auth = load_auth_json(auth_file)
+    auth = load_operator_auth(str(auth_file))
     if args.base_url:
         auth["base_url"] = args.base_url.rstrip("/")
     return auth_file, auth

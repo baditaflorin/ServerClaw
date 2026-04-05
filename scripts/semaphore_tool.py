@@ -11,19 +11,15 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, load_operator_auth
 from platform.ansible.semaphore import SemaphoreClient, SemaphoreError
 
 
 DEFAULT_AUTH_FILE = repo_path(".local", "semaphore", "admin-auth.json")
 
 
-def load_auth(path: str) -> dict:
-    return load_json(Path(path).expanduser())
-
-
 def build_client(auth_file: str) -> tuple[SemaphoreClient, dict]:
-    auth = load_auth(auth_file)
+    auth = load_operator_auth(auth_file)
     client = SemaphoreClient(auth["base_url"], verify_ssl=bool(auth.get("verify_ssl", True)))
     api_token = auth.get("api_token", "").strip()
     if api_token and client.verify_api_token(api_token):

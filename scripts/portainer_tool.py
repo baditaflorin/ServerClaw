@@ -8,7 +8,7 @@ from pathlib import Path
 import requests
 import urllib3
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, load_operator_auth
 
 
 DEFAULT_AUTH_FILE = repo_path(".local", "portainer", "admin-auth.json")
@@ -146,19 +146,15 @@ def decode_docker_log_stream(payload: bytes) -> str:
     return payload.decode("utf-8", errors="replace")
 
 
-def load_auth(path: str) -> dict:
-    return load_json(Path(path).expanduser())
-
-
 def command_whoami(args) -> int:
-    client = PortainerClient(load_auth(args.auth_file))
+    client = PortainerClient(load_operator_auth(args.auth_file))
     client.login()
     print(json.dumps(client.whoami(), indent=2, sort_keys=True))
     return 0
 
 
 def command_list_containers(args) -> int:
-    client = PortainerClient(load_auth(args.auth_file))
+    client = PortainerClient(load_operator_auth(args.auth_file))
     client.login()
     containers = client.list_containers(all_containers=args.all)
     for container in containers:
@@ -168,14 +164,14 @@ def command_list_containers(args) -> int:
 
 
 def command_container_logs(args) -> int:
-    client = PortainerClient(load_auth(args.auth_file))
+    client = PortainerClient(load_operator_auth(args.auth_file))
     client.login()
     print(client.container_logs(args.container, args.tail), end="")
     return 0
 
 
 def command_restart_container(args) -> int:
-    client = PortainerClient(load_auth(args.auth_file))
+    client = PortainerClient(load_operator_auth(args.auth_file))
     client.login()
     client.restart_container(args.container)
     print(f"restarted: {args.container}")

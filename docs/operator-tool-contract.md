@@ -273,14 +273,18 @@ Key points:
 
 The following tools are currently registered and must remain compliant:
 
-| Tool | Location |
-|------|----------|
-| Proxmox tool | `scripts/proxmox_tool.py` |
-| Coolify tool | `scripts/coolify_tool.py` |
-| Keycloak tool | `scripts/keycloak_tool.py` |
-| Windmill tool | `scripts/windmill_tool.py` |
-| Vikunja tool | `scripts/vikunja_tool.py` |
-| Woodpecker tool | `scripts/woodpecker_tool.py` |
+| Tool | Location | Notes |
+|------|----------|-------|
+| Proxmox tool | `scripts/proxmox_tool.py` | |
+| Coolify tool | `scripts/coolify_tool.py` | |
+| Keycloak tool | `scripts/keycloak_tool.py` | |
+| Windmill tool | `scripts/windmill_tool.py` | |
+| Vikunja tool | `scripts/vikunja_tool.py` | |
+| Woodpecker tool | `scripts/woodpecker_tool.py` | |
+| Portainer tool | `scripts/portainer_tool.py` | |
+| Plane tool | `scripts/plane_tool.py` | |
+| Semaphore tool | `scripts/semaphore_tool.py` | |
+| Uptime Kuma tool | `scripts/uptime_kuma_tool.py` | Previously used non-standard `load_auth_json`; now delegates to `load_operator_auth` from toolkit |
 
 New tools added to `scripts/` that accept `--auth-file` or perform state
 mutations must be added to this registry before merging.

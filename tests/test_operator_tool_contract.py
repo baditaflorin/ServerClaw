@@ -247,3 +247,128 @@ class TestProxmoxGuestExec:
         client = self._FakeClient()
         cat.proxmox_guest_exec(client, 100, ["uptime"], timeout=120)
         assert client.calls[0]["timeout"] == 120
+
+
+# ---------------------------------------------------------------------------
+# woodpecker_tool — ADR 0343 load_auth compliance
+# ---------------------------------------------------------------------------
+
+class TestWoodpeckerToolContract:
+    """Verify woodpecker_tool uses toolkit load_operator_auth (ADR 0343)."""
+
+    def test_uses_toolkit_auth(self):
+        """woodpecker_tool must not define its own load_auth."""
+        import woodpecker_tool
+        import inspect
+        src = inspect.getsource(woodpecker_tool)
+        assert "def load_auth" not in src, "woodpecker_tool must not define its own load_auth"
+
+    def test_build_client_fails_on_missing_file(self, tmp_path):
+        """build_client must exit 1 on missing auth file (via load_operator_auth)."""
+        import woodpecker_tool
+        with pytest.raises(SystemExit) as exc:
+            woodpecker_tool.build_client(str(tmp_path / "nonexistent.json"))
+        assert exc.value.code == 1
+
+
+# ---------------------------------------------------------------------------
+# portainer_tool — ADR 0343 load_auth compliance
+# ---------------------------------------------------------------------------
+
+class TestPortainerToolContract:
+    """Verify portainer_tool uses toolkit load_operator_auth (ADR 0343)."""
+
+    def test_uses_toolkit_auth(self):
+        """portainer_tool must not define its own load_auth."""
+        import portainer_tool
+        import inspect
+        src = inspect.getsource(portainer_tool)
+        assert "def load_auth" not in src, "portainer_tool must not define its own load_auth"
+
+    def test_command_whoami_fails_on_missing_file(self, tmp_path):
+        """command_whoami must exit 1 on missing auth file (via load_operator_auth)."""
+        import portainer_tool
+        import argparse
+        args = argparse.Namespace(auth_file=str(tmp_path / "nonexistent.json"))
+        with pytest.raises(SystemExit) as exc:
+            portainer_tool.command_whoami(args)
+        assert exc.value.code == 1
+
+
+# ---------------------------------------------------------------------------
+# plane_tool — ADR 0343 load_auth compliance
+# ---------------------------------------------------------------------------
+
+class TestPlaneToolContract:
+    """Verify plane_tool uses toolkit load_operator_auth (ADR 0343)."""
+
+    def test_uses_toolkit_auth(self):
+        """plane_tool must not define its own load_auth."""
+        import plane_tool
+        import inspect
+        src = inspect.getsource(plane_tool)
+        assert "def load_auth" not in src, "plane_tool must not define its own load_auth"
+
+    def test_build_client_fails_on_missing_file(self, tmp_path):
+        """build_client must exit 1 on missing auth file (via load_operator_auth)."""
+        import plane_tool
+        with pytest.raises(SystemExit) as exc:
+            plane_tool.build_client(str(tmp_path / "nonexistent.json"))
+        assert exc.value.code == 1
+
+
+# ---------------------------------------------------------------------------
+# semaphore_tool — ADR 0343 load_auth compliance
+# ---------------------------------------------------------------------------
+
+class TestSemaphoreToolContract:
+    """Verify semaphore_tool uses toolkit load_operator_auth (ADR 0343)."""
+
+    def test_uses_toolkit_auth(self):
+        """semaphore_tool must not define its own load_auth."""
+        import semaphore_tool
+        import inspect
+        src = inspect.getsource(semaphore_tool)
+        assert "def load_auth" not in src, "semaphore_tool must not define its own load_auth"
+
+    def test_build_client_fails_on_missing_file(self, tmp_path):
+        """build_client must exit 1 on missing auth file (via load_operator_auth)."""
+        import semaphore_tool
+        with pytest.raises(SystemExit) as exc:
+            semaphore_tool.build_client(str(tmp_path / "nonexistent.json"))
+        assert exc.value.code == 1
+
+
+# ---------------------------------------------------------------------------
+# uptime_kuma_tool — ADR 0343 load_auth compliance
+# ---------------------------------------------------------------------------
+
+socketio_available = True
+try:
+    import socketio as _socketio  # noqa: F401
+except ImportError:
+    socketio_available = False
+
+
+@pytest.mark.skipif(not socketio_available, reason="socketio not installed")
+class TestUptimeKumaToolContract:
+    """Verify uptime_kuma_tool uses toolkit load_operator_auth (ADR 0343)."""
+
+    def test_uses_toolkit_auth(self):
+        """uptime_kuma_tool must not define its own load_auth_json."""
+        import uptime_kuma_tool
+        import inspect
+        src = inspect.getsource(uptime_kuma_tool)
+        assert "def load_auth_json" not in src, "uptime_kuma_tool must not define its own load_auth_json"
+
+    def test_resolve_auth_fails_on_missing_file(self, tmp_path):
+        """resolve_auth must exit 1 on missing auth file (via load_operator_auth)."""
+        import uptime_kuma_tool
+        import argparse
+        args = argparse.Namespace(
+            auth_file=str(tmp_path / "nonexistent.json"),
+            base_url=None,
+        )
+        with pytest.raises(SystemExit) as exc:
+            uptime_kuma_tool.resolve_auth(args)
+        assert exc.value.code == 1
