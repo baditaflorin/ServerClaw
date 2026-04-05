@@ -1,0 +1,55 @@
+id: ws-0254-serverclaw-runtime-fix
+adr: '0254'
+title: Fix ServerClaw OIDC login, hairpin NAT, model access, and Keycloak network IaC
+status: ready_for_merge
+owner: claude
+branch: claude/great-mestorf
+worktree_path: .claude/worktrees/great-mestorf
+doc: docs/runbooks/configure-serverclaw.md
+depends_on:
+- adr-0060-open-webui
+- adr-0097-keycloak-identity
+- adr-0145-nginx-edge-publication
+- adr-0254-serverclaw
+conflicts_with: []
+shared_surfaces:
+- docs/runbooks/configure-serverclaw.md
+- inventory/group_vars/all.yml
+- playbooks/serverclaw.yml
+- workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: serverclaw_runtime_fix
+    paths:
+    - playbooks/serverclaw.yml
+    - docs/runbooks/configure-serverclaw.md
+    - inventory/group_vars/all.yml
+    - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/open-webui.env.j2
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+    mode: exclusive
+  - id: serverclaw_shared_generated_contract
+    paths:
+    - workstreams.yaml
+    - workstreams/active/ws-0254-serverclaw-runtime-fix.yaml
+    - build/platform-manifest.json
+    - changelog.md
+    - docs/adr/.index.yaml
+    - docs/adr/index/*
+    - docs/diagrams/*
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - build/onboarding/*
+    - receipts/sbom/*
+    mode: shared_contract
+    contract: mainline-release-integration-v1
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: fixed ServerClaw OIDC login by moving runtime.env to persistent
+    /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support
+    to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model
+    visibility, and made Keycloak startup idempotent by auto-creating the external
+    Docker network
+  release_bump: patch

@@ -33,6 +33,9 @@ services:
       - "{{ open_webui_port }}:8080"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+{% for host_entry in open_webui_extra_hosts %}
+      - "{{ host_entry }}"
+{% endfor %}
     env_file:
       - {{ open_webui_env_file }}
 {% if open_webui_enable_openbao_agent | bool %}

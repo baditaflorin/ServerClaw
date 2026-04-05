@@ -56,6 +56,7 @@ open_webui_web_search_concurrent_requests: 1
 open_webui_bypass_web_search_web_loader: true
 open_webui_default_models: ""
 open_webui_default_pinned_models: ""
+open_webui_user_permissions_workspace_models_access: true
 open_webui_user_permissions_workspace_knowledge_access: false
 open_webui_user_permissions_workspace_prompts_access: false
 open_webui_user_permissions_workspace_tools_access: false
@@ -66,3 +67,4 @@ open_webui_auth_cookie_same_site: ""
 open_webui_session_cookie_secure: false
 open_webui_auth_cookie_secure: false
 open_webui_audit_log_level: METADATA
+open_webui_extra_hosts: []
