@@ -5,7 +5,7 @@
 # Idempotency: Fully idempotent; existence checks guard all create operations; secrets reuse stable generated values.
 # Dependencies: ADR 0359 postgres_client registry, requires a writable PostgreSQL primary.
 ---
-- name: Validate postgres_client required inputs for {{ postgres_client_service }}
+- name: "Validate postgres_client required inputs for {{ postgres_client_service }}"
   ansible.builtin.assert:
     that:
       - postgres_client_service | length > 0
@@ -19,7 +19,7 @@
       postgres_client_user, postgres_client_password_local_file,
       postgres_client_password_remote_dir, and postgres_client_password_remote_file.
 
-- name: Ensure the controller-local artifact directory exists for {{ postgres_client_service }}
+- name: "Ensure the controller-local artifact directory exists for {{ postgres_client_service }}"
   ansible.builtin.file:
     path: "{{ postgres_client_password_local_file | dirname }}"
     state: directory
@@ -27,7 +27,7 @@
   delegate_to: localhost
   become: false
 
-- name: Generate the {{ postgres_client_service }} database password when missing
+- name: "Generate database password when missing: {{ postgres_client_service }}"
   ansible.builtin.shell: |
     set -euo pipefail
     if [ ! -s "{{ postgres_client_password_local_file }}" ]; then
@@ -43,7 +43,7 @@
   changed_when: "'changed' in postgres_client_password_generation.stdout"
   no_log: true
 
-- name: Read the {{ postgres_client_service }} database password from controller
+- name: "Read database password from controller: {{ postgres_client_service }}"
   ansible.builtin.slurp:
     src: "{{ postgres_client_password_local_file }}"
   delegate_to: localhost
@@ -51,12 +51,12 @@
   register: postgres_client_password_raw
   no_log: true
 
-- name: Record the {{ postgres_client_service }} database password
+- name: "Record database password: {{ postgres_client_service }}"
   ansible.builtin.set_fact:
     postgres_client_password: "{{ postgres_client_password_raw.content | b64decode | trim }}"
   no_log: true
 
-- name: Ensure the {{ postgres_client_service }} PostgreSQL secret directory exists on the guest
+- name: "Ensure PostgreSQL secret directory exists on guest: {{ postgres_client_service }}"
   ansible.builtin.file:
     path: "{{ postgres_client_password_remote_dir }}"
     state: directory
@@ -64,7 +64,7 @@
     group: postgres
     mode: "0750"
 
-- name: Mirror the {{ postgres_client_service }} database password to the guest
+- name: "Mirror database password to guest: {{ postgres_client_service }}"
   ansible.builtin.copy:
     dest: "{{ postgres_client_password_remote_file }}"
     content: "{{ postgres_client_password }}\n"
@@ -73,7 +73,7 @@
     mode: "0640"
   no_log: true
 
-- name: Mirror the {{ postgres_client_service }} database password back to the controller
+- name: "Mirror database password back to controller: {{ postgres_client_service }}"
   ansible.builtin.copy:
     dest: "{{ postgres_client_password_local_file }}"
     content: "{{ postgres_client_password }}\n"
@@ -82,7 +82,7 @@
   become: false
   no_log: true
 
-- name: Check whether the local PostgreSQL member is writable for {{ postgres_client_service }}
+- name: "Check whether the local PostgreSQL member is writable for {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -93,7 +93,7 @@
   register: postgres_client_writable_check
   changed_when: false
 
-- name: Install {{ postgres_client_service }} PostgreSQL extension packages
+- name: "Install PostgreSQL extension packages: {{ postgres_client_service }}"
   ansible.builtin.apt:
     name: "{{ postgres_client_extension_packages }}"
     state: present
@@ -103,7 +103,7 @@
     - postgres_client_extension_packages | length > 0
     - postgres_client_writable_check.stdout | trim == "1"
 
-- name: Ensure the {{ postgres_client_service }} support role exists
+- name: "Ensure support role exists: {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -118,7 +118,7 @@
     - postgres_client_support_role | length > 0
     - postgres_client_writable_check.stdout | trim == "1"
 
-- name: Ensure the {{ postgres_client_service }} primary role exists with correct password
+- name: "Ensure primary role exists with correct password: {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -144,7 +144,7 @@
   no_log: true
   when: postgres_client_writable_check.stdout | trim == "1"
 
-- name: Create the {{ postgres_client_service }} PostgreSQL extensions
+- name: "Create PostgreSQL extensions: {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -162,7 +162,7 @@
     - postgres_client_extensions | length > 0
     - postgres_client_writable_check.stdout | trim == "1"
 
-- name: Check whether the {{ postgres_client_service }} PostgreSQL database exists
+- name: "Check whether PostgreSQL database exists: {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -174,7 +174,7 @@
   changed_when: false
   when: postgres_client_writable_check.stdout | trim == "1"
 
-- name: Create the {{ postgres_client_service }} PostgreSQL database (standard)
+- name: "Create PostgreSQL database (standard): {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -190,7 +190,7 @@
     - postgres_client_database_check.stdout | trim != "1"
     - not (postgres_client_database_collation | length > 0 or postgres_client_database_ctype | length > 0 or postgres_client_database_template | length > 0)
 
-- name: Create the {{ postgres_client_service }} PostgreSQL database (with locale/template)
+- name: "Create PostgreSQL database (with locale/template): {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -211,7 +211,7 @@
     - postgres_client_database_check.stdout | trim != "1"
     - postgres_client_database_collation | length > 0 or postgres_client_database_ctype | length > 0 or postgres_client_database_template | length > 0
 
-- name: Ensure the {{ postgres_client_service }} database owner is correct
+- name: "Ensure database owner is correct: {{ postgres_client_service }}"
   become: true
   become_user: postgres
   ansible.builtin.command:
