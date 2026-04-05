@@ -68,3 +68,4 @@ open_webui_session_cookie_secure: false
 open_webui_auth_cookie_secure: false
 open_webui_audit_log_level: METADATA
 open_webui_extra_hosts: []
+open_webui_public_models: []

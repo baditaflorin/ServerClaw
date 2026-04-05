@@ -351,5 +351,43 @@
   no_log: true
   when: open_webui_enable_password_auth | bool
 
+- name: Provision public model access grants
+  when: open_webui_public_models | length > 0
+  block:
+    - name: Sign in as Open WebUI admin to obtain a session token
+      ansible.builtin.uri:
+        url: "{{ open_webui_internal_base_url }}/api/v1/auths/signin"
+        method: POST
+        body_format: json
+        body:
+          email: "{{ open_webui_admin_email }}"
+          password: "{{ open_webui_admin_password }}"
+        return_content: true
+        status_code: 200
+      register: open_webui_model_admin_signin
+      changed_when: false
+      no_log: true
+
+    - name: Grant public read access to each configured model
+      ansible.builtin.uri:
+        url: "{{ open_webui_internal_base_url }}/api/v1/models/model/access/update"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ open_webui_model_admin_signin.json.token }}"
+        body_format: json
+        body:
+          id: "{{ item.id }}"
+          name: "{{ item.name | default(item.id) }}"
+          access_grants:
+            - principal_type: user
+              principal_id: "*"
+              permission: read
+        status_code: 200
+      loop: "{{ open_webui_public_models }}"
+      loop_control:
+        label: "{{ item.id }}"
+      changed_when: false
+      no_log: true
+
 - name: Verify Open WebUI health probes
   ansible.builtin.import_tasks: verify.yml
