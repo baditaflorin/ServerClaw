@@ -34,6 +34,13 @@
       "allowed_bypasses": [
         "skip_remote_gate"
       ]
+    },
+    "build_server_disk_full": {
+      "summary": "The build-server gate runner ran out of disk space preventing snapshot upload or container execution.",
+      "max_expiry_days": 2,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
     }
   }
 }

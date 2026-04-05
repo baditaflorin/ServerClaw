@@ -1,5 +1,5 @@
 id: ops-portal-patternfly-removal
-adr: '0328'
+adr: 0328
 title: Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse
 status: ready_for_merge
 owner: claude
@@ -64,9 +64,10 @@ ready_to_merge: true
 live_applied: false
 canonical_truth:
   changelog_entry: removed all PatternFly v5 CSS framework classes from ops portal
-    templates (base, index, entry, task_detail, all partials and macros); portal
-    now uses only custom portal.css classes eliminating the CDN dependency and layout
+    templates (base, index, entry, task_detail, all partials and macros); portal now
+    uses only custom portal.css classes eliminating the CDN dependency and layout
     conflicts caused by pf-v5-c-page__sidebar translateX collapse; added repowise
     to service-capability-catalog and dependency-graph (lifecycle_status planned,
     ADR 0346)
   release_bump: patch
+plane_issue_id: ca0a8137-c27a-46bf-95b4-2809209dd449
