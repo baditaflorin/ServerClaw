@@ -21,6 +21,8 @@ entries:
     - config/grafana/
     - config/prometheus/
     - config/alertmanager/
+    - roles/netdata_runtime
+    - playbooks/realtime.yml
     backup:
     - playbooks/backup-vm.yml
     - config/pbs/

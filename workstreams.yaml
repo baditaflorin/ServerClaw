@@ -879,6 +879,78 @@ workstreams:
     included_in_repo_version: 0.177.48
     latest_receipts:
       dify: 2026-03-28-adr-0197-dify-mainline-live-apply
+- id: ws-realtime-dynamic-children
+  adr: 0196
+  title: Auto-discover all production hosts as Netdata streaming children
+  status: in_progress
+  owner: claude
+  branch: claude/relaxed-mcnulty
+  worktree_path: .claude/worktrees/relaxed-mcnulty
+  doc: docs/workstreams/ws-realtime-dynamic-children.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-realtime-dynamic-children.yaml
+  - docs/workstreams/ws-realtime-dynamic-children.md
+  - build/platform-manifest.json
+  - docs/site-generated/architecture/dependency-graph.md
+  - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
+  - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
+  - .config-locations.yaml
+  - .repo-structure.yaml
+  - build/onboarding/agent-core.yaml
+  - build/onboarding/automation.yaml
+  - build/onboarding/service-catalog.yaml
+  - docs/discovery/repo-structure/cross-cutting-concerns.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_realtime_dynamic_children_registry_source
+      paths:
+      - workstreams/active/ws-realtime-dynamic-children.yaml
+      mode: exclusive
+    - id: ws_realtime_dynamic_children_doc
+      paths:
+      - docs/workstreams/ws-realtime-dynamic-children.md
+      mode: exclusive
+    - id: ws_realtime_dynamic_children_netdata
+      paths:
+      - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
+      - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
+      mode: exclusive
+    - id: ws_realtime_dynamic_children_generated
+      paths:
+      - build/platform-manifest.json
+      - docs/site-generated/architecture/dependency-graph.md
+      mode: shared_contract
+      contract: ws-realtime-dynamic-children-generated-v1
+    - id: ws_realtime_dynamic_children_discovery
+      paths:
+      - .config-locations.yaml
+      - .repo-structure.yaml
+      - build/onboarding/agent-core.yaml
+      - build/onboarding/automation.yaml
+      - build/onboarding/service-catalog.yaml
+      - docs/discovery/repo-structure/cross-cutting-concerns.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: ws-realtime-dynamic-children-generated-v1
+  canonical_truth:
+    changelog_entry: replaces the static Netdata child host list with a dynamic inventory-group
+      expression so all production hosts stream to realtime.lv3.org automatically
+      when new VMs are added to the inventory
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  blockers: []
+  ready_to_merge: false
+  live_applied: false
 - id: adr-0095-unified-search
   adr: 0095
   title: Unified search across platform services

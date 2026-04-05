@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-04'
+generated: '2026-04-05'
 generated_from:
   - docs/discovery/onboarding-packs.yaml
   - docs/discovery/repo-structure/root-entrypoints.yaml
@@ -228,6 +228,8 @@ repo_structure_sections:
           - config/grafana/
           - config/prometheus/
           - config/alertmanager/
+          - roles/netdata_runtime
+          - playbooks/realtime.yml
         backup:
           - playbooks/backup-vm.yml
           - config/pbs/
