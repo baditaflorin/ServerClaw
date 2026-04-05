@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.11",
+  "repo_version": "0.178.12",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-05T19:46:21Z",
-  "next_refresh_at": "2026-04-05T20:46:21Z",
+  "generated_at": "2026-04-05T19:58:56Z",
+  "next_refresh_at": "2026-04-05T20:58:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.10",
+    "last_version": "0.178.11",
     "deployed_at": "2026-04-05",
-    "summary": "Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image). fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network",
-    "release_notes_url": "docs/release-notes/0.178.11.md"
+    "summary": "implements ADR 0359 by replacing 27 near-identical `{service}_postgres` role implementations with a shared `postgres_client` role driven by a canonical `platform_postgres_clients` registry; updates `pg_hba.conf.j2` to generate per-service least-privilege entries; reduces role boilerplate by ~4700 lines `platform_postgres_clients` registry in `inventory/group_vars/platform_postgres.yml` is the single source of truth for all service\u2013database relationships, driving pg_hba.conf and role provisioning",
+    "release_notes_url": "docs/release-notes/0.178.12.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
