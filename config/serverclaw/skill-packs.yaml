@@ -9,6 +9,12 @@ workspaces:
   - id: ops
     title: Operations
     description: Workspace-local overrides for platform operators managing the LV3 estate.
+shared_skill_packs:
+  - skill_id: human-review-queue
+    path: config/serverclaw/skills/shared/human-review-queue/SKILL.md
+    enabled: true
+    description: Flag agent decisions for human review in Label Studio.
+
 imported_skill_packs:
   - skill_id: openclaw-mirror-observe
     provider: openclaw-mirror

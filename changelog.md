@@ -12,12 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- recovers the remaining degraded public services after the runtime-pool stabilization merges by re-materializing OpenBao-backed runtime env files, preventing docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3, and replaying the Harbor and Vaultwarden recovery paths safely
-- implements ADR 0325 by replacing the monolithic ADR metadata catalog with shard-backed discovery manifests, adding a committed ADR reservation ledger, and validating reservation-aware query and generator workflows from exact main
-- implements ADR 0327 by splitting the root agent-discovery registries into sectional source files, generating concise public-safe root entrypoints, tracking generated onboarding packs under build/onboarding, and validating the discovery artifacts plus public entrypoints through the rebased exact-main automation gates
-- implements ADR 0328 by enforcing explicit line budgets for the root README, changelog, and release-note index, rolling older release and status rows into generated archive ledgers, and teaching the validation plus release automation to keep those bounded summaries current
-- hardens ADR 0337 by normalizing the sharded workstream registry to repo-root-relative metadata, preserving canonical in-repo workstream doc links, hardening worktree creation and service scaffolding against out-of-repo paths, and re-verifying the portability gate from the latest realistic mainline
-
 ## Latest Release
 
 - [0.178.7 release notes](docs/release-notes/0.178.7.md)

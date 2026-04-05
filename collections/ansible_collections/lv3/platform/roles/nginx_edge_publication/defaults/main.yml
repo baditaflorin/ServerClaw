@@ -292,6 +292,8 @@ public_edge_authenticated_sites:
       - /healthz
   langfuse.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_prefix_paths:
+      - /api/public/
   minio-console.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   tasks.lv3.org:
