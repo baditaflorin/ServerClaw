@@ -7,20 +7,20 @@ branch: codex/adr-0116-risk-scoring
 worktree_path: .worktrees/adr-0116
 doc: docs/workstreams/adr-0116-change-risk-scoring.md
 depends_on:
-- adr-0075-service-capability-catalog
-- adr-0080-maintenance-windows
-- adr-0090-platform-cli
-- adr-0112-goal-compiler
-- adr-0113-world-state-materializer
-- adr-0115-mutation-ledger
-- adr-0117-dependency-graph-runtime
+  - adr-0075-service-capability-catalog
+  - adr-0080-maintenance-windows
+  - adr-0090-platform-cli
+  - adr-0112-goal-compiler
+  - adr-0113-world-state-materializer
+  - adr-0115-mutation-ledger
+  - adr-0117-dependency-graph-runtime
 conflicts_with: []
 shared_surfaces:
-- scripts/risk_scorer
-- scripts/lv3_cli.py
-- config/risk-scoring-weights.yaml
-- config/risk-scoring-overrides.yaml
-- config/windmill/scripts/calibrate-risk-scoring.py
-- docs/runbooks/change-risk-scoring.md
+  - scripts/risk_scorer
+  - scripts/lv3_cli.py
+  - config/risk-scoring-weights.yaml
+  - config/risk-scoring-overrides.yaml
+  - config/windmill/scripts/calibrate-risk-scoring.py
+  - docs/runbooks/change-risk-scoring.md
 ready_to_merge: false
 live_applied: false

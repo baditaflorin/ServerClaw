@@ -7,70 +7,73 @@ branch: codex/ws-0233-live-apply
 worktree_path: .worktrees/ws-0233-live-apply
 doc: docs/workstreams/ws-0233-live-apply.md
 depends_on:
-- adr-0143-gitea-for-self-hosted-git-and-ci
-- adr-0168-automated-validation-gate
-- adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
+  - adr-0143-gitea-for-self-hosted-git-and-ci
+  - adr-0168-automated-validation-gate
+  - adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0233-live-apply.md
-- docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
-- docs/runbooks/configure-gitea.md
-- docs/runbooks/signed-release-bundles.md
-- config/controller-local-secrets.json
-- config/workflow-catalog.json
-- .config-locations.yaml
-- .gitea/workflows/release-bundle.yml
-- keys/gitea-release-bundle-cosign.pub
-- scripts/release_bundle.py
-- collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
-- collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
-- tests/test_release_bundle.py
-- tests/test_gitea_runtime_role.py
-- receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
-- receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0233-live-apply.md
+  - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+  - docs/runbooks/configure-gitea.md
+  - docs/runbooks/signed-release-bundles.md
+  - config/controller-local-secrets.json
+  - config/workflow-catalog.json
+  - .config-locations.yaml
+  - .gitea/workflows/release-bundle.yml
+  - keys/gitea-release-bundle-cosign.pub
+  - scripts/release_bundle.py
+  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+  - tests/test_release_bundle.py
+  - tests/test_gitea_runtime_role.py
+  - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+  - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0233_live_apply
-    paths:
-    - docs/workstreams/ws-0233-live-apply.md
-    - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
-    - docs/runbooks/configure-gitea.md
-    - docs/runbooks/signed-release-bundles.md
-    - config/controller-local-secrets.json
-    - config/workflow-catalog.json
-    - .config-locations.yaml
-    - .gitea/workflows/release-bundle.yml
-    - keys/gitea-release-bundle-cosign.pub
-    - scripts/release_bundle.py
-    - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
-    - tests/test_release_bundle.py
-    - tests/test_gitea_runtime_role.py
-    - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
-    - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0233_live_apply
+      paths:
+        - docs/workstreams/ws-0233-live-apply.md
+        - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+        - docs/runbooks/configure-gitea.md
+        - docs/runbooks/signed-release-bundles.md
+        - config/controller-local-secrets.json
+        - config/workflow-catalog.json
+        - .config-locations.yaml
+        - .gitea/workflows/release-bundle.yml
+        - keys/gitea-release-bundle-cosign.pub
+        - scripts/release_bundle.py
+        - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+        - tests/test_release_bundle.py
+        - tests/test_gitea_runtime_role.py
+        - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+        - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
+      mode: exclusive
 ready_to_merge: false
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0233 by publishing signed control-plane release
-    bundles from private Gitea Releases, seeding a durable repository token for private
-    asset replay, and verifying bundle provenance with Cosign before runtime consumption
+  changelog_entry: implemented ADR 0233 by publishing signed control-plane
+    release bundles from private Gitea Releases, seeding a durable repository
+    token for private asset replay, and verifying bundle provenance with Cosign
+    before runtime consumption
   release_bump: patch
   included_in_repo_version: 0.177.53
   latest_receipts:
-    signed_release_bundles: 2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
+    signed_release_bundles:
+      2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
   live_apply_verification:
     release_tag: bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a
     head_sha: 2fb56c14b62a73d0de47cb367a78c987dfd257c5
     workflow_runs:
       publish_verify_run_id: 68
       validate_run_id: 69
-    bundle_sha256: da9139777eadf4d0a6f4b520decc40781fb13282486ef67326217990e6223a8f
+    bundle_sha256:
+      da9139777eadf4d0a6f4b520decc40781fb13282486ef67326217990e6223a8f

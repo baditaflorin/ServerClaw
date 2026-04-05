@@ -7,15 +7,15 @@ branch: codex/adr-0122-operator-admin-ui
 worktree_path: .worktrees/adr-0122-operator-admin-ui
 doc: docs/workstreams/adr-0122-operator-access-admin.md
 depends_on:
-- adr-0044-windmill
-- adr-0056-keycloak
-- adr-0066-mutation-audit-log
-- adr-0108-operator-onboarding
+  - adr-0044-windmill
+  - adr-0056-keycloak
+  - adr-0066-mutation-audit-log
+  - adr-0108-operator-onboarding
 conflicts_with: []
 shared_surfaces:
-- config/windmill/scripts/
-- config/windmill/apps/
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/
-- docs/runbooks/operator-onboarding.md
+  - config/windmill/scripts/
+  - config/windmill/apps/
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+  - docs/runbooks/operator-onboarding.md
 ready_to_merge: false
 live_applied: true

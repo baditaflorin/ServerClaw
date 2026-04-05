@@ -7,51 +7,52 @@ branch: codex/ws-0196-main-merge-v2
 worktree_path: .worktrees/ws-0196-live-apply
 doc: docs/workstreams/ws-0196-live-apply.md
 depends_on:
-- adr-0011-monitoring
-- adr-0071-agent-observation-loop
-- adr-0133-portal-authentication-by-default
-- adr-0196-netdata-realtime-streaming-metrics
+  - adr-0011-monitoring
+  - adr-0071-agent-observation-loop
+  - adr-0133-portal-authentication-by-default
+  - adr-0196-netdata-realtime-streaming-metrics
 conflicts_with: []
 shared_surfaces:
-- collections/ansible_collections/lv3/platform/roles/netdata_runtime/
-- collections/ansible_collections/lv3/platform/roles/monitoring_vm/
-- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
-- inventory/host_vars/proxmox_florin.yml
-- config/service-capability-catalog.json
-- config/subdomain-catalog.json
-- config/health-probe-catalog.json
-- docs/runbooks/configure-netdata.md
-- receipts/live-applies/
+  - collections/ansible_collections/lv3/platform/roles/netdata_runtime/
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+  - inventory/host_vars/proxmox_florin.yml
+  - config/service-capability-catalog.json
+  - config/subdomain-catalog.json
+  - config/health-probe-catalog.json
+  - docs/runbooks/configure-netdata.md
+  - receipts/live-applies/
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: realtime_live_apply_docs
-    paths:
-    - docs/workstreams/ws-0196-live-apply.md
-    - receipts/live-applies/
-    mode: exclusive
-  - id: realtime_live_apply_contracts
-    paths:
-    - collections/ansible_collections/lv3/platform/roles/netdata_runtime/**
-    - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
-    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
-    - inventory/host_vars/proxmox_florin.yml
-    - config/service-capability-catalog.json
-    - config/subdomain-catalog.json
-    - config/health-probe-catalog.json
-    - docs/runbooks/configure-netdata.md
-    mode: shared_contract
-    contract: realtime-live-apply-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: realtime_live_apply_docs
+      paths:
+        - docs/workstreams/ws-0196-live-apply.md
+        - receipts/live-applies/
+      mode: exclusive
+    - id: realtime_live_apply_contracts
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/netdata_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+        - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+        - inventory/host_vars/proxmox_florin.yml
+        - config/service-capability-catalog.json
+        - config/subdomain-catalog.json
+        - config/health-probe-catalog.json
+        - docs/runbooks/configure-netdata.md
+      mode: shared_contract
+      contract: realtime-live-apply-v1
 ready_to_merge: false
 live_applied: true
 canonical_truth:
-  changelog_entry: completed the ADR 0196 latest-main live integration so realtime.lv3.org,
-    the Netdata parent-plus-children topology, Prometheus ingestion, and the canonical
-    live-apply receipt are now recorded directly on main
+  changelog_entry: completed the ADR 0196 latest-main live integration so
+    realtime.lv3.org, the Netdata parent-plus-children topology, Prometheus
+    ingestion, and the canonical live-apply receipt are now recorded directly on
+    main
   release_bump: patch
   included_in_repo_version: 0.177.25
   latest_receipts:

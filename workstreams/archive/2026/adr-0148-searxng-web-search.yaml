@@ -7,21 +7,21 @@ branch: codex/adr-0148-searxng-web-search
 worktree_path: .worktrees/adr-0148-searxng-web-search
 doc: docs/workstreams/adr-0148-searxng-web-search.md
 depends_on:
-- adr-0023-docker-runtime
-- adr-0060-open-webui-workbench
-- adr-0068-container-image-policy
+  - adr-0023-docker-runtime
+  - adr-0060-open-webui-workbench
+  - adr-0068-container-image-policy
 conflicts_with: []
 shared_surfaces:
-- collections/ansible_collections/lv3/platform/roles/searxng_runtime
-- collections/ansible_collections/lv3/platform/playbooks/searxng.yml
-- roles/open_webui_runtime
-- roles/proxmox_tailscale_proxy
-- platform/web
-- inventory/host_vars/proxmox_florin.yml
-- config/image-catalog.json
-- config/service-capability-catalog.json
-- config/subdomain-catalog.json
-- config/workflow-catalog.json
-- config/dependency-graph.json
+  - collections/ansible_collections/lv3/platform/roles/searxng_runtime
+  - collections/ansible_collections/lv3/platform/playbooks/searxng.yml
+  - roles/open_webui_runtime
+  - roles/proxmox_tailscale_proxy
+  - platform/web
+  - inventory/host_vars/proxmox_florin.yml
+  - config/image-catalog.json
+  - config/service-capability-catalog.json
+  - config/subdomain-catalog.json
+  - config/workflow-catalog.json
+  - config/dependency-graph.json
 ready_to_merge: false
 live_applied: true

@@ -7,87 +7,88 @@ branch: codex/ws-0253-live-apply-r2
 worktree_path: .worktrees/ws-0253-live-apply-r2
 doc: docs/workstreams/ws-0253-live-apply.md
 depends_on:
-- adr-0093-interactive-ops-portal
-- adr-0113-world-state-materializer
-- adr-0244-runtime-assurance-matrix
-- adr-0209-use-case-services
+  - adr-0093-interactive-ops-portal
+  - adr-0113-world-state-materializer
+  - adr-0244-runtime-assurance-matrix
+  - adr-0209-use-case-services
 conflicts_with: []
 shared_surfaces:
-- docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
-- docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
-- docs/workstreams/ws-0253-live-apply.md
-- docs/runbooks/runtime-assurance-scoreboard.md
-- docs/runbooks/ops-portal-down.md
-- scripts/ops_portal/app.py
-- scripts/ops_portal/runtime_assurance.py
-- scripts/ops_portal/templates/partials/overview.html
-- scripts/ops_portal/static/portal.css
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-- tests/test_interactive_ops_portal.py
-- tests/test_runtime_assurance_scoreboard.py
-- receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply.json
-- receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation.json
-- README.md
-- VERSION
-- changelog.md
-- RELEASE.md
-- docs/release-notes/README.md
-- docs/release-notes/0.177.59.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/adr/.index.yaml
-- workstreams.yaml
+  - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+  - docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
+  - docs/workstreams/ws-0253-live-apply.md
+  - docs/runbooks/runtime-assurance-scoreboard.md
+  - docs/runbooks/ops-portal-down.md
+  - scripts/ops_portal/app.py
+  - scripts/ops_portal/runtime_assurance.py
+  - scripts/ops_portal/templates/partials/overview.html
+  - scripts/ops_portal/static/portal.css
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+  - tests/test_interactive_ops_portal.py
+  - tests/test_runtime_assurance_scoreboard.py
+  - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply.json
+  - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation.json
+  - README.md
+  - VERSION
+  - changelog.md
+  - RELEASE.md
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.59.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/adr/.index.yaml
+  - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index_registry
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: runtime_assurance_live_apply
-    paths:
-    - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
-    - docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
-    - docs/workstreams/ws-0253-live-apply.md
-    - docs/runbooks/runtime-assurance-scoreboard.md
-    - docs/runbooks/ops-portal-down.md
-    - scripts/ops_portal/app.py
-    - scripts/ops_portal/runtime_assurance.py
-    - scripts/ops_portal/templates/partials/overview.html
-    - scripts/ops_portal/static/portal.css
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-    - tests/test_interactive_ops_portal.py
-    - tests/test_runtime_assurance_scoreboard.py
-    - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply.json
-    - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation.json
-    mode: exclusive
-  - id: integration_release_surfaces
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - RELEASE.md
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.59.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index_registry
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: runtime_assurance_live_apply
+      paths:
+        - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+        - docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
+        - docs/workstreams/ws-0253-live-apply.md
+        - docs/runbooks/runtime-assurance-scoreboard.md
+        - docs/runbooks/ops-portal-down.md
+        - scripts/ops_portal/app.py
+        - scripts/ops_portal/runtime_assurance.py
+        - scripts/ops_portal/templates/partials/overview.html
+        - scripts/ops_portal/static/portal.css
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+        - tests/test_interactive_ops_portal.py
+        - tests/test_runtime_assurance_scoreboard.py
+        - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply.json
+        - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation.json
+      mode: exclusive
+    - id: integration_release_surfaces
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - RELEASE.md
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.59.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements the live interactive runtime assurance scoreboard and
-    service-environment rollup for the ops portal, combining live health, publication
-    truth, and receipt-backed evidence into one operator-facing trust surface while
-    hardening the live ops-portal sync, build, and scoreboard verification path for
-    containerized apply
+  changelog_entry: implements the live interactive runtime assurance scoreboard
+    and service-environment rollup for the ops portal, combining live health,
+    publication truth, and receipt-backed evidence into one operator-facing
+    trust surface while hardening the live ops-portal sync, build, and
+    scoreboard verification path for containerized apply
   release_bump: patch
   included_in_repo_version: 0.177.59
   latest_receipts:
-    ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation
+    ops_portal:
+      2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation

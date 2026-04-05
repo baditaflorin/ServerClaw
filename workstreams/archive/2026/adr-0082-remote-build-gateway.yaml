@@ -9,10 +9,10 @@ doc: docs/workstreams/adr-0082-remote-build-gateway.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-- scripts/remote_exec.sh
-- config/build-server.json
-- inventory/build_server.yml
-- .rsync-exclude
-- Makefile
+  - scripts/remote_exec.sh
+  - config/build-server.json
+  - inventory/build_server.yml
+  - .rsync-exclude
+  - Makefile
 ready_to_merge: false
 live_applied: true

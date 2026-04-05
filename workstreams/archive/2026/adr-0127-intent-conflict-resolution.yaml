@@ -7,16 +7,16 @@ branch: codex/adr-0127-conflict-mgmt
 worktree_path: .worktrees/adr-0127-intent-conflict-resolution
 doc: docs/workstreams/adr-0127-intent-conflict-resolution.md
 depends_on:
-- adr-0112-goal-compiler
-- adr-0115-mutation-ledger
-- adr-0119-budgeted-workflow-scheduler
+  - adr-0112-goal-compiler
+  - adr-0115-mutation-ledger
+  - adr-0119-budgeted-workflow-scheduler
 conflicts_with: []
 shared_surfaces:
-- platform/conflict/
-- platform/scheduler/
-- scripts/lv3_cli.py
-- config/workflow-catalog.json
-- config/ledger-event-types.yaml
-- docs/runbooks/intent-conflict-resolution.md
+  - platform/conflict/
+  - platform/scheduler/
+  - scripts/lv3_cli.py
+  - config/workflow-catalog.json
+  - config/ledger-event-types.yaml
+  - docs/runbooks/intent-conflict-resolution.md
 ready_to_merge: false
 live_applied: false

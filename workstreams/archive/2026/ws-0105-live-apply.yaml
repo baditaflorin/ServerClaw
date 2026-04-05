@@ -7,16 +7,16 @@ branch: codex/ws-0105-live-apply
 worktree_path: .worktrees/ws-0105-live-apply
 doc: docs/workstreams/ws-0105-live-apply.md
 depends_on:
-- adr-0011-monitoring
-- adr-0097-alerting-routing
-- adr-0105-capacity-model
+  - adr-0011-monitoring
+  - adr-0097-alerting-routing
+  - adr-0105-capacity-model
 conflicts_with: []
 shared_surfaces:
-- collections/ansible_collections/lv3/platform/roles/monitoring_vm/
-- config/grafana/dashboards/capacity-overview.json
-- config/alertmanager/rules/platform.yml
-- config/windmill/scripts/weekly-capacity-report.py
-- docs/runbooks/capacity-model.md
-- receipts/live-applies/
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+  - config/grafana/dashboards/capacity-overview.json
+  - config/alertmanager/rules/platform.yml
+  - config/windmill/scripts/weekly-capacity-report.py
+  - docs/runbooks/capacity-model.md
+  - receipts/live-applies/
 ready_to_merge: false
 live_applied: true

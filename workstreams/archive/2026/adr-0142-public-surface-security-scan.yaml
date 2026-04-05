@@ -7,19 +7,19 @@ branch: codex/adr-0142-public-surface-scan
 worktree_path: .worktrees/adr-0142
 doc: docs/workstreams/adr-0142-public-surface-security-scan.md
 depends_on:
-- adr-0044-windmill
-- adr-0057-mattermost-chatops
-- adr-0061-glitchtip-failure-signals
-- adr-0083-docker-check-runner
-- adr-0102-security-posture-reporting
+  - adr-0044-windmill
+  - adr-0057-mattermost-chatops
+  - adr-0061-glitchtip-failure-signals
+  - adr-0083-docker-check-runner
+  - adr-0102-security-posture-reporting
 conflicts_with: []
 shared_surfaces:
-- config/public-surface-scan-policy.json
-- scripts/public_surface_scan.py
-- config/windmill/scripts/weekly-security-scan.py
-- config/workflow-catalog.json
-- config/control-plane-lanes.json
-- receipts/security-scan/
-- docs/runbooks/public-surface-security-scan.md
+  - config/public-surface-scan-policy.json
+  - scripts/public_surface_scan.py
+  - config/windmill/scripts/weekly-security-scan.py
+  - config/workflow-catalog.json
+  - config/control-plane-lanes.json
+  - receipts/security-scan/
+  - docs/runbooks/public-surface-security-scan.md
 ready_to_merge: false
 live_applied: false

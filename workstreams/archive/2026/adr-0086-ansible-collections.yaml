@@ -7,17 +7,17 @@ branch: codex/adr-0086-ansible-collections
 worktree_path: .worktrees/adr-0086-ansible-collections
 doc: docs/workstreams/adr-0086-ansible-collections.md
 depends_on:
-- adr-0082-remote-build-gateway
-- adr-0083-docker-check-runner
+  - adr-0082-remote-build-gateway
+  - adr-0083-docker-check-runner
 conflicts_with: []
 shared_surfaces:
-- collections/
-- roles/
-- filter_plugins/
-- callback_plugins/
-- playbooks/
-- ansible.cfg
-- Makefile
-- config/windmill/scripts/collection-publish.py
+  - collections/
+  - roles/
+  - filter_plugins/
+  - callback_plugins/
+  - playbooks/
+  - ansible.cfg
+  - Makefile
+  - config/windmill/scripts/collection-publish.py
 ready_to_merge: false
 live_applied: false

@@ -7,21 +7,21 @@ branch: codex/ws-0105-live-apply
 worktree_path: .worktrees/adr-0105-capacity-model
 doc: docs/workstreams/adr-0105-capacity-model.md
 depends_on:
-- adr-0010-vm-topology
-- adr-0073-promotion-gate
-- adr-0085-opentofu-vm-lifecycle
-- adr-0097-alerting-routing
-- adr-0098-postgres-ha
+  - adr-0010-vm-topology
+  - adr-0073-promotion-gate
+  - adr-0085-opentofu-vm-lifecycle
+  - adr-0097-alerting-routing
+  - adr-0098-postgres-ha
 conflicts_with: []
 shared_surfaces:
-- config/capacity-model.json
-- scripts/capacity_report.py
-- scripts/promotion_pipeline.py
-- config/grafana/dashboards/capacity-overview.json
-- config/alertmanager/rules/platform.yml
-- config/windmill/scripts/weekly-capacity-report.py
-- collections/ansible_collections/lv3/platform/roles/monitoring_vm/
-- docs/runbooks/capacity-model.md
-- receipts/live-applies/
+  - config/capacity-model.json
+  - scripts/capacity_report.py
+  - scripts/promotion_pipeline.py
+  - config/grafana/dashboards/capacity-overview.json
+  - config/alertmanager/rules/platform.yml
+  - config/windmill/scripts/weekly-capacity-report.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+  - docs/runbooks/capacity-model.md
+  - receipts/live-applies/
 ready_to_merge: false
 live_applied: true

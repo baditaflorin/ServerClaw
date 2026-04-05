@@ -7,19 +7,19 @@ branch: codex/integration-0092-live
 worktree_path: .worktrees/integration-0092
 doc: docs/workstreams/adr-0092-platform-api-gateway.md
 depends_on:
-- adr-0021-nginx-edge
-- adr-0045-communication-lanes
-- adr-0047-short-lived-creds
-- adr-0056-keycloak
-- adr-0058-nats-event-bus
-- adr-0066-mutation-audit-log
-- adr-0069-agent-tool-registry
+  - adr-0021-nginx-edge
+  - adr-0045-communication-lanes
+  - adr-0047-short-lived-creds
+  - adr-0056-keycloak
+  - adr-0058-nats-event-bus
+  - adr-0066-mutation-audit-log
+  - adr-0069-agent-tool-registry
 conflicts_with: []
 shared_surfaces:
-- config/api-gateway-catalog.json
-- config/service-capability-catalog.json
-- config/agent-tool-registry.json
-- Compose stack docker-runtime-lv3
-- nginx edge config
+  - config/api-gateway-catalog.json
+  - config/service-capability-catalog.json
+  - config/agent-tool-registry.json
+  - Compose stack docker-runtime-lv3
+  - nginx edge config
 ready_to_merge: false
 live_applied: true

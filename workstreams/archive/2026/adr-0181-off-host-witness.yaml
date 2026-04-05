@@ -7,20 +7,20 @@ branch: codex/adr-0181-metadata-replication
 worktree_path: .worktrees/adr-0181-off-host-witness
 doc: docs/workstreams/adr-0181-off-host-witness-replication.md
 depends_on:
-- adr-0051-control-plane-recovery
-- adr-0100-rto-rpo-targets
-- adr-0179-service-redundancy-tier-matrix
+  - adr-0051-control-plane-recovery
+  - adr-0100-rto-rpo-targets
+  - adr-0179-service-redundancy-tier-matrix
 conflicts_with: []
 shared_surfaces:
-- scripts/control_metadata_witness.py
-- playbooks/control-plane-recovery.yml
-- inventory/group_vars/all.yml
-- scripts/disaster_recovery_runbook.py
-- scripts/generate_dr_report.py
-- docs/runbooks/configure-control-plane-recovery.md
-- docs/runbooks/disaster-recovery.md
-- config/command-catalog.json
-- config/workflow-catalog.json
-- receipts/witness-replication/
+  - scripts/control_metadata_witness.py
+  - playbooks/control-plane-recovery.yml
+  - inventory/group_vars/all.yml
+  - scripts/disaster_recovery_runbook.py
+  - scripts/generate_dr_report.py
+  - docs/runbooks/configure-control-plane-recovery.md
+  - docs/runbooks/disaster-recovery.md
+  - config/command-catalog.json
+  - config/workflow-catalog.json
+  - receipts/witness-replication/
 ready_to_merge: false
 live_applied: true

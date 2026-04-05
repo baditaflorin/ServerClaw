@@ -7,50 +7,51 @@ branch: codex/ws-0190-live-apply
 worktree_path: .worktrees/ws-0190-live-apply
 doc: docs/workstreams/ws-0190-live-apply.md
 depends_on:
-- adr-0099-backup-restore-verification
-- adr-0105-capacity-model
-- adr-0171-controlled-fault-injection
-- adr-0181-off-host-witness-replication
+  - adr-0099-backup-restore-verification
+  - adr-0105-capacity-model
+  - adr-0171-controlled-fault-injection
+  - adr-0181-off-host-witness-replication
 conflicts_with: []
 shared_surfaces:
-- scripts/restore_verification.py
-- scripts/synthetic_transaction_replay.py
-- config/synthetic-transaction-catalog.json
-- docs/runbooks/backup-restore-verification.md
-- docs/runbooks/synthetic-transaction-replay.md
-- receipts/restore-verifications/
-- receipts/live-applies/
+  - scripts/restore_verification.py
+  - scripts/synthetic_transaction_replay.py
+  - config/synthetic-transaction-catalog.json
+  - docs/runbooks/backup-restore-verification.md
+  - docs/runbooks/synthetic-transaction-replay.md
+  - receipts/restore-verifications/
+  - receipts/live-applies/
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0190_replay_surface
-    paths:
-    - config/synthetic-transaction-catalog.json
-    - scripts/synthetic_transaction_replay.py
-    - scripts/restore_verification.py
-    - tests/test_synthetic_transaction_replay.py
-    - tests/test_restore_verification.py
-    - docs/runbooks/backup-restore-verification.md
-    - docs/runbooks/synthetic-transaction-replay.md
-    - docs/workstreams/ws-0190-live-apply.md
-    - docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
-    mode: exclusive
-  - id: restore_verification_workflow_contract
-    paths:
-    - Makefile
-    - config/workflow-catalog.json
-    - config/command-catalog.json
-    mode: shared_contract
-    contract: restore-verification-workflow-v2
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0190_replay_surface
+      paths:
+        - config/synthetic-transaction-catalog.json
+        - scripts/synthetic_transaction_replay.py
+        - scripts/restore_verification.py
+        - tests/test_synthetic_transaction_replay.py
+        - tests/test_restore_verification.py
+        - docs/runbooks/backup-restore-verification.md
+        - docs/runbooks/synthetic-transaction-replay.md
+        - docs/workstreams/ws-0190-live-apply.md
+        - docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
+      mode: exclusive
+    - id: restore_verification_workflow_contract
+      paths:
+        - Makefile
+        - config/workflow-catalog.json
+        - config/command-catalog.json
+      mode: shared_contract
+      contract: restore-verification-workflow-v2
 ready_to_merge: false
 live_applied: false
 canonical_truth:
-  changelog_entry: implemented ADR 0190 synthetic transaction replay for restore verification,
-    including the governed replay catalog, guest-agent restore fallback, and committed
-    live-apply evidence for the current restore-health gap
+  changelog_entry: implemented ADR 0190 synthetic transaction replay for restore
+    verification, including the governed replay catalog, guest-agent restore
+    fallback, and committed live-apply evidence for the current restore-health
+    gap
   release_bump: patch
   included_in_repo_version: 0.177.21

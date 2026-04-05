@@ -7,14 +7,14 @@ branch: codex/adr-0056-keycloak-sso
 worktree_path: .worktrees/adr-0056-keycloak-sso
 doc: docs/workstreams/adr-0056-keycloak-sso.md
 depends_on:
-- adr-0046-identity-classes
-- adr-0047-short-lived-creds
-- adr-0049-private-api-publication
+  - adr-0046-identity-classes
+  - adr-0047-short-lived-creds
+  - adr-0049-private-api-publication
 conflicts_with: []
 shared_surfaces:
-- internal app auth
-- operator sessions
-- agent clients
-- MFA policies
+  - internal app auth
+  - operator sessions
+  - agent clients
+  - MFA policies
 ready_to_merge: false
 live_applied: true

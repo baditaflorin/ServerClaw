@@ -7,12 +7,12 @@ branch: codex/adr-0028-build-telemetry
 worktree_path: .worktrees/adr-0028-build-telemetry
 doc: docs/workstreams/adr-0028-build-telemetry.md
 depends_on:
-- adr-0011-monitoring
+  - adr-0011-monitoring
 conflicts_with: []
 shared_surfaces:
-- docker-build-lv3
-- playbooks/monitoring-stack.yml
-- roles/docker_build_observability
-- roles/monitoring_vm
+  - docker-build-lv3
+  - playbooks/monitoring-stack.yml
+  - roles/docker_build_observability
+  - roles/monitoring_vm
 ready_to_merge: false
 live_applied: true

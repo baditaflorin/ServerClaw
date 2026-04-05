@@ -7,84 +7,84 @@ branch: codex/ws-0231-main-merge
 worktree_path: .worktrees/ws-0231-main-merge
 doc: docs/workstreams/ws-0231-main-merge.md
 depends_on:
-- ws-0231-live-apply
+  - ws-0231-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0231-main-merge.md
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/0.177.45.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/adr/.index.yaml
-- docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
-- docs/runbooks/configure-control-plane-recovery.md
-- docs/workstreams/ws-0231-live-apply.md
-- collections/ansible_collections/lv3/platform/roles/common/README.md
-- collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
-- collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
-- collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
-- collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
-- collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
-- platform/ansible/plane.py
-- tests/test_compose_runtime_secret_injection.py
-- receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0231-main-merge.md
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.45.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/adr/.index.yaml
+  - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+  - docs/runbooks/configure-control-plane-recovery.md
+  - docs/workstreams/ws-0231-live-apply.md
+  - collections/ansible_collections/lv3/platform/roles/common/README.md
+  - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+  - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+  - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+  - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+  - platform/ansible/plane.py
+  - tests/test_compose_runtime_secret_injection.py
+  - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: ws_0231_main_merge_doc
-    paths:
-    - docs/workstreams/ws-0231-main-merge.md
-    mode: exclusive
-  - id: adr_0231_mainline_truth
-    paths:
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.45.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    mode: exclusive
-  - id: adr_0231_main_merge_surfaces
-    paths:
-    - docs/adr/.index.yaml
-    - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
-    - docs/runbooks/configure-control-plane-recovery.md
-    - docs/workstreams/ws-0231-live-apply.md
-    - collections/ansible_collections/lv3/platform/roles/common/README.md
-    - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
-    - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
-    - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
-    - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
-    - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
-    - platform/ansible/plane.py
-    - tests/test_compose_runtime_secret_injection.py
-    mode: shared_contract
-    contract: adr-0231-main-merge-v1
-  - id: live_apply_evidence
-    paths:
-    - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
-    mode: shared_contract
-    contract: live-apply-receipts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0231_main_merge_doc
+      paths:
+        - docs/workstreams/ws-0231-main-merge.md
+      mode: exclusive
+    - id: adr_0231_mainline_truth
+      paths:
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.45.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: exclusive
+    - id: adr_0231_main_merge_surfaces
+      paths:
+        - docs/adr/.index.yaml
+        - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+        - docs/runbooks/configure-control-plane-recovery.md
+        - docs/workstreams/ws-0231-live-apply.md
+        - collections/ansible_collections/lv3/platform/roles/common/README.md
+        - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+        - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+        - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+        - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+        - platform/ansible/plane.py
+        - tests/test_compose_runtime_secret_injection.py
+      mode: shared_contract
+      contract: adr-0231-main-merge-v1
+    - id: live_apply_evidence
+      paths:
+        - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+      mode: shared_contract
+      contract: live-apply-receipts-v1
 ready_to_merge: true
 live_applied: false
 canonical_truth:
-  changelog_entry: integrates ADR 0231 into main by replacing the control-plane backup
-    service's plaintext OpenBao token and baked-in Windmill DSN with host-native OpenBao
-    Agent delivery through systemd credentials
+  changelog_entry: integrates ADR 0231 into main by replacing the control-plane
+    backup service's plaintext OpenBao token and baked-in Windmill DSN with
+    host-native OpenBao Agent delivery through systemd credentials
   release_bump: patch
   included_in_repo_version: 0.177.45

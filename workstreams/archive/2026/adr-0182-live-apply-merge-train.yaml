@@ -7,21 +7,21 @@ branch: codex/adr-0182-live-apply-landing
 worktree_path: .worktrees/adr-0182-live-apply-merge-train
 doc: docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md
 depends_on:
-- adr-0155-intent-queue-with-release-triggered-scheduling
-- adr-0173-workstream-surface-ownership-manifest
-- adr-0178-dependency-wave-manifests-for-parallel-apply
+  - adr-0155-intent-queue-with-release-triggered-scheduling
+  - adr-0173-workstream-surface-ownership-manifest
+  - adr-0178-dependency-wave-manifests-for-parallel-apply
 conflicts_with: []
 shared_surfaces:
-- platform/live_apply/
-- scripts/live_apply_merge_train.py
-- scripts/validate_repository_data_models.py
-- Makefile
-- docs/runbooks/live-apply-merge-train.md
+  - platform/live_apply/
+  - scripts/live_apply_merge_train.py
+  - scripts/validate_repository_data_models.py
+  - Makefile
+  - docs/runbooks/live-apply-merge-train.md
 ready_to_merge: false
 live_applied: false
 canonical_truth:
-  changelog_entry: implemented ADR 0182 live-apply merge-train queueing, wave planning,
-    and rollback bundle execution
+  changelog_entry: implemented ADR 0182 live-apply merge-train queueing, wave
+    planning, and rollback bundle execution
   release_bump: patch
   included_in_repo_version: 0.176.6
   latest_receipts: {}

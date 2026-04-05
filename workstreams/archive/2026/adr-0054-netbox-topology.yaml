@@ -9,9 +9,9 @@ doc: docs/workstreams/adr-0054-netbox-topology.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-- topology catalog
-- VM inventory
-- IP addressing
-- ownership metadata
+  - topology catalog
+  - VM inventory
+  - IP addressing
+  - ownership metadata
 ready_to_merge: false
 live_applied: true

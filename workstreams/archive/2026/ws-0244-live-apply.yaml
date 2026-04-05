@@ -7,94 +7,94 @@ branch: codex/ws-0244-live-apply
 worktree_path: .worktrees/ws-0244-live-apply
 doc: docs/workstreams/ws-0244-live-apply.md
 depends_on:
-- adr-0064-health-probes
-- adr-0075-service-capability-catalog
-- adr-0092-api-gateway
-- adr-0093-interactive-ops-portal
-- adr-0113-world-state-materializer
-- adr-0123-uptime-contracts
-- adr-0133-portal-auth-default
-- adr-0142-public-surface-scan
-- adr-0169-structured-logs
-- adr-0190-synthetic-replay
-- adr-0214-prod-staging-cells
-- adr-0244-runtime-assurance-adrs
+  - adr-0064-health-probes
+  - adr-0075-service-capability-catalog
+  - adr-0092-api-gateway
+  - adr-0093-interactive-ops-portal
+  - adr-0113-world-state-materializer
+  - adr-0123-uptime-contracts
+  - adr-0133-portal-auth-default
+  - adr-0142-public-surface-scan
+  - adr-0169-structured-logs
+  - adr-0190-synthetic-replay
+  - adr-0214-prod-staging-cells
+  - adr-0244-runtime-assurance-adrs
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0244-live-apply.md
-- docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
-- docs/adr/.index.yaml
-- docs/runbooks/runtime-assurance-matrix.md
-- config/runtime-assurance-matrix.json
-- docs/schema/runtime-assurance-matrix.schema.json
-- scripts/runtime_assurance.py
-- scripts/validate_repository_data_models.py
-- scripts/api_gateway/main.py
-- scripts/ops_portal/app.py
-- scripts/ops_portal/templates/index.html
-- scripts/ops_portal/templates/partials/runtime_assurance.html
-- tests/test_runtime_assurance.py
-- tests/test_api_gateway.py
-- tests/test_api_gateway_runtime_role.py
-- tests/test_interactive_ops_portal.py
-- tests/test_ops_portal_runtime_role.py
-- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
-- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-- receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0244-live-apply.md
+  - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/runtime-assurance-matrix.md
+  - config/runtime-assurance-matrix.json
+  - docs/schema/runtime-assurance-matrix.schema.json
+  - scripts/runtime_assurance.py
+  - scripts/validate_repository_data_models.py
+  - scripts/api_gateway/main.py
+  - scripts/ops_portal/app.py
+  - scripts/ops_portal/templates/index.html
+  - scripts/ops_portal/templates/partials/runtime_assurance.html
+  - tests/test_runtime_assurance.py
+  - tests/test_api_gateway.py
+  - tests/test_api_gateway_runtime_role.py
+  - tests/test_interactive_ops_portal.py
+  - tests/test_ops_portal_runtime_role.py
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+  - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: adr_0244_live_apply
-    paths:
-    - docs/workstreams/ws-0244-live-apply.md
-    - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
-    - docs/runbooks/runtime-assurance-matrix.md
-    - config/runtime-assurance-matrix.json
-    - docs/schema/runtime-assurance-matrix.schema.json
-    - scripts/runtime_assurance.py
-    - scripts/validate_repository_data_models.py
-    - tests/test_runtime_assurance.py
-    mode: exclusive
-  - id: runtime_assurance_adapters
-    paths:
-    - scripts/api_gateway/main.py
-    - scripts/ops_portal/app.py
-    - scripts/ops_portal/templates/index.html
-    - scripts/ops_portal/templates/partials/runtime_assurance.html
-    - tests/test_api_gateway.py
-    - tests/test_api_gateway_runtime_role.py
-    - tests/test_interactive_ops_portal.py
-    - tests/test_ops_portal_runtime_role.py
-    - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-    mode: shared_contract
-    contract: runtime-assurance-adapters-v1
-  - id: live_apply_evidence
-    paths:
-    - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
-    mode: shared_contract
-    contract: live-apply-receipts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: adr_0244_live_apply
+      paths:
+        - docs/workstreams/ws-0244-live-apply.md
+        - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+        - docs/runbooks/runtime-assurance-matrix.md
+        - config/runtime-assurance-matrix.json
+        - docs/schema/runtime-assurance-matrix.schema.json
+        - scripts/runtime_assurance.py
+        - scripts/validate_repository_data_models.py
+        - tests/test_runtime_assurance.py
+      mode: exclusive
+    - id: runtime_assurance_adapters
+      paths:
+        - scripts/api_gateway/main.py
+        - scripts/ops_portal/app.py
+        - scripts/ops_portal/templates/index.html
+        - scripts/ops_portal/templates/partials/runtime_assurance.html
+        - tests/test_api_gateway.py
+        - tests/test_api_gateway_runtime_role.py
+        - tests/test_interactive_ops_portal.py
+        - tests/test_ops_portal_runtime_role.py
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      mode: shared_contract
+      contract: runtime-assurance-adapters-v1
+    - id: live_apply_evidence
+      paths:
+        - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
+      mode: shared_contract
+      contract: live-apply-receipts-v1
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: live-applied ADR 0244 by restoring the governed runtime assurance
-    matrix through the authenticated API gateway and ops portal, hardening the runtime
-    sync path against metadata sidecars, and fixing the gateway helper packaging gap
-    that blocked rebuilt containers
+  changelog_entry: live-applied ADR 0244 by restoring the governed runtime
+    assurance matrix through the authenticated API gateway and ops portal,
+    hardening the runtime sync path against metadata sidecars, and fixing the
+    gateway helper packaging gap that blocked rebuilt containers
   release_bump: patch
   included_in_repo_version: 0.177.61
   latest_receipts:

@@ -7,25 +7,25 @@ branch: codex/adr-0177-namespace-partitioning
 worktree_path: .worktrees/adr-0177-run-namespace-partitioning
 doc: docs/workstreams/adr-0177-run-namespace-partitioning.md
 depends_on:
-- adr-0156-agent-session-workspace-isolation
-- adr-0160-parallel-dry-run-fan-out
+  - adr-0156-agent-session-workspace-isolation
+  - adr-0160-parallel-dry-run-fan-out
 conflicts_with: []
 shared_surfaces:
-- Makefile
-- scripts/run_namespace.py
-- scripts/run_with_namespace.sh
-- scripts/tofu_exec.sh
-- scripts/remote_exec.sh
-- platform/diff_engine/adapters/
-- scripts/drift_detector.py
-- docs/runbooks/run-namespace-partitioning.md
+  - Makefile
+  - scripts/run_namespace.py
+  - scripts/run_with_namespace.sh
+  - scripts/tofu_exec.sh
+  - scripts/remote_exec.sh
+  - platform/diff_engine/adapters/
+  - scripts/drift_detector.py
+  - docs/runbooks/run-namespace-partitioning.md
 ready_to_merge: false
 live_applied: false
 canonical_truth:
-  changelog_entry: implemented ADR 0177 run namespace partitioning so controller-local
-    Ansible and OpenTofu tooling now uses per-run namespaces, forwards `LV3_RUN_ID`
-    through remote execution, and verifies concurrent isolated plan directories in
-    focused tests
+  changelog_entry: implemented ADR 0177 run namespace partitioning so
+    controller-local Ansible and OpenTofu tooling now uses per-run namespaces,
+    forwards `LV3_RUN_ID` through remote execution, and verifies concurrent
+    isolated plan directories in focused tests
   release_bump: patch
   included_in_repo_version: 0.177.2
   latest_receipts: {}

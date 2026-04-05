@@ -9,10 +9,10 @@ doc: docs/workstreams/adr-0027-uptime-kuma.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-- docker-runtime-lv3
-- uptime.lv3.org
-- /opt/uptime-kuma
-- nginx_edge
-- hetzner_dns
+  - docker-runtime-lv3
+  - uptime.lv3.org
+  - /opt/uptime-kuma
+  - nginx_edge
+  - hetzner_dns
 ready_to_merge: false
 live_applied: true

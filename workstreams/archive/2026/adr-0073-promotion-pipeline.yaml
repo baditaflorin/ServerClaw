@@ -7,19 +7,19 @@ branch: codex/adr-0073-promotion-pipeline
 worktree_path: .worktrees/adr-0073
 doc: docs/workstreams/adr-0073-promotion-pipeline.md
 depends_on:
-- adr-0072-staging-production-topology
-- adr-0044-windmill
-- adr-0048-command-catalog
-- adr-0064-health-probe-contracts
-- adr-0066-structured-mutation-audit-log
+  - adr-0072-staging-production-topology
+  - adr-0044-windmill
+  - adr-0048-command-catalog
+  - adr-0064-health-probe-contracts
+  - adr-0066-structured-mutation-audit-log
 conflicts_with: []
 shared_surfaces:
-- config/command-catalog.json
-- config/workflow-catalog.json
-- scripts/promotion_pipeline.py
-- receipts/live-applies/staging/
-- receipts/promotions/
-- Makefile
-- Windmill seeded scripts
+  - config/command-catalog.json
+  - config/workflow-catalog.json
+  - scripts/promotion_pipeline.py
+  - receipts/live-applies/staging/
+  - receipts/promotions/
+  - Makefile
+  - Windmill seeded scripts
 ready_to_merge: false
 live_applied: false

@@ -7,17 +7,17 @@ branch: codex/adr-0133-portal-auth-default
 worktree_path: .worktrees/adr-0133-auth-default
 doc: docs/workstreams/adr-0133-portal-authentication-by-default.md
 depends_on:
-- adr-0011-monitoring
-- adr-0056-keycloak-sso
-- adr-0074-ops-portal
-- adr-0081-changelog-portal
-- adr-0094-developer-portal
+  - adr-0011-monitoring
+  - adr-0056-keycloak-sso
+  - adr-0074-ops-portal
+  - adr-0081-changelog-portal
+  - adr-0094-developer-portal
 conflicts_with: []
 shared_surfaces:
-- config/subdomain-catalog.json
-- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
-- collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/
-- collections/ansible_collections/lv3/platform/roles/grafana_sso/
-- docs/runbooks/
+  - config/subdomain-catalog.json
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/
+  - collections/ansible_collections/lv3/platform/roles/grafana_sso/
+  - docs/runbooks/
 ready_to_merge: false
 live_applied: true

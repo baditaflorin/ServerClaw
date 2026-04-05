@@ -7,50 +7,50 @@ branch: codex/adr-0176-inventory-sharding
 worktree_path: .worktrees/adr-0176-inventory-sharding
 doc: docs/workstreams/adr-0176-inventory-sharding.md
 depends_on:
-- adr-0048-command-catalog
-- adr-0154-vm-scoped-parallel-execution-lanes
-- adr-0157-per-vm-concurrency-budget
+  - adr-0048-command-catalog
+  - adr-0154-vm-scoped-parallel-execution-lanes
+  - adr-0157-per-vm-concurrency-budget
 conflicts_with: []
 shared_surfaces:
-- config/ansible-execution-scopes.yaml
-- platform/ansible/execution_scopes.py
-- scripts/ansible_scope_runner.py
-- Makefile
-- scripts/validate_repo.sh
-- docs/runbooks/ansible-inventory-sharding.md
+  - config/ansible-execution-scopes.yaml
+  - platform/ansible/execution_scopes.py
+  - scripts/ansible_scope_runner.py
+  - Makefile
+  - scripts/validate_repo.sh
+  - docs/runbooks/ansible-inventory-sharding.md
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: inventory_sharding_repo_surface
-    paths:
-    - config/ansible-execution-scopes.yaml
-    - platform/ansible/execution_scopes.py
-    - scripts/ansible_scope_runner.py
-    - tests/test_ansible_execution_scopes.py
-    - docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md
-    - docs/workstreams/adr-0176-inventory-sharding.md
-    - docs/runbooks/ansible-inventory-sharding.md
-    mode: exclusive
-  - id: live_apply_entrypoints_contract
-    paths:
-    - Makefile
-    mode: shared_contract
-    contract: live-apply-entrypoints-v1
-  - id: repo_validation_pipeline_contract
-    paths:
-    - scripts/validate_repo.sh
-    mode: shared_contract
-    contract: repo-validation-pipeline-v1
-  - id: integration_truth
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    mode: generated
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: inventory_sharding_repo_surface
+      paths:
+        - config/ansible-execution-scopes.yaml
+        - platform/ansible/execution_scopes.py
+        - scripts/ansible_scope_runner.py
+        - tests/test_ansible_execution_scopes.py
+        - docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md
+        - docs/workstreams/adr-0176-inventory-sharding.md
+        - docs/runbooks/ansible-inventory-sharding.md
+      mode: exclusive
+    - id: live_apply_entrypoints_contract
+      paths:
+        - Makefile
+      mode: shared_contract
+      contract: live-apply-entrypoints-v1
+    - id: repo_validation_pipeline_contract
+      paths:
+        - scripts/validate_repo.sh
+      mode: shared_contract
+      contract: repo-validation-pipeline-v1
+    - id: integration_truth
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+      mode: generated
 ready_to_merge: false
 live_applied: true

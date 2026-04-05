@@ -7,21 +7,21 @@ branch: codex/ws-0117-live-apply
 worktree_path: .worktrees/adr-0117-dependency-graph-runtime
 doc: docs/workstreams/adr-0117-dependency-graph-runtime.md
 depends_on:
-- adr-0048-command-catalog
-- adr-0054-netbox-topology
-- adr-0058-nats-event-bus
-- adr-0075-service-capability-catalog
-- adr-0092-platform-api-gateway
-- adr-0098-postgres-ha
-- adr-0113-world-state-materializer
+  - adr-0048-command-catalog
+  - adr-0054-netbox-topology
+  - adr-0058-nats-event-bus
+  - adr-0075-service-capability-catalog
+  - adr-0092-platform-api-gateway
+  - adr-0098-postgres-ha
+  - adr-0113-world-state-materializer
 conflicts_with:
-- adr-0113-world-state-materializer
+  - adr-0113-world-state-materializer
 shared_surfaces:
-- platform/graph/
-- config/dependency-graph.yaml
-- config/windmill/scripts/graph/
-- scripts/api_gateway/main.py
-- scripts/risk_scorer/context.py
-- migrations/0012_graph_schema.sql
+  - platform/graph/
+  - config/dependency-graph.yaml
+  - config/windmill/scripts/graph/
+  - scripts/api_gateway/main.py
+  - scripts/risk_scorer/context.py
+  - migrations/0012_graph_schema.sql
 ready_to_merge: false
 live_applied: true

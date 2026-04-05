@@ -1,115 +1,116 @@
 id: ws-0209-live-apply
 adr: 0209
-title: Shared runbook use-case service with thin CLI, API gateway, Windmill, and ops
-  portal adapters
+title: Shared runbook use-case service with thin CLI, API gateway, Windmill, and
+  ops portal adapters
 status: live_applied
 owner: codex
 branch: codex/ws-0209-live-apply
 worktree_path: .worktrees/ws-0209-live-apply
 doc: docs/workstreams/ws-0209-live-apply.md
 depends_on:
-- adr-0129-runbook-automation-executor
-- adr-0204-architecture-governance
+  - adr-0129-runbook-automation-executor
+  - adr-0204-architecture-governance
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0209-live-apply.md
-- docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
-- docs/adr/.index.yaml
-- Makefile
-- config/command-catalog.json
-- config/workflow-catalog.json
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/runbooks/runbook-automation-executor.md
-- docs/runbooks/platform-operations-portal.md
-- docs/runbooks/ops-portal-down.md
-- docs/runbooks/validation-gate-status.yaml
-- platform/use_cases/
-- scripts/runbook_executor.py
-- scripts/api_gateway/main.py
-- scripts/ops_portal/app.py
-- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
-- playbooks/api-gateway.yml
-- playbooks/ops-portal.yml
-- tests/test_api_gateway.py
-- tests/test_api_gateway_runtime_role.py
-- tests/test_interactive_ops_portal.py
-- tests/test_runbook_executor.py
-- tests/test_runbook_executor_windmill.py
-- tests/test_validation_gate.py
-- tests/test_validation_gate_windmill.py
-- tests/test_windmill_operator_admin_app.py
-- README.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/0.177.38.md
-- versions/stack.yaml
-- receipts/live-applies/
+  - workstreams.yaml
+  - docs/workstreams/ws-0209-live-apply.md
+  - docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
+  - docs/adr/.index.yaml
+  - Makefile
+  - config/command-catalog.json
+  - config/workflow-catalog.json
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/runbook-automation-executor.md
+  - docs/runbooks/platform-operations-portal.md
+  - docs/runbooks/ops-portal-down.md
+  - docs/runbooks/validation-gate-status.yaml
+  - platform/use_cases/
+  - scripts/runbook_executor.py
+  - scripts/api_gateway/main.py
+  - scripts/ops_portal/app.py
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+  - playbooks/api-gateway.yml
+  - playbooks/ops-portal.yml
+  - tests/test_api_gateway.py
+  - tests/test_api_gateway_runtime_role.py
+  - tests/test_interactive_ops_portal.py
+  - tests/test_runbook_executor.py
+  - tests/test_runbook_executor_windmill.py
+  - tests/test_validation_gate.py
+  - tests/test_validation_gate_windmill.py
+  - tests/test_windmill_operator_admin_app.py
+  - README.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.38.md
+  - versions/stack.yaml
+  - receipts/live-applies/
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index_contract
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: api_gateway_runbook_adapter_contract
-    paths:
-    - scripts/api_gateway/main.py
-    - config/command-catalog.json
-    - build/platform-manifest.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    mode: shared_contract
-    contract: api-gateway-runbook-adapters-v1
-  - id: integration_truth_release
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.38.md
-    - versions/stack.yaml
-    mode: shared_contract
-    contract: integration-release-v1
-  - id: architecture_adr_0209_contract
-    paths:
-    - docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
-    mode: shared_contract
-    contract: architecture-governance-adrs-v1
-  - id: runbook_use_case_service
-    paths:
-    - docs/workstreams/ws-0209-live-apply.md
-    - Makefile
-    - config/workflow-catalog.json
-    - docs/runbooks/runbook-automation-executor.md
-    - docs/runbooks/platform-operations-portal.md
-    - docs/runbooks/ops-portal-down.md
-    - docs/runbooks/validation-gate-status.yaml
-    - platform/use_cases/*
-    - scripts/runbook_executor.py
-    - scripts/ops_portal/app.py
-    - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/*
-    - tests/test_api_gateway.py
-    - tests/test_api_gateway_runtime_role.py
-    - tests/test_interactive_ops_portal.py
-    - tests/test_runbook_executor.py
-    - tests/test_runbook_executor_windmill.py
-    - tests/test_validation_gate.py
-    - tests/test_validation_gate_windmill.py
-    - tests/test_windmill_operator_admin_app.py
-    - receipts/live-applies/2026-03-28-adr-0209-use-case-services-live-apply.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index_contract
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: api_gateway_runbook_adapter_contract
+      paths:
+        - scripts/api_gateway/main.py
+        - config/command-catalog.json
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: api-gateway-runbook-adapters-v1
+    - id: integration_truth_release
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.38.md
+        - versions/stack.yaml
+      mode: shared_contract
+      contract: integration-release-v1
+    - id: architecture_adr_0209_contract
+      paths:
+        - docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
+      mode: shared_contract
+      contract: architecture-governance-adrs-v1
+    - id: runbook_use_case_service
+      paths:
+        - docs/workstreams/ws-0209-live-apply.md
+        - Makefile
+        - config/workflow-catalog.json
+        - docs/runbooks/runbook-automation-executor.md
+        - docs/runbooks/platform-operations-portal.md
+        - docs/runbooks/ops-portal-down.md
+        - docs/runbooks/validation-gate-status.yaml
+        - platform/use_cases/*
+        - scripts/runbook_executor.py
+        - scripts/ops_portal/app.py
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/*
+        - tests/test_api_gateway.py
+        - tests/test_api_gateway_runtime_role.py
+        - tests/test_interactive_ops_portal.py
+        - tests/test_runbook_executor.py
+        - tests/test_runbook_executor_windmill.py
+        - tests/test_validation_gate.py
+        - tests/test_validation_gate_windmill.py
+        - tests/test_windmill_operator_admin_app.py
+        - receipts/live-applies/2026-03-28-adr-0209-use-case-services-live-apply.json
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0209 by extracting a shared runbook use-case service
-    and converging thin gateway and ops-portal adapters around the same delivery contract
+  changelog_entry: implemented ADR 0209 by extracting a shared runbook use-case
+    service and converging thin gateway and ops-portal adapters around the same
+    delivery contract
   release_bump: patch
   included_in_repo_version: 0.177.39
   latest_receipts:

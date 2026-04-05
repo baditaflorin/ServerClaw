@@ -7,24 +7,24 @@ branch: codex/adr-0102-security-posture
 worktree_path: .worktrees/adr-0102-security-posture-reporting
 doc: docs/workstreams/adr-0102-security-posture-reporting.md
 depends_on:
-- adr-0006-security-baseline
-- adr-0044-windmill
-- adr-0057-mattermost
-- adr-0061-glitchtip
-- adr-0066-mutation-audit-log
-- adr-0097-alerting-routing
+  - adr-0006-security-baseline
+  - adr-0044-windmill
+  - adr-0057-mattermost
+  - adr-0061-glitchtip
+  - adr-0066-mutation-audit-log
+  - adr-0097-alerting-routing
 conflicts_with: []
 shared_surfaces:
-- playbooks/tasks/security-scan.yml
-- scripts/parse_lynis_report.py
-- scripts/trivy_scan_running_images.sh
-- scripts/security_posture_report.py
-- config/windmill/scripts/security-posture-scan.py
-- config/workflow-catalog.json
-- config/control-plane-lanes.json
-- config/api-publication.json
-- scripts/generate_ops_portal.py
-- collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2
-- receipts/security-reports
+  - playbooks/tasks/security-scan.yml
+  - scripts/parse_lynis_report.py
+  - scripts/trivy_scan_running_images.sh
+  - scripts/security_posture_report.py
+  - config/windmill/scripts/security-posture-scan.py
+  - config/workflow-catalog.json
+  - config/control-plane-lanes.json
+  - config/api-publication.json
+  - scripts/generate_ops_portal.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2
+  - receipts/security-reports
 ready_to_merge: false
 live_applied: true

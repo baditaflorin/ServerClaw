@@ -7,84 +7,85 @@ branch: codex/ws-0204-live-apply
 worktree_path: .worktrees/ws-0204-live-apply
 doc: docs/workstreams/ws-0204-live-apply.md
 depends_on:
-- adr-0204-architecture-governance
-- adr-0126-observation-to-action-closure-loop
-- adr-0172-watchdog-escalation-and-stale-job-self-healing
+  - adr-0204-architecture-governance
+  - adr-0126-observation-to-action-closure-loop
+  - adr-0172-watchdog-escalation-and-stale-job-self-healing
 conflicts_with: []
 shared_surfaces:
-- docs/adr/0204-self-correcting-automation-loops.md
-- docs/workstreams/ws-0204-live-apply.md
-- docs/runbooks/configure-windmill.md
-- docs/runbooks/observation-to-action-closure-loop.md
-- docs/runbooks/validate-repository-automation.md
-- config/correction-loops.json
-- config/ansible-role-idempotency.yml
-- docs/schema/correction-loop-catalog.schema.json
-- config/merge-eligible-files.yaml
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-- scripts/correction_loops.py
-- scripts/incident_triage.py
-- scripts/live_apply_receipts.py
-- scripts/sync_windmill_seed_schedules.py
-- scripts/workflow_catalog.py
-- scripts/command_catalog.py
-- scripts/validate_repository_data_models.py
-- platform/closure_loop/**
-- config/windmill/scripts/platform-observation-loop.py
-- tests/test_correction_loops.py
-- tests/unit/test_closure_loop.py
-- tests/test_closure_loop_windmill.py
-- tests/test_incident_triage.py
-- tests/test_live_apply_receipts.py
-- tests/test_config_merge_repo_surfaces.py
-- tests/test_windmill_operator_admin_app.py
-- .config-locations.yaml
-- docs/adr/.index.yaml
-- workstreams.yaml
+  - docs/adr/0204-self-correcting-automation-loops.md
+  - docs/workstreams/ws-0204-live-apply.md
+  - docs/runbooks/configure-windmill.md
+  - docs/runbooks/observation-to-action-closure-loop.md
+  - docs/runbooks/validate-repository-automation.md
+  - config/correction-loops.json
+  - config/ansible-role-idempotency.yml
+  - docs/schema/correction-loop-catalog.schema.json
+  - config/merge-eligible-files.yaml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+  - scripts/correction_loops.py
+  - scripts/incident_triage.py
+  - scripts/live_apply_receipts.py
+  - scripts/sync_windmill_seed_schedules.py
+  - scripts/workflow_catalog.py
+  - scripts/command_catalog.py
+  - scripts/validate_repository_data_models.py
+  - platform/closure_loop/**
+  - config/windmill/scripts/platform-observation-loop.py
+  - tests/test_correction_loops.py
+  - tests/unit/test_closure_loop.py
+  - tests/test_closure_loop_windmill.py
+  - tests/test_incident_triage.py
+  - tests/test_live_apply_receipts.py
+  - tests/test_config_merge_repo_surfaces.py
+  - tests/test_windmill_operator_admin_app.py
+  - .config-locations.yaml
+  - docs/adr/.index.yaml
+  - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0204_correction_loop_surface
-    paths:
-    - docs/adr/0204-self-correcting-automation-loops.md
-    - docs/workstreams/ws-0204-live-apply.md
-    - docs/runbooks/configure-windmill.md
-    - docs/runbooks/observation-to-action-closure-loop.md
-    - docs/runbooks/validate-repository-automation.md
-    - config/correction-loops.json
-    - config/ansible-role-idempotency.yml
-    - docs/schema/correction-loop-catalog.schema.json
-    - config/merge-eligible-files.yaml
-    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-    - scripts/correction_loops.py
-    - scripts/incident_triage.py
-    - scripts/live_apply_receipts.py
-    - scripts/sync_windmill_seed_schedules.py
-    - scripts/workflow_catalog.py
-    - scripts/command_catalog.py
-    - scripts/validate_repository_data_models.py
-    - platform/closure_loop/**
-    - config/windmill/scripts/platform-observation-loop.py
-    - tests/test_correction_loops.py
-    - tests/unit/test_closure_loop.py
-    - tests/test_closure_loop_windmill.py
-    - tests/test_incident_triage.py
-    - tests/test_live_apply_receipts.py
-    - tests/test_config_merge_repo_surfaces.py
-    - tests/test_windmill_operator_admin_app.py
-    - .config-locations.yaml
-    - docs/adr/.index.yaml
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0204_correction_loop_surface
+      paths:
+        - docs/adr/0204-self-correcting-automation-loops.md
+        - docs/workstreams/ws-0204-live-apply.md
+        - docs/runbooks/configure-windmill.md
+        - docs/runbooks/observation-to-action-closure-loop.md
+        - docs/runbooks/validate-repository-automation.md
+        - config/correction-loops.json
+        - config/ansible-role-idempotency.yml
+        - docs/schema/correction-loop-catalog.schema.json
+        - config/merge-eligible-files.yaml
+        - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+        - scripts/correction_loops.py
+        - scripts/incident_triage.py
+        - scripts/live_apply_receipts.py
+        - scripts/sync_windmill_seed_schedules.py
+        - scripts/workflow_catalog.py
+        - scripts/command_catalog.py
+        - scripts/validate_repository_data_models.py
+        - platform/closure_loop/**
+        - config/windmill/scripts/platform-observation-loop.py
+        - tests/test_correction_loops.py
+        - tests/unit/test_closure_loop.py
+        - tests/test_closure_loop_windmill.py
+        - tests/test_incident_triage.py
+        - tests/test_live_apply_receipts.py
+        - tests/test_config_merge_repo_surfaces.py
+        - tests/test_windmill_operator_admin_app.py
+        - .config-locations.yaml
+        - docs/adr/.index.yaml
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0204 by adding a governed correction-loop catalog,
-    enforcing exact workflow coverage in repo validation, and wiring the live observation
-    loop to persist and report its bounded self-correction contract
+  changelog_entry: implemented ADR 0204 by adding a governed correction-loop
+    catalog, enforcing exact workflow coverage in repo validation, and wiring
+    the live observation loop to persist and report its bounded self-correction
+    contract
   release_bump: patch
   included_in_repo_version: 0.177.37
   latest_receipts:

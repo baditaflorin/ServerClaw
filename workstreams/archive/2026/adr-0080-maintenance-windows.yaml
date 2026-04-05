@@ -7,17 +7,17 @@ branch: codex/adr-0080-maintenance-windows
 worktree_path: .worktrees/adr-0080-maintenance-windows
 doc: docs/workstreams/adr-0080-maintenance-windows.md
 depends_on:
-- adr-0058-nats-event-bus
-- adr-0044-windmill
-- adr-0071-agent-observation-loop
-- adr-0027-uptime-kuma
+  - adr-0058-nats-event-bus
+  - adr-0044-windmill
+  - adr-0071-agent-observation-loop
+  - adr-0027-uptime-kuma
 conflicts_with: []
 shared_surfaces:
-- scripts/maintenance_window_tool.py
-- scripts/platform_observation_tool.py
-- docs/schema/maintenance-window.json
-- config/command-catalog.json
-- config/control-plane-lanes.json
-- Makefile
+  - scripts/maintenance_window_tool.py
+  - scripts/platform_observation_tool.py
+  - docs/schema/maintenance-window.json
+  - config/command-catalog.json
+  - config/control-plane-lanes.json
+  - Makefile
 ready_to_merge: false
 live_applied: false

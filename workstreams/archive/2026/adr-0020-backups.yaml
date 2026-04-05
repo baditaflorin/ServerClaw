@@ -9,9 +9,9 @@ doc: docs/workstreams/adr-0020-backups.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-- /etc/pve/storage.cfg
-- /etc/pve/jobs.cfg
-- backup_policy
-- restore_validation
+  - /etc/pve/storage.cfg
+  - /etc/pve/jobs.cfg
+  - backup_policy
+  - restore_validation
 ready_to_merge: false
 live_applied: true

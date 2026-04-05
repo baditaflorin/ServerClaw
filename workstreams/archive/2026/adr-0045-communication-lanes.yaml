@@ -7,13 +7,13 @@ branch: codex/adr-0045-communication-lanes
 worktree_path: .worktrees/adr-0045-communication-lanes
 doc: docs/workstreams/adr-0045-communication-lanes.md
 depends_on:
-- adr-0014-tailscale
-- adr-0041-email-platform
+  - adr-0014-tailscale
+  - adr-0041-email-platform
 conflicts_with: []
 shared_surfaces:
-- SSH
-- HTTPS APIs
-- SMTP submission
-- webhook flows
+  - SSH
+  - HTTPS APIs
+  - SMTP submission
+  - webhook flows
 ready_to_merge: false
 live_applied: true

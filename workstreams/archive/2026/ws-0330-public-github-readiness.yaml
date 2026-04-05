@@ -1,86 +1,87 @@
 id: ws-0330-public-github-readiness
 adr: '0330'
-title: Prepare the repository for public GitHub publication as a generic and forkable
-  reference platform
+title: Prepare the repository for public GitHub publication as a generic and
+  forkable reference platform
 status: merged
 owner: codex
 branch: codex/ws-0327-public-github-readiness
 worktree_path: .worktrees/ws-0327-public-github-readiness
 doc: docs/workstreams/adr-0330-public-github-readiness-bundle.md
 depends_on:
-- adr-0038-generated-status-documents-from-canonical-state
-- adr-0163-repository-structure-index-for-agent-discovery
-- adr-0167-agent-handoff-and-context-preservation
-- adr-0168-automated-enforcement-of-agent-standards
+  - adr-0038-generated-status-documents-from-canonical-state
+  - adr-0163-repository-structure-index-for-agent-discovery
+  - adr-0167-agent-handoff-and-context-preservation
+  - adr-0168-automated-enforcement-of-agent-standards
 conflicts_with: []
 shared_surfaces:
-- README.md
-- AGENTS.md
-- .repo-structure.yaml
-- workstreams.yaml
-- changelog.md
-- docs/release-notes/README.md
-- docs/adr/.index.yaml
-- docs/workstreams/adr-0330-public-github-readiness-bundle.md
-- docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
-- docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
-- docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
-- docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
-- docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
-- docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
-- docs/adr/0336-public-entrypoint-leakage-validation.md
-- docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
-- docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
-- docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
-- scripts/generate_status_docs.py
-- scripts/generate_release_notes.py
-- scripts/validate_repo.sh
-- scripts/validate_repository_data_models.py
-- scripts/workstream_surface_ownership.py
-- scripts/validate_public_entrypoints.py
-- RELEASE.md
-- VERSION
-- docs/release-notes/*.md
+  - README.md
+  - AGENTS.md
+  - .repo-structure.yaml
+  - workstreams.yaml
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/adr/.index.yaml
+  - docs/workstreams/adr-0330-public-github-readiness-bundle.md
+  - docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+  - docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+  - docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
+  - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+  - docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+  - docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
+  - docs/adr/0336-public-entrypoint-leakage-validation.md
+  - docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+  - docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+  - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+  - scripts/generate_status_docs.py
+  - scripts/generate_release_notes.py
+  - scripts/validate_repo.sh
+  - scripts/validate_repository_data_models.py
+  - scripts/workstream_surface_ownership.py
+  - scripts/validate_public_entrypoints.py
+  - RELEASE.md
+  - VERSION
+  - docs/release-notes/*.md
 ownership_manifest:
   owned_surfaces:
-  - id: public_github_readiness_bundle
-    paths:
-    - README.md
-    - AGENTS.md
-    - .repo-structure.yaml
-    - workstreams.yaml
-    - changelog.md
-    - RELEASE.md
-    - VERSION
-    - build/platform-manifest.json
-    - versions/stack.yaml
-    - docs/diagrams/agent-coordination-map.excalidraw
-    - docs/adr/.index.yaml
-    - docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
-    - docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
-    - docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
-    - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
-    - docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
-    - docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
-    - docs/adr/0336-public-entrypoint-leakage-validation.md
-    - docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
-    - docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
-    - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
-    - docs/release-notes/README.md
-    - docs/release-notes/*.md
-    - docs/workstreams/adr-0330-public-github-readiness-bundle.md
-    - scripts/generate_release_notes.py
-    - scripts/generate_status_docs.py
-    - scripts/validate_public_entrypoints.py
-    - scripts/validate_repo.sh
-    - scripts/validate_repository_data_models.py
-    - scripts/workstream_surface_ownership.py
-    mode: exclusive
+    - id: public_github_readiness_bundle
+      paths:
+        - README.md
+        - AGENTS.md
+        - .repo-structure.yaml
+        - workstreams.yaml
+        - changelog.md
+        - RELEASE.md
+        - VERSION
+        - build/platform-manifest.json
+        - versions/stack.yaml
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - docs/adr/.index.yaml
+        - docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
+        - docs/adr/0331-repository-relative-paths-for-public-metadata-and-generated-docs.md
+        - docs/adr/0332-relative-release-and-status-links-in-generated-root-surfaces.md
+        - docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
+        - docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
+        - docs/adr/0335-public-safe-agent-onboarding-entrypoints.md
+        - docs/adr/0336-public-entrypoint-leakage-validation.md
+        - docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
+        - docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
+        - docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
+        - docs/release-notes/README.md
+        - docs/release-notes/*.md
+        - docs/workstreams/adr-0330-public-github-readiness-bundle.md
+        - scripts/generate_release_notes.py
+        - scripts/generate_status_docs.py
+        - scripts/validate_public_entrypoints.py
+        - scripts/validate_repo.sh
+        - scripts/validate_repository_data_models.py
+        - scripts/workstream_surface_ownership.py
+      mode: exclusive
 canonical_truth:
-  changelog_entry: implements ADRs 0330-0339 by turning public GitHub readiness into
-    a first-class repository lifecycle, making workstream and generated-doc metadata
-    repository-relative, simplifying root onboarding docs into a generic forkable
-    template, and enforcing new public-entrypoint leakage validation
+  changelog_entry: implements ADRs 0330-0339 by turning public GitHub readiness
+    into a first-class repository lifecycle, making workstream and generated-doc
+    metadata repository-relative, simplifying root onboarding docs into a
+    generic forkable template, and enforcing new public-entrypoint leakage
+    validation
   release_bump: patch
   included_in_repo_version: 0.177.143
 ready_to_merge: true

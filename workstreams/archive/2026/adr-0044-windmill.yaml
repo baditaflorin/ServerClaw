@@ -7,12 +7,12 @@ branch: codex/adr-0044-windmill
 worktree_path: .worktrees/adr-0044-windmill
 doc: docs/workstreams/adr-0044-windmill.md
 depends_on:
-- adr-0026-postgres-vm
+  - adr-0026-postgres-vm
 conflicts_with: []
 shared_surfaces:
-- docker-runtime-lv3
-- postgres-lv3
-- workflow APIs
-- webhook entry points
+  - docker-runtime-lv3
+  - postgres-lv3
+  - workflow APIs
+  - webhook entry points
 ready_to_merge: false
 live_applied: true

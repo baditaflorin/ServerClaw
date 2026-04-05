@@ -7,16 +7,16 @@ branch: codex/adr-0051-control-plane-backup-recovery-break-glass
 worktree_path: .worktrees/adr-0051-control-plane-recovery
 doc: docs/workstreams/adr-0051-control-plane-recovery.md
 depends_on:
-- adr-0029-backup-vm
-- adr-0042-step-ca
-- adr-0043-openbao
-- adr-0044-windmill
-- adr-0041-email-platform
+  - adr-0029-backup-vm
+  - adr-0042-step-ca
+  - adr-0043-openbao
+  - adr-0044-windmill
+  - adr-0041-email-platform
 conflicts_with: []
 shared_surfaces:
-- PBS backups
-- recovery metadata
-- break-glass procedures
-- control-plane state
+  - PBS backups
+  - recovery metadata
+  - break-glass procedures
+  - control-plane state
 ready_to_merge: false
 live_applied: true

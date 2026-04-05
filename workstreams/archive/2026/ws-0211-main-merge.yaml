@@ -7,80 +7,82 @@ branch: codex/ws-0211-main-merge
 worktree_path: .worktrees/ws-0211-main-merge
 doc: docs/workstreams/ws-0211-main-merge.md
 depends_on:
-- ws-0211-live-apply
+  - ws-0211-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0211-main-merge.md
-- README.md
-- VERSION
-- changelog.md
-- versions/stack.yaml
-- docs/adr/0211-shared-policy-packs-and-rule-registries.md
-- docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
-- docs/runbooks/capacity-model.md
-- docs/runbooks/capacity-classes.md
-- docs/runbooks/service-redundancy-tier-matrix.md
-- docs/runbooks/failure-domain-policy.md
-- config/shared-policy-packs.json
-- docs/schema/shared-policy-packs.schema.json
-- scripts/shared_policy_packs.py
-- scripts/service_redundancy.py
-- scripts/standby_capacity.py
-- scripts/capacity_report.py
-- scripts/failure_domain_policy.py
-- scripts/environment_topology.py
-- scripts/validate_repository_data_models.py
-- docs/adr/.index.yaml
-- docs/site-generated/architecture/dependency-graph.md
-- receipts/ops-portal-snapshot.html
-- receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-live-apply.json
-- receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0211-main-merge.md
+  - README.md
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - docs/adr/0211-shared-policy-packs-and-rule-registries.md
+  - docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
+  - docs/runbooks/capacity-model.md
+  - docs/runbooks/capacity-classes.md
+  - docs/runbooks/service-redundancy-tier-matrix.md
+  - docs/runbooks/failure-domain-policy.md
+  - config/shared-policy-packs.json
+  - docs/schema/shared-policy-packs.schema.json
+  - scripts/shared_policy_packs.py
+  - scripts/service_redundancy.py
+  - scripts/standby_capacity.py
+  - scripts/capacity_report.py
+  - scripts/failure_domain_policy.py
+  - scripts/environment_topology.py
+  - scripts/validate_repository_data_models.py
+  - docs/adr/.index.yaml
+  - docs/site-generated/architecture/dependency-graph.md
+  - receipts/ops-portal-snapshot.html
+  - receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-live-apply.json
+  - receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: ws_0211_main_merge_doc
-    paths:
-    - docs/workstreams/ws-0211-main-merge.md
-    mode: exclusive
-  - id: shared_policy_registry_main_merge
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    - docs/adr/0211-shared-policy-packs-and-rule-registries.md
-    - docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
-    - docs/runbooks/capacity-model.md
-    - docs/runbooks/capacity-classes.md
-    - docs/runbooks/service-redundancy-tier-matrix.md
-    - docs/runbooks/failure-domain-policy.md
-    - config/shared-policy-packs.json
-    - docs/schema/shared-policy-packs.schema.json
-    - scripts/shared_policy_packs.py
-    - scripts/service_redundancy.py
-    - scripts/standby_capacity.py
-    - scripts/capacity_report.py
-    - scripts/failure_domain_policy.py
-    - scripts/environment_topology.py
-    - scripts/validate_repository_data_models.py
-    - docs/adr/.index.yaml
-    - docs/site-generated/architecture/dependency-graph.md
-    - receipts/ops-portal-snapshot.html
-    - receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-live-apply.json
-    - receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json
-    mode: shared_contract
-    contract: shared-policy-registry-main-merge-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0211_main_merge_doc
+      paths:
+        - docs/workstreams/ws-0211-main-merge.md
+      mode: exclusive
+    - id: shared_policy_registry_main_merge
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+        - docs/adr/0211-shared-policy-packs-and-rule-registries.md
+        - docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
+        - docs/runbooks/capacity-model.md
+        - docs/runbooks/capacity-classes.md
+        - docs/runbooks/service-redundancy-tier-matrix.md
+        - docs/runbooks/failure-domain-policy.md
+        - config/shared-policy-packs.json
+        - docs/schema/shared-policy-packs.schema.json
+        - scripts/shared_policy_packs.py
+        - scripts/service_redundancy.py
+        - scripts/standby_capacity.py
+        - scripts/capacity_report.py
+        - scripts/failure_domain_policy.py
+        - scripts/environment_topology.py
+        - scripts/validate_repository_data_models.py
+        - docs/adr/.index.yaml
+        - docs/site-generated/architecture/dependency-graph.md
+        - receipts/ops-portal-snapshot.html
+        - receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-live-apply.json
+        - receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json
+      mode: shared_contract
+      contract: shared-policy-registry-main-merge-v1
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: integrated ADR 0211 by promoting the shared policy registry into
-    main and re-verifying the governed headscale live-apply path from merged main
+  changelog_entry: integrated ADR 0211 by promoting the shared policy registry
+    into main and re-verifying the governed headscale live-apply path from
+    merged main
   release_bump: patch
   included_in_repo_version: 0.177.39
   latest_receipts:
-    shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
+    shared_policy_packs:
+      2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply

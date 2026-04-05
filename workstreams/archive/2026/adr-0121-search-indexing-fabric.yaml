@@ -7,26 +7,26 @@ branch: codex/ws-0121-live-apply
 worktree_path: .worktrees/ws-0121-live-apply
 doc: docs/workstreams/adr-0121-search-indexing-fabric.md
 depends_on:
-- adr-0048-command-catalog
-- adr-0052-loki-logs
-- adr-0061-glitchtip-failure-signals
-- adr-0090-platform-cli
-- adr-0092-platform-api-gateway
-- adr-0093-interactive-ops-portal
-- adr-0095-unified-search
-- adr-0098-postgres-ha
-- adr-0113-world-state-materializer
-- adr-0115-mutation-ledger
-- adr-0118-failure-case-library
+  - adr-0048-command-catalog
+  - adr-0052-loki-logs
+  - adr-0061-glitchtip-failure-signals
+  - adr-0090-platform-cli
+  - adr-0092-platform-api-gateway
+  - adr-0093-interactive-ops-portal
+  - adr-0095-unified-search
+  - adr-0098-postgres-ha
+  - adr-0113-world-state-materializer
+  - adr-0115-mutation-ledger
+  - adr-0118-failure-case-library
 conflicts_with: []
 shared_surfaces:
-- scripts/search_fabric/
-- migrations/0014_search_schema.sql
-- config/search-synonyms.yaml
-- config/windmill/scripts/rebuild-search-index.py
-- scripts/api_gateway/main.py
-- scripts/lv3_cli.py
-- scripts/ops_portal/
-- docs/runbooks/search-indexing-fabric.md
+  - scripts/search_fabric/
+  - migrations/0014_search_schema.sql
+  - config/search-synonyms.yaml
+  - config/windmill/scripts/rebuild-search-index.py
+  - scripts/api_gateway/main.py
+  - scripts/lv3_cli.py
+  - scripts/ops_portal/
+  - docs/runbooks/search-indexing-fabric.md
 ready_to_merge: false
 live_applied: true

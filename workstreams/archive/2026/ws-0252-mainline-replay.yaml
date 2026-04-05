@@ -1,49 +1,53 @@
 id: ws-0252-mainline-replay
 adr: '0252'
-title: Re-verify ADR 0252 from the latest origin/main and prepare final merge surfaces
+title: Re-verify ADR 0252 from the latest origin/main and prepare final merge
+  surfaces
 status: live_applied
 owner: codex
 branch: codex/ws-0252-live-apply-r4
 worktree_path: .worktrees/ws-0252-live-apply-r4
 doc: docs/workstreams/ws-0252-mainline-replay.md
 depends_on:
-- ws-0252-live-apply
+  - ws-0252-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0252-mainline-replay.md
-- docs/workstreams/ws-0252-live-apply.md
-- docs/runbooks/configure-vaultwarden.md
-- docs/site-generated/architecture/dependency-graph.md
-- receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
-- receipts/subdomain-exposure-audit/20260329T112637Z.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0252-mainline-replay.md
+  - docs/workstreams/ws-0252-live-apply.md
+  - docs/runbooks/configure-vaultwarden.md
+  - docs/site-generated/architecture/dependency-graph.md
+  - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
+  - receipts/subdomain-exposure-audit/20260329T112637Z.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0252_mainline_replay
-    paths:
-    - docs/workstreams/ws-0252-mainline-replay.md
-    - docs/workstreams/ws-0252-live-apply.md
-    - docs/runbooks/configure-vaultwarden.md
-    - docs/site-generated/architecture/dependency-graph.md
-    - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
-    - receipts/subdomain-exposure-audit/20260329T112637Z.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0252_mainline_replay
+      paths:
+        - docs/workstreams/ws-0252-mainline-replay.md
+        - docs/workstreams/ws-0252-live-apply.md
+        - docs/runbooks/configure-vaultwarden.md
+        - docs/site-generated/architecture/dependency-graph.md
+        - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
+        - receipts/subdomain-exposure-audit/20260329T112637Z.json
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: records ADR 0252 exact-main evidence on the current mainline by
-    refreshing the latest route, edge, and Vaultwarden receipts and documenting the
-    HTTP/1.1 Vaultwarden verification form while the integrated platform baseline
-    remains 0.130.51 and the original first-implementation truth stays anchored at
-    repo version 0.177.68 on platform version 0.130.43
+  changelog_entry: records ADR 0252 exact-main evidence on the current mainline
+    by refreshing the latest route, edge, and Vaultwarden receipts and
+    documenting the HTTP/1.1 Vaultwarden verification form while the integrated
+    platform baseline remains 0.130.51 and the original first-implementation
+    truth stays anchored at repo version 0.177.68 on platform version 0.130.43
   release_bump: patch
   included_in_repo_version: 0.177.76
   latest_receipts:
-    public_edge_publication: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
-    route_dns_assertion_ledger: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
-    vaultwarden: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
+    public_edge_publication:
+      2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
+    route_dns_assertion_ledger:
+      2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
+    vaultwarden:
+      2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply

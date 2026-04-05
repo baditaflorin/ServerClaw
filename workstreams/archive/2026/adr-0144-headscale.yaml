@@ -7,59 +7,59 @@ branch: codex/adr-0144-headscale
 worktree_path: .worktrees/adr-0144-headscale
 doc: docs/workstreams/adr-0144-headscale.md
 depends_on:
-- adr-0014-tailscale
+  - adr-0014-tailscale
 conflicts_with: []
 shared_surfaces:
-- proxmox_host_access
-- guest_access
-- private_network
-- inventory/hosts.yml
-- inventory/host_vars/proxmox_florin.yml
-- config/service-capability-catalog.json
-- config/control-plane-lanes.json
+  - proxmox_host_access
+  - guest_access
+  - private_network
+  - inventory/hosts.yml
+  - inventory/host_vars/proxmox_florin.yml
+  - config/service-capability-catalog.json
+  - config/control-plane-lanes.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: headscale_runtime_repo_surface
-    paths:
-    - collections/ansible_collections/lv3/platform/roles/proxmox_headscale/**
-    - playbooks/headscale.yml
-    - playbooks/services/headscale.yml
-    - config/headscale-acl.hujson
-    - docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md
-    - docs/workstreams/adr-0144-headscale.md
-    - docs/runbooks/configure-headscale.md
-    mode: exclusive
-  - id: inventory_hosts_contract
-    paths:
-    - inventory/hosts.yml
-    mode: shared_contract
-    contract: inventory-hosts-v1
-  - id: proxmox_host_vars_contract
-    paths:
-    - inventory/host_vars/proxmox_florin.yml
-    mode: shared_contract
-    contract: proxmox-host-vars-v1
-  - id: service_capability_catalog_contract
-    paths:
-    - config/service-capability-catalog.json
-    mode: shared_contract
-    contract: service-capability-catalog-v1
-  - id: control_plane_lane_contract
-    paths:
-    - config/control-plane-lanes.json
-    mode: shared_contract
-    contract: control-plane-lanes-v1
-  - id: integration_truth
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    mode: generated
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: headscale_runtime_repo_surface
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/proxmox_headscale/**
+        - playbooks/headscale.yml
+        - playbooks/services/headscale.yml
+        - config/headscale-acl.hujson
+        - docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md
+        - docs/workstreams/adr-0144-headscale.md
+        - docs/runbooks/configure-headscale.md
+      mode: exclusive
+    - id: inventory_hosts_contract
+      paths:
+        - inventory/hosts.yml
+      mode: shared_contract
+      contract: inventory-hosts-v1
+    - id: proxmox_host_vars_contract
+      paths:
+        - inventory/host_vars/proxmox_florin.yml
+      mode: shared_contract
+      contract: proxmox-host-vars-v1
+    - id: service_capability_catalog_contract
+      paths:
+        - config/service-capability-catalog.json
+      mode: shared_contract
+      contract: service-capability-catalog-v1
+    - id: control_plane_lane_contract
+      paths:
+        - config/control-plane-lanes.json
+      mode: shared_contract
+      contract: control-plane-lanes-v1
+    - id: integration_truth
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+      mode: generated
 ready_to_merge: false
 live_applied: true

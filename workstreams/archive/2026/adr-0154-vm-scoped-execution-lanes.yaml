@@ -7,22 +7,22 @@ branch: codex/live-apply-0154-main-v3
 worktree_path: .worktrees/live-apply-0154-main-v3
 doc: docs/workstreams/adr-0154-vm-scoped-execution-lanes.md
 depends_on:
-- adr-0044-windmill
-- adr-0075-service-capability-catalog
-- adr-0112-goal-compiler
-- adr-0119-budgeted-workflow-scheduler
-- adr-0127-intent-conflict-resolution
+  - adr-0044-windmill
+  - adr-0075-service-capability-catalog
+  - adr-0112-goal-compiler
+  - adr-0119-budgeted-workflow-scheduler
+  - adr-0127-intent-conflict-resolution
 conflicts_with: []
 shared_surfaces:
-- config/execution-lanes.yaml
-- platform/execution_lanes/
-- platform/scheduler/
-- platform/goal_compiler/
-- scripts/risk_scorer/
-- scripts/lv3_cli.py
-- config/windmill/scripts/
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/
-- collections/ansible_collections/lv3/platform/roles/windmill_postgres/
-- docs/runbooks/vm-scoped-execution-lanes.md
+  - config/execution-lanes.yaml
+  - platform/execution_lanes/
+  - platform/scheduler/
+  - platform/goal_compiler/
+  - scripts/risk_scorer/
+  - scripts/lv3_cli.py
+  - config/windmill/scripts/
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+  - collections/ansible_collections/lv3/platform/roles/windmill_postgres/
+  - docs/runbooks/vm-scoped-execution-lanes.md
 ready_to_merge: false
 live_applied: true

@@ -7,16 +7,16 @@ branch: codex/adr-0129-runbook-automation-executor
 worktree_path: .worktrees/adr-0129
 doc: docs/workstreams/adr-0129-runbook-automation-executor.md
 depends_on:
-- adr-0044-windmill
-- adr-0066-mutation-audit-log
-- adr-0090-platform-cli
-- adr-0119-budgeted-workflow-scheduler
+  - adr-0044-windmill
+  - adr-0066-mutation-audit-log
+  - adr-0090-platform-cli
+  - adr-0119-budgeted-workflow-scheduler
 conflicts_with: []
 shared_surfaces:
-- scripts/runbook_executor.py
-- scripts/lv3_cli.py
-- config/windmill/scripts/
-- config/workflow-catalog.json
-- docs/runbooks/
+  - scripts/runbook_executor.py
+  - scripts/lv3_cli.py
+  - config/windmill/scripts/
+  - config/workflow-catalog.json
+  - docs/runbooks/
 ready_to_merge: true
 live_applied: false

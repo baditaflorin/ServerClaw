@@ -7,16 +7,16 @@ branch: codex/adr-0094-developer-portal
 worktree_path: .worktrees/adr-0094-developer-portal
 doc: docs/workstreams/adr-0094-developer-portal.md
 depends_on:
-- adr-0021-nginx-edge
-- adr-0033-service-catalog
-- adr-0076-subdomain-governance
-- adr-0081-changelog-portal
-- adr-0092-platform-api-gateway
+  - adr-0021-nginx-edge
+  - adr-0033-service-catalog
+  - adr-0076-subdomain-governance
+  - adr-0081-changelog-portal
+  - adr-0092-platform-api-gateway
 conflicts_with: []
 shared_surfaces:
-- config/service-capability-catalog.json
-- docs/adr/
-- changelog.md
-- nginx edge config
+  - config/service-capability-catalog.json
+  - docs/adr/
+  - changelog.md
+  - nginx edge config
 ready_to_merge: false
 live_applied: true

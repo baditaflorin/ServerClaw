@@ -1,94 +1,95 @@
 id: ws-0340-implementation
 adr: '0340'
-title: "Dedicated Coolify Apps VM Separation \u2014 introduce coolify-apps-lv3 as\
-  \ the Coolify deployment server"
+title: "Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify
+  deployment server"
 status: merged
 owner: claude
 branch: claude/affectionate-galileo
 worktree_path: .claude/worktrees/affectionate-galileo
 doc: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
 depends_on:
-- adr-0194-coolify-paas-deploy-from-repo
-- adr-0224-coolify-dns-mirror-edge-and-education
-- adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
+  - adr-0194-coolify-paas-deploy-from-repo
+  - adr-0224-coolify-dns-mirror-edge-and-education
+  - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- inventory/hosts.yml
-- inventory/host_vars/proxmox_florin.yml
-- inventory/group_vars/platform.yml
-- versions/stack.yaml
-- config/subdomain-catalog.json
-- config/contracts/service-partitions/catalog.json
-- config/health-probe-catalog.json
-- config/service-redundancy-catalog.json
-- playbooks/coolify.yml
-- scripts/coolify_tool.py
-- docs/adr/0340-dedicated-coolify-apps-vm-separation.md
-- docs/adr/.index.yaml
-- tests/test_coolify_playbook.py
-- tests/test_coolify_tool.py
+  - workstreams.yaml
+  - inventory/hosts.yml
+  - inventory/host_vars/proxmox_florin.yml
+  - inventory/group_vars/platform.yml
+  - versions/stack.yaml
+  - config/subdomain-catalog.json
+  - config/contracts/service-partitions/catalog.json
+  - config/health-probe-catalog.json
+  - config/service-redundancy-catalog.json
+  - playbooks/coolify.yml
+  - scripts/coolify_tool.py
+  - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
+  - docs/adr/.index.yaml
+  - tests/test_coolify_playbook.py
+  - tests/test_coolify_tool.py
 ownership_manifest:
   owned_surfaces:
-  - id: ws0340_workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: ws0340_adr
-    paths:
-    - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
-    mode: exclusive
-  - id: ws0340_adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-generator-v1
-  - id: ws0340_inventory
-    paths:
-    - inventory/hosts.yml
-    - inventory/host_vars/proxmox_florin.yml
-    mode: exclusive
-  - id: ws0340_platform_inventory_contract
-    paths:
-    - inventory/group_vars/platform.yml
-    mode: shared_contract
-    contract: platform-topology-v1
-  - id: ws0340_platform_truth
-    paths:
-    - versions/stack.yaml
-    mode: shared_contract
-    contract: canonical-truth-v1
-  - id: ws0340_config_catalogs
-    paths:
-    - config/subdomain-catalog.json
-    - config/contracts/service-partitions/catalog.json
-    - config/health-probe-catalog.json
-    - config/service-redundancy-catalog.json
-    mode: exclusive
-  - id: ws0340_playbook
-    paths:
-    - playbooks/coolify.yml
-    mode: shared_contract
-    contract: coolify-deployment-playbook-v1
-  - id: ws0340_tool
-    paths:
-    - scripts/coolify_tool.py
-    mode: shared_contract
-    contract: coolify-api-tool-v1
-  - id: ws0340_tests
-    paths:
-    - tests/test_coolify_playbook.py
-    - tests/test_coolify_tool.py
-    mode: shared_contract
-    contract: coolify-runtime-test-contract-v1
+    - id: ws0340_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0340_adr
+      paths:
+        - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
+      mode: exclusive
+    - id: ws0340_adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: ws0340_inventory
+      paths:
+        - inventory/hosts.yml
+        - inventory/host_vars/proxmox_florin.yml
+      mode: exclusive
+    - id: ws0340_platform_inventory_contract
+      paths:
+        - inventory/group_vars/platform.yml
+      mode: shared_contract
+      contract: platform-topology-v1
+    - id: ws0340_platform_truth
+      paths:
+        - versions/stack.yaml
+      mode: shared_contract
+      contract: canonical-truth-v1
+    - id: ws0340_config_catalogs
+      paths:
+        - config/subdomain-catalog.json
+        - config/contracts/service-partitions/catalog.json
+        - config/health-probe-catalog.json
+        - config/service-redundancy-catalog.json
+      mode: exclusive
+    - id: ws0340_playbook
+      paths:
+        - playbooks/coolify.yml
+      mode: shared_contract
+      contract: coolify-deployment-playbook-v1
+    - id: ws0340_tool
+      paths:
+        - scripts/coolify_tool.py
+      mode: shared_contract
+      contract: coolify-api-tool-v1
+    - id: ws0340_tests
+      paths:
+        - tests/test_coolify_playbook.py
+        - tests/test_coolify_tool.py
+      mode: shared_contract
+      contract: coolify-runtime-test-contract-v1
 blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0340 by introducing coolify-apps-lv3 as the dedicated
-    Coolify deployment runtime, migrating the existing Coolify applications onto it,
-    and finalizing the HTTP edge publication and repo-smoke verification on `*.apps.lv3.org`
+  changelog_entry: implements ADR 0340 by introducing coolify-apps-lv3 as the
+    dedicated Coolify deployment runtime, migrating the existing Coolify
+    applications onto it, and finalizing the HTTP edge publication and
+    repo-smoke verification on `*.apps.lv3.org`
   release_bump: patch
   included_in_repo_version: 0.177.153
   latest_receipts:

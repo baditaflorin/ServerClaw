@@ -7,23 +7,24 @@ branch: codex/ws-0295-live-apply
 worktree_path: .worktrees/ws-0295-live-apply
 doc: docs/workstreams/ws-0295-live-apply.md
 depends_on:
-- ws-0274-artifact-cache-plane
-- adr-0089-build-cache
-- adr-0153-distributed-resource-lock-registry
-- adr-0191-immutable-guest-replacement
+  - ws-0274-artifact-cache-plane
+  - adr-0089-build-cache
+  - adr-0153-distributed-resource-lock-registry
+  - adr-0191-immutable-guest-replacement
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0295-live-apply.md
-- docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
-- docs/runbooks/artifact-cache-runtime.md
-- docs/runbooks/configure-build-artifact-cache.md
-- receipts/live-applies/2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply.json
-- build/platform-manifest.json
-- versions/stack.yaml
-- README.md
+  - workstreams.yaml
+  - docs/workstreams/ws-0295-live-apply.md
+  - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+  - docs/runbooks/artifact-cache-runtime.md
+  - docs/runbooks/configure-build-artifact-cache.md
+  - receipts/live-applies/2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply.json
+  - build/platform-manifest.json
+  - versions/stack.yaml
+  - README.md
 ready_to_merge: true
 live_applied: true
 canonical_truth:
   latest_receipts:
-    artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
+    artifact_cache_plane:
+      2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply

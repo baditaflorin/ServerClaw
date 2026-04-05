@@ -7,54 +7,54 @@ branch: codex/adr-0173-ownership-manifest
 worktree_path: .worktrees/adr-0173-workstream-surface-ownership-manifest
 doc: docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
 depends_on:
-- adr-0156-agent-session-workspace-isolation
-- adr-0172-watchdog-escalation
+  - adr-0156-agent-session-workspace-isolation
+  - adr-0172-watchdog-escalation
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/
-- scripts/validate_repo.sh
-- scripts/validate_repository_data_models.py
-- VERSION
-- changelog.md
-- versions/stack.yaml
+  - workstreams.yaml
+  - docs/workstreams/
+  - scripts/validate_repo.sh
+  - scripts/validate_repository_data_models.py
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: ownership_validation_runtime
-    paths:
-    - scripts/workstream_surface_ownership.py
-    - scripts/generate_adr_index.py
-    - scripts/validate_repository_data_models.py
-    - scripts/validate_repo.sh
-    - tests/test_workstream_surface_ownership.py
-    - tests/test_validate_repo_cache.py
-    mode: exclusive
-  - id: workstream_docs_contract
-    paths:
-    - docs/workstreams/README.md
-    - docs/workstreams/TEMPLATE.md
-    mode: shared_contract
-    contract: workstream-docs-v1
-  - id: adr_0173_docs
-    paths:
-    - docs/adr/0173-workstream-surface-ownership-manifest.md
-    - docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
-    mode: exclusive
-  - id: adr_index_contract
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: integration_release_surface
-    paths:
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ownership_validation_runtime
+      paths:
+        - scripts/workstream_surface_ownership.py
+        - scripts/generate_adr_index.py
+        - scripts/validate_repository_data_models.py
+        - scripts/validate_repo.sh
+        - tests/test_workstream_surface_ownership.py
+        - tests/test_validate_repo_cache.py
+      mode: exclusive
+    - id: workstream_docs_contract
+      paths:
+        - docs/workstreams/README.md
+        - docs/workstreams/TEMPLATE.md
+      mode: shared_contract
+      contract: workstream-docs-v1
+    - id: adr_0173_docs
+      paths:
+        - docs/adr/0173-workstream-surface-ownership-manifest.md
+        - docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
+      mode: exclusive
+    - id: adr_index_contract
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: integration_release_surface
+      paths:
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+      mode: exclusive
 ready_to_merge: false
 live_applied: true

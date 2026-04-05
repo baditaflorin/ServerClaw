@@ -7,15 +7,15 @@ branch: codex/adr-0139-subdomain-exposure-audit
 worktree_path: .worktrees/adr-0139
 doc: docs/workstreams/adr-0139-subdomain-exposure-audit.md
 depends_on:
-- adr-0076-subdomain-governance
-- adr-0091-drift-detection
+  - adr-0076-subdomain-governance
+  - adr-0091-drift-detection
 conflicts_with: []
 shared_surfaces:
-- config/subdomain-catalog.json
-- config/subdomain-exposure-registry.json
-- scripts/subdomain_exposure_audit.py
-- config/workflow-catalog.json
-- roles/nginx_edge_publication/defaults/main.yml
-- receipts/subdomain-exposure-audit
+  - config/subdomain-catalog.json
+  - config/subdomain-exposure-registry.json
+  - scripts/subdomain_exposure_audit.py
+  - config/workflow-catalog.json
+  - roles/nginx_edge_publication/defaults/main.yml
+  - receipts/subdomain-exposure-audit
 ready_to_merge: false
 live_applied: false

@@ -7,19 +7,19 @@ branch: codex/live-apply-0096
 worktree_path: .worktrees/adr-0096
 doc: docs/workstreams/adr-0096-slo-tracking.md
 depends_on:
-- adr-0011-monitoring
-- adr-0064-health-probes
-- adr-0073-promotion-gate
-- adr-0092-platform-api-gateway
+  - adr-0011-monitoring
+  - adr-0064-health-probes
+  - adr-0073-promotion-gate
+  - adr-0092-platform-api-gateway
 conflicts_with: []
 shared_surfaces:
-- config/slo-catalog.json
-- config/prometheus/
-- config/grafana/dashboards/
-- scripts/slo_tracking.py
-- scripts/promotion_pipeline.py
-- scripts/platform_context_service.py
-- scripts/generate_ops_portal.py
-- collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+  - config/slo-catalog.json
+  - config/prometheus/
+  - config/grafana/dashboards/
+  - scripts/slo_tracking.py
+  - scripts/promotion_pipeline.py
+  - scripts/platform_context_service.py
+  - scripts/generate_ops_portal.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
 ready_to_merge: false
 live_applied: true

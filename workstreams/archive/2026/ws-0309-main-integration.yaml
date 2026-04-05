@@ -1,124 +1,125 @@
 id: ws-0309-main-integration
 adr: 0309
-title: Integrate ADR 0309 task-oriented information architecture onto main and replay
-  it from exact mainline truth
+title: Integrate ADR 0309 task-oriented information architecture onto main and
+  replay it from exact mainline truth
 status: live_applied
 owner: codex
 branch: codex/ws-0309-main-integration
 worktree_path: .worktrees/ws-0309-main-integration
 doc: docs/workstreams/ws-0309-main-integration.md
 depends_on:
-- ws-0309-live-apply
+  - ws-0309-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0309-live-apply.md
-- docs/workstreams/ws-0309-main-integration.md
-- docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
-- docs/adr/.index.yaml
-- Makefile
-- docs/runbooks/platform-operations-portal.md
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- versions/stack.yaml
-- inventory/group_vars/platform.yml
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/release-notes/README.md
-- docs/release-notes/*.md
-- docs/site-generated/architecture/dependency-graph.md
-- playbooks/ops-portal.yml
-- config/persona-catalog.json
-- config/workflow-catalog.json
-- config/workbench-information-architecture.json
-- docs/schema/persona-catalog.schema.json
-- docs/schema/workbench-information-architecture.schema.json
-- scripts/workbench_information_architecture.py
-- scripts/workflow_catalog.py
-- scripts/generate_release_notes.py
-- scripts/validate_repository_data_models.py
-- scripts/ops_portal/
-- roles/ops_portal_runtime/defaults/main.yml
-- roles/ops_portal_runtime/tasks/main.yml
-- roles/ops_portal_runtime/tasks/sync_service_tree.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/
-- tests/test_generate_release_notes.py
-- tests/test_interactive_ops_portal.py
-- tests/test_ops_portal.py
-- tests/test_ops_portal_playbook.py
-- tests/test_ops_portal_runtime_role.py
-- receipts/live-applies/*adr-0309*
-- receipts/live-applies/evidence/*ws-0309*
-- receipts/restic-backups/20260403T001854Z.json
-- receipts/restic-snapshots-latest.json
-- receipts/ops-portal-snapshot.html
+  - workstreams.yaml
+  - docs/workstreams/ws-0309-live-apply.md
+  - docs/workstreams/ws-0309-main-integration.md
+  - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+  - docs/adr/.index.yaml
+  - Makefile
+  - docs/runbooks/platform-operations-portal.md
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - inventory/group_vars/platform.yml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/release-notes/README.md
+  - docs/release-notes/*.md
+  - docs/site-generated/architecture/dependency-graph.md
+  - playbooks/ops-portal.yml
+  - config/persona-catalog.json
+  - config/workflow-catalog.json
+  - config/workbench-information-architecture.json
+  - docs/schema/persona-catalog.schema.json
+  - docs/schema/workbench-information-architecture.schema.json
+  - scripts/workbench_information_architecture.py
+  - scripts/workflow_catalog.py
+  - scripts/generate_release_notes.py
+  - scripts/validate_repository_data_models.py
+  - scripts/ops_portal/
+  - roles/ops_portal_runtime/defaults/main.yml
+  - roles/ops_portal_runtime/tasks/main.yml
+  - roles/ops_portal_runtime/tasks/sync_service_tree.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/
+  - tests/test_generate_release_notes.py
+  - tests/test_interactive_ops_portal.py
+  - tests/test_ops_portal.py
+  - tests/test_ops_portal_playbook.py
+  - tests/test_ops_portal_runtime_role.py
+  - receipts/live-applies/*adr-0309*
+  - receipts/live-applies/evidence/*ws-0309*
+  - receipts/restic-backups/20260403T001854Z.json
+  - receipts/restic-snapshots-latest.json
+  - receipts/ops-portal-snapshot.html
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index_generation
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-generator-v1
-  - id: adr_0309_main_integration
-    paths:
-    - docs/workstreams/ws-0309-live-apply.md
-    - docs/workstreams/ws-0309-main-integration.md
-    - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
-    - Makefile
-    - docs/runbooks/platform-operations-portal.md
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    - inventory/group_vars/platform.yml
-    - build/platform-manifest.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    - docs/release-notes/**
-    - docs/site-generated/architecture/dependency-graph.md
-    - playbooks/ops-portal.yml
-    - config/persona-catalog.json
-    - config/workflow-catalog.json
-    - config/workbench-information-architecture.json
-    - docs/schema/persona-catalog.schema.json
-    - docs/schema/workbench-information-architecture.schema.json
-    - scripts/workbench_information_architecture.py
-    - scripts/workflow_catalog.py
-    - scripts/generate_release_notes.py
-    - scripts/validate_repository_data_models.py
-    - scripts/ops_portal/**
-    - roles/ops_portal_runtime/defaults/main.yml
-    - roles/ops_portal_runtime/tasks/main.yml
-    - roles/ops_portal_runtime/tasks/sync_service_tree.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
-    - tests/test_generate_release_notes.py
-    - tests/test_interactive_ops_portal.py
-    - tests/test_ops_portal.py
-    - tests/test_ops_portal_playbook.py
-    - tests/test_ops_portal_runtime_role.py
-    - receipts/live-applies/*adr-0309*
-    - receipts/live-applies/evidence/*ws-0309*
-    - receipts/restic-backups/20260403T001854Z.json
-    - receipts/restic-snapshots-latest.json
-    - receipts/ops-portal-snapshot.html
-    mode: shared_contract
-    contract: adr-0309-main-integration-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index_generation
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: adr_0309_main_integration
+      paths:
+        - docs/workstreams/ws-0309-live-apply.md
+        - docs/workstreams/ws-0309-main-integration.md
+        - docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+        - Makefile
+        - docs/runbooks/platform-operations-portal.md
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+        - inventory/group_vars/platform.yml
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - docs/release-notes/**
+        - docs/site-generated/architecture/dependency-graph.md
+        - playbooks/ops-portal.yml
+        - config/persona-catalog.json
+        - config/workflow-catalog.json
+        - config/workbench-information-architecture.json
+        - docs/schema/persona-catalog.schema.json
+        - docs/schema/workbench-information-architecture.schema.json
+        - scripts/workbench_information_architecture.py
+        - scripts/workflow_catalog.py
+        - scripts/generate_release_notes.py
+        - scripts/validate_repository_data_models.py
+        - scripts/ops_portal/**
+        - roles/ops_portal_runtime/defaults/main.yml
+        - roles/ops_portal_runtime/tasks/main.yml
+        - roles/ops_portal_runtime/tasks/sync_service_tree.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
+        - tests/test_generate_release_notes.py
+        - tests/test_interactive_ops_portal.py
+        - tests/test_ops_portal.py
+        - tests/test_ops_portal_playbook.py
+        - tests/test_ops_portal_runtime_role.py
+        - receipts/live-applies/*adr-0309*
+        - receipts/live-applies/evidence/*ws-0309*
+        - receipts/restic-backups/20260403T001854Z.json
+        - receipts/restic-snapshots-latest.json
+        - receipts/ops-portal-snapshot.html
+      mode: shared_contract
+      contract: adr-0309-main-integration-v1
 blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0309 by adding the task-oriented Start, Observe,
-    Change, Learn, and Recover information architecture across the live ops portal
-    shell, launcher, runbook surfaces, and supporting catalogs, then carrying the
-    exact-main validation and replay path onto main
+  changelog_entry: implements ADR 0309 by adding the task-oriented Start,
+    Observe, Change, Learn, and Recover information architecture across the live
+    ops portal shell, launcher, runbook surfaces, and supporting catalogs, then
+    carrying the exact-main validation and replay path onto main
   release_bump: patch
   included_in_repo_version: 0.177.148
   latest_receipts:
-    ops_portal: 2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply
+    ops_portal:
+      2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply

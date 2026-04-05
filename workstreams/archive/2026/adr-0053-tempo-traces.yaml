@@ -7,13 +7,13 @@ branch: codex/adr-0053-tempo-traces
 worktree_path: .worktrees/adr-0053-tempo-traces
 doc: docs/workstreams/adr-0053-tempo-traces.md
 depends_on:
-- adr-0011-monitoring
-- adr-0052-loki-logs
+  - adr-0011-monitoring
+  - adr-0052-loki-logs
 conflicts_with: []
 shared_surfaces:
-- monitoring-lv3
-- Grafana
-- internal APIs
-- workflow execution
+  - monitoring-lv3
+  - Grafana
+  - internal APIs
+  - workflow execution
 ready_to_merge: false
 live_applied: true

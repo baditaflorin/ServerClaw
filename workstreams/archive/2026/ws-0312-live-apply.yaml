@@ -1,75 +1,75 @@
 id: ws-0312-live-apply
 adr: '0312'
-title: Live apply the shared notification center and activity timeline across human
-  surfaces
+title: Live apply the shared notification center and activity timeline across
+  human surfaces
 status: live_applied
 owner: codex
 branch: codex/ws-0312-live-apply
 worktree_path: .worktrees/ws-0312-live-apply
 doc: docs/workstreams/ws-0312-live-apply.md
 depends_on:
-- adr-0093-interactive-ops-portal
-- adr-0307-platform-workbench-as-the-cohesive-first-party-app-frame
-- adr-0309-task-oriented-information-architecture-across-the-platform-workbench
+  - adr-0093-interactive-ops-portal
+  - adr-0307-platform-workbench-as-the-cohesive-first-party-app-frame
+  - adr-0309-task-oriented-information-architecture-across-the-platform-workbench
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0312-live-apply.md
-- docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
-- docs/adr/.index.yaml
-- docs/runbooks/platform-operations-portal.md
-- docs/runbooks/ops-portal-down.md
-- scripts/ops_portal/app.py
-- scripts/ops_portal/static/portal.css
-- scripts/ops_portal/templates/base.html
-- scripts/ops_portal/templates/index.html
-- scripts/ops_portal/templates/partials/attention.html
-- scripts/ops_portal/templates/partials/changelog.html
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
-- tests/test_interactive_ops_portal.py
-- tests/test_ops_portal_runtime_role.py
-- tests/test_ops_portal_playbook.py
-- receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
-- receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
+  - workstreams.yaml
+  - docs/workstreams/ws-0312-live-apply.md
+  - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/platform-operations-portal.md
+  - docs/runbooks/ops-portal-down.md
+  - scripts/ops_portal/app.py
+  - scripts/ops_portal/static/portal.css
+  - scripts/ops_portal/templates/base.html
+  - scripts/ops_portal/templates/index.html
+  - scripts/ops_portal/templates/partials/attention.html
+  - scripts/ops_portal/templates/partials/changelog.html
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
+  - tests/test_interactive_ops_portal.py
+  - tests/test_ops_portal_runtime_role.py
+  - tests/test_ops_portal_playbook.py
+  - receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: ws0312_ops_portal_surface
-    paths:
-    - docs/workstreams/ws-0312-live-apply.md
-    - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
-    - docs/runbooks/platform-operations-portal.md
-    - docs/runbooks/ops-portal-down.md
-    - scripts/ops_portal/app.py
-    - scripts/ops_portal/static/portal.css
-    - scripts/ops_portal/templates/base.html
-    - scripts/ops_portal/templates/index.html
-    - scripts/ops_portal/templates/partials/attention.html
-    - scripts/ops_portal/templates/partials/changelog.html
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
-    - tests/test_interactive_ops_portal.py
-    - tests/test_ops_portal_runtime_role.py
-    - tests/test_ops_portal_playbook.py
-    - receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
-    - receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
-    mode: exclusive
-  - id: ws0312_adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: ws0312-adr-index-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0312_ops_portal_surface
+      paths:
+        - docs/workstreams/ws-0312-live-apply.md
+        - docs/adr/0312-shared-notification-center-and-activity-timeline-across-human-surfaces.md
+        - docs/runbooks/platform-operations-portal.md
+        - docs/runbooks/ops-portal-down.md
+        - scripts/ops_portal/app.py
+        - scripts/ops_portal/static/portal.css
+        - scripts/ops_portal/templates/base.html
+        - scripts/ops_portal/templates/index.html
+        - scripts/ops_portal/templates/partials/attention.html
+        - scripts/ops_portal/templates/partials/changelog.html
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/docker-compose.yml.j2
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
+        - tests/test_interactive_ops_portal.py
+        - tests/test_ops_portal_runtime_role.py
+        - tests/test_ops_portal_playbook.py
+        - receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json
+        - receipts/live-applies/evidence/2026-04-02-ws-0308-journey-*
+      mode: exclusive
+    - id: ws0312_adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: ws0312-adr-index-v1
 blockers: []
 canonical_truth:
   included_in_repo_version: 0.177.146

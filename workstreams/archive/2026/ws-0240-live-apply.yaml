@@ -7,54 +7,55 @@ branch: codex/ws-0240-live-apply
 worktree_path: .worktrees/ws-0240-live-apply
 doc: docs/workstreams/ws-0240-live-apply.md
 depends_on:
-- adr-0093-interactive-ops-portal
-- adr-0104-service-dependency-graph
-- adr-0161-real-time-agent-coordination-map
-- adr-0205-capability-contracts-before-product-selection
+  - adr-0093-interactive-ops-portal
+  - adr-0104-service-dependency-graph
+  - adr-0161-real-time-agent-coordination-map
+  - adr-0205-capability-contracts-before-product-selection
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0240-live-apply.md
-- docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
-- docs/adr/.index.yaml
-- docs/runbooks/ops-portal-down.md
-- scripts/ops_portal/**
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-- tests/test_interactive_ops_portal.py
-- receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0240-live-apply.md
+  - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/ops-portal-down.md
+  - scripts/ops_portal/**
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+  - tests/test_interactive_ops_portal.py
+  - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0240_live_apply
-    paths:
-    - docs/workstreams/ws-0240-live-apply.md
-    - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
-    - docs/runbooks/ops-portal-down.md
-    - scripts/ops_portal/**
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-    - tests/test_interactive_ops_portal.py
-    mode: exclusive
-  - id: adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: live_apply_evidence
-    paths:
-    - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
-    mode: shared_contract
-    contract: live-apply-receipts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0240_live_apply
+      paths:
+        - docs/workstreams/ws-0240-live-apply.md
+        - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+        - docs/runbooks/ops-portal-down.md
+        - scripts/ops_portal/**
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+        - tests/test_interactive_ops_portal.py
+      mode: exclusive
+    - id: adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: live_apply_evidence
+      paths:
+        - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+      mode: shared_contract
+      contract: live-apply-receipts-v1
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0240 by embedding Apache ECharts-backed health,
-    coordination, rollout, and dependency topology panels in the interactive ops portal
-    from canonical repository data
+  changelog_entry: implements ADR 0240 by embedding Apache ECharts-backed
+    health, coordination, rollout, and dependency topology panels in the
+    interactive ops portal from canonical repository data
   release_bump: patch
   included_in_repo_version: 0.177.64
   latest_receipts:
-    ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
+    ops_portal_visualizations:
+      2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply

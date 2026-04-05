@@ -7,15 +7,15 @@ branch: codex/ws-0101-live-apply
 worktree_path: .worktrees/ws-0101-live-apply
 doc: docs/workstreams/ws-0101-live-apply.md
 depends_on:
-- adr-0101-certificate-lifecycle
+  - adr-0101-certificate-lifecycle
 conflicts_with: []
 shared_surfaces:
-- playbooks/openbao.yml
-- roles/openbao_runtime
-- roles/vaultwarden_runtime
-- roles/cert_renewal_timer
-- config/certificate-catalog.json
-- docs/runbooks/configure-openbao.md
-- receipts/live-applies/
+  - playbooks/openbao.yml
+  - roles/openbao_runtime
+  - roles/vaultwarden_runtime
+  - roles/cert_renewal_timer
+  - config/certificate-catalog.json
+  - docs/runbooks/configure-openbao.md
+  - receipts/live-applies/
 ready_to_merge: true
 live_applied: true

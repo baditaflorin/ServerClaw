@@ -7,15 +7,15 @@ branch: codex/adr-0060-open-webui-workbench
 worktree_path: .worktrees/adr-0060-open-webui-workbench
 doc: docs/workstreams/adr-0060-open-webui-workbench.md
 depends_on:
-- adr-0044-windmill
-- adr-0048-command-catalog
-- adr-0056-keycloak-sso
+  - adr-0044-windmill
+  - adr-0048-command-catalog
+  - adr-0056-keycloak-sso
 conflicts_with: []
 shared_surfaces:
-- workflow catalog
-- receipts
-- status docs
-- governed tools
-- operator sessions
+  - workflow catalog
+  - receipts
+  - status docs
+  - governed tools
+  - operator sessions
 ready_to_merge: false
 live_applied: true

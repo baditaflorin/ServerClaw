@@ -1,80 +1,81 @@
 id: ws-0241-main-merge
 adr: '0241'
-title: Integrate ADR 0241 rich content and inline knowledge editing into origin/main
+title: Integrate ADR 0241 rich content and inline knowledge editing into
+  origin/main
 status: merged
 owner: codex
 branch: codex/ws-0241-main-merge-r3
 worktree_path: .worktrees/ws-0241-main-merge-r3
 doc: docs/workstreams/ws-0241-main-merge.md
 depends_on:
-- ws-0241-live-apply
+  - ws-0241-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0241-main-merge.md
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/0.177.61.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/adr/.index.yaml
-- docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
-- docs/workstreams/ws-0241-live-apply.md
-- docs/runbooks/validate-repository-automation.md
-- docs/runbooks/validation-gate.md
-- docs/runbooks/windmill-operator-access-admin.md
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-- config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
-- config/windmill/apps/wmill-lock.yaml
-- config/windmill/scripts/operator-update-notes.py
-- scripts/operator_manager.py
-- tests/test_operator_manager.py
-- tests/test_windmill_operator_admin_app.py
-- receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0241-main-merge.md
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.61.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/adr/.index.yaml
+  - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+  - docs/workstreams/ws-0241-live-apply.md
+  - docs/runbooks/validate-repository-automation.md
+  - docs/runbooks/validation-gate.md
+  - docs/runbooks/windmill-operator-access-admin.md
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+  - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+  - config/windmill/apps/wmill-lock.yaml
+  - config/windmill/scripts/operator-update-notes.py
+  - scripts/operator_manager.py
+  - tests/test_operator_manager.py
+  - tests/test_windmill_operator_admin_app.py
+  - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0241_main_merge
-    paths:
-    - docs/workstreams/ws-0241-main-merge.md
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.61.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    - docs/adr/.index.yaml
-    - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
-    - docs/workstreams/ws-0241-live-apply.md
-    - docs/runbooks/validate-repository-automation.md
-    - docs/runbooks/validation-gate.md
-    - docs/runbooks/windmill-operator-access-admin.md
-    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-    - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
-    - config/windmill/apps/wmill-lock.yaml
-    - config/windmill/scripts/operator-update-notes.py
-    - scripts/operator_manager.py
-    - tests/test_operator_manager.py
-    - tests/test_windmill_operator_admin_app.py
-    - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0241_main_merge
+      paths:
+        - docs/workstreams/ws-0241-main-merge.md
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.61.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/adr/.index.yaml
+        - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+        - docs/workstreams/ws-0241-live-apply.md
+        - docs/runbooks/validate-repository-automation.md
+        - docs/runbooks/validation-gate.md
+        - docs/runbooks/windmill-operator-access-admin.md
+        - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+        - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+        - config/windmill/apps/wmill-lock.yaml
+        - config/windmill/scripts/operator-update-notes.py
+        - scripts/operator_manager.py
+        - tests/test_operator_manager.py
+        - tests/test_windmill_operator_admin_app.py
+        - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+      mode: exclusive
 ready_to_merge: true
 live_applied: false
 canonical_truth:
-  changelog_entry: records ADR 0241 exact-main evidence on the current mainline by
-    preserving the verified Tiptap rich-notes rollout, refreshed release surfaces,
-    and latest operator-access and Windmill receipt truth while the live platform
-    baseline remains 0.130.44
+  changelog_entry: records ADR 0241 exact-main evidence on the current mainline
+    by preserving the verified Tiptap rich-notes rollout, refreshed release
+    surfaces, and latest operator-access and Windmill receipt truth while the
+    live platform baseline remains 0.130.44
   release_bump: patch
   included_in_repo_version: 0.177.61

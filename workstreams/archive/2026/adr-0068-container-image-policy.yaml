@@ -7,14 +7,14 @@ branch: codex/adr-0068-container-image-policy
 worktree_path: .worktrees/adr-0068-container-image-policy
 doc: docs/workstreams/adr-0068-container-image-policy.md
 depends_on:
-- adr-0023-docker-runtime
-- adr-0025-docker-compose-stacks
-- adr-0044-windmill
+  - adr-0023-docker-runtime
+  - adr-0025-docker-compose-stacks
+  - adr-0044-windmill
 conflicts_with: []
 shared_surfaces:
-- Docker Compose files
-- config/image-catalog.json
-- receipts/image-scans/
-- docker-build-lv3 role
+  - Docker Compose files
+  - config/image-catalog.json
+  - receipts/image-scans/
+  - docker-build-lv3 role
 ready_to_merge: false
 live_applied: false

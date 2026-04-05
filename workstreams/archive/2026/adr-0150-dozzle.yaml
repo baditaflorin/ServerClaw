@@ -7,17 +7,17 @@ branch: codex/live-apply-0150
 worktree_path: .worktrees/live-apply-0150
 doc: docs/workstreams/adr-0150-dozzle.md
 depends_on:
-- adr-0023-docker-runtime
-- adr-0052-loki-logs
-- adr-0133-portal-auth-by-default
+  - adr-0023-docker-runtime
+  - adr-0052-loki-logs
+  - adr-0133-portal-auth-by-default
 conflicts_with: []
 shared_surfaces:
-- roles/dozzle_runtime
-- roles/nginx_edge_publication
-- inventory/host_vars/proxmox_florin.yml
-- config/service-capability-catalog.json
-- config/subdomain-catalog.json
-- config/api-gateway-catalog.json
-- config/dependency-graph.json
+  - roles/dozzle_runtime
+  - roles/nginx_edge_publication
+  - inventory/host_vars/proxmox_florin.yml
+  - config/service-capability-catalog.json
+  - config/subdomain-catalog.json
+  - config/api-gateway-catalog.json
+  - config/dependency-graph.json
 ready_to_merge: false
 live_applied: true

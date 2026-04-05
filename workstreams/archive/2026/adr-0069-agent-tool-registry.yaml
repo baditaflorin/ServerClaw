@@ -7,14 +7,14 @@ branch: codex/adr-0069-agent-tool-registry
 worktree_path: .worktrees/adr-0069-agent-tool-registry
 doc: docs/workstreams/adr-0069-agent-tool-registry.md
 depends_on:
-- adr-0048-command-catalog
-- adr-0049-private-api-publication
+  - adr-0048-command-catalog
+  - adr-0049-private-api-publication
 conflicts_with: []
 shared_surfaces:
-- config/agent-tool-registry.json
-- config/command-catalog.json
-- config/workflow-catalog.json
-- docs/schema
-- .local/tool-audit/agent-tool-calls.jsonl
+  - config/agent-tool-registry.json
+  - config/command-catalog.json
+  - config/workflow-catalog.json
+  - docs/schema
+  - .local/tool-audit/agent-tool-calls.jsonl
 ready_to_merge: false
 live_applied: false

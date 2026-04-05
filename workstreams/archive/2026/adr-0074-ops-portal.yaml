@@ -7,15 +7,15 @@ branch: codex/adr-0074-ops-portal
 worktree_path: .worktrees/adr-0074-ops-portal
 doc: docs/workstreams/adr-0074-ops-portal.md
 depends_on:
-- adr-0075-service-capability-catalog
-- adr-0076-subdomain-governance
-- adr-0056-keycloak-sso
+  - adr-0075-service-capability-catalog
+  - adr-0076-subdomain-governance
+  - adr-0056-keycloak-sso
 conflicts_with: []
 shared_surfaces:
-- scripts/generate_ops_portal.py
-- build/ops-portal/
-- NGINX edge config
-- ops.lv3.org
-- Makefile
+  - scripts/generate_ops_portal.py
+  - build/ops-portal/
+  - NGINX edge config
+  - ops.lv3.org
+  - Makefile
 ready_to_merge: false
 live_applied: true

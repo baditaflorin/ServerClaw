@@ -9,9 +9,9 @@ doc: docs/workstreams/adr-0062-role-composability.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-- roles/common/
-- filter_plugins/
-- make validate
-- role argument specs
+  - roles/common/
+  - filter_plugins/
+  - make validate
+  - role argument specs
 ready_to_merge: false
 live_applied: false

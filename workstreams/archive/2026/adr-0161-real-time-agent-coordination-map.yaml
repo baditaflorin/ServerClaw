@@ -7,21 +7,21 @@ branch: codex/adr-0161-main-integration
 worktree_path: .worktrees/adr-0161-main
 doc: docs/workstreams/adr-0161-real-time-agent-coordination-map.md
 depends_on:
-- adr-0058-nats
-- adr-0092-platform-api-gateway
-- adr-0093-interactive-ops-portal
-- adr-0126-observation-loop
-- adr-0130-agent-state-persistence
-- adr-0131-multi-agent-handoffs
+  - adr-0058-nats
+  - adr-0092-platform-api-gateway
+  - adr-0093-interactive-ops-portal
+  - adr-0126-observation-loop
+  - adr-0130-agent-state-persistence
+  - adr-0131-multi-agent-handoffs
 conflicts_with: []
 shared_surfaces:
-- platform/agent
-- platform/closure_loop
-- scripts/api_gateway/main.py
-- scripts/ops_portal
-- scripts/generate_ops_portal.py
-- config/windmill/scripts/platform-observation-loop.py
-- receipts/agent-coordination
-- docs/runbooks/agent-coordination-map.md
+  - platform/agent
+  - platform/closure_loop
+  - scripts/api_gateway/main.py
+  - scripts/ops_portal
+  - scripts/generate_ops_portal.py
+  - config/windmill/scripts/platform-observation-loop.py
+  - receipts/agent-coordination
+  - docs/runbooks/agent-coordination-map.md
 ready_to_merge: false
 live_applied: true

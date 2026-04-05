@@ -7,63 +7,64 @@ branch: codex/ws-0241-live-apply
 worktree_path: .worktrees/ws-0241-live-apply
 doc: docs/workstreams/ws-0241-live-apply.md
 depends_on:
-- adr-0108-operator-onboarding-and-offboarding
-- adr-0122-windmill-operator-access-admin
-- adr-0199-outline-living-knowledge-wiki
-- adr-0206-ports-and-adapters
+  - adr-0108-operator-onboarding-and-offboarding
+  - adr-0122-windmill-operator-access-admin
+  - adr-0199-outline-living-knowledge-wiki
+  - adr-0206-ports-and-adapters
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0241-live-apply.md
-- docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
-- docs/adr/.index.yaml
-- docs/runbooks/validate-repository-automation.md
-- docs/runbooks/validation-gate.md
-- docs/runbooks/windmill-operator-access-admin.md
-- config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
-- config/windmill/apps/wmill-lock.yaml
-- config/windmill/scripts/operator-update-notes.py
-- scripts/operator_manager.py
-- roles/windmill_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-- tests/test_operator_manager.py
-- tests/test_windmill_operator_admin_app.py
-- receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0241-live-apply.md
+  - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/validate-repository-automation.md
+  - docs/runbooks/validation-gate.md
+  - docs/runbooks/windmill-operator-access-admin.md
+  - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+  - config/windmill/apps/wmill-lock.yaml
+  - config/windmill/scripts/operator-update-notes.py
+  - scripts/operator_manager.py
+  - roles/windmill_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+  - tests/test_operator_manager.py
+  - tests/test_windmill_operator_admin_app.py
+  - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0241_live_apply
-    paths:
-    - docs/workstreams/ws-0241-live-apply.md
-    - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
-    - docs/adr/.index.yaml
-    - docs/runbooks/validate-repository-automation.md
-    - docs/runbooks/validation-gate.md
-    - docs/runbooks/windmill-operator-access-admin.md
-    - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
-    - config/windmill/apps/wmill-lock.yaml
-    - config/windmill/scripts/operator-update-notes.py
-    - scripts/operator_manager.py
-    - roles/windmill_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-    - tests/test_operator_manager.py
-    - tests/test_windmill_operator_admin_app.py
-    - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0241_live_apply
+      paths:
+        - docs/workstreams/ws-0241-live-apply.md
+        - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+        - docs/adr/.index.yaml
+        - docs/runbooks/validate-repository-automation.md
+        - docs/runbooks/validation-gate.md
+        - docs/runbooks/windmill-operator-access-admin.md
+        - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+        - config/windmill/apps/wmill-lock.yaml
+        - config/windmill/scripts/operator-update-notes.py
+        - scripts/operator_manager.py
+        - roles/windmill_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+        - tests/test_operator_manager.py
+        - tests/test_windmill_operator_admin_app.py
+        - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0241 by adding a Tiptap-backed bounded-knowledge
-    editor to the repo-managed Windmill operator-access admin surface, regenerating
-    the raw-app dependency lock, and hardening governed Windmill live replay from
-    concurrent non-primary worktrees
+  changelog_entry: implemented ADR 0241 by adding a Tiptap-backed
+    bounded-knowledge editor to the repo-managed Windmill operator-access admin
+    surface, regenerating the raw-app dependency lock, and hardening governed
+    Windmill live replay from concurrent non-primary worktrees
   release_bump: patch
   included_in_repo_version: 0.177.62
   latest_receipts:
-    operator_access: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
+    operator_access:
+      2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply

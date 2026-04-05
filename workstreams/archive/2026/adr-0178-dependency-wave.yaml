@@ -7,18 +7,18 @@ branch: codex/adr-0178-dependency-wave
 worktree_path: .worktrees/adr-0178-dependency-wave
 doc: docs/workstreams/adr-0178-dependency-wave-manifests.md
 depends_on:
-- adr-0153-distributed-resource-lock-registry
-- adr-0154-vm-scoped-execution-lanes
-- adr-0176-inventory-sharding
+  - adr-0153-distributed-resource-lock-registry
+  - adr-0154-vm-scoped-execution-lanes
+  - adr-0176-inventory-sharding
 conflicts_with:
-- adr-0176-inventory-sharding
-- adr-0182-live-apply-merge-train
+  - adr-0176-inventory-sharding
+  - adr-0182-live-apply-merge-train
 shared_surfaces:
-- platform/ansible/
-- scripts/dependency_wave_apply.py
-- Makefile
-- config/workflow-catalog.json
-- config/dependency-wave-playbooks.yaml
-- docs/runbooks/dependency-wave-parallel-apply.md
+  - platform/ansible/
+  - scripts/dependency_wave_apply.py
+  - Makefile
+  - config/workflow-catalog.json
+  - config/dependency-wave-playbooks.yaml
+  - docs/runbooks/dependency-wave-parallel-apply.md
 ready_to_merge: false
 live_applied: false

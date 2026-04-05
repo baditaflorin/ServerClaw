@@ -7,17 +7,17 @@ branch: codex/adr-0099-backup-restore-verification
 worktree_path: .worktrees/adr-0099-backup-restore-verification
 doc: docs/workstreams/adr-0099-backup-restore-verification.md
 depends_on:
-- adr-0020-backups
-- adr-0029-backup-vm
-- adr-0044-windmill
-- adr-0057-mattermost
-- adr-0066-mutation-audit-log
-- adr-0088-ephemeral-fixtures
-- adr-0097-alerting-routing
+  - adr-0020-backups
+  - adr-0029-backup-vm
+  - adr-0044-windmill
+  - adr-0057-mattermost
+  - adr-0066-mutation-audit-log
+  - adr-0088-ephemeral-fixtures
+  - adr-0097-alerting-routing
 conflicts_with: []
 shared_surfaces:
-- scripts/
-- Windmill workflows
-- receipts/
+  - scripts/
+  - Windmill workflows
+  - receipts/
 ready_to_merge: false
 live_applied: false

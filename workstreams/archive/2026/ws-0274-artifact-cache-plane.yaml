@@ -7,75 +7,76 @@ branch: codex/ws-0274-artifact-cache-plane
 worktree_path: .worktrees/ws-0274-artifact-cache-plane
 doc: docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md
 depends_on:
-- adr-0068-container-image-policy
-- adr-0082-remote-build-gateway
-- adr-0083-docker-check-runner
-- adr-0089-build-cache
-- adr-0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments
+  - adr-0068-container-image-policy
+  - adr-0082-remote-build-gateway
+  - adr-0083-docker-check-runner
+  - adr-0089-build-cache
+  - adr-0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
-- docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
-- docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md
-- docs/adr/.index.yaml
-- docs/runbooks/artifact-cache-runtime.md
-- docs/runbooks/configure-build-artifact-cache.md
-- playbooks/services/build-artifact-cache.yml
-- collections/ansible_collections/lv3/platform/playbooks/services/build-artifact-cache.yml
-- collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/
-- collections/ansible_collections/lv3/platform/roles/build_server/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/build_server/meta/argument_specs.yml
-- collections/ansible_collections/lv3/platform/roles/build_server/templates/buildkitd.toml.j2
-- collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
-- scripts/artifact_cache_seed.py
-- tests/test_artifact_cache_runtime_role.py
-- tests/test_artifact_cache_seed.py
-- tests/test_docker_runtime_role.py
+  - workstreams.yaml
+  - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+  - docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+  - docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/artifact-cache-runtime.md
+  - docs/runbooks/configure-build-artifact-cache.md
+  - playbooks/services/build-artifact-cache.yml
+  - collections/ansible_collections/lv3/platform/playbooks/services/build-artifact-cache.yml
+  - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/
+  - collections/ansible_collections/lv3/platform/roles/build_server/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/build_server/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/build_server/templates/buildkitd.toml.j2
+  - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
+  - scripts/artifact_cache_seed.py
+  - tests/test_artifact_cache_runtime_role.py
+  - tests/test_artifact_cache_seed.py
+  - tests/test_docker_runtime_role.py
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: artifact_cache_adr_index_contract
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-generator-v1
-  - id: artifact_cache_architecture_docs
-    paths:
-    - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
-    - docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
-    - docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md
-    mode: exclusive
-  - id: artifact_cache_runtime_surfaces
-    paths:
-    - docs/runbooks/artifact-cache-runtime.md
-    - docs/runbooks/configure-build-artifact-cache.md
-    - playbooks/services/build-artifact-cache.yml
-    - collections/ansible_collections/lv3/platform/playbooks/services/build-artifact-cache.yml
-    - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/
-    - collections/ansible_collections/lv3/platform/roles/build_server/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/build_server/meta/argument_specs.yml
-    - collections/ansible_collections/lv3/platform/roles/build_server/templates/buildkitd.toml.j2
-    - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
-    - scripts/artifact_cache_seed.py
-    - tests/test_artifact_cache_runtime_role.py
-    - tests/test_artifact_cache_seed.py
-    - tests/test_docker_runtime_role.py
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: artifact_cache_adr_index_contract
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: artifact_cache_architecture_docs
+      paths:
+        - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+        - docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+        - docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md
+      mode: exclusive
+    - id: artifact_cache_runtime_surfaces
+      paths:
+        - docs/runbooks/artifact-cache-runtime.md
+        - docs/runbooks/configure-build-artifact-cache.md
+        - playbooks/services/build-artifact-cache.yml
+        - collections/ansible_collections/lv3/platform/playbooks/services/build-artifact-cache.yml
+        - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/
+        - collections/ansible_collections/lv3/platform/roles/build_server/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/build_server/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/build_server/templates/buildkitd.toml.j2
+        - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
+        - scripts/artifact_cache_seed.py
+        - tests/test_artifact_cache_runtime_role.py
+        - tests/test_artifact_cache_seed.py
+        - tests/test_docker_runtime_role.py
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0295 by adding repo-managed pull-through image
-    mirrors, a catalog-derived warm-set planner, and BuildKit mirror wiring on the
-    build artifact cache lane while keeping the dedicated cache VM from ADR 0296 as
-    a later live-apply step
+  changelog_entry: implemented ADR 0295 by adding repo-managed pull-through
+    image mirrors, a catalog-derived warm-set planner, and BuildKit mirror
+    wiring on the build artifact cache lane while keeping the dedicated cache VM
+    from ADR 0296 as a later live-apply step
   release_bump: patch
   included_in_repo_version: 0.177.73
   latest_receipts:
-    artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
+    artifact_cache_plane:
+      2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply

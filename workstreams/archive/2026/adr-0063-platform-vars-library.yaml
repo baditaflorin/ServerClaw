@@ -7,12 +7,12 @@ branch: codex/adr-0063-platform-vars-library
 worktree_path: .worktrees/adr-0063-platform-vars-library
 doc: docs/workstreams/adr-0063-platform-vars-library.md
 depends_on:
-- adr-0062-role-composability
+  - adr-0062-role-composability
 conflicts_with: []
 shared_surfaces:
-- inventory/group_vars/
-- versions/stack.yaml
-- filter_plugins/
-- Makefile
+  - inventory/group_vars/
+  - versions/stack.yaml
+  - filter_plugins/
+  - Makefile
 ready_to_merge: false
 live_applied: false

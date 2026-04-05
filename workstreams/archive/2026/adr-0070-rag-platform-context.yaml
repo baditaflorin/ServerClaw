@@ -7,16 +7,16 @@ branch: codex/adr-0070-rag-platform-context
 worktree_path: .worktrees/adr-0070-rag-platform-context
 doc: docs/workstreams/adr-0070-rag-platform-context.md
 depends_on:
-- adr-0044-windmill
-- adr-0049-private-api-publication
-- adr-0060-open-webui-workbench
-- adr-0069-agent-tool-registry
+  - adr-0044-windmill
+  - adr-0049-private-api-publication
+  - adr-0060-open-webui-workbench
+  - adr-0069-agent-tool-registry
 conflicts_with: []
 shared_surfaces:
-- docs/ corpus
-- config/ catalogs
-- versions/stack.yaml
-- receipts/
-- Open WebUI tools
+  - docs/ corpus
+  - config/ catalogs
+  - versions/stack.yaml
+  - receipts/
+  - Open WebUI tools
 ready_to_merge: false
 live_applied: true

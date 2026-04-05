@@ -7,17 +7,17 @@ branch: codex/adr-0103
 worktree_path: .worktrees/codex-adr-0103
 doc: docs/workstreams/adr-0103-data-retention-policy.md
 depends_on:
-- adr-0043-openbao
-- adr-0052-loki-log-aggregation
-- adr-0053-tempo-traces
-- adr-0066-mutation-audit-log
-- adr-0077-compose-secrets-injection
-- adr-0087-validation-gate
+  - adr-0043-openbao
+  - adr-0052-loki-log-aggregation
+  - adr-0053-tempo-traces
+  - adr-0066-mutation-audit-log
+  - adr-0077-compose-secrets-injection
+  - adr-0087-validation-gate
 conflicts_with: []
 shared_surfaces:
-- Loki config
-- Tempo config
-- Mattermost config
-- config/ catalogs
+  - Loki config
+  - Tempo config
+  - Mattermost config
+  - config/ catalogs
 ready_to_merge: false
 live_applied: false

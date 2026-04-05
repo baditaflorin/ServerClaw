@@ -9,9 +9,9 @@ doc: docs/workstreams/adr-0046-identity-classes.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-- SSH users
-- API principals
-- workflow identities
-- mail senders
+  - SSH users
+  - API principals
+  - workflow identities
+  - mail senders
 ready_to_merge: false
 live_applied: true

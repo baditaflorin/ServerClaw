@@ -7,13 +7,13 @@ branch: codex/adr-0057-mattermost-chatops
 worktree_path: .worktrees/adr-0057-mattermost-chatops
 doc: docs/workstreams/adr-0057-mattermost-chatops.md
 depends_on:
-- adr-0045-communication-lanes
-- adr-0050-notification-profiles
+  - adr-0045-communication-lanes
+  - adr-0050-notification-profiles
 conflicts_with: []
 shared_surfaces:
-- alerts
-- workflow notifications
-- approvals
-- incoming webhooks
+  - alerts
+  - workflow notifications
+  - approvals
+  - incoming webhooks
 ready_to_merge: false
 live_applied: true

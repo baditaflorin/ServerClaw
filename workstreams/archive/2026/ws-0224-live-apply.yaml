@@ -1,89 +1,92 @@
 id: ws-0224-live-apply
 adr: '0224'
-title: Live apply ADR 0224 server-resident operations as the default control model
+title: Live apply ADR 0224 server-resident operations as the default control
+  model
 status: live_applied
 owner: codex
 branch: codex/ws-0224-live-apply-r3
 worktree_path: .worktrees/ws-0224-live-apply-r3
 doc: docs/workstreams/ws-0224-live-apply.md
 depends_on:
-- adr-0143-gitea
-- adr-0204-self-correcting-automation-loops
-- adr-0225-server-resident-reconciliation-via-ansible-pull
-- adr-0226-systemd-units-timers-and-paths-for-host-resident-control-loops
-- adr-0227-bounded-command-execution-via-systemd-run-and-approved-wrappers
-- adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
-- adr-0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials
+  - adr-0143-gitea
+  - adr-0204-self-correcting-automation-loops
+  - adr-0225-server-resident-reconciliation-via-ansible-pull
+  - adr-0226-systemd-units-timers-and-paths-for-host-resident-control-loops
+  - adr-0227-bounded-command-execution-via-systemd-run-and-approved-wrappers
+  - adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
+  - adr-0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0224-live-apply.md
-- docs/workstreams/ws-0226-live-apply.md
-- docs/adr/0224-server-resident-operations-as-the-default-control-model.md
-- docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
-- docs/adr/.index.yaml
-- docs/runbooks/server-resident-reconciliation.md
-- docs/runbooks/configure-host-control-loops.md
-- Makefile
-- config/workflow-catalog.json
-- config/command-catalog.json
-- playbooks/proxmox-install.yml
-- collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
-- tests/test_proxmox_host_control_loops_role.py
-- receipts/live-applies/**
-- README.md
-- VERSION
-- changelog.md
-- RELEASE.md
-- docs/release-notes/README.md
-- docs/release-notes/*.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams.yaml
+  - docs/workstreams/ws-0224-live-apply.md
+  - docs/workstreams/ws-0226-live-apply.md
+  - docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+  - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/server-resident-reconciliation.md
+  - docs/runbooks/configure-host-control-loops.md
+  - Makefile
+  - config/workflow-catalog.json
+  - config/command-catalog.json
+  - playbooks/proxmox-install.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+  - tests/test_proxmox_host_control_loops_role.py
+  - receipts/live-applies/**
+  - README.md
+  - VERSION
+  - changelog.md
+  - RELEASE.md
+  - docs/release-notes/README.md
+  - docs/release-notes/*.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0224_live_apply
-    paths:
-    - docs/workstreams/ws-0224-live-apply.md
-    - docs/workstreams/ws-0226-live-apply.md
-    - docs/adr/0224-server-resident-operations-as-the-default-control-model.md
-    - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
-    - docs/adr/.index.yaml
-    - docs/runbooks/server-resident-reconciliation.md
-    - docs/runbooks/configure-host-control-loops.md
-    - Makefile
-    - config/workflow-catalog.json
-    - config/command-catalog.json
-    - playbooks/proxmox-install.yml
-    - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
-    - tests/test_proxmox_host_control_loops_role.py
-    - receipts/live-applies/**
-    mode: shared_contract
-    contract: adr-0224-live-apply-v1
-  - id: integration_release_surfaces
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - RELEASE.md
-    - docs/release-notes/README.md
-    - docs/release-notes/*.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0224_live_apply
+      paths:
+        - docs/workstreams/ws-0224-live-apply.md
+        - docs/workstreams/ws-0226-live-apply.md
+        - docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+        - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+        - docs/adr/.index.yaml
+        - docs/runbooks/server-resident-reconciliation.md
+        - docs/runbooks/configure-host-control-loops.md
+        - Makefile
+        - config/workflow-catalog.json
+        - config/command-catalog.json
+        - playbooks/proxmox-install.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+        - tests/test_proxmox_host_control_loops_role.py
+        - receipts/live-applies/**
+      mode: shared_contract
+      contract: adr-0224-live-apply-v1
+    - id: integration_release_surfaces
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - RELEASE.md
+        - docs/release-notes/README.md
+        - docs/release-notes/*.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: verifies ADR 0224 from the latest mainline by carrying the host-resident
-    supervisor baseline into repo truth and re-proving that reconciliation, supervision,
-    validation, and approval now run through server-resident platform surfaces
+  changelog_entry: verifies ADR 0224 from the latest mainline by carrying the
+    host-resident supervisor baseline into repo truth and re-proving that
+    reconciliation, supervision, validation, and approval now run through
+    server-resident platform surfaces
   release_bump: patch
   included_in_repo_version: 0.177.52
   latest_receipts:
-    server_resident_operations: 2026-03-28-adr-0224-server-resident-operations-default-control-live-apply
+    server_resident_operations:
+      2026-03-28-adr-0224-server-resident-operations-default-control-live-apply

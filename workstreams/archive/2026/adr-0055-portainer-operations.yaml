@@ -7,14 +7,14 @@ branch: codex/adr-0055-portainer-operations
 worktree_path: .worktrees/adr-0055-portainer-operations
 doc: docs/workstreams/adr-0055-portainer-operations.md
 depends_on:
-- adr-0023-docker-runtime
-- adr-0025-docker-compose-stacks
-- adr-0048-command-catalog
+  - adr-0023-docker-runtime
+  - adr-0025-docker-compose-stacks
+  - adr-0048-command-catalog
 conflicts_with: []
 shared_surfaces:
-- docker-runtime-lv3
-- Compose stacks
-- container logs
-- runtime controls
+  - docker-runtime-lv3
+  - Compose stacks
+  - container logs
+  - runtime controls
 ready_to_merge: false
 live_applied: true

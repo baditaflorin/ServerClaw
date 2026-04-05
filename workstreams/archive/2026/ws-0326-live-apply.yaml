@@ -1,134 +1,135 @@
 id: ws-0326-live-apply
 adr: '0326'
-title: Implement shard-backed workstream registry source files with generated compatibility
-  assembly
+title: Implement shard-backed workstream registry source files with generated
+  compatibility assembly
 status: live_applied
 owner: codex
 branch: codex/ws-0326-live-apply
 worktree_path: .worktrees/ws-0326-live-apply
 doc: docs/workstreams/adr-0326-workstream-registry-shards.md
 depends_on:
-- adr-0167-agent-handoff-and-context-preservation
-- adr-0174-integration-only-canonical-truth-assembly
-- adr-0175-cross-workstream-interface-contracts
-- adr-0326-workstream-registry-shards-with-active-and-archive-assembly
+  - adr-0167-agent-handoff-and-context-preservation
+  - adr-0174-integration-only-canonical-truth-assembly
+  - adr-0175-cross-workstream-interface-contracts
+  - adr-0326-workstream-registry-shards-with-active-and-archive-assembly
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- workstreams/policy.yaml
-- workstreams/active/*.yaml
-- workstreams/archive/*.yaml
-- docs/workstreams/adr-0326-workstream-registry-shards.md
-- docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md
-- docs/adr/.index.yaml
-- docs/runbooks/workstream-registry-shards.md
-- docs/runbooks/cross-workstream-interface-contracts.md
-- docs/runbooks/canonical-truth-assembly.md
-- docs/runbooks/validate-repository-automation.md
-- .repo-structure.yaml
-- .config-locations.yaml
-- config/contracts/workstream-registry-v1.yaml
-- platform/workstream_registry.py
-- scripts/workstream_registry.py
-- scripts/workstream_tool.py
-- scripts/create-workstream.sh
-- scripts/canonical_truth.py
-- scripts/generate_status_docs.py
-- scripts/generate_diagrams.py
-- scripts/drift_lib.py
-- scripts/workstream_surface_ownership.py
-- scripts/validate_repository_data_models.py
-- scripts/validate_repo.sh
-- tests/test_workstream_registry.py
-- tests/test_canonical_truth.py
-- tests/test_workstream_surface_ownership.py
-- tests/test_interface_contracts.py
-- README.md
-- changelog.md
-- versions/stack.yaml
-- docs/diagrams/agent-coordination-map.excalidraw
-- build/platform-manifest.json
-- receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json
-- receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply.json
-- receipts/live-applies/evidence/2026-04-03-ws-0326-*
+  - workstreams.yaml
+  - workstreams/policy.yaml
+  - workstreams/active/*.yaml
+  - workstreams/archive/*.yaml
+  - docs/workstreams/adr-0326-workstream-registry-shards.md
+  - docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/workstream-registry-shards.md
+  - docs/runbooks/cross-workstream-interface-contracts.md
+  - docs/runbooks/canonical-truth-assembly.md
+  - docs/runbooks/validate-repository-automation.md
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - config/contracts/workstream-registry-v1.yaml
+  - platform/workstream_registry.py
+  - scripts/workstream_registry.py
+  - scripts/workstream_tool.py
+  - scripts/create-workstream.sh
+  - scripts/canonical_truth.py
+  - scripts/generate_status_docs.py
+  - scripts/generate_diagrams.py
+  - scripts/drift_lib.py
+  - scripts/workstream_surface_ownership.py
+  - scripts/validate_repository_data_models.py
+  - scripts/validate_repo.sh
+  - tests/test_workstream_registry.py
+  - tests/test_canonical_truth.py
+  - tests/test_workstream_surface_ownership.py
+  - tests/test_interface_contracts.py
+  - README.md
+  - changelog.md
+  - versions/stack.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - build/platform-manifest.json
+  - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json
+  - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-03-ws-0326-*
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: ws0326_workstream_source
-    paths:
-    - workstreams/policy.yaml
-    - workstreams/active/*.yaml
-    - workstreams/archive/*.yaml
-    mode: exclusive
-  - id: ws0326_registry_tooling
-    paths:
-    - platform/workstream_registry.py
-    - scripts/workstream_registry.py
-    - scripts/workstream_tool.py
-    - scripts/create-workstream.sh
-    - scripts/canonical_truth.py
-    - scripts/generate_status_docs.py
-    - scripts/generate_diagrams.py
-    - scripts/drift_lib.py
-    - scripts/workstream_surface_ownership.py
-    - scripts/validate_repository_data_models.py
-    - scripts/validate_repo.sh
-    mode: exclusive
-  - id: ws0326_workstream_docs
-    paths:
-    - docs/workstreams/adr-0326-workstream-registry-shards.md
-    - docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md
-    - docs/runbooks/workstream-registry-shards.md
-    - docs/runbooks/cross-workstream-interface-contracts.md
-    - docs/runbooks/canonical-truth-assembly.md
-    - docs/runbooks/validate-repository-automation.md
-    mode: exclusive
-  - id: ws0326_registry_indexes
-    paths:
-    - docs/adr/.index.yaml
-    - .repo-structure.yaml
-    - .config-locations.yaml
-    - config/contracts/workstream-registry-v1.yaml
-    mode: exclusive
-  - id: ws0326_registry_tests
-    paths:
-    - tests/test_workstream_registry.py
-    - tests/test_canonical_truth.py
-    - tests/test_workstream_surface_ownership.py
-    - tests/test_interface_contracts.py
-    mode: exclusive
-  - id: ws0326_generated_truth
-    paths:
-    - docs/diagrams/agent-coordination-map.excalidraw
-    mode: shared_contract
-    contract: latest-main-generated-truth-v1
-  - id: ws0326_canonical_truth
-    paths:
-    - README.md
-    - changelog.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    mode: shared_contract
-    contract: canonical-truth-v1
-  - id: ws0326_live_apply_receipts
-    paths:
-    - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json
-    - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply.json
-    - receipts/live-applies/evidence/2026-04-03-ws-0326-*
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0326_workstream_source
+      paths:
+        - workstreams/policy.yaml
+        - workstreams/active/*.yaml
+        - workstreams/archive/*.yaml
+      mode: exclusive
+    - id: ws0326_registry_tooling
+      paths:
+        - platform/workstream_registry.py
+        - scripts/workstream_registry.py
+        - scripts/workstream_tool.py
+        - scripts/create-workstream.sh
+        - scripts/canonical_truth.py
+        - scripts/generate_status_docs.py
+        - scripts/generate_diagrams.py
+        - scripts/drift_lib.py
+        - scripts/workstream_surface_ownership.py
+        - scripts/validate_repository_data_models.py
+        - scripts/validate_repo.sh
+      mode: exclusive
+    - id: ws0326_workstream_docs
+      paths:
+        - docs/workstreams/adr-0326-workstream-registry-shards.md
+        - docs/adr/0326-workstream-registry-shards-with-active-and-archive-assembly.md
+        - docs/runbooks/workstream-registry-shards.md
+        - docs/runbooks/cross-workstream-interface-contracts.md
+        - docs/runbooks/canonical-truth-assembly.md
+        - docs/runbooks/validate-repository-automation.md
+      mode: exclusive
+    - id: ws0326_registry_indexes
+      paths:
+        - docs/adr/.index.yaml
+        - .repo-structure.yaml
+        - .config-locations.yaml
+        - config/contracts/workstream-registry-v1.yaml
+      mode: exclusive
+    - id: ws0326_registry_tests
+      paths:
+        - tests/test_workstream_registry.py
+        - tests/test_canonical_truth.py
+        - tests/test_workstream_surface_ownership.py
+        - tests/test_interface_contracts.py
+      mode: exclusive
+    - id: ws0326_generated_truth
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: ws0326_canonical_truth
+      paths:
+        - README.md
+        - changelog.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: canonical-truth-v1
+    - id: ws0326_live_apply_receipts
+      paths:
+        - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-live-apply.json
+        - receipts/live-applies/2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply.json
+        - receipts/live-applies/evidence/2026-04-03-ws-0326-*
+      mode: exclusive
 blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0326 by making per-workstream shard files the authored
-    source of truth, generating a compact active-only workstreams.yaml compatibility
-    surface, and teaching release and validation automation to consume the sharded
-    registry safely
+  changelog_entry: implements ADR 0326 by making per-workstream shard files the
+    authored source of truth, generating a compact active-only workstreams.yaml
+    compatibility surface, and teaching release and validation automation to
+    consume the sharded registry safely
   release_bump: patch
   included_in_repo_version: 0.178.3
   latest_receipts:
-    workstream_registry_shards: 2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply
+    workstream_registry_shards:
+      2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply

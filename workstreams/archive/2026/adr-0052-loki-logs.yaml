@@ -7,13 +7,13 @@ branch: codex/adr-0052-loki-logs
 worktree_path: .worktrees/adr-0052-loki-logs
 doc: docs/workstreams/adr-0052-loki-logs.md
 depends_on:
-- adr-0011-monitoring
+  - adr-0011-monitoring
 conflicts_with: []
 shared_surfaces:
-- monitoring-lv3
-- Grafana
-- host logs
-- guest logs
-- container logs
+  - monitoring-lv3
+  - Grafana
+  - host logs
+  - guest logs
+  - container logs
 ready_to_merge: false
 live_applied: true

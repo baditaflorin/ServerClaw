@@ -7,104 +7,105 @@ branch: codex/ws-0268-main-integration
 worktree_path: .worktrees/ws-0268-main-integration
 doc: docs/workstreams/ws-0268-main-integration.md
 depends_on:
-- ws-0268-live-apply
+  - ws-0268-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- .config-locations.yaml
-- Makefile
-- mkdocs.yml
-- config/ansible-execution-scopes.yaml
-- config/command-catalog.json
-- config/correction-loops.json
-- config/workflow-catalog.json
-- config/worktree-bootstrap-manifests.json
-- scripts/canonical_truth.py
-- docs/adr/0094-developer-portal-and-documentation-site.md
-- docs/workstreams/ws-0268-main-integration.md
-- docs/workstreams/ws-0268-live-apply.md
-- docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
-- docs/adr/.index.yaml
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/runbooks/controller-local-secrets-and-preflight.md
-- docs/runbooks/playbook-execution-model.md
-- docs/release-process.md
-- docs/site-generated/architecture/dependency-graph.md
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/0.177.83.md
-- versions/stack.yaml
-- receipts/ops-portal-snapshot.html
-- receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
-- receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
-- scripts/generate_docs_site.py
-- scripts/preflight_controller_local.py
-- tests/test_canonical_truth.py
-- scripts/workflow_catalog.py
-- scripts/worktree_bootstrap.py
-- tests/test_docs_site.py
-- tests/test_preflight_controller_local.py
-- tests/test_service_id_resolver.py
+  - workstreams.yaml
+  - .config-locations.yaml
+  - Makefile
+  - mkdocs.yml
+  - config/ansible-execution-scopes.yaml
+  - config/command-catalog.json
+  - config/correction-loops.json
+  - config/workflow-catalog.json
+  - config/worktree-bootstrap-manifests.json
+  - scripts/canonical_truth.py
+  - docs/adr/0094-developer-portal-and-documentation-site.md
+  - docs/workstreams/ws-0268-main-integration.md
+  - docs/workstreams/ws-0268-live-apply.md
+  - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+  - docs/adr/.index.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/controller-local-secrets-and-preflight.md
+  - docs/runbooks/playbook-execution-model.md
+  - docs/release-process.md
+  - docs/site-generated/architecture/dependency-graph.md
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.83.md
+  - versions/stack.yaml
+  - receipts/ops-portal-snapshot.html
+  - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+  - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
+  - scripts/generate_docs_site.py
+  - scripts/preflight_controller_local.py
+  - tests/test_canonical_truth.py
+  - scripts/workflow_catalog.py
+  - scripts/worktree_bootstrap.py
+  - tests/test_docs_site.py
+  - tests/test_preflight_controller_local.py
+  - tests/test_service_id_resolver.py
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0268_mainline_integration
-    paths:
-    - .config-locations.yaml
-    - Makefile
-    - mkdocs.yml
-    - config/ansible-execution-scopes.yaml
-    - config/command-catalog.json
-    - config/correction-loops.json
-    - config/workflow-catalog.json
-    - config/worktree-bootstrap-manifests.json
-    - scripts/canonical_truth.py
-    - docs/adr/0094-developer-portal-and-documentation-site.md
-    - docs/workstreams/ws-0268-main-integration.md
-    - docs/workstreams/ws-0268-live-apply.md
-    - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
-    - docs/adr/.index.yaml
-    - build/platform-manifest.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    - docs/runbooks/controller-local-secrets-and-preflight.md
-    - docs/runbooks/playbook-execution-model.md
-    - docs/release-process.md
-    - docs/site-generated/architecture/dependency-graph.md
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.83.md
-    - versions/stack.yaml
-    - receipts/ops-portal-snapshot.html
-    - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
-    - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
-    - scripts/generate_docs_site.py
-    - scripts/preflight_controller_local.py
-    - tests/test_canonical_truth.py
-    - scripts/workflow_catalog.py
-    - scripts/worktree_bootstrap.py
-    - tests/test_docs_site.py
-    - tests/test_preflight_controller_local.py
-    - tests/test_service_id_resolver.py
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0268_mainline_integration
+      paths:
+        - .config-locations.yaml
+        - Makefile
+        - mkdocs.yml
+        - config/ansible-execution-scopes.yaml
+        - config/command-catalog.json
+        - config/correction-loops.json
+        - config/workflow-catalog.json
+        - config/worktree-bootstrap-manifests.json
+        - scripts/canonical_truth.py
+        - docs/adr/0094-developer-portal-and-documentation-site.md
+        - docs/workstreams/ws-0268-main-integration.md
+        - docs/workstreams/ws-0268-live-apply.md
+        - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+        - docs/adr/.index.yaml
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - docs/runbooks/controller-local-secrets-and-preflight.md
+        - docs/runbooks/playbook-execution-model.md
+        - docs/release-process.md
+        - docs/site-generated/architecture/dependency-graph.md
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.83.md
+        - versions/stack.yaml
+        - receipts/ops-portal-snapshot.html
+        - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+        - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
+        - scripts/generate_docs_site.py
+        - scripts/preflight_controller_local.py
+        - tests/test_canonical_truth.py
+        - scripts/workflow_catalog.py
+        - scripts/worktree_bootstrap.py
+        - tests/test_docs_site.py
+        - tests/test_preflight_controller_local.py
+        - tests/test_service_id_resolver.py
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: records ADR 0268 exact-main evidence on release 0.177.83 by replaying
-    the generic public-edge live-apply wrapper from a clean worktree, preserving fresh-worktree
-    bootstrap repair, and fixing the public-edge to nginx_edge guard-chain alias so
-    the full governed path can run end to end
+  changelog_entry: records ADR 0268 exact-main evidence on release 0.177.83 by
+    replaying the generic public-edge live-apply wrapper from a clean worktree,
+    preserving fresh-worktree bootstrap repair, and fixing the public-edge to
+    nginx_edge guard-chain alias so the full governed path can run end to end
   release_bump: patch
   included_in_repo_version: 0.177.83
   latest_receipts:
-    public_edge_publication: 2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply
+    public_edge_publication:
+      2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply

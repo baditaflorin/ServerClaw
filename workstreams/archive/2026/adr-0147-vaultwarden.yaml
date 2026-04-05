@@ -7,16 +7,16 @@ branch: codex/adr-0147-vaultwarden
 worktree_path: .worktrees/adr-0147
 doc: docs/workstreams/adr-0147-vaultwarden.md
 depends_on:
-- adr-0026-postgres-vm
-- adr-0042-step-ca
-- adr-0067-guest-network-policy
+  - adr-0026-postgres-vm
+  - adr-0042-step-ca
+  - adr-0067-guest-network-policy
 conflicts_with: []
 shared_surfaces:
-- roles/vaultwarden_runtime
-- roles/vaultwarden_postgres
-- playbooks/vaultwarden.yml
-- inventory/host_vars/proxmox_florin.yml
-- config/service-capability-catalog.json
-- config/workflow-catalog.json
+  - roles/vaultwarden_runtime
+  - roles/vaultwarden_postgres
+  - playbooks/vaultwarden.yml
+  - inventory/host_vars/proxmox_florin.yml
+  - config/service-capability-catalog.json
+  - config/workflow-catalog.json
 ready_to_merge: false
 live_applied: true

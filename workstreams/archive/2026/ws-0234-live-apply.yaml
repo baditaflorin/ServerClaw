@@ -7,87 +7,87 @@ branch: codex/ws-0234-live-apply-r2
 worktree_path: .worktrees/ws-0234-live-apply-r2
 doc: docs/workstreams/ws-0234-live-apply.md
 depends_on:
-- adr-0093-interactive-ops-portal
-- adr-0133-portal-authentication-by-default
-- adr-0209-use-case-services
+  - adr-0093-interactive-ops-portal
+  - adr-0133-portal-authentication-by-default
+  - adr-0209-use-case-services
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- README.md
-- docs/workstreams/ws-0234-live-apply.md
-- docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
-- docs/adr/.index.yaml
-- docs/runbooks/ops-portal-down.md
-- playbooks/ops-portal.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-- scripts/ops_portal/static/portal.css
-- scripts/ops_portal/static/portal.js
-- scripts/ops_portal/templates/base.html
-- scripts/ops_portal/templates/index.html
-- scripts/ops_portal/templates/macros/states.html
-- scripts/ops_portal/templates/partials/action_result.html
-- scripts/ops_portal/templates/partials/agents.html
-- scripts/ops_portal/templates/partials/changelog.html
-- scripts/ops_portal/templates/partials/drift.html
-- scripts/ops_portal/templates/partials/overview.html
-- scripts/ops_portal/templates/partials/runbooks.html
-- scripts/ops_portal/templates/partials/search.html
-- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
-- tests/test_interactive_ops_portal.py
-- tests/test_nginx_edge_publication_role.py
-- tests/test_ops_portal_runtime_role.py
-- tests/test_ops_portal_playbook.py
-- tests/test_security_headers_audit.py
-- receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json
+  - workstreams.yaml
+  - README.md
+  - docs/workstreams/ws-0234-live-apply.md
+  - docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/ops-portal-down.md
+  - playbooks/ops-portal.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+  - scripts/ops_portal/static/portal.css
+  - scripts/ops_portal/static/portal.js
+  - scripts/ops_portal/templates/base.html
+  - scripts/ops_portal/templates/index.html
+  - scripts/ops_portal/templates/macros/states.html
+  - scripts/ops_portal/templates/partials/action_result.html
+  - scripts/ops_portal/templates/partials/agents.html
+  - scripts/ops_portal/templates/partials/changelog.html
+  - scripts/ops_portal/templates/partials/drift.html
+  - scripts/ops_portal/templates/partials/overview.html
+  - scripts/ops_portal/templates/partials/runbooks.html
+  - scripts/ops_portal/templates/partials/search.html
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+  - tests/test_interactive_ops_portal.py
+  - tests/test_nginx_edge_publication_role.py
+  - tests/test_ops_portal_runtime_role.py
+  - tests/test_ops_portal_playbook.py
+  - tests/test_security_headers_audit.py
+  - receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: adr_0234_live_apply
-    paths:
-    - README.md
-    - docs/workstreams/ws-0234-live-apply.md
-    - docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
-    - docs/runbooks/ops-portal-down.md
-    - playbooks/ops-portal.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-    - scripts/ops_portal/static/portal.css
-    - scripts/ops_portal/static/portal.js
-    - scripts/ops_portal/templates/base.html
-    - scripts/ops_portal/templates/index.html
-    - scripts/ops_portal/templates/macros/states.html
-    - scripts/ops_portal/templates/partials/action_result.html
-    - scripts/ops_portal/templates/partials/agents.html
-    - scripts/ops_portal/templates/partials/changelog.html
-    - scripts/ops_portal/templates/partials/drift.html
-    - scripts/ops_portal/templates/partials/overview.html
-    - scripts/ops_portal/templates/partials/runbooks.html
-    - scripts/ops_portal/templates/partials/search.html
-    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
-    - tests/test_interactive_ops_portal.py
-    - tests/test_nginx_edge_publication_role.py
-    - tests/test_ops_portal_runtime_role.py
-    - tests/test_ops_portal_playbook.py
-    - tests/test_security_headers_audit.py
-    - receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: adr_0234_live_apply
+      paths:
+        - README.md
+        - docs/workstreams/ws-0234-live-apply.md
+        - docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
+        - docs/runbooks/ops-portal-down.md
+        - playbooks/ops-portal.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+        - scripts/ops_portal/static/portal.css
+        - scripts/ops_portal/static/portal.js
+        - scripts/ops_portal/templates/base.html
+        - scripts/ops_portal/templates/index.html
+        - scripts/ops_portal/templates/macros/states.html
+        - scripts/ops_portal/templates/partials/action_result.html
+        - scripts/ops_portal/templates/partials/agents.html
+        - scripts/ops_portal/templates/partials/changelog.html
+        - scripts/ops_portal/templates/partials/drift.html
+        - scripts/ops_portal/templates/partials/overview.html
+        - scripts/ops_portal/templates/partials/runbooks.html
+        - scripts/ops_portal/templates/partials/search.html
+        - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+        - tests/test_interactive_ops_portal.py
+        - tests/test_nginx_edge_publication_role.py
+        - tests/test_ops_portal_runtime_role.py
+        - tests/test_ops_portal_playbook.py
+        - tests/test_security_headers_audit.py
+        - receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json
+      mode: exclusive
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0234 by live-applying the shared PatternFly shell
-    on the interactive ops portal, including the masthead, responsive navigation,
-    shared state primitives, and the public-edge CSP allowance for the pinned PatternFly
-    asset
+  changelog_entry: implemented ADR 0234 by live-applying the shared PatternFly
+    shell on the interactive ops portal, including the masthead, responsive
+    navigation, shared state primitives, and the public-edge CSP allowance for
+    the pinned PatternFly asset
   release_bump: patch
   included_in_repo_version: 0.177.72
   latest_receipts:

@@ -1,72 +1,74 @@
 id: ws-0296-education-refresh
 adr: '0224'
-title: Refresh education_wemeshup from upstream main through a named repo-deploy profile
+title: Refresh education_wemeshup from upstream main through a named repo-deploy
+  profile
 status: merged
 owner: codex
 branch: codex/ws-0296-education-refresh
 worktree_path: .worktrees/ws-0296-education-refresh
 doc: docs/workstreams/ws-0296-education-refresh.md
 depends_on:
-- adr-0194-coolify-paas-deploy-from-repo
-- adr-0224-self-service-repo-intake-and-agent-assisted-deployments
-- adr-0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments
+  - adr-0194-coolify-paas-deploy-from-repo
+  - adr-0224-self-service-repo-intake-and-agent-assisted-deployments
+  - adr-0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0296-education-refresh.md
-- docs/runbooks/configure-coolify.md
-- config/repo-deploy-catalog.json
-- docs/schema/repo-deploy-catalog.schema.json
-- scripts/repo_deploy_profiles.py
-- scripts/lv3_cli.py
-- scripts/validate_repository_data_models.py
-- Makefile
-- config/workflow-catalog.json
-- config/command-catalog.json
-- config/correction-loops.json
-- tests/test_lv3_cli.py
-- tests/test_repo_deploy_profiles.py
-- receipts/live-applies/2026-03-30-adr-0224-education-repo-profile-refresh-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0296-education-refresh.md
+  - docs/runbooks/configure-coolify.md
+  - config/repo-deploy-catalog.json
+  - docs/schema/repo-deploy-catalog.schema.json
+  - scripts/repo_deploy_profiles.py
+  - scripts/lv3_cli.py
+  - scripts/validate_repository_data_models.py
+  - Makefile
+  - config/workflow-catalog.json
+  - config/command-catalog.json
+  - config/correction-loops.json
+  - tests/test_lv3_cli.py
+  - tests/test_repo_deploy_profiles.py
+  - receipts/live-applies/2026-03-30-adr-0224-education-repo-profile-refresh-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: repo_deploy_profile_docs
-    paths:
-    - docs/workstreams/ws-0296-education-refresh.md
-    - docs/runbooks/configure-coolify.md
-    mode: shared_contract
-    contract: repo-deploy-profile-docs-v1
-  - id: repo_deploy_profile_catalog
-    paths:
-    - config/repo-deploy-catalog.json
-    - docs/schema/repo-deploy-catalog.schema.json
-    - scripts/repo_deploy_profiles.py
-    - tests/test_repo_deploy_profiles.py
-    mode: exclusive
-  - id: repo_deploy_profile_integration
-    paths:
-    - scripts/lv3_cli.py
-    - scripts/validate_repository_data_models.py
-    - Makefile
-    - config/workflow-catalog.json
-    - config/command-catalog.json
-    - config/correction-loops.json
-    - tests/test_lv3_cli.py
-    mode: shared_contract
-    contract: repo-deploy-profile-integration-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: repo_deploy_profile_docs
+      paths:
+        - docs/workstreams/ws-0296-education-refresh.md
+        - docs/runbooks/configure-coolify.md
+      mode: shared_contract
+      contract: repo-deploy-profile-docs-v1
+    - id: repo_deploy_profile_catalog
+      paths:
+        - config/repo-deploy-catalog.json
+        - docs/schema/repo-deploy-catalog.schema.json
+        - scripts/repo_deploy_profiles.py
+        - tests/test_repo_deploy_profiles.py
+      mode: exclusive
+    - id: repo_deploy_profile_integration
+      paths:
+        - scripts/lv3_cli.py
+        - scripts/validate_repository_data_models.py
+        - Makefile
+        - config/workflow-catalog.json
+        - config/command-catalog.json
+        - config/correction-loops.json
+        - tests/test_lv3_cli.py
+      mode: shared_contract
+      contract: repo-deploy-profile-integration-v1
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: extends ADR 0224 by adding named repo-deploy profiles, a governed
-    deploy-repo-profile operator path, and the verified 2026-03-30 education_wemeshup
-    upstream refresh so production can be updated from upstream main without retyping
-    raw Coolify arguments
+  changelog_entry: extends ADR 0224 by adding named repo-deploy profiles, a
+    governed deploy-repo-profile operator path, and the verified 2026-03-30
+    education_wemeshup upstream refresh so production can be updated from
+    upstream main without retyping raw Coolify arguments
   release_bump: patch
   included_in_repo_version: 0.177.89
   latest_receipts:
     coolify_apps: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
-    education_wemeshup: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
+    education_wemeshup:
+      2026-03-30-adr-0224-education-repo-profile-refresh-live-apply

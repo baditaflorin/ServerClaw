@@ -7,356 +7,356 @@ branch: codex/ws-0300-live-apply
 worktree_path: .worktrees/ws-0300-live-apply
 doc: docs/workstreams/ws-0300-live-apply.md
 depends_on:
-- adr-0052-log-shipping
-- adr-0066-structured-mutation-audit-log
-- adr-0124-platform-event-taxonomy-and-canonical-nats-topics
-- adr-0276-nats-jetstream-as-the-platform-event-bus
-- adr-0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection
+  - adr-0052-log-shipping
+  - adr-0066-structured-mutation-audit-log
+  - adr-0124-platform-event-taxonomy-and-canonical-nats-topics
+  - adr-0276-nats-jetstream-as-the-platform-event-bus
+  - adr-0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0300-live-apply.md
-- docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
-- docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
-- docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
-- docs/runbooks/configure-falco-runtime.md
-- docs/runbooks/configure-ntfy.md
-- docs/runbooks/k6-load-testing.md
-- docs/runbooks/configure-label-studio.md
-- docs/adr/.index.yaml
-- docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
-- docs/adr/0340-dedicated-coolify-apps-vm-separation.md
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/*.md
-- versions/stack.yaml
-- .ansible-lint-ignore
-- .config-locations.yaml
-- build/platform-manifest.json
-- config/capacity-model.json
-- config/api-gateway-catalog.json
-- config/certificate-catalog.json
-- config/contracts/service-partitions/catalog.json
-- config/data-catalog.json
-- config/dependency-graph.json
-- config/grafana/dashboards/slo-overview.json
-- config/health-probe-catalog.json
-- config/image-catalog.json
-- config/prometheus/file_sd/https_tls_targets.yml
-- config/prometheus/file_sd/slo_targets.yml
-- config/prometheus/rules/https_tls_alerts.yml
-- config/prometheus/rules/slo_alerts.yml
-- config/prometheus/rules/slo_rules.yml
-- config/secret-catalog.json
-- config/service-capability-catalog.json
-- config/service-completeness.json
-- config/service-redundancy-catalog.json
-- config/slo-catalog.json
-- config/subdomain-catalog.json
-- config/subdomain-exposure-registry.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/diagrams/service-dependency-graph.excalidraw
-- docs/site-generated/architecture/dependency-graph.md
-- docs/proxmox-tool-topology.yaml.example
-- inventory/host_vars/proxmox_florin.yml
-- inventory/group_vars/all.yml
-- inventory/group_vars/platform.yml
-- scripts/generate_platform_vars.py
-- scripts/matrix_admin_register.py
-- scripts/matrix_bridge_smoke.py
-- scripts/label_studio_sync.py
-- scripts/proxmox_tool.py
-- tests/test_generate_platform_vars.py
-- Makefile
-- config/workflow-catalog.json
-- config/command-catalog.json
-- config/ansible-execution-scopes.yaml
-- config/ansible-role-idempotency.yml
-- config/validation-gate.json
-- config/event-taxonomy.yaml
-- config/ntfy/server.yml
-- config/ntfy/topics.yaml
-- config/controller-local-secrets.json
-- config/falco/
-- scripts/coolify_tool.py
-- scripts/drift_lib.py
-- scripts/falco_event_bridge.py
-- scripts/falco_event_bridge_server.py
-- scripts/nats_streams.py
-- scripts/k6_load_testing.py
-- scripts/validate_nats_topics.py
-- playbooks/coolify.yml
-- playbooks/falco.yml
-- playbooks/label-studio.yml
-- playbooks/services/falco.yml
-- playbooks/services/label-studio.yml
-- playbooks/services/nats-jetstream.yml
-- collections/ansible_collections/lv3/platform/playbooks/label-studio.yml
-- collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
-- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
-- collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
-- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
-- collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
-- collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
-- collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
-- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/
-- collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/ntfy_runtime/
-- collections/ansible_collections/lv3/platform/roles/falco_runtime/
-- collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/
-- collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2
-- tests/test_docker_runtime_role.py
-- tests/test_coolify_tool.py
-- tests/test_compose_runtime_secret_injection.py
-- tests/test_dependency_graph.py
-- tests/test_edge_publication_playbooks.py
-- tests/test_falco_event_bridge.py
-- tests/test_falco_runtime_role.py
-- tests/test_label_studio_playbook.py
-- tests/test_label_studio_runtime_role.py
-- tests/test_label_studio_sync.py
-- tests/test_nginx_edge_publication_role.py
-- tests/test_nats_jetstream_runtime_role.py
-- tests/test_k6_load_testing.py
-- tests/test_loki_log_agent_role.py
-- tests/test_ntfy_runtime_config.py
-- tests/test_openbao_runtime_role.py
-- tests/test_openbao_compose_env_helper.py
-- tests/test_proxmox_tool.py
-- tests/test_security_posture_report.py
-- tests/test_subdomain_catalog.py
-- tests/unit/test_event_taxonomy.py
-- receipts/live-applies/
-- receipts/live-applies/2026-04-03-adr-0300-falco-mainline-live-apply.json
-- receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
-- receipts/live-applies/evidence/2026-04-03-adr-0300-*
-- receipts/gate-bypasses/*.json
-- receipts/image-scans/2026-03-31-label-studio-runtime.json
-- receipts/image-scans/2026-03-31-label-studio-runtime.trivy.json
-- receipts/ops-portal-snapshot.html
-- receipts/restic-backups/20260403T092200Z.json
-- receipts/restic-snapshots-latest.json
-- receipts/security-reports/20260403T090506Z.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0300-live-apply.md
+  - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+  - docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+  - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+  - docs/runbooks/configure-falco-runtime.md
+  - docs/runbooks/configure-ntfy.md
+  - docs/runbooks/k6-load-testing.md
+  - docs/runbooks/configure-label-studio.md
+  - docs/adr/.index.yaml
+  - docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+  - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/*.md
+  - versions/stack.yaml
+  - .ansible-lint-ignore
+  - .config-locations.yaml
+  - build/platform-manifest.json
+  - config/capacity-model.json
+  - config/api-gateway-catalog.json
+  - config/certificate-catalog.json
+  - config/contracts/service-partitions/catalog.json
+  - config/data-catalog.json
+  - config/dependency-graph.json
+  - config/grafana/dashboards/slo-overview.json
+  - config/health-probe-catalog.json
+  - config/image-catalog.json
+  - config/prometheus/file_sd/https_tls_targets.yml
+  - config/prometheus/file_sd/slo_targets.yml
+  - config/prometheus/rules/https_tls_alerts.yml
+  - config/prometheus/rules/slo_alerts.yml
+  - config/prometheus/rules/slo_rules.yml
+  - config/secret-catalog.json
+  - config/service-capability-catalog.json
+  - config/service-completeness.json
+  - config/service-redundancy-catalog.json
+  - config/slo-catalog.json
+  - config/subdomain-catalog.json
+  - config/subdomain-exposure-registry.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/diagrams/service-dependency-graph.excalidraw
+  - docs/site-generated/architecture/dependency-graph.md
+  - docs/proxmox-tool-topology.yaml.example
+  - inventory/host_vars/proxmox_florin.yml
+  - inventory/group_vars/all.yml
+  - inventory/group_vars/platform.yml
+  - scripts/generate_platform_vars.py
+  - scripts/matrix_admin_register.py
+  - scripts/matrix_bridge_smoke.py
+  - scripts/label_studio_sync.py
+  - scripts/proxmox_tool.py
+  - tests/test_generate_platform_vars.py
+  - Makefile
+  - config/workflow-catalog.json
+  - config/command-catalog.json
+  - config/ansible-execution-scopes.yaml
+  - config/ansible-role-idempotency.yml
+  - config/validation-gate.json
+  - config/event-taxonomy.yaml
+  - config/ntfy/server.yml
+  - config/ntfy/topics.yaml
+  - config/controller-local-secrets.json
+  - config/falco/
+  - scripts/coolify_tool.py
+  - scripts/drift_lib.py
+  - scripts/falco_event_bridge.py
+  - scripts/falco_event_bridge_server.py
+  - scripts/nats_streams.py
+  - scripts/k6_load_testing.py
+  - scripts/validate_nats_topics.py
+  - playbooks/coolify.yml
+  - playbooks/falco.yml
+  - playbooks/label-studio.yml
+  - playbooks/services/falco.yml
+  - playbooks/services/label-studio.yml
+  - playbooks/services/nats-jetstream.yml
+  - collections/ansible_collections/lv3/platform/playbooks/label-studio.yml
+  - collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+  - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
+  - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+  - collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
+  - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/
+  - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ntfy_runtime/
+  - collections/ansible_collections/lv3/platform/roles/falco_runtime/
+  - collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/
+  - collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2
+  - tests/test_docker_runtime_role.py
+  - tests/test_coolify_tool.py
+  - tests/test_compose_runtime_secret_injection.py
+  - tests/test_dependency_graph.py
+  - tests/test_edge_publication_playbooks.py
+  - tests/test_falco_event_bridge.py
+  - tests/test_falco_runtime_role.py
+  - tests/test_label_studio_playbook.py
+  - tests/test_label_studio_runtime_role.py
+  - tests/test_label_studio_sync.py
+  - tests/test_nginx_edge_publication_role.py
+  - tests/test_nats_jetstream_runtime_role.py
+  - tests/test_k6_load_testing.py
+  - tests/test_loki_log_agent_role.py
+  - tests/test_ntfy_runtime_config.py
+  - tests/test_openbao_runtime_role.py
+  - tests/test_openbao_compose_env_helper.py
+  - tests/test_proxmox_tool.py
+  - tests/test_security_posture_report.py
+  - tests/test_subdomain_catalog.py
+  - tests/unit/test_event_taxonomy.py
+  - receipts/live-applies/
+  - receipts/live-applies/2026-04-03-adr-0300-falco-mainline-live-apply.json
+  - receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
+  - receipts/live-applies/evidence/2026-04-03-adr-0300-*
+  - receipts/gate-bypasses/*.json
+  - receipts/image-scans/2026-03-31-label-studio-runtime.json
+  - receipts/image-scans/2026-03-31-label-studio-runtime.trivy.json
+  - receipts/ops-portal-snapshot.html
+  - receipts/restic-backups/20260403T092200Z.json
+  - receipts/restic-snapshots-latest.json
+  - receipts/security-reports/20260403T090506Z.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index_generation
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-generator-v1
-  - id: falco_release_surfaces
-    paths:
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/*.md
-    mode: shared_contract
-    contract: release-truth-v1
-  - id: falco_canonical_truth
-    paths:
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    mode: shared_contract
-    contract: canonical-truth-v1
-  - id: falco_latest_main_generated_truth
-    paths:
-    - config/capacity-model.json
-    - config/prometheus/file_sd/https_tls_targets.yml
-    - config/prometheus/rules/https_tls_alerts.yml
-    - config/service-capability-catalog.json
-    - config/subdomain-exposure-registry.json
-    mode: shared_contract
-    contract: latest-main-generated-truth-v1
-  - id: falco_generated_truth
-    paths:
-    - docs/diagrams/agent-coordination-map.excalidraw
-    mode: shared_contract
-    contract: latest-main-generated-truth-v1
-  - id: falco_docs
-    paths:
-    - docs/workstreams/ws-0300-live-apply.md
-    - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
-    - docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
-    - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
-    - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
-    - docs/runbooks/configure-falco-runtime.md
-    - docs/runbooks/configure-ntfy.md
-    - docs/runbooks/k6-load-testing.md
-    mode: exclusive
-  - id: falco_platform_contract
-    paths:
-    - inventory/host_vars/proxmox_florin.yml
-    - inventory/group_vars/platform.yml
-    - scripts/generate_platform_vars.py
-    - tests/test_generate_platform_vars.py
-    mode: shared_contract
-    contract: platform-topology-v1
-  - id: falco_repository_automation_contract
-    paths:
-    - Makefile
-    - .ansible-lint-ignore
-    - .config-locations.yaml
-    - build/platform-manifest.json
-    - config/validation-gate.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    - scripts/matrix_admin_register.py
-    - scripts/matrix_bridge_smoke.py
-    - config/service-completeness.json
-    - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
-    - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
-    - tests/test_docker_runtime_role.py
-    mode: shared_contract
-    contract: repository-automation-v1
-  - id: falco_workflow_catalog_contract
-    paths:
-    - config/workflow-catalog.json
-    mode: shared_contract
-    contract: workflow-catalog-v1
-  - id: falco_command_catalog_contract
-    paths:
-    - config/command-catalog.json
-    mode: shared_contract
-    contract: command-catalog-v1
-  - id: falco_ansible_scope_contract
-    paths:
-    - config/ansible-execution-scopes.yaml
-    mode: shared_contract
-    contract: ansible-execution-scope-catalog-v1
-  - id: falco_ansible_idempotency_registry
-    paths:
-    - config/ansible-role-idempotency.yml
-    mode: exclusive
-  - id: falco_security_event_contract
-    paths:
-    - config/event-taxonomy.yaml
-    - config/ntfy/server.yml
-    - config/ntfy/topics.yaml
-    - config/controller-local-secrets.json
-    - scripts/k6_load_testing.py
-    - scripts/validate_nats_topics.py
-    - collections/ansible_collections/lv3/platform/roles/ntfy_runtime/**
-    - tests/test_k6_load_testing.py
-    - tests/test_ntfy_runtime_config.py
-    - tests/unit/test_event_taxonomy.py
-    mode: exclusive
-  - id: falco_latest_main_coolify_surfaces
-    paths:
-    - playbooks/coolify.yml
-    - scripts/coolify_tool.py
-    - tests/test_coolify_tool.py
-    mode: shared_contract
-    contract: latest-main-integration-v1
-  - id: falco_latest_main_carry_forward
-    paths:
-    - docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
-    - docs/runbooks/configure-label-studio.md
-    - docs/proxmox-tool-topology.yaml.example
-    - docs/workstreams/ws-0289-label-studio-live-apply.md
-    - docs/diagrams/service-dependency-graph.excalidraw
-    - docs/site-generated/architecture/dependency-graph.md
-    - inventory/group_vars/all.yml
-    - scripts/label_studio_sync.py
-    - scripts/proxmox_tool.py
-    - playbooks/label-studio.yml
-    - playbooks/services/label-studio.yml
-    - collections/ansible_collections/lv3/platform/playbooks/label-studio.yml
-    - collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
-    - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
-    - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
-    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
-    - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
-    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
-    - config/api-gateway-catalog.json
-    - config/certificate-catalog.json
-    - config/contracts/service-partitions/catalog.json
-    - config/data-catalog.json
-    - config/dependency-graph.json
-    - config/grafana/dashboards/slo-overview.json
-    - config/health-probe-catalog.json
-    - config/image-catalog.json
-    - config/prometheus/file_sd/slo_targets.yml
-    - config/prometheus/rules/slo_alerts.yml
-    - config/prometheus/rules/slo_rules.yml
-    - config/secret-catalog.json
-    - config/service-redundancy-catalog.json
-    - config/slo-catalog.json
-    - config/subdomain-catalog.json
-    - receipts/image-scans/2026-03-31-label-studio-runtime.json
-    - receipts/image-scans/2026-03-31-label-studio-runtime.trivy.json
-    - receipts/ops-portal-snapshot.html
-    - tests/test_compose_runtime_secret_injection.py
-    - tests/test_dependency_graph.py
-    - tests/test_edge_publication_playbooks.py
-    - tests/test_label_studio_playbook.py
-    - tests/test_label_studio_runtime_role.py
-    - tests/test_label_studio_sync.py
-    - tests/test_nginx_edge_publication_role.py
-    - tests/test_openbao_compose_env_helper.py
-    - tests/test_proxmox_tool.py
-    - tests/test_subdomain_catalog.py
-    mode: shared_contract
-    contract: latest-main-integration-v1
-  - id: falco_nats_runtime_surfaces
-    paths:
-    - scripts/drift_lib.py
-    - scripts/nats_streams.py
-    - playbooks/services/nats-jetstream.yml
-    - collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/**
-    - tests/test_nats_jetstream_runtime_role.py
-    - tests/test_security_posture_report.py
-    mode: exclusive
-  - id: falco_runtime_surfaces
-    paths:
-    - config/falco/**
-    - scripts/falco_event_bridge.py
-    - scripts/falco_event_bridge_server.py
-    - playbooks/falco.yml
-    - playbooks/services/falco.yml
-    - collections/ansible_collections/lv3/platform/roles/falco_runtime/**
-    - collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/**
-    - collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2
-    - tests/test_falco_event_bridge.py
-    - tests/test_falco_runtime_role.py
-    - tests/test_loki_log_agent_role.py
-    - tests/test_openbao_runtime_role.py
-    mode: exclusive
-  - id: falco_live_receipts
-    paths:
-    - receipts/live-applies/**
-    mode: exclusive
-  - id: falco_mainline_receipts
-    paths:
-    - receipts/live-applies/2026-04-03-adr-0300-falco-mainline-live-apply.json
-    - receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
-    - receipts/live-applies/evidence/2026-04-03-adr-0300-*
-    - receipts/gate-bypasses/*.json
-    - receipts/restic-backups/20260403T092200Z.json
-    - receipts/restic-snapshots-latest.json
-    - receipts/security-reports/20260403T090506Z.json
-    mode: shared_contract
-    contract: live-apply-receipts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index_generation
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: falco_release_surfaces
+      paths:
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/*.md
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: falco_canonical_truth
+      paths:
+        - versions/stack.yaml
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: canonical-truth-v1
+    - id: falco_latest_main_generated_truth
+      paths:
+        - config/capacity-model.json
+        - config/prometheus/file_sd/https_tls_targets.yml
+        - config/prometheus/rules/https_tls_alerts.yml
+        - config/service-capability-catalog.json
+        - config/subdomain-exposure-registry.json
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: falco_generated_truth
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: falco_docs
+      paths:
+        - docs/workstreams/ws-0300-live-apply.md
+        - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+        - docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+        - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+        - docs/adr/0340-dedicated-coolify-apps-vm-separation.md
+        - docs/runbooks/configure-falco-runtime.md
+        - docs/runbooks/configure-ntfy.md
+        - docs/runbooks/k6-load-testing.md
+      mode: exclusive
+    - id: falco_platform_contract
+      paths:
+        - inventory/host_vars/proxmox_florin.yml
+        - inventory/group_vars/platform.yml
+        - scripts/generate_platform_vars.py
+        - tests/test_generate_platform_vars.py
+      mode: shared_contract
+      contract: platform-topology-v1
+    - id: falco_repository_automation_contract
+      paths:
+        - Makefile
+        - .ansible-lint-ignore
+        - .config-locations.yaml
+        - build/platform-manifest.json
+        - config/validation-gate.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - scripts/matrix_admin_register.py
+        - scripts/matrix_bridge_smoke.py
+        - config/service-completeness.json
+        - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+        - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+        - tests/test_docker_runtime_role.py
+      mode: shared_contract
+      contract: repository-automation-v1
+    - id: falco_workflow_catalog_contract
+      paths:
+        - config/workflow-catalog.json
+      mode: shared_contract
+      contract: workflow-catalog-v1
+    - id: falco_command_catalog_contract
+      paths:
+        - config/command-catalog.json
+      mode: shared_contract
+      contract: command-catalog-v1
+    - id: falco_ansible_scope_contract
+      paths:
+        - config/ansible-execution-scopes.yaml
+      mode: shared_contract
+      contract: ansible-execution-scope-catalog-v1
+    - id: falco_ansible_idempotency_registry
+      paths:
+        - config/ansible-role-idempotency.yml
+      mode: exclusive
+    - id: falco_security_event_contract
+      paths:
+        - config/event-taxonomy.yaml
+        - config/ntfy/server.yml
+        - config/ntfy/topics.yaml
+        - config/controller-local-secrets.json
+        - scripts/k6_load_testing.py
+        - scripts/validate_nats_topics.py
+        - collections/ansible_collections/lv3/platform/roles/ntfy_runtime/**
+        - tests/test_k6_load_testing.py
+        - tests/test_ntfy_runtime_config.py
+        - tests/unit/test_event_taxonomy.py
+      mode: exclusive
+    - id: falco_latest_main_coolify_surfaces
+      paths:
+        - playbooks/coolify.yml
+        - scripts/coolify_tool.py
+        - tests/test_coolify_tool.py
+      mode: shared_contract
+      contract: latest-main-integration-v1
+    - id: falco_latest_main_carry_forward
+      paths:
+        - docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md
+        - docs/runbooks/configure-label-studio.md
+        - docs/proxmox-tool-topology.yaml.example
+        - docs/workstreams/ws-0289-label-studio-live-apply.md
+        - docs/diagrams/service-dependency-graph.excalidraw
+        - docs/site-generated/architecture/dependency-graph.md
+        - inventory/group_vars/all.yml
+        - scripts/label_studio_sync.py
+        - scripts/proxmox_tool.py
+        - playbooks/label-studio.yml
+        - playbooks/services/label-studio.yml
+        - collections/ansible_collections/lv3/platform/playbooks/label-studio.yml
+        - collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+        - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
+        - collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/label_studio_postgres/**
+        - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+        - config/api-gateway-catalog.json
+        - config/certificate-catalog.json
+        - config/contracts/service-partitions/catalog.json
+        - config/data-catalog.json
+        - config/dependency-graph.json
+        - config/grafana/dashboards/slo-overview.json
+        - config/health-probe-catalog.json
+        - config/image-catalog.json
+        - config/prometheus/file_sd/slo_targets.yml
+        - config/prometheus/rules/slo_alerts.yml
+        - config/prometheus/rules/slo_rules.yml
+        - config/secret-catalog.json
+        - config/service-redundancy-catalog.json
+        - config/slo-catalog.json
+        - config/subdomain-catalog.json
+        - receipts/image-scans/2026-03-31-label-studio-runtime.json
+        - receipts/image-scans/2026-03-31-label-studio-runtime.trivy.json
+        - receipts/ops-portal-snapshot.html
+        - tests/test_compose_runtime_secret_injection.py
+        - tests/test_dependency_graph.py
+        - tests/test_edge_publication_playbooks.py
+        - tests/test_label_studio_playbook.py
+        - tests/test_label_studio_runtime_role.py
+        - tests/test_label_studio_sync.py
+        - tests/test_nginx_edge_publication_role.py
+        - tests/test_openbao_compose_env_helper.py
+        - tests/test_proxmox_tool.py
+        - tests/test_subdomain_catalog.py
+      mode: shared_contract
+      contract: latest-main-integration-v1
+    - id: falco_nats_runtime_surfaces
+      paths:
+        - scripts/drift_lib.py
+        - scripts/nats_streams.py
+        - playbooks/services/nats-jetstream.yml
+        - collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/**
+        - tests/test_nats_jetstream_runtime_role.py
+        - tests/test_security_posture_report.py
+      mode: exclusive
+    - id: falco_runtime_surfaces
+      paths:
+        - config/falco/**
+        - scripts/falco_event_bridge.py
+        - scripts/falco_event_bridge_server.py
+        - playbooks/falco.yml
+        - playbooks/services/falco.yml
+        - collections/ansible_collections/lv3/platform/roles/falco_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2
+        - tests/test_falco_event_bridge.py
+        - tests/test_falco_runtime_role.py
+        - tests/test_loki_log_agent_role.py
+        - tests/test_openbao_runtime_role.py
+      mode: exclusive
+    - id: falco_live_receipts
+      paths:
+        - receipts/live-applies/**
+      mode: exclusive
+    - id: falco_mainline_receipts
+      paths:
+        - receipts/live-applies/2026-04-03-adr-0300-falco-mainline-live-apply.json
+        - receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json
+        - receipts/live-applies/evidence/2026-04-03-adr-0300-*
+        - receipts/gate-bypasses/*.json
+        - receipts/restic-backups/20260403T092200Z.json
+        - receipts/restic-snapshots-latest.json
+        - receipts/security-reports/20260403T090506Z.json
+      mode: shared_contract
+      contract: live-apply-receipts-v1
 blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0300 by adding repo-managed Falco syscall monitoring
-    across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3,
-    restoring the runtime-control NATS fan-out path and streams, and verifying four-host
-    NATS, ntfy, Loki, and mutation-audit delivery
+  changelog_entry: implements ADR 0300 by adding repo-managed Falco syscall
+    monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and
+    postgres-lv3, restoring the runtime-control NATS fan-out path and streams,
+    and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery
   release_bump: minor
   included_in_repo_version: 0.178.0
   latest_receipts:

@@ -7,93 +7,93 @@ branch: codex/ws-0246-main-merge-v2
 worktree_path: .worktrees/ws-0246-main-merge-v2
 doc: docs/workstreams/ws-0246-main-merge.md
 depends_on:
-- ws-0246-live-apply
+  - ws-0246-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0246-main-merge.md
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/0.177.60.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/adr/.index.yaml
-- docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
-- docs/workstreams/ws-0246-live-apply.md
-- docs/runbooks/health-probe-contracts.md
-- docs/runbooks/service-uptime-contracts.md
-- docs/runbooks/scaffold-new-service.md
-- config/health-probe-catalog.json
-- playbooks/tasks/post-verify.yml
-- collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-- platform/health/semantics.py
-- platform/health/composite.py
-- platform/graph/client.py
-- platform/world_state/workers.py
-- scripts/platform_observation_tool.py
-- scripts/scaffold_service.py
-- scripts/validate_repository_data_models.py
-- tests/test_post_verify_tasks.py
-- tests/test_platform_observation_tool.py
-- tests/test_world_state_workers.py
-- tests/test_health_composite.py
-- tests/test_scaffold_service.py
-- tests/unit/test_graph_client.py
-- receipts/live-applies/2026-03-28-adr-0246-runtime-state-semantics-live-apply.json
+  - workstreams.yaml
+  - docs/workstreams/ws-0246-main-merge.md
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.60.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/adr/.index.yaml
+  - docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+  - docs/workstreams/ws-0246-live-apply.md
+  - docs/runbooks/health-probe-contracts.md
+  - docs/runbooks/service-uptime-contracts.md
+  - docs/runbooks/scaffold-new-service.md
+  - config/health-probe-catalog.json
+  - playbooks/tasks/post-verify.yml
+  - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+  - platform/health/semantics.py
+  - platform/health/composite.py
+  - platform/graph/client.py
+  - platform/world_state/workers.py
+  - scripts/platform_observation_tool.py
+  - scripts/scaffold_service.py
+  - scripts/validate_repository_data_models.py
+  - tests/test_post_verify_tasks.py
+  - tests/test_platform_observation_tool.py
+  - tests/test_world_state_workers.py
+  - tests/test_health_composite.py
+  - tests/test_scaffold_service.py
+  - tests/unit/test_graph_client.py
+  - receipts/live-applies/2026-03-28-adr-0246-runtime-state-semantics-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0246_main_merge
-    paths:
-    - docs/workstreams/ws-0246-main-merge.md
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.60.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    - docs/adr/.index.yaml
-    - docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
-    - docs/workstreams/ws-0246-live-apply.md
-    - docs/runbooks/health-probe-contracts.md
-    - docs/runbooks/service-uptime-contracts.md
-    - docs/runbooks/scaffold-new-service.md
-    - config/health-probe-catalog.json
-    - playbooks/tasks/post-verify.yml
-    - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
-    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-    - platform/health/semantics.py
-    - platform/health/composite.py
-    - platform/graph/client.py
-    - platform/world_state/workers.py
-    - scripts/platform_observation_tool.py
-    - scripts/scaffold_service.py
-    - scripts/validate_repository_data_models.py
-    - tests/test_post_verify_tasks.py
-    - tests/test_platform_observation_tool.py
-    - tests/test_world_state_workers.py
-    - tests/test_health_composite.py
-    - tests/test_scaffold_service.py
-    - tests/unit/test_graph_client.py
-    - receipts/live-applies/2026-03-28-adr-0246-runtime-state-semantics-live-apply.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0246_main_merge
+      paths:
+        - docs/workstreams/ws-0246-main-merge.md
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.60.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - docs/adr/.index.yaml
+        - docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+        - docs/workstreams/ws-0246-live-apply.md
+        - docs/runbooks/health-probe-contracts.md
+        - docs/runbooks/service-uptime-contracts.md
+        - docs/runbooks/scaffold-new-service.md
+        - config/health-probe-catalog.json
+        - playbooks/tasks/post-verify.yml
+        - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+        - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+        - platform/health/semantics.py
+        - platform/health/composite.py
+        - platform/graph/client.py
+        - platform/world_state/workers.py
+        - scripts/platform_observation_tool.py
+        - scripts/scaffold_service.py
+        - scripts/validate_repository_data_models.py
+        - tests/test_post_verify_tasks.py
+        - tests/test_platform_observation_tool.py
+        - tests/test_world_state_workers.py
+        - tests/test_health_composite.py
+        - tests/test_scaffold_service.py
+        - tests/unit/test_graph_client.py
+        - receipts/live-applies/2026-03-28-adr-0246-runtime-state-semantics-live-apply.json
+      mode: exclusive
 ready_to_merge: true
 live_applied: false
 canonical_truth:
-  changelog_entry: records ADR 0246 exact-main evidence on the current mainline by
-    preserving the verified runtime-state rollout, refreshed release surfaces, and
-    current platform baseline 0.130.44
+  changelog_entry: records ADR 0246 exact-main evidence on the current mainline
+    by preserving the verified runtime-state rollout, refreshed release
+    surfaces, and current platform baseline 0.130.44
   release_bump: patch
   included_in_repo_version: 0.177.60

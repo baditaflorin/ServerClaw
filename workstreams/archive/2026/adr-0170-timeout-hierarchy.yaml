@@ -7,24 +7,24 @@ branch: codex/adr-0170-timeout-hierarchy
 worktree_path: .worktrees/adr-0170-timeout-hierarchy
 doc: docs/workstreams/adr-0170-timeout-hierarchy.md
 depends_on:
-- adr-0092-platform-api-gateway
-- adr-0113-world-state-materializer
-- adr-0119-budgeted-workflow-scheduler
+  - adr-0092-platform-api-gateway
+  - adr-0113-world-state-materializer
+  - adr-0119-budgeted-workflow-scheduler
 conflicts_with:
-- adr-0092-platform-api-gateway
-- adr-0113-world-state-materializer
-- adr-0119-budgeted-workflow-scheduler
+  - adr-0092-platform-api-gateway
+  - adr-0113-world-state-materializer
+  - adr-0119-budgeted-workflow-scheduler
 shared_surfaces:
-- config/timeout-hierarchy.yaml
-- platform/timeouts/
-- scripts/api_gateway/main.py
-- platform/scheduler/
-- platform/world_state/workers.py
-- scripts/drift_lib.py
-- scripts/netbox_inventory_sync.py
-- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/
-- config/workflow-catalog.json
-- docs/runbooks/platform-timeout-hierarchy.md
+  - config/timeout-hierarchy.yaml
+  - platform/timeouts/
+  - scripts/api_gateway/main.py
+  - platform/scheduler/
+  - platform/world_state/workers.py
+  - scripts/drift_lib.py
+  - scripts/netbox_inventory_sync.py
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+  - config/workflow-catalog.json
+  - docs/runbooks/platform-timeout-hierarchy.md
 ready_to_merge: false
 live_applied: true

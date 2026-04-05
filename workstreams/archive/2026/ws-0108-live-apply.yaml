@@ -7,29 +7,29 @@ branch: codex/ws-0108-main-merge-v5
 worktree_path: .worktrees/ws-0108-main-merge
 doc: docs/workstreams/ws-0108-live-apply.md
 depends_on:
-- adr-0042-step-ca
-- adr-0043-openbao
-- adr-0044-windmill
-- adr-0056-keycloak
-- adr-0122-operator-access-admin
+  - adr-0042-step-ca
+  - adr-0043-openbao
+  - adr-0044-windmill
+  - adr-0056-keycloak
+  - adr-0122-operator-access-admin
 conflicts_with: []
 shared_surfaces:
-- scripts/operator_manager.py
-- config/windmill/scripts/
-- collections/ansible_collections/lv3/platform/roles/windmill_runtime/
-- docs/runbooks/operator-onboarding.md
-- docs/runbooks/operator-offboarding.md
-- docs/runbooks/configure-windmill.md
-- tests/test_operator_manager.py
-- tests/test_windmill_operator_admin_app.py
-- tests/test_config_merge_windmill.py
-- tests/test_config_merge_repo_surfaces.py
+  - scripts/operator_manager.py
+  - config/windmill/scripts/
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+  - docs/runbooks/operator-onboarding.md
+  - docs/runbooks/operator-offboarding.md
+  - docs/runbooks/configure-windmill.md
+  - tests/test_operator_manager.py
+  - tests/test_windmill_operator_admin_app.py
+  - tests/test_config_merge_windmill.py
+  - tests/test_config_merge_repo_surfaces.py
 ready_to_merge: false
 live_applied: true
 canonical_truth:
-  changelog_entry: completed ADR 0108 latest-main live apply by hardening the Windmill
-    seed sync and runtime env passthrough so operator onboarding, inventory, and offboarding
-    now replay durably from production main
+  changelog_entry: completed ADR 0108 latest-main live apply by hardening the
+    Windmill seed sync and runtime env passthrough so operator onboarding,
+    inventory, and offboarding now replay durably from production main
   release_bump: patch
   included_in_repo_version: 0.177.8
   latest_receipts:

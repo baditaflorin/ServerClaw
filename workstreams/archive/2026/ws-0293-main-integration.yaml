@@ -7,164 +7,164 @@ branch: codex/ws-0293-main-integration-r1
 worktree_path: .worktrees/ws-0293-main-integration-r1
 doc: docs/workstreams/ws-0293-main-integration.md
 depends_on:
-- ws-0293-livekit-live-apply
+  - ws-0293-livekit-live-apply
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0293-livekit-live-apply.md
-- docs/workstreams/ws-0293-main-integration.md
-- docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
-- docs/adr/.index.yaml
-- docs/runbooks/configure-livekit.md
-- Makefile
-- inventory/host_vars/proxmox_florin.yml
-- inventory/group_vars/platform.yml
-- scripts/generate_platform_vars.py
-- playbooks/livekit.yml
-- playbooks/services/livekit.yml
-- collections/ansible_collections/lv3/platform/playbooks/livekit.yml
-- collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml
-- collections/ansible_collections/lv3/platform/roles/livekit_runtime/
-- collections/ansible_collections/lv3/platform/roles/proxmox_network/
-- collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
-- config/ansible-execution-scopes.yaml
-- config/certificate-catalog.json
-- config/command-catalog.json
-- config/controller-local-secrets.json
-- config/dependency-graph.json
-- config/dependency-wave-playbooks.yaml
-- config/health-probe-catalog.json
-- config/image-catalog.json
-- config/prometheus/file_sd/https_tls_targets.yml
-- config/prometheus/rules/https_tls_alerts.yml
-- config/secret-catalog.json
-- config/service-capability-catalog.json
-- config/service-completeness.json
-- config/service-redundancy-catalog.json
-- config/subdomain-catalog.json
-- config/subdomain-exposure-registry.json
-- config/workflow-catalog.json
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/0.177.132.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/diagrams/service-dependency-graph.excalidraw
-- docs/site-generated/architecture/dependency-graph.md
-- receipts/image-scans/2026-03-30-livekit-runtime.json
-- receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
-- receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
-- receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
-- receipts/ops-portal-snapshot.html
-- receipts/restic-backups/20260401T141105Z.json
-- receipts/restic-snapshots-latest.json
-- receipts/live-applies/2026-04-01-adr-0293-livekit-mainline-live-apply.json
-- receipts/live-applies/evidence/2026-04-01-ws-0293-livekit-mainline-*
-- receipts/live-applies/evidence/*livekit*
-- scripts/livekit_tool.py
-- tests/test_generate_platform_vars.py
-- tests/test_docker_runtime_role.py
-- tests/test_livekit_playbook.py
-- tests/test_livekit_runtime_role.py
-- tests/test_livekit_tool.py
-- tests/test_linux_guest_firewall_role.py
-- tests/test_proxmox_network_role.py
+  - workstreams.yaml
+  - docs/workstreams/ws-0293-livekit-live-apply.md
+  - docs/workstreams/ws-0293-main-integration.md
+  - docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/configure-livekit.md
+  - Makefile
+  - inventory/host_vars/proxmox_florin.yml
+  - inventory/group_vars/platform.yml
+  - scripts/generate_platform_vars.py
+  - playbooks/livekit.yml
+  - playbooks/services/livekit.yml
+  - collections/ansible_collections/lv3/platform/playbooks/livekit.yml
+  - collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml
+  - collections/ansible_collections/lv3/platform/roles/livekit_runtime/
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/
+  - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+  - config/ansible-execution-scopes.yaml
+  - config/certificate-catalog.json
+  - config/command-catalog.json
+  - config/controller-local-secrets.json
+  - config/dependency-graph.json
+  - config/dependency-wave-playbooks.yaml
+  - config/health-probe-catalog.json
+  - config/image-catalog.json
+  - config/prometheus/file_sd/https_tls_targets.yml
+  - config/prometheus/rules/https_tls_alerts.yml
+  - config/secret-catalog.json
+  - config/service-capability-catalog.json
+  - config/service-completeness.json
+  - config/service-redundancy-catalog.json
+  - config/subdomain-catalog.json
+  - config/subdomain-exposure-registry.json
+  - config/workflow-catalog.json
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.132.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/diagrams/service-dependency-graph.excalidraw
+  - docs/site-generated/architecture/dependency-graph.md
+  - receipts/image-scans/2026-03-30-livekit-runtime.json
+  - receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
+  - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
+  - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
+  - receipts/ops-portal-snapshot.html
+  - receipts/restic-backups/20260401T141105Z.json
+  - receipts/restic-snapshots-latest.json
+  - receipts/live-applies/2026-04-01-adr-0293-livekit-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-01-ws-0293-livekit-mainline-*
+  - receipts/live-applies/evidence/*livekit*
+  - scripts/livekit_tool.py
+  - tests/test_generate_platform_vars.py
+  - tests/test_docker_runtime_role.py
+  - tests/test_livekit_playbook.py
+  - tests/test_livekit_runtime_role.py
+  - tests/test_livekit_tool.py
+  - tests/test_linux_guest_firewall_role.py
+  - tests/test_proxmox_network_role.py
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index_generation
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-generator-v1
-  - id: workstream_docs
-    paths:
-    - docs/workstreams/ws-0293-livekit-live-apply.md
-    - docs/workstreams/ws-0293-main-integration.md
-    - docs/runbooks/configure-livekit.md
-    mode: shared_contract
-    contract: workstream-docs-v1
-  - id: livekit_repo_surface
-    paths:
-    - docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
-    - Makefile
-    - inventory/host_vars/proxmox_florin.yml
-    - inventory/group_vars/platform.yml
-    - scripts/generate_platform_vars.py
-    - playbooks/livekit.yml
-    - playbooks/services/livekit.yml
-    - collections/ansible_collections/lv3/platform/playbooks/livekit.yml
-    - collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml
-    - collections/ansible_collections/lv3/platform/roles/livekit_runtime/**
-    - collections/ansible_collections/lv3/platform/roles/proxmox_network/**
-    - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
-    - config/ansible-execution-scopes.yaml
-    - config/certificate-catalog.json
-    - config/command-catalog.json
-    - config/controller-local-secrets.json
-    - config/dependency-graph.json
-    - config/dependency-wave-playbooks.yaml
-    - config/health-probe-catalog.json
-    - config/image-catalog.json
-    - config/prometheus/file_sd/https_tls_targets.yml
-    - config/prometheus/rules/https_tls_alerts.yml
-    - config/secret-catalog.json
-    - config/service-capability-catalog.json
-    - config/service-completeness.json
-    - config/service-redundancy-catalog.json
-    - config/subdomain-catalog.json
-    - config/subdomain-exposure-registry.json
-    - config/workflow-catalog.json
-    - docs/diagrams/service-dependency-graph.excalidraw
-    - docs/site-generated/architecture/dependency-graph.md
-    - receipts/image-scans/2026-03-30-livekit-runtime.json
-    - receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
-    - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
-    - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
-    - scripts/livekit_tool.py
-    - tests/test_generate_platform_vars.py
-    - tests/test_docker_runtime_role.py
-    - tests/test_livekit_playbook.py
-    - tests/test_livekit_runtime_role.py
-    - tests/test_livekit_tool.py
-    - tests/test_linux_guest_firewall_role.py
-    - tests/test_proxmox_network_role.py
-    mode: shared_contract
-    contract: livekit-main-integration-v1
-  - id: release_management_surfaces
-    paths:
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.132.md
-    mode: shared_contract
-    contract: release-management-v1
-  - id: platform_truth_generation
-    paths:
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    - docs/diagrams/agent-coordination-map.excalidraw
-    - receipts/ops-portal-snapshot.html
-    mode: shared_contract
-    contract: canonical-truth-v1
-  - id: livekit_mainline_receipts
-    paths:
-    - receipts/live-applies/2026-04-01-adr-0293-livekit-mainline-live-apply.json
-    - receipts/live-applies/evidence/2026-04-01-ws-0293-livekit-mainline-*
-    - receipts/live-applies/evidence/*livekit*
-    - receipts/restic-backups/20260401T141105Z.json
-    - receipts/restic-snapshots-latest.json
-    mode: shared_contract
-    contract: receipt-evidence-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index_generation
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: workstream_docs
+      paths:
+        - docs/workstreams/ws-0293-livekit-live-apply.md
+        - docs/workstreams/ws-0293-main-integration.md
+        - docs/runbooks/configure-livekit.md
+      mode: shared_contract
+      contract: workstream-docs-v1
+    - id: livekit_repo_surface
+      paths:
+        - docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+        - Makefile
+        - inventory/host_vars/proxmox_florin.yml
+        - inventory/group_vars/platform.yml
+        - scripts/generate_platform_vars.py
+        - playbooks/livekit.yml
+        - playbooks/services/livekit.yml
+        - collections/ansible_collections/lv3/platform/playbooks/livekit.yml
+        - collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml
+        - collections/ansible_collections/lv3/platform/roles/livekit_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/**
+        - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+        - config/ansible-execution-scopes.yaml
+        - config/certificate-catalog.json
+        - config/command-catalog.json
+        - config/controller-local-secrets.json
+        - config/dependency-graph.json
+        - config/dependency-wave-playbooks.yaml
+        - config/health-probe-catalog.json
+        - config/image-catalog.json
+        - config/prometheus/file_sd/https_tls_targets.yml
+        - config/prometheus/rules/https_tls_alerts.yml
+        - config/secret-catalog.json
+        - config/service-capability-catalog.json
+        - config/service-completeness.json
+        - config/service-redundancy-catalog.json
+        - config/subdomain-catalog.json
+        - config/subdomain-exposure-registry.json
+        - config/workflow-catalog.json
+        - docs/diagrams/service-dependency-graph.excalidraw
+        - docs/site-generated/architecture/dependency-graph.md
+        - receipts/image-scans/2026-03-30-livekit-runtime.json
+        - receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
+        - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
+        - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
+        - scripts/livekit_tool.py
+        - tests/test_generate_platform_vars.py
+        - tests/test_docker_runtime_role.py
+        - tests/test_livekit_playbook.py
+        - tests/test_livekit_runtime_role.py
+        - tests/test_livekit_tool.py
+        - tests/test_linux_guest_firewall_role.py
+        - tests/test_proxmox_network_role.py
+      mode: shared_contract
+      contract: livekit-main-integration-v1
+    - id: release_management_surfaces
+      paths:
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.132.md
+      mode: shared_contract
+      contract: release-management-v1
+    - id: platform_truth_generation
+      paths:
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - receipts/ops-portal-snapshot.html
+      mode: shared_contract
+      contract: canonical-truth-v1
+    - id: livekit_mainline_receipts
+      paths:
+        - receipts/live-applies/2026-04-01-adr-0293-livekit-mainline-live-apply.json
+        - receipts/live-applies/evidence/2026-04-01-ws-0293-livekit-mainline-*
+        - receipts/live-applies/evidence/*livekit*
+        - receipts/restic-backups/20260401T141105Z.json
+        - receipts/restic-snapshots-latest.json
+      mode: shared_contract
+      contract: receipt-evidence-v1
 ready_to_merge: true
 live_applied: false

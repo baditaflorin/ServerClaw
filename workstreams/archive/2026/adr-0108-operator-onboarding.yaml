@@ -7,17 +7,17 @@ branch: codex/adr-0108-operator-onboarding
 worktree_path: .worktrees/adr-0108
 doc: docs/workstreams/adr-0108-operator-onboarding.md
 depends_on:
-- adr-0014-tailscale
-- adr-0042-step-ca
-- adr-0043-openbao
-- adr-0044-windmill
-- adr-0046-identity-classes
-- adr-0056-keycloak
-- adr-0066-mutation-audit-log
+  - adr-0014-tailscale
+  - adr-0042-step-ca
+  - adr-0043-openbao
+  - adr-0044-windmill
+  - adr-0046-identity-classes
+  - adr-0056-keycloak
+  - adr-0066-mutation-audit-log
 conflicts_with: []
 shared_surfaces:
-- config/
-- Windmill workflows
-- Keycloak realm configuration
+  - config/
+  - Windmill workflows
+  - Keycloak realm configuration
 ready_to_merge: false
 live_applied: true

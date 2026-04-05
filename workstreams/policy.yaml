@@ -3,7 +3,7 @@ delivery_model:
   mode: parallel_workstreams
   branch_prefix: codex/
   allowed_extra_prefixes:
-  - claude/
+    - claude/
   workstream_doc_root: docs/workstreams
   registry_owner: main
 release_policy:

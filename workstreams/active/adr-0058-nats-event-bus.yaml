@@ -7,38 +7,38 @@ branch: codex/adr-0058-nats-event-bus
 worktree_path: .worktrees/adr-0058-nats-event-bus
 doc: docs/workstreams/adr-0058-nats-event-bus.md
 depends_on:
-- adr-0045-communication-lanes
-- adr-0046-identity-classes
-- adr-0047-short-lived-creds
+  - adr-0045-communication-lanes
+  - adr-0046-identity-classes
+  - adr-0047-short-lived-creds
 conflicts_with: []
 shared_surfaces:
-- workflow events
-- alert events
-- agent handoffs
-- internal consumers
+  - workflow events
+  - alert events
+  - agent handoffs
+  - internal consumers
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_0058_docs
-    paths:
-    - docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
-    - docs/workstreams/adr-0058-nats-event-bus.md
-    mode: exclusive
-  - id: visual_agent_operations_runbook
-    paths:
-    - docs/runbooks/plan-visual-agent-operations.md
-    mode: shared_contract
-    contract: visual-agent-operations-runbook-v1
-  - id: integration_truth
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    mode: generated
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0058_docs
+      paths:
+        - docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+        - docs/workstreams/adr-0058-nats-event-bus.md
+      mode: exclusive
+    - id: visual_agent_operations_runbook
+      paths:
+        - docs/runbooks/plan-visual-agent-operations.md
+      mode: shared_contract
+      contract: visual-agent-operations-runbook-v1
+    - id: integration_truth
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+      mode: generated
 ready_to_merge: false
 live_applied: false

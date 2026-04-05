@@ -7,13 +7,13 @@ branch: codex/adr-0067-guest-network-policy
 worktree_path: .worktrees/adr-0067-guest-network-policy
 doc: docs/workstreams/adr-0067-guest-network-policy.md
 depends_on:
-- adr-0012-proxmox-host-bridge-and-nat-network
-- adr-0013-public-ingress
+  - adr-0012-proxmox-host-bridge-and-nat-network
+  - adr-0013-public-ingress
 conflicts_with: []
 shared_surfaces:
-- inventory/host_vars/proxmox_florin.yml
-- Proxmox VE firewall
-- roles/proxmox/network/
-- roles/linux/guest_firewall/
+  - inventory/host_vars/proxmox_florin.yml
+  - Proxmox VE firewall
+  - roles/proxmox/network/
+  - roles/linux/guest_firewall/
 ready_to_merge: true
 live_applied: true

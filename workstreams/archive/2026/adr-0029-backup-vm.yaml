@@ -7,41 +7,41 @@ branch: codex/adr-0026-backup-vm
 worktree_path: .worktrees/adr-0029-backup-vm
 doc: docs/workstreams/adr-0029-backup-vm.md
 depends_on:
-- adr-0020-backups
+  - adr-0020-backups
 conflicts_with: []
 shared_surfaces:
-- backup-lv3
-- /etc/pve/storage.cfg
-- /etc/pve/jobs.cfg
-- backup_policy
-- guest_provisioning
+  - backup-lv3
+  - /etc/pve/storage.cfg
+  - /etc/pve/jobs.cfg
+  - backup_policy
+  - guest_provisioning
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: backup_vm_repo_surface
-    paths:
-    - playbooks/backup-vm.yml
-    - roles/backup_vm/**
-    - roles/proxmox_backups/**
-    - roles/proxmox_guests/**
-    - docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
-    - docs/workstreams/adr-0029-backup-vm.md
-    mode: exclusive
-  - id: inventory_contract
-    paths:
-    - inventory/**
-    mode: shared_contract
-    contract: inventory-v1
-  - id: integration_truth
-    paths:
-    - README.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    mode: generated
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: backup_vm_repo_surface
+      paths:
+        - playbooks/backup-vm.yml
+        - roles/backup_vm/**
+        - roles/proxmox_backups/**
+        - roles/proxmox_guests/**
+        - docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+        - docs/workstreams/adr-0029-backup-vm.md
+      mode: exclusive
+    - id: inventory_contract
+      paths:
+        - inventory/**
+      mode: shared_contract
+      contract: inventory-v1
+    - id: integration_truth
+      paths:
+        - README.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+      mode: generated
 ready_to_merge: false
 live_applied: true

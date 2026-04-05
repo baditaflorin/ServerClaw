@@ -7,17 +7,17 @@ branch: codex/adr-0110-platform-versioning
 worktree_path: .worktrees/adr-0110-platform-versioning
 doc: docs/workstreams/adr-0110-platform-versioning.md
 depends_on:
-- adr-0008-versioning-model
-- adr-0017-adr-lifecycle
-- adr-0073-promotion-gate
-- adr-0081-changelog-portal
-- adr-0090-platform-cli
-- adr-0094-developer-portal
+  - adr-0008-versioning-model
+  - adr-0017-adr-lifecycle
+  - adr-0073-promotion-gate
+  - adr-0081-changelog-portal
+  - adr-0090-platform-cli
+  - adr-0094-developer-portal
 conflicts_with: []
 shared_surfaces:
-- VERSION
-- changelog.md
-- versions/stack.yaml
-- scripts/lv3_cli.py
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - scripts/lv3_cli.py
 ready_to_merge: false
 live_applied: false

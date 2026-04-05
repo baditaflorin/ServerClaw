@@ -7,97 +7,98 @@ branch: codex/ws-0210-live-apply
 worktree_path: .worktrees/ws-0210-live-apply
 doc: docs/workstreams/ws-0210-live-apply.md
 depends_on:
-- adr-0074-human-navigation-and-platform-ops-portal
-- adr-0076-subdomain-governance
-- adr-0139-subdomain-exposure-registry
-- adr-0207-anti-corruption-layers-at-provider-boundaries
+  - adr-0074-human-navigation-and-platform-ops-portal
+  - adr-0076-subdomain-governance
+  - adr-0139-subdomain-exposure-registry
+  - adr-0207-anti-corruption-layers-at-provider-boundaries
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/workstreams/ws-0210-live-apply.md
-- docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
-- docs/adr/.index.yaml
-- docs/release-notes/README.md
-- docs/release-notes/0.177.34.md
-- docs/runbooks/subdomain-exposure-audit.md
-- docs/runbooks/subdomain-governance.md
-- docs/runbooks/ops-portal-down.md
-- config/subdomain-exposure-registry.json
-- docs/schema/subdomain-exposure-registry.schema.json
-- scripts/publication_contract.py
-- scripts/subdomain_exposure_audit.py
-- scripts/ops_portal/app.py
-- scripts/ops_portal/templates/partials/overview.html
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
-- tests/test_compose_runtime_secret_injection.py
-- tests/test_subdomain_exposure_audit.py
-- tests/test_interactive_ops_portal.py
-- receipts/subdomain-exposure-audit/20260328T113654Z.json
-- receipts/live-applies/2026-03-28-adr-0210-canonical-domain-models-live-apply.json
+  - workstreams.yaml
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/workstreams/ws-0210-live-apply.md
+  - docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
+  - docs/adr/.index.yaml
+  - docs/release-notes/README.md
+  - docs/release-notes/0.177.34.md
+  - docs/runbooks/subdomain-exposure-audit.md
+  - docs/runbooks/subdomain-governance.md
+  - docs/runbooks/ops-portal-down.md
+  - config/subdomain-exposure-registry.json
+  - docs/schema/subdomain-exposure-registry.schema.json
+  - scripts/publication_contract.py
+  - scripts/subdomain_exposure_audit.py
+  - scripts/ops_portal/app.py
+  - scripts/ops_portal/templates/partials/overview.html
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
+  - tests/test_compose_runtime_secret_injection.py
+  - tests/test_subdomain_exposure_audit.py
+  - tests/test_interactive_ops_portal.py
+  - receipts/subdomain-exposure-audit/20260328T113654Z.json
+  - receipts/live-applies/2026-03-28-adr-0210-canonical-domain-models-live-apply.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: adr_0210_mainline_release_contract
-    paths:
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    - docs/release-notes/README.md
-    - docs/release-notes/0.177.34.md
-    mode: shared_contract
-    contract: mainline-release-integration-v1
-  - id: adr_0210_live_apply
-    paths:
-    - docs/workstreams/ws-0210-live-apply.md
-    - docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
-    - docs/runbooks/subdomain-exposure-audit.md
-    - docs/runbooks/subdomain-governance.md
-    - docs/runbooks/ops-portal-down.md
-    - config/subdomain-exposure-registry.json
-    - docs/schema/subdomain-exposure-registry.schema.json
-    - scripts/publication_contract.py
-    - scripts/subdomain_exposure_audit.py
-    - scripts/ops_portal/app.py
-    - scripts/ops_portal/templates/partials/overview.html
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
-    - tests/test_compose_runtime_secret_injection.py
-    - tests/test_subdomain_exposure_audit.py
-    - tests/test_interactive_ops_portal.py
-    - receipts/subdomain-exposure-audit/*.json
-    - receipts/live-applies/2026-03-28-adr-0210-canonical-domain-models-live-apply.json
-    mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: adr_0210_mainline_release_contract
+      paths:
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/release-notes/README.md
+        - docs/release-notes/0.177.34.md
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: adr_0210_live_apply
+      paths:
+        - docs/workstreams/ws-0210-live-apply.md
+        - docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
+        - docs/runbooks/subdomain-exposure-audit.md
+        - docs/runbooks/subdomain-governance.md
+        - docs/runbooks/ops-portal-down.md
+        - config/subdomain-exposure-registry.json
+        - docs/schema/subdomain-exposure-registry.schema.json
+        - scripts/publication_contract.py
+        - scripts/subdomain_exposure_audit.py
+        - scripts/ops_portal/app.py
+        - scripts/ops_portal/templates/partials/overview.html
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
+        - tests/test_compose_runtime_secret_injection.py
+        - tests/test_subdomain_exposure_audit.py
+        - tests/test_interactive_ops_portal.py
+        - receipts/subdomain-exposure-audit/*.json
+        - receipts/live-applies/2026-03-28-adr-0210-canonical-domain-models-live-apply.json
+      mode: exclusive
 ready_to_merge: false
 live_applied: true
 canonical_truth:
-  changelog_entry: integrated ADR 0210 by separating canonical publication semantics
-    from delivery-adapter fields in the shared subdomain registry, surfacing that
-    contract in the live ops portal, and hardening the live publication audit to record
-    TLS probe drift without aborting
+  changelog_entry: integrated ADR 0210 by separating canonical publication
+    semantics from delivery-adapter fields in the shared subdomain registry,
+    surfacing that contract in the live ops portal, and hardening the live
+    publication audit to record TLS probe drift without aborting
   release_bump: patch
   included_in_repo_version: 0.177.35
   latest_receipts:
-    canonical_publication_models: 2026-03-28-adr-0210-canonical-domain-models-live-apply
+    canonical_publication_models:
+      2026-03-28-adr-0210-canonical-domain-models-live-apply

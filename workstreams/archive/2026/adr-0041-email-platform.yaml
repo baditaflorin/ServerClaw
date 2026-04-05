@@ -1,20 +1,21 @@
 id: adr-0041-email-platform
 adr: '0041'
-title: Dockerized mail platform with API, Grafana telemetry, and failover delivery
+title: Dockerized mail platform with API, Grafana telemetry, and failover
+  delivery
 status: merged
 owner: codex
 branch: codex/adr-0040-email-platform
 worktree_path: .worktrees/adr-0041-email-platform
 doc: docs/workstreams/adr-0041-email-platform.md
 depends_on:
-- adr-0011-monitoring
-- adr-0023-docker-runtime
+  - adr-0011-monitoring
+  - adr-0023-docker-runtime
 conflicts_with: []
 shared_surfaces:
-- docker-runtime-lv3
-- monitoring-lv3
-- mail transport and DNS
-- Stalwart management API
-- Grafana mail dashboards
+  - docker-runtime-lv3
+  - monitoring-lv3
+  - mail transport and DNS
+  - Stalwart management API
+  - Grafana mail dashboards
 ready_to_merge: false
 live_applied: true

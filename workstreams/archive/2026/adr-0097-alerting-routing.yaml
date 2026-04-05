@@ -7,15 +7,15 @@ branch: codex/adr-0097-alerting-routing
 worktree_path: .worktrees/adr-0097-alerting-routing
 doc: docs/workstreams/adr-0097-alerting-routing.md
 depends_on:
-- adr-0011-monitoring
-- adr-0057-mattermost
-- adr-0064-health-probes
-- adr-0080-maintenance-windows
-- adr-0096-slo-tracking
+  - adr-0011-monitoring
+  - adr-0057-mattermost
+  - adr-0064-health-probes
+  - adr-0080-maintenance-windows
+  - adr-0096-slo-tracking
 conflicts_with: []
 shared_surfaces:
-- config/grafana/provisioning/
-- scripts/maintenance_window_tool.py
-- monitoring-lv3 services
+  - config/grafana/provisioning/
+  - scripts/maintenance_window_tool.py
+  - monitoring-lv3 services
 ready_to_merge: false
 live_applied: false

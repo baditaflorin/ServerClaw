@@ -7,17 +7,17 @@ branch: codex/adr-0179-redundancy-tier
 worktree_path: .worktrees/adr-0179-service-redundancy-tier-matrix
 doc: docs/workstreams/adr-0179-service-redundancy-tier-matrix.md
 depends_on:
-- adr-0075-service-capability-catalog
-- adr-0100-disaster-recovery-playbook
+  - adr-0075-service-capability-catalog
+  - adr-0100-disaster-recovery-playbook
 conflicts_with: []
 shared_surfaces:
-- config/service-redundancy-catalog.json
-- docs/schema/service-redundancy-catalog.schema.json
-- scripts/service_redundancy.py
-- Makefile
-- scripts/validate_repository_data_models.py
-- docs/runbooks/service-redundancy-tier-matrix.md
-- docs/runbooks/deploy-a-service.md
-- docs/runbooks/service-capability-catalog.md
+  - config/service-redundancy-catalog.json
+  - docs/schema/service-redundancy-catalog.schema.json
+  - scripts/service_redundancy.py
+  - Makefile
+  - scripts/validate_repository_data_models.py
+  - docs/runbooks/service-redundancy-tier-matrix.md
+  - docs/runbooks/deploy-a-service.md
+  - docs/runbooks/service-capability-catalog.md
 ready_to_merge: false
 live_applied: false

@@ -1,88 +1,91 @@
 id: ws-0249-live-apply
 adr: 0249
-title: Live apply HTTPS and TLS assurance through blackbox exporter and testssl.sh
+title: Live apply HTTPS and TLS assurance through blackbox exporter and
+  testssl.sh
 status: live_applied
 owner: codex
 branch: codex/ws-0249-live-apply
 worktree_path: .worktrees/ws-0249-live-apply
 doc: docs/workstreams/ws-0249-live-apply.md
 depends_on:
-- adr-0096-slo-tracking
-- adr-0101-certificate-lifecycle
-- adr-0142-public-surface-security-scan
+  - adr-0096-slo-tracking
+  - adr-0101-certificate-lifecycle
+  - adr-0142-public-surface-security-scan
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- docs/workstreams/ws-0249-live-apply.md
-- docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
-- docs/adr/.index.yaml
-- docs/runbooks/https-tls-assurance.md
-- docs/runbooks/monitoring-stack.md
-- config/prometheus/file_sd/https_tls_targets.yml
-- config/prometheus/rules/https_tls_alerts.yml
-- config/workflow-catalog.json
-- config/windmill/scripts/https-tls-assurance.py
-- scripts/https_tls_assurance_targets.py
-- scripts/generate_https_tls_assurance.py
-- scripts/https_tls_assurance.py
-- scripts/public_surface_scan.py
-- collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
-- tests/test_https_tls_assurance_targets.py
-- tests/test_monitoring_vm_role.py
-- receipts/https-tls-assurance/**
-- receipts/live-applies/**
+  - workstreams.yaml
+  - docs/workstreams/ws-0249-live-apply.md
+  - docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/https-tls-assurance.md
+  - docs/runbooks/monitoring-stack.md
+  - config/prometheus/file_sd/https_tls_targets.yml
+  - config/prometheus/rules/https_tls_alerts.yml
+  - config/workflow-catalog.json
+  - config/windmill/scripts/https-tls-assurance.py
+  - scripts/https_tls_assurance_targets.py
+  - scripts/generate_https_tls_assurance.py
+  - scripts/https_tls_assurance.py
+  - scripts/public_surface_scan.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+  - tests/test_https_tls_assurance_targets.py
+  - tests/test_monitoring_vm_role.py
+  - receipts/https-tls-assurance/**
+  - receipts/live-applies/**
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: adr-index-v1
-  - id: adr_0249_live_apply
-    paths:
-    - docs/workstreams/ws-0249-live-apply.md
-    - docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
-    - docs/runbooks/https-tls-assurance.md
-    - docs/runbooks/monitoring-stack.md
-    - config/prometheus/file_sd/https_tls_targets.yml
-    - config/prometheus/rules/https_tls_alerts.yml
-    - config/workflow-catalog.json
-    - config/windmill/scripts/https-tls-assurance.py
-    - scripts/https_tls_assurance_targets.py
-    - scripts/generate_https_tls_assurance.py
-    - scripts/https_tls_assurance.py
-    - scripts/public_surface_scan.py
-    - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
-    - tests/test_https_tls_assurance_targets.py
-    - tests/test_monitoring_vm_role.py
-    - receipts/https-tls-assurance/**
-    - receipts/live-applies/**
-    mode: exclusive
-  - id: integration_release_surfaces
-    paths:
-    - README.md
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - versions/stack.yaml
-    - build/platform-manifest.json
-    - docs/release-notes/README.md
-    - docs/release-notes/*.md
-    mode: shared_contract
-    contract: mainline-release-integration-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: adr_0249_live_apply
+      paths:
+        - docs/workstreams/ws-0249-live-apply.md
+        - docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+        - docs/runbooks/https-tls-assurance.md
+        - docs/runbooks/monitoring-stack.md
+        - config/prometheus/file_sd/https_tls_targets.yml
+        - config/prometheus/rules/https_tls_alerts.yml
+        - config/workflow-catalog.json
+        - config/windmill/scripts/https-tls-assurance.py
+        - scripts/https_tls_assurance_targets.py
+        - scripts/generate_https_tls_assurance.py
+        - scripts/https_tls_assurance.py
+        - scripts/public_surface_scan.py
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+        - tests/test_https_tls_assurance_targets.py
+        - tests/test_monitoring_vm_role.py
+        - receipts/https-tls-assurance/**
+        - receipts/live-applies/**
+      mode: exclusive
+    - id: integration_release_surfaces
+      paths:
+        - README.md
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/release-notes/README.md
+        - docs/release-notes/*.md
+      mode: shared_contract
+      contract: mainline-release-integration-v1
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0249 by generating repo-managed HTTPS and TLS assurance
-    probes plus Prometheus expiry alerts from the shared service catalogs, recording
-    periodic testssl.sh receipts from the same target set, and hardening the monitoring
-    replay defaults that guest observability and Loki log shipping depend on
+  changelog_entry: implemented ADR 0249 by generating repo-managed HTTPS and TLS
+    assurance probes plus Prometheus expiry alerts from the shared service
+    catalogs, recording periodic testssl.sh receipts from the same target set,
+    and hardening the monitoring replay defaults that guest observability and
+    Loki log shipping depend on
   release_bump: patch
   included_in_repo_version: 0.177.82
   latest_receipts:
-    https_tls_assurance: 2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply
+    https_tls_assurance:
+      2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply

@@ -1,154 +1,154 @@
 id: ws-0310-live-apply
 adr: '0310'
-title: Implement the first-run activation checklist and progressive capability reveal
-  inside the interactive ops portal
+title: Implement the first-run activation checklist and progressive capability
+  reveal inside the interactive ops portal
 status: live_applied
 owner: codex
 branch: codex/ws-0310-main-integration
 worktree_path: .worktrees/ws-0310-live-apply
 doc: docs/workstreams/ws-0310-live-apply.md
 depends_on:
-- adr-0093-interactive-ops-portal-runtime-contract
-- adr-0108-operator-onboarding-and-offboarding
-- adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher
-- adr-0242-guided-human-onboarding-via-shepherd-tours
-- adr-0308-journey-aware-entry-routing-and-saved-home-selection
+  - adr-0093-interactive-ops-portal-runtime-contract
+  - adr-0108-operator-onboarding-and-offboarding
+  - adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher
+  - adr-0242-guided-human-onboarding-via-shepherd-tours
+  - adr-0308-journey-aware-entry-routing-and-saved-home-selection
 conflicts_with: []
 shared_surfaces:
-- workstreams.yaml
-- README.md
-- RELEASE.md
-- VERSION
-- changelog.md
-- docs/release-notes/README.md
-- docs/release-notes/*.md
-- versions/stack.yaml
-- build/platform-manifest.json
-- docs/diagrams/agent-coordination-map.excalidraw
-- docs/workstreams/ws-0310-live-apply.md
-- docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
-- docs/adr/.index.yaml
-- docs/runbooks/platform-operations-portal.md
-- docs/runbooks/operator-onboarding.md
-- docs/runbooks/windmill-operator-access-admin.md
-- Makefile
-- playbooks/ops-portal.yml
-- .config-locations.yaml
-- config/activation-checklist.json
-- docs/schema/activation-checklist.schema.json
-- scripts/validate_repository_data_models.py
-- scripts/ops_portal/app.py
-- scripts/ops_portal/static/portal.css
-- scripts/ops_portal/templates/base.html
-- scripts/ops_portal/templates/index.html
-- scripts/ops_portal/templates/partials/activation.html
-- scripts/ops_portal/templates/partials/launcher.html
-- scripts/ops_portal/templates/partials/overview.html
-- scripts/ops_portal/templates/partials/runbooks.html
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-- collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-- tests/test_interactive_ops_portal.py
-- tests/test_ops_portal_playbook.py
-- tests/test_ops_portal_runtime_role.py
-- receipts/live-applies/2026-04-02-adr-0310-activation-checklist-mainline-live-apply.json
-- receipts/live-applies/evidence/2026-04-02-ws-0310-*
-- receipts/restic-backups/20260402T122554Z.json
-- receipts/restic-backups/20260402T124641Z.json
-- receipts/restic-snapshots-latest.json
-- receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+  - workstreams.yaml
+  - README.md
+  - RELEASE.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/*.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/workstreams/ws-0310-live-apply.md
+  - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/platform-operations-portal.md
+  - docs/runbooks/operator-onboarding.md
+  - docs/runbooks/windmill-operator-access-admin.md
+  - Makefile
+  - playbooks/ops-portal.yml
+  - .config-locations.yaml
+  - config/activation-checklist.json
+  - docs/schema/activation-checklist.schema.json
+  - scripts/validate_repository_data_models.py
+  - scripts/ops_portal/app.py
+  - scripts/ops_portal/static/portal.css
+  - scripts/ops_portal/templates/base.html
+  - scripts/ops_portal/templates/index.html
+  - scripts/ops_portal/templates/partials/activation.html
+  - scripts/ops_portal/templates/partials/launcher.html
+  - scripts/ops_portal/templates/partials/overview.html
+  - scripts/ops_portal/templates/partials/runbooks.html
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+  - tests/test_interactive_ops_portal.py
+  - tests/test_ops_portal_playbook.py
+  - tests/test_ops_portal_runtime_role.py
+  - receipts/live-applies/2026-04-02-adr-0310-activation-checklist-mainline-live-apply.json
+  - receipts/live-applies/evidence/2026-04-02-ws-0310-*
+  - receipts/restic-backups/20260402T122554Z.json
+  - receipts/restic-backups/20260402T124641Z.json
+  - receipts/restic-snapshots-latest.json
+  - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
 ownership_manifest:
   owned_surfaces:
-  - id: workstream_registry
-    paths:
-    - workstreams.yaml
-    mode: shared_contract
-    contract: workstream-registry-v1
-  - id: ws0310_release_surfaces
-    paths:
-    - RELEASE.md
-    - VERSION
-    - changelog.md
-    - docs/release-notes/README.md
-    - docs/release-notes/*.md
-    mode: shared_contract
-    contract: release-management-v1
-  - id: ws0310_platform_truth_generation
-    paths:
-    - versions/stack.yaml
-    - inventory/group_vars/platform.yml
-    - build/platform-manifest.json
-    mode: shared_contract
-    contract: canonical-truth-v1
-  - id: ws0310_generated_truth
-    paths:
-    - README.md
-    - docs/diagrams/agent-coordination-map.excalidraw
-    mode: shared_contract
-    contract: latest-main-generated-truth-v1
-  - id: ws0310_workstream_docs
-    paths:
-    - docs/workstreams/ws-0310-live-apply.md
-    - docs/runbooks/platform-operations-portal.md
-    - docs/runbooks/operator-onboarding.md
-    - docs/runbooks/windmill-operator-access-admin.md
-    - Makefile
-    - playbooks/ops-portal.yml
-    mode: shared_contract
-    contract: portal-activation-docs-v1
-  - id: ws0310_adr_surface
-    paths:
-    - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
-    mode: shared_contract
-    contract: adr-0310-metadata-v1
-  - id: ws0310_adr_index
-    paths:
-    - docs/adr/.index.yaml
-    mode: shared_contract
-    contract: ws0310-adr-index-v1
-  - id: ws0310_activation_catalog
-    paths:
-    - config/activation-checklist.json
-    - docs/schema/activation-checklist.schema.json
-    mode: exclusive
-  - id: ws0310_repo_validation_contract
-    paths:
-    - .config-locations.yaml
-    - scripts/validate_repository_data_models.py
-    mode: shared_contract
-    contract: repo-validation-pipeline-v1
-  - id: ws0310_ops_portal_runtime
-    paths:
-    - scripts/ops_portal/app.py
-    - scripts/ops_portal/static/portal.css
-    - scripts/ops_portal/templates/base.html
-    - scripts/ops_portal/templates/index.html
-    - scripts/ops_portal/templates/partials/activation.html
-    - scripts/ops_portal/templates/partials/launcher.html
-    - scripts/ops_portal/templates/partials/overview.html
-    - scripts/ops_portal/templates/partials/runbooks.html
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
-    - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
-    - tests/test_interactive_ops_portal.py
-    - tests/test_ops_portal_playbook.py
-    - tests/test_ops_portal_runtime_role.py
-    mode: shared_contract
-    contract: ws0310-portal-activation-surface-v1
-  - id: ws0310_live_apply_receipts
-    paths:
-    - receipts/live-applies/2026-04-02-adr-0310-activation-checklist-mainline-live-apply.json
-    - receipts/live-applies/evidence/2026-04-02-ws-0310-*
-    - receipts/restic-backups/20260402T122554Z.json
-    - receipts/restic-backups/20260402T124641Z.json
-    - receipts/restic-snapshots-latest.json
-    - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
-    mode: shared_contract
-    contract: live-apply-receipts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0310_release_surfaces
+      paths:
+        - RELEASE.md
+        - VERSION
+        - changelog.md
+        - docs/release-notes/README.md
+        - docs/release-notes/*.md
+      mode: shared_contract
+      contract: release-management-v1
+    - id: ws0310_platform_truth_generation
+      paths:
+        - versions/stack.yaml
+        - inventory/group_vars/platform.yml
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: canonical-truth-v1
+    - id: ws0310_generated_truth
+      paths:
+        - README.md
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: ws0310_workstream_docs
+      paths:
+        - docs/workstreams/ws-0310-live-apply.md
+        - docs/runbooks/platform-operations-portal.md
+        - docs/runbooks/operator-onboarding.md
+        - docs/runbooks/windmill-operator-access-admin.md
+        - Makefile
+        - playbooks/ops-portal.yml
+      mode: shared_contract
+      contract: portal-activation-docs-v1
+    - id: ws0310_adr_surface
+      paths:
+        - docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md
+      mode: shared_contract
+      contract: adr-0310-metadata-v1
+    - id: ws0310_adr_index
+      paths:
+        - docs/adr/.index.yaml
+      mode: shared_contract
+      contract: ws0310-adr-index-v1
+    - id: ws0310_activation_catalog
+      paths:
+        - config/activation-checklist.json
+        - docs/schema/activation-checklist.schema.json
+      mode: exclusive
+    - id: ws0310_repo_validation_contract
+      paths:
+        - .config-locations.yaml
+        - scripts/validate_repository_data_models.py
+      mode: shared_contract
+      contract: repo-validation-pipeline-v1
+    - id: ws0310_ops_portal_runtime
+      paths:
+        - scripts/ops_portal/app.py
+        - scripts/ops_portal/static/portal.css
+        - scripts/ops_portal/templates/base.html
+        - scripts/ops_portal/templates/index.html
+        - scripts/ops_portal/templates/partials/activation.html
+        - scripts/ops_portal/templates/partials/launcher.html
+        - scripts/ops_portal/templates/partials/overview.html
+        - scripts/ops_portal/templates/partials/runbooks.html
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+        - tests/test_interactive_ops_portal.py
+        - tests/test_ops_portal_playbook.py
+        - tests/test_ops_portal_runtime_role.py
+      mode: shared_contract
+      contract: ws0310-portal-activation-surface-v1
+    - id: ws0310_live_apply_receipts
+      paths:
+        - receipts/live-applies/2026-04-02-adr-0310-activation-checklist-mainline-live-apply.json
+        - receipts/live-applies/evidence/2026-04-02-ws-0310-*
+        - receipts/restic-backups/20260402T122554Z.json
+        - receipts/restic-backups/20260402T124641Z.json
+        - receipts/restic-snapshots-latest.json
+        - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+      mode: shared_contract
+      contract: live-apply-receipts-v1
 canonical_truth:
-  changelog_entry: implements ADR 0310 by adding a first-run activation checklist,
-    progressive capability reveal, and server-side launcher, runbook, and service-action
-    guardrails to the interactive ops portal
+  changelog_entry: implements ADR 0310 by adding a first-run activation
+    checklist, progressive capability reveal, and server-side launcher, runbook,
+    and service-action guardrails to the interactive ops portal
   release_bump: patch
   included_in_repo_version: 0.177.144
   latest_receipts:

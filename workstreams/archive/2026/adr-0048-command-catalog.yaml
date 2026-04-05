@@ -7,13 +7,13 @@ branch: codex/adr-0048-command-catalog
 worktree_path: .worktrees/adr-0048-command-catalog
 doc: docs/workstreams/adr-0048-command-catalog.md
 depends_on:
-- adr-0044-windmill
-- adr-0046-identity-classes
+  - adr-0044-windmill
+  - adr-0046-identity-classes
 conflicts_with: []
 shared_surfaces:
-- remote commands
-- live-apply receipts
-- workflow execution
-- runbooks
+  - remote commands
+  - live-apply receipts
+  - workflow execution
+  - runbooks
 ready_to_merge: false
 live_applied: true
