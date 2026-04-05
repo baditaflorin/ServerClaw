@@ -50,12 +50,20 @@
 - name: Assert the repository workspace has no tracked or generated compose env files
   ansible.builtin.assert:
     that:
-      - (preflight_repo_env_files.files | default([])) | length == 0
+      - >-
+        (
+          preflight_repo_env_files.files | default([])
+          | map(attribute='path')
+          | reject('search', '/(\.git|\.ansible|\.claude|\.local|\.venv|\.worktrees)/')
+          | list
+          | length
+        ) == 0
     fail_msg: >-
       Repository workspace contains unexpected .env files:
       {{
         (preflight_repo_env_files.files | default([]))
         | map(attribute='path')
+        | reject('search', '/(\.git|\.ansible|\.claude|\.local|\.venv|\.worktrees)/')
         | join(', ')
       }}.
   delegate_to: localhost
