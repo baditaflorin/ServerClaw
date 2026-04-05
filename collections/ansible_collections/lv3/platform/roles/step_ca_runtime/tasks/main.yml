@@ -74,7 +74,7 @@
   changed_when: false
   failed_when: false
 
-- name: Install pinned step CLI binary on docker-runtime-lv3
+- name: Install the pinned step CLI binary when required
   ansible.builtin.shell: |
     set -euo pipefail
     workdir="$(mktemp -d)"
@@ -193,64 +193,91 @@
     group: root
     mode: "0644"
 
-- name: Pull the step-ca container image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ step_ca_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ step_ca_site_dir }}"
-  register: step_ca_pull
-  changed_when: >-
-    'Downloaded newer image' in step_ca_pull.stdout
-    or 'Pull complete' in step_ca_pull.stdout
-    or 'Pulling' in step_ca_pull.stdout
+- name: Pull the step-ca container image and recover Docker daemon availability
+  block:
+    - name: Pull the step-ca container image
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ step_ca_compose_file }}"
+          - pull
+      args:
+        chdir: "{{ step_ca_site_dir }}"
+      register: step_ca_pull
+      changed_when: >-
+        'Downloaded newer image' in step_ca_pull.stdout
+        or 'Pull complete' in step_ca_pull.stdout
+        or 'Pulling' in step_ca_pull.stdout
+  rescue:
+    - name: Flag Docker daemon availability failures during step-ca image pull
+      ansible.builtin.set_fact:
+        step_ca_pull_docker_unavailable: >-
+          {{
+            'Cannot connect to the Docker daemon'
+            in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' '
+              ~ (ansible_failed_result.stdout | default(''))
+              ~ ' '
+              ~ (ansible_failed_result.msg | default(''))
+            )
+          }}
 
-- name: Reset SSH connection before Docker chain checks for step-ca startup
-  ansible.builtin.meta: reset_connection
+    - name: Surface unexpected step-ca image pull failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('step-ca image pull failed')) }}"
+      when: not step_ca_pull_docker_unavailable
 
-- name: Check whether Docker nat chain exists before step-ca startup
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: step_ca_docker_nat_chain_check
-  changed_when: false
-  failed_when: step_ca_docker_nat_chain_check.rc not in [0, 1]
+    - name: Restart Docker before retrying the step-ca image pull
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_daemon_restart
+      vars:
+        common_docker_daemon_restart_service_name: docker
+        common_docker_daemon_restart_reason: step-ca image pull recovery
+      when: step_ca_pull_docker_unavailable
 
-- name: Check whether Docker forward chain exists before step-ca startup
-  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
-  register: step_ca_docker_forward_chain_check
-  changed_when: false
-  failed_when: step_ca_docker_forward_chain_check.rc not in [0, 1]
+    - name: Reset SSH connection before retrying the step-ca image pull after Docker recovery
+      ansible.builtin.meta: reset_connection
+      when: step_ca_pull_docker_unavailable
 
-- name: Restart Docker when required chains are missing before step-ca startup
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
-  when: step_ca_docker_nat_chain_check.rc == 1 or step_ca_docker_forward_chain_check.rc == 1
+    - name: Wait for Docker to answer before retrying the step-ca image pull
+      ansible.builtin.command:
+        argv:
+          - docker
+          - info
+      register: step_ca_docker_info_after_pull_recovery
+      changed_when: false
+      retries: "{{ step_ca_pull_recovery_retries }}"
+      delay: "{{ step_ca_pull_recovery_delay_seconds }}"
+      until: step_ca_docker_info_after_pull_recovery.rc == 0
+      when: step_ca_pull_docker_unavailable
 
-- name: Recheck Docker nat chain before step-ca startup
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: step_ca_docker_nat_chain_recheck
-  changed_when: false
+    - name: Retry pulling the step-ca container image after Docker recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ step_ca_compose_file }}"
+          - pull
+      args:
+        chdir: "{{ step_ca_site_dir }}"
+      register: step_ca_pull
+      changed_when: >-
+        'Downloaded newer image' in step_ca_pull.stdout
+        or 'Pull complete' in step_ca_pull.stdout
+        or 'Pulling' in step_ca_pull.stdout
 
-- name: Recheck Docker forward chain before step-ca startup
-  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
-  register: step_ca_docker_forward_chain_recheck
-  changed_when: false
-
-- name: Assert Docker nat chain is present before step-ca startup
-  ansible.builtin.assert:
-    that:
-      - step_ca_docker_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; step-ca published ports will fail."
-
-- name: Assert Docker forward chain is present before step-ca startup
-  ansible.builtin.assert:
-    that:
-      - step_ca_docker_forward_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; step-ca bridge networking will fail."
+- name: Ensure Docker bridge networking chains are ready before step-ca startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
 
 - name: Check whether the step-ca container already exists
   ansible.builtin.command:

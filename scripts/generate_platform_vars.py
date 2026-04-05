@@ -852,8 +852,8 @@ def build_service_topology(
         service["ports"] = ports_map
         service["urls"] = urls
 
-        if "edge" in service and service["edge"].get("kind") == "proxy":
-            service["edge"]["upstream"] = urls.get("internal", service["edge"]["upstream"])
+        if "edge" in service and service["edge"].get("kind") == "proxy" and "upstream" not in service["edge"]:
+            service["edge"]["upstream"] = urls["internal"]
         if "edge" in service and "action_url" in service["edge"] and service_id == "proxmox_ui":
             service["edge"]["action_url"] = urls["controller"]
         if "access" in service and "controller" in urls:

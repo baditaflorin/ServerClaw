@@ -42,6 +42,14 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "homepage",
         "mailpit",
     ]
+    route_upstreams = {
+        route["route_id"]: route["upstream"] for route in playbook[1]["vars"]["runtime_pool_substrate_routes"]
+    }
+    assert route_upstreams == {
+        "uptime-kuma": "{{ platform_service_topology | platform_service_url('uptime_kuma', 'internal') }}",
+        "homepage": "{{ platform_service_topology | platform_service_url('homepage', 'internal') }}",
+        "mailpit": "{{ platform_service_topology | platform_service_url('mailpit', 'internal') }}",
+    }
     assert [role["role"] for role in playbook[1]["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.linux_access",
@@ -87,7 +95,14 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         if task["name"] == "Verify the runtime-general Traefik route to Uptime Kuma"
     )
     assert uptime_route_task["ansible.builtin.uri"]["follow_redirects"] == "none"
-    assert uptime_route_task["ansible.builtin.uri"]["status_code"] == [200, 302]
+    assert uptime_route_task["ansible.builtin.uri"]["status_code"] == [200, 302, 303]
+    homepage_route_task = next(
+        task
+        for task in playbook[4]["post_tasks"]
+        if task["name"] == "Verify the runtime-general Traefik route to Homepage"
+    )
+    assert homepage_route_task["ansible.builtin.uri"]["follow_redirects"] == "none"
+    assert homepage_route_task["ansible.builtin.uri"]["status_code"] == [200, 302, 303]
 
     dapr_post_task = next(
         task
@@ -103,12 +118,37 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.nginx_edge_publication",
     ]
+    uptime_public_route_task = next(
+        task
+        for task in playbook[5]["post_tasks"]
+        if task["name"] == "Verify the Uptime Kuma public route through the shared edge"
+    )
+    assert uptime_public_route_task["ansible.builtin.uri"]["url"] == (
+        "{{ platform_service_topology | platform_service_url('uptime_kuma', 'public') }}"
+    )
+    assert uptime_public_route_task["delegate_to"] == "localhost"
+    assert uptime_public_route_task["become"] is False
+    status_public_route_task = next(
+        task
+        for task in playbook[5]["post_tasks"]
+        if task["name"] == "Verify the public status page route through the shared edge"
+    )
+    assert status_public_route_task["ansible.builtin.uri"]["url"] == "https://status.lv3.org/"
+    assert status_public_route_task["delegate_to"] == "localhost"
+    assert status_public_route_task["become"] is False
     homepage_public_route_task = next(
         task
         for task in playbook[5]["post_tasks"]
         if task["name"] == "Verify the Homepage public route through the shared edge"
     )
-    assert homepage_public_route_task["ansible.builtin.uri"]["follow_redirects"] == "none"
+    assert homepage_public_route_task["ansible.builtin.uri"]["url"] == (
+        "{{ platform_service_topology | platform_service_url('homepage', 'public') }}"
+    )
+    assert homepage_public_route_task["retries"] == 5
+    assert homepage_public_route_task["delay"] == 2
+    assert homepage_public_route_task["until"] == "runtime_general_public_homepage_route.status in [200, 302, 303]"
+    assert homepage_public_route_task["delegate_to"] == "localhost"
+    assert homepage_public_route_task["become"] is False
     assert homepage_public_route_task["ansible.builtin.uri"]["status_code"] == [200, 302, 303]
     readiness_task = next(
         task

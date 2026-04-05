@@ -259,6 +259,33 @@
   until: keycloak_operator_grafana_group_membership.status == 204
   no_log: true
 
+- name: Refresh the Keycloak admin token before reconciling the Outline automation user
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    timeout: "{{ keycloak_admin_connection_timeout }}"
+    body_format: form-urlencoded
+    body:
+      grant_type: password
+      client_id: admin-cli
+      username: "{{ keycloak_bootstrap_admin_username }}"
+      password: "{{ keycloak_bootstrap_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_repo_user_outline_admin_token
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: >-
+    keycloak_repo_user_outline_admin_token.status == 200
+    and (keycloak_repo_user_outline_admin_token.json.access_token | default('') | length) > 0
+  no_log: true
+
+- name: Record the refreshed Keycloak admin headers for Outline automation reconciliation
+  ansible.builtin.set_fact:
+    keycloak_repo_user_admin_headers:
+      Authorization: "Bearer {{ keycloak_repo_user_outline_admin_token.json.access_token }}"
+  no_log: true
+
 - name: Look up the Outline automation user in Keycloak
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users?username={{ keycloak_outline_automation_username | urlencode }}&exact=true"

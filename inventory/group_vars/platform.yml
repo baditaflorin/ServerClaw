@@ -397,7 +397,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:AA:99:7C
       cores: 4
-      memory_mb: 24576
+      memory_mb: 18432
       disk_gb: 160
       tags:
         - docker
@@ -419,7 +419,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:0F:8A:F2
       cores: 12
-      memory_mb: 24576
+      memory_mb: 12288
       disk_gb: 160
       tags:
         - docker
@@ -552,7 +552,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:C7:84:19
       cores: 4
-      memory_mb: 8192
+      memory_mb: 6144
       disk_gb: 96
       tags:
         - paas
@@ -598,7 +598,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:18:AC:80
       cores: 4
-      memory_mb: 8192
+      memory_mb: 4096
       disk_gb: 160
       tags:
         - artifact-cache
@@ -714,7 +714,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:AA:99:7C
       cores: 4
-      memory_mb: 24576
+      memory_mb: 18432
       disk_gb: 160
       tags:
         - docker
@@ -737,7 +737,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:0F:8A:F2
       cores: 12
-      memory_mb: 24576
+      memory_mb: 12288
       disk_gb: 160
       tags:
         - docker
@@ -875,7 +875,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:C7:84:19
       cores: 4
-      memory_mb: 8192
+      memory_mb: 6144
       disk_gb: 96
       tags:
         - paas
@@ -923,7 +923,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:18:AC:80
       cores: 4
-      memory_mb: 8192
+      memory_mb: 4096
       disk_gb: 160
       tags:
         - artifact-cache
@@ -1042,7 +1042,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:AA:99:7C
       cores: 4
-      memory_mb: 24576
+      memory_mb: 18432
       disk_gb: 160
       tags:
         - docker
@@ -1065,7 +1065,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:0F:8A:F2
       cores: 12
-      memory_mb: 24576
+      memory_mb: 12288
       disk_gb: 160
       tags:
         - docker
@@ -1203,7 +1203,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:C7:84:19
       cores: 4
-      memory_mb: 8192
+      memory_mb: 6144
       disk_gb: 96
       tags:
         - paas
@@ -1251,7 +1251,7 @@ platform_guest_catalog:
       gateway4: 10.10.10.1
       macaddr: BC:24:11:18:AC:80
       cores: 4
-      memory_mb: 8192
+      memory_mb: 4096
       disk_gb: 160
       tags:
         - artifact-cache
@@ -2991,8 +2991,8 @@ platform_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -3009,10 +3009,10 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.20:8091
+      internal: http://10.10.10.92:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -3110,7 +3110,8 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.91:3090
+      upstream: http://10.10.10.91:9080
+      root_proxy_path: /homepage
     service_id: homepage
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/homepage.yml
@@ -5389,8 +5390,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    owning_vm: runtime-control-lv3
+    private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -5407,10 +5408,10 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.20:8091
+      internal: http://10.10.10.92:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -5508,7 +5509,8 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.91:3090
+      upstream: http://10.10.10.91:9080
+      root_proxy_path: /homepage
     service_id: homepage
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/homepage.yml

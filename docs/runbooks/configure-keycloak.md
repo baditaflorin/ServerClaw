@@ -7,7 +7,7 @@ This runbook converges the shared Keycloak SSO broker defined by ADR 0056.
 It covers:
 
 - PostgreSQL database and role provisioning on `postgres-lv3`
-- Keycloak runtime deployment on `docker-runtime-lv3`
+- Keycloak runtime deployment on `runtime-control-lv3`
 - public DNS and edge publication at `https://sso.lv3.org`
 - repo-managed realm, groups, initial named operator account, and confidential clients
 - a repo-managed confidential client for delegated ServerClaw runtime verification
@@ -21,7 +21,7 @@ It covers:
 Before running the workflow, confirm:
 
 1. the controller has the SSH key at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
-2. `postgres-lv3`, `docker-runtime-lv3`, `monitoring-lv3`, and `nginx-lv3` are reachable through the Proxmox jump path
+2. `postgres-lv3`, `runtime-control-lv3`, `monitoring-lv3`, and `nginx-lv3` are reachable through the Proxmox jump path
 3. `HETZNER_DNS_API_TOKEN` is available in the shell that runs the converge
 
 ## Entrypoints
@@ -36,7 +36,7 @@ The workflow manages these live surfaces:
 
 - PostgreSQL database `keycloak` on `postgres-lv3`
 - PostgreSQL login role `keycloak` on `postgres-lv3`
-- Keycloak runtime under `/opt/keycloak` on `docker-runtime-lv3`
+- Keycloak runtime under `/opt/keycloak` on `runtime-control-lv3`
 - shared SSO hostname `https://sso.lv3.org`
 - repo-managed realm `lv3`
 - internal Keycloak mail submission endpoint `lv3-mail-stalwart:1587` on the shared mail Docker network
@@ -67,11 +67,11 @@ Treat the entire `.local/keycloak/` subtree as recovery material and keep it out
 Run these checks after converge:
 
 1. `make syntax-check-keycloak`
-2. `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'docker compose --file /opt/keycloak/docker-compose.yml ps && sudo ls -l /opt/keycloak/openbao /run/lv3-secrets/keycloak && sudo test ! -e /opt/keycloak/keycloak.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+2. `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml runtime-control-lv3 -m shell -a 'docker compose --file /opt/keycloak/docker-compose.yml ps && sudo ls -l /opt/keycloak/openbao /run/lv3-secrets/keycloak && sudo test ! -e /opt/keycloak/keycloak.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 3. `curl -s https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
 4. `curl -I https://grafana.lv3.org/login/generic_oauth`
 5. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
-6. `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a "docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc 'timeout 15 bash -lc \"exec 3<>/dev/tcp/lv3-mail-stalwart/1587\"'" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+6. `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml runtime-control-lv3 -m shell -a "docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc 'timeout 15 bash -lc \"exec 3<>/dev/tcp/lv3-mail-stalwart/1587\"'" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 7. `uv run --with playwright python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt`
 8. `curl -s --data "grant_type=client_credentials&client_id=serverclaw-runtime&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
 
@@ -117,7 +117,7 @@ The password recovery action:
 
 If the master-realm bootstrap admin can no longer obtain a token but the live
 Keycloak container is healthy, use the runtime-local Keycloak recovery path on
-`docker-runtime-lv3` before changing any downstream client configuration.
+`runtime-control-lv3` before changing any downstream client configuration.
 
 The validated recovery sequence from the 2026-04-03 Open WebUI rollout was:
 
@@ -134,7 +134,7 @@ The validated recovery sequence from the 2026-04-03 Open WebUI rollout was:
 - The shared browser-session logout contract depends on the edge publication and app-local consumers being current as well as Keycloak. After changing post-logout redirect URIs here, replay `make configure-edge-publication` and any affected service playbooks before relying on end-to-end logout verification.
 - The shared edge and Grafana flows now complete Keycloak logout without an interactive confirmation page because the shared proxy logout path can provide `id_token_hint`. Outline is the current declared gap: its app-local logout reaches the Keycloak confirmation page and then returns through `https://ops.lv3.org/.well-known/lv3/session/proxy-logout`. Treat that confirmation page as expected current behavior until Outline can provide an `id_token_hint`.
 - The Keycloak master bootstrap admin remains a break-glass recovery identity and should not become a routine human login.
-- As of the 2026-04-03 Open WebUI rollout, the repo-managed Keycloak runtime and its controller-local mirrors are confirmed live on `docker-runtime-lv3`. If downstream client reconciliation fails after a Keycloak recovery, check the controller-local bootstrap password mirror first instead of hand-creating replacement client secrets.
+- After the runtime-control live apply completes, the repo-managed Keycloak runtime and its controller-local mirrors are expected on `runtime-control-lv3`. If downstream client reconciliation fails after a Keycloak recovery, check the controller-local bootstrap password mirror first instead of hand-creating replacement client secrets.
 - The named operator account is created with a bootstrap password and a required `CONFIGURE_TOTP` action so MFA enrollment happens on first successful interactive login.
 - Because the named operator remains MFA-first, the Keycloak converge does not
   verify a repo-managed direct-grant token for that human identity.

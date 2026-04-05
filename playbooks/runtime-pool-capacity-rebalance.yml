@@ -1,0 +1,145 @@
+# Playbook: runtime-pool-capacity-rebalance.yml
+# Purpose: Rebalance existing Proxmox guest memory allocations so the remaining runtime-general and runtime-control pool guests can be created without violating the governed host free-memory floor.
+# Use case: Run before the remaining ADR 0319 and ADR 0320 pool live applies when the production host needs repo-managed capacity reclamation.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector. This playbook currently converges only the production host.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH routing mode for the post-restart verification step.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - Existing guests `docker-build-lv3`, `artifact-cache-lv3`, `coolify-lv3`, and `docker-runtime-lv3` carry the repo-declared reduced memory allocations needed for the remaining runtime-pool rollout.
+#
+# Idempotency: Partially idempotent
+#              The Proxmox-side replay is idempotent, but the memory changes require a stop/start cycle for each selected VM so the new allocation becomes effective.
+#
+# Dependencies:
+#   - ADR 0319: Introduces the runtime-pool split that needs dedicated runtime-general and runtime-control guests.
+#   - ADR 0321: Governs the host free-memory floor that this rebalance protects before the remaining pool VMs are created.
+#   - Role: lv3.platform.proxmox_guests — reapplies the selected VM hardware settings from the canonical guest inventory.
+#
+# Related ADRs: 0319, 0321
+# Related Runbooks: docs/runbooks/runtime-pool-capacity-rebalance.md, docs/runbooks/runtime-pool-memory-governance.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-03
+---
+- name: Rebalance the existing runtime-supporting VMs on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-runtime-pool-capacity-rebalance
+  vars:
+    runtime_pool_capacity_rebalance_vmids:
+      - 130
+      - 180
+      - 170
+      - 120
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'in', runtime_pool_capacity_rebalance_vmids)
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - runtime-pool-capacity-rebalance
+
+  post_tasks:
+    - name: Restart each rebalanced guest so the new memory setting takes effect
+      ansible.builtin.shell: |
+        qm stop {{ item.vmid }} --skiplock 1 || true
+        qm start {{ item.vmid }}
+      args:
+        executable: /bin/bash
+      changed_when: true
+      loop: "{{ proxmox_guests_active }}"
+      loop_control:
+        label: "{{ item.name }}"
+      tags:
+        - guests
+        - runtime-pool-capacity-rebalance
+
+    - name: Verify the rebalanced guest memory from Proxmox
+      ansible.builtin.command:
+        argv:
+          - qm
+          - config
+          - "{{ item.vmid | string }}"
+      register: runtime_pool_capacity_rebalance_qm_config
+      changed_when: false
+      loop: "{{ proxmox_guests_active }}"
+      loop_control:
+        label: "{{ item.name }}"
+      failed_when: >
+        runtime_pool_capacity_rebalance_qm_config.rc != 0
+        or ('memory: ' ~ (item.memory_mb | string)) not in runtime_pool_capacity_rebalance_qm_config.stdout
+      tags:
+        - guests
+        - runtime-pool-capacity-rebalance
+
+- name: Verify the rebalanced guests come back with SSH and Docker
+  hosts: docker-build-lv3:artifact-cache-lv3:coolify-lv3:docker-runtime-lv3
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-pool-capacity-rebalance
+
+  tasks:
+    - name: Wait for SSH after the rebalance restart
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after the rebalance restart
+      ansible.builtin.setup:
+
+    - name: Ensure Docker is started on the rebalanced guest
+      ansible.builtin.service:
+        name: docker
+        state: started
+
+    - name: Verify Docker is active on the rebalanced guest
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-active
+          - docker.service
+      register: runtime_pool_capacity_rebalance_docker
+      changed_when: false
+      failed_when: false
+      retries: 10
+      delay: 3
+      until: runtime_pool_capacity_rebalance_docker.stdout.strip() == "active"
+
+- name: Verify host free memory after the rebalance
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - automation
+    - service-runtime-pool-capacity-rebalance
+
+  tasks:
+    - name: Read the host memory summary after the rebalance
+      ansible.builtin.command:
+        argv:
+          - free
+          - -h
+      register: runtime_pool_capacity_rebalance_free
+      changed_when: false
+
+    - name: Emit the host memory summary after the rebalance
+      ansible.builtin.debug:
+        var: runtime_pool_capacity_rebalance_free.stdout_lines

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,6 +30,14 @@ def test_ntfy_config_renders_governed_auth_line_payloads() -> None:
     assert "auth-users: {{ ntfy_runtime_auth_user_lines | to_json }}" in config
     assert "auth-tokens: {{ ntfy_runtime_auth_token_lines | to_json }}" in config
     assert "auth-access: {{ ntfy_runtime_auth_access_lines | to_json }}" in config
+
+
+def test_ntfy_registry_declares_windmill_resource_with_windmill_safe_path() -> None:
+    registry = yaml.safe_load((REPO_ROOT / "config" / "ntfy" / "topics.yaml").read_text(encoding="utf-8"))
+
+    assert registry["windmill"]["resource_type"]["name"] == "ntfy_platform_channel"
+    assert registry["windmill"]["resource"]["path"] == "f/lv3/ntfy_platform"
+    assert registry["windmill"]["resource"]["publisher"] == "windmill"
 
 
 def test_ntfy_runtime_restarts_when_config_changes() -> None:

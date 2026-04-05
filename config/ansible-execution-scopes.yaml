@@ -224,6 +224,13 @@ playbooks:
       - config/execution-lanes.yaml
       - config/api-gateway-catalog.json
       - config/service-capability-catalog.json
+  playbooks/runtime-pool-capacity-rebalance.yml:
+    playbook_id: runtime-pool-capacity-rebalance
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-pool-capacity-rebalance
+      - inventory/host_vars/proxmox_florin.yml
+      - config/capacity-model.json
   playbooks/runtime-general-pool.yml:
     playbook_id: runtime-general-pool
     mutation_scope: platform
@@ -707,6 +714,13 @@ playbooks:
       - config/execution-lanes.yaml
       - config/api-gateway-catalog.json
       - config/service-capability-catalog.json
+  playbooks/services/runtime-pool-capacity-rebalance.yml:
+    playbook_id: runtime-pool-capacity-rebalance
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-pool-capacity-rebalance
+      - inventory/host_vars/proxmox_florin.yml
+      - config/capacity-model.json
   playbooks/services/runtime-general-pool.yml:
     playbook_id: runtime-general-pool
     mutation_scope: platform

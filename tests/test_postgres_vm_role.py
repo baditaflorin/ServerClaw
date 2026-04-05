@@ -35,6 +35,9 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
     tasks = load_yaml(TASKS_PATH)
     install_task = next(task for task in tasks if task.get("name") == "Install PostgreSQL guest packages")
     package_task = next(task for task in tasks if task.get("name") == "Ensure PostgreSQL pgaudit package is present")
+    extension_check_task = next(
+        task for task in tasks if task.get("name") == "Check whether pgaudit extension already exists in each writable database"
+    )
     extension_task = next(task for task in tasks if task.get("name") == "Create pgaudit extension in writable databases")
 
     assert install_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
@@ -44,7 +47,15 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
         "postgres_vm_pgaudit_enabled | bool",
         "'pgaudit' in postgres_vm_shared_preload_libraries",
     ]
+    assert extension_check_task["register"] == "postgres_vm_pgaudit_extension_check"
+    assert extension_check_task["retries"] == 10
+    assert extension_check_task["delay"] == 3
+    assert extension_check_task["until"] == "postgres_vm_pgaudit_extension_check.rc == 0"
     assert extension_task["ansible.builtin.command"]["argv"][-1] == "CREATE EXTENSION IF NOT EXISTS pgaudit"
+    assert extension_task["register"] == "postgres_vm_pgaudit_extension_create"
+    assert extension_task["retries"] == 10
+    assert extension_task["delay"] == 3
+    assert extension_task["until"] == "postgres_vm_pgaudit_extension_create.rc == 0"
 
 
 def test_main_tasks_load_sensitive_table_catalog_and_grant_audit_role() -> None:

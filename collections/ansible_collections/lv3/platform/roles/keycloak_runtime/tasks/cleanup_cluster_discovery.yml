@@ -1,0 +1,32 @@
+# Purpose: Clear duplicate Keycloak JDBC discovery rows before a single-node recovery recreate restarts the runtime.
+# Use case: Included from the Keycloak runtime role when duplicate JGroups JDBC_PING rows would otherwise hold readiness DOWN during a restart or recovery.
+# Inputs: Managed Keycloak database name, delegated PostgreSQL host, and the cluster discovery cleanup settings.
+# Outputs: Removes duplicate rows from the Keycloak `jgroups_ping` table before the next container boot while leaving a single healthy row untouched.
+# Idempotency: Partially idempotent because it only changes state when duplicate discovery rows exist; repeated runs safely no-op once the table is reduced to zero or one row.
+# Dependencies: ADR 0165, ADR 0056, and ADR 0262.
+- name: Remove duplicate Keycloak JDBC discovery rows before recovery
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ keycloak_database_name }}"
+      - -At
+      - -c
+      - >-
+        WITH deleted AS (
+          DELETE FROM jgroups_ping
+          WHERE cluster_name = '{{ keycloak_cluster_discovery_cluster_name }}'
+            AND (
+              SELECT count(*)
+              FROM jgroups_ping
+              WHERE cluster_name = '{{ keycloak_cluster_discovery_cluster_name }}'
+            ) > 1
+          RETURNING 1
+        )
+        SELECT count(*) FROM deleted;
+  register: keycloak_cluster_discovery_cleanup
+  changed_when: (keycloak_cluster_discovery_cleanup.stdout | trim | int) > 0
+  delegate_to: "{{ keycloak_cluster_discovery_cleanup_delegate_host }}"
+  become: true
+  become_user: postgres
+  when: keycloak_cluster_discovery_cleanup_enabled

@@ -95,25 +95,25 @@
     runtime_pool_substrate_routes:
       - route_id: api-gateway
         prefix: /api-gateway
-        upstream: "http://127.0.0.1:{{ platform_port_assignments.api_gateway_internal_port }}"
+        upstream: "{{ platform_service_topology | platform_service_url('api_gateway', 'internal') }}"
       - route_id: gitea
         prefix: /gitea
-        upstream: "http://127.0.0.1:{{ platform_port_assignments.gitea_http_port }}"
+        upstream: "{{ platform_service_topology | platform_service_url('gitea', 'internal') }}"
       - route_id: keycloak
         prefix: /keycloak
         upstream: http://127.0.0.1:18080
       - route_id: mail-platform
         prefix: /mail-platform
-        upstream: "http://127.0.0.1:{{ platform_port_assignments.mail_platform_gateway_port }}"
+        upstream: "{{ platform_service_topology.mail_platform.urls.private_api }}"
       - route_id: openfga
         prefix: /openfga
-        upstream: "http://127.0.0.1:{{ platform_port_assignments.openfga_http_port }}"
+        upstream: "{{ platform_service_topology | platform_service_url('openfga', 'internal') }}"
       - route_id: semaphore
         prefix: /semaphore
-        upstream: "http://127.0.0.1:{{ platform_port_assignments.semaphore_server_port }}"
+        upstream: "{{ platform_service_topology | platform_service_url('semaphore', 'internal') }}"
       - route_id: windmill
         prefix: /windmill
-        upstream: "http://127.0.0.1:{{ platform_port_assignments.windmill_server_port }}"
+        upstream: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 
   pre_tasks:
     - name: Wait for the runtime-control VM SSH service to be reachable
@@ -201,9 +201,6 @@
 
 - import_playbook: step-ca.yml
 - import_playbook: openbao.yml
-  vars:
-    openbao_migration_enabled: true
-    openbao_migration_source_host: docker-runtime-lv3
 - import_playbook: mail-platform.yml
 - import_playbook: keycloak.yml
 - import_playbook: openfga.yml

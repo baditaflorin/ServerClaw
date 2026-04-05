@@ -159,14 +159,14 @@ curl -s \
 Run these checks after converge:
 
 1. `make syntax-check-mail-platform`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.92 'docker compose --file /opt/mail-platform/docker-compose.yml ps && sudo ls -l /opt/mail-platform/openbao /run/lv3-secrets/mail-platform && sudo test ! -e /opt/mail-platform/gateway/gateway.env'`
-3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.92 'python3 /usr/local/libexec/lv3-mail-platform-metrics.py'`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.92 'docker compose --file /opt/mail-platform/docker-compose.yml ps && sudo ls -l /opt/mail-platform/openbao /run/lv3-secrets/mail-platform && sudo test ! -e /opt/mail-platform/gateway/gateway.env'`
+3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.92 'python3 /usr/local/libexec/lv3-mail-platform-metrics.py'`
 4. `curl -s -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" http://10.10.10.92:8081/v1/profiles`
 5. `curl -s -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" http://10.10.10.92:8081/v1/mailboxes`
 6. `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit runtime-control-lv3`
 7. `curl -I https://grafana.lv3.org`
-8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values | jq -r ''.tagValues[]'' | grep mail-gateway'`
-9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.92 'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path(\"/etc/lv3/mail-platform/server-mailbox-password\").read_text().strip()\nclient = smtplib.SMTP(\"10.10.10.92\", 1587, timeout=10)\nclient.ehlo()\nassert \"starttls\" not in client.esmtp_features, client.esmtp_features\nprint(client.login(\"server\", password))\nclient.quit()\nPY'`
+8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values | jq -r ''.tagValues[]'' | grep mail-gateway'`
+9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.92 'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path(\"/etc/lv3/mail-platform/server-mailbox-password\").read_text().strip()\nclient = smtplib.SMTP(\"10.10.10.92\", 1587, timeout=10)\nclient.ehlo()\nassert \"starttls\" not in client.esmtp_features, client.esmtp_features\nprint(client.login(\"server\", password))\nclient.quit()\nPY'`
 
 ## Notes
 

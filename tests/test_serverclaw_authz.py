@@ -6,6 +6,8 @@ import urllib.error
 from datetime import timedelta
 from pathlib import Path
 
+import pytest
+
 import serverclaw_authz
 
 
@@ -134,6 +136,79 @@ def test_http_json_retries_transient_transport_failures(monkeypatch) -> None:
     assert attempts["count"] == 3
     assert status == 200
     assert payload == {"status": "ok"}
+
+
+def test_http_json_retries_transient_http_502_failures(monkeypatch) -> None:
+    attempts = {"count": 0}
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return b'{"status":"ok"}'
+
+    class FakeHttpError(urllib.error.HTTPError):
+        def __init__(self) -> None:
+            super().__init__(
+                url="http://example.invalid/healthz",
+                code=502,
+                msg="Bad Gateway",
+                hdrs=None,
+                fp=None,
+            )
+
+        def read(self) -> bytes:
+            return b'{"message":"upstream unavailable"}'
+
+    def fake_urlopen(request, timeout=None):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise FakeHttpError()
+        return FakeResponse()
+
+    monkeypatch.setattr(serverclaw_authz.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(serverclaw_authz.time, "sleep", lambda *_args, **_kwargs: None)
+
+    status, payload = serverclaw_authz.http_json("GET", "http://example.invalid/healthz")
+
+    assert attempts["count"] == 3
+    assert status == 200
+    assert payload == {"status": "ok"}
+
+
+def test_http_json_wraps_permanent_http_failures_without_retry(monkeypatch) -> None:
+    attempts = {"count": 0}
+
+    class FakeHttpError(urllib.error.HTTPError):
+        def __init__(self) -> None:
+            super().__init__(
+                url="http://example.invalid/healthz",
+                code=401,
+                msg="Unauthorized",
+                hdrs=None,
+                fp=None,
+            )
+
+        def read(self) -> bytes:
+            return b'{"message":"unauthorized"}'
+
+    def fake_urlopen(request, timeout=None):
+        attempts["count"] += 1
+        raise FakeHttpError()
+
+    monkeypatch.setattr(serverclaw_authz.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(serverclaw_authz.time, "sleep", lambda *_args, **_kwargs: None)
+
+    with pytest.raises(serverclaw_authz.AuthzError, match="failed with status 401"):
+        serverclaw_authz.http_json("GET", "http://example.invalid/healthz")
+
+    assert attempts["count"] == 1
 
 
 def test_repo_path_uses_the_shared_repo_root_for_worktree_local_artifacts(monkeypatch, tmp_path: Path) -> None:

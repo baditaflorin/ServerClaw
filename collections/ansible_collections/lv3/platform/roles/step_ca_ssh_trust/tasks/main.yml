@@ -6,14 +6,14 @@
       - step_ca_internal_url | length > 0
       - step_ca_local_root_certificate_file | length > 0
       - step_ca_local_ssh_user_ca_file | length > 0
-      - step_ca_local_hosts_password_file | length > 0
       - step_ca_root_remote_file | length > 0
       - step_ca_ssh_trusted_user_ca_file | length > 0
       - step_ca_ssh_host_private_key | length > 0
       - step_ca_ssh_host_public_key | length > 0
       - step_ca_ssh_host_certificate_file | length > 0
       - step_ca_ssh_trust_dropin_file | length > 0
-    fail_msg: "step_ca_ssh_trust requires the controller-local bootstrap artifacts, CA URL, and SSH host-key paths."
+      - step_ca_ssh_sign_delegate_host | length > 0
+    fail_msg: "step_ca_ssh_trust requires the controller-local trust artifacts, CA URL, delegate host, and SSH host-key paths."
 
 - name: Check installed step CLI version on SSH trust target
   ansible.builtin.command: step version
@@ -64,15 +64,6 @@
     group: root
     mode: "0644"
 
-- name: Install the hosts provisioner password on the target
-  ansible.builtin.copy:
-    dest: "{{ step_ca_ssh_hosts_password_remote_file }}"
-    content: "{{ lookup('file', step_ca_local_hosts_password_file) }}"
-    owner: root
-    group: root
-    mode: "0600"
-  no_log: true
-
 - name: Build the SSH host certificate principal list
   ansible.builtin.set_fact:
     step_ca_ssh_host_principals: >-
@@ -107,15 +98,44 @@
   changed_when: false
   failed_when: step_ca_ssh_needs_renewal.rc not in [0, 1, 2]
 
+- name: Read the SSH host public key that will be signed
+  ansible.builtin.slurp:
+    src: "{{ step_ca_ssh_host_public_key }}"
+  register: step_ca_ssh_host_public_key_slurp
+  when: step_ca_ssh_needs_renewal.rc != 1
+  no_log: true
+
+- name: Derive the SSH host identity UUID from /etc/machine-id
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import hashlib
+        import pathlib
+        import uuid
+
+        machine_id = pathlib.Path("/etc/machine-id").read_bytes()
+        payload = bytearray(hashlib.blake2b(machine_id, digest_size=16, key=b"man moon machine").digest())
+        payload[6] = (payload[6] & 0x0F) | 0x40
+        payload[8] = (payload[8] & 0x3F) | 0x80
+        print(uuid.UUID(bytes=bytes(payload)))
+  register: step_ca_ssh_host_identity_uuid
+  changed_when: false
+  when: step_ca_ssh_needs_renewal.rc != 1
+
 - name: Issue or renew the SSH host certificate from step-ca
   ansible.builtin.shell: |
     set -euo pipefail
+    workdir="$(mktemp -d)"
+    trap 'rm -rf "$workdir"' EXIT
+    printf '%s' '{{ step_ca_ssh_host_public_key_slurp.content }}' | base64 -d > "$workdir/host.pub"
     step ssh certificate \
       --host \
       --sign \
       --force \
       --no-agent \
-      --host-id machine \
+      --host-id "{{ step_ca_ssh_host_identity_uuid.stdout | trim }}" \
     {% for principal in step_ca_ssh_host_principals %}
       --principal "{{ principal }}" \
     {% endfor %}
@@ -124,11 +144,31 @@
       --ca-url "{{ step_ca_internal_url }}" \
       --root "{{ step_ca_root_remote_file }}" \
       "{{ step_ca_ssh_host_key_id }}" \
-      "{{ step_ca_ssh_host_public_key }}"
+      "$workdir/host.pub" \
+      >/dev/null 2>&1
+    cat "$workdir/host-cert.pub"
   args:
     executable: /bin/bash
+  register: step_ca_ssh_issue_result
+  delegate_to: "{{ step_ca_ssh_sign_delegate_host }}"
+  become: true
   when: step_ca_ssh_needs_renewal.rc != 1
-  changed_when: true
+  changed_when: false
+  retries: "{{ step_ca_ssh_issue_retries }}"
+  delay: "{{ step_ca_ssh_issue_delay_seconds }}"
+  until: step_ca_ssh_issue_result.rc == 0
+  throttle: 1
+  no_log: true
+
+- name: Install the signed SSH host certificate on the target
+  ansible.builtin.copy:
+    dest: "{{ step_ca_ssh_host_certificate_file }}"
+    content: "{{ step_ca_ssh_issue_result.stdout }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: step_ca_ssh_needs_renewal.rc != 1
+  no_log: true
 
 - name: Render the SSH CA trust drop-in
   ansible.builtin.template:

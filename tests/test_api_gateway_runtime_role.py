@@ -84,7 +84,9 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
     assert "api_gateway_runtime_recovery_probe_retries: 18" in defaults
     assert "api_gateway_runtime_recovery_probe_delay: 5" in defaults
-    assert "api_gateway_structured_search_verify_retries: 12" in defaults
+    assert "api_gateway_typesense_verify_retries: 24" in defaults
+    assert "api_gateway_typesense_verify_delay: 5" in defaults
+    assert "api_gateway_structured_search_verify_retries: 24" in defaults
     assert "api_gateway_structured_search_verify_delay: 5" in defaults
     assert "api_gateway_tree_sync_become_timeout: 60" in defaults
     assert "api_gateway_network_mode: host" in defaults
@@ -322,6 +324,11 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert 'retries: "{{ api_gateway_keycloak_verify_token_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_keycloak_verify_token_delay }}"' in verify_tasks
     assert "until: api_gateway_verify_token_response.status == 200" in verify_tasks
+    assert "Wait for the Typesense backend used by API gateway structured search verification" in verify_tasks
+    assert 'X-TYPESENSE-API-KEY: "{{ api_gateway_resolved_typesense_api_key }}"' in verify_tasks
+    assert 'retries: "{{ api_gateway_typesense_verify_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_typesense_verify_delay }}"' in verify_tasks
+    assert "until: api_gateway_typesense_health_check.status == 200" in verify_tasks
     assert 'retries: "{{ api_gateway_structured_search_verify_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_structured_search_verify_delay }}"' in verify_tasks
     assert "until: api_gateway_structured_search_check.status == 200" in verify_tasks

@@ -15,13 +15,28 @@
 - name: Converge the private step-ca runtime on runtime-control-lv3
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
-  gather_facts: true
+  gather_facts: false
   tags:
     - tier-2
     - security
     - service-step-ca
 
   pre_tasks:
+    - name: Reset the runtime-control SSH connection after Proxmox-side step-ca changes
+      ansible.builtin.meta: reset_connection
+
+    - name: Wait for the runtime-control SSH connection after Proxmox-side step-ca changes
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather runtime-control facts after the SSH transport reset
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - min
+          - network
+        gather_timeout: 15
+
     - name: Run shared preflight checks
       ansible.builtin.import_tasks: tasks/preflight.yml
       vars:
@@ -34,6 +49,7 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.step_ca_runtime
+    - role: lv3.platform.step_ca_ssh_trust
 
   post_tasks:
     - name: Run shared post-verify checks
@@ -63,15 +79,30 @@
           - "{{ management_tailscale_ipv4 }}"
 
 - name: Converge SSH CA trust on managed guests
-  hosts: "{{ 'lv3_guests:&staging' if (env | default('production')) == 'staging' else 'lv3_guests:&production' }}"
+  hosts: "{{ 'lv3_guests:&staging:!docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'lv3_guests:&production:!runtime-control-lv3' }}"
   become: true
-  gather_facts: true
+  gather_facts: false
   tags:
     - tier-1
     - security
     - service-step-ca
 
   pre_tasks:
+    - name: Reset managed guest SSH connections after the Proxmox step-ca trust changes
+      ansible.builtin.meta: reset_connection
+
+    - name: Wait for managed guest SSH connections after the Proxmox step-ca trust changes
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather managed guest facts after the SSH transport reset
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - min
+          - network
+        gather_timeout: 15
+
     - name: Run shared preflight checks
       ansible.builtin.import_tasks: tasks/preflight.yml
       vars:

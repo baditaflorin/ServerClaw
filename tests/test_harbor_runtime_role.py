@@ -153,6 +153,56 @@ def test_role_only_runs_harbor_prepare_when_compose_assets_need_regeneration() -
     assert "or harbor_prepare_needed | bool" in compose_assets_changed_fact
 
 
+def test_role_recovers_retention_policy_id_from_create_location_and_persists_metadata() -> None:
+    tasks = load_yaml(ROLE_TASKS)
+    task_by_name = {task["name"]: task for task in tasks}
+
+    create_task = task_by_name["Create the check-runner Harbor retention policy when missing"]
+    created_fact_task = task_by_name["Record the check-runner Harbor retention policy ID advertised after creation"]
+    retention_id_task = task_by_name["Record the check-runner Harbor retention policy ID"]
+    sync_task = task_by_name[
+        "Persist the check-runner Harbor retention policy ID in project metadata when Harbor omits it"
+    ]
+    synced_query_task = task_by_name[
+        "Re-query the check-runner Harbor project metadata after retention ID synchronization"
+    ]
+    synced_assert_task = task_by_name[
+        "Assert Harbor persisted the check-runner retention policy ID for future reconciliations"
+    ]
+
+    assert create_task["register"] == "harbor_check_runner_retention_create"
+    assert create_task["when"] == "harbor_check_runner_retention_id_before == 0"
+
+    created_facts = created_fact_task["ansible.builtin.set_fact"]
+    assert "harbor_check_runner_retention_create.location" in created_facts[
+        "harbor_check_runner_retention_create_location"
+    ]
+    assert "regex_findall('[0-9]+$')" in created_facts["harbor_check_runner_retention_id_created"]
+    assert created_fact_task["when"] == "harbor_check_runner_retention_id_before == 0"
+
+    retention_id_fact = retention_id_task["ansible.builtin.set_fact"]["harbor_check_runner_retention_id"]
+    assert "after_id" in retention_id_fact
+    assert "before_id" in retention_id_fact
+    assert "created_id" in retention_id_fact
+
+    assert sync_task["ansible.builtin.uri"]["method"] == "POST"
+    assert sync_task["ansible.builtin.uri"]["body"]["retention_id"] == "{{ harbor_check_runner_retention_id | string }}"
+    assert sync_task["when"] == [
+        "harbor_check_runner_retention_id | int > 0",
+        "harbor_check_runner_project_metadata_after.json.retention_id | default('0') | int == 0",
+    ]
+
+    assert synced_query_task["register"] == "harbor_check_runner_project_metadata_synced"
+    assert synced_query_task["when"] == [
+        "harbor_check_runner_retention_id | int > 0",
+        "harbor_check_runner_project_metadata_after.json.retention_id | default('0') | int == 0",
+    ]
+    assert (
+        synced_assert_task["ansible.builtin.assert"]["that"][0]
+        == "harbor_check_runner_project_metadata_synced.json.retention_id | default('0') | int == harbor_check_runner_retention_id | int"
+    )
+
+
 def test_verify_accepts_running_services_after_ping() -> None:
     tasks = load_yaml(VERIFY_TASKS)
     task_by_name = {task["name"]: task for task in tasks}

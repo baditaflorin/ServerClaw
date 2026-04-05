@@ -51,7 +51,7 @@
       "environment": "production",
       "metrics_host": "docker-runtime-lv3",
       "allocated": {
-        "ram_gb": 24,
+        "ram_gb": 18,
         "vcpu": 4,
         "disk_gb": 96
       },
@@ -63,7 +63,7 @@
       "disk_paths": [
         "/"
       ],
-      "notes": "Validated from live qm config on 2026-03-23."
+      "notes": "Reduced in ws-0331 to fund the remaining runtime pool guests while keeping the ADR 0321 host floor intact."
     },
     {
       "vmid": 130,
@@ -72,7 +72,7 @@
       "environment": "production",
       "metrics_host": "docker-build-lv3",
       "allocated": {
-        "ram_gb": 24,
+        "ram_gb": 12,
         "vcpu": 12,
         "disk_gb": 160
       },
@@ -84,7 +84,7 @@
       "disk_paths": [
         "/"
       ],
-      "notes": "Validated from live qm config on 2026-03-23."
+      "notes": "Reduced in ws-0331 to return idle build-host headroom to the remaining runtime pool rollout."
     },
     {
       "vmid": 140,
@@ -157,7 +157,7 @@
       "environment": "production",
       "metrics_host": "coolify-lv3",
       "allocated": {
-        "ram_gb": 8,
+        "ram_gb": 6,
         "vcpu": 4,
         "disk_gb": 96
       },
@@ -169,7 +169,7 @@
       "disk_paths": [
         "/"
       ],
-      "notes": "Declared from inventory for ADR 0194 Coolify rollout."
+      "notes": "Reduced in ws-0331 after verifying the live Coolify guest remained well below the previous 8 GiB allocation."
     },
     {
       "vmid": 171,
@@ -199,7 +199,7 @@
       "environment": "production",
       "metrics_host": "artifact-cache-lv3",
       "allocated": {
-        "ram_gb": 8,
+        "ram_gb": 4,
         "vcpu": 4,
         "disk_gb": 160
       },
@@ -211,7 +211,7 @@
       "disk_paths": [
         "/"
       ],
-      "notes": "Validated from live qm config on 2026-03-30 for ADR 0296 dedicated artifact cache adoption."
+      "notes": "Reduced in ws-0331 to release host memory before the remaining runtime pool live apply while keeping the dedicated cache plane online."
     },
     {
       "vmid": 190,

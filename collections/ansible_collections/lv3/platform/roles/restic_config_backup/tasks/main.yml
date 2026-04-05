@@ -134,6 +134,39 @@
       nats_password: "{{ restic_config_backup_nats_password }}"
       ntfy_token: "{{ restic_config_backup_ntfy_token }}"
 
+- name: Probe whether the dedicated OpenBao API is reachable from the backup runtime
+  ansible.builtin.uri:
+    url: "{{ restic_config_backup_runtime_openbao_address }}/v1/sys/health"
+    method: GET
+    return_content: false
+    status_code:
+      - 200
+      - 429
+      - 472
+      - 473
+      - 501
+      - 503
+    timeout: 5
+  register: restic_config_backup_runtime_remote_openbao_probe
+  changed_when: false
+  failed_when: false
+
+- name: Choose the OpenBao API path for restic host-native credentials
+  ansible.builtin.set_fact:
+    restic_config_backup_runtime_openbao_effective_address: >-
+      {{
+        restic_config_backup_runtime_openbao_address
+        if restic_config_backup_runtime_remote_openbao_probe.status | default(0) in [200, 429, 472, 473, 501, 503]
+        else restic_config_backup_runtime_openbao_local_address
+      }}
+    restic_config_backup_runtime_openbao_effective_manage_local_runtime: >-
+      {{
+        not (
+          restic_config_backup_runtime_remote_openbao_probe.status | default(0)
+          in [200, 429, 472, 473, 501, 503]
+        )
+      }}
+
 - name: Provision OpenBao-backed systemd credentials for the restic backup service
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -157,6 +190,8 @@
     common_openbao_systemd_credentials_image: "{{ openbao_agent_image }}"
     common_openbao_systemd_credentials_agent_service_name: "{{ restic_config_backup_runtime_openbao_agent_service_name }}"
     common_openbao_systemd_credentials_container_name: "{{ restic_config_backup_runtime_openbao_agent_container_name }}"
+    common_openbao_systemd_credentials_openbao_address: "{{ restic_config_backup_runtime_openbao_effective_address }}"
+    common_openbao_systemd_credentials_manage_local_openbao_runtime: "{{ restic_config_backup_runtime_openbao_effective_manage_local_runtime }}"
 
 - name: Render the restic runtime wrapper
   ansible.builtin.template:

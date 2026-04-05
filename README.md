@@ -46,8 +46,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.5` |
-| Platform version | `0.130.99` |
+| Repository version | `0.178.6` |
+| Platform version | `0.130.100` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -57,7 +57,7 @@ rewriting one operator's workstation paths.
 | Field | Value |
 | --- | --- |
 | Managed guest count | 13 |
-| Running guest count | 10 |
+| Running guest count | 12 |
 | Template VM present | `true` |
 | Declared services | 72 |
 | Publicly published services | 45 |
@@ -73,26 +73,26 @@ rewriting one operator's workstation paths.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `temporal` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `step_ca` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `semaphore` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `openfga` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `mailpit` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `mail_platform` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `homepage` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `harbor` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `gitea` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `docker_runtime` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `api_gateway` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `vaultwarden` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `runbook_task_reentry` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
-| `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |
-| `public_github_readiness` | `2026-04-04-adr-0330-public-github-readiness-mainline-live-apply` |
-| `private_overlay_contract` | `2026-04-04-adr-0333-private-overlay-mainline-live-apply` |
-| `plausible_analytics` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `ops_portal` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
-| `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
-| `matrix_synapse` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `keycloak` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
-| `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `harbor` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `grist` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
-| `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
-| `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
-| `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 
 Showing 20 of 171 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -173,8 +173,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.5` |
-| Platform version | `0.130.99` |
+| Repository version | `0.178.6` |
+| Platform version | `0.130.100` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -194,7 +194,7 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 296 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 297 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |

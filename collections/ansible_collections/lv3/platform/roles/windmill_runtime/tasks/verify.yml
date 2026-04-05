@@ -280,7 +280,7 @@
 
 - name: Verify the critical Windmill verification scripts are seeded with current controller content
   ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+    url: "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
     method: GET
     headers:
       Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
@@ -365,7 +365,7 @@
       - python3
       - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py"
       - --base-url
-      - "{{ windmill_private_base_url }}"
+      - "{{ windmill_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --manifest
@@ -393,7 +393,7 @@
 
 - name: Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt
   ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+    url: "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
     method: GET
     headers:
       Authorization: "Bearer {{ windmill_bootstrap_session_token }}"

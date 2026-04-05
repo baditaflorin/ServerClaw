@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-05T12:22:50Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "HEAD",
+  "commit": "ea233bf49e2840a71997ef9d3db0873ba1e30b3d",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "build-lv3 remote pre-push gate stayed unavailable or hung after repeated SSH handoff during ws-0331 final integration",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "receipts/live-applies/evidence/2026-04-05-ws-0331-validate-targeted-r4.txt",
+      ".local/validation-gate/last-run.json status=passed local-fallback full gate",
+      "current branch rebased to origin/main at 27d9ed13a with targeted replay completed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-07",
+    "remediation_ref": "ws-0331-runtime-pool-live-apply"
+  }
+}

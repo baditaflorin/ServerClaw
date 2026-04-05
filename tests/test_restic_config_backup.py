@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
+import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +19,13 @@ COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 CONTROL_PLANE_LANES_PATH = REPO_ROOT / "config" / "control-plane-lanes.json"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
+RESTIC_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "restic-config-backup.yml"
+RESTIC_ROLE_DEFAULTS_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "restic_config_backup" / "defaults" / "main.yml"
+)
+RESTIC_ROLE_TASKS_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "restic_config_backup" / "tasks" / "main.yml"
+)
 
 
 def _load_module(path: Path, name: str):
@@ -941,6 +949,50 @@ def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path
     }
 
 
+def test_ensure_remote_runtime_credentials_runs_converge_when_missing(monkeypatch) -> None:
+    exists_sequence = iter([False, True])
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        trigger,
+        "remote_file_exists",
+        lambda context, target, path: next(exists_sequence),
+    )
+    monkeypatch.setattr(
+        trigger,
+        "run_local_converge_restic",
+        lambda env: captured.update({"env": env}),
+    )
+
+    trigger.ensure_remote_runtime_credentials(
+        {"controller": "context"},
+        env="production",
+        credential_file="/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+    )
+
+    assert captured == {"env": "production"}
+
+
+def test_ensure_remote_runtime_credentials_raises_when_converge_does_not_restore_file(monkeypatch) -> None:
+    monkeypatch.setattr(
+        trigger,
+        "remote_file_exists",
+        lambda context, target, path: False,
+    )
+    monkeypatch.setattr(trigger, "run_local_converge_restic", lambda env: None)
+
+    try:
+        trigger.ensure_remote_runtime_credentials(
+            {"controller": "context"},
+            env="production",
+            credential_file="/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+        )
+    except RuntimeError as exc:
+        assert "restic runtime credentials are still missing" in str(exc)
+    else:
+        raise AssertionError("expected ensure_remote_runtime_credentials to fail when the credential file stays missing")
+
+
 def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
@@ -950,6 +1002,18 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         "ensure_remote_runtime_support_files",
         lambda context, repo_root, target="docker-runtime-lv3": captured.update(
             {"context": context, "repo_root": repo_root, "target": target}
+        ),
+    )
+    monkeypatch.setattr(
+        trigger,
+        "ensure_remote_runtime_credentials",
+        lambda context, env, credential_file, target="docker-runtime-lv3": captured.update(
+            {
+                "credential_context": context,
+                "credential_env": env,
+                "credential_file": credential_file,
+                "credential_target": target,
+            }
         ),
     )
     monkeypatch.setattr(trigger, "build_guest_ssh_command", lambda context, target, remote_command: ["ssh", target, remote_command])
@@ -989,6 +1053,10 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         "context": {"controller": "context"},
         "repo_root": "/srv/proxmox_florin_server",
         "target": "docker-runtime-lv3",
+        "credential_context": {"controller": "context"},
+        "credential_env": "production",
+        "credential_file": "/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+        "credential_target": "docker-runtime-lv3",
         "sync_context": {"controller": "context"},
         "sync_target": "docker-runtime-lv3",
         "sync_repo_root": "/srv/proxmox_florin_server",
@@ -1076,6 +1144,27 @@ def test_main_live_apply_backup_omits_ntfy_requirement(monkeypatch, tmp_path: Pa
 
     assert result == 0
     assert captured["required_fields"] == ("restic_password", "minio_secret_key", "nats_password")
+
+
+def test_restic_role_prefers_runtime_control_openbao_with_local_fallback() -> None:
+    defaults = RESTIC_ROLE_DEFAULTS_PATH.read_text(encoding="utf-8")
+    tasks = RESTIC_ROLE_TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "restic_config_backup_openbao_service_topology" in defaults
+    assert "restic_config_backup_runtime_openbao_address" in defaults
+    assert "restic_config_backup_runtime_openbao_local_address" in defaults
+    assert "Probe whether the dedicated OpenBao API is reachable from the backup runtime" in tasks
+    assert "restic_config_backup_runtime_openbao_effective_address" in tasks
+    assert 'common_openbao_systemd_credentials_openbao_address: "{{ restic_config_backup_runtime_openbao_effective_address }}"' in tasks
+    assert 'common_openbao_systemd_credentials_manage_local_openbao_runtime: "{{ restic_config_backup_runtime_openbao_effective_manage_local_runtime }}"' in tasks
+
+
+def test_restic_playbook_enables_bridge_chain_recovery_on_docker_runtime() -> None:
+    playbook = yaml.safe_load(RESTIC_PLAYBOOK_PATH.read_text(encoding="utf-8"))
+    roles = playbook[0]["roles"]
+    firewall_role = next(role for role in roles if role["role"] == "lv3.platform.linux_guest_firewall")
+
+    assert firewall_role["vars"]["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
 
 def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
     makefile = MAKEFILE_PATH.read_text(encoding="utf-8")

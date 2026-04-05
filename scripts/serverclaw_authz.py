@@ -152,8 +152,8 @@ def http_json(
                     raise AuthzError(f"{method} {url} returned unexpected status {response.status}")
                 return response.status, json.loads(payload) if payload else {}
         except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise AuthzError(f"{method} {url} failed with status {exc.code}: {detail}") from exc
+            setattr(exc, "_lv3_detail", exc.read().decode("utf-8", errors="replace"))
+            raise
     try:
         return with_retry(
             perform_request,
@@ -168,8 +168,17 @@ def http_json(
             error_context=f"{method} {url}",
             sleep_fn=time.sleep,
         )
+    except urllib.error.HTTPError as exc:
+        detail = getattr(exc, "_lv3_detail", "")
+        raise AuthzError(f"{method} {url} failed with status {exc.code}: {detail}") from exc
     except MaxRetriesExceeded as exc:
         assert exc.last_error is not None
+        if isinstance(exc.last_error, urllib.error.HTTPError):
+            detail = getattr(exc.last_error, "_lv3_detail", "")
+            raise AuthzError(
+                f"{method} {url} failed after {max(retries, 1)} attempts: "
+                f"{method} {url} failed with status {exc.last_error.code}: {detail}"
+            ) from exc.last_error
         raise AuthzError(f"{method} {url} failed after {max(retries, 1)} attempts: {exc.last_error}") from exc.last_error
 
 

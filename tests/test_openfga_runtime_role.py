@@ -204,9 +204,6 @@ def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
         "openfga_bootstrap.rc != 0 or (openfga_bootstrap.stdout | length == 0) or "
         "(not (openfga_bootstrap.stdout | from_json).verification_passed)"
     )
-    assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_host"] == (
-        "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
-    )
     assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_url"] == (
-        "http://{{ hostvars[openfga_bootstrap_keycloak_host].ansible_host }}:8091"
+        "{{ hostvars['proxmox_florin'].platform_service_topology.keycloak.urls.public }}"
     )

@@ -9,6 +9,7 @@
 #   - security_sbom_output_dir (path, optional, default=repo receipts/sbom)
 #   - security_sbom_report_date (string, optional, default=controller UTC date)
 #   - security_sbom_remote_dir (path, optional, default=/var/tmp/lv3-security-posture)
+#   - security_sbom_source (string, optional, default=file:/var/lib/dpkg/status)
 #
 # Outputs:
 #   - A fetched host SBOM under receipts/sbom/host-<hostname>-<date>.cdx.json and a pinned Syft binary on the managed host.
@@ -42,6 +43,16 @@
       {{
         security_sbom_remote_dir
         | default('/var/tmp/lv3-security-posture', true)
+      }}
+    security_sbom_source: >-
+      {{
+        security_sbom_source
+        | default('file:/var/lib/dpkg/status', true)
+      }}
+    security_sbom_timeout_seconds: >-
+      {{
+        security_sbom_timeout_seconds
+        | default(900, true)
       }}
   changed_when: false
 
@@ -90,30 +101,19 @@
         path: "{{ security_sbom_syft_archive_dir.path }}"
         state: absent
 
+- name: Remove any stale host SBOM before regeneration
+  ansible.builtin.file:
+    path: "{{ security_sbom_remote_dir }}/{{ inventory_hostname }}-host-sbom.cdx.json"
+    state: absent
+
 - name: Generate the host CycloneDX SBOM
   ansible.builtin.command:
     argv:
+      - timeout
+      - "{{ security_sbom_timeout_seconds }}"
       - /usr/local/bin/syft
       - scan
-      - dir:/
-      - --base-path
-      - /
-      - --exclude
-      - ./dev/**
-      - --exclude
-      - ./proc/**
-      - --exclude
-      - ./run/**
-      - --exclude
-      - ./sys/**
-      - --exclude
-      - ./tmp/**
-      - --exclude
-      - ./var/tmp/**
-      - --exclude
-      - ./var/lib/containerd/**
-      - --exclude
-      - ./var/lib/docker/**
+      - "{{ security_sbom_source }}"
       - --source-name
       - "{{ inventory_hostname }}"
       - -o

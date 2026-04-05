@@ -92,8 +92,13 @@ Verify representative private proxies still answer through the Proxmox host:
 ```bash
 curl -fsS http://100.64.0.1:3009/api/healthz
 curl -fsS http://100.64.0.1:8014/healthz -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt)"
-curl -fsS https://100.64.0.1:8200/v1/sys/health --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt
+curl -fsS https://100.64.0.1:9443/health --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt
 ```
+
+OpenBao is intentionally exposed as an mTLS-only private proxy on
+`https://100.64.0.1:8200`, so do not treat a bare `curl --cacert ...` request
+as a valid verification step here. Reuse the controller-side client-certificate
+verification documented in [Configure OpenBao](./configure-openbao.md).
 
 Verify the legacy control-plane copies are no longer running on
 `docker-runtime-lv3`:
@@ -124,6 +129,13 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv
   already verified the `runtime-control-lv3` routes. Do not bypass that guard
   with `--start-at-task`, `--limit docker-runtime-lv3`, or ad hoc
   retirement-only replays.
+- If the replay stalls while OpenBao configures the PostgreSQL dynamic
+  credential backend, verify the live Proxmox guest firewall has actually
+  replayed the repo policy for `postgres-lv3`. A stale `/etc/pve/firewall/150.fw`
+  can still block `10.10.10.92 -> 10.10.10.50:5432` even when
+  `inventory/host_vars/proxmox_florin.yml` already declares the allowance; in
+  that case, re-run `lv3.platform.proxmox_network` on `proxmox_florin` before
+  retrying the full `runtime-control-pool` play.
 - Public edge publications for `api.lv3.org`, `registry.lv3.org`, and
   `sso.lv3.org` still terminate on `nginx-lv3`; the runtime-control substrate
   remains private-only.

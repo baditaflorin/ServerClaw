@@ -59,7 +59,7 @@ python3 scripts/serverclaw_authz.py verify \
   --config config/serverclaw-authz/bootstrap.json \
   --openfga-url http://100.64.0.1:8014 \
   --openfga-preshared-key-file .local/openfga/preshared-key.txt \
-  --keycloak-url http://10.10.10.92:8091
+  --keycloak-url https://sso.lv3.org
 ```
 
 Expected results:
@@ -69,9 +69,9 @@ Expected results:
   network and is the canonical probe target for SLO and k6 validation
 - `http://100.64.0.1:8014/stores` returns `200` when the repo-managed
   preshared key is presented
-- the controller-side bootstrap and verify steps use the VM-private Keycloak
-  listener at `http://10.10.10.92:8091` so delegated-authz validation does not
-  depend on the public `sso.lv3.org` edge route
+- the controller-side bootstrap and verify steps use the public Keycloak URL at
+  `https://sso.lv3.org` because the control machine does not have direct
+  routing to the private `runtime-control-lv3` listener
 - the bootstrap report records the declared Keycloak operator principal and a
   live client-credentials token for `serverclaw-runtime`
 - the configured OpenFGA checks all return their expected boolean result

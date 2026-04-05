@@ -1067,7 +1067,7 @@
     },
     "keycloak": {
       "service_name": "keycloak",
-      "owning_vm": "docker-runtime-lv3",
+      "owning_vm": "runtime-control-lv3",
       "role": "keycloak_runtime",
       "verify_file": "roles/keycloak_runtime/tasks/verify.yml",
       "startup": {
@@ -2357,7 +2357,7 @@
         "timeout_seconds": 60,
         "retries": 12,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8100",
+        "url": "http://127.0.0.1:8099",
         "method": "GET",
         "expected_status": [
           200

@@ -22,7 +22,9 @@ def test_openbao_postgres_dynamic_credential_verification_skips_become_on_delega
     assert credential_task["delegate_to"] == "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
     assert credential_task["become"] is False
     assert atlas_login_task["delegate_to"] == "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
+    assert atlas_login_task["become"] is False
     assert atlas_credential_task["delegate_to"] == "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
+    assert atlas_credential_task["become"] is False
 
 
 def test_openbao_playbook_reestablishes_unsealed_state_before_postgres_end_to_end_verification() -> None:

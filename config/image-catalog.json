@@ -1192,17 +1192,17 @@
       "digest": "sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b",
       "ref": "docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-22",
+      "pinned_on": "2026-04-05",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-22-openbao-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-04-05-openbao-runtime.json",
       "exception": {
-        "owner": "Platform operations",
         "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
         "compensating_controls": [
           "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
           "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
         ],
-        "approved_on": "2026-03-22",
+        "approved_on": "2026-04-05",
         "expires_on": "2026-04-05",
         "remediation_plan": "Re-scan and refresh openbao_runtime with make upgrade-container-image IMAGE_ID=openbao_runtime WRITE=true APPLY=true before the exception expires."
       },

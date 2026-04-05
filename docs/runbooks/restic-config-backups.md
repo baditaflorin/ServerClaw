@@ -75,6 +75,15 @@ make backup-coverage-ledger
   at `/srv/proxmox_florin_server`. The converge role and live-apply trigger
   stage the minimal backup support files there before validation runs, but the
   broader worker checkout should still be kept current for ongoing scheduled use.
+- When the live-apply trigger finds the runtime credential file missing on
+  `docker-runtime-lv3`, it now self-heals through the repo-managed
+  `converge-restic-config-backup` path before retrying the backup trigger
+  instead of failing immediately on an empty `/run` credential directory after a
+  host reboot.
+- The restic backup agent now prefers the dedicated OpenBao control-plane
+  address when `runtime-control-lv3` is reachable, but still falls back to the
+  local Docker-runtime OpenBao listener during the transition window before the
+  runtime-control migration is live.
 - The host-side service, live-apply trigger, and Windmill wrapper still fall
   back to `/opt/api-gateway/service/scripts/restic_config_backup.py` and
   `/etc/lv3/restic-config-backup/restic-file-backup-catalog.json` if the worker

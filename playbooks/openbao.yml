@@ -221,6 +221,7 @@
         return_content: true
         status_code: 200
       delegate_to: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
+      become: false
       register: openbao_verify_atlas_login
       no_log: true
 
@@ -233,6 +234,7 @@
         return_content: true
         status_code: 200
       delegate_to: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
+      become: false
       register: openbao_verify_atlas_dynamic_credential
       retries: 6
       delay: 5

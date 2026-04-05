@@ -67,7 +67,7 @@ to it.
 
 - **Windmill workflows**: any workflow step that reaches an `escalate` repair
   action in `correction-loops.json` (ADR 0204) publishes to the appropriate ntfy
-  topic via the platform's Windmill resource `res:ntfy/platform`; this resource
+  topic via the platform's Windmill resource `res:f/lv3/ntfy_platform`; this resource
   holds the access token and base URL, injected from OpenBao
 - **Ansible playbooks**: Ansible roles that perform irreversible mutations publish
   a `platform-ansible-warn` notification at the start and a

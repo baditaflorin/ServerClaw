@@ -1,0 +1,29 @@
+---
+# Playbook: services/runtime-pool-capacity-rebalance.yml
+# Purpose: Provide the canonical live-apply entrypoint for the runtime-pool host-capacity rebalance.
+# Use case: Run through `make live-apply-service service=runtime-pool-capacity-rebalance env=production` before bringing the remaining runtime pools live.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the post-restart verification step.
+#
+# Outputs:
+#   - Imports the root runtime-pool-capacity-rebalance playbook used by the governed service live-apply wrapper.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the root rebalance playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0319: Defines the pool split that the rebalance enables.
+#   - ADR 0321: Defines the host free-memory floor that the rebalance protects.
+#   - Requires: playbooks/runtime-pool-capacity-rebalance.yml.
+#
+# Related ADRs: 0319, 0321
+# Related Runbooks: docs/runbooks/runtime-pool-capacity-rebalance.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-03
+
+- import_playbook: ../runtime-pool-capacity-rebalance.yml

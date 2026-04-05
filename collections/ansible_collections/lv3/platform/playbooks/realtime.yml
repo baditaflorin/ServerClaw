@@ -127,7 +127,7 @@
         playbook_execution_notification_service: realtime
 
 - name: Converge Netdata child agents on the Proxmox host and all managed guests
-  hosts: "lv3_guests:proxmox_hosts:&{{ playbook_execution_env }}:!{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+  hosts: "{{ 'lv3_guests:proxmox_hosts:&staging:!monitoring-lv3' if (env | default('production')) == 'staging' else 'lv3_guests:proxmox_hosts:&production:!monitoring-lv3' }}"
   become: true
   gather_facts: true
   vars_files:

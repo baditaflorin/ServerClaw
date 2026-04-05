@@ -44,9 +44,10 @@ class HomepageRuntimeRoleTests(unittest.TestCase):
         self.assertIn("owning_vm: runtime-general-lv3", self.host_vars_text)
         self.assertIn("public_hostname: home.lv3.org", self.host_vars_text)
         self.assertIn(
-            "upstream: \"http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}\"",
+            "upstream: \"http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:9080\"",
             self.host_vars_text,
         )
+        self.assertIn("root_proxy_path: /homepage", self.host_vars_text)
         self.assertIn("port: 3090", self.host_vars_text)
 
 

@@ -31,6 +31,10 @@ def test_realtime_playbook_converges_network_before_agents() -> None:
     )
 
     assert plays.index(network_play) < plays.index(parent_play) < plays.index(child_play)
+    assert (
+        child_play["hosts"]
+        == "{{ 'lv3_guests:proxmox_hosts:&staging:!monitoring-lv3' if (env | default('production')) == 'staging' else 'lv3_guests:proxmox_hosts:&production:!monitoring-lv3' }}"
+    )
     assert network_play["roles"] == [{"role": "lv3.platform.proxmox_network"}]
     assert parent_play["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},

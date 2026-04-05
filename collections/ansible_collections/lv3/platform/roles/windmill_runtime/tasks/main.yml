@@ -2182,7 +2182,7 @@
 
 - name: Wait for the Windmill API before syncing repo-managed scripts
   ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/version"
+    url: "{{ windmill_base_url }}/api/version"
     method: GET
     status_code: 200
   delegate_to: localhost
@@ -2208,7 +2208,7 @@
       - python3
       - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py"
       - --base-url
-      - "{{ windmill_private_base_url }}"
+      - "{{ windmill_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --manifest
@@ -2266,7 +2266,7 @@
       - python3
       - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_resources.py"
       - --base-url
-      - "{{ windmill_private_base_url }}"
+      - "{{ windmill_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --token
@@ -2468,7 +2468,7 @@
       - python3
       - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py"
       - --base-url
-      - "{{ windmill_private_base_url }}"
+      - "{{ windmill_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --manifest
