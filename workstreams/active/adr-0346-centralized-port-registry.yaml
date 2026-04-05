@@ -73,6 +73,10 @@ ownership_manifest:
     - docs/adr/index/by-status/*.yaml
     mode: shared_contract
     contract: adr-index-generator-v1
+  - id: service_capability_catalog
+    paths:
+    - config/service-capability-catalog.json
+    mode: exclusive
   - id: generated_truth
     paths:
     - docs/diagrams/agent-coordination-map.excalidraw
