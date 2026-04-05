@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.19",
+  "repo_version": "0.178.18",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-05T21:55:01Z",
-  "next_refresh_at": "2026-04-05T22:55:01Z",
+  "generated_at": "2026-04-05T21:45:43Z",
+  "next_refresh_at": "2026-04-05T22:45:43Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.18",
+    "last_version": "0.178.17",
     "deployed_at": "2026-04-05",
     "summary": "Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image). fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network",
-    "release_notes_url": "docs/release-notes/0.178.19.md"
+    "release_notes_url": "docs/release-notes/0.178.18.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

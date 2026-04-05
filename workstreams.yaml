@@ -1748,6 +1748,9 @@ workstreams:
       paths:
       - config/prometheus/file_sd/https_tls_targets.yml
       - config/subdomain-exposure-registry.json
+      - config/subdomain-catalog.json
+      - docs/status/history/merged-workstreams.md
+      - build/platform-manifest.json
       mode: shared_contract
       contract: discovery-artifacts-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
