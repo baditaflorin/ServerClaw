@@ -663,6 +663,84 @@
     and ((paperless_taxonomy_sync.stdout | from_json).changed | default(false))
   failed_when: paperless_taxonomy_sync.rc != 0
 
+- name: List the existing Paperless groups
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/api/groups/"
+    method: GET
+    headers:
+      Authorization: "Token {{ paperless_api_token }}"
+    status_code: 200
+  register: paperless_groups_list
+  changed_when: false
+  no_log: true
+
+- name: Record whether the default SSO group exists
+  ansible.builtin.set_fact:
+    paperless_default_sso_group_exists: >-
+      {{
+        (paperless_groups_list.json.results
+        | selectattr('name', 'equalto', paperless_default_sso_group)
+        | list | length) > 0
+      }}
+
+- name: Bootstrap the default Paperless SSO users group
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/api/groups/"
+    method: POST
+    body_format: json
+    body:
+      name: "{{ paperless_default_sso_group }}"
+      permissions: "{{ paperless_default_sso_group_permissions }}"
+    headers:
+      Authorization: "Token {{ paperless_api_token }}"
+    status_code: 201
+  register: paperless_default_sso_group_create
+  when: not paperless_default_sso_group_exists
+  no_log: true
+
+- name: Resolve the default SSO group ID
+  ansible.builtin.set_fact:
+    paperless_default_sso_group_id: >-
+      {{
+        (paperless_groups_list.json.results
+        | selectattr('name', 'equalto', paperless_default_sso_group)
+        | list | first).id
+        if paperless_default_sso_group_exists
+        else paperless_default_sso_group_create.json.id
+      }}
+
+- name: List the existing Paperless users
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/api/users/?page_size=200"
+    method: GET
+    headers:
+      Authorization: "Token {{ paperless_api_token }}"
+    status_code: 200
+  register: paperless_users_list
+  changed_when: false
+  no_log: true
+
+- name: Backfill the default SSO group onto existing ungrouped users
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/api/users/{{ item.id }}/"
+    method: PATCH
+    body_format: json
+    body:
+      groups: "{{ (item.groups | default([])) + [paperless_default_sso_group_id | int] }}"
+    headers:
+      Authorization: "Token {{ paperless_api_token }}"
+    status_code: 200
+  loop: >-
+    {{
+      paperless_users_list.json.results
+      | selectattr('username', 'ne', paperless_admin_username)
+      | list
+    }}
+  loop_control:
+    label: "{{ item.username }}"
+  when: paperless_default_sso_group_id | int not in (item.groups | default([]))
+  no_log: true
+
 - name: Mirror the Paperless sync report to the control machine
   ansible.builtin.slurp:
     src: "{{ paperless_sync_report_file }}"

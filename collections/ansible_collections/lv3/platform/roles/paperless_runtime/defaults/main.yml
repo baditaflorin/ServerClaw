@@ -64,6 +64,34 @@ paperless_volume_names:
   media: paperless-media
   export: paperless-export
   consume: paperless-consume
+paperless_default_sso_group: lv3-platform-users
+paperless_default_sso_group_permissions:
+  - documents.view_document
+  - documents.add_document
+  - documents.change_document
+  - documents.delete_document
+  - documents.view_tag
+  - documents.add_tag
+  - documents.change_tag
+  - documents.view_correspondent
+  - documents.add_correspondent
+  - documents.change_correspondent
+  - documents.view_documenttype
+  - documents.add_documenttype
+  - documents.change_documenttype
+  - documents.view_savedview
+  - documents.add_savedview
+  - documents.change_savedview
+  - documents.delete_savedview
+  - documents.view_uisettings
+  - documents.add_uisettings
+  - documents.change_uisettings
+  - documents.delete_uisettings
+  - documents.view_sharingtoken
+  - documents.add_sharingtoken
+  - documents.change_sharingtoken
+  - documents.delete_sharingtoken
+
 paperless_taxonomy_manifest:
   schema_version: "1.0.0"
   correspondents:
