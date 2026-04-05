@@ -8,18 +8,19 @@
 schema_version: 2
 generated: '2026-04-05'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 367
+total_adrs: 366
 adr_number_range:
   first: '0001'
   last: '0346'
   next_available: '0347'
 implementation_status_summary:
-  Implemented: 332
-  Partial: 7
-  Not Implemented: 27
+  Implemented: 324
+  Partial: 10
+  Not Implemented: 30
   Deprecated: 1
+  Accepted: 1
 decision_status_summary:
-  Accepted: 311
+  Accepted: 310
   Proposed: 4
   Deprecated: 2
   Implemented: 50
@@ -42,7 +43,7 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 50
+      count: 49
       first_adr: '0300'
       last_adr: '0346'
   by_concern:
@@ -63,7 +64,7 @@ facets:
       count: 5
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 40
+      count: 39
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 20
@@ -81,7 +82,7 @@ facets:
       count: 16
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 125
+      count: 126
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -99,23 +100,27 @@ facets:
       count: 3
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 35
+      count: 34
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 332
+      count: 324
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 7
+      count: 10
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 27
+      count: 30
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
+      count: 1
+    - implementation_status: Accepted
+      slug: accepted
+      path: docs/adr/index/by-status/accepted.yaml
       count: 1
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
@@ -125,11 +130,10 @@ reservation_ledger:
   next_available_adr: '0347'
 latest_adrs:
   - adr: '0346'
-    title: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
-    implementation_status: Implemented
-    concern: ci-cd
-    path: docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
-    implemented_on: '2026-04-04'
+    title: Centralized Port Registry
+    implementation_status: Accepted
+    concern: platform
+    path: docs/adr/0346-centralized-port-registry.md
   - adr: '0345'
     title: Layered Operator Tool Separation
     implementation_status: Implemented
@@ -168,16 +172,15 @@ latest_adrs:
     implemented_on: '2026-04-03'
   - adr: 0339
     title: Reference Deployment Samples And Replaceable Provider Profiles
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     concern: vm-topology
     path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
-    implemented_on: '2026-04-04'
   - adr: 0338
     title: Public Documentation Tiers And Private History Boundaries
-    implementation_status: Implemented
+    implementation_status: Partial
     concern: documentation
     path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
-    implemented_on: '2026-04-04'
+    implemented_on: '2026-04-02'
   - adr: '0337'
     title: Fork-First Workstream And Worktree Metadata
     implementation_status: Implemented

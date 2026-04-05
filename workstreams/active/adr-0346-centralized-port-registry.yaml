@@ -26,11 +26,15 @@ ownership_manifest:
     - docs/adr/0346-centralized-port-registry.md
     - docs/workstreams/adr-0346-centralized-port-registry.md
     mode: exclusive
+  - id: platform_topology_contract
+    paths:
+    - inventory/group_vars/platform.yml
+    - scripts/generate_platform_vars.py
+    mode: shared_contract
+    contract: platform-topology-v1
   - id: port_registry
     paths:
     - inventory/host_vars/proxmox_florin.yml
-    - inventory/group_vars/platform.yml
-    - scripts/generate_platform_vars.py
     - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/defaults/main.yml

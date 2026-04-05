@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: platform
-total_adrs: 125
+total_adrs: 126
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2266,3 +2266,21 @@ adrs:
     path: docs/adr/0345-layered-operator-tool-separation.md
     implemented_in_repo_version: 0.178.5
     implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: Centralized Port Registry
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-05'
+    concern: platform
+    keywords:
+      - platform
+      - ports
+      - configuration
+      - dry
+      - contracts
+      - centralized
+      - port
+      - registry
+    summary: 'A port is "platform-managed" if it is:'
+    filename: 0346-centralized-port-registry.md
+    path: docs/adr/0346-centralized-port-registry.md

@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 50
+total_adrs: 49
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -338,7 +338,7 @@ adrs:
   - adr: '0314'
     title: Resumable Multi-Step Flows And Return-To-Task Reentry
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -350,9 +350,6 @@ adrs:
     summary: We will treat important multi-step human flows as resumable tasks with
     filename: 0314-resumable-multi-step-flows-and-return-to-task-reentry.md
     path: docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
-    implemented_in_repo_version: 0.178.5
-    implemented_in_platform_version: 0.130.99
-    implemented_on: '2026-04-04'
   - adr: '0315'
     title: Canonical Page States And Next-Best-Action Guidance For Human Surfaces
     status: Accepted
@@ -436,24 +433,6 @@ adrs:
     implemented_in_platform_version: 0.130.97
     implemented_on: '2026-04-03'
   - adr: 0319
-    title: Dynamic Inventory as Source of Truth for Topology-Tracking Services
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-04-05'
-    concern: vm-topology
-    keywords:
-      - dynamic
-      - inventory
-      - as
-      - source
-      - truth
-      - topology-tracking
-      - services
-    summary: Any service that installs agents on managed VMs MUST derive its host list from
-    filename: 0319-dynamic-inventory-as-source-of-truth-for-topology-tracking-services.md
-    path: docs/adr/0319-dynamic-inventory-as-source-of-truth-for-topology-tracking-services.md
-    implemented_in_repo_version: 0.178.5
-  - adr: 0319
     title: Runtime Pools As The Service Partition Boundary
     status: Accepted
     implementation_status: Implemented
@@ -509,8 +488,7 @@ adrs:
     filename: 0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
     path: docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
     implemented_in_repo_version: 0.177.145
-    implemented_in_platform_version: 0.130.100
-    implemented_on: '2026-04-05'
+    implemented_on: '2026-04-02'
   - adr: '0322'
     title: Memory-Pressure Autoscaling For Elastic Runtime Pools
     status: Accepted
@@ -546,8 +524,7 @@ adrs:
     filename: 0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
     path: docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
     implemented_in_repo_version: 0.177.145
-    implemented_in_platform_version: 0.130.100
-    implemented_on: '2026-04-05'
+    implemented_on: '2026-04-02'
   - adr: '0324'
     title: Service Definition Shards And Generated Service Catalog Assembly
     status: Accepted
@@ -588,7 +565,6 @@ adrs:
     summary: We will evolve ADR discovery into faceted generated shards and introduce a
     filename: 0325-faceted-adr-index-shards-and-reservation-windows.md
     path: docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
-    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-03'
   - adr: '0326'
     title: Workstream Registry Shards With Active And Archive Assembly
@@ -630,7 +606,6 @@ adrs:
     summary: We will reorganize discovery metadata into sectional registries with
     filename: 0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
     path: docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
-    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-03'
   - adr: 0328
     title: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
@@ -651,7 +626,6 @@ adrs:
     summary: We will manage root summary surfaces with explicit size budgets and
     filename: 0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
     path: docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
-    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-03'
   - adr: 0329
     title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
@@ -676,7 +650,7 @@ adrs:
   - adr: '0330'
     title: Public GitHub Readiness As A First-Class Repository Lifecycle
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-04-02'
     concern: vm-topology
     keywords:
@@ -693,8 +667,8 @@ adrs:
     summary: We will treat public GitHub readiness as a first-class repository lifecycle,
     filename: 0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
     path: docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md
-    implemented_in_repo_version: 0.178.5
-    implemented_on: '2026-04-04'
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
   - adr: '0331'
     title: Repository-Relative Paths For Public Metadata And Generated Docs
     status: Accepted
@@ -740,7 +714,7 @@ adrs:
   - adr: '0333'
     title: Private Overlay Files For Deployment-Specific Secrets And Identities
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-04-02'
     concern: security
     keywords:
@@ -756,13 +730,12 @@ adrs:
     summary: Deployment-specific secrets, identities, and one-off bootstrap artefacts must
     filename: 0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
     path: docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md
-    implemented_in_repo_version: 0.178.4
-    implemented_in_platform_version: 0.130.98
-    implemented_on: '2026-04-04'
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
   - adr: '0334'
     title: Example-First Inventory And Service Identity Catalogs
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     date: '2026-04-02'
     concern: vm-topology
     keywords:
@@ -778,7 +751,6 @@ adrs:
     summary: Primary onboarding catalogs should move toward example-first inventories and
     filename: 0334-example-first-inventory-and-service-identity-catalogs.md
     path: docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md
-    implemented_on: '2026-04-04'
   - adr: '0335'
     title: Public-Safe Agent Onboarding Entrypoints
     status: Accepted
@@ -834,12 +806,11 @@ adrs:
     summary: Workstream and worktree metadata must be fork-first and repository-relative.
     filename: 0337-fork-first-workstream-and-worktree-metadata.md
     path: docs/adr/0337-fork-first-workstream-and-worktree-metadata.md
-    implemented_in_repo_version: 0.178.4
     implemented_on: '2026-04-04'
   - adr: 0338
     title: Public Documentation Tiers And Private History Boundaries
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-04-02'
     concern: documentation
     keywords:
@@ -854,11 +825,12 @@ adrs:
     summary: We will manage documentation with explicit public tiers and private-history
     filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
     path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
-    implemented_on: '2026-04-04'
+    implemented_in_repo_version: 0.177.143
+    implemented_on: '2026-04-02'
   - adr: 0339
     title: Reference Deployment Samples And Replaceable Provider Profiles
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     date: '2026-04-02'
     concern: vm-topology
     keywords:
@@ -874,8 +846,6 @@ adrs:
     summary: We will provide reference deployment samples and replaceable provider profiles
     filename: 0339-reference-deployment-samples-and-replaceable-provider-profiles.md
     path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
-    implemented_in_repo_version: 0.178.4
-    implemented_on: '2026-04-04'
   - adr: '0340'
     title: Dedicated Coolify Apps VM Separation
     status: Accepted
@@ -1007,25 +977,20 @@ adrs:
     implemented_in_repo_version: 0.178.5
     implemented_on: '2026-04-04'
   - adr: '0346'
-    title: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
+    title: Centralized Port Registry
     status: Accepted
-    implementation_status: Implemented
-    date: '2026-04-04'
-    concern: ci-cd
+    implementation_status: Accepted
+    date: '2026-04-05'
+    concern: platform
     keywords:
-      - compose
-      - docker
-      - readiness
-      - resilience
-      - validation
-      - dependency
-      - health
-      - gates
-      - as
-      - repo-enforced
-    summary: We will treat health-gated compose dependencies as a repository resilience
-    filename: 0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
-    path: docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
-    implemented_in_repo_version: 0.178.4
-    implemented_in_platform_version: 0.130.98
-    implemented_on: '2026-04-04'
+      - platform
+      - ports
+      - configuration
+      - dry
+      - contracts
+      - centralized
+      - port
+      - registry
+    summary: 'A port is "platform-managed" if it is:'
+    filename: 0346-centralized-port-registry.md
+    path: docs/adr/0346-centralized-port-registry.md

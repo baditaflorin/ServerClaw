@@ -1,0 +1,32 @@
+# ============================================================================
+# ADR Status Shard Accepted — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-05'
+facet: status
+implementation_status: Accepted
+slug: accepted
+total_adrs: 1
+adrs:
+  - adr: '0346'
+    title: Centralized Port Registry
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-05'
+    concern: platform
+    keywords:
+      - platform
+      - ports
+      - configuration
+      - dry
+      - contracts
+      - centralized
+      - port
+      - registry
+    summary: 'A port is "platform-managed" if it is:'
+    filename: 0346-centralized-port-registry.md
+    path: docs/adr/0346-centralized-port-registry.md
