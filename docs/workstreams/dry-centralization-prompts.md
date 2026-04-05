@@ -545,10 +545,6 @@ For each compose template that has manual `extra_hosts`, verify that:
 
 Add `python scripts/generate_cross_cutting_artifacts.py --check` to the validation gate alongside other catalog validators.
 
-## DO NOT implement Phases 2-5 (DNS, TLS, Proxy, SSO) in this session
-
-Those require further design discussion. Only implement the hairpin concern. If you have time remaining, write stub functions for the other concerns that raise `NotImplementedError("Phase N not yet implemented — see ADR 0374")`.
-
 ## Rules you must follow
 
 - The generator must NOT make live API calls (no Hetzner, no Keycloak, no cert issuance).
@@ -557,4 +553,473 @@ Those require further design discussion. Only implement the hairpin concern. If 
 - Do NOT add cross-cutting fields to the registry that have no generator consuming them yet.
 - Read `AGENTS.md` and `CLAUDE.md` at the repo root before starting.
 - This is a branch-local change. Do NOT modify VERSION, changelog.md, RELEASE.md, or README.md.
+```
+
+---
+
+## Prompt 8: ADR 0374 Phase 2 — DNS Publication
+
+```
+You are implementing Phase 2 (DNS publication) of ADR 0374. Read `docs/adr/0374-cross-cutting-service-manifest.md` completely, focusing on the "Phase 2: DNS Publication" section before writing code.
+
+## Your task
+
+Phase 2 extends `scripts/generate_cross_cutting_artifacts.py` to generate DNS declarations for services that need external hostnames (not hairpin internal).
+
+### Prerequisites
+- ADR 0369 (validation toolkit) is implemented
+- ADR 0373 (service registry) exists with service entries
+- Phase 1 (hairpin) is working — the generator structure exists
+
+### Step 1: Extend the service registry schema
+
+In `inventory/group_vars/platform_services.yml`, add optional `dns` section to each service entry that needs external DNS:
+
+```yaml
+platform_service_registry:
+  directus:
+    image_catalog_key: directus_runtime
+    internal_port: 8055
+    host_group: docker_runtime_lv3
+    dns:
+      fqdn: directus.lv3.org
+      type: public  # or 'internal' for split-view
+      ttl: 3600
+```
+
+### Step 2: Implement DNS generator in the script
+
+Add to `scripts/generate_cross_cutting_artifacts.py`:
+
+```python
+def generate_dns_declarations(registry, catalog, write=False):
+    """
+    Generate DNS declarations for services with dns section.
+    Output: config/generated/dns-declarations.yaml
+    """
+    declarations = {}
+
+    for service_name, service_config in registry.items():
+        dns_config = service_config.get('dns')
+        if not dns_config:
+            continue
+
+        fqdn = require_str(dns_config.get('fqdn'), f'platform_service_registry.{service_name}.dns.fqdn')
+        dns_type = require_enum(dns_config.get('type'), ['public', 'internal'], f'platform_service_registry.{service_name}.dns.type')
+        ttl = require_int(dns_config.get('ttl'), f'platform_service_registry.{service_name}.dns.ttl')
+
+        declarations[fqdn] = {
+            'service': service_name,
+            'type': dns_type,
+            'ttl': ttl
+        }
+
+    if write:
+        with open('config/generated/dns-declarations.yaml', 'w') as f:
+            yaml.dump({'dns_records': declarations}, f, default_flow_style=False)
+
+    return declarations
+```
+
+### Step 3: Integrate with cross-cutting workflow
+
+Update the main function in `generate_cross_cutting_artifacts.py` to call:
+```python
+if phase == 'dns' or phase == 'all':
+    dns_decls = generate_dns_declarations(registry, catalog, write=write)
+    if not write:
+        print(f"DNS: {len(dns_decls)} declarations would be generated")
+```
+
+### Step 4: Add validation
+
+Create `scripts/validate_dns_declarations.py` that:
+- Loads `config/generated/dns-declarations.yaml`
+- Checks each FQDN is well-formed (matches pattern `[a-z0-9]([a-z0-9-]*\.)+lv3\.org`)
+- Warns if two services declare the same FQDN
+- Fails if any FQDN lacks matching platform_service_registry entry
+
+### Step 5: Test
+
+```bash
+python scripts/generate_cross_cutting_artifacts.py --check --only dns
+python scripts/validate_dns_declarations.py --check
+```
+
+## Rules you must follow
+
+- DNS generator must NOT make actual DNS API calls
+- Must validate FQDN format matches domain policy
+- Must NOT overwrite manually maintained DNS records
+- One service = one FQDN (no CNAME synthesis yet)
+- Do NOT add DNS fields to registry entries that are internal-only
+```
+
+---
+
+## Prompt 9: ADR 0374 Phase 3 — TLS Certificate Management
+
+```
+You are implementing Phase 3 (TLS certificate management) of ADR 0374. Read `docs/adr/0374-cross-cutting-service-manifest.md` completely, focusing on the "Phase 3: TLS Certificate Management" section.
+
+## Your task
+
+Phase 3 generates TLS certificate declarations and verifies they exist or have a provisioning plan.
+
+### Prerequisites
+- Phase 2 (DNS) is working
+- ADR 0370 (service lifecycle tasks) exists
+- Roles can read from `inventory/group_vars/platform_tls_certs.yml`
+
+### Step 1: Extend registry with TLS section
+
+In `inventory/group_vars/platform_services.yml`, add optional `tls` section:
+
+```yaml
+platform_service_registry:
+  directus:
+    # ... existing fields ...
+    tls:
+      cert_source: letsencrypt  # or 'openbao', 'self-signed'
+      wildcard: false
+      cert_validity_days: 90
+```
+
+### Step 2: Implement TLS generator
+
+Add to `scripts/generate_cross_cutting_artifacts.py`:
+
+```python
+def generate_tls_certificates(registry, catalog, write=False):
+    """
+    Generate TLS certificate declarations.
+    Output: inventory/group_vars/platform_tls_certs.yml
+    """
+    certs = {}
+
+    for service_name, service_config in registry.items():
+        tls_config = service_config.get('tls')
+        if not tls_config:
+            continue
+
+        dns_config = service_config.get('dns')
+        if not dns_config:
+            raise ValueError(f'{service_name}: TLS requires dns section')
+
+        fqdn = dns_config['fqdn']
+        cert_source = require_enum(tls_config.get('cert_source'), ['letsencrypt', 'openbao', 'self-signed'], f'platform_service_registry.{service_name}.tls.cert_source')
+        wildcard = require_bool(tls_config.get('wildcard', False), f'platform_service_registry.{service_name}.tls.wildcard')
+
+        certs[fqdn] = {
+            'service': service_name,
+            'source': cert_source,
+            'wildcard': wildcard,
+            'provisioned': False  # Mark as needing provisioning
+        }
+
+    if write:
+        with open('inventory/group_vars/platform_tls_certs.yml', 'w') as f:
+            yaml.dump({'platform_tls_certs': certs}, f, default_flow_style=False)
+
+    return certs
+```
+
+### Step 3: Add provisioning task
+
+Create `roles/common/tasks/provision_tls_certs.yml`:
+- Called by service playbooks before container startup
+- Checks if cert exists in `/etc/lv3/certs/{fqdn}/`
+- If not, provisioning method depends on `cert_source`:
+  - `letsencrypt`: call Ansible certbot module
+  - `openbao`: call openbao_agent to fetch from PKI
+  - `self-signed`: generate with openssl
+
+### Step 4: Validate
+
+Create `scripts/validate_tls_certs.py` that:
+- Checks all TLS entries have matching DNS entry
+- Warns if cert_source=letsencrypt but domain is .internal
+- Lists which certs need provisioning
+
+### Step 5: Integration
+
+Update service playbooks to include the provisioning task before `docker_compose_converge.yml`
+
+## Rules you must follow
+
+- Do NOT provision actual certificates in --check mode
+- Must track which certs are self-signed vs. production
+- Must warn if same domain used by multiple services (conflict)
+- Do NOT expose private keys in generated artifacts
+```
+
+---
+
+## Prompt 10: ADR 0374 Phase 4 — Nginx Edge Publication
+
+```
+You are implementing Phase 4 (Nginx edge publication / reverse proxy) of ADR 0374. Read `docs/adr/0374-cross-cutting-service-manifest.md` completely, focusing on the "Phase 4: Nginx Edge Publication" section.
+
+## Your task
+
+Phase 4 generates nginx upstream declarations and edge publication rules from the service registry.
+
+### Prerequisites
+- Phase 3 (TLS) is working
+- ADR 0365 (playbook composition) exists with nginx playbook includes
+- Nginx role can read from `config/generated/nginx-upstreams.conf`
+
+### Step 1: Extend registry with proxy section
+
+In `inventory/group_vars/platform_services.yml`, add optional `proxy` section:
+
+```yaml
+platform_service_registry:
+  directus:
+    # ... existing fields ...
+    proxy:
+      enabled: true
+      upstream_port: 8055  # service's internal port
+      path_prefix: /
+      auth_required: true  # or false for public services
+      rate_limit: "10r/s"
+```
+
+### Step 2: Implement nginx generator
+
+Add to `scripts/generate_cross_cutting_artifacts.py`:
+
+```python
+def generate_nginx_upstreams(registry, catalog, write=False):
+    """
+    Generate nginx upstream definitions and location blocks.
+    Output: config/generated/nginx-upstreams.conf
+    """
+    upstreams = []
+
+    for service_name, service_config in registry.items():
+        proxy_config = service_config.get('proxy')
+        if not proxy_config or not proxy_config.get('enabled'):
+            continue
+
+        dns_config = service_config.get('dns')
+        if not dns_config:
+            raise ValueError(f'{service_name}: proxy requires dns section')
+
+        fqdn = dns_config['fqdn']
+        upstream_port = require_int(proxy_config.get('upstream_port'), f'platform_service_registry.{service_name}.proxy.upstream_port')
+        auth_required = require_bool(proxy_config.get('auth_required', False), f'platform_service_registry.{service_name}.proxy.auth_required')
+        path_prefix = require_str(proxy_config.get('path_prefix', '/'), f'platform_service_registry.{service_name}.proxy.path_prefix')
+
+        upstream_name = f'{service_name}_upstream'
+        upstreams.append({
+            'name': upstream_name,
+            'service_name': service_name,
+            'fqdn': fqdn,
+            'port': upstream_port,
+            'path': path_prefix,
+            'auth_required': auth_required
+        })
+
+    if write:
+        # Generate nginx config
+        nginx_conf = _render_nginx_upstreams(upstreams)
+        with open('config/generated/nginx-upstreams.conf', 'w') as f:
+            f.write(nginx_conf)
+
+    return upstreams
+
+def _render_nginx_upstreams(upstreams):
+    """Render nginx upstream blocks as text"""
+    lines = ['# Generated by ADR 0374 Phase 4 — do not edit manually\n']
+
+    for upstream in upstreams:
+        lines.append(f"upstream {upstream['name']} {{")
+        lines.append(f"  server 10.10.10.92:{upstream['port']};  # {upstream['service_name']}")
+        lines.append("}\n")
+
+    return ''.join(lines)
+```
+
+### Step 3: Generate location blocks
+
+Add template for edge nginx role that includes upstreams:
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name _;
+
+    ssl_certificate /etc/lv3/certs/edge.lv3.org/fullchain.pem;
+    ssl_certificate_key /etc/lv3/certs/edge.lv3.org/privkey.pem;
+
+    include config/generated/nginx-upstreams.conf;
+
+    # Location blocks for each upstream
+    {% for upstream in platform_nginx_upstreams %}
+    location {{ upstream.path_prefix }} {
+        proxy_pass http://{{ upstream.name }};
+        proxy_set_header Host $host;
+        {% if upstream.auth_required %}
+        auth_request /oauth2/auth;
+        {% endif %}
+    }
+    {% endfor %}
+}
+```
+
+### Step 4: Validate
+
+Create `scripts/validate_nginx_config.py` that:
+- Parses generated nginx config
+- Checks upstream ports match service internal_port
+- Warns if service has proxy enabled but no dns entry
+- Tests that nginx can syntax-check the config (via `nginx -t`)
+
+### Step 5: Integration
+
+Update `playbooks/_includes/nginx_edge_publication.yml` to:
+1. Call generator: `generate_cross_cutting_artifacts.py --write --only proxy`
+2. Include generated upstream file
+3. Reload nginx after changes
+
+## Rules you must follow
+
+- Do NOT modify /etc/nginx/sites-enabled directly — always generate
+- Must NOT proxy to 0.0.0.0 or 127.0.0.1 (use 10.10.10.92 for runtime)
+- Generated config must pass `nginx -t` validation
+- One service = one upstream block (no multiplexing yet)
+```
+
+---
+
+## Prompt 11: ADR 0374 Phase 5 — SSO Client Provisioning
+
+```
+You are implementing Phase 5 (SSO client provisioning) of ADR 0374. Read `docs/adr/0374-cross-cutting-service-manifest.md` completely, focusing on the "Phase 5: SSO Client Provisioning" section.
+
+## Your task
+
+Phase 5 generates Keycloak SSO client declarations and integrates with the OpenBao secret pipeline to provision and distribute client credentials.
+
+### Prerequisites
+- All prior phases (1-4) are working
+- ADR 0373 (service registry with derived defaults) exists
+- OpenBao is running with Keycloak OIDC PKI role
+- Keycloak admin API is accessible
+
+### Step 1: Extend registry with SSO section
+
+In `inventory/group_vars/platform_services.yml`, add optional `sso` section:
+
+```yaml
+platform_service_registry:
+  directus:
+    # ... existing fields ...
+    sso:
+      enabled: true
+      provider: keycloak
+      client_name: directus_runtime
+      redirect_uris:
+        - https://directus.lv3.org/auth/callback
+      scopes: [openid, profile, email]
+      public_client: false
+```
+
+### Step 2: Implement SSO client generator
+
+Add to `scripts/generate_cross_cutting_artifacts.py`:
+
+```python
+def generate_sso_clients(registry, catalog, write=False):
+    """
+    Generate SSO client declarations.
+    Output: config/generated/sso-clients.yaml
+    """
+    clients = {}
+
+    for service_name, service_config in registry.items():
+        sso_config = service_config.get('sso')
+        if not sso_config or not sso_config.get('enabled'):
+            continue
+
+        client_name = require_str(sso_config.get('client_name'), f'platform_service_registry.{service_name}.sso.client_name')
+        provider = require_enum(sso_config.get('provider'), ['keycloak', 'oauth2-proxy'], f'platform_service_registry.{service_name}.sso.provider')
+        redirect_uris = require_string_list(sso_config.get('redirect_uris', []), f'platform_service_registry.{service_name}.sso.redirect_uris')
+        scopes = require_string_list(sso_config.get('scopes', ['openid', 'profile']), f'platform_service_registry.{service_name}.sso.scopes')
+        public_client = require_bool(sso_config.get('public_client', False), f'platform_service_registry.{service_name}.sso.public_client')
+
+        clients[client_name] = {
+            'service': service_name,
+            'provider': provider,
+            'redirect_uris': redirect_uris,
+            'scopes': scopes,
+            'public_client': public_client,
+            'provisioned': False
+        }
+
+    if write:
+        with open('config/generated/sso-clients.yaml', 'w') as f:
+            yaml.dump({'sso_clients': clients}, f, default_flow_style=False)
+
+    return clients
+```
+
+### Step 3: Create SSO provisioning task
+
+Create `roles/common/tasks/provision_sso_clients.yml`:
+- Called by service playbooks during converge
+- For each client in `sso_clients`:
+  1. Check if client exists in Keycloak (via API)
+  2. If not, create it with provided redirect_uris and scopes
+  3. Generate client secret and store in OpenBao at `secret/data/sso/{client_name}`
+  4. Create env file `<service_dir>/.env.sso` with OIDC_CLIENT_ID and OIDC_CLIENT_SECRET
+- Must be idempotent — second run skips existing clients
+
+### Step 4: Integrate with service playbooks
+
+Update service playbooks that have `sso.enabled: true` to:
+1. Include `roles/common/tasks/provision_sso_clients.yml` before docker_compose_converge
+2. Reference the generated `sso_clients` list
+
+Example in playbook:
+```yaml
+- name: Provision SSO clients
+  include_tasks: roles/common/tasks/provision_sso_clients.yml
+  vars:
+    sso_clients_to_provision: "{{ sso_clients | selectattr('service', 'equalto', inventory_hostname) | list }}"
+```
+
+### Step 5: Add secret injection to compose environment
+
+Extend `roles/common/tasks/manage_service_secrets.yml` to:
+- Read generated SSO secrets from OpenBao
+- Inject `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` into compose env files for services with sso.enabled=true
+
+### Step 6: Validation
+
+Create `scripts/validate_sso_clients.py` that:
+- Loads `config/generated/sso-clients.yaml`
+- For each client:
+  - Checks redirect_uris are HTTPS and match service dns.fqdn
+  - Validates scopes are in Keycloak allowed list
+  - Warns if public_client=true (less secure)
+  - Checks OpenBao path exists with credentials
+
+### Step 7: Test
+
+```bash
+python scripts/generate_cross_cutting_artifacts.py --check --only sso
+python scripts/validate_sso_clients.py --check
+make converge-<service> env=development  # Verify SSO env vars injected
+```
+
+## Rules you must follow
+
+- Do NOT make real Keycloak API calls in --check mode
+- Client secrets must NEVER appear in generated files (only in OpenBao)
+- Must validate redirect_uris match service FQDN before provisioning
+- One service = one SSO client (no sharing)
+- Do NOT provision SSO if service has no dns.fqdn
+- Do NOT auto-delete Keycloak clients on service removal (manual cleanup)
+- Read `AGENTS.md` and `CLAUDE.md` at the repo root before starting
 ```
