@@ -37,6 +37,18 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
         "semaphore",
         "windmill",
     ]
+    route_upstreams = {
+        route["route_id"]: route["upstream"] for route in playbook[1]["vars"]["runtime_pool_substrate_routes"]
+    }
+    assert route_upstreams == {
+        "api-gateway": "{{ platform_service_topology | platform_service_url('api_gateway', 'internal') }}",
+        "gitea": "{{ platform_service_topology | platform_service_url('gitea', 'internal') }}",
+        "keycloak": "http://127.0.0.1:18080",
+        "mail-platform": "{{ platform_service_topology.mail_platform.urls.private_api }}",
+        "openfga": "{{ platform_service_topology | platform_service_url('openfga', 'internal') }}",
+        "semaphore": "{{ platform_service_topology | platform_service_url('semaphore', 'internal') }}",
+        "windmill": "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}",
+    }
     assert [role["role"] for role in playbook[1]["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.linux_access",
@@ -72,8 +84,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert import_playbooks.index("openbao.yml") < import_playbooks.index("mail-platform.yml")
     openbao_import = playbook[5]
     assert openbao_import["import_playbook"] == "openbao.yml"
-    assert openbao_import["vars"]["openbao_migration_enabled"] is True
-    assert openbao_import["vars"]["openbao_migration_source_host"] == "docker-runtime-lv3"
+    assert "vars" not in openbao_import
 
     assert playbook[17]["name"] == "Verify the runtime-control substrate routes after the control-plane migration"
     assert playbook[17]["hosts"] == "runtime-control-lv3"

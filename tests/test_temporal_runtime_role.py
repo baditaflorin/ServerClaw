@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import yaml
@@ -70,6 +71,7 @@ CONFIG_TEMPLATE_PATH = (
     / "templates"
     / "server-config.yml.j2"
 )
+HEALTH_PROBE_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
 
 
 def load_tasks() -> list[dict]:
@@ -172,6 +174,16 @@ def test_temporal_verify_task_checks_ui_cluster_health_and_namespace() -> None:
         "{{ temporal_default_namespace }}",
     ]
     assert "temporal_default_namespace in temporal_verify_namespace.stdout" in assert_task["ansible.builtin.assert"]["that"]
+
+
+def test_temporal_health_probe_catalog_points_at_the_loopback_ui_port() -> None:
+    probes = json.loads(HEALTH_PROBE_CATALOG_PATH.read_text(encoding="utf-8"))["services"]
+    temporal_probe = probes["temporal"]
+
+    assert temporal_probe["owning_vm"] == "runtime-control-lv3"
+    assert temporal_probe["liveness"]["url"] == "http://127.0.0.1:8099"
+    assert temporal_probe["startup"]["argv"][-3:] == ["operator", "cluster", "health"]
+    assert temporal_probe["readiness"]["argv"][-4:] == ["namespace", "describe", "--namespace", "lv3"]
 
 
 def test_temporal_compose_and_config_templates_use_loopback_publication_and_password_placeholder() -> None:

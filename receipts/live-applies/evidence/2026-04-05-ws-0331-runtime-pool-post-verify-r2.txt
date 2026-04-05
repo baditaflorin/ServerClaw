@@ -1,0 +1,155 @@
+# ws-0331 runtime pool post-verify r2
+recorded_at=2026-04-05T10:41:08Z
+
+## runtime-general substrate
+OK
+{"id":"runtime-general-router","runtimeVersion":"1.16.0","enabledFeatures":["SchedulerReminders"],"extended":{"daprRuntimeVersion":"1.16.0"},"appConnectionProperties":{"port":9080,"protocol":"http","channelAddress":"127.0.0.1"},"actorRuntime":{"runtimeStatus":"DISABLED","hostReady":false,"placement":"placement: disconnected"},"workflows":{}}
+
+## runtime-general routes
+uptime_kuma_http 302
+homepage_http 200
+{"Version":"v1.29.5","LatestVersion":"disabled","Database":"/tmp/mailpit-1775233275623156085.db","DatabaseSize":90112,"Messages":1,"Unread":1,"Tags":{},"RuntimeStats":{"Uptime":152395,"Memory":12364056,"MessagesDeleted":0,"SMTPAccepted":1,"SMTPAcceptedSize":500,"SMTPRejected":0,"SMTPIgnored":0}}
+
+
+## runtime-general dapr invoke
+uptime_kuma_dapr_http 302
+
+## runtime-general nomad
+Name                   = runtime-general
+Description            = Runtime general pool namespace for the dedicated operator and support guest.
+Quota                  = <none>
+Enabled Drivers        = *
+Disabled Drivers       = <none>
+Enabled Network Modes  = *
+Disabled Network Modes = <none>
+24b2871c  default    dc1  runtime-general-lv3  runtime-general  false  eligible     ready
+
+## shared public routes
+home_http 200
+uptime_http 302
+status_http 200
+
+## runtime-control substrate
+OK
+{"id":"runtime-control-router","runtimeVersion":"1.16.0","enabledFeatures":["SchedulerReminders"],"extended":{"daprRuntimeVersion":"1.16.0"},"appConnectionProperties":{"port":9080,"protocol":"http","channelAddress":"127.0.0.1"},"actorRuntime":{"runtimeStatus":"DISABLED","hostReady":false,"placement":"placement: disconnected"},"workflows":{}}
+
+## runtime-control routes
+{"status":"ok"}
+{"status":"SERVING"}
+
+CE v1.662.0
+## runtime-control dapr invoke
+{"status":"SERVING"}
+
+## runtime-control nomad
+Name                   = runtime-control
+Description            = Runtime control pool namespace for the fixed-capacity control-plane guest.
+Quota                  = <none>
+Enabled Drivers        = *
+Disabled Drivers       = <none>
+Enabled Network Modes  = *
+Disabled Network Modes = <none>
+36fd4f40  default    dc1  runtime-control-lv3  runtime-control  false  eligible     ready
+
+## host private proxies
+{
+  "status": "pass",
+  "description": "Gitea: Git with a cup of tea",
+  "checks": {
+    "cache:ping": [
+      {
+        "status": "pass",
+        "time": "2026-04-05T10:41:23Z"
+      }
+    ],
+    "database:ping": [
+      {
+        "status": "pass",
+        "time": "2026-04-05T10:41:23Z"
+      }
+    ]
+  }
+}
+{"status":"SERVING"}
+
+CE v1.662.0
+{"status":"ok"}
+
+
+## openbao mtls
+{"initialized":true,"sealed":false,"standby":false,"performance_standby":false,"replication_performance_mode":"primary","replication_dr_mode":"disabled","server_time_utc":1775385687,"version":"2.5.1","cluster_name":"vault-cluster-0a1cd33d","cluster_id":"64f388be-6224-ad5f-c9f2-bef4c7b7791b"}
+openbao_without_client_cert expected_failure
+
+## step-ca runtime health
+step-ca Up 7 minutes (healthy)
+{"Status":"healthy","FailingStreak":0,"Log":[{"Start":"2026-04-05T10:39:17.666945063Z","End":"2026-04-05T10:39:17.723252792Z","ExitCode":0,"Output":""},{"Start":"2026-04-05T10:39:47.724650025Z","End":"2026-04-05T10:39:47.774586327Z","ExitCode":0,"Output":""},{"Start":"2026-04-05T10:40:17.775815237Z","End":"2026-04-05T10:40:17.82539762Z","ExitCode":0,"Output":""},{"Start":"2026-04-05T10:40:47.82640146Z","End":"2026-04-05T10:40:47.889595987Z","ExitCode":0,"Output":""},{"Start":"2026-04-05T10:41:17.890654266Z","End":"2026-04-05T10:41:17.943120777Z","ExitCode":0,"Output":""}]}
+
+## legacy control-plane retirement
+legacy_control_plane_absent
+
+## live memory allocations
+memory: 18432
+name: docker-runtime-lv3
+memory: 12288
+name: docker-build-lv3
+memory: 8192
+name: coolify-lv3
+memory: 4096
+name: artifact-cache-lv3
+memory: 12288
+name: runtime-general-lv3
+memory: 12288
+name: runtime-control-lv3
+
+               total        used        free      shared  buff/cache   available
+Mem:           125Gi        96Gi        14Gi       106Mi        15Gi        29Gi
+
+## capacity report
+Capacity Report for florin (proxmox_florin)
+Metrics source: disabled
+
+Host summary:
+- RAM: committed 124.0 GB / target 96.0 GB (129.2%), actual n/a
+- vCPU: committed 58.0 cores / target 22.5 cores (257.8%), actual n/a
+- Disk: committed 2138.0 GB / target 2512.5 GB (85.1%), actual n/a
+- Projected committed with planned capacity and reservations: RAM 190.0 GB, vCPU 87.0, disk 2922.0 GB
+- Budget envelope with planned growth: RAM 306.0 GB, vCPU 132.0, disk 3730.0 GB
+
+Guest summary:
+- nginx-lv3 [active] alloc=4GB/2vCPU/32GB budget=6GB/4vCPU/48GB actual=n/a
+- docker-runtime-lv3 [active] alloc=18GB/4vCPU/96GB budget=32GB/8vCPU/160GB actual=n/a
+- docker-build-lv3 [active] alloc=12GB/12vCPU/160GB budget=32GB/16vCPU/240GB actual=n/a
+- monitoring-lv3 [active] alloc=8GB/4vCPU/64GB budget=12GB/8vCPU/96GB actual=n/a
+- postgres-lv3 [active] alloc=8GB/4vCPU/96GB budget=12GB/6vCPU/128GB actual=n/a
+- postgres-replica-lv3 [planned] alloc=8GB/4vCPU/96GB budget=12GB/6vCPU/128GB actual=n/a
+- backup-lv3 [active] alloc=8GB/4vCPU/672GB budget=12GB/6vCPU/800GB actual=n/a
+- coolify-lv3 [active] alloc=6GB/4vCPU/96GB budget=12GB/6vCPU/128GB actual=n/a
+- coolify-apps-lv3 [active] alloc=8GB/4vCPU/128GB budget=12GB/6vCPU/160GB actual=n/a
+- artifact-cache-lv3 [active] alloc=4GB/4vCPU/160GB budget=12GB/6vCPU/240GB actual=n/a
+- runtime-ai-lv3 [active] alloc=16GB/6vCPU/128GB budget=24GB/8vCPU/160GB actual=n/a
+- runtime-general-lv3 [active] alloc=12GB/4vCPU/128GB budget=20GB/6vCPU/160GB actual=n/a
+- runtime-control-lv3 [active] alloc=12GB/4vCPU/128GB budget=16GB/6vCPU/160GB actual=n/a
+- nginx-staging-lv3 [planned] alloc=2GB/1vCPU/24GB budget=4GB/2vCPU/32GB actual=n/a
+- docker-runtime-staging-lv3 [planned] alloc=8GB/2vCPU/64GB budget=12GB/4vCPU/96GB actual=n/a
+- docker-build-staging-lv3 [planned] alloc=8GB/4vCPU/96GB budget=12GB/6vCPU/128GB actual=n/a
+- monitoring-staging-lv3 [planned] alloc=4GB/2vCPU/48GB budget=8GB/4vCPU/64GB actual=n/a
+- postgres-staging-lv3 [planned] alloc=4GB/2vCPU/64GB budget=8GB/4vCPU/96GB actual=n/a
+- backup-staging-lv3 [planned] alloc=4GB/2vCPU/64GB budget=8GB/4vCPU/96GB actual=n/a
+- artifact-cache-staging-lv3 [planned] alloc=4GB/2vCPU/64GB budget=8GB/4vCPU/96GB actual=n/a
+
+Runtime pool memory governance:
+- Combined runtime-pool envelope: baseline 40.0 GB, max 64.0 GB
+- Host free-memory floor: 20.0 GB (remaining at pool max 32.0 GB)
+- Measurement and control: prometheus via nomad-autoscaler
+- runtime-control priority=1 baseline=12.0GB max=16.0GB
+- runtime-general priority=2 baseline=12.0GB max=20.0GB
+- runtime-ai priority=3 baseline=16.0GB max=28.0GB
+
+Reservations:
+- ephemeral-pool [ephemeral_pool] 20GB RAM / 8 vCPU / 216GB disk
+- recovery-drill-pool [planned_growth] 4GB RAM / 2 vCPU / 48GB disk
+
+Capacity classes:
+- ha_reserved reserved=12GB/6vCPU/128GB occupied=0GB/0vCPU/0GB available=12GB/6vCPU/128GB sources=guest:postgres-replica-lv3[planned]
+- recovery_reserved reserved=4GB/2vCPU/48GB occupied=0GB/0vCPU/0GB available=4GB/2vCPU/48GB sources=reservation:recovery-drill-pool[planned_growth]
+- preview_burst reserved=20GB/8vCPU/216GB occupied=0GB/0vCPU/0GB available=20GB/8vCPU/216GB sources=reservation:ephemeral-pool[ephemeral_pool]

@@ -9,6 +9,8 @@ import shlex
 import subprocess
 from pathlib import Path, PurePosixPath
 
+import yaml
+
 from controller_automation_toolkit import emit_cli_error
 from drift_lib import build_guest_ssh_command, load_controller_context, run_command
 
@@ -150,6 +152,68 @@ def sync_remote_runtime_file(
         raise RuntimeError(f"{remote_path}: {detail}")
 
 
+def remote_file_exists(
+    context: dict,
+    *,
+    target: str,
+    path: str,
+) -> bool:
+    remote_command = f"sudo test -s {shlex.quote(path)}"
+    command = build_guest_ssh_command(context, target, remote_command)
+    completed = subprocess.run(
+        command,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return completed.returncode == 0
+
+
+def resolve_openbao_init_local_file() -> Path:
+    group_vars = LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all.yml"
+    payload = yaml.safe_load(group_vars.read_text(encoding="utf-8")) or {}
+    init_path = str(payload.get("openbao_init_local_file") or "").strip()
+    if not init_path:
+        raise ValueError("openbao_init_local_file is not declared in inventory/group_vars/all.yml")
+    return Path(init_path)
+
+
+def run_local_converge_restic(env: str) -> None:
+    init_path = resolve_openbao_init_local_file()
+    if not init_path.is_file():
+        raise ValueError(f"OpenBao init payload is missing locally: {init_path}")
+
+    command = ["make", "converge-restic-config-backup", f"env={env}"]
+    completed = subprocess.run(
+        command,
+        cwd=str(LOCAL_REPO_ROOT),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip() or "local restic converge failed"
+        raise RuntimeError(detail)
+
+
+def ensure_remote_runtime_credentials(
+    context: dict,
+    *,
+    env: str,
+    credential_file: str,
+    target: str = "docker-runtime-lv3",
+) -> None:
+    if remote_file_exists(context, target=target, path=credential_file):
+        return
+
+    run_local_converge_restic(env)
+
+    if not remote_file_exists(context, target=target, path=credential_file):
+        raise RuntimeError(
+            f"restic runtime credentials are still missing on {target} after converge: {credential_file}"
+        )
+
+
 def normalize_repo_relative_path(path: str) -> PurePosixPath:
     candidate = PurePosixPath(str(path).strip())
     if candidate.is_absolute():
@@ -249,6 +313,11 @@ def main(argv: list[str] | None = None) -> int:
 
         context = load_controller_context()
         ensure_remote_runtime_support_files(context, repo_root=args.repo_root)
+        ensure_remote_runtime_credentials(
+            context,
+            env=args.env,
+            credential_file=args.credential_file,
+        )
         remote_command = build_remote_command(
             mode=args.mode,
             triggered_by=args.triggered_by,

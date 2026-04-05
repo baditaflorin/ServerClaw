@@ -4,4 +4,5 @@ dependencies:
     vars:
       preflight_required_vars:
         - uptime_kuma_site_dir
+        - uptime_kuma_compose_file
         - uptime_kuma_port

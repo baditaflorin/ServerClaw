@@ -18,16 +18,16 @@ argument_specs:
         required: true
         description:
           - Controller-local SSH user CA public key path.
-      step_ca_local_hosts_password_file:
-        type: path
-        required: true
-        description:
-          - Controller-local provisioner password file for SSH host certificates.
       step_ca_root_remote_file:
         type: path
         required: true
         description:
           - Remote path where the Step CA root certificate is stored.
+      step_ca_ssh_sign_delegate_host:
+        type: str
+        required: false
+        description:
+          - Inventory host that signs SSH host certificates on behalf of managed targets.
       step_ca_ssh_host_certificate_file:
         type: path
         required: true

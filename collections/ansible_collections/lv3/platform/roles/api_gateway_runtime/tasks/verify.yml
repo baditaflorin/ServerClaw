@@ -202,6 +202,20 @@
   delay: "{{ api_gateway_runtime_recovery_probe_delay }}"
   until: api_gateway_runtime_assurance_check.status == 200
 
+- name: Wait for the Typesense backend used by API gateway structured search verification
+  ansible.builtin.uri:
+    url: "{{ api_gateway_resolved_typesense_base_url }}/health"
+    method: GET
+    headers:
+      X-TYPESENSE-API-KEY: "{{ api_gateway_resolved_typesense_api_key }}"
+    status_code: 200
+  register: api_gateway_typesense_health_check
+  changed_when: false
+  retries: "{{ api_gateway_typesense_verify_retries }}"
+  delay: "{{ api_gateway_typesense_verify_delay }}"
+  until: api_gateway_typesense_health_check.status == 200
+  no_log: true
+
 - name: Verify the authenticated structured platform search endpoint succeeds with a real bearer token
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ api_gateway_internal_port }}/v1/platform/search/structured?q=api&collection={{ api_gateway_typesense_collection | urlencode }}"

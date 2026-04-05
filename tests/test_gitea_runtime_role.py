@@ -95,6 +95,8 @@ def test_runner_tasks_use_docker_compose_plugin() -> None:
     task_names = {task["name"] for task in runner_tasks}
     assert "Verify Docker Compose plugin is available" in task_names
     assert "Record whether the Gitea runner stack needs a force recreate" in task_names
+    assert "Check whether a persisted Gitea runner registration already exists" in task_names
+    assert "Remove a stale persisted Gitea runner registration before restart" in task_names
 
     pull_task = next(task for task in runner_tasks if task["name"] == "Pull the Gitea runner image")
     up_task = next(
@@ -107,6 +109,12 @@ def test_runner_tasks_use_docker_compose_plugin() -> None:
     up_argv = start_task["ansible.builtin.command"]["argv"]
     assert "gitea_runner_force_recreate" in up_argv
     assert "--force-recreate" in up_argv
+
+    force_recreate_task = next(
+        task for task in runner_tasks if task["name"] == "Record whether the Gitea runner stack needs a force recreate"
+    )
+    force_recreate_expr = force_recreate_task["ansible.builtin.set_fact"]["gitea_runner_force_recreate"]
+    assert "gitea_runner_registration_drifted" in force_recreate_expr
 
 
 def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:
@@ -153,6 +161,32 @@ def test_runner_tasks_recover_stale_compose_network_during_startup() -> None:
     assert "Flag stale Gitea runner compose-network failures during startup" in rescue_names
     assert "Reset stale Gitea runner compose resources before retrying startup" in rescue_names
     assert "Retry Gitea runner stack startup after compose-network recovery" in rescue_names
+
+
+def test_runner_tasks_recover_stale_registration_state() -> None:
+    runner_tasks = yaml.safe_load((ROLE_ROOT / "gitea_runner" / "tasks" / "main.yml").read_text())
+    inspect_block = next(
+        task for task in runner_tasks if task["name"] == "Inspect the persisted Gitea runner registration state"
+    )
+    block_names = [task["name"] for task in inspect_block["block"]]
+    rescue_names = [task["name"] for task in inspect_block["rescue"]]
+
+    assert "Read the persisted Gitea runner registration state" in block_names
+    assert "Decode the persisted Gitea runner registration state" in block_names
+    assert "Record whether the persisted Gitea runner registration drifted from the desired topology" in block_names
+    assert "Record whether the persisted Gitea runner registration should be replaced" in block_names
+    assert "Flag unreadable Gitea runner registration state for replacement" in rescue_names
+
+    drift_task = next(
+        task
+        for task in inspect_block["block"]
+        if task["name"] == "Record whether the persisted Gitea runner registration drifted from the desired topology"
+    )
+    drift_expr = drift_task["ansible.builtin.set_fact"]["gitea_runner_registration_drift_reasons"]
+    assert "gitea_runner_registration_state.address" in drift_expr
+    assert "gitea_runner_registration_state.name" in drift_expr
+    assert "gitea_runner_registration_state.labels" in drift_expr
+    assert "gitea_runner_expected_labels" in drift_expr
 
 
 def test_gitea_waits_on_the_published_service_address() -> None:

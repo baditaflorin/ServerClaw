@@ -42,6 +42,9 @@ restic_config_backup_nats_password_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/nats/jetstream-admin-password.txt
 restic_config_backup_ntfy_token_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/ntfy/windmill-token.txt
+restic_config_backup_openbao_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('openbao') }}"
+restic_config_backup_runtime_openbao_address: "http://{{ restic_config_backup_openbao_service_topology.private_ip }}:{{ hostvars['proxmox_florin'].platform_port_assignments.openbao_http_port }}"
+restic_config_backup_runtime_openbao_local_address: "http://127.0.0.1:{{ openbao_http_port }}"
 restic_config_backup_runtime_openbao_secret_path: services/restic-config-backup/runtime-config
 restic_config_backup_runtime_openbao_policy_name: lv3-restic-config-backup-runtime
 restic_config_backup_runtime_openbao_approle_name: restic-config-backup

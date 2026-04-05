@@ -118,6 +118,28 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
     assert defaults["linux_guest_firewall_docker_bridge_chain_service_name"] == "docker"
     assert defaults["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
 
+
+def test_linux_guest_firewall_only_resets_ssh_when_the_rendered_policy_changes() -> None:
+    tasks = load_tasks()
+
+    reset_task = next(
+        task for task in tasks if task["name"] == "Reset SSH connection after guest nftables policy evaluation"
+    )
+    wait_task = next(task for task in tasks if task["name"] == "Wait for guest SSH after nftables changes")
+    post_bridge_reset_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Reset SSH connection after post-bridge guest nftables policy evaluation"
+    )
+    post_bridge_wait_task = next(
+        task for task in tasks if task["name"] == "Wait for guest SSH after post-bridge nftables changes"
+    )
+
+    assert reset_task["when"] == "linux_guest_firewall_config.changed"
+    assert wait_task["when"] == "linux_guest_firewall_config.changed"
+    assert post_bridge_reset_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
+    assert post_bridge_wait_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
+
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 TEMPLATE_PATH = (
     REPO_ROOT

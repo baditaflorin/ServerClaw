@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from platform.execution_lanes import LaneRegistry
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +92,29 @@ converge-wrapper:
         + "\n",
     )
     return tmp_path, catalog_path, inventory_path
+
+
+def write_execution_lanes(path: Path) -> None:
+    write(
+        path,
+        """
+schema_version: 1.0.0
+lanes:
+  lane:alpha:
+    hostname: alpha
+    vmid: 101
+    services:
+      - alpha
+    max_concurrent_ops: 1
+    serialisation: resource_lock
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 512
+      total_disk_iops: 100
+""".strip()
+        + "\n",
+    )
 
 
 def test_resolve_playbook_scope_inherits_single_import(tmp_path: Path) -> None:
@@ -340,6 +364,86 @@ def test_run_scoped_playbook_uses_primary_inventory_for_group_vars_and_shard_for
             "/tmp/test.id_ed25519",
         ]
     ]
+
+
+def test_run_planned_playbook_reserves_and_releases_target_lane(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root, _catalog_path, inventory_path = make_repo(tmp_path)
+    write_execution_lanes(repo_root / "config" / "execution-lanes.yaml")
+    registry = LaneRegistry(repo_root=repo_root, state_path=repo_root / ".local" / "execution-lanes.json")
+    plan = scopes.PlannedPlaybookExecution(
+        playbook_path="playbooks/leaf-alpha.yml",
+        env="production",
+        run_id="run-789",
+        mutation_scope="lane",
+        execution_class="mutation",
+        target_lane="lane:alpha",
+        target_hosts=("alpha",),
+        limit_expression="alpha",
+        inventory_shard_path=str(repo_root / ".ansible" / "shards" / "run-789" / "leaf-alpha-production.json"),
+        shared_surfaces=("playbooks/leaf-alpha.yml", "service:alpha", "host:alpha"),
+        source_leaf_playbooks=("playbooks/leaf-alpha.yml",),
+    )
+    captured: list[list[str]] = []
+
+    def fake_run(command: list[str], cwd: Path, text: bool, check: bool = False):
+        del cwd, text, check
+        captured.append(command)
+        snapshot = registry.snapshot()
+        assert snapshot["active"]["lane:alpha"][0]["actor_intent_id"] == "ansible-scope:run-789"
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+
+    result = scopes.run_planned_playbook(
+        plan,
+        inventory_path=inventory_path,
+        repo_root=repo_root,
+        lane_registry=registry,
+    )
+
+    assert result.returncode == 0
+    assert captured
+    assert registry.snapshot()["active"]["lane:alpha"] == []
+
+
+def test_run_planned_playbook_returns_busy_when_target_lane_is_already_reserved(tmp_path: Path) -> None:
+    repo_root, _catalog_path, inventory_path = make_repo(tmp_path)
+    write_execution_lanes(repo_root / "config" / "execution-lanes.yaml")
+    registry = LaneRegistry(repo_root=repo_root, state_path=repo_root / ".local" / "execution-lanes.json")
+    registry.reserve(
+        {
+            "workflow_id": "converge-alpha",
+            "target_vm": "alpha",
+            "arguments": {"target_vm": "alpha"},
+        },
+        actor_intent_id="intent-a",
+        ttl_seconds=120,
+    )
+    plan = scopes.PlannedPlaybookExecution(
+        playbook_path="playbooks/leaf-alpha.yml",
+        env="production",
+        run_id="run-790",
+        mutation_scope="lane",
+        execution_class="mutation",
+        target_lane="lane:alpha",
+        target_hosts=("alpha",),
+        limit_expression="alpha",
+        inventory_shard_path=str(repo_root / ".ansible" / "shards" / "run-790" / "leaf-alpha-production.json"),
+        shared_surfaces=("playbooks/leaf-alpha.yml", "service:alpha", "host:alpha"),
+        source_leaf_playbooks=("playbooks/leaf-alpha.yml",),
+    )
+
+    result = scopes.run_planned_playbook(
+        plan,
+        inventory_path=inventory_path,
+        repo_root=repo_root,
+        lane_registry=registry,
+    )
+
+    assert result.returncode == 3
+    assert "execution lane busy: lane:alpha" in result.stderr
 
 
 def test_real_repo_scope_resolution_for_live_apply_paths() -> None:

@@ -32,8 +32,28 @@ def test_nomad_member_tasks_install_the_binary_and_cli_wrapper() -> None:
     tasks = load_tasks(MEMBER_TASKS)
     names = {task["name"] for task in tasks}
     assert "Install the pinned Nomad binary" in names
+    assert "Reset SSH connection before installing Nomad TLS artifacts" in names
+    assert "Wait for SSH after resetting the connection before installing Nomad TLS artifacts" in names
+    assert "Reset SSH connection before rendering the local Nomad CLI wrapper" in names
+    assert "Wait for SSH after resetting the connection before rendering the local Nomad CLI wrapper" in names
     assert "Render the local Nomad CLI wrapper" in names
     assert "Verify the Nomad agent" in names
+
+    wait_for_ssh = next(
+        task for task in tasks if task["name"] == "Wait for SSH after resetting the connection before installing Nomad TLS artifacts"
+    )
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["timeout"] == 60
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["sleep"] == 2
+
+    cli_wrapper_wait_for_ssh = next(
+        task
+        for task in tasks
+        if task["name"] == "Wait for SSH after resetting the connection before rendering the local Nomad CLI wrapper"
+    )
+    assert cli_wrapper_wait_for_ssh["ansible.builtin.wait_for_connection"]["timeout"] == 60
+    assert cli_wrapper_wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
+    assert cli_wrapper_wait_for_ssh["ansible.builtin.wait_for_connection"]["sleep"] == 2
 
 
 def test_nomad_bootstrap_defaults_track_controller_artifacts_and_smoke_jobs() -> None:

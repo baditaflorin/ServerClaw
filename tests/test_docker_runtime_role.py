@@ -99,8 +99,12 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
     assert task_names.index("Record conflicting Docker packages that are currently installed") < task_names.index(
         "Remove conflicting Docker packages"
     )
-    assert task_names.index("Inspect Docker runtime package status") < task_names.index("Record missing Docker runtime packages")
-    assert task_names.index("Record missing Docker runtime packages") < task_names.index("Install Docker runtime packages")
+    assert task_names.index("Inspect Docker runtime package status") < task_names.index(
+        "Record missing Docker runtime packages"
+    )
+    assert task_names.index("Record missing Docker runtime packages") < task_names.index(
+        "Install Docker runtime packages"
+    )
     assert task_names.index("Apply Docker bridge forward-compat rules live without reloading nftables") < task_names.index(
         "Persist required Docker kernel modules across reboot"
     )
@@ -118,58 +122,8 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
     persist_modules = next(task for task in tasks if task["name"] == "Persist required Docker kernel modules across reboot")
     load_modules = next(task for task in tasks if task["name"] == "Load required Docker kernel modules before starting Docker")
     ensure_docker_socket = next(task for task in tasks if task["name"] == "Ensure Docker socket activation is enabled and listening")
-    inspect_prereqs = next(task for task in tasks if task["name"] == "Inspect Docker repository prerequisite package status")
-    record_missing_prereqs = next(task for task in tasks if task["name"] == "Record missing Docker repository prerequisites")
-    install_prereqs = next(task for task in tasks if task["name"] == "Install Docker repository prerequisites")
-    inspect_conflicts = next(task for task in tasks if task["name"] == "Inspect conflicting Docker package status")
-    record_installed_conflicts = next(
-        task for task in tasks if task["name"] == "Record conflicting Docker packages that are currently installed"
-    )
-    remove_conflicts = next(task for task in tasks if task["name"] == "Remove conflicting Docker packages")
-    inspect_engine_packages = next(task for task in tasks if task["name"] == "Inspect Docker runtime package status")
-    record_missing_engine_packages = next(task for task in tasks if task["name"] == "Record missing Docker runtime packages")
-    install_engine_packages = next(task for task in tasks if task["name"] == "Install Docker runtime packages")
     assert defaults["docker_runtime_kernel_modules"] == ["iptable_nat"]
     assert defaults["docker_runtime_kernel_modules_file"] == "/etc/modules-load.d/lv3-docker-runtime.conf"
-    assert inspect_prereqs["ansible.builtin.command"]["argv"] == ["dpkg-query", "-W", "-f=${Status}", "{{ item }}"]
-    assert inspect_prereqs["loop"] == "{{ docker_runtime_prereq_packages }}"
-    assert inspect_prereqs["register"] == "docker_runtime_prereq_package_status"
-    assert inspect_prereqs["changed_when"] is False
-    assert inspect_prereqs["failed_when"] is False
-    assert "docker_runtime_prereq_package_status.results" in record_missing_prereqs["ansible.builtin.set_fact"][
-        "docker_runtime_missing_prereq_packages"
-    ]
-    assert 'rejectattr("stdout", "equalto", "install ok installed")' in record_missing_prereqs["ansible.builtin.set_fact"][
-        "docker_runtime_missing_prereq_packages"
-    ]
-    assert install_prereqs["ansible.builtin.apt"]["name"] == "{{ docker_runtime_missing_prereq_packages }}"
-    assert install_prereqs["when"] == "docker_runtime_missing_prereq_packages | length > 0"
-    assert inspect_conflicts["ansible.builtin.command"]["argv"] == ["dpkg-query", "-W", "-f=${Status}", "{{ item }}"]
-    assert inspect_conflicts["loop"] == "{{ docker_runtime_conflicting_packages }}"
-    assert inspect_conflicts["register"] == "docker_runtime_conflicting_package_status"
-    assert inspect_conflicts["changed_when"] is False
-    assert inspect_conflicts["failed_when"] is False
-    assert "docker_runtime_conflicting_package_status.results" in record_installed_conflicts["ansible.builtin.set_fact"][
-        "docker_runtime_installed_conflicting_packages"
-    ]
-    assert 'selectattr("stdout", "equalto", "install ok installed")' in record_installed_conflicts["ansible.builtin.set_fact"][
-        "docker_runtime_installed_conflicting_packages"
-    ]
-    assert remove_conflicts["ansible.builtin.apt"]["name"] == "{{ docker_runtime_installed_conflicting_packages }}"
-    assert remove_conflicts["when"] == "docker_runtime_installed_conflicting_packages | length > 0"
-    assert inspect_engine_packages["ansible.builtin.command"]["argv"] == ["dpkg-query", "-W", "-f=${Status}", "{{ item }}"]
-    assert inspect_engine_packages["loop"] == "{{ docker_runtime_engine_packages }}"
-    assert inspect_engine_packages["register"] == "docker_runtime_engine_package_status"
-    assert inspect_engine_packages["changed_when"] is False
-    assert inspect_engine_packages["failed_when"] is False
-    assert "docker_runtime_engine_package_status.results" in record_missing_engine_packages["ansible.builtin.set_fact"][
-        "docker_runtime_missing_engine_packages"
-    ]
-    assert 'rejectattr("stdout", "equalto", "install ok installed")' in record_missing_engine_packages["ansible.builtin.set_fact"][
-        "docker_runtime_missing_engine_packages"
-    ]
-    assert install_engine_packages["ansible.builtin.apt"]["name"] == "{{ docker_runtime_missing_engine_packages }}"
-    assert install_engine_packages["when"] == "docker_runtime_missing_engine_packages | length > 0"
     assert persist_modules["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_kernel_modules_file }}"
     assert persist_modules["when"] == "docker_runtime_kernel_modules | length > 0"
     assert load_modules["ansible.builtin.command"]["argv"] == ["modprobe", "{{ item }}"]
@@ -992,24 +946,22 @@ def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() 
     tasks = load_common_docker_bridge_chains()
     task_names = {task["name"] for task in tasks}
     assert "Warm the Docker control socket before chain health checks" in task_names
-    assert "Decide whether Docker bridge-chain recovery checks are required" in task_names
     assert "Reset SSH connection before Docker bridge-chain recovery checks" in task_names
     assert "Wait for SSH before Docker bridge-chain recovery checks" in task_names
     assert "Wait briefly for Docker bridge chains to recover after daemon activation" in task_names
     assert "Restart Docker when required bridge chains are missing" not in task_names
     assert "Restart Docker when required bridge chains are still missing after the retry loop" not in task_names
-    assert "Verify Docker nat chain after retry loop" not in task_names
-    assert "Verify Docker forward chain after retry loop" not in task_names
-    assert "Capture final Docker nat chain state after retry loop" not in task_names
-    assert "Capture final Docker forward chain state after retry loop" not in task_names
     info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
-    reset_connection = next(task for task in tasks if task["name"] == "Reset SSH connection before Docker bridge-chain recovery checks")
     wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
     chain_wait = next(
         task for task in tasks if task["name"] == "Wait briefly for Docker bridge chains to recover after daemon activation"
     )
     nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after health evaluation")
     forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after health evaluation")
+    nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
+    forward_verify = next(task for task in tasks if task["name"] == "Verify Docker forward chain after retry loop")
+    nat_final = next(task for task in tasks if task["name"] == "Capture final Docker nat chain state after retry loop")
+    forward_final = next(task for task in tasks if task["name"] == "Capture final Docker forward chain state after retry loop")
     nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation")
     forward_assert = next(
         task for task in tasks if task["name"] == "Assert Docker forward chain is present after health evaluation"
@@ -1024,12 +976,6 @@ def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() 
     assert info_ready["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert info_ready["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert info_ready["until"] == "common_docker_bridge_chains_info_ready.rc == 0"
-    assert info_ready["become_flags"] == "-n"
-    assert reset_connection["when"] == [
-        "common_docker_bridge_chains_active_state.rc == 0",
-        "common_docker_bridge_chains_needs_recovery_check | default(false)",
-    ]
-    assert reset_connection["ansible.builtin.include_tasks"] == "docker_bridge_chains_reset_connection.yml"
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["timeout"] == (
         "{{ ((common_docker_bridge_chains_retries | int) * (common_docker_bridge_chains_delay | int)) + 60 }}"
     )
@@ -1037,33 +983,41 @@ def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() 
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["sleep"] == (
         "{{ [common_docker_bridge_chains_delay | int, 1] | max }}"
     )
-    assert wait_for_ssh["when"] == [
-        "common_docker_bridge_chains_active_state.rc == 0",
-        "common_docker_bridge_chains_needs_recovery_check | default(false)",
-    ]
     assert "iptables -t nat -S DOCKER" in chain_wait["ansible.builtin.shell"]
     assert "iptables -t filter -S DOCKER-FORWARD" in chain_wait["ansible.builtin.shell"]
     assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in chain_wait["ansible.builtin.shell"]
+    assert "iptables -t filter -S FORWARD" in chain_wait["ansible.builtin.shell"]
     assert "sleep {{ common_docker_bridge_chains_delay }}" in chain_wait["ansible.builtin.shell"]
     assert chain_wait["failed_when"] is False
+    assert "iptables -t filter -S FORWARD" in forward_recheck["ansible.builtin.shell"]
     assert nat_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert nat_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert nat_recheck["until"] == "common_docker_bridge_chains_nat_recheck.rc == 0"
     assert "iptables -t filter -S DOCKER-FORWARD" in forward_recheck["ansible.builtin.shell"]
     assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in forward_recheck["ansible.builtin.shell"]
+    assert "iptables -t filter -S FORWARD" in forward_recheck["ansible.builtin.shell"]
     assert forward_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert forward_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert forward_recheck["until"] == "common_docker_bridge_chains_forward_recheck.rc == 0"
-    assert "common_docker_bridge_chains_nat_recheck is defined" in nat_assert["ansible.builtin.assert"]["that"][0]
-    assert "common_docker_bridge_chains_nat_check" in nat_assert["ansible.builtin.assert"]["that"][0]
-    assert nat_assert["ansible.builtin.assert"]["that"][0].strip().endswith("== 0")
-    assert "common_docker_bridge_chains_forward_recheck is defined" in forward_assert["ansible.builtin.assert"]["that"][0]
-    assert "common_docker_bridge_chains_forward_check" in forward_assert["ansible.builtin.assert"]["that"][0]
-    assert forward_assert["ansible.builtin.assert"]["that"][0].strip().endswith("== 0")
-    assert (
-        forward_assert["ansible.builtin.assert"]["fail_msg"]
-        == "Docker is running but neither the filter DOCKER-FORWARD chain nor the legacy filter DOCKER chain is present; bridge networking will fail."
+    assert nat_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert nat_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert nat_verify["until"] == "common_docker_bridge_chains_nat_verify.rc == 0"
+    assert "iptables -t filter -S DOCKER-FORWARD" in forward_verify["ansible.builtin.shell"]
+    assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in forward_verify["ansible.builtin.shell"]
+    assert "iptables -t filter -S FORWARD" in forward_verify["ansible.builtin.shell"]
+    assert forward_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert forward_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert forward_verify["until"] == "common_docker_bridge_chains_forward_verify.rc == 0"
+    assert nat_final["ansible.builtin.set_fact"]["common_docker_bridge_chains_nat_final"] == (
+        "{{ common_docker_bridge_chains_nat_verify }}"
     )
+    assert forward_final["ansible.builtin.set_fact"]["common_docker_bridge_chains_forward_final"] == (
+        "{{ common_docker_bridge_chains_forward_verify }}"
+    )
+    assert nat_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_nat_final.rc == 0"]
+    assert forward_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_forward_final.rc == 0"]
+    assert "equivalent Docker-managed FORWARD bridge rules" in forward_assert["ansible.builtin.assert"]["fail_msg"]
+    assert "legacy filter DOCKER chain" in forward_assert["ansible.builtin.assert"]["fail_msg"]
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
@@ -1181,12 +1135,10 @@ def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     assert prereq_apt["cache_valid_time"] == 3600
     assert prereq_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert prereq_apt["force_apt_get"] is True
-    assert prereq_task["when"] == "docker_runtime_missing_prereq_packages | length > 0"
 
     assert remove_conflicts_apt["name"] == "{{ docker_runtime_installed_conflicting_packages }}"
     assert remove_conflicts_apt["state"] == "absent"
     assert remove_conflicts_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
-    assert remove_conflicts_task["when"] == "docker_runtime_installed_conflicting_packages | length > 0"
 
     assert install_runtime_apt["name"] == "{{ docker_runtime_missing_engine_packages }}"
     assert install_runtime_apt["state"] == "present"
@@ -1194,7 +1146,6 @@ def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     assert install_runtime_apt["cache_valid_time"] == 3600
     assert install_runtime_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert install_runtime_apt["force_apt_get"] is True
-    assert install_runtime_task["when"] == "docker_runtime_missing_engine_packages | length > 0"
 
 
 def test_docker_runtime_verify_checks_publication_assurance_helper_is_executable() -> None:

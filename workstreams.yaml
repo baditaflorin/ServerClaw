@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 300
+  total_workstreams: 301
   by_year:
-    '2026': 300
+    '2026': 301
 workstreams:
 - id: ws-0318-provision-operator-v2
   adr: 0318

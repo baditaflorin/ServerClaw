@@ -172,7 +172,7 @@ windmill:
           type: string
           description: Registry publisher id used for governance checks.
   resource:
-    path: ntfy/platform
+    path: f/lv3/ntfy_platform
     publisher: windmill
     description: Repo-managed Windmill ntfy publication channel for operator push delivery.
   bridge:

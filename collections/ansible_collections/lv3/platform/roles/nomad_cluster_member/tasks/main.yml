@@ -157,6 +157,15 @@
         group: "{{ nomad_cluster_group }}"
         mode: "0750"
 
+- name: Reset SSH connection before installing Nomad TLS artifacts
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for SSH after resetting the connection before installing Nomad TLS artifacts
+  ansible.builtin.wait_for_connection:
+    timeout: 60
+    connect_timeout: 5
+    sleep: 2
+
 - name: Install the Nomad CA certificate
   ansible.builtin.copy:
     dest: "{{ nomad_cluster_ca_cert_file }}"
@@ -202,6 +211,15 @@
     group: root
     mode: "0644"
   notify: Restart lv3 nomad
+
+- name: Reset SSH connection before rendering the local Nomad CLI wrapper
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for SSH after resetting the connection before rendering the local Nomad CLI wrapper
+  ansible.builtin.wait_for_connection:
+    timeout: 60
+    connect_timeout: 5
+    sleep: 2
 
 - name: Render the local Nomad CLI wrapper
   ansible.builtin.template:

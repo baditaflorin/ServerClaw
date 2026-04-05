@@ -1056,6 +1056,39 @@
     body_format: json
     body: "{{ harbor_check_runner_retention_policy }}"
     status_code: 201
+  register: harbor_check_runner_retention_create
+  when: harbor_check_runner_retention_id_before == 0
+  no_log: true
+
+- name: Record the check-runner Harbor retention policy ID advertised after creation
+  ansible.builtin.set_fact:
+    harbor_check_runner_retention_create_location: >-
+      {{
+        harbor_check_runner_retention_create.location
+        | default(
+            harbor_check_runner_retention_create.headers.location
+            | default(
+                harbor_check_runner_retention_create.headers.Location
+                | default('')
+            )
+          )
+      }}
+    harbor_check_runner_retention_id_created: >-
+      {{
+        (
+          harbor_check_runner_retention_create.location
+          | default(
+              harbor_check_runner_retention_create.headers.location
+              | default(
+                  harbor_check_runner_retention_create.headers.Location
+                  | default('')
+              )
+            )
+          | regex_findall('[0-9]+$')
+          | first
+          | default('0')
+        ) | int
+      }}
   when: harbor_check_runner_retention_id_before == 0
   no_log: true
 
@@ -1074,7 +1107,58 @@
 
 - name: Record the check-runner Harbor retention policy ID
   ansible.builtin.set_fact:
-    harbor_check_runner_retention_id: "{{ harbor_check_runner_project_metadata_after.json.retention_id | int }}"
+    harbor_check_runner_retention_id: >-
+      {%- set after_id = harbor_check_runner_project_metadata_after.json.retention_id | default('0') | int -%}
+      {%- set before_id = harbor_check_runner_retention_id_before | default(0) | int -%}
+      {%- set created_id = harbor_check_runner_retention_id_created | default(0) | int -%}
+      {{ after_id if after_id > 0 else (before_id if before_id > 0 else created_id) }}
+  no_log: true
+
+- name: Persist the check-runner Harbor retention policy ID in project metadata when Harbor omits it
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects/{{ harbor_check_runner_project_name | urlencode }}/metadatas/
+    method: POST
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      retention_id: "{{ harbor_check_runner_retention_id | string }}"
+    status_code:
+      - 200
+      - 409
+  when:
+    - harbor_check_runner_retention_id | int > 0
+    - harbor_check_runner_project_metadata_after.json.retention_id | default('0') | int == 0
+  no_log: true
+
+- name: Re-query the check-runner Harbor project metadata after retention ID synchronization
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects/{{ harbor_check_runner_project_name | urlencode }}/metadatas/
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_check_runner_project_metadata_synced
+  changed_when: false
+  when:
+    - harbor_check_runner_retention_id | int > 0
+    - harbor_check_runner_project_metadata_after.json.retention_id | default('0') | int == 0
+  no_log: true
+
+- name: Assert Harbor persisted the check-runner retention policy ID for future reconciliations
+  ansible.builtin.assert:
+    that:
+      - harbor_check_runner_project_metadata_synced.json.retention_id | default('0') | int == harbor_check_runner_retention_id | int
+    fail_msg: >-
+      Harbor created the check-runner retention policy but did not expose a durable retention_id in project metadata.
+      Re-running the runtime-control apply would create duplicate policies instead of reconciling the existing one.
+  when:
+    - harbor_check_runner_retention_id | int > 0
+    - harbor_check_runner_project_metadata_after.json.retention_id | default('0') | int == 0
   no_log: true
 
 - name: Reconcile the check-runner Harbor retention policy

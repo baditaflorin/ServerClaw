@@ -66,21 +66,6 @@
   register: openbao_init_payload_local
   no_log: true
 
-- name: Read the persisted OpenBao init payload for migration-aware recovery
-  ansible.builtin.slurp:
-    src: "{{ openbao_init_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: openbao_existing_init_payload_raw
-  when: openbao_init_payload_local.stat.exists
-  no_log: true
-
-- name: Record the persisted OpenBao init payload facts for migration-aware recovery
-  ansible.builtin.set_fact:
-    openbao_existing_init_payload: "{{ openbao_existing_init_payload_raw.content | b64decode | from_json }}"
-  when: openbao_init_payload_local.stat.exists
-  no_log: true
-
 - name: Reset the OpenBao data and log directories before first initialization
   ansible.builtin.file:
     path: "{{ item }}"
@@ -258,26 +243,94 @@
   tags:
     - mutation
 
-- name: Pull the OpenBao image
-  vars:
-    mutation_audit_action: pull.openbao_image
-    mutation_audit_target: openbao-runtime
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ openbao_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ openbao_site_dir }}"
-  register: openbao_pull
-  changed_when: >-
-    'Downloaded newer image' in openbao_pull.stdout
-    or 'Pull complete' in openbao_pull.stdout
-    or 'Pulling' in openbao_pull.stdout
-  tags:
-    - mutation
+- name: Pull the OpenBao image and recover Docker daemon availability
+  block:
+    - name: Pull the OpenBao image
+      vars:
+        mutation_audit_action: pull.openbao_image
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - pull
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_pull
+      changed_when: >-
+        'Downloaded newer image' in openbao_pull.stdout
+        or 'Pull complete' in openbao_pull.stdout
+        or 'Pulling' in openbao_pull.stdout
+      tags:
+        - mutation
+  rescue:
+    - name: Flag Docker daemon availability failures during OpenBao image pull
+      ansible.builtin.set_fact:
+        openbao_pull_docker_unavailable: >-
+          {{
+            'Cannot connect to the Docker daemon'
+            in (
+              (ansible_failed_result.stderr | default(''))
+              ~ ' '
+              ~ (ansible_failed_result.stdout | default(''))
+              ~ ' '
+              ~ (ansible_failed_result.msg | default(''))
+            )
+          }}
+
+    - name: Surface unexpected OpenBao image pull failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('OpenBao image pull failed')) }}"
+      when: not openbao_pull_docker_unavailable
+
+    - name: Restart Docker before retrying OpenBao image pull
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_daemon_restart
+      vars:
+        common_docker_daemon_restart_service_name: docker
+        common_docker_daemon_restart_reason: OpenBao image pull recovery
+      when: openbao_pull_docker_unavailable
+
+    - name: Reset SSH connection before retrying OpenBao image pull after Docker recovery
+      ansible.builtin.meta: reset_connection
+      when: openbao_pull_docker_unavailable
+
+    - name: Wait for Docker to answer before retrying OpenBao image pull
+      ansible.builtin.command:
+        argv:
+          - docker
+          - info
+      register: openbao_docker_info_after_pull_recovery
+      changed_when: false
+      retries: "{{ openbao_runtime_chain_recheck_retries }}"
+      delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+      until: openbao_docker_info_after_pull_recovery.rc == 0
+      when: openbao_pull_docker_unavailable
+
+    - name: Retry pulling the OpenBao image after Docker recovery
+      vars:
+        mutation_audit_action: pull.openbao_image
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - pull
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_pull
+      changed_when: >-
+        'Downloaded newer image' in openbao_pull.stdout
+        or 'Pull complete' in openbao_pull.stdout
+        or 'Pulling' in openbao_pull.stdout
+      when: openbao_pull_docker_unavailable
+      tags:
+        - mutation
 
 - name: Reset SSH connection before Docker chain checks for OpenBao startup
   ansible.builtin.meta: reset_connection
@@ -563,173 +616,201 @@
   until: openbao_init_status.status == 200
   changed_when: false
 
-- name: Record whether OpenBao is already initialized
+- name: Normalize the OpenBao initialization status payload
   ansible.builtin.set_fact:
-    openbao_runtime_initialized: "{{ openbao_init_status.json.initialized | default(false) | bool }}"
+    openbao_init_status_payload: >-
+      {{
+        openbao_init_status.json
+        if (openbao_init_status.json is defined)
+        else ((openbao_init_status.content | default('{}')) | from_json)
+      }}
+  no_log: true
 
-- name: Restore the existing OpenBao raft state onto a blank runtime target during migration
-  when:
-    - openbao_migration_enabled | bool
-    - openbao_init_payload_local.stat.exists
-    - not (openbao_runtime_initialized | bool)
-  block:
-    - name: Verify the migration source OpenBao runtime is healthy before snapshot capture
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
-        method: GET
-        headers:
-          X-Vault-Token: "{{ openbao_existing_init_payload.root_token }}"
-        return_content: true
-        status_code: 200
-      delegate_to: "{{ openbao_migration_source_host }}"
-      register: openbao_migration_source_health
-      retries: 12
-      delay: 2
-      until: openbao_migration_source_health.status == 200
-      changed_when: false
-      no_log: true
+- name: Read the existing OpenBao init payload when present
+  ansible.builtin.set_fact:
+    openbao_existing_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
+  when: openbao_init_payload_local.stat.exists
+  no_log: true
 
-    - name: Create a temporary raft snapshot file on the migration source host
-      ansible.builtin.tempfile:
-        state: file
-        suffix: .snap
-      delegate_to: "{{ openbao_migration_source_host }}"
-      register: openbao_migration_source_snapshot
+- name: Determine whether legacy OpenBao state restore is required
+  ansible.builtin.set_fact:
+    openbao_legacy_restore_required: >-
+      {{
+        openbao_legacy_restore_enabled | bool
+        and inventory_hostname == openbao_legacy_restore_target_host
+        and openbao_legacy_restore_source_host in groups['all']
+        and not (openbao_init_status_payload.initialized | default(false) | bool)
+        and openbao_init_payload_local.stat.exists
+      }}
+  no_log: true
 
-    - name: Create a controller-local directory for the migrated raft snapshot
-      ansible.builtin.tempfile:
-        state: directory
-        suffix: openbao-migration
-      delegate_to: localhost
-      become: false
-      register: openbao_migration_controller_snapshot_dir
+- name: Read the legacy OpenBao initialization status from the source host
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
+    method: GET
+    return_content: true
+    status_code: 200
+  delegate_to: "{{ openbao_legacy_restore_source_host }}"
+  become: false
+  register: openbao_legacy_source_init_status
+  retries: 12
+  delay: 2
+  until: openbao_legacy_source_init_status.status == 200
+  changed_when: false
+  when: openbao_legacy_restore_required | bool
 
-    - name: Save the source OpenBao raft snapshot for migration
-      ansible.builtin.shell: |
-        set -euo pipefail
-        curl -fsS \
-          --header "X-Vault-Token: {{ openbao_existing_init_payload.root_token }}" \
-          http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot \
-          > "{{ openbao_migration_source_snapshot.path }}"
-      args:
-        executable: /bin/bash
-      delegate_to: "{{ openbao_migration_source_host }}"
-      changed_when: false
-      no_log: true
+- name: Normalize the legacy OpenBao initialization status payload
+  ansible.builtin.set_fact:
+    openbao_legacy_source_init_status_payload: >-
+      {{
+        openbao_legacy_source_init_status.json
+        if (openbao_legacy_source_init_status.json is defined)
+        else ((openbao_legacy_source_init_status.content | default('{}')) | from_json)
+      }}
+  when: openbao_legacy_restore_required | bool
+  no_log: true
 
-    - name: Fetch the source OpenBao raft snapshot to the controller
-      ansible.builtin.fetch:
-        src: "{{ openbao_migration_source_snapshot.path }}"
-        dest: "{{ openbao_migration_controller_snapshot_dir.path }}/openbao-raft.snap"
-        flat: true
-      delegate_to: "{{ openbao_migration_source_host }}"
-      no_log: true
+- name: Assert the legacy OpenBao node can supply a restore snapshot
+  ansible.builtin.assert:
+    that:
+      - openbao_legacy_source_init_status_payload.initialized | default(false) | bool
+    fail_msg: >-
+      The legacy OpenBao source host {{ openbao_legacy_restore_source_host }} is not initialized,
+      so runtime-control cannot restore the existing cluster state.
+  when: openbao_legacy_restore_required | bool
 
-    - name: Create a temporary raft snapshot file on the target runtime host
-      ansible.builtin.tempfile:
-        state: file
-        suffix: .snap
-      register: openbao_migration_target_snapshot
+- name: Capture the legacy OpenBao raft snapshot from the source host
+  ansible.builtin.shell: |
+    set -euo pipefail
+    curl -fsS \
+      -H 'X-Vault-Token: {{ openbao_existing_init_payload.root_token }}' \
+      'http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot' \
+      > '{{ openbao_legacy_restore_source_snapshot_file }}'
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ openbao_legacy_restore_source_host }}"
+  become: false
+  register: openbao_legacy_snapshot_capture
+  changed_when: true
+  when: openbao_legacy_restore_required | bool
+  no_log: true
 
-    - name: Stage the migrated OpenBao raft snapshot on the target runtime host
-      ansible.builtin.copy:
-        src: "{{ openbao_migration_controller_snapshot_dir.path }}/openbao-raft.snap"
-        dest: "{{ openbao_migration_target_snapshot.path }}"
-        mode: "0600"
-      no_log: true
+- name: Read the legacy OpenBao raft snapshot from the source host
+  ansible.builtin.slurp:
+    src: "{{ openbao_legacy_restore_source_snapshot_file }}"
+  delegate_to: "{{ openbao_legacy_restore_source_host }}"
+  become: false
+  register: openbao_legacy_snapshot_raw
+  when: openbao_legacy_restore_required | bool
+  no_log: true
 
-    - name: Initialize the blank target OpenBao runtime for snapshot restore bootstrap
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
-        method: POST
-        body_format: json
-        body:
-          secret_shares: "{{ openbao_init_key_shares }}"
-          secret_threshold: "{{ openbao_init_key_threshold }}"
-        return_content: true
-        status_code: 200
-      register: openbao_migration_bootstrap_init
-      changed_when: true
-      no_log: true
-      tags:
-        - mutation
+- name: Remove the temporary legacy OpenBao snapshot from the source host
+  ansible.builtin.file:
+    path: "{{ openbao_legacy_restore_source_snapshot_file }}"
+    state: absent
+  delegate_to: "{{ openbao_legacy_restore_source_host }}"
+  become: false
+  when: openbao_legacy_restore_required | bool
 
-    - name: Record the temporary OpenBao bootstrap payload for snapshot restore
-      ansible.builtin.set_fact:
-        openbao_migration_bootstrap_payload: "{{ openbao_migration_bootstrap_init.json }}"
-      no_log: true
+- name: Initialize temporary OpenBao barrier state before legacy snapshot restore
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
+    method: POST
+    body_format: json
+    body:
+      secret_shares: "{{ openbao_legacy_restore_temp_init_shares }}"
+      secret_threshold: "{{ openbao_legacy_restore_temp_init_threshold }}"
+    return_content: true
+    status_code: 200
+  register: openbao_legacy_restore_temp_init
+  when: openbao_legacy_restore_required | bool
+  changed_when: true
+  no_log: true
 
-    - name: Ensure the blank target OpenBao runtime is unsealed before snapshot restore
-      ansible.builtin.include_tasks: ensure_unsealed.yml
-      vars:
-        openbao_unseal_context: migration snapshot restore bootstrap
-        openbao_unseal_init_payload: "{{ openbao_migration_bootstrap_payload }}"
+- name: Temporarily unseal OpenBao before legacy snapshot restore
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
+    method: POST
+    body_format: json
+    body:
+      key: "{{ openbao_legacy_restore_temp_init.json.keys_base64[0] }}"
+    return_content: true
+    status_code: 200
+  register: openbao_legacy_restore_temp_unseal
+  retries: 6
+  delay: 2
+  until:
+    - openbao_legacy_restore_temp_unseal.status == 200
+    - not (openbao_legacy_restore_temp_unseal.json.sealed | bool)
+  when: openbao_legacy_restore_required | bool
+  changed_when: true
+  no_log: true
 
-    - name: Force-restore the migrated OpenBao raft snapshot onto the target runtime
-      ansible.builtin.shell: |
-        set -euo pipefail
-        curl -fsS \
-          --request POST \
-          --header "X-Vault-Token: {{ openbao_migration_bootstrap_payload.root_token }}" \
-          --data-binary "@{{ openbao_migration_target_snapshot.path }}" \
-          http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot-force
-      args:
-        executable: /bin/bash
-      register: openbao_migration_restore
-      changed_when: true
-      no_log: true
-      tags:
-        - mutation
+- name: Stage the legacy OpenBao raft snapshot on the runtime-control host
+  ansible.builtin.copy:
+    dest: "{{ openbao_legacy_restore_target_snapshot_file }}"
+    content: "{{ openbao_legacy_snapshot_raw.content | b64decode }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: openbao_legacy_restore_required | bool
+  no_log: true
 
-    - name: Wait for OpenBao to answer after the migration snapshot restore
-      ansible.builtin.wait_for:
-        host: 127.0.0.1
-        port: "{{ openbao_http_port }}"
-        delay: 0
-        timeout: 120
+- name: Force restore the legacy OpenBao raft snapshot onto the runtime-control node
+  ansible.builtin.command:
+    argv:
+      - curl
+      - --fail
+      - --silent
+      - --show-error
+      - --header
+      - "X-Vault-Token: {{ openbao_legacy_restore_temp_init.json.root_token }}"
+      - --request
+      - POST
+      - --data-binary
+      - "@{{ openbao_legacy_restore_target_snapshot_file }}"
+      - "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot-force"
+  register: openbao_legacy_snapshot_restore
+  when: openbao_legacy_restore_required | bool
+  changed_when: true
+  no_log: true
 
-    - name: Ensure OpenBao is unsealed with the migrated cluster keys after snapshot restore
-      ansible.builtin.include_tasks: ensure_unsealed.yml
-      vars:
-        openbao_unseal_context: migrated raft snapshot recovery
-        openbao_unseal_init_payload: "{{ openbao_existing_init_payload }}"
+- name: Remove the staged legacy OpenBao snapshot from the runtime-control host
+  ansible.builtin.file:
+    path: "{{ openbao_legacy_restore_target_snapshot_file }}"
+    state: absent
+  when: openbao_legacy_restore_required | bool
 
-    - name: Re-read OpenBao initialization status after migration snapshot restore
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
-        method: GET
-        return_content: true
-        status_code: 200
-      register: openbao_init_status
-      retries: 12
-      delay: 2
-      until: openbao_init_status.status == 200
-      changed_when: false
+- name: Refresh OpenBao initialization status after legacy snapshot restore
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openbao_init_status
+  retries: 12
+  delay: 2
+  until:
+    - openbao_init_status.status == 200
+    - >-
+      (
+        openbao_init_status.json
+        if (openbao_init_status.json is defined)
+        else ((openbao_init_status.content | default('{}')) | from_json)
+      ).initialized | default(false) | bool
+  changed_when: false
+  when: openbao_legacy_restore_required | bool
 
-    - name: Record the restored OpenBao initialization state after migration snapshot restore
-      ansible.builtin.set_fact:
-        openbao_runtime_initialized: "{{ openbao_init_status.json.initialized | default(false) | bool }}"
-  always:
-    - name: Remove the staged migration raft snapshot from the target runtime host
-      ansible.builtin.file:
-        path: "{{ openbao_migration_target_snapshot.path }}"
-        state: absent
-      when: openbao_migration_target_snapshot is defined
-
-    - name: Remove the temporary migration raft snapshot from the source host
-      ansible.builtin.file:
-        path: "{{ openbao_migration_source_snapshot.path }}"
-        state: absent
-      delegate_to: "{{ openbao_migration_source_host }}"
-      when: openbao_migration_source_snapshot is defined
-
-    - name: Remove the controller-local migration snapshot directory
-      ansible.builtin.file:
-        path: "{{ openbao_migration_controller_snapshot_dir.path }}"
-        state: absent
-      delegate_to: localhost
-      become: false
-      when: openbao_migration_controller_snapshot_dir is defined
+- name: Normalize the refreshed OpenBao initialization status payload
+  ansible.builtin.set_fact:
+    openbao_init_status_payload: >-
+      {{
+        openbao_init_status.json
+        if (openbao_init_status.json is defined)
+        else ((openbao_init_status.content | default('{}')) | from_json)
+      }}
+  when: openbao_legacy_restore_required | bool
+  no_log: true
 
 - name: Fail if OpenBao is initialized remotely but the local init payload is missing
   ansible.builtin.fail:
@@ -738,7 +819,7 @@
       {{ openbao_init_local_file }} is missing on the control machine.
       Restore the controller-local init payload before rerunning automation.
   when:
-    - openbao_runtime_initialized | bool
+    - openbao_init_status_payload.initialized | default(false) | bool
     - not openbao_init_payload_local.stat.exists
 
 - name: Fail if a local init payload exists but the remote service is not initialized
@@ -747,7 +828,7 @@
       {{ openbao_init_local_file }} exists on the control machine, but OpenBao on
       {{ inventory_hostname }} is not initialized. Resolve the drift before rerunning automation.
   when:
-    - not (openbao_runtime_initialized | bool)
+    - not (openbao_init_status_payload.initialized | default(false) | bool)
     - openbao_init_payload_local.stat.exists
 
 - name: Initialize OpenBao
@@ -765,7 +846,7 @@
     return_content: true
     status_code: 200
   when:
-    - not (openbao_runtime_initialized | bool)
+    - not (openbao_init_status_payload.initialized | default(false) | bool)
     - not openbao_init_payload_local.stat.exists
   register: openbao_init_response
   changed_when: true
@@ -1251,34 +1332,84 @@
     - mutation
 
 - name: Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts
-  vars:
-    mutation_audit_action: configure.openbao_database_backend_allowed_roles
-    mutation_audit_target: openbao-runtime
-    mutation_audit_emit_on_success: true
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      plugin_name: "{{ openbao_database_plugin_name }}"
-      allowed_roles: "{{ openbao_database_allowed_roles | join(',') }}"
-      connection_url: "{{ openbao_database_connection_url }}"
-      username: "{{ openbao_postgres_admin_role }}"
-      password: "{{ openbao_postgres_rotator_password }}"
-      password_authentication: "{{ openbao_database_password_authentication }}"
-    status_code: 204
-  register: openbao_database_backend_allowed_roles_result
-  retries: 6
-  delay: 2
-  until: openbao_database_backend_allowed_roles_result.status == 204
-  no_log: true
-  tags:
-    - mutation
+  block:
+    - name: Ensure OpenBao remains unsealed before reconciling PostgreSQL dynamic credential backend allowed roles
+      ansible.builtin.include_tasks: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: reconciling PostgreSQL dynamic credential backend allowed roles
+        openbao_unseal_init_payload: "{{ openbao_init_payload }}"
+
+    - name: Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts
+      vars:
+        mutation_audit_action: configure.openbao_database_backend_allowed_roles
+        mutation_audit_target: openbao-runtime
+        mutation_audit_emit_on_success: true
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+        body_format: json
+        body:
+          plugin_name: "{{ openbao_database_plugin_name }}"
+          allowed_roles: "{{ openbao_database_allowed_roles | join(',') }}"
+          connection_url: "{{ openbao_database_connection_url }}"
+          username: "{{ openbao_postgres_admin_role }}"
+          password: "{{ openbao_postgres_rotator_password }}"
+          password_authentication: "{{ openbao_database_password_authentication }}"
+        status_code: 204
+      register: openbao_database_backend_allowed_roles_result
+      retries: 6
+      delay: 2
+      until: openbao_database_backend_allowed_roles_result.status == 204
+      no_log: true
+      tags:
+        - mutation
+  rescue:
+    - name: Ensure OpenBao remains unsealed before retrying PostgreSQL dynamic credential backend allowed role reconciliation
+      ansible.builtin.include_tasks: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: retrying PostgreSQL dynamic credential backend allowed role reconciliation
+        openbao_unseal_init_payload: "{{ openbao_init_payload }}"
+
+    - name: Retry reconciling PostgreSQL dynamic credential backend allowed roles after runtime recovery
+      vars:
+        mutation_audit_action: configure.openbao_database_backend_allowed_roles
+        mutation_audit_target: openbao-runtime
+        mutation_audit_emit_on_success: true
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+        body_format: json
+        body:
+          plugin_name: "{{ openbao_database_plugin_name }}"
+          allowed_roles: "{{ openbao_database_allowed_roles | join(',') }}"
+          connection_url: "{{ openbao_database_connection_url }}"
+          username: "{{ openbao_postgres_admin_role }}"
+          password: "{{ openbao_postgres_rotator_password }}"
+          password_authentication: "{{ openbao_database_password_authentication }}"
+        status_code: 204
+      register: openbao_database_backend_allowed_roles_retry_result
+      retries: 6
+      delay: 2
+      until: openbao_database_backend_allowed_roles_retry_result.status == 204
+      no_log: true
+      tags:
+        - mutation
 
 - name: Seed controller secrets and verify OpenBao auth flows
   ansible.builtin.import_tasks: seeded_secrets_and_verification.yml
+
+- name: Reset SSH connection before OpenBao health verification
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for SSH after resetting the connection before OpenBao health verification
+  ansible.builtin.wait_for_connection:
+    timeout: 60
+    connect_timeout: 5
+    sleep: 2
 
 - name: Verify OpenBao health probes
   ansible.builtin.import_tasks: verify.yml

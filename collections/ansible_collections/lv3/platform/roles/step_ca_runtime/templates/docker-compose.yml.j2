@@ -3,6 +3,16 @@ services:
     image: {{ step_ca_image }}
     container_name: step-ca
     restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl -fsS https://127.0.0.1:{{ step_ca_api_port }}{{ step_ca_healthcheck_path }}
+          --cacert {{ step_ca_home }}/certs/root_ca.crt >/dev/null
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 10s
     environment:
       STEPPATH: {{ step_ca_home }}
     entrypoint:

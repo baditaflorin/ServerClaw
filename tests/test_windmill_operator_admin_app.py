@@ -54,6 +54,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_host_proxy_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
     assert defaults["windmill_private_base_url"] == "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
     assert defaults["windmill_base_url"] == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+    assert defaults["windmill_ntfy_resource_path"] == "f/lv3/ntfy_platform"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
     assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
     assert defaults["windmill_stage_smoke_suites_script_path"] == "f/lv3/stage-smoke-suites"
@@ -927,7 +928,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False)" in verify_tasks
     assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py', rstrip=False)" in verify_tasks
     assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)" in verify_tasks
-    assert "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
+    assert "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert "windmill_verify_critical_seed_script_drift_paths" in verify_tasks
     assert "selectattr('path', 'in', windmill_verify_critical_seed_script_drift_paths)" in verify_tasks
@@ -1101,6 +1102,83 @@ def test_windmill_runtime_waits_for_full_env_contract_before_starting_or_recreat
         "windmill_worker_native",
         "windmill_extra",
     ]
+
+
+def test_windmill_controller_local_sync_and_verify_calls_use_the_host_proxy_url() -> None:
+    tasks = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "tasks"
+            / "main.yml"
+        ).read_text()
+    )
+    verify_tasks = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "tasks"
+            / "verify.yml"
+        ).read_text()
+    )
+
+    sync_wait_task = next(
+        task for task in tasks if task["name"] == "Wait for the Windmill API before syncing repo-managed scripts"
+    )
+    sync_script_task = next(task for task in tasks if task["name"] == "Sync repo-managed Windmill scripts")
+    sync_resource_task = next(task for task in tasks if task["name"] == "Sync repo-managed Windmill resources")
+    sync_schedule_task = next(task for task in tasks if task["name"] == "Sync repo-managed Windmill schedules")
+    verify_seed_task = next(
+        task
+        for task in verify_tasks
+        if task["name"] == "Verify the critical Windmill verification scripts are seeded with current controller content"
+    )
+    resync_seed_task = next(
+        task
+        for task in verify_tasks
+        if task["name"] == "Re-sync drifted critical Windmill verification scripts after concurrent drift"
+    )
+    verify_seed_post_repair_task = next(
+        task
+        for task in verify_tasks
+        if task["name"]
+        == "Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt"
+    )
+
+    assert sync_wait_task["delegate_to"] == "localhost"
+    assert sync_wait_task["ansible.builtin.uri"]["url"] == "{{ windmill_base_url }}/api/version"
+    assert sync_script_task["delegate_to"] == "localhost"
+    assert "{{ windmill_base_url }}" in sync_script_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_private_base_url }}" not in sync_script_task["ansible.builtin.command"]["argv"]
+    assert sync_resource_task["delegate_to"] == "localhost"
+    assert "{{ windmill_base_url }}" in sync_resource_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_private_base_url }}" not in sync_resource_task["ansible.builtin.command"]["argv"]
+    assert sync_schedule_task["delegate_to"] == "localhost"
+    assert "{{ windmill_base_url }}" in sync_schedule_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_private_base_url }}" not in sync_schedule_task["ansible.builtin.command"]["argv"]
+    assert verify_seed_task["delegate_to"] == "localhost"
+    assert (
+        verify_seed_task["ansible.builtin.uri"]["url"]
+        == "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+    )
+    assert resync_seed_task["delegate_to"] == "localhost"
+    assert "{{ windmill_base_url }}" in resync_seed_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_private_base_url }}" not in resync_seed_task["ansible.builtin.command"]["argv"]
+    assert verify_seed_post_repair_task["delegate_to"] == "localhost"
+    assert (
+        verify_seed_post_repair_task["ansible.builtin.uri"]["url"]
+        == "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+    )
 
 
 def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift_check() -> None:

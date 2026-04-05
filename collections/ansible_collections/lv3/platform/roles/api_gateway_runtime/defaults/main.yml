@@ -296,7 +296,9 @@ api_gateway_keycloak_verify_ready_retries: 60
 api_gateway_keycloak_verify_ready_delay: 5
 api_gateway_keycloak_verify_token_retries: 18
 api_gateway_keycloak_verify_token_delay: 5
-api_gateway_structured_search_verify_retries: 12
+api_gateway_typesense_verify_retries: 24
+api_gateway_typesense_verify_delay: 5
+api_gateway_structured_search_verify_retries: 24
 api_gateway_structured_search_verify_delay: 5
 api_gateway_keycloak_docker_network: keycloak_default
 api_gateway_tree_sync_become_timeout: 60

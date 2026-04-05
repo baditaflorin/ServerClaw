@@ -11,6 +11,9 @@ Document the repo-managed memory envelope and host headroom procedure for
   - `guests[]` for current VM allocations and budgets
   - `runtime_pool_memory` for the approved pool baselines, maxima, and host
     free-memory floor
+- `playbooks/runtime-pool-capacity-rebalance.yml` for the current
+  repo-managed host-memory reclamation step that funds the remaining
+  runtime-general and runtime-control rollout
 - `config/service-capability-catalog.json` for the declared `runtime_pool`
   assignments
 - `scripts/capacity_report.py` for the operator-readable and machine-readable
@@ -50,6 +53,13 @@ uv run --with pytest pytest \
 scripts/validate_repo.sh data-models
 ```
 
+6. When the host needs capacity reclaimed before the remaining pool guests can
+   come online, replay the governed rebalance step.
+
+```bash
+ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=runtime-pool-capacity-rebalance env=production EXTRA_ARGS='-e bypass_promotion=true'
+```
+
 ## Verification
 
 Inspect the governed pool view without live metrics:
@@ -80,3 +90,6 @@ The output should include:
   amendment.
 - Treat `scripts/validate_repo.sh data-models` failures as contract drift, not
   as optional warnings.
+- Treat `playbooks/runtime-pool-capacity-rebalance.yml` as the reviewed path for
+  the current runtime-pool memory rebalance; do not replace it with ad hoc
+  `qm set --memory` changes on the host.

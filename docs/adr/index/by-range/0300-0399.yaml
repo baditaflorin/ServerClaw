@@ -509,7 +509,8 @@ adrs:
     filename: 0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
     path: docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
     implemented_in_repo_version: 0.177.145
-    implemented_on: '2026-04-02'
+    implemented_in_platform_version: 0.130.100
+    implemented_on: '2026-04-05'
   - adr: '0322'
     title: Memory-Pressure Autoscaling For Elastic Runtime Pools
     status: Accepted
@@ -545,7 +546,8 @@ adrs:
     filename: 0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
     path: docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
     implemented_in_repo_version: 0.177.145
-    implemented_on: '2026-04-02'
+    implemented_in_platform_version: 0.130.100
+    implemented_on: '2026-04-05'
   - adr: '0324'
     title: Service Definition Shards And Generated Service Catalog Assembly
     status: Accepted

@@ -2276,7 +2276,7 @@
         "make syntax-check-openfga",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 '\\''curl -fsS http://127.0.0.1:8098/healthz && docker compose --file /opt/openfga/docker-compose.yml ps'\\'''",
         "curl -fsS -H \"Authorization: Bearer $(cat $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091"
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt --keycloak-url https://sso.lv3.org"
       ],
       "execution_class": "mutation",
       "budget": {

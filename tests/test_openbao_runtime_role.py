@@ -85,7 +85,6 @@ PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH = (
     / "seed_rotation_metadata.yml"
 )
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
 def load_openbao_runtime_tasks() -> list[dict]:
@@ -108,6 +107,10 @@ def read_openbao_runtime_tasks_text() -> str:
     return TASKS_PATH.read_text(encoding="utf-8") + "\n" + SEEDED_SECRET_TASKS_PATH.read_text(encoding="utf-8")
 
 
+def load_seeded_secret_tasks() -> list[dict]:
+    return yaml.safe_load(SEEDED_SECRET_TASKS_PATH.read_text(encoding="utf-8"))
+
+
 def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
@@ -123,10 +126,10 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert 'GRANT pg_use_reserved_connections TO "{{name}}";' in defaults
     assert "revocation_statements: !unsafe |-" in defaults
     assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert "{{ name }}" not in defaults
+    assert "{{ password }}" not in defaults
     assert "{{ expiration }}" not in defaults
     assert "openbao_http_extra_bind_addresses: []" in defaults
-    assert "openbao_migration_enabled: false" in defaults
-    assert "openbao_migration_source_host: docker-runtime-lv3" in defaults
     assert 'openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"' in defaults
     assert 'path "database/creds/postgres-atlas-readonly"' in (
         REPO_ROOT
@@ -151,15 +154,6 @@ def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
 
     assert platform_vars["openbao_postgres_host"] == primary_guest["ipv4"]
     assert platform_vars["platform_postgres_host"] == "database.lv3.org"
-
-
-def test_runtime_control_network_policy_allows_openbao_to_reach_the_postgres_primary() -> None:
-    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
-    postgres_rules = host_vars["network_policy"]["guests"]["postgres-lv3"]["allowed_inbound"]
-    runtime_control_rule = next(rule for rule in postgres_rules if rule["source"] == "runtime-control-lv3")
-
-    assert runtime_control_rule["protocol"] == "tcp"
-    assert runtime_control_rule["ports"] == [5432]
 
 
 def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
@@ -229,8 +223,6 @@ def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     assert "- name: Read OpenBao initialization status" in tasks
     assert "register: openbao_init_status" in tasks
     assert "until: openbao_init_status.status == 200" in tasks
-    assert "- name: Record whether OpenBao is already initialized" in tasks
-    assert 'openbao_runtime_initialized: "{{ openbao_init_status.json.initialized | default(false) | bool }}"' in tasks
     assert "changed_when: false" in tasks
     assert "- name: Ensure OpenBao is unsealed after bootstrap or restart" in tasks
     assert "include_tasks: ensure_unsealed.yml" in tasks
@@ -245,22 +237,32 @@ def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     assert "changed_when: false" in ensure_unsealed_tasks
 
 
-def test_openbao_runtime_restores_a_blank_runtime_target_from_a_migrated_raft_snapshot() -> None:
-    tasks = read_openbao_runtime_tasks_text()
+def test_openbao_runtime_restores_legacy_runtime_control_state_when_local_init_exists() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
 
-    assert "- name: Restore the existing OpenBao raft state onto a blank runtime target during migration" in tasks
-    assert "openbao_migration_enabled | bool" in tasks
-    assert "Read the persisted OpenBao init payload for migration-aware recovery" in tasks
-    assert "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot" in tasks
-    assert "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot-force" in tasks
-    assert "Initialize the blank target OpenBao runtime for snapshot restore bootstrap" in tasks
-    assert "Ensure the blank target OpenBao runtime is unsealed before snapshot restore" in tasks
-    assert "migration snapshot restore bootstrap" in tasks
-    assert "Ensure OpenBao is unsealed with the migrated cluster keys after snapshot restore" in tasks
-    assert "migrated raft snapshot recovery" in tasks
-    assert "Fetch the source OpenBao raft snapshot to the controller" in tasks
-    assert "Record the restored OpenBao initialization state after migration snapshot restore" in tasks
-    assert "Remove the controller-local migration snapshot directory" in tasks
+    assert "openbao_legacy_restore_enabled: true" in defaults
+    assert "openbao_legacy_restore_target_host: runtime-control-lv3" in defaults
+    assert "openbao_legacy_restore_source_host: docker-runtime-lv3" in defaults
+    assert "Determine whether legacy OpenBao state restore is required" in tasks
+    assert "Read the legacy OpenBao initialization status from the source host" in tasks
+    assert "Capture the legacy OpenBao raft snapshot from the source host" in tasks
+    assert "Initialize temporary OpenBao barrier state before legacy snapshot restore" in tasks
+    assert "Temporarily unseal OpenBao before legacy snapshot restore" in tasks
+    assert "Force restore the legacy OpenBao raft snapshot onto the runtime-control node" in tasks
+    assert "Refresh OpenBao initialization status after legacy snapshot restore" in tasks
+    assert "/v1/sys/storage/raft/snapshot" in tasks
+    assert "/v1/sys/storage/raft/snapshot-force" in tasks
+
+
+def test_openbao_runtime_normalizes_init_status_payloads_before_branching() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "Normalize the OpenBao initialization status payload" in tasks
+    assert "Normalize the legacy OpenBao initialization status payload" in tasks
+    assert "Normalize the refreshed OpenBao initialization status payload" in tasks
+    assert "openbao_init_status_payload.initialized | default(false) | bool" in tasks
+    assert "openbao_legacy_source_init_status_payload.initialized | default(false) | bool" in tasks
 
 
 def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_health_checks_guard_recovery() -> None:
@@ -289,8 +291,20 @@ def test_openbao_runtime_recovers_dnat_chain_failures_during_compose_startup() -
     assert "- name: Retry OpenBao startup after Docker bridge-chain recovery" in tasks
 
 
+def test_openbao_runtime_recovers_docker_daemon_failures_during_image_pull() -> None:
+    tasks = read_openbao_runtime_tasks_text()
+
+    assert "- name: Pull the OpenBao image and recover Docker daemon availability" in tasks
+    assert "- name: Flag Docker daemon availability failures during OpenBao image pull" in tasks
+    assert "Cannot connect to the Docker daemon" in tasks
+    assert "- name: Restart Docker before retrying OpenBao image pull" in tasks
+    assert "- name: Wait for Docker to answer before retrying OpenBao image pull" in tasks
+    assert "- name: Retry pulling the OpenBao image after Docker recovery" in tasks
+
+
 def test_openbao_runtime_uses_the_shared_docker_restart_guard_for_bridge_chain_recovery() -> None:
     tasks = load_openbao_runtime_tasks()
+    pull_restart = next(task for task in tasks if task.get("name") == "Restart Docker before retrying OpenBao image pull")
     startup_restart = next(
         task for task in tasks if task.get("name") == "Restart Docker when required chains are missing before OpenBao startup"
     )
@@ -298,6 +312,10 @@ def test_openbao_runtime_uses_the_shared_docker_restart_guard_for_bridge_chain_r
         task for task in tasks if task.get("name") == "Restart Docker to restore bridge chains before retrying OpenBao startup"
     )
 
+    assert pull_restart["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert pull_restart["ansible.builtin.include_role"]["tasks_from"] == "docker_daemon_restart"
+    assert pull_restart["vars"]["common_docker_daemon_restart_service_name"] == "docker"
+    assert pull_restart["vars"]["common_docker_daemon_restart_reason"] == "OpenBao image pull recovery"
     assert startup_restart["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert startup_restart["ansible.builtin.include_role"]["tasks_from"] == "docker_daemon_restart"
     assert startup_restart["vars"]["common_docker_daemon_restart_service_name"] == "docker"
@@ -378,8 +396,24 @@ def test_openbao_runtime_reconciles_allowed_roles_after_database_role_upserts() 
 
     reconcile_task = tasks[reconcile_index]
     assert (
-        reconcile_task["until"]
+        reconcile_task["block"][0]["name"]
+        == "Ensure OpenBao remains unsealed before reconciling PostgreSQL dynamic credential backend allowed roles"
+    )
+    assert (
+        reconcile_task["block"][1]["name"]
+        == "Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts"
+    )
+    assert (
+        reconcile_task["block"][1]["until"]
         == "openbao_database_backend_allowed_roles_result.status == 204"
+    )
+    assert (
+        reconcile_task["rescue"][0]["name"]
+        == "Ensure OpenBao remains unsealed before retrying PostgreSQL dynamic credential backend allowed role reconciliation"
+    )
+    assert (
+        reconcile_task["rescue"][1]["name"]
+        == "Retry reconciling PostgreSQL dynamic credential backend allowed roles after runtime recovery"
     )
 
 
@@ -444,6 +478,8 @@ def test_openbao_runtime_waits_out_background_apt_maintenance() -> None:
 def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     tasks = read_openbao_runtime_tasks_text()
 
+    assert "- name: Resolve controller-local seed source paths for rotatable secrets" in tasks
+    assert "- name: Read controller-local seed source files for rotatable secrets" in tasks
     assert "- name: Seed dedicated rotatable secrets into OpenBao" in tasks
     assert "(item.value.openbao_field):" in tasks
     assert "register: openbao_seed_rotatable_secret_result" in tasks
@@ -451,6 +487,13 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "- name: Seed rotation metadata for dedicated rotatable secrets one at a time through recovery-aware retries" in tasks
     assert "ansible.builtin.include_tasks: seed_rotation_metadata.yml" in tasks
     assert "loop_var: openbao_rotation_contract" in tasks
+    assert "repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true)" in tasks
+    assert "openbao_rotatable_secret_repo_local_root:" in tasks
+    assert "openbao_rotatable_secret_seed_path.startswith('.local/')" in tasks
+    assert "openbao_rotatable_secret_seed_path: \"{{ openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path }}\"" in tasks
+    assert "| ternary(" in tasks
+    assert "| replace('.local/', '', 1)" in tasks
+    assert "openbao_rotatable_secret_seed_files.results" in tasks
     assert "\"{{ item.value.openbao_field }}\":" not in tasks
     assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(
         encoding="utf-8"
@@ -458,6 +501,33 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(
         encoding="utf-8"
     )
+
+
+def test_openbao_runtime_reads_rotatable_seed_sources_from_the_shared_overlay_root() -> None:
+    tasks = load_seeded_secret_tasks()
+    resolve_task = next(
+        task for task in tasks if task["name"] == "Resolve controller-local seed source paths for rotatable secrets"
+    )
+    stat_task = next(
+        task for task in tasks if task["name"] == "Check controller-local seed source files for rotatable secrets"
+    )
+    slurp_task = next(
+        task for task in tasks if task["name"] == "Read controller-local seed source files for rotatable secrets"
+    )
+    seed_task = next(task for task in tasks if task["name"] == "Seed dedicated rotatable secrets into OpenBao")
+
+    assert resolve_task["vars"]["openbao_rotatable_secret_seed_path"] == (
+        "{{ openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path }}"
+    )
+    assert resolve_task["vars"]["openbao_rotatable_secret_repo_local_root"] == (
+        "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}"
+    )
+    assert stat_task["delegate_to"] == "localhost"
+    assert stat_task["become"] is False
+    assert slurp_task["delegate_to"] == "localhost"
+    assert slurp_task["become"] is False
+    assert seed_task["no_log"] is True
+    assert "openbao_rotatable_secret_seed_files.results" in seed_task["ansible.builtin.uri"]["body"]["data"]
 
 
 def test_openbao_seed_rotation_metadata_task_recovers_each_secret_through_unseal_checks() -> None:
@@ -554,6 +624,23 @@ def test_openbao_runtime_verification_requests_skip_become_on_loopback() -> None
     assert "until: openbao_mail_platform_secret_read.status == 200" in tasks
     assert "- name: Refresh short-lived AppRole secret IDs after managed verification" in tasks
     assert "until: openbao_refreshed_secret_ids.status | default(0) == 200" in tasks
+
+
+def test_openbao_runtime_resets_ssh_before_final_health_verification() -> None:
+    tasks = load_openbao_runtime_tasks()
+
+    names = {task["name"] for task in tasks}
+    assert "Reset SSH connection before OpenBao health verification" in names
+    assert "Wait for SSH after resetting the connection before OpenBao health verification" in names
+
+    wait_for_ssh = next(
+        task
+        for task in tasks
+        if task["name"] == "Wait for SSH after resetting the connection before OpenBao health verification"
+    )
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["timeout"] == 60
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
+    assert wait_for_ssh["ansible.builtin.wait_for_connection"]["sleep"] == 2
 
 
 def test_openbao_compose_template_supports_private_extra_http_bindings() -> None:

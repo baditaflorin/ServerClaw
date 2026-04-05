@@ -437,6 +437,63 @@
     - semaphore_controller_ping.content | trim == "pong"
   changed_when: false
 
+- name: Check whether the controller-facing Semaphore login already accepts the desired admin password
+  ansible.builtin.uri:
+    url: "{{ semaphore_controller_url }}/api/auth/login"
+    method: POST
+    body_format: json
+    body:
+      auth: "{{ semaphore_admin_username }}"
+      password: "{{ semaphore_admin_password }}"
+    status_code:
+      - 204
+      - 401
+  delegate_to: localhost
+  become: false
+  register: semaphore_controller_login_preflight
+  changed_when: false
+  no_log: true
+
+- name: Reconcile the persisted Semaphore admin password when controller login rejects the desired password
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ semaphore_compose_file }}"
+      - exec
+      - -T
+      - "{{ semaphore_container_name }}"
+      - sh
+      - -lc
+      - >
+        set -euo pipefail;
+        /usr/local/bin/semaphore user change-by-login
+        --login "$SEMAPHORE_ADMIN"
+        --password "$SEMAPHORE_ADMIN_PASSWORD"
+  args:
+    chdir: "{{ semaphore_site_dir }}"
+  register: semaphore_admin_password_recovery
+  changed_when: "'changed!' in (semaphore_admin_password_recovery.stdout | default('') | lower)"
+  when: semaphore_controller_login_preflight.status == 401
+  no_log: true
+
+- name: Recheck the controller-facing Semaphore login after reconciling the persisted admin password
+  ansible.builtin.uri:
+    url: "{{ semaphore_controller_url }}/api/auth/login"
+    method: POST
+    body_format: json
+    body:
+      auth: "{{ semaphore_admin_username }}"
+      password: "{{ semaphore_admin_password }}"
+    status_code: 204
+  delegate_to: localhost
+  become: false
+  register: semaphore_controller_login_recheck
+  when: semaphore_controller_login_preflight.status == 401
+  changed_when: false
+  no_log: true
+
 - name: Bootstrap the Semaphore project and controller auth artifacts
   ansible.builtin.command:
     argv:

@@ -4,11 +4,14 @@ import json
 import os
 import re
 import subprocess
+import sys
 import uuid
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from platform.execution_lanes import LaneRegistry, load_execution_lane_catalog
 from platform.repo import REPO_ROOT, load_yaml
 
 
@@ -25,6 +28,7 @@ ENV_DEFAULT_EXPR_PATTERN = re.compile(
 ENV_TERNARY_EXPR_PATTERN = re.compile(
     r"{{\s*['\"](?P<when_true>[^'\"]+)['\"]\s*if\s*\(\s*env\s*\|\s*default\(\s*['\"](?P<default>[^'\"]+)['\"]\s*\)\s*\)\s*==\s*['\"](?P<expected>[^'\"]+)['\"]\s*else\s*['\"](?P<when_false>[^'\"]+)['\"]\s*}}"
 )
+DEFAULT_LANE_RESERVATION_TTL_SECONDS = int(os.environ.get("LV3_EXECUTION_LANE_TTL_SECONDS", "14400"))
 
 
 class AnsibleExecutionScopeError(RuntimeError):
@@ -649,6 +653,7 @@ def run_scoped_playbook(
     catalog_path: Path = CATALOG_PATH,
     ansible_playbook_bin: str = "ansible-playbook",
     ansible_inventory_bin: str = "ansible-inventory",
+    lane_registry: LaneRegistry | None = None,
 ) -> subprocess.CompletedProcess[str]:
     plan = plan_playbook_execution(
         playbook,
@@ -667,7 +672,50 @@ def run_scoped_playbook(
         inventory_path=inventory_path,
         repo_root=repo_root,
         ansible_playbook_bin=ansible_playbook_bin,
+        lane_registry=lane_registry,
     )
+
+
+@contextmanager
+def _reserved_lane(
+    plan: PlannedPlaybookExecution,
+    *,
+    repo_root: Path,
+    lane_registry: LaneRegistry | None = None,
+    ttl_seconds: int = DEFAULT_LANE_RESERVATION_TTL_SECONDS,
+) -> Any:
+    if plan.execution_class != "mutation" or not plan.target_lane:
+        yield None
+        return
+
+    catalog = load_execution_lane_catalog(repo_root=repo_root)
+    lane = catalog.lanes.get(plan.target_lane)
+    if lane is None:
+        raise AnsibleExecutionScopeError(f"target lane '{plan.target_lane}' is not defined in config/execution-lanes.yaml")
+    if not lane.hostname:
+        raise AnsibleExecutionScopeError(f"target lane '{plan.target_lane}' does not declare a hostname")
+
+    registry = lane_registry or LaneRegistry(repo_root=repo_root)
+    actor_intent_id = f"ansible-scope:{plan.run_id}"
+    reservation = registry.reserve(
+        {
+            "workflow_id": f"ansible-scope:{plan.playbook_path}",
+            "target_vm": lane.hostname,
+            "arguments": {
+                "target_vm": lane.hostname,
+            },
+        },
+        actor_intent_id=actor_intent_id,
+        ttl_seconds=ttl_seconds,
+    )
+    if reservation.status != "acquired":
+        yield reservation
+        return
+
+    try:
+        yield reservation
+    finally:
+        registry.release(actor_intent_id)
 
 
 def run_planned_playbook(
@@ -677,6 +725,7 @@ def run_planned_playbook(
     inventory_path: Path = INVENTORY_PATH,
     repo_root: Path = REPO_ROOT,
     ansible_playbook_bin: str = "ansible-playbook",
+    lane_registry: LaneRegistry | None = None,
 ) -> subprocess.CompletedProcess[str]:
     command = [
         ansible_playbook_bin,
@@ -691,4 +740,12 @@ def run_planned_playbook(
         f"env={plan.env}",
         *(passthrough_args or []),
     ]
-    return subprocess.run(command, cwd=repo_root, text=True, check=False)
+    with _reserved_lane(plan, repo_root=repo_root, lane_registry=lane_registry) as lane_reservation:
+        if lane_reservation is not None and lane_reservation.status != "acquired":
+            stderr = (
+                f"execution lane busy: {plan.target_lane} already has "
+                f"{lane_reservation.active_count}/{lane_reservation.max_concurrent_ops} active operation(s)"
+            )
+            print(stderr, file=sys.stderr, flush=True)
+            return subprocess.CompletedProcess(command, 3, stdout="", stderr=stderr)
+        return subprocess.run(command, cwd=repo_root, text=True, check=False)

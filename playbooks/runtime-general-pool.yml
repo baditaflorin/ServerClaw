@@ -95,13 +95,13 @@
     runtime_pool_substrate_routes:
       - route_id: uptime-kuma
         prefix: /uptime-kuma
-        upstream: "http://127.0.0.1:{{ platform_service_topology.uptime_kuma.ports.internal }}"
+        upstream: "{{ platform_service_topology | platform_service_url('uptime_kuma', 'internal') }}"
       - route_id: homepage
         prefix: /homepage
-        upstream: "http://127.0.0.1:{{ platform_service_topology.homepage.ports.internal }}"
+        upstream: "{{ platform_service_topology | platform_service_url('homepage', 'internal') }}"
       - route_id: mailpit
         prefix: /mailpit
-        upstream: "http://127.0.0.1:{{ platform_service_topology.mailpit.ports.internal }}"
+        upstream: "{{ platform_service_topology | platform_service_url('mailpit', 'internal') }}"
 
   pre_tasks:
     - name: Wait for the runtime-general VM SSH service to be reachable
@@ -344,10 +344,11 @@
       ansible.builtin.uri:
         url: "http://127.0.0.1:9080/uptime-kuma"
         method: GET
+        follow_redirects: none
         status_code:
           - 200
           - 302
-        follow_redirects: none
+          - 303
         return_content: true
         timeout: 30
       register: runtime_general_uptime_route
@@ -357,8 +358,11 @@
       ansible.builtin.uri:
         url: "http://127.0.0.1:9080/homepage"
         method: GET
+        follow_redirects: none
         status_code:
           - 200
+          - 302
+          - 303
         return_content: true
         timeout: 30
       register: runtime_general_homepage_route
@@ -405,41 +409,49 @@
   post_tasks:
     - name: Verify the Uptime Kuma public route through the shared edge
       ansible.builtin.uri:
-        url: https://127.0.0.1/
+        url: "{{ platform_service_topology | platform_service_url('uptime_kuma', 'public') }}"
         method: GET
-        headers:
-          Host: uptime.lv3.org
-        validate_certs: false
         status_code:
           - 200
         timeout: 30
+      register: runtime_general_public_uptime_route
+      until: runtime_general_public_uptime_route.status == 200
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+      become: false
       changed_when: false
 
     - name: Verify the public status page route through the shared edge
       ansible.builtin.uri:
-        url: https://127.0.0.1/
+        url: https://status.lv3.org/
         method: GET
-        headers:
-          Host: status.lv3.org
-        validate_certs: false
         status_code:
           - 200
         timeout: 30
+      register: runtime_general_public_status_route
+      until: runtime_general_public_status_route.status == 200
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+      become: false
       changed_when: false
 
     - name: Verify the Homepage public route through the shared edge
       ansible.builtin.uri:
-        url: https://127.0.0.1/
+        url: "{{ platform_service_topology | platform_service_url('homepage', 'public') }}"
         method: GET
-        headers:
-          Host: home.lv3.org
-        validate_certs: false
-        follow_redirects: none
         status_code:
           - 200
           - 302
           - 303
         timeout: 30
+      register: runtime_general_public_homepage_route
+      until: runtime_general_public_homepage_route.status in [200, 302, 303]
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+      become: false
       changed_when: false
 
     - name: Record runtime-general retirement readiness on the controller

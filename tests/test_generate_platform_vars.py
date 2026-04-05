@@ -387,6 +387,9 @@ def test_build_platform_vars_projects_control_and_dedicated_pool_metadata() -> N
     keycloak = platform_vars["platform_service_topology"]["keycloak"]
     grafana = platform_vars["platform_service_topology"]["grafana"]
 
+    assert keycloak["owning_vm"] == "runtime-control-lv3"
+    assert keycloak["private_ip"] == "10.10.10.92"
+    assert keycloak["edge"]["upstream"] == "http://10.10.10.92:8091"
     assert keycloak["runtime_pool"] == "runtime-control"
     assert keycloak["restart_domain"] == "runtime-control-identity"
     assert keycloak["mobility_tier"] == "anchor"
@@ -491,6 +494,8 @@ def test_build_platform_vars_moves_support_surfaces_to_runtime_general() -> None
 
     assert homepage["owning_vm"] == "runtime-general-lv3"
     assert homepage["urls"]["internal"] == "http://10.10.10.91:3090"
+    assert homepage["edge"]["upstream"] == "http://10.10.10.91:9080"
+    assert homepage["edge"]["root_proxy_path"] == "/homepage"
     assert mailpit["owning_vm"] == "runtime-general-lv3"
     assert mailpit["urls"]["internal"] == "http://10.10.10.91:8025"
     assert status_page["owning_vm"] == "runtime-general-lv3"

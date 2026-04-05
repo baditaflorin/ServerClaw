@@ -59,3 +59,5 @@ step_ca_runtime_packages:
   - openssl
   - tar
 step_ca_service_test_name: step-ca-service-test.lv3.internal
+step_ca_pull_recovery_retries: 10
+step_ca_pull_recovery_delay_seconds: 2

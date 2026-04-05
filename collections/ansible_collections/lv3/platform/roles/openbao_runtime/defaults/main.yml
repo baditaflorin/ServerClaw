@@ -70,6 +70,13 @@ openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
 openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"
 openbao_breakglass_password_local_file: "{{ openbao_local_artifact_dir }}/breakglass-password.txt"
 openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/postgres-rotator-password.txt"
+openbao_legacy_restore_enabled: true
+openbao_legacy_restore_target_host: runtime-control-lv3
+openbao_legacy_restore_source_host: docker-runtime-lv3
+openbao_legacy_restore_source_snapshot_file: /var/tmp/openbao-runtime-control-legacy.snap
+openbao_legacy_restore_target_snapshot_file: /var/tmp/openbao-runtime-control-legacy.snap
+openbao_legacy_restore_temp_init_shares: 1
+openbao_legacy_restore_temp_init_threshold: 1
 openbao_controller_approle_local_file: "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
 openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"
 openbao_mail_platform_approle_local_file: "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
@@ -157,23 +164,23 @@ openbao_database_roles:
   - name: postgres-readonly
     db_name: "{{ openbao_database_name }}"
     creation_statements: !unsafe |-
-      CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD '{{ password }}' VALID UNTIL '{{ expiration }}';
-      GRANT lv3_openbao_connect_all TO "{{ name }}";
-      GRANT pg_read_all_data TO "{{ name }}";
-      GRANT pg_use_reserved_connections TO "{{ name }}";
+      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
+      GRANT lv3_openbao_connect_all TO "{{name}}";
+      GRANT pg_read_all_data TO "{{name}}";
+      GRANT pg_use_reserved_connections TO "{{name}}";
     revocation_statements: !unsafe |-
-      DROP ROLE IF EXISTS "{{ name }}";
+      DROP ROLE IF EXISTS "{{name}}";
     default_ttl: 1h
     max_ttl: 24h
   - name: postgres-atlas-readonly
     db_name: "{{ openbao_database_name }}"
     creation_statements: !unsafe |-
-      CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD '{{ password }}' VALID UNTIL '{{ expiration }}';
-      GRANT lv3_openbao_connect_all TO "{{ name }}";
-      GRANT pg_read_all_data TO "{{ name }}";
-      GRANT pg_use_reserved_connections TO "{{ name }}";
+      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
+      GRANT lv3_openbao_connect_all TO "{{name}}";
+      GRANT pg_read_all_data TO "{{name}}";
+      GRANT pg_use_reserved_connections TO "{{name}}";
     revocation_statements: !unsafe |-
-      DROP ROLE IF EXISTS "{{ name }}";
+      DROP ROLE IF EXISTS "{{name}}";
     default_ttl: 1h
     max_ttl: 24h
 openbao_seeded_secret_paths:

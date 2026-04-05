@@ -183,12 +183,68 @@
     mode: "0644"
   register: gitea_runner_compose_render
 
+- name: Record the expected Gitea runner labels
+  ansible.builtin.set_fact:
+    gitea_runner_expected_labels: "{{ gitea_runner_labels.split(',') | map('trim') | reject('equalto', '') | list }}"
+
+- name: Check whether a persisted Gitea runner registration already exists
+  ansible.builtin.stat:
+    path: "{{ gitea_runner_data_dir }}/.runner"
+  register: gitea_runner_registration_state_file
+
+- name: Inspect the persisted Gitea runner registration state
+  when: gitea_runner_registration_state_file.stat.exists
+  block:
+    - name: Read the persisted Gitea runner registration state
+      ansible.builtin.slurp:
+        path: "{{ gitea_runner_data_dir }}/.runner"
+      register: gitea_runner_registration_state_raw
+
+    - name: Decode the persisted Gitea runner registration state
+      ansible.builtin.set_fact:
+        gitea_runner_registration_state: "{{ gitea_runner_registration_state_raw.content | b64decode | from_json }}"
+
+    - name: Record whether the persisted Gitea runner registration drifted from the desired topology
+      ansible.builtin.set_fact:
+        gitea_runner_registration_drift_reasons: >-
+          {{
+            [
+              'address' if (gitea_runner_registration_state.address | default('')) != gitea_runner_instance_url else '',
+              'name' if (gitea_runner_registration_state.name | default('')) != gitea_runner_name else '',
+              'labels'
+              if (
+                (gitea_runner_registration_state.labels | default([]) | map('string') | map('trim') | reject('equalto', '') | list | sort)
+                != (gitea_runner_expected_labels | sort)
+              )
+              else ''
+            ]
+            | reject('equalto', '')
+            | list
+          }}
+
+    - name: Record whether the persisted Gitea runner registration should be replaced
+      ansible.builtin.set_fact:
+        gitea_runner_registration_drifted: "{{ (gitea_runner_registration_drift_reasons | length) > 0 }}"
+  rescue:
+    - name: Flag unreadable Gitea runner registration state for replacement
+      ansible.builtin.set_fact:
+        gitea_runner_registration_drift_reasons:
+          - unreadable_state_file
+        gitea_runner_registration_drifted: true
+
+- name: Remove a stale persisted Gitea runner registration before restart
+  ansible.builtin.file:
+    path: "{{ gitea_runner_data_dir }}/.runner"
+    state: absent
+  when: gitea_runner_registration_drifted | default(false) | bool
+
 - name: Record whether the Gitea runner stack needs a force recreate
   ansible.builtin.set_fact:
     gitea_runner_force_recreate: >-
       {{
         (gitea_runner_config_render.changed | default(false))
         or (gitea_runner_compose_render.changed | default(false))
+        or (gitea_runner_registration_drifted | default(false))
       }}
 
 - name: Pull the Gitea runner image

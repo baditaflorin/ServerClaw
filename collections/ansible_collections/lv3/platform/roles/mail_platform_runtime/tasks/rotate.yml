@@ -318,6 +318,8 @@
   ansible.builtin.service:
     name: docker
     state: restarted
+  register: mail_platform_rotation_docker_restart
+  failed_when: false
   when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
 
 - name: Recheck the Docker nat chain before mail-platform rotation
@@ -504,9 +506,22 @@
 - name: Remove the stale mail-platform compose network before retrying rotation
   ansible.builtin.shell: |
     set -euo pipefail
+    removed=0
     stale_networks="$(docker network ls -q --filter name=^{{ mail_platform_docker_network_name }}$)"
-    if [ -n "$stale_networks" ]; then
-      docker network rm $stale_networks
+    if [ -z "$stale_networks" ]; then
+      exit 0
+    fi
+    for network_id in $stale_networks; do
+      endpoint_count="$(docker network inspect --format '{% raw %}{{ len .Containers }}{% endraw %}' "$network_id" 2>/dev/null || echo 1)"
+      if [ "$endpoint_count" = "0" ] && docker network rm "$network_id" >/dev/null 2>&1; then
+        removed=1
+      elif [ "$endpoint_count" = "0" ]; then
+        echo "skipped $network_id removal_failed"
+      else
+        echo "skipped $network_id active_endpoints=$endpoint_count"
+      fi
+    done
+    if [ "$removed" = "1" ]; then
       echo changed
     fi
   args:

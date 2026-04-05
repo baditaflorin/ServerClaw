@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-05-ws-0331-runtime-pool-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-05",
+  "recorded_on": "2026-04-05",
+  "recorded_at": "2026-04-05T10:41:08Z",
+  "recorded_by": "codex",
+  "source_commit": "27660bb17ff8d8d52fe54054178251516ecbcafc",
+  "repo_version_context": "0.178.5",
+  "platform_version_context": "0.130.99",
+  "workflow_id": "live-apply-service",
+  "adr": "0319",
+  "summary": "Fully live applied the remaining runtime-pool transition from the latest exact-main baseline by replaying the runtime-control pool against `origin/main@630f663bd4b35214ef866df0772acef48a6ac6fe`, correcting the stale Windmill ntfy resource path and the mail-platform `created|...` startup-state false negative that only surfaced during that replay, verifying the runtime-general and runtime-control substrate plus Nomad contracts, and retiring the legacy control-plane copies from `docker-runtime-lv3` before the governed post-apply restic backup trigger completed.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-general-lv3",
+      "vmid": 191,
+      "address": "10.10.10.91"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control-lv3",
+      "vmid": 192,
+      "address": "10.10.10.92"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Platform API Gateway Public",
+      "address": "https://api.lv3.org/healthz"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Homepage Public",
+      "address": "https://home.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill Private Proxy",
+      "address": "http://100.64.0.1:8005/api/version"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Authoritative exact-main runtime-control replay",
+      "result": "pass",
+      "observed": "The final exact-main replay preserved in `receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-control-mainline-live-apply-r28.txt` completed with zero failures across `runtime-control-lv3`, `postgres-lv3`, `proxmox_florin`, `nginx-lv3`, `monitoring-lv3`, and the remaining production guests, while the tail of the same receipt shows the runtime-control substrate route verification and the retirement of legacy control-plane copies from `docker-runtime-lv3`."
+    },
+    {
+      "check": "Runtime-pool post-apply substrate, route, and Nomad verification",
+      "result": "pass",
+      "observed": "`receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r2.txt` recorded healthy Dapr metadata on both runtime pools, successful runtime-control route checks for API Gateway, OpenFGA, and Windmill, successful runtime-general route checks for Homepage, Uptime Kuma, and Mailpit, ready Nomad clients in both the `runtime-general` and `runtime-control` namespaces, green public edge probes for `home.lv3.org`, `uptime.lv3.org`, and `status.lv3.org`, the expected mTLS-only OpenBao behavior, a healthy repo-managed `step-ca` runtime healthcheck, the retired legacy control-plane set on `docker-runtime-lv3`, and the live memory allocations plus capacity-governance summary."
+    },
+    {
+      "check": "Controller-visible public and private endpoint sweep",
+      "result": "pass",
+      "observed": "`receipts/live-applies/evidence/2026-04-05-ws-0331-controller-probes-r1.json` captured green controller-side probes for `https://api.lv3.org/healthz`, `https://registry.lv3.org/api/v2.0/ping`, `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`, `https://home.lv3.org`, `https://uptime.lv3.org`, `https://status.lv3.org`, `https://vault.lv3.org/alive`, plus the private Gitea, Windmill, Semaphore, OpenFGA, and step-ca management proxies."
+    },
+    {
+      "check": "OpenBao mTLS and step-ca health-gated runtime verification",
+      "result": "pass",
+      "observed": "`receipts/live-applies/evidence/2026-04-05-ws-0331-openbao-mtls-verify-r1.txt` captured the first corrected controller-side OpenBao mTLS proof after the stale bare-curl check failed, `receipts/live-applies/evidence/2026-04-05-ws-0331-step-ca-healthcheck-live-apply-r1.txt` captured the successful bounded step-ca replay used to keep the runtime under a repo-managed compose healthcheck, and `receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r2.txt` confirmed the resulting healthy `step-ca` runtime state."
+    },
+    {
+      "check": "Governed post-apply config backup trigger",
+      "result": "pass",
+      "observed": "The `live-apply-service` restic trigger at the end of `r28` completed successfully and refreshed `receipts/restic-backups/20260405T101939Z.json` plus `receipts/restic-snapshots-latest.json`, recording protected backups for both `config/` and `versions/stack.yaml`."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "config/ntfy/topics.yaml",
+    "docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md",
+    "docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md",
+    "docs/adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md",
+    "docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md",
+    "docs/workstreams/ws-0331-runtime-pool-live-apply.md",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-controller-probes-r1.json",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-openbao-mtls-verify-r1.txt",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-step-ca-healthcheck-live-apply-r1.txt",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-control-mainline-live-apply-r25.txt",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-control-mainline-live-apply-r27.txt",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-control-mainline-live-apply-r28.txt",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r1.txt",
+    "receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r2.txt",
+    "receipts/restic-backups/20260405T101939Z.json",
+    "receipts/restic-backups/20260405T103625Z.json",
+    "receipts/restic-snapshots-latest.json",
+    "tests/test_step_ca_runtime_role.py",
+    "tests/test_mail_platform_runtime_role.py",
+    "tests/test_ntfy_runtime_config.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "workstreams/archive/2026/ws-0331-runtime-pool-live-apply.yaml"
+  ],
+  "notes": [
+    "The duplicate `r26` runtime-control replay was terminated in favor of the newer corrected replay so only `r28` is treated as the authoritative exact-main result.",
+    "OpenBao remains protected by the private mTLS proxy contract, so this receipt treats the local health checks inside the successful exact-main apply as the authoritative OpenBao verification and uses controller-side probes only for the endpoints that are intentionally reachable from the controller environment.",
+    "The first post-apply verification sweep (`receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r1.txt`) surfaced a stale bare-curl OpenBao probe in `docs/runbooks/configure-runtime-control-pool.md`, so `r2` is the authoritative final verification sweep after the runbook and proof set were corrected.",
+    "ADR 0322 remains repo-implemented only after this closeout because the live platform still lacks a Nomad Autoscaler controller and scale-action receipts; this receipt covers the runtime-pool, memory-envelope, and mobility-wave live state rather than a live autoscaling rollout.",
+    "The final integration step on `main` updates the repo truth to `0.178.6` and the verified live platform truth to `0.130.100`; this receipt intentionally preserves the exact-main apply context that was current while the live replay ran."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-05-ws-0331-runtime-pool-mainline-live-apply",
+    "surface": "exact-main runtime-pool closeout for runtime-control and the remaining shared-runtime retirement work",
+    "diagnosis": "contract_drift",
+    "repair_action": "Switched the Windmill-seeded ntfy resource path from the stale `ntfy/platform` identifier to `f/lv3/ntfy_platform`, adjusted the mail-platform runtime startup evaluation so the expected `created|...` compose state no longer fails the live replay, and reran the exact-main runtime-control workstream until the final authoritative replay completed cleanly.",
+    "verification": "Replay `r28`, the runtime-pool post-verify sweep, and the controller-visible endpoint probes all passed, with the legacy control-plane copies retired from `docker-runtime-lv3` and the governed restic backup trigger succeeding afterward."
+  }
+}

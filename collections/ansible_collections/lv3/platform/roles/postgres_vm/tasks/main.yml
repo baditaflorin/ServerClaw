@@ -256,6 +256,9 @@
     label: "{{ item }}"
   register: postgres_vm_pgaudit_extension_check
   changed_when: false
+  retries: 10
+  delay: 3
+  until: postgres_vm_pgaudit_extension_check.rc == 0
   when: postgres_vm_pgaudit_enabled | bool
 
 - name: Create pgaudit extension in writable databases
@@ -273,10 +276,14 @@
   loop: "{{ postgres_vm_pgaudit_extension_check.results }}"
   loop_control:
     label: "{{ item.item }}"
+  register: postgres_vm_pgaudit_extension_create
   when:
     - postgres_vm_pgaudit_enabled | bool
     - item.stdout != "1"
   changed_when: true
+  retries: 10
+  delay: 3
+  until: postgres_vm_pgaudit_extension_create.rc == 0
 
 - name: Assert pgaudit sensitive-table grants point at existing databases
   ansible.builtin.assert:
