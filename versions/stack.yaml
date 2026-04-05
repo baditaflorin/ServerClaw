@@ -38,7 +38,7 @@ live_apply_evidence:
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     step_ca: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    openbao: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    openbao: 2026-04-06-adr-0360-openbao-tls-cert-hardening-72h-live-apply
     vaultwarden: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     windmill: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
