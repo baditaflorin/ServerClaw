@@ -2671,6 +2671,7 @@
       "exposure": "edge-published",
       "health_probe_id": "repowise",
       "adr": "0346",
+      "adr_file": "docs/adr/0346-repowise-semantic-search.md",
       "runbook": "docs/runbooks/configure-repowise.md",
       "runtime_pool": "runtime-general",
       "deployment_surface": "playbooks/repowise.yml",
