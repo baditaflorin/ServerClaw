@@ -3336,7 +3336,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.20:8091
+      internal: http://10.10.10.92:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -5734,7 +5734,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.20:8091
+      internal: http://10.10.10.92:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
