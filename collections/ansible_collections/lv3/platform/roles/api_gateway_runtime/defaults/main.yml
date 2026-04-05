@@ -367,3 +367,14 @@ api_gateway_windmill_token: >-
     | default('', true)
     | trim
   }}
+api_gateway_portainer_base_url: https://10.10.10.20:9443
+api_gateway_portainer_username: ops-portainer
+api_gateway_portainer_endpoint_id: "1"
+api_gateway_portainer_verify_ssl: false
+api_gateway_portainer_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/portainer/admin-password.txt
+api_gateway_portainer_admin_password: >-
+  {{
+    lookup('ansible.builtin.file', api_gateway_portainer_admin_password_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}

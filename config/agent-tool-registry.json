@@ -886,19 +886,19 @@
           "stdout_log": {
             "type": "string"
           },
-            "stderr_log": {
-              "type": "string"
-            },
-            "receipt_path": {
-              "type": "string"
-            },
-            "parameters": {
-              "type": "object"
-            },
-            "returncode": {
-              "type": "integer"
-            }
+          "stderr_log": {
+            "type": "string"
+          },
+          "receipt_path": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "returncode": {
+            "type": "integer"
           }
+        }
       },
       "implementation": {
         "kind": "handler",
@@ -1008,6 +1008,112 @@
         "idempotentHint": true
       },
       "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "list-containers",
+      "title": "List Containers",
+      "description": "List all Docker containers across the managed Portainer endpoint. Returns name, image, state, and status for each container.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "service://portainer/containers",
+      "auth": "portainer-admin",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "include_stopped": {
+            "type": "boolean"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "count",
+          "containers"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "containers": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_containers"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/container-ops.md"
+    },
+    {
+      "name": "get-container-logs",
+      "title": "Get Container Logs",
+      "description": "Retrieve recent stdout and stderr log lines for a named Docker container via Portainer. Accepts a container name, ID, or ID prefix.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "service://portainer/containers/{container}/logs",
+      "auth": "portainer-admin",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "container"
+        ],
+        "properties": {
+          "container": {
+            "type": "string"
+          },
+          "tail": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "container",
+          "tail",
+          "logs"
+        ],
+        "properties": {
+          "container": {
+            "type": "string"
+          },
+          "tail": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "logs": {
+            "type": "string"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_container_logs"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/container-ops.md"
     }
   ]
 }

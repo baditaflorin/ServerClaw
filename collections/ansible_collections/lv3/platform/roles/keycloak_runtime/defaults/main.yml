@@ -213,3 +213,9 @@ keycloak_paperless_post_logout_redirect_uris:
 keycloak_serverclaw_post_logout_redirect_uris:
   - "{{ keycloak_serverclaw_root_url }}"
   - "{{ keycloak_serverclaw_root_url }}/"
+keycloak_dify_client_id: dify
+keycloak_dify_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/dify-client-secret.txt
+keycloak_dify_root_url: https://agents.lv3.org
+keycloak_dify_post_logout_redirect_uris:
+  - "{{ keycloak_dify_root_url }}"
+  - "{{ keycloak_dify_root_url }}/"

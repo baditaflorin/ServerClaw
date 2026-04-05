@@ -201,6 +201,58 @@ class DifyClient:
             json={"tracing_provider": provider, "tracing_config": config},
         ).json()
 
+    def get_workspace_setting(self) -> dict[str, Any]:
+        return self._request("GET", "/console/api/workspaces/current/setting").json()
+
+    def get_sso_setting(self) -> dict[str, Any] | None:
+        """Return the current workspace SSO setting, or None if the endpoint is unavailable."""
+        response = self.session.get(
+            f"{self.base_url}/console/api/workspaces/current/sso-setting",
+            timeout=self.timeout_seconds,
+            headers=self._headers(),
+        )
+        if response.status_code == 404:
+            return None
+        if response.status_code != 200:
+            raise DifyApiError(
+                f"GET /console/api/workspaces/current/sso-setting returned {response.status_code}: {response.text.strip()}"
+            )
+        return response.json()
+
+    def configure_sso(
+        self,
+        *,
+        enabled: bool,
+        protocol: str = "oidc",
+        client_id: str,
+        client_secret: str,
+        issuer_url: str,
+    ) -> dict[str, Any]:
+        """Idempotently configure workspace-level OIDC SSO."""
+        payload: dict[str, Any] = {
+            "enabled": enabled,
+            "type": protocol,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "issuer_url": issuer_url,
+        }
+        response = self.session.post(
+            f"{self.base_url}/console/api/workspaces/current/sso-setting",
+            timeout=self.timeout_seconds,
+            headers=self._headers(),
+            json=payload,
+        )
+        if response.status_code == 404:
+            raise DifyApiError(
+                "SSO setting endpoint not found — this Dify version may not support programmatic SSO configuration. "
+                "Ensure you are running Dify >= 0.10 with the SSO feature enabled."
+            )
+        if response.status_code not in (200, 201):
+            raise DifyApiError(
+                f"POST /console/api/workspaces/current/sso-setting returned {response.status_code}: {response.text.strip()}"
+            )
+        return response.json()
+
     def get_api_tool_provider(self, provider_name: str) -> dict[str, Any] | None:
         response = self.session.get(
             f"{self.base_url}/console/api/workspaces/current/tool-provider/api/get",

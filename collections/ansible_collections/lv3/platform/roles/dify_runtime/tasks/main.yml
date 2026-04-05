@@ -149,6 +149,7 @@
     dify_plugin_inner_api_key: "{{ dify_secret_reads.results[7].content | b64decode | trim }}"
     dify_tools_api_key: "{{ dify_secret_reads.results[8].content | b64decode | trim }}"
     dify_database_password: "{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}"
+    dify_smtp_password: "{{ lookup('ansible.builtin.file', dify_smtp_password_local_file) | trim }}"
     dify_runtime_secret_payload:
       DB_PASSWORD: "{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}"
       INIT_PASSWORD: "{{ dify_secret_reads.results[0].content | b64decode | trim }}"
@@ -160,6 +161,7 @@
       PLUGIN_DAEMON_KEY: "{{ dify_secret_reads.results[6].content | b64decode | trim }}"
       PLUGIN_DIFY_INNER_API_KEY: "{{ dify_secret_reads.results[7].content | b64decode | trim }}"
       TOOLS_API_KEY: "{{ dify_secret_reads.results[8].content | b64decode | trim }}"
+      SMTP_PASSWORD: "{{ lookup('ansible.builtin.file', dify_smtp_password_local_file) | trim }}"
   no_log: true
 
 - name: Ensure the local Dify artifact directory exists
@@ -374,3 +376,27 @@
 
 - name: Run the Dify role verification tasks
   ansible.builtin.import_tasks: verify.yml
+
+- name: Bootstrap Dify SSO with Keycloak OIDC
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ dify_scripts_dir }}/dify_sso_bootstrap.py"
+      - --base-url
+      - "{{ dify_public_base_url }}"
+      - --admin-email
+      - "{{ dify_admin_email }}"
+      - --admin-password-file
+      - "{{ dify_admin_password_local_file }}"
+      - --keycloak-client-id
+      - "{{ dify_keycloak_client_id }}"
+      - --keycloak-client-secret-file
+      - "{{ dify_keycloak_client_secret_local_file }}"
+      - --keycloak-issuer-url
+      - "{{ dify_keycloak_issuer }}"
+  delegate_to: localhost
+  become: false
+  register: dify_sso_bootstrap
+  changed_when: >-
+    (dify_sso_bootstrap.stdout | from_json).action == 'configured'
+  no_log: false

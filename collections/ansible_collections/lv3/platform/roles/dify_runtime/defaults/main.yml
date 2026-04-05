@@ -91,3 +91,13 @@ dify_nginx_port: 80
 dify_ssrf_proxy_port: 3128
 dify_redis_uid: "999"
 dify_redis_gid: "999"
+dify_smtp_server: "{{ smtp_host }}"
+dify_smtp_port: "{{ smtp_port }}"
+dify_smtp_username: "{{ smtp_username }}"
+dify_smtp_password_local_file: "{{ smtp_password_local_file }}"
+dify_smtp_from_address: "{{ smtp_from_address }}"
+dify_smtp_use_tls: "{{ smtp_starttls }}"
+dify_keycloak_client_id: "{{ keycloak_dify_client_id }}"
+dify_keycloak_client_secret_local_file: "{{ keycloak_dify_client_secret_local_file }}"
+dify_keycloak_issuer: "{{ keycloak_public_base_url }}/realms/{{ keycloak_realm_name }}"
+dify_scripts_dir: "{{ playbook_dir | dirname }}/scripts"

@@ -23,6 +23,7 @@ from deployment_history import query_deployment_history
 from governed_command import execute_governed_command
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
 from maintenance_window_tool import list_active_windows_best_effort
+from portainer_tool import PortainerClient
 from platform.use_cases.serverclaw_skills import list_serverclaw_skill_packs
 from workflow_catalog import (
     load_secret_manifest,
@@ -43,6 +44,12 @@ AUDIT_LOG_ENV: Final[str] = "LV3_AGENT_TOOL_AUDIT_LOG_PATH"
 PLATFORM_CONTEXT_TOKEN_ENV: Final[str] = "LV3_PLATFORM_CONTEXT_API_TOKEN_FILE"
 BROWSER_RUNNER_BASE_URL_ENV: Final[str] = "LV3_BROWSER_RUNNER_BASE_URL"
 DEFAULT_PLATFORM_CONTEXT_TOKEN_PATH: Final[Path] = REPO_ROOT / ".local" / "platform-context" / "api-token.txt"
+PORTAINER_BASE_URL_ENV: Final[str] = "LV3_PORTAINER_BASE_URL"
+PORTAINER_USERNAME_ENV: Final[str] = "LV3_PORTAINER_USERNAME"
+PORTAINER_PASSWORD_ENV: Final[str] = "LV3_PORTAINER_PASSWORD"
+PORTAINER_ENDPOINT_ID_ENV: Final[str] = "LV3_PORTAINER_ENDPOINT_ID"
+PORTAINER_VERIFY_SSL_ENV: Final[str] = "LV3_PORTAINER_VERIFY_SSL"
+DEFAULT_PORTAINER_AUTH_FILE_PATH: Final[Path] = REPO_ROOT / ".local" / "portainer" / "admin-auth.json"
 SUPPORTED_SCHEMA_VERSION: Final[str] = "1.0.0"
 ALLOWED_TOOL_CATEGORIES: Final[set[str]] = {"observe", "report", "execute", "approve"}
 ALLOWED_TRANSPORTS: Final[set[str]] = {"controller_local", "http", "nats", "ansible"}
@@ -290,6 +297,19 @@ def resolve_platform_context_token_path() -> Path:
     if override:
         return Path(override).expanduser()
     return DEFAULT_PLATFORM_CONTEXT_TOKEN_PATH
+
+
+def resolve_portainer_auth() -> dict[str, Any]:
+    base_url = os.environ.get(PORTAINER_BASE_URL_ENV, "").strip()
+    if base_url:
+        return {
+            "base_url": base_url,
+            "username": os.environ.get(PORTAINER_USERNAME_ENV, "ops-portainer"),
+            "password": os.environ.get(PORTAINER_PASSWORD_ENV, ""),
+            "endpoint_id": os.environ.get(PORTAINER_ENDPOINT_ID_ENV, "1"),
+            "verify_ssl": os.environ.get(PORTAINER_VERIFY_SSL_ENV, "false").lower() == "true",
+        }
+    return load_json(DEFAULT_PORTAINER_AUTH_FILE_PATH)
 
 
 def read_secret_file(path: Path, label: str) -> str:
@@ -596,6 +616,33 @@ def tool_run_governed_command(_tool: dict[str, Any], args: dict[str, Any]) -> tu
     )
 
 
+def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    include_stopped = bool(args.get("include_stopped", False))
+    client = PortainerClient(resolve_portainer_auth())
+    client.login()
+    containers = client.list_containers(all_containers=include_stopped)
+    normalized = [
+        {
+            "id": c["Id"][:12],
+            "names": [n.lstrip("/") for n in c.get("Names", [])],
+            "image": c.get("Image", ""),
+            "state": c.get("State", ""),
+            "status": c.get("Status", ""),
+        }
+        for c in containers
+    ]
+    return {"count": len(normalized), "containers": normalized}
+
+
+def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    container = require_str(args.get("container"), "arguments.container")
+    tail = require_int(args.get("tail", 100), "arguments.tail", 1)
+    client = PortainerClient(resolve_portainer_auth())
+    client.login()
+    logs = client.container_logs(container, tail)
+    return {"container": container, "tail": tail, "logs": logs}
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -610,6 +657,8 @@ HANDLERS: Final[dict[str, Any]] = {
     "browser_run_session": tool_browser_run_session,
     "check_command_approval": tool_check_command_approval,
     "run_governed_command": tool_run_governed_command,
+    "list_containers": tool_list_containers,
+    "get_container_logs": tool_get_container_logs,
 }
 
 
