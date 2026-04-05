@@ -336,7 +336,7 @@ proxmox_guests:
     macaddr: BC:24:11:0F:8A:F2
     cores: 12
     memory_mb: 24576
-    disk_gb: 160
+    disk_gb: 320
     tags:
       - docker
       - build
