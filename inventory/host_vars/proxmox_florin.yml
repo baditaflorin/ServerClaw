@@ -2358,9 +2358,10 @@ lv3_service_topology:
       service_telemetry: false
     dns:
       managed: true
+      visibility: public
       name: scheduler
       type: A
-      target: "{{ public_ipv4 }}"
+      target: "{{ management_ipv4 }}"
       ttl: 60
     edge:
       enabled: true
@@ -3348,3 +3349,24 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}"
+  repowise:
+    service_name: repowise
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: repowise.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repowise
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:7070"

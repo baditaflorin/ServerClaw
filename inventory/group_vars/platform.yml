@@ -2244,6 +2244,10 @@ platform_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
+    urls:
+      public: https://scheduler.lv3.org
+      internal: https://10.10.10.40:4646
+      controller: https://100.64.0.1:8013
     service_id: nomad
     runtime_pool: dedicated-monitoring
     deployment_surface: playbooks/services/nomad.yml
@@ -2253,10 +2257,6 @@ platform_service_topology:
     ports:
       internal: 4646
       controller: 8013
-    urls:
-      public: https://scheduler.lv3.org
-      internal: https://10.10.10.40:4646
-      controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
     owning_vm: runtime-control-lv3
@@ -3820,6 +3820,31 @@ platform_service_topology:
     urls:
       public: https://bi.lv3.org
       internal: http://10.10.10.20:8105
+  repowise:
+    service_name: repowise
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: repowise.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repowise
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:7070
+    service_id: repowise
+    ports: {}
+    urls:
+      public: https://repowise.lv3.org
 platform_session_authority:
   authority_hostname: ops.lv3.org
   ops_portal_client_id: ops-portal-oauth
@@ -3878,6 +3903,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: livekit
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: scheduler
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -4006,6 +4035,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: bi
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: repowise
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -4657,6 +4690,10 @@ public_edge_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
+    urls:
+      public: https://scheduler.lv3.org
+      internal: https://10.10.10.40:4646
+      controller: https://100.64.0.1:8013
     service_id: nomad
     runtime_pool: dedicated-monitoring
     deployment_surface: playbooks/services/nomad.yml
@@ -4666,10 +4703,6 @@ public_edge_service_topology:
     ports:
       internal: 4646
       controller: 8013
-    urls:
-      public: https://scheduler.lv3.org
-      internal: https://10.10.10.40:4646
-      controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
     owning_vm: runtime-control-lv3
@@ -6233,6 +6266,31 @@ public_edge_service_topology:
     urls:
       public: https://bi.lv3.org
       internal: http://10.10.10.20:8105
+  repowise:
+    service_name: repowise
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: repowise.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repowise
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:7070
+    service_id: repowise
+    ports: {}
+    urls:
+      public: https://repowise.lv3.org
 uptime_kuma_service_topology:
   service_name: uptime-kuma
   owning_vm: runtime-general-lv3
