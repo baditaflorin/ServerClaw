@@ -12,8 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- fully live applies the remaining runtime pool transition by bringing runtime-general and runtime-control online, rebalancing host memory to satisfy ADR 0321, and capturing the verified platform truth from exact mainline
-
 ## Latest Release
 
 - [0.178.6 release notes](docs/release-notes/0.178.6.md)
