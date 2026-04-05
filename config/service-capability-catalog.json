@@ -1700,7 +1700,9 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://100.64.0.1:8013"
+          "url": "https://scheduler.lv3.org",
+          "subdomain": "scheduler.lv3.org",
+          "notes": "Operator dashboard published through shared NGINX edge with native OIDC auth."
         }
       }
     },
