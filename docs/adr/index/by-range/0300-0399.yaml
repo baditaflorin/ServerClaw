@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 64
+total_adrs: 66
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1047,6 +1047,25 @@ adrs:
     implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: PostgreSQL Domain Clustering
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - postgres
+      - infrastructure
+      - vm-separation
+      - reliability
+      - blast-radius
+      - postgresql
+      - domain
+      - clustering
+    summary: Split the single PostgreSQL cluster into three purpose-specific clusters,
+    filename: 0346-postgresql-domain-clustering.md
+    path: docs/adr/0346-postgresql-domain-clustering.md
+    implemented_in_repo_version: 0.179.0
   - adr: '0347'
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted
@@ -1067,6 +1086,25 @@ adrs:
     summary: Every mutable infrastructure file belongs to exactly one file domain. A
     filename: 0347-agent-file-domain-locking.md
     path: docs/adr/0347-agent-file-domain-locking.md
+  - adr: '0347'
+    title: Docker Runtime Workload Split
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - infrastructure
+      - vm-separation
+      - reliability
+      - blast-radius
+      - docker
+      - runtime
+      - workload
+      - split
+    summary: Split docker-runtime-lv3 into three purpose-scoped VMs aligned to workload
+    filename: 0347-docker-runtime-workload-split.md
+    path: docs/adr/0347-docker-runtime-workload-split.md
+    implemented_in_repo_version: 0.179.0
   - adr: 0348
     title: Per-Service LLM Context File (service.llm.yaml)
     status: Accepted

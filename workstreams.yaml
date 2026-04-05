@@ -519,6 +519,71 @@ workstreams:
       contract: ws0286-generated-diagrams-v1
   ready_to_merge: true
   live_applied: false
+- id: plausible-drop-oidc
+  adr: 0283
+  title: "Remove dead Plausible OIDC config \u2014 CE v3.x uses oauth2-proxy auth\
+    \ only"
+  status: ready_for_merge
+  owner: claude
+  branch: claude/nice-buck
+  worktree_path: .claude/worktrees/nice-buck
+  doc: docs/runbooks/configure-plausible.md
+  depends_on:
+  - adr-0097-keycloak-identity
+  - adr-0145-nginx-edge-publication
+  - adr-0283-plausible-analytics
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/group_vars/platform.yml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: plausible_oidc_removal
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/templates/plausible.env.ctmpl.j2
+      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/templates/plausible.env.j2
+      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+      mode: exclusive
+    - id: plausible_shared_topology
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
+      - inventory/group_vars/platform.yml
+      mode: shared_contract
+      contract: platform-topology-v1
+    - id: plausible_shared_generated_contract
+      paths:
+      - workstreams.yaml
+      - workstreams/active/plausible-drop-oidc.yaml
+      - build/platform-manifest.json
+      - changelog.md
+      - docs/adr/.index.yaml
+      - docs/adr/index/*
+      - docs/diagrams/*
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/*
+      - receipts/sbom/*
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - versions/stack.yaml
+      - docs/release-notes/*
+      - docs/release-notes/index/*
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/status/history/*
+      - docs/diagrams/*
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+  ready_to_merge: true
+  live_applied: true
+  canonical_truth:
+    changelog_entry: "removed dead Plausible OIDC config (OIDC_DISCOVERY_URI, OIDC_CLIENT_SECRET,\
+      \ extra_hosts, /login redirect) \u2014 Plausible CE v3.x dropped community OIDC;\
+      \ auth is now exclusively via oauth2-proxy at the NGINX edge"
+    release_bump: patch
 - id: ws-0275-live-apply
   adr: '0275'
   title: Refresh Apache Tika exact-main live-apply truth after the runtime-ai pool
@@ -1068,6 +1133,8 @@ workstreams:
     - id: ws_realtime_dynamic_children_netdata
       paths:
       - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/realtime.yml
+      - collections/ansible_collections/lv3/platform/playbooks/groups/observability.yml
       - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
       mode: exclusive
     - id: ws_realtime_dynamic_children_generated

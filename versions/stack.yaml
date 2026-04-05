@@ -138,7 +138,7 @@ live_apply_evidence:
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
     browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
     mailpit: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    plausible_analytics: 2026-04-05-plausible-drop-oidc-oauth2-proxy-auth-only-live-apply
+    plausible_analytics: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
     tika: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
@@ -1189,7 +1189,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.9
+    current: 0.178.10
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.98

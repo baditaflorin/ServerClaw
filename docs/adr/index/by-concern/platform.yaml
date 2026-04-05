@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: platform
-total_adrs: 126
+total_adrs: 127
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2284,3 +2284,18 @@ adrs:
     summary: 'A port is "platform-managed" if it is:'
     filename: 0346-centralized-port-registry.md
     path: docs/adr/0346-centralized-port-registry.md
+  - adr: 0359
+    title: Declarative PostgreSQL Client Registry
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - declarative
+      - postgresql
+      - client
+      - registry
+    summary: 'Introduce a declarative PostgreSQL client registry as the single source of truth for all service database relationships.
+      All downstream artifacts — pghba.conf, '
+    filename: 0359-declarative-postgres-client-registry.md
+    path: docs/adr/0359-declarative-postgres-client-registry.md
