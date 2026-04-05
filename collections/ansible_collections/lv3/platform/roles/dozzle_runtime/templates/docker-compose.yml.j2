@@ -7,7 +7,7 @@ services:
     network_mode: host
     depends_on:
       dozzle-agent:
-        condition: service_started
+        condition: service_healthy
     command:
       - "--addr"
       - ":{{ dozzle_runtime_hub_port }}"
@@ -50,4 +50,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
-      disable: true
+      test:
+        - CMD
+        - /dozzle
+        - healthcheck
+        - --addr
+        - :{{ dozzle_runtime_agent_port }}
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
