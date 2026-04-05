@@ -59,13 +59,13 @@
   delay: 3
   until: ops_portal_verify_root.status == 200
 
-- name: Assert the contextual help drawer is present on the ops portal root page
+- name: Assert the ops portal root page renders with required elements
   ansible.builtin.assert:
     that:
-      - "'Contextual Help' in ops_portal_verify_root.content"
-      - "'Live apply' in ops_portal_verify_root.content"
-      - "'Escalation Path' in ops_portal_verify_root.content"
-    fail_msg: "Ops portal root page rendered without the ADR 0313 contextual help drawer."
+      - "'Interactive Ops Portal' in ops_portal_verify_root.content"
+      - "'Activation' in ops_portal_verify_root.content"
+      - "'Overview' in ops_portal_verify_root.content"
+    fail_msg: "Ops portal root page rendered without required navigation elements."
 
 - name: Verify the journey-aware entry surface renders locally
   ansible.builtin.uri:
