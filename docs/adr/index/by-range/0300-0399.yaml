@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 69
+total_adrs: 70
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1388,3 +1388,21 @@ adrs:
     summary: Plane becomes the primary human-visible and agent-visible surface for
     filename: 0360-plane-as-agent-task-hq.md
     path: docs/adr/0360-plane-as-agent-task-hq.md
+  - adr: '0361'
+    title: Nomad OIDC Auth and Edge Publication
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-05'
+    concern: security
+    keywords:
+      - nomad
+      - oidc
+      - keycloak
+      - edge
+      - sso
+      - scheduler
+      - auth
+      - publication
+    summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
+    filename: 0361-nomad-oidc-edge-publication.md
+    path: docs/adr/0361-nomad-oidc-edge-publication.md

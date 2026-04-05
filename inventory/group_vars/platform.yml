@@ -2223,24 +2223,10 @@ platform_service_topology:
     service_name: nomad
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: scheduler.lv3.org
-    exposure_model: edge-published
+    exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: scheduler
-      type: A
-      target: 65.108.75.123
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      kind: proxy
-      upstream: https://10.10.10.40:4646
-      upstream_ssl_verify: false
     access:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
@@ -2254,7 +2240,6 @@ platform_service_topology:
       internal: 4646
       controller: 8013
     urls:
-      public: https://scheduler.lv3.org
       internal: https://10.10.10.40:4646
       controller: https://100.64.0.1:8013
   gitea:
@@ -4636,24 +4621,10 @@ public_edge_service_topology:
     service_name: nomad
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: scheduler.lv3.org
-    exposure_model: edge-published
+    exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: scheduler
-      type: A
-      target: 65.108.75.123
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      kind: proxy
-      upstream: https://10.10.10.40:4646
-      upstream_ssl_verify: false
     access:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
@@ -4667,7 +4638,6 @@ public_edge_service_topology:
       internal: 4646
       controller: 8013
     urls:
-      public: https://scheduler.lv3.org
       internal: https://10.10.10.40:4646
       controller: https://100.64.0.1:8013
   gitea:
