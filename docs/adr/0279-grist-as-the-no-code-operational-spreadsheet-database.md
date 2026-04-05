@@ -98,6 +98,43 @@ database.
 - Grist is not used for long-term metric or log data; those stay in InfluxDB
   and Loki.
 
+## Operational Lessons (2026-04-05)
+
+An incident on 2026-04-05 exposed several non-obvious runtime requirements
+that are now encoded in the role defaults and nginx_edge_publication CSP
+overrides. See `docs/runbooks/configure-grist.md` for the full postmortem.
+
+**NGINX CSP must allow `'unsafe-inline'` for `script-src`.**
+Grist injects a `<script>window.gristConfig = {...}</script>` inline bootstrap
+block on every page. Without `'unsafe-inline'` in `script-src`, the client
+cannot determine the organisation from the URL and throws
+`Cannot figure out what organization the URL is for` before any login flow
+begins. The `nginx_edge_publication` role now carries a `grist.lv3.org`
+override in `public_edge_security_headers_overrides`.
+
+**`GRIST_SERVE_SAME_ORIGIN=true` is required for single-org mode.**
+Without it, Grist cannot resolve the organisation from the same-origin URL
+pattern in single-org deployments. This variable must be set alongside
+`GRIST_SINGLE_ORG`.
+
+**`GRIST_FORCE_LOGIN=false` with `GRIST_ANONYMOUS_PLAYGROUND=false` is the
+correct public-sharing posture.**
+Setting `GRIST_FORCE_LOGIN=true` blocks unauthenticated access to documents
+that have been explicitly marked public by their owner. The correct combination
+is `GRIST_FORCE_LOGIN=false` (allows public document links to work) plus
+`GRIST_ANONYMOUS_PLAYGROUND=false` (prevents anonymous users from creating
+new documents or accessing the org workspace without authentication).
+
+**Container restarts pick up env file changes only with `--force-recreate`.**
+`docker compose restart` reuses the cached container environment. Changed
+`env_file` values are only picked up via `docker compose up -d --force-recreate`.
+
+**The `nginx_edge_publication` preliminary render required a missing default.**
+The `public_edge_site_tls_materials` variable lacked a default value, causing
+the preliminary NGINX config render to fail with an `UndefinedError` before
+the final TLS-aware render ran. The variable is now defaulted to `{}` in
+`nginx_edge_publication/defaults/main.yml`.
+
 ## Related ADRs
 
 - ADR 0021: Public subdomain publication at the NGINX edge

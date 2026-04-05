@@ -42,6 +42,7 @@ public_edge_service_topology: >-
 public_edge_session_authority: "{{ platform_session_authority }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
+public_edge_site_tls_materials: {}
 public_edge_acme_challenge_method: webroot
 public_edge_certbot_retries: 6
 public_edge_certbot_delay_seconds: 15
@@ -154,6 +155,12 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;
       connect-src 'self' https://draw.lv3.org wss://draw.lv3.org; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
+  grist.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data: blob:; font-src 'self' data:;
+      connect-src 'self' https://grist.lv3.org https://sso.lv3.org; manifest-src 'self'
   grafana.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
