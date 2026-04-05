@@ -75,6 +75,8 @@ services:
         condition: service_healthy
     env_file:
       - {{ langfuse_env_file }}
+    extra_hosts:
+      - "sso.lv3.org:{{ hostvars['nginx-lv3'].ansible_host }}"
 
   langfuse-web:
     image: {{ langfuse_web_image }}
@@ -91,6 +93,8 @@ services:
         condition: service_healthy
     env_file:
       - {{ langfuse_env_file }}
+    extra_hosts:
+      - "sso.lv3.org:{{ hostvars['nginx-lv3'].ansible_host }}"
     ports:
       - "{{ ansible_host }}:{{ langfuse_internal_port }}:3000"
       - "127.0.0.1:{{ langfuse_internal_port }}:3000"
