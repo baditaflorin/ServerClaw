@@ -8,20 +8,21 @@
 schema_version: 2
 generated: '2026-04-05'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 382
+total_adrs: 381
 adr_number_range:
   first: '0001'
-  last: 0358
-  next_available: 0359
+  last: 0359
+  next_available: '0360'
 implementation_status_summary:
   Implemented: 332
   Partial: 7
   Not Implemented: 39
   Deprecated: 1
-  Accepted: 3
+  Accepted: 1
+  Proposed: 1
 decision_status_summary:
-  Accepted: 326
-  Proposed: 4
+  Accepted: 324
+  Proposed: 5
   Deprecated: 2
   Implemented: 50
 facets:
@@ -43,9 +44,9 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 65
+      count: 64
       first_adr: '0300'
-      last_adr: 0358
+      last_adr: 0359
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -82,7 +83,7 @@ facets:
       count: 25
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 126
+      count: 127
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -100,7 +101,7 @@ facets:
       count: 3
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 37
+      count: 35
   by_status:
     - implementation_status: Implemented
       slug: implemented
@@ -121,14 +122,23 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 3
+      count: 1
+    - implementation_status: Proposed
+      slug: proposed
+      path: docs/adr/index/by-status/proposed.yaml
+      count: 1
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0359
+  next_available_adr: '0360'
 latest_adrs:
+  - adr: 0359
+    title: Declarative PostgreSQL Client Registry
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0359-declarative-postgres-client-registry.md
   - adr: 0358
     title: Platform Health Contract and Inter-Service Dependency SLO
     implementation_status: Not Implemented
@@ -174,11 +184,6 @@ latest_adrs:
     implementation_status: Not Implemented
     concern: networking
     path: docs/adr/0350-nginx-fragment-based-atomic-config.md
-  - adr: 0349
-    title: Agent Capability Manifest and Peer Discovery
-    implementation_status: Not Implemented
-    concern: networking
-    path: docs/adr/0349-agent-capability-manifest-and-peer-discovery.md
 discovery_queries:
   how do we bootstrap:
     - '0001'
