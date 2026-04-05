@@ -1961,7 +1961,9 @@
         "edge_auth": {
           "provider": "oauth2_proxy",
           "unauthenticated_paths": [],
-          "unauthenticated_prefix_paths": []
+          "unauthenticated_prefix_paths": [
+            "/api/public/"
+          ]
         },
         "repo_route_service_id": "langfuse",
         "repo_route_metadata": {
