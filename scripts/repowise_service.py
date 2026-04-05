@@ -78,13 +78,15 @@ class OllamaEmbedder:
             mid = max(1, len(texts) // 2)
             return self._embed_batch(texts[:mid]) + self._embed_batch(texts[mid:])
 
-    def embed_one(self, text: str) -> list[float]:
-        vecs = []
-        for i in range(0, 1, EMBED_BATCH_SIZE):
-            vecs.extend(self._embed_batch([text]))
-        return vecs[0]
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        out: list[list[float]] = []
+        for i in range(0, len(texts), EMBED_BATCH_SIZE):
+            out.extend(self._embed_batch(texts[i : i + EMBED_BATCH_SIZE]))
+        return out
 
-    @property
+    def embed_one(self, text: str) -> list[float]:
+        return self.embed([text])[0]
+
     def dimension(self) -> int:
         if self._dim is None:
             self._dim = len(self.embed_one("probe"))
@@ -121,6 +123,17 @@ class QdrantHTTP:
             return True
         except RuntimeError:
             return False
+
+    def create_collection(self, name: str, dimension: int) -> None:
+        self._request("PUT", f"/collections/{name}", {
+            "vectors": {"size": dimension, "distance": "Cosine"},
+        })
+
+    def delete_collection(self, name: str) -> None:
+        self._request("DELETE", f"/collections/{name}")
+
+    def upsert(self, collection: str, points: list[dict]) -> None:
+        self._request("PUT", f"/collections/{collection}/points", {"points": points})
 
     def count(self, name: str) -> int:
         try:

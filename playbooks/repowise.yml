@@ -6,7 +6,7 @@
 #   ansible-playbook playbooks/repowise.yml -i inventory/hosts.yml --limit docker-runtime-lv3
 
 - name: Converge repowise on the Docker runtime VM
-  hosts: docker_runtime
+  hosts: docker-runtime-lv3
   become: true
   gather_facts: true
 

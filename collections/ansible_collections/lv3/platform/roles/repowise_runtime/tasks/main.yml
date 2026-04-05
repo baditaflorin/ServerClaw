@@ -27,13 +27,17 @@
     - "{{ playbook_dir }}/../scripts/repowise_service.py"
   notify: restart repowise
 
-- name: Clone or update the platform git repo for indexing
-  ansible.builtin.git:
-    repo: "{{ repowise_git_repo }}"
-    dest: "{{ repowise_repo_dir }}"
-    version: "{{ repowise_git_branch }}"
-    depth: 1
-    force: false
+- name: Sync platform repo to indexing dir (rsync from controller)
+  ansible.posix.synchronize:
+    src: "{{ playbook_dir }}/../"
+    dest: "{{ repowise_repo_dir }}/"
+    rsync_opts:
+      - "--exclude=.git"
+      - "--exclude=.claude"
+      - "--exclude=.local"
+      - "--exclude=__pycache__"
+      - "--exclude=*.pyc"
+      - "--delete"
   become: false
 
 - name: Write docker-compose.yml
@@ -58,6 +62,11 @@
     project_src: "{{ repowise_base_dir }}"
     state: present
     pull: missing
+
+- name: Ensure cron is installed
+  ansible.builtin.package:
+    name: cron
+    state: present
 
 - name: Schedule nightly index rebuild (cron)
   ansible.builtin.cron:

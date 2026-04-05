@@ -3,12 +3,7 @@
 # Runs inside a temporary container sharing the same network as the service.
 set -e
 
-echo "[repowise-rebuild] Pulling latest repo…"
-git -C "{{ repowise_repo_dir }}" pull --ff-only origin {{ repowise_git_branch }} || \
-  git clone --depth=1 --branch {{ repowise_git_branch }} \
-    {{ repowise_git_repo }} "{{ repowise_repo_dir }}"
-
-echo "[repowise-rebuild] Running indexer…"
+echo "[repowise-rebuild] Running indexer (repo synced by Ansible; run playbook to refresh)…"
 docker run --rm \
   --network {{ repowise_qdrant_network }} \
   -v "{{ repowise_service_dir }}:/service:ro" \
