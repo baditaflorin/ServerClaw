@@ -46,13 +46,25 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
     - collections/ansible_collections/lv3/platform/playbooks/secret-rotation.yml
     mode: exclusive
+  - id: workstream_source
+    paths:
+    - workstreams/active/adr-0346-centralized-port-registry.yaml
+    mode: exclusive
   - id: release_management
     paths:
+    - README.md
     - VERSION
     - changelog.md
     - docs/release-notes/0.178.4.md
+    - docs/release-notes/README.md
+    - docs/release-notes/index/*.md
     mode: shared_contract
     contract: release-management-v1
+  - id: platform_truth_generation
+    paths:
+    - versions/stack.yaml
+    mode: shared_contract
+    contract: canonical-truth-v1
   - id: adr_index_generation
     paths:
     - docs/adr/.index.yaml
@@ -64,6 +76,9 @@ ownership_manifest:
   - id: generated_truth
     paths:
     - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/site-generated/architecture/dependency-graph.md
+    - receipts/ops-portal-snapshot.html
+    - config/subdomain-exposure-registry.json
     - build/platform-manifest.json
     mode: shared_contract
     contract: latest-main-generated-truth-v1
