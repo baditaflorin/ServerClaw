@@ -2,9 +2,15 @@ id: naughty-jepsen-ops-fixes
 adr: '0043'
 title: Operational fixes — OpenBao unseal watcher, Keycloak VM migration,
   oauth2-proxy
-status: in_progress
-ready_to_merge: false
+status: merged
+ready_to_merge: true
 live_applied: false
+canonical_truth:
+  changelog_entry: >
+    Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM
+    corrected to runtime-control-lv3, oauth2-proxy internal URL updated,
+    dozzle-agent healthcheck disabled (scratch image).
+  release_bump: patch
 owner: claude
 branch: claude/naughty-jepsen
 worktree_path: .claude/worktrees/naughty-jepsen
