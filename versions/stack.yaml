@@ -1192,5 +1192,5 @@ release_tracks:
     current: 0.178.18
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.98
+    current: 0.131.0
     meaning: intended platform release for the actual server configuration

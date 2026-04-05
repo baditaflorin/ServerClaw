@@ -137,4 +137,22 @@ ownership_manifest:
     - playbooks/services/runtime-comms-pool.yml
     mode: shared_contract
     contract: topology-v1
+  - id: gate_fix_ansible_lint
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/postgres_client/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+    mode: exclusive
+  - id: gate_fix_public_entrypoints
+    paths:
+    - AGENTS.md
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: gate_fix_release_notes
+    paths:
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/index/2026.md
+    - docs/release-notes/index/README.md
+    mode: shared_contract
+    contract: release-management-v1
 plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b

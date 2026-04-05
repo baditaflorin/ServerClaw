@@ -235,7 +235,7 @@ workstreams:
   owner: claude
   branch: claude/affectionate-galileo
   worktree_path: .claude/worktrees/affectionate-galileo
-  doc: docs/adr/0328-ops-portal.md
+  doc: docs/adr/0093-interactive-ops-portal.md
   depends_on:
   - adr-0328-ops-portal
   conflicts_with: []
@@ -1719,6 +1719,24 @@ workstreams:
       - playbooks/services/runtime-comms-pool.yml
       mode: shared_contract
       contract: topology-v1
+    - id: gate_fix_ansible_lint
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/postgres_client/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+      mode: exclusive
+    - id: gate_fix_public_entrypoints
+      paths:
+      - AGENTS.md
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: gate_fix_release_notes
+      paths:
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/index/2026.md
+      - docs/release-notes/index/README.md
+      mode: shared_contract
+      contract: release-management-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
 surface_ownership:
   global_mutable_paths:
