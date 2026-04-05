@@ -14,9 +14,9 @@ adr_number_range:
   last: '0363'
   next_available: '0364'
 implementation_status_summary:
-  Implemented: 334
+  Implemented: 336
   Partial: 8
-  Not Implemented: 41
+  Not Implemented: 39
   Deprecated: 1
   Accepted: 4
   Proposed: 2
@@ -106,7 +106,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 334
+      count: 336
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -114,7 +114,7 @@ facets:
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 41
+      count: 39
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -136,14 +136,16 @@ reservation_ledger:
 latest_adrs:
   - adr: '0363'
     title: Plane Agent Tools — Programmatic Task Management for Agents
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     concern: automation
     path: docs/adr/0363-plane-agent-tools.md
+    implemented_on: '2026-04-06'
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     concern: security
     path: docs/adr/0362-agent-service-api-gateway-pattern.md
+    implemented_on: '2026-04-06'
   - adr: '0361'
     title: Nomad OIDC Auth and Edge Publication
     implementation_status: Partial

@@ -10,7 +10,7 @@ generated: '2026-04-06'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 41
+total_adrs: 39
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -695,43 +695,3 @@ adrs:
     summary: 'Four health levels for any service:'
     filename: 0358-platform-health-contract-and-dependency-slo.md
     path: docs/adr/0358-platform-health-contract-and-dependency-slo.md
-  - adr: '0362'
-    title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-06'
-    concern: security
-    keywords:
-      - agents
-      - tools
-      - api
-      - governance
-      - credentials
-      - pattern
-      - agent
-      - service
-      - gateway
-      - governed
-    summary: All agent-callable service tools discover credentials from the .local/
-    filename: 0362-agent-service-api-gateway-pattern.md
-    path: docs/adr/0362-agent-service-api-gateway-pattern.md
-  - adr: '0363'
-    title: Plane Agent Tools — Programmatic Task Management for Agents
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-06'
-    concern: automation
-    keywords:
-      - agents
-      - tools
-      - plane
-      - tasks
-      - api
-      - automation
-      - agent
-      - programmatic
-      - task
-      - management
-    summary: 'Five Plane tools, following the ADR 0362 gateway pattern:'
-    filename: 0363-plane-agent-tools.md
-    path: docs/adr/0363-plane-agent-tools.md

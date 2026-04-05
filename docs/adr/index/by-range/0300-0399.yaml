@@ -1427,7 +1427,7 @@ adrs:
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-06'
     concern: security
     keywords:
@@ -1444,10 +1444,12 @@ adrs:
     summary: All agent-callable service tools discover credentials from the .local/
     filename: 0362-agent-service-api-gateway-pattern.md
     path: docs/adr/0362-agent-service-api-gateway-pattern.md
+    implemented_in_repo_version: 0.178.19
+    implemented_on: '2026-04-06'
   - adr: '0363'
     title: Plane Agent Tools — Programmatic Task Management for Agents
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -1464,3 +1466,5 @@ adrs:
     summary: 'Five Plane tools, following the ADR 0362 gateway pattern:'
     filename: 0363-plane-agent-tools.md
     path: docs/adr/0363-plane-agent-tools.md
+    implemented_in_repo_version: 0.178.19
+    implemented_on: '2026-04-06'
