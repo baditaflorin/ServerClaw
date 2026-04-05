@@ -10,7 +10,7 @@ generated: '2026-04-05'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 3
+total_adrs: 4
 adrs:
   - adr: '0346'
     title: Centralized Port Registry
@@ -68,3 +68,23 @@ adrs:
     filename: 0347-docker-runtime-workload-split.md
     path: docs/adr/0347-docker-runtime-workload-split.md
     implemented_in_repo_version: 0.179.0
+  - adr: '0360'
+    title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-05'
+    concern: monitoring
+    keywords:
+      - platform
+      - plane
+      - agents
+      - observability
+      - workflow
+      - automation
+      - as
+      - agent
+      - task
+      - hq
+    summary: Plane becomes the primary human-visible and agent-visible surface for
+    filename: 0360-plane-as-agent-task-hq.md
+    path: docs/adr/0360-plane-as-agent-task-hq.md

@@ -15,13 +15,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
 - removed dead Plausible OIDC config (OIDC_DISCOVERY_URI, OIDC_CLIENT_SECRET, extra_hosts, /login redirect) — Plausible CE v3.x dropped community OIDC; auth is now exclusively via oauth2-proxy at the NGINX edge
+- move Plane RabbitMQ broker credentials out of docker-compose environment block and into openbao-backed env_file; add ADR 0360 defining Plane as agent task HQ with per-worktree issue lifecycle, dual-write strategy, and agent-to-agent coordination via blocking links
 
 ## Latest Release
 
-- [0.178.10 release notes](docs/release-notes/0.178.10.md)
+- [0.178.11 release notes](docs/release-notes/0.178.11.md)
 
 ## Previous Releases
 
+- [0.178.10 release notes](docs/release-notes/0.178.10.md)
 - [0.178.9 release notes](docs/release-notes/0.178.9.md)
 - [0.178.8 release notes](docs/release-notes/0.178.8.md)
 - [0.178.7 release notes](docs/release-notes/0.178.7.md)
@@ -33,9 +35,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.1 release notes](docs/release-notes/0.178.1.md)
 - [0.178.0 release notes](docs/release-notes/0.178.0.md)
 - [0.177.153 release notes](docs/release-notes/0.177.153.md)
-- [0.177.152 release notes](docs/release-notes/0.177.152.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (349 releases)](docs/release-notes/index/2026.md)
+- [2026 (350 releases)](docs/release-notes/index/2026.md)
