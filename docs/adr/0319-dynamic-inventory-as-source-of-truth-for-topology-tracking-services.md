@@ -74,7 +74,8 @@ Current table:
 
 | Trigger | Required follow-up | Why |
 |---|---|---|
-| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology derived from `lv3_guests`; new VMs won't stream until Netdata is installed |
+| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology derived from `lv3_guests`; new VMs invisible on realtime.lv3.org until Netdata is installed |
+| VM added to / removed from `lv3_guests` | `make live-apply-service service=guest-log-shipping` | Loki log-agent topology derived from `lv3_guests`; new VMs produce no log streams until the agent is deployed |
 
 New topology-tracking services MUST add a row to this table when introduced.
 

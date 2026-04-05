@@ -168,11 +168,12 @@ re-converge the services below or the running state will drift from inventory tr
 
 | Trigger | Required follow-up | Why |
 |---|---|---|
-| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology is derived from `lv3_guests`; new VMs won't stream metrics until Netdata is installed on them |
+| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology derived from `lv3_guests`; new VMs invisible on realtime.lv3.org until Netdata is installed |
+| VM added to / removed from `lv3_guests` | `make live-apply-service service=guest-log-shipping` | Loki log-agent topology derived from `lv3_guests`; new VMs produce no log streams until the agent is deployed |
 
 Running `site.yml` (full-stack converge) satisfies all of the above automatically because
-`playbooks/groups/observability.yml` imports the realtime service playbook.
-For targeted VM-only runs (`make provision-guests`), apply the realtime service manually afterwards.
+`playbooks/groups/observability.yml` imports all topology-tracking service playbooks.
+For targeted VM-only runs (`make provision-guests`), apply each service in the table manually afterwards.
 
 ## Lessons Learned
 
