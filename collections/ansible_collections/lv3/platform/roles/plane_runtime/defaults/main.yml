@@ -109,3 +109,8 @@ plane_trusted_proxies:
   - 10.10.10.10
   - 100.64.0.1
 plane_healthcheck_path: /api/instances/
+# Workspace members to ensure exist after bootstrap.
+# Role 20 = Admin, 15 = Member, 10 = Viewer.
+# The bootstrap admin (plane_bootstrap_admin_email) is always owner — no need to list here.
+# Add any operator or sysadmin accounts that should see the full workspace.
+plane_workspace_members: []

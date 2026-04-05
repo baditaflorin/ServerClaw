@@ -95,6 +95,12 @@ proxmox_management_allowed_sources:
   - 90.95.35.115/32
 proxmox_breakglass_ssh_port: 2222
 proxmox_notification_email: baditaflorin@gmail.com
+# Plane workspace members automatically added/kept in sync on every converge.
+# The bootstrap admin (ops@lv3.org) is always owner — no need to list here.
+# role 20=Admin, 15=Member, 10=Viewer
+plane_workspace_members:
+  - email: "{{ proxmox_notification_email }}"
+    role: 20
 proxmox_notification_author: Proxmox LV3
 proxmox_notification_endpoint_name: lv3-ops-email
 proxmox_notification_endpoint_comment: LV3 operations mailbox

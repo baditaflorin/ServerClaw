@@ -371,5 +371,38 @@
   until: plane_sync.rc == 0
   changed_when: false
 
+- name: Enforce Plane workspace members via Django ORM (plane_workspace_members)
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ plane_api_container_name }}"
+      - python
+      - manage.py
+      - shell
+      - -c
+      - |
+        from plane.db.models import User, Workspace, WorkspaceMember
+        ws = Workspace.objects.get(slug='{{ plane_bootstrap_workspace_slug }}')
+        members = {{ plane_workspace_members | to_json }}
+        for entry in members:
+            try:
+                user = User.objects.get(email=entry['email'])
+                m, created = WorkspaceMember.objects.get_or_create(workspace=ws, member=user, defaults={'role': entry['role']})
+                if not created and m.role != entry['role']:
+                    m.role = entry['role']
+                    m.is_active = True
+                    m.save()
+                    print(f"updated {entry['email']} role={entry['role']}")
+                elif created:
+                    print(f"added {entry['email']} role={entry['role']}")
+                else:
+                    print(f"noop {entry['email']} role={m.role}")
+            except User.DoesNotExist:
+                print(f"skip {entry['email']}: user not found in Plane yet")
+  register: plane_member_sync
+  changed_when: "'updated ' in plane_member_sync.stdout or 'added ' in plane_member_sync.stdout"
+  when: plane_workspace_members | length > 0
+
 - name: Verify the Plane runtime
   ansible.builtin.import_tasks: verify.yml

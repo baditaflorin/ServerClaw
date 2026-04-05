@@ -300,6 +300,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Create the AW project if missing, then exit",
     )
     parser.add_argument(
+        "--sync-members",
+        metavar="JSON",
+        help=(
+            "JSON array of {email, role} objects to ensure as workspace members. "
+            "role: 20=Admin, 15=Member, 10=Viewer. Idempotent."
+        ),
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print what would happen without making API calls",
@@ -307,9 +315,72 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def sync_workspace_members(
+    *,
+    auth_file: Path,
+    members: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Ensure a list of {email, role} entries are workspace members.
+
+    Idempotent: members already present at the correct role are left unchanged.
+    Members present at a different role are updated.
+    New members are invited directly (no email confirmation needed for existing users).
+    """
+    client, auth = _build_client(auth_file)
+    workspace_slug = auth["workspace_slug"]
+
+    # Fetch current members keyed by email.
+    # Plane v1.x returns members with the email at the top level; v2.x nests it
+    # under "member". Support both shapes.
+    current: dict[str, dict[str, Any]] = {}
+    for m in client._collect(f"/api/v1/workspaces/{workspace_slug}/members/"):
+        email = m.get("email") or m.get("member", {}).get("email", "")
+        if email:
+            current[email] = m
+
+    results: list[dict[str, Any]] = []
+    for entry in members:
+        email = entry["email"]
+        role = int(entry.get("role", 15))
+        if email in current:
+            existing_role = current[email].get("role")
+            if existing_role == role:
+                results.append({"email": email, "action": "noop", "role": role})
+            else:
+                # Plane v1.x CE does not expose a member-role-update REST endpoint.
+                # Record as needs_role_update so Ansible can enforce via Django shell.
+                results.append({
+                    "email": email,
+                    "action": "needs_role_update",
+                    "current_role": existing_role,
+                    "desired_role": role,
+                    "note": "Use make converge-plane or Django shell to update role",
+                })
+        else:
+            # Try direct invitation (works for existing Plane users without email flow)
+            try:
+                client._request(
+                    f"/api/v1/workspaces/{workspace_slug}/invitations/",
+                    method="POST",
+                    payload={"email": email, "role": role},
+                    expected_statuses={200, 201},
+                )
+                results.append({"email": email, "action": "invited", "role": role})
+            except PlaneError as exc:
+                results.append({"email": email, "action": "error", "error": str(exc)})
+
+    return {"workspace": workspace_slug, "members": results}
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     auth_file = Path(args.auth_file).expanduser()
+
+    if args.sync_members:
+        members = json.loads(args.sync_members)
+        result = sync_workspace_members(auth_file=auth_file, members=members)
+        print(json.dumps(result, indent=2))
+        return 0
 
     if args.repair:
         result = repair_orphans(auth_file=auth_file, aw_identifier=args.aw_project)
