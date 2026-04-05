@@ -33,7 +33,13 @@
     recurse: true
     hidden: true
     patterns: "*.env"
-    excludes: ".git,.ansible,.claude,.local,.venv,.worktrees"
+    excludes:
+      - ".git"
+      - ".ansible"
+      - ".claude"
+      - ".local"
+      - ".venv"
+      - ".worktrees"
   delegate_to: localhost
   become: false
   run_once: true
