@@ -2541,11 +2541,6 @@
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_dify_client_id }}"
-        auth_client_id: admin-cli
-        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-        auth_realm: master
-        auth_username: "{{ keycloak_bootstrap_admin_username }}"
-        auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_dify_client_secret_info
       retries: "{{ keycloak_admin_reconciliation_retries }}"
