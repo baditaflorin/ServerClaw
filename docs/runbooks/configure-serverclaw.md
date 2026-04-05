@@ -56,13 +56,13 @@ make converge-one-api
 Verify the runtime container and generated files on `coolify-lv3`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps && sudo ls -ld /opt/serverclaw /opt/serverclaw/data /etc/lv3/serverclaw /run/lv3-secrets/serverclaw && sudo test ! -e /opt/serverclaw/serverclaw.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps && sudo ls -ld /opt/serverclaw /opt/serverclaw/data /etc/lv3/serverclaw && sudo test -s /etc/lv3/serverclaw/runtime.env && sudo test ! -e /opt/serverclaw/serverclaw.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the rendered runtime env enables Keycloak, One-API, and web search:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a "sudo grep -E '^(WEBUI_URL|WEBUI_NAME|ENABLE_OAUTH_SIGNUP|OAUTH_CLIENT_ID|OPENID_PROVIDER_URL|ENABLE_OPENAI_API|ENABLE_OLLAMA_API|OPENAI_API_BASE_URL|SEARXNG_QUERY_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /run/lv3-secrets/serverclaw/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a "sudo grep -E '^(WEBUI_URL|WEBUI_NAME|ENABLE_OAUTH_SIGNUP|OAUTH_CLIENT_ID|OPENID_PROVIDER_URL|ENABLE_OPENAI_API|ENABLE_OLLAMA_API|OPENAI_API_BASE_URL|SEARXNG_QUERY_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /etc/lv3/serverclaw/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the Proxmox VM firewall exposes the upstream proxy lane from
@@ -137,6 +137,6 @@ surface is back in place.
 
 - Keep `WEBUI_URL=https://chat.lv3.org` aligned with the live hostname before changing the OIDC client contract.
 - Treat `.local/serverclaw/` and `.local/keycloak/serverclaw-client-secret.txt` as sensitive controller-only material.
-- ServerClaw currently renders `/run/lv3-secrets/serverclaw/runtime.env` directly on `coolify-lv3` instead of running the shared OpenBao sidecar there, because the managed OpenBao automation listener remains host-local to `docker-runtime-lv3`.
+- ServerClaw renders `/etc/lv3/serverclaw/runtime.env` directly during converge instead of running the shared OpenBao sidecar, because the managed OpenBao automation listener remains host-local to `docker-runtime-lv3`. The persistent path under `/etc/lv3/` ensures the env file survives host reboots without requiring the sidecar.
 - ServerClaw intentionally reuses the existing One-API and SearXNG backends instead of standing up a separate model or search tier for ADR 0254.
 - Matrix, channel bridges, delegated OpenFGA authorization, and the richer memory plane remain follow-on work for the adjacent ServerClaw ADRs.

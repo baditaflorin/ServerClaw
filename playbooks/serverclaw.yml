@@ -125,7 +125,7 @@
         open_webui_data_dir: /opt/serverclaw/data
         open_webui_secret_dir: /etc/lv3/serverclaw
         open_webui_compose_file: /opt/serverclaw/docker-compose.yml
-        open_webui_env_file: /run/lv3-secrets/serverclaw/runtime.env
+        open_webui_env_file: /etc/lv3/serverclaw/runtime.env
         open_webui_legacy_env_file: /opt/serverclaw/serverclaw.env
         open_webui_openbao_agent_dir: /opt/serverclaw/openbao
         open_webui_openbao_agent_container_name: serverclaw-openbao-agent
@@ -163,6 +163,7 @@
         open_webui_searxng_query_url: "{{ serverclaw_searxng_query_url }}"
         open_webui_default_models: "{{ serverclaw_default_models }}"
         open_webui_default_pinned_models: "{{ serverclaw_default_pinned_models }}"
+        open_webui_user_permissions_workspace_models_access: "{{ serverclaw_workspace_models_access }}"
         open_webui_user_permissions_workspace_knowledge_access: "{{ serverclaw_workspace_knowledge_access }}"
         open_webui_user_permissions_workspace_prompts_access: "{{ serverclaw_workspace_prompts_access }}"
         open_webui_user_permissions_workspace_tools_access: "{{ serverclaw_workspace_tools_access }}"
@@ -172,6 +173,7 @@
         open_webui_auth_cookie_same_site: "{{ serverclaw_auth_cookie_same_site }}"
         open_webui_session_cookie_secure: "{{ serverclaw_session_cookie_secure }}"
         open_webui_auth_cookie_secure: "{{ serverclaw_auth_cookie_secure }}"
+        open_webui_extra_hosts: "{{ serverclaw_extra_hosts | default([]) }}"
 
   post_tasks:
     - name: Run shared post-verify checks

@@ -267,6 +267,7 @@ serverclaw_searxng_query_url: http://10.10.10.20:8881/search?q=<query>&format=js
 serverclaw_default_models: "{{ one_api_default_chat_model_alias }}"
 serverclaw_default_pinned_models: "{{ one_api_default_chat_model_alias }}"
 serverclaw_default_user_role: user
+serverclaw_workspace_models_access: true
 serverclaw_workspace_knowledge_access: true
 serverclaw_workspace_prompts_access: true
 serverclaw_workspace_tools_access: false
@@ -276,6 +277,8 @@ serverclaw_session_cookie_same_site: lax
 serverclaw_auth_cookie_same_site: lax
 serverclaw_session_cookie_secure: true
 serverclaw_auth_cookie_secure: true
+serverclaw_extra_hosts:
+  - "sso.lv3.org:10.10.10.10"
 platform_context_host_proxy_port: 8010
 platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
 platform_context_embedding_backend: ollama
