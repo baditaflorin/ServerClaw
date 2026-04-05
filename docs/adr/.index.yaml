@@ -92,7 +92,7 @@ facets:
       count: 5
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 27
+      count: 28
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 6
@@ -139,6 +139,12 @@ latest_adrs:
     implementation_status: Accepted
     concern: monitoring
     path: docs/adr/0360-plane-as-agent-task-hq.md
+  - adr: '0360'
+    title: OpenBao TLS Cert Lifetime And Renewal Hardening
+    implementation_status: Implemented
+    concern: security
+    path: docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
+    implemented_on: '2026-04-05'
   - adr: 0359
     title: Declarative PostgreSQL Client Registry
     implementation_status: Proposed
@@ -179,11 +185,6 @@ latest_adrs:
     implementation_status: Not Implemented
     concern: security
     path: docs/adr/0352-token-budgeted-agent-onboarding-packs.md
-  - adr: '0351'
-    title: Change Provenance Tagging in All Generated and Managed Files
-    implementation_status: Not Implemented
-    concern: networking
-    path: docs/adr/0351-change-provenance-tagging.md
 discovery_queries:
   how do we bootstrap:
     - '0001'
