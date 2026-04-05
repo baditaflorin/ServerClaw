@@ -23,13 +23,13 @@
 # Related Runbooks: docs/runbooks/configure-netdata.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-03-28
+# Last Updated: 2026-04-05
 netdata_runtime_parent_inventory_host: monitoring-lv3
-netdata_runtime_child_inventory_hosts:
-  - proxmox_florin
-  - nginx-lv3
-  - docker-runtime-lv3
-  - postgres-lv3
+netdata_runtime_child_inventory_hosts: >-
+  {{ (groups['lv3_guests'] + groups['proxmox_hosts'])
+     | unique
+     | intersect(groups[playbook_execution_env | default('production')])
+     | difference([netdata_runtime_parent_inventory_host]) }}
 netdata_runtime_is_parent: "{{ inventory_hostname == netdata_runtime_parent_inventory_host }}"
 netdata_runtime_parent_web_port: "{{ hostvars[groups['proxmox_hosts'][0]].platform_port_assignments.netdata_port }}"
 netdata_runtime_parent_private_ip: "{{ hostvars[netdata_runtime_parent_inventory_host].ansible_host }}"

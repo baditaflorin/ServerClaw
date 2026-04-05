@@ -23,7 +23,12 @@ def test_realtime_playbook_converges_network_before_agents() -> None:
 
     network_play = next(play for play in plays if play["hosts"] == "proxmox_hosts")
     parent_play = next(play for play in plays if play["hosts"] == "monitoring-lv3")
-    child_play = next(play for play in plays if play["hosts"] == "proxmox_florin:nginx-lv3:docker-runtime-lv3:postgres-lv3")
+    child_play = next(
+        play
+        for play in plays
+        if isinstance(play.get("hosts"), str)
+        and "lv3_guests:proxmox_hosts" in play["hosts"]
+    )
 
     assert plays.index(network_play) < plays.index(parent_play) < plays.index(child_play)
     assert network_play["roles"] == [{"role": "lv3.platform.proxmox_network"}]
