@@ -1069,6 +1069,30 @@
       }
     },
     {
+      "id": "scheduler-edge",
+      "service_id": "nomad",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for scheduler.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "scheduler.lv3.org",
+        "port": 443,
+        "server_name": "scheduler.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "status-edge",
       "service_id": "status_page",
       "status": "active",
