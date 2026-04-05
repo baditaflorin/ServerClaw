@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: security
-total_adrs: 25
+total_adrs: 27
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -479,3 +479,41 @@ adrs:
     implemented_in_repo_version: 0.178.3
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-03'
+  - adr: 0348
+    title: Per-Service LLM Context File (service.llm.yaml)
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: security
+    keywords:
+      - llm
+      - agent-discovery
+      - token-budget
+      - documentation
+      - service-catalog
+      - dry
+      - per-service
+      - context
+      - file
+      - service
+    summary: Each Ansible role that deploys a service ships a service.llm.yaml file
+    filename: 0348-per-service-llm-context-file.md
+    path: docs/adr/0348-per-service-llm-context-file.md
+  - adr: '0352'
+    title: Token-Budgeted Agent Onboarding Packs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: security
+    keywords:
+      - llm
+      - token-budget
+      - agent-discovery
+      - onboarding
+      - performance
+      - token-budgeted
+      - agent
+      - packs
+    summary: 'Three categories of pack, each with a hard token budget:'
+    filename: 0352-token-budgeted-agent-onboarding-packs.md
+    path: docs/adr/0352-token-budgeted-agent-onboarding-packs.md

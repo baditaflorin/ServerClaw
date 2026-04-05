@@ -11,8 +11,8 @@ purpose: Compact ADR discovery manifest that points readers to shard-sized ADR m
 total_adrs: 380
 adr_number_range:
   first: '0001'
-  last: '0358'
-  next_available: '0359'
+  last: 0358
+  next_available: 0359
 implementation_status_summary:
   Implemented: 332
   Partial: 7
@@ -45,11 +45,11 @@ facets:
       path: docs/adr/index/by-range/0300-0399.yaml
       count: 63
       first_adr: '0300'
-      last_adr: '0358'
+      last_adr: 0358
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
-      count: 9
+      count: 2
     - concern: agent-discovery
       path: docs/adr/index/by-concern/agent-discovery.yaml
       count: 22
@@ -64,7 +64,7 @@ facets:
       count: 5
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 40
+      count: 41
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 20
@@ -79,7 +79,7 @@ facets:
       count: 9
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
-      count: 16
+      count: 25
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
       count: 126
@@ -91,7 +91,7 @@ facets:
       count: 5
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 25
+      count: 27
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 6
@@ -113,7 +113,7 @@ facets:
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 27
+      count: 39
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -127,127 +127,58 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0359'
+  next_available_adr: 0359
 latest_adrs:
-  - adr: '0358'
+  - adr: 0358
     title: Platform Health Contract and Inter-Service Dependency SLO
     implementation_status: Not Implemented
-    concern: agent-coordination
+    concern: networking
     path: docs/adr/0358-platform-health-contract-and-dependency-slo.md
   - adr: '0357'
     title: Idempotent Workstream Apply Receipts
     implementation_status: Not Implemented
-    concern: agent-coordination
+    concern: networking
     path: docs/adr/0357-idempotent-workstream-apply-receipts.md
   - adr: '0356'
     title: LLM Inference Routing and Model Registry
     implementation_status: Not Implemented
-    concern: agent-coordination
+    concern: networking
     path: docs/adr/0356-llm-inference-routing-and-model-registry.md
   - adr: '0355'
     title: Apply-Phase Serialization via Resource-Group Semaphore
     implementation_status: Not Implemented
-    concern: agent-coordination
+    concern: networking
     path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
   - adr: '0354'
     title: Structured Agent Mutation Audit Log
     implementation_status: Not Implemented
-    concern: agent-coordination
+    concern: networking
     path: docs/adr/0354-structured-agent-mutation-audit-log.md
   - adr: '0353'
     title: Service Integration Contract Registry
     implementation_status: Not Implemented
-    concern: platform
+    concern: ci-cd
     path: docs/adr/0353-service-integration-contract-registry.md
   - adr: '0352'
     title: Token-Budgeted Agent Onboarding Packs
     implementation_status: Not Implemented
-    concern: agent-discovery
+    concern: security
     path: docs/adr/0352-token-budgeted-agent-onboarding-packs.md
   - adr: '0351'
     title: Change Provenance Tagging in All Generated and Managed Files
     implementation_status: Not Implemented
-    concern: platform
+    concern: networking
     path: docs/adr/0351-change-provenance-tagging.md
   - adr: '0350'
     title: Nginx Fragment-Based Atomic Configuration
     implementation_status: Not Implemented
-    concern: platform
+    concern: networking
     path: docs/adr/0350-nginx-fragment-based-atomic-config.md
-  - adr: '0349'
+  - adr: 0349
     title: Agent Capability Manifest and Peer Discovery
     implementation_status: Not Implemented
-    concern: agent-coordination
+    concern: networking
     path: docs/adr/0349-agent-capability-manifest-and-peer-discovery.md
-  - adr: '0348'
-    title: Per-Service LLM Context File
-    implementation_status: Not Implemented
-    concern: agent-discovery
-    path: docs/adr/0348-per-service-llm-context-file.md
-  - adr: '0347'
-    title: Agent File-Domain Locking for Atomic Infrastructure Mutations
-    implementation_status: Not Implemented
-    concern: agent-coordination
-    path: docs/adr/0347-agent-file-domain-locking.md
-  - adr: '0346'
-    title: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
-    implementation_status: Implemented
-    concern: ci-cd
-    path: docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md
-    implemented_on: '2026-04-04'
-  - adr: '0346'
-    title: Centralized Port Registry
-    implementation_status: Accepted
-    concern: platform
-    path: docs/adr/0346-centralized-port-registry.md
-  - adr: '0345'
-    title: Layered Operator Tool Separation
-    implementation_status: Implemented
-    concern: platform
-    path: docs/adr/0345-layered-operator-tool-separation.md
-    implemented_on: '2026-04-04'
-  - adr: '0344'
-    title: Single-Source Environment Topology
-    implementation_status: Implemented
-    concern: vm-topology
-    path: docs/adr/0344-single-source-environment-topology.md
-    implemented_on: '2026-04-04'
-  - adr: '0343'
-    title: Operator Tool Interface Contract
-    implementation_status: Implemented
-    concern: automation
-    path: docs/adr/0343-operator-tool-interface-contract.md
-    implemented_on: '2026-04-04'
-  - adr: '0342'
-    title: Zero-SSH Guest Operations via Proxmox QAPI
-    implementation_status: Implemented
-    concern: host-os
-    path: docs/adr/0342-zero-ssh-guest-operations-via-proxmox-qapi.md
-    implemented_on: '2026-04-04'
-  - adr: '0341'
-    title: Open WebUI Keycloak OIDC With Break-Glass Fallback
-    implementation_status: Implemented
-    concern: security
-    path: docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md
-    implemented_on: '2026-04-03'
-  - adr: '0340'
-    title: Dedicated Coolify Apps VM Separation
-    implementation_status: Implemented
-    concern: vm-topology
-    path: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
-    implemented_on: '2026-04-03'
-  - adr: 0339
-    title: Reference Deployment Samples And Replaceable Provider Profiles
-    implementation_status: Implemented
-    concern: vm-topology
-    path: docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md
-    implemented_on: '2026-04-04'
-  - adr: 0338
-    title: Public Documentation Tiers And Private History Boundaries
-    implementation_status: Implemented
-    concern: documentation
-    path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
-    implemented_on: '2026-04-04'
 discovery_queries:
   how do we bootstrap:
     - '0001'

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: ci-cd
-total_adrs: 40
+total_adrs: 41
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -755,3 +755,22 @@ adrs:
     implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'
+  - adr: '0353'
+    title: Service Integration Contract Registry
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: ci-cd
+    keywords:
+      - integration
+      - contracts
+      - infrastructure
+      - dry
+      - service-catalog
+      - validation
+      - service
+      - contract
+      - registry
+    summary: A new file type integration.yaml is placed in
+    filename: 0353-service-integration-contract-registry.md
+    path: docs/adr/0353-service-integration-contract-registry.md

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: networking
-total_adrs: 16
+total_adrs: 25
 adrs:
   - adr: '0015'
     title: lv3.org DNS And Subdomain Model
@@ -305,3 +305,177 @@ adrs:
     summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
     filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
     path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+  - adr: '0347'
+    title: Agent File-Domain Locking for Atomic Infrastructure Mutations
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - agent-coordination
+      - locking
+      - atomicity
+      - nginx
+      - docker-compose
+      - infrastructure
+      - agent
+      - file-domain
+      - atomic
+      - mutations
+    summary: Every mutable infrastructure file belongs to exactly one file domain. A
+    filename: 0347-agent-file-domain-locking.md
+    path: docs/adr/0347-agent-file-domain-locking.md
+  - adr: 0349
+    title: Agent Capability Manifest and Peer Discovery
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - agent-coordination
+      - agent-discovery
+      - capability-manifest
+      - peer-awareness
+      - nats
+      - agent
+      - capability
+      - manifest
+      - peer
+      - discovery
+    summary: Every agent session publishes a capability manifest alongside its
+    filename: 0349-agent-capability-manifest-and-peer-discovery.md
+    path: docs/adr/0349-agent-capability-manifest-and-peer-discovery.md
+  - adr: '0350'
+    title: Nginx Fragment-Based Atomic Configuration
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - nginx
+      - atomicity
+      - infrastructure
+      - agent-coordination
+      - include-dirs
+      - fragment-based
+      - atomic
+      - configuration
+    summary: ''
+    filename: 0350-nginx-fragment-based-atomic-config.md
+    path: docs/adr/0350-nginx-fragment-based-atomic-config.md
+  - adr: '0351'
+    title: Change Provenance Tagging in All Generated and Managed Files
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - audit
+      - provenance
+      - documentation
+      - infrastructure
+      - agent-coordination
+      - dry
+      - change
+      - tagging
+      - all
+      - generated
+    summary: Every file rendered from a Jinja2 template or written by an operator tool must
+    filename: 0351-change-provenance-tagging.md
+    path: docs/adr/0351-change-provenance-tagging.md
+  - adr: '0354'
+    title: Structured Agent Mutation Audit Log
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - audit
+      - agent-coordination
+      - observability
+      - compliance
+      - mutation-tracking
+      - structured
+      - agent
+      - mutation
+      - log
+    summary: Every agent mutation produces a mutation event — a structured JSON record
+    filename: 0354-structured-agent-mutation-audit-log.md
+    path: docs/adr/0354-structured-agent-mutation-audit-log.md
+  - adr: '0355'
+    title: Apply-Phase Serialization via Resource-Group Semaphore
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - agent-coordination
+      - locking
+      - semaphore
+      - apply-safety
+      - atomicity
+      - apply-phase
+      - serialization
+      - resource-group
+    summary: A resource group is a named set of resources that share a single
+    filename: 0355-apply-phase-serialization-via-semaphore.md
+    path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
+  - adr: '0356'
+    title: LLM Inference Routing and Model Registry
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - llm
+      - ollama
+      - open-webui
+      - ai
+      - token-budget
+      - inference
+      - agent-coordination
+      - routing
+      - model
+      - registry
+    summary: 'config/llm-model-registry.yaml declares all permitted models and their properties:'
+    filename: 0356-llm-inference-routing-and-model-registry.md
+    path: docs/adr/0356-llm-inference-routing-and-model-registry.md
+  - adr: '0357'
+    title: Idempotent Workstream Apply Receipts
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - workstreams
+      - audit
+      - idempotency
+      - agent-coordination
+      - receipts
+      - infrastructure
+      - idempotent
+      - workstream
+      - apply
+    summary: A standardised apply receipt is written to receipts/live-applies/ on every
+    filename: 0357-idempotent-workstream-apply-receipts.md
+    path: docs/adr/0357-idempotent-workstream-apply-receipts.md
+  - adr: 0358
+    title: Platform Health Contract and Inter-Service Dependency SLO
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-05'
+    concern: networking
+    keywords:
+      - health
+      - slo
+      - contracts
+      - integration
+      - observability
+      - agent-coordination
+      - platform
+      - contract
+      - inter-service
+      - dependency
+    summary: 'Four health levels for any service:'
+    filename: 0358-platform-health-contract-and-dependency-slo.md
+    path: docs/adr/0358-platform-health-contract-and-dependency-slo.md
