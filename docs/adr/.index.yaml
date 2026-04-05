@@ -8,22 +8,22 @@
 schema_version: 2
 generated: '2026-04-06'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 390
+total_adrs: 398
 adr_number_range:
   first: '0001'
-  last: '0363'
-  next_available: '0364'
+  last: '0375'
+  next_available: '0376'
 implementation_status_summary:
-  Implemented: 336
+  Implemented: 337
   Partial: 8
-  Not Implemented: 39
-  Deprecated: 1
+  Not Implemented: 36
+  Deprecated: 4
   Accepted: 4
-  Proposed: 2
+  Proposed: 9
 decision_status_summary:
-  Accepted: 332
-  Proposed: 6
-  Deprecated: 2
+  Accepted: 327
+  Proposed: 16
+  Deprecated: 5
   Implemented: 50
 facets:
   by_range:
@@ -44,9 +44,9 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 73
+      count: 81
       first_adr: '0300'
-      last_adr: '0363'
+      last_adr: '0375'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -59,13 +59,13 @@ facets:
       count: 10
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 25
+      count: 26
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 5
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 41
+      count: 42
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 21
@@ -83,16 +83,16 @@ facets:
       count: 25
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 127
+      count: 131
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
     - concern: resilience
       path: docs/adr/index/by-concern/resilience.yaml
-      count: 5
+      count: 6
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 30
+      count: 31
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 6
@@ -106,7 +106,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 336
+      count: 337
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -114,11 +114,11 @@ facets:
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 39
+      count: 36
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
-      count: 1
+      count: 4
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
@@ -126,14 +126,54 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 2
+      count: 9
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0364'
+  next_available_adr: '0376'
 latest_adrs:
+  - adr: '0375'
+    title: Certificate Validation And Concordance Enforcement
+    implementation_status: Implemented
+    concern: security
+    path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+  - adr: '0374'
+    title: Cross-Cutting Service Manifest
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0374-cross-cutting-service-manifest.md
+  - adr: '0373'
+    title: Service Registry and Derived Defaults
+    implementation_status: Proposed
+    concern: resilience
+    path: docs/adr/0373-service-registry-and-derived-defaults.md
+  - adr: '0372'
+    title: Data-Driven Playbook Composition
+    implementation_status: Proposed
+    concern: automation
+    path: docs/adr/0372-data-driven-playbook-composition.md
+  - adr: '0371'
+    title: Parameterized Service Verification Tasks
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0371-parameterized-verify-tasks.md
+  - adr: '0370'
+    title: Service Lifecycle Task Includes
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0370-service-lifecycle-task-includes.md
+  - adr: 0369
+    title: Python Validation Toolkit
+    implementation_status: Proposed
+    concern: ci-cd
+    path: docs/adr/0369-python-validation-toolkit.md
+  - adr: 0368
+    title: Docker Compose Jinja2 Macro Library
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0368-docker-compose-jinja2-macro-library.md
   - adr: '0363'
     title: Plane Agent Tools — Programmatic Task Management for Agents
     implementation_status: Implemented
@@ -146,47 +186,6 @@ latest_adrs:
     concern: security
     path: docs/adr/0362-agent-service-api-gateway-pattern.md
     implemented_on: '2026-04-06'
-  - adr: '0361'
-    title: Nomad OIDC Auth and Edge Publication
-    implementation_status: Partial
-    concern: security
-    path: docs/adr/0361-nomad-oidc-edge-publication.md
-  - adr: '0360'
-    title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
-    implementation_status: Accepted
-    concern: monitoring
-    path: docs/adr/0360-plane-as-agent-task-hq.md
-  - adr: '0360'
-    title: OpenBao TLS Cert Lifetime And Renewal Hardening
-    implementation_status: Implemented
-    concern: security
-    path: docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
-    implemented_on: '2026-04-05'
-  - adr: 0359
-    title: Declarative PostgreSQL Client Registry
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0359-declarative-postgres-client-registry.md
-  - adr: 0358
-    title: Platform Health Contract and Inter-Service Dependency SLO
-    implementation_status: Not Implemented
-    concern: networking
-    path: docs/adr/0358-platform-health-contract-and-dependency-slo.md
-  - adr: '0357'
-    title: Idempotent Workstream Apply Receipts
-    implementation_status: Not Implemented
-    concern: networking
-    path: docs/adr/0357-idempotent-workstream-apply-receipts.md
-  - adr: '0356'
-    title: LLM Inference Routing and Model Registry
-    implementation_status: Not Implemented
-    concern: networking
-    path: docs/adr/0356-llm-inference-routing-and-model-registry.md
-  - adr: '0355'
-    title: Apply-Phase Serialization via Resource-Group Semaphore
-    implementation_status: Not Implemented
-    concern: networking
-    path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

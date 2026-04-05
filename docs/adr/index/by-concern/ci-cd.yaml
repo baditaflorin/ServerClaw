@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-06'
 facet: concern
 concern: ci-cd
-total_adrs: 41
+total_adrs: 42
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -774,3 +774,17 @@ adrs:
     summary: A new file type integration.yaml is placed in
     filename: 0353-service-integration-contract-registry.md
     path: docs/adr/0353-service-integration-contract-registry.md
+  - adr: 0369
+    title: Python Validation Toolkit
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - python
+      - validation
+      - toolkit
+    summary: Create a shared validation toolkit module at scripts/validationtoolkit.py containing all canonical validation
+      functions. All 43+ catalog/registry scripts must i
+    filename: 0369-python-validation-toolkit.md
+    path: docs/adr/0369-python-validation-toolkit.md

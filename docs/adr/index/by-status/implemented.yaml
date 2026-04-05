@@ -10,7 +10,7 @@ generated: '2026-04-06'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 336
+total_adrs: 337
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6207,8 +6207,22 @@ adrs:
       - programmatic
       - task
       - management
-    summary: 'Five Plane tools, following the ADR 0362 gateway pattern:'
+    summary: 'Five Plane tools, following the ADR 0369 gateway pattern:'
     filename: 0363-plane-agent-tools.md
     path: docs/adr/0363-plane-agent-tools.md
     implemented_in_repo_version: 0.178.19
     implemented_on: '2026-04-06'
+  - adr: '0375'
+    title: Certificate Validation And Concordance Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - certificate
+      - validation
+      - concordance
+      - enforcement
+    summary: 'We will implement certificate validation and concordance enforcement that:'
+    filename: 0375-certificate-validation-and-concordance-enforcement.md
+    path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-06'
 facet: concern
 concern: security
-total_adrs: 30
+total_adrs: 31
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -481,8 +481,8 @@ adrs:
     implemented_on: '2026-04-03'
   - adr: 0348
     title: Per-Service LLM Context File (service.llm.yaml)
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -501,8 +501,8 @@ adrs:
     path: docs/adr/0348-per-service-llm-context-file.md
   - adr: '0352'
     title: Token-Budgeted Agent Onboarding Packs
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -574,3 +574,17 @@ adrs:
     path: docs/adr/0362-agent-service-api-gateway-pattern.md
     implemented_in_repo_version: 0.178.19
     implemented_on: '2026-04-06'
+  - adr: '0375'
+    title: Certificate Validation And Concordance Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - certificate
+      - validation
+      - concordance
+      - enforcement
+    summary: 'We will implement certificate validation and concordance enforcement that:'
+    filename: 0375-certificate-validation-and-concordance-enforcement.md
+    path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md

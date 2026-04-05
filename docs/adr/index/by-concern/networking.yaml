@@ -327,7 +327,7 @@ adrs:
     path: docs/adr/0347-agent-file-domain-locking.md
   - adr: 0349
     title: Agent Capability Manifest and Peer Discovery
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -385,7 +385,7 @@ adrs:
     path: docs/adr/0351-change-provenance-tagging.md
   - adr: '0354'
     title: Structured Agent Mutation Audit Log
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -422,8 +422,8 @@ adrs:
     path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
   - adr: '0356'
     title: LLM Inference Routing and Model Registry
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -461,7 +461,7 @@ adrs:
     path: docs/adr/0357-idempotent-workstream-apply-receipts.md
   - adr: 0358
     title: Platform Health Contract and Inter-Service Dependency SLO
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking

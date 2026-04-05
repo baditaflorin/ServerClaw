@@ -10,7 +10,7 @@ generated: '2026-04-06'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 39
+total_adrs: 36
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -484,29 +484,9 @@ adrs:
     summary: Every mutable infrastructure file belongs to exactly one file domain. A
     filename: 0347-agent-file-domain-locking.md
     path: docs/adr/0347-agent-file-domain-locking.md
-  - adr: 0348
-    title: Per-Service LLM Context File (service.llm.yaml)
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-05'
-    concern: security
-    keywords:
-      - llm
-      - agent-discovery
-      - token-budget
-      - documentation
-      - service-catalog
-      - dry
-      - per-service
-      - context
-      - file
-      - service
-    summary: Each Ansible role that deploys a service ships a service.llm.yaml file
-    filename: 0348-per-service-llm-context-file.md
-    path: docs/adr/0348-per-service-llm-context-file.md
   - adr: 0349
     title: Agent Capability Manifest and Peer Discovery
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -562,24 +542,6 @@ adrs:
     summary: Every file rendered from a Jinja2 template or written by an operator tool must
     filename: 0351-change-provenance-tagging.md
     path: docs/adr/0351-change-provenance-tagging.md
-  - adr: '0352'
-    title: Token-Budgeted Agent Onboarding Packs
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-05'
-    concern: security
-    keywords:
-      - llm
-      - token-budget
-      - agent-discovery
-      - onboarding
-      - performance
-      - token-budgeted
-      - agent
-      - packs
-    summary: 'Three categories of pack, each with a hard token budget:'
-    filename: 0352-token-budgeted-agent-onboarding-packs.md
-    path: docs/adr/0352-token-budgeted-agent-onboarding-packs.md
   - adr: '0353'
     title: Service Integration Contract Registry
     status: Accepted
@@ -601,7 +563,7 @@ adrs:
     path: docs/adr/0353-service-integration-contract-registry.md
   - adr: '0354'
     title: Structured Agent Mutation Audit Log
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -636,26 +598,6 @@ adrs:
     summary: A resource group is a named set of resources that share a single
     filename: 0355-apply-phase-serialization-via-semaphore.md
     path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
-  - adr: '0356'
-    title: LLM Inference Routing and Model Registry
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-05'
-    concern: networking
-    keywords:
-      - llm
-      - ollama
-      - open-webui
-      - ai
-      - token-budget
-      - inference
-      - agent-coordination
-      - routing
-      - model
-      - registry
-    summary: 'config/llm-model-registry.yaml declares all permitted models and their properties:'
-    filename: 0356-llm-inference-routing-and-model-registry.md
-    path: docs/adr/0356-llm-inference-routing-and-model-registry.md
   - adr: '0357'
     title: Idempotent Workstream Apply Receipts
     status: Accepted
@@ -677,7 +619,7 @@ adrs:
     path: docs/adr/0357-idempotent-workstream-apply-receipts.md
   - adr: 0358
     title: Platform Health Contract and Inter-Service Dependency SLO
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking

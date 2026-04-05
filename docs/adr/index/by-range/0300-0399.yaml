@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 73
+total_adrs: 81
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1145,8 +1145,8 @@ adrs:
     implemented_in_repo_version: 0.179.0
   - adr: 0348
     title: Per-Service LLM Context File (service.llm.yaml)
-    status: Superseded
-    implementation_status: Will Not Implement
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1165,7 +1165,7 @@ adrs:
     path: docs/adr/0348-per-service-llm-context-file.md
   - adr: 0349
     title: Agent Capability Manifest and Peer Discovery
-    status: Deferred
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1223,8 +1223,8 @@ adrs:
     path: docs/adr/0351-change-provenance-tagging.md
   - adr: '0352'
     title: Token-Budgeted Agent Onboarding Packs
-    status: Superseded
-    implementation_status: Will Not Implement
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1260,7 +1260,7 @@ adrs:
     path: docs/adr/0353-service-integration-contract-registry.md
   - adr: '0354'
     title: Structured Agent Mutation Audit Log
-    status: Deferred
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1297,8 +1297,8 @@ adrs:
     path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
   - adr: '0356'
     title: LLM Inference Routing and Model Registry
-    status: Superseded
-    implementation_status: Will Not Implement
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1336,7 +1336,7 @@ adrs:
     path: docs/adr/0357-idempotent-workstream-apply-receipts.md
   - adr: 0358
     title: Platform Health Contract and Inter-Service Dependency SLO
-    status: Deferred
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1463,8 +1463,125 @@ adrs:
       - programmatic
       - task
       - management
-    summary: 'Five Plane tools, following the ADR 0362 gateway pattern:'
+    summary: 'Five Plane tools, following the ADR 0369 gateway pattern:'
     filename: 0363-plane-agent-tools.md
     path: docs/adr/0363-plane-agent-tools.md
     implemented_in_repo_version: 0.178.19
     implemented_on: '2026-04-06'
+  - adr: 0368
+    title: Docker Compose Jinja2 Macro Library
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - docker
+      - compose
+      - jinja2
+      - macro
+      - library
+    summary: 'Create a shared Jinja2 macro library at collections/ansiblecollections/lv3/platform/roles/common/templates/composemacros.j2.
+      Each compose template imports from '
+    filename: 0368-docker-compose-jinja2-macro-library.md
+    path: docs/adr/0368-docker-compose-jinja2-macro-library.md
+  - adr: 0369
+    title: Python Validation Toolkit
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - python
+      - validation
+      - toolkit
+    summary: Create a shared validation toolkit module at scripts/validationtoolkit.py containing all canonical validation
+      functions. All 43+ catalog/registry scripts must i
+    filename: 0369-python-validation-toolkit.md
+    path: docs/adr/0369-python-validation-toolkit.md
+  - adr: '0370'
+    title: Service Lifecycle Task Includes
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - service
+      - lifecycle
+      - task
+      - includes
+    summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
+      Runtime roles include them with includerole / in
+    filename: 0370-service-lifecycle-task-includes.md
+    path: docs/adr/0370-service-lifecycle-task-includes.md
+  - adr: '0371'
+    title: Parameterized Service Verification Tasks
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - parameterized
+      - service
+      - verification
+      - tasks
+    summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
+      parameters.
+    filename: 0371-parameterized-verify-tasks.md
+    path: docs/adr/0371-parameterized-verify-tasks.md
+  - adr: '0372'
+    title: Data-Driven Playbook Composition
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: automation
+    keywords:
+      - data-driven
+      - playbook
+      - composition
+    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
+      that drives playbook composition.
+    filename: 0372-data-driven-playbook-composition.md
+    path: docs/adr/0372-data-driven-playbook-composition.md
+  - adr: '0373'
+    title: Service Registry and Derived Defaults
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - service
+      - registry
+      - derived
+      - defaults
+    summary: 'Create a platform service registry in inventory/groupvars/platformservices.yml that declares each service''s
+      identity and metadata. A shared Ansible vars plugin '
+    filename: 0373-service-registry-and-derived-defaults.md
+    path: docs/adr/0373-service-registry-and-derived-defaults.md
+  - adr: '0374'
+    title: Cross-Cutting Service Manifest
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - cross-cutting
+      - service
+      - manifest
+    summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
+      what it needs from DNS, nginx, TLS, and SSO — in '
+    filename: 0374-cross-cutting-service-manifest.md
+    path: docs/adr/0374-cross-cutting-service-manifest.md
+  - adr: '0375'
+    title: Certificate Validation And Concordance Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - certificate
+      - validation
+      - concordance
+      - enforcement
+    summary: 'We will implement certificate validation and concordance enforcement that:'
+    filename: 0375-certificate-validation-and-concordance-enforcement.md
+    path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
