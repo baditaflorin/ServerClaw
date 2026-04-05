@@ -112,6 +112,7 @@ ownership_manifest:
     - docs/adr/index/by-status/implemented.yaml
     - docs/adr/index/by-status/not-implemented.yaml
     - docs/adr/index/by-status/partial.yaml
+    - docs/adr/index/by-status/proposed.yaml
     mode: shared_contract
     contract: adr-index-v1
   - id: parallel_adr_sync_surfaces
@@ -137,4 +138,37 @@ ownership_manifest:
     - playbooks/services/runtime-comms-pool.yml
     mode: shared_contract
     contract: topology-v1
+  - id: gate_fix_ansible_lint
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/postgres_client/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+    mode: exclusive
+  - id: gate_fix_public_entrypoints
+    paths:
+    - AGENTS.md
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: gate_fix_release_notes
+    paths:
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/index/2026.md
+    - docs/release-notes/index/README.md
+    - README.md
+    - versions/stack.yaml
+    mode: shared_contract
+    contract: release-management-v1
+  - id: gate_fix_skills
+    paths:
+    - config/serverclaw/skills/shared/human-review-queue/SKILL.md
+    mode: exclusive
+  - id: gate_fix_generated_config
+    paths:
+    - config/prometheus/file_sd/https_tls_targets.yml
+    - config/subdomain-exposure-registry.json
+    - config/subdomain-catalog.json
+    - docs/status/history/merged-workstreams.md
+    - build/platform-manifest.json
+    mode: shared_contract
+    contract: discovery-artifacts-v1
 plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b

@@ -1976,6 +1976,7 @@
       until: keycloak_langfuse_client_reconcile is succeeded
     - name: Ensure the Dify OAuth client exists
       community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_dify_client_id }}"
         name: Dify

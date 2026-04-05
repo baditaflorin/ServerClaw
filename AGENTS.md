@@ -102,7 +102,7 @@ New agent? Read these files in order - all six take under 2 minutes:
 
 ## Plane Task Board Protocol (ADR 0360)
 
-The platform task board (see `config/plane/` for connection details) is the **Agent Work HQ**. Every non-trivial agent session gets a
+The **Plane task board** (configured in `.local/plane/`) is the **Agent Work HQ**. Every non-trivial agent session gets a
 Plane issue in the **AW** project. This applies to all agents: Claude, Codex,
 GPT, Gemini, or any automated script that writes workstream YAML files.
 
@@ -141,7 +141,7 @@ python scripts/sync_plane_agent_issues.py --workstream <id> \
 
 ### Rules
 
-- **Git is authoritative.** Plane is a projection. If the task board is down,
+- **Git is authoritative.** Plane is a projection. If the Plane task board is down,
   continue without it — the workstream YAML is the fallback.
 - `plane_issue_id` is written into the workstream YAML after issue creation.
   Subsequent calls use it directly (no re-scan of the issue list).
@@ -229,9 +229,9 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 
 | Resource | Location |
 |---|---|
-| **UI** | Nomad UI — see `.config-locations.yaml` for the deployment URL |
-| **API proxy** | Tailscale proxy — see `.config-locations.yaml` (requires management token) |
-| **Server** | `monitoring-lv3` (Nomad agent on the monitoring VM) |
+| **UI** | Nomad scheduler web UI (OIDC login via Keycloak) |
+| **API proxy** | Tailscale mesh management proxy (requires management token) |
+| **Server** | monitoring-lv3 (see inventory for host details) |
 | **Clients** | docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, runtime-control-lv3, docker-build-lv3 |
 | **CLI wrapper** | `/usr/local/bin/lv3-nomad` on all cluster nodes (auto-loads token) |
 | **Playbook** | `playbooks/nomad.yml` |

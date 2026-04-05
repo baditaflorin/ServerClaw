@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-06'
 facet: concern
 concern: documentation
-total_adrs: 20
+total_adrs: 21
 adrs:
   - adr: '0074'
     title: Platform Operations Portal
@@ -393,3 +393,21 @@ adrs:
     filename: 0338-public-documentation-tiers-and-private-history-boundaries.md
     path: docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md
     implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: '— Repowise: local semantic code search over the git repo'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: documentation
+    keywords:
+      - repowise
+      - local
+      - semantic
+      - code
+      - search
+      - over
+      - git
+      - repo
+    summary: 'Deploy repowise — a local semantic code search service — using:'
+    filename: 0346-repowise-semantic-search.md
+    path: docs/adr/0346-repowise-semantic-search.md

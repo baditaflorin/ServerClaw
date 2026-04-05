@@ -46,7 +46,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.18` |
+| Repository version | `0.178.19` |
 | Platform version | `0.131.0` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -60,15 +60,15 @@ rewriting one operator's workstation paths.
 | Running guest count | 10 |
 | Template VM present | `true` |
 | Declared services | 72 |
-| Publicly published services | 45 |
+| Publicly published services | 46 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 36 |
+| `edge-published` | 37 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
-| `private-only` | 31 |
+| `private-only` | 30 |
 
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
@@ -173,7 +173,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.18` |
+| Repository version | `0.178.19` |
 | Platform version | `0.131.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -199,7 +199,7 @@ Showing 25 of 299 merged or live-applied workstreams. Full history: [merged work
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
-| `0328` | Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse | `merged` | [0328-ops-portal.md](docs/adr/0328-ops-portal.md) |
+| `0328` | Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse | `merged` | [0093-interactive-ops-portal.md](docs/adr/0093-interactive-ops-portal.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
