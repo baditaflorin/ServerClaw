@@ -883,6 +883,9 @@
     openbao_unseal_context: bootstrap or restart recovery
     openbao_unseal_init_payload: "{{ openbao_init_payload }}"
 
+- name: Deploy the OpenBao unseal watcher so container restarts are handled automatically
+  ansible.builtin.include_tasks: setup_unseal_watcher.yml
+
 - name: Wait for OpenBao to become the active node
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"

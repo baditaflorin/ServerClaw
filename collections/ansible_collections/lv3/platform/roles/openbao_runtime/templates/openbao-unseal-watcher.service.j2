@@ -1,0 +1,17 @@
+[Unit]
+Description=OpenBao container restart unseal watcher
+Documentation=https://openbao.org/docs/concepts/seal/
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStart={{ openbao_unseal_watcher_script_path }}
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier={{ openbao_unseal_watcher_service_name }}
+
+[Install]
+WantedBy=multi-user.target

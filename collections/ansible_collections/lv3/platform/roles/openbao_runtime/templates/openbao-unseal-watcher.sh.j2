@@ -1,0 +1,33 @@
+#!/bin/bash
+# Purpose: Watch for lv3-openbao container start events and submit unseal keys immediately on each restart.
+# Use case: Runs as a persistent systemd service so OpenBao is unsealed automatically after any container
+#           restart without requiring a full VM reboot or manual operator intervention.
+# Dependencies: ADR 0165, the openbao_runtime role, and the repo-managed init payload.
+set -euo pipefail
+
+BAO_ADDR="http://127.0.0.1:{{ openbao_http_port }}"
+CONTAINER="{{ openbao_container_name }}"
+START_DELAY="{{ openbao_unseal_watcher_start_delay_seconds }}"
+
+_unseal() {
+  local status
+  status="$(curl -sf "${BAO_ADDR}/v1/sys/seal-status" \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)["sealed"])' 2>/dev/null || echo 'unknown')"
+  if [ "$status" = "True" ]; then
+{% for key in openbao_init_payload.keys_base64[:openbao_init_key_threshold] %}
+    docker exec "${CONTAINER}" bao operator unseal -address="${BAO_ADDR}" '{{ key }}' >/dev/null 2>&1 || true
+{% endfor %}
+  fi
+}
+
+# Attempt unseal immediately in case we started while OpenBao was already sealed.
+_unseal
+
+# Stream container start events and unseal on each one.
+docker events \
+  --filter "container=${CONTAINER}" \
+  --filter "event=start" \
+  --format 'start' | while read -r _event; do
+  sleep "${START_DELAY}"
+  _unseal
+done

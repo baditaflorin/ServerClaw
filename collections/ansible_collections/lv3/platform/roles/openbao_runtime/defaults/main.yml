@@ -60,6 +60,10 @@ openbao_tls_renewal_timer_path: "/etc/systemd/system/{{ openbao_tls_renewal_time
 openbao_tls_renewal_on_calendar: "*:0/15"
 openbao_tls_renewal_randomized_delay_seconds: 60
 openbao_tls_reload_command: "docker compose --file {{ openbao_compose_file }} restart openbao"
+openbao_unseal_watcher_service_name: lv3-openbao-unseal-watcher
+openbao_unseal_watcher_script_path: "{{ openbao_site_dir }}/unseal-watcher.sh"
+openbao_unseal_watcher_service_path: "/etc/systemd/system/{{ openbao_unseal_watcher_service_name }}.service"
+openbao_unseal_watcher_start_delay_seconds: 5
 openbao_runtime_chain_recheck_retries: 30
 openbao_runtime_chain_recheck_delay_seconds: 2
 openbao_runtime_post_active_settle_seconds: 60

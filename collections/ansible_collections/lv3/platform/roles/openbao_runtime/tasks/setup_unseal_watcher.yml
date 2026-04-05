@@ -1,0 +1,45 @@
+# Purpose: Deploy and enable a persistent systemd watcher that unseals OpenBao whenever its container restarts.
+# Use case: Replaces the oneshot boot-time unseal service with an event-driven watcher that reacts to each
+#           container start event so OpenBao is never left sealed after a mid-session container restart.
+# Inputs: openbao_init_payload (must already be set as a fact), openbao_init_key_threshold, site dir, and port vars.
+# Outputs: An enabled systemd service that watches Docker events and submits unseal keys on each container start.
+# Idempotency: Fully idempotent because all tasks check current state before changing it.
+# Dependencies: ADR 0165, the openbao_runtime role, and the repo-managed init payload.
+---
+- name: Render the OpenBao unseal watcher script
+  ansible.builtin.template:
+    src: openbao-unseal-watcher.sh.j2
+    dest: "{{ openbao_unseal_watcher_script_path }}"
+    owner: root
+    group: root
+    mode: "0700"
+  register: openbao_unseal_watcher_script
+  no_log: true
+
+- name: Render the OpenBao unseal watcher systemd unit
+  ansible.builtin.template:
+    src: openbao-unseal-watcher.service.j2
+    dest: "{{ openbao_unseal_watcher_service_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: openbao_unseal_watcher_unit
+
+- name: Reload systemd and restart the unseal watcher when inputs changed
+  ansible.builtin.systemd_service:
+    name: "{{ openbao_unseal_watcher_service_name }}"
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  when: openbao_unseal_watcher_script is changed or openbao_unseal_watcher_unit is changed
+
+- name: Ensure the OpenBao unseal watcher is enabled and running
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ openbao_unseal_watcher_service_name }}"
+    common_systemd_unit_enabled: true
+    common_systemd_unit_state: started
+    common_systemd_unit_daemon_reload: false
+    common_systemd_unit_expected_active_state: active
