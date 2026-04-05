@@ -31,8 +31,9 @@ We deploy Netdata as a parent-plus-children topology for real-time metrics.
 - service id: `realtime`
 - product: Netdata
 - parent host: `monitoring-lv3`
-- child agents: `proxmox_florin`, `nginx-lv3`, `docker-runtime-lv3`,
-  `postgres-lv3`
+- child agents: all hosts in `lv3_guests` + `proxmox_hosts` for the active
+  environment, excluding the monitoring parent — derived dynamically from
+  inventory groups (see ADR 0319). No hardcoded list is maintained.
 - parent listener: `http://10.10.10.40:19999`
 - public URL: `https://realtime.lv3.org`
 - publication model: shared NGINX edge plus the existing Keycloak-backed
