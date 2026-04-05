@@ -21,6 +21,34 @@ archive_summary:
   by_year:
     '2026': 301
 workstreams:
+- id: ws-0375-certificate-validation
+  adr: '0375'
+  title: Certificate Validation and Concordance Enforcement
+  status: ready
+  owner: platform-infrastructure
+  branch: claude/nervous-feistel
+  worktree_path: .claude/worktrees/nervous-feistel
+  doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+  depends_on:
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0273-public-endpoint-admission-control
+  conflicts_with: []
+  shared_surfaces:
+  - .githooks/pre-push
+  - scripts/certificate_validator.py
+  - playbooks/certificate-validation.yml
+  - playbooks/fix-edge-certificate.yml
+  notes: 'Implements ADR 0375: automated SSL certificate validation for all 53
+
+    edge-published domains. Fixes hostname mismatches on ci.lv3.org,
+
+    bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org,
+
+    ntfy.lv3.org. Adds pre-push gate, Uptime Kuma integration, and
+
+    automated remediation playbooks.
+
+    '
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
