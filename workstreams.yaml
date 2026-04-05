@@ -6,7 +6,7 @@ delivery_model:
   mode: parallel_workstreams
   branch_prefix: codex/
   allowed_extra_prefixes:
-  - claude/
+    - claude/
   workstream_doc_root: docs/workstreams
   registry_owner: main
 release_policy:
@@ -17,677 +17,972 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 301
+  total_workstreams: 289
   by_year:
-    '2026': 301
+    '2026': 289
 workstreams:
-- id: adr-0346-centralized-port-registry
-  adr: '0346'
-  title: "Centralized port registry \u2014 eliminate hardcoded platform port numbers"
-  status: ready
-  owner: claude
-  branch: claude/modest-northcutt
-  worktree_path: .claude/worktrees/modest-northcutt
-  doc: docs/workstreams/adr-0346-centralized-port-registry.md
-  depends_on:
-  - adr-0165-role-interface-contracts
-  - adr-0344-single-source-environment-topology
-  conflicts_with: []
-  shared_surfaces:
-  - inventory/host_vars/proxmox_florin.yml
-  - inventory/group_vars/platform.yml
-  - scripts/generate_platform_vars.py
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
+  - id: ws-0328-live-apply
+    adr: 0328
+    title: Implement size-budgeted root summaries and automatic rollover ledgers
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0328-live-apply
+    worktree_path: .worktrees/ws-0328-live-apply
+    doc: docs/workstreams/ws-0328-live-apply.md
+    depends_on:
+      - adr-0038-generated-status-documents-from-canonical-state
+      - adr-0081-deployment-changelog-generation
+      - adr-0167-agent-handoff-and-context-preservation
+      - adr-0174-integration-only-canonical-truth-assembly
+      - adr-0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers
+    conflicts_with: []
+    shared_surfaces:
       - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_0346_docs
-      paths:
-      - docs/adr/0346-centralized-port-registry.md
-      - docs/workstreams/adr-0346-centralized-port-registry.md
-      mode: exclusive
-    - id: platform_topology_contract
-      paths:
-      - inventory/group_vars/platform.yml
-      - scripts/generate_platform_vars.py
-      mode: shared_contract
-      contract: platform-topology-v1
-    - id: port_registry
-      paths:
-      - inventory/host_vars/proxmox_florin.yml
-      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/playbooks/secret-rotation.yml
-      mode: exclusive
-    - id: workstream_source
-      paths:
-      - workstreams/active/adr-0346-centralized-port-registry.yaml
-      mode: exclusive
-    - id: release_management
-      paths:
+      - docs/workstreams/ws-0328-live-apply.md
+      - docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/canonical-truth-assembly.md
+      - docs/runbooks/validate-repository-automation.md
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - docs/discovery/config-locations/versioning.yaml
+      - docs/discovery/repo-structure/documentation-and-history.yaml
+      - config/root-summary-budgets.yaml
+      - platform/root_summary.py
+      - scripts/generate_release_notes.py
+      - scripts/generate_status_docs.py
+      - scripts/release_manager.py
+      - scripts/validate_repo.sh
+      - Makefile
+      - tests/test_root_summary.py
+      - tests/test_generate_release_notes.py
+      - tests/test_generate_status_docs.py
       - README.md
-      - VERSION
       - changelog.md
-      - docs/release-notes/0.178.7.md
       - docs/release-notes/README.md
       - docs/release-notes/index/*.md
-      mode: shared_contract
-      contract: release-management-v1
-    - id: platform_truth_generation
-      paths:
+      - docs/status/history/*.md
+      - VERSION
+      - RELEASE.md
       - versions/stack.yaml
-      mode: shared_contract
-      contract: canonical-truth-v1
-    - id: adr_index_generation
-      paths:
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/onboarding/*.yaml
+      - receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-live-apply.json
+      - receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-03-ws-0328-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0328_workstream_docs
+          paths:
+            - docs/workstreams/ws-0328-live-apply.md
+            - docs/adr/0328-size-budgeted-root-summaries-and-automatic-rollover-ledgers.md
+            - docs/runbooks/canonical-truth-assembly.md
+            - docs/runbooks/validate-repository-automation.md
+          mode: exclusive
+        - id: ws0328_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: ws0328_root_summary_policy
+          paths:
+            - config/root-summary-budgets.yaml
+            - platform/root_summary.py
+          mode: exclusive
+        - id: ws0328_root_summary_generation
+          paths:
+            - scripts/generate_release_notes.py
+            - scripts/generate_status_docs.py
+            - scripts/release_manager.py
+            - scripts/validate_repo.sh
+          mode: exclusive
+        - id: ws0328_makefile_targets
+          paths:
+            - Makefile
+          mode: shared_contract
+          contract: root-summary-make-targets-v1
+        - id: ws0328_root_summary_tests
+          paths:
+            - tests/test_root_summary.py
+            - tests/test_generate_release_notes.py
+            - tests/test_generate_status_docs.py
+          mode: exclusive
+        - id: ws0328_repo_indexes
+          paths:
+            - .repo-structure.yaml
+            - .config-locations.yaml
+            - docs/discovery/config-locations/versioning.yaml
+            - docs/discovery/repo-structure/documentation-and-history.yaml
+            - build/onboarding/*.yaml
+          mode: exclusive
+        - id: ws0328_release_management_surfaces
+          paths:
+            - VERSION
+            - RELEASE.md
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/index/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: ws0328_generated_status_surfaces
+          paths:
+            - README.md
+            - docs/status/history/*.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: ws0328_canonical_truth
+          paths:
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: ws0328_live_apply_receipts
+          paths:
+            - receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-live-apply.json
+            - receipts/live-applies/2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-03-ws-0328-*
+          mode: exclusive
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0328 by enforcing explicit line budgets
+        for the root README, changelog, and release-note index, rolling older
+        release and status rows into generated archive ledgers, and teaching the
+        validation plus release automation to keep those bounded summaries
+        current
+      release_bump: patch
+      included_in_repo_version:
+      latest_receipts:
+        root_summary_rollover:
+          2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply
+  - id: ws-0327-live-apply
+    adr: '0327'
+    title: Live apply sectional agent discovery registries and generated
+      onboarding packs from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0327-live-apply
+    worktree_path: .worktrees/ws-0327-live-apply
+    doc: docs/workstreams/ws-0327-live-apply.md
+    depends_on:
+      - adr-0163-repository-structure-index-for-agent-discovery
+      - adr-0166-canonical-configuration-locations-registry
+      - adr-0168-automated-enforcement-of-agent-standards
+      - adr-0327-sectional-agent-discovery-registries-and-generated-onboarding-packs
+      - adr-0335-public-safe-agent-onboarding-entrypoints
+      - adr-0336-public-entrypoint-leakage-validation
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - workstreams/active/ws-0327-live-apply.yaml
+      - docs/workstreams/ws-0327-live-apply.md
+      - docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/discovery-registry-maintenance.md
+      - .gitignore
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      - docs/discovery/onboarding-packs.yaml
+      - docs/discovery/repo-structure/**
+      - docs/discovery/config-locations/**
+      - build/onboarding/**
+      - scripts/generate_discovery_artifacts.py
+      - scripts/label_studio_sync.py
+      - scripts/validate_public_entrypoints.py
+      - scripts/validate_repo.sh
+      - tests/test_generate_discovery_artifacts.py
+      - tests/test_label_studio_sync.py
+      - tests/test_validate_public_entrypoints.py
+      - tests/test_validate_repo_cache.py
+      - receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-live-apply.json
+      - receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-03-ws-0327-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: ws0327_discovery_docs
+          paths:
+            - docs/workstreams/ws-0327-live-apply.md
+            - docs/runbooks/discovery-registry-maintenance.md
+            - docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md
+          mode: exclusive
+        - id: ws0327_discovery_sources
+          paths:
+            - docs/discovery/onboarding-packs.yaml
+            - docs/discovery/repo-structure/**
+            - docs/discovery/config-locations/**
+          mode: exclusive
+        - id: ws0327_generated_discovery_entrypoints
+          paths:
+            - .gitignore
+            - .repo-structure.yaml
+            - .config-locations.yaml
+            - build/onboarding/**
+          mode: exclusive
+        - id: ws0327_generated_truth_artifacts
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: ws0327_canonical_truth
+          paths:
+            - README.md
+            - changelog.md
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: ws0327_discovery_tooling
+          paths:
+            - scripts/generate_discovery_artifacts.py
+            - scripts/label_studio_sync.py
+            - scripts/validate_public_entrypoints.py
+            - scripts/validate_repo.sh
+            - tests/test_generate_discovery_artifacts.py
+            - tests/test_label_studio_sync.py
+            - tests/test_validate_public_entrypoints.py
+            - tests/test_validate_repo_cache.py
+          mode: exclusive
+        - id: ws0327_live_apply_receipts
+          paths:
+            - receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-live-apply.json
+            - receipts/live-applies/2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-03-ws-0327-*
+          mode: exclusive
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0327 by splitting the root agent-discovery
+        registries into sectional source files, generating concise public-safe
+        root entrypoints, tracking generated onboarding packs under
+        build/onboarding, and validating the discovery artifacts plus public
+        entrypoints through the rebased exact-main automation gates
+      release_bump: patch
+      included_in_repo_version:
+      latest_receipts:
+        sectional_agent_discovery:
+          2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply
+  - id: ws-0325-live-apply
+    adr: '0325'
+    title: Live apply faceted ADR index shards and reservation windows from
+      latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0325-live-apply
+    worktree_path: .worktrees/ws-0325-live-apply
+    doc: docs/workstreams/ws-0325-live-apply.md
+    depends_on:
+      - adr-0164-adr-metadata-index
+      - adr-0167-agent-handoff-and-context-preservation
+      - adr-0168-automated-enforcement-of-agent-standards
+      - adr-0326-workstream-registry-shards-with-active-and-archive-assembly
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - workstreams/active/ws-0325-live-apply.yaml
+      - docs/workstreams/ws-0325-live-apply.md
+      - docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
       - docs/adr/.index.yaml
       - docs/adr/index/by-range/*.yaml
       - docs/adr/index/by-concern/*.yaml
       - docs/adr/index/by-status/*.yaml
-      mode: shared_contract
-      contract: adr-index-generator-v1
-    - id: service_capability_catalog
-      paths:
-      - config/service-capability-catalog.json
-      mode: exclusive
-    - id: generated_truth
-      paths:
+      - docs/adr/index/reservations.yaml
+      - docs/runbooks/adr-discovery-and-reservations.md
       - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/site-generated/architecture/dependency-graph.md
-      - receipts/ops-portal-snapshot.html
-      - config/subdomain-exposure-registry.json
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/*.yaml
+      - docs/discovery/config-locations/agent-discovery.yaml
+      - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+      - docs/discovery/repo-structure/documentation-and-history.yaml
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - scripts/adr_discovery.py
+      - scripts/generate_adr_index.py
+      - scripts/adr_query_tool.py
+      - scripts/generate_discovery_artifacts.py
+      - scripts/validate_repo.sh
+      - tests/test_generate_adr_index.py
+      - tests/test_adr_query_tool.py
+      - tests/test_generate_discovery_artifacts.py
+      - tests/test_validation_lanes.py
+      - README.md
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/index/*.md
+      - docs/status/history/*.md
+      - versions/stack.yaml
       - build/platform-manifest.json
-      mode: shared_contract
-      contract: latest-main-generated-truth-v1
-  ready_to_merge: true
-  live_applied: true
-- id: ws-0318-provision-operator-v2
-  adr: 0318
-  title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding
-    email'
-  status: ready_for_merge
-  owner: claude
-  branch: claude/provision-operator-v2
-  worktree_path: .worktrees/provision-v2-worktree
-  doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
-  depends_on:
-  - adr-0318-repeatable-operator-onboarding-with-cc-audit-trail
-  conflicts_with: []
-  shared_surfaces:
-  - scripts/provision_operator.py
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0318v2_provision_script
-      paths:
+      - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json
+      - receipts/live-applies/2026-04-04-adr-0325-adr-discovery-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-04-03-ws-0325-*
+      - receipts/live-applies/evidence/2026-04-04-ws-0325-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0325_workstream_source
+          paths:
+            - workstreams/active/ws-0325-live-apply.yaml
+          mode: exclusive
+        - id: ws0325_adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/index/by-range/*.yaml
+            - docs/adr/index/by-concern/*.yaml
+            - docs/adr/index/by-status/*.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v2
+        - id: ws0325_adr_reservations
+          paths:
+            - docs/adr/index/reservations.yaml
+          mode: exclusive
+        - id: ws0325_docs
+          paths:
+            - docs/workstreams/ws-0325-live-apply.md
+            - docs/adr/0325-faceted-adr-index-shards-and-reservation-windows.md
+            - docs/runbooks/adr-discovery-and-reservations.md
+          mode: exclusive
+        - id: ws0325_generated_truth
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - README.md
+            - docs/status/history/*.md
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: ws0325_repo_indexes
+          paths:
+            - .repo-structure.yaml
+            - .config-locations.yaml
+            - build/onboarding/*.yaml
+          mode: shared_contract
+          contract: agent-discovery-index-v1
+        - id: ws0325_discovery_sources
+          paths:
+            - docs/discovery/config-locations/agent-discovery.yaml
+            - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+            - docs/discovery/repo-structure/documentation-and-history.yaml
+          mode: shared_contract
+          contract: agent-discovery-index-v1
+        - id: ws0325_validation_contract
+          paths:
+            - config/validation-gate.json
+            - config/validation-lanes.yaml
+            - scripts/validate_repo.sh
+            - tests/test_validation_lanes.py
+          mode: shared_contract
+          contract: validation-gate-contract-v1
+        - id: ws0325_tooling
+          paths:
+            - scripts/adr_discovery.py
+            - scripts/generate_adr_index.py
+            - scripts/adr_query_tool.py
+            - scripts/generate_discovery_artifacts.py
+            - tests/test_generate_adr_index.py
+            - tests/test_adr_query_tool.py
+            - tests/test_generate_discovery_artifacts.py
+          mode: exclusive
+        - id: ws0325_release_management_surfaces
+          paths:
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/index/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: ws0325_canonical_truth
+          paths:
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: ws0325_live_apply_receipts
+          paths:
+            - receipts/live-applies/2026-04-03-adr-0325-adr-discovery-live-apply.json
+            - receipts/live-applies/2026-04-04-adr-0325-adr-discovery-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-04-03-ws-0325-*
+            - receipts/live-applies/evidence/2026-04-04-ws-0325-*
+          mode: exclusive
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0325 by replacing the monolithic ADR
+        metadata catalog with shard-backed discovery manifests, adding a
+        committed ADR reservation ledger, and validating reservation-aware query
+        and generator workflows from exact main
+      release_bump: patch
+      included_in_repo_version:
+      latest_receipts:
+        adr_discovery: 2026-04-04-adr-0325-adr-discovery-mainline-live-apply
+  - id: ws-0318-provision-operator-v2
+    adr: 0318
+    title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding
+      email'
+    status: ready_for_merge
+    owner: claude
+    branch: claude/provision-operator-v2
+    worktree_path: .worktrees/provision-v2-worktree
+    doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    depends_on:
+      - adr-0318-repeatable-operator-onboarding-with-cc-audit-trail
+    conflicts_with: []
+    shared_surfaces:
       - scripts/provision_operator.py
-      mode: exclusive
-    - id: ws0318v2_generated_diagrams
-      paths:
-      - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: ws0318v2-generated-diagrams-v1
-  ready_to_merge: true
-  live_applied: false
-- id: ws-0318-operator-onboarding-iac
-  adr: 0318
-  title: Repeatable operator onboarding with provision_operator.py and CC audit trail
-  status: ready_for_merge
-  owner: claude
-  branch: claude/adr-0318-operator-onboarding
-  worktree_path: .worktrees/onboard-worktree
-  doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
-  depends_on:
-  - adr-0108-operator-onboarding-and-offboarding
-  - adr-0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
-  - scripts/provision_operator.py
-  - config/operators.yaml
-  - docs/adr/.index.yaml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
       - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0318_adr_doc
-      paths:
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0318v2_provision_script
+          paths:
+            - scripts/provision_operator.py
+          mode: exclusive
+        - id: ws0318v2_generated_diagrams
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: ws0318v2-generated-diagrams-v1
+    ready_to_merge: true
+    live_applied: false
+  - id: ws-0318-operator-onboarding-iac
+    adr: 0318
+    title: Repeatable operator onboarding with provision_operator.py and CC
+      audit trail
+    status: ready_for_merge
+    owner: claude
+    branch: claude/adr-0318-operator-onboarding
+    worktree_path: .worktrees/onboard-worktree
+    doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+    depends_on:
+      - adr-0108-operator-onboarding-and-offboarding
+      - adr-0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy
+    conflicts_with: []
+    shared_surfaces:
       - docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
-      mode: exclusive
-    - id: ws0318_provision_script
-      paths:
       - scripts/provision_operator.py
-      mode: shared_contract
-      contract: provision-operator-shared-v1
-    - id: ws0318_operators_yaml
-      paths:
       - config/operators.yaml
-      mode: shared_contract
-      contract: ws0318-operators-yaml-v1
-    - id: ws0318_adr_index
-      paths:
       - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: ws0318-adr-index-v1
-    - id: ws0318_generated_artifacts
-      paths:
-      - README.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: ws0318-generated-artifacts-v1
-  ready_to_merge: true
-  live_applied: false
-- id: ws-0317-keycloak-provisioning-adr
-  adr: '0317'
-  title: Keycloak direct-API operator provisioning via SSH proxy
-  status: ready_for_merge
-  owner: claude
-  branch: claude/adr-0317-keycloak-provisioning
-  worktree_path: .worktrees/adr-0317-worktree
-  doc: docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
-  depends_on:
-  - adr-0307-temporary-guest-operator-accounts-with-72-hour-expiry
-  - adr-0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
-  - docs/adr/.index.yaml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
       - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0317_adr_doc
-      paths:
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0318_adr_doc
+          paths:
+            - docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
+          mode: exclusive
+        - id: ws0318_provision_script
+          paths:
+            - scripts/provision_operator.py
+          mode: shared_contract
+          contract: provision-operator-shared-v1
+        - id: ws0318_operators_yaml
+          paths:
+            - config/operators.yaml
+          mode: shared_contract
+          contract: ws0318-operators-yaml-v1
+        - id: ws0318_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: ws0318-adr-index-v1
+        - id: ws0318_generated_artifacts
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: ws0318-generated-artifacts-v1
+    ready_to_merge: true
+    live_applied: false
+  - id: ws-0317-keycloak-provisioning-adr
+    adr: '0317'
+    title: Keycloak direct-API operator provisioning via SSH proxy
+    status: ready_for_merge
+    owner: claude
+    branch: claude/adr-0317-keycloak-provisioning
+    worktree_path: .worktrees/adr-0317-worktree
+    doc:
+      docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+    depends_on:
+      - adr-0307-temporary-guest-operator-accounts-with-72-hour-expiry
+      - adr-0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning
+    conflicts_with: []
+    shared_surfaces:
       - docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
-      mode: shared_contract
-      contract: adr-0317-doc-v1
-    - id: ws0317_adr_index
-      paths:
       - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: ws0317-adr-index-v1
-    - id: ws0317_generated_artifacts
-      paths:
-      - README.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: ws0317-generated-artifacts-v1
-  ready_to_merge: true
-  live_applied: false
-- id: ws-0308-live-apply
-  adr: 0308
-  title: Live apply ADR 0308 operator provisioning execution surface and connectivity
-    contracts from latest origin/main
-  status: ready_for_merge
-  owner: codex
-  branch: codex/ws-0308-live-apply
-  worktree_path: .worktrees/ws-0308-live-apply
-  doc: docs/workstreams/ws-0308-live-apply.md
-  depends_on:
-  - adr-0044-windmill-for-agent-and-operator-workflows
-  - adr-0056-keycloak-for-operator-and-agent-sso
-  - adr-0108-operator-onboarding-and-offboarding
-  conflicts_with:
-  - ws-0307-0308-operator-adrs
-  shared_surfaces:
-  - workstreams.yaml
-  - docs/workstreams/ws-0308-live-apply.md
-  - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-  - docs/runbooks/operator-onboarding.md
-  - docs/adr/.index.yaml
-  - README.md
-  - RELEASE.md
-  - VERSION
-  - changelog.md
-  - docs/release-notes/README.md
-  - docs/release-notes/*.md
-  - versions/stack.yaml
-  - build/platform-manifest.json
-  - docs/diagrams/agent-coordination-map.excalidraw
-  - config/workflow-catalog.json
-  - config/windmill/scripts/gate-status.py
-  - scripts/gate_status.py
-  - scripts/preflight_controller_local.py
-  - scripts/workflow_catalog.py
-  - platform/repo.py
-  - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
-  - tests/test_preflight_controller_local.py
-  - tests/test_controller_automation_toolkit.py
-  - tests/test_common_docker_bridge_chains_helper.py
-  - tests/test_docker_runtime_role.py
-  - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
-  - receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json
-  - receipts/live-applies/evidence/2026-04-02-ws-0308-*
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
       - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0308_operator_surface_docs
-      paths:
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0317_adr_doc
+          paths:
+            - docs/adr/0317-keycloak-direct-api-operator-provisioning-via-ssh-proxy.md
+          mode: shared_contract
+          contract: adr-0317-doc-v1
+        - id: ws0317_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: ws0317-adr-index-v1
+        - id: ws0317_generated_artifacts
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: ws0317-generated-artifacts-v1
+    ready_to_merge: true
+    live_applied: false
+  - id: ws-0308-live-apply
+    adr: 0308
+    title: Live apply ADR 0308 operator provisioning execution surface and
+      connectivity contracts from latest origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0308-live-apply
+    worktree_path: .worktrees/ws-0308-live-apply
+    doc: docs/workstreams/ws-0308-live-apply.md
+    depends_on:
+      - adr-0044-windmill-for-agent-and-operator-workflows
+      - adr-0056-keycloak-for-operator-and-agent-sso
+      - adr-0108-operator-onboarding-and-offboarding
+    conflicts_with:
+      - ws-0307-0308-operator-adrs
+    shared_surfaces:
+      - workstreams.yaml
       - docs/workstreams/ws-0308-live-apply.md
-      mode: exclusive
-    - id: ws0308_operator_onboarding_runbook_contract
-      paths:
+      - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
       - docs/runbooks/operator-onboarding.md
-      mode: shared_contract
-      contract: operator-onboarding-runbook-v1
-    - id: release_management_surfaces
-      paths:
+      - docs/adr/.index.yaml
+      - README.md
       - RELEASE.md
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
       - docs/release-notes/*.md
-      mode: shared_contract
-      contract: release-management-v1
-    - id: platform_truth_generation
-      paths:
       - versions/stack.yaml
       - build/platform-manifest.json
-      mode: shared_contract
-      contract: canonical-truth-v1
-    - id: ws0308_generated_truth_artifacts
-      paths:
-      - README.md
       - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: latest-main-generated-truth-v1
-    - id: ws0308_0308_execution_surface_contract
-      paths:
-      - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-      mode: shared_contract
-      contract: adr-0308-execution-surface-v1
-    - id: ws0308_preflight_contract
-      paths:
       - config/workflow-catalog.json
-      - scripts/preflight_controller_local.py
-      - scripts/workflow_catalog.py
-      - tests/test_preflight_controller_local.py
-      mode: shared_contract
-      contract: ws0308-preflight-catalog-v1
-    - id: ws0308_windmill_gate_contract
-      paths:
       - config/windmill/scripts/gate-status.py
       - scripts/gate_status.py
-      mode: shared_contract
-      contract: validation-gate-status-v1
-    - id: ws0308_controller_repo_path
-      paths:
+      - scripts/preflight_controller_local.py
+      - scripts/workflow_catalog.py
       - platform/repo.py
-      - tests/test_controller_automation_toolkit.py
-      mode: shared_contract
-      contract: ws0308-controller-repo-path-v1
-    - id: ws0308_exact_main_runtime_guard
-      paths:
       - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - tests/test_preflight_controller_local.py
+      - tests/test_controller_automation_toolkit.py
       - tests/test_common_docker_bridge_chains_helper.py
       - tests/test_docker_runtime_role.py
       - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
-      mode: shared_contract
-      contract: ws0308-docker-runtime-guard-v1
-    - id: ws0308_adr_index
-      paths:
-      - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: ws0308-adr-index-v1
-    - id: ws0308_live_apply_receipts
-      paths:
       - receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json
       - receipts/live-applies/evidence/2026-04-02-ws-0308-*
-      mode: exclusive
-  blockers: []
-  ready_to_merge: true
-  live_applied: true
-  canonical_truth:
-    changelog_entry: implements ADR 0308 by documenting the verified operator provisioning
-      execution surface, making operator-onboard preflight fail closed on dependency
-      outages, repairing the Windmill gate-status and worktree checkout paths, and
-      re-verifying the latest exact-main Windmill plus controller-local workflows
-    release_bump: patch
-    included_in_repo_version: 0.177.138
-    latest_receipts:
-      operator_provisioning_connectivity: 2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply
-- id: ws-0307-0308-operator-adrs
-  adr: '0307'
-  title: Temporary guest operator accounts and LLM agent execution surface contracts
-  status: ready_for_merge
-  owner: claude
-  branch: claude/focused-chaum
-  worktree_path: .claude/worktrees/focused-chaum
-  doc: docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
-  depends_on:
-  - adr-0108-operator-onboarding-and-offboarding
-  conflicts_with: []
-  shared_surfaces:
-  - config/operators.yaml
-  - docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
-  - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-  - docs/adr/.index.yaml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0307_operator_config
-      paths:
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0308_operator_surface_docs
+          paths:
+            - docs/workstreams/ws-0308-live-apply.md
+          mode: exclusive
+        - id: ws0308_operator_onboarding_runbook_contract
+          paths:
+            - docs/runbooks/operator-onboarding.md
+          mode: shared_contract
+          contract: operator-onboarding-runbook-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: ws0308_generated_truth_artifacts
+          paths:
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: ws0308_0308_execution_surface_contract
+          paths:
+            - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+          mode: shared_contract
+          contract: adr-0308-execution-surface-v1
+        - id: ws0308_preflight_contract
+          paths:
+            - config/workflow-catalog.json
+            - scripts/preflight_controller_local.py
+            - scripts/workflow_catalog.py
+            - tests/test_preflight_controller_local.py
+          mode: shared_contract
+          contract: ws0308-preflight-catalog-v1
+        - id: ws0308_windmill_gate_contract
+          paths:
+            - config/windmill/scripts/gate-status.py
+            - scripts/gate_status.py
+          mode: shared_contract
+          contract: validation-gate-status-v1
+        - id: ws0308_controller_repo_path
+          paths:
+            - platform/repo.py
+            - tests/test_controller_automation_toolkit.py
+          mode: shared_contract
+          contract: ws0308-controller-repo-path-v1
+        - id: ws0308_exact_main_runtime_guard
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - tests/test_common_docker_bridge_chains_helper.py
+            - tests/test_docker_runtime_role.py
+            - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+          mode: shared_contract
+          contract: ws0308-docker-runtime-guard-v1
+        - id: ws0308_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: ws0308-adr-index-v1
+        - id: ws0308_live_apply_receipts
+          paths:
+            - receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json
+            - receipts/live-applies/evidence/2026-04-02-ws-0308-*
+          mode: exclusive
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0308 by documenting the verified operator
+        provisioning execution surface, making operator-onboard preflight fail
+        closed on dependency outages, repairing the Windmill gate-status and
+        worktree checkout paths, and re-verifying the latest exact-main Windmill
+        plus controller-local workflows
+      release_bump: patch
+      included_in_repo_version: 0.177.138
+      latest_receipts:
+        operator_provisioning_connectivity:
+          2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply
+  - id: ws-0307-0308-operator-adrs
+    adr: '0307'
+    title: Temporary guest operator accounts and LLM agent execution surface
+      contracts
+    status: ready_for_merge
+    owner: claude
+    branch: claude/focused-chaum
+    worktree_path: .claude/worktrees/focused-chaum
+    doc: docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+    depends_on:
+      - adr-0108-operator-onboarding-and-offboarding
+    conflicts_with: []
+    shared_surfaces:
       - config/operators.yaml
-      mode: exclusive
-    - id: ws0307_adr_docs
-      paths:
       - docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
-      - platform/interface_contracts.py
-      mode: exclusive
-    - id: ws0307_0308_execution_surface_contract
-      paths:
       - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
-      mode: shared_contract
-      contract: adr-0308-execution-surface-v1
-    - id: ws0307_adr_index
-      paths:
       - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: ws0307-adr-index-v1
-    - id: ws0307_rebased_mainline_surfaces
-      paths:
-      - README.md
-      - build/platform-manifest.json
-      - versions/stack.yaml
-      - scripts/gate_status.py
-      - config/windmill/scripts/gate-status.py
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/runbooks/security-posture-reporting.md
-      - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
-      - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-      - tests/test_compose_runtime_secret_injection.py
-      - tests/test_openbao_compose_env_helper.py
-      - tests/test_validation_gate.py
-      - tests/test_windmill_operator_admin_app.py
-      mode: shared_contract
-      contract: ws0307-rebased-mainline-v1
-  ready_to_merge: true
-  live_applied: true
-  canonical_truth:
-    changelog_entry: integrates ADR 0305 into main by re-verifying the latest realistic
-      origin/main exact-main smoke and load paths for Keycloak and OpenFGA, preserving
-      truthful k6 receipts and bounded notification warnings while recording the remaining
-      live Keycloak load-test failure
-    release_bump: patch
-    included_in_repo_version: 0.177.120
-    latest_receipts:
-      k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
-- id: ws-0286-0291-vikunja-sftpgo-live-apply
-  adr: 0286
-  title: Live apply Vikunja task management and SFTPGo managed file transfer
-  status: ready_for_merge
-  owner: claude
-  branch: claude/push-all-pending
-  worktree_path: .worktrees/push-all-worktree
-  doc: docs/adr/0286-vikunja-as-the-task-and-project-management-rest-api.md
-  depends_on:
-  - adr-0021-platform-service-inventory
-  - adr-0063-ansible-as-the-configuration-management-and-deployment-tool
-  conflicts_with: []
-  shared_surfaces:
-  - collections/ansible_collections/lv3/platform/roles/vikunja_postgres/
-  - collections/ansible_collections/lv3/platform/roles/vikunja_runtime/
-  - collections/ansible_collections/lv3/platform/roles/sftpgo_postgres/
-  - collections/ansible_collections/lv3/platform/roles/sftpgo_runtime/
-  - collections/ansible_collections/lv3/platform/playbooks/vikunja.yml
-  - playbooks/vikunja.yml
-  - playbooks/services/vikunja.yml
-  - playbooks/sftpgo.yml
-  - playbooks/services/sftpgo.yml
-  - scripts/vikunja_sync.py
-  - scripts/vikunja_tool.py
-  - scripts/sftpgo_bootstrap.py
-  - platform/ansible/vikunja.py
-  - config/windmill/scripts/vikunja-alert-tasks.py
-  - tests/test_sftpgo_playbook.py
-  - tests/test_sftpgo_postgres_role.py
-  - tests/test_sftpgo_runtime_role.py
-  - workstreams.yaml
-  - docs/adr/.index.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
       - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0286_vikunja_impl
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/vikunja_postgres/**
-      - collections/ansible_collections/lv3/platform/roles/vikunja_runtime/**
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0307_operator_config
+          paths:
+            - config/operators.yaml
+          mode: exclusive
+        - id: ws0307_adr_docs
+          paths:
+            - docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
+            - platform/interface_contracts.py
+          mode: exclusive
+        - id: ws0307_0308_execution_surface_contract
+          paths:
+            - docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md
+          mode: shared_contract
+          contract: adr-0308-execution-surface-v1
+        - id: ws0307_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: ws0307-adr-index-v1
+        - id: ws0307_rebased_mainline_surfaces
+          paths:
+            - README.md
+            - build/platform-manifest.json
+            - versions/stack.yaml
+            - scripts/gate_status.py
+            - config/windmill/scripts/gate-status.py
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/runbooks/security-posture-reporting.md
+            - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+            - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_compose_runtime_secret_injection.py
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_validation_gate.py
+            - tests/test_windmill_operator_admin_app.py
+          mode: shared_contract
+          contract: ws0307-rebased-mainline-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0305 into main by re-verifying the latest
+        realistic origin/main exact-main smoke and load paths for Keycloak and
+        OpenFGA, preserving truthful k6 receipts and bounded notification
+        warnings while recording the remaining live Keycloak load-test failure
+      release_bump: patch
+      included_in_repo_version: 0.177.120
+      latest_receipts:
+        k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
+  - id: ws-0286-0291-vikunja-sftpgo-live-apply
+    adr: 0286
+    title: Live apply Vikunja task management and SFTPGo managed file transfer
+    status: ready_for_merge
+    owner: claude
+    branch: claude/push-all-pending
+    worktree_path: .worktrees/push-all-worktree
+    doc: docs/adr/0286-vikunja-as-the-task-and-project-management-rest-api.md
+    depends_on:
+      - adr-0021-platform-service-inventory
+      - adr-0063-ansible-as-the-configuration-management-and-deployment-tool
+    conflicts_with: []
+    shared_surfaces:
+      - collections/ansible_collections/lv3/platform/roles/vikunja_postgres/
+      - collections/ansible_collections/lv3/platform/roles/vikunja_runtime/
+      - collections/ansible_collections/lv3/platform/roles/sftpgo_postgres/
+      - collections/ansible_collections/lv3/platform/roles/sftpgo_runtime/
       - collections/ansible_collections/lv3/platform/playbooks/vikunja.yml
       - playbooks/vikunja.yml
       - playbooks/services/vikunja.yml
-      - scripts/vikunja_sync.py
-      - scripts/vikunja_tool.py
-      - platform/ansible/vikunja.py
-      - config/windmill/scripts/vikunja-alert-tasks.py
-      mode: exclusive
-    - id: ws0291_sftpgo_impl
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/sftpgo_postgres/**
-      - collections/ansible_collections/lv3/platform/roles/sftpgo_runtime/**
       - playbooks/sftpgo.yml
       - playbooks/services/sftpgo.yml
+      - scripts/vikunja_sync.py
+      - scripts/vikunja_tool.py
       - scripts/sftpgo_bootstrap.py
+      - platform/ansible/vikunja.py
+      - config/windmill/scripts/vikunja-alert-tasks.py
       - tests/test_sftpgo_playbook.py
       - tests/test_sftpgo_postgres_role.py
       - tests/test_sftpgo_runtime_role.py
-      mode: exclusive
-    - id: ws0286_adr_index
-      paths:
-      - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: ws0286-adr-index-v1
-    - id: ws0286_generated_diagrams
-      paths:
-      - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: ws0286-generated-diagrams-v1
-  ready_to_merge: true
-  live_applied: false
-- id: ws-0275-live-apply
-  adr: '0275'
-  title: Refresh Apache Tika exact-main live-apply truth after the runtime-ai pool
-    migration
-  status: ready_for_merge
-  owner: codex
-  branch: codex/ws-0275-main-closeout-r8
-  worktree_path: .worktrees/ws-0275-main-closeout-r8
-  doc: docs/workstreams/ws-0275-live-apply.md
-  depends_on:
-  - adr-0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline
-  - adr-0319-runtime-pools-as-the-service-partition-boundary
-  - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
-  conflicts_with: []
-  shared_surfaces:
-  - workstreams.yaml
-  - docs/workstreams/ws-0275-live-apply.md
-  - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
-  - docs/runbooks/configure-tika.md
-  - docs/adr/.index.yaml
-  - README.md
-  - RELEASE.md
-  - VERSION
-  - changelog.md
-  - docs/release-notes/README.md
-  - docs/release-notes/*.md
-  - versions/stack.yaml
-  - build/platform-manifest.json
-  - docs/diagrams/agent-coordination-map.excalidraw
-  - docs/site-generated/architecture/dependency-graph.md
-  - receipts/ops-portal-snapshot.html
-  - tests/test_tika_playbook.py
-  - tests/test_tesseract_ocr_runtime_role.py
-  - tests/test_gotenberg_runtime_role.py
-  - receipts/security-reports/*.json
-  - receipts/live-applies/*0275*
-  - receipts/live-applies/evidence/*ws-0275*
-  - receipts/restic-backups/20260403T063547Z.json
-  - receipts/restic-snapshots-latest.json
-  - receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
       - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0275_docs_and_adr
-      paths:
+      - docs/adr/.index.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0286_vikunja_impl
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/vikunja_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/vikunja_runtime/**
+            - collections/ansible_collections/lv3/platform/playbooks/vikunja.yml
+            - playbooks/vikunja.yml
+            - playbooks/services/vikunja.yml
+            - scripts/vikunja_sync.py
+            - scripts/vikunja_tool.py
+            - platform/ansible/vikunja.py
+            - config/windmill/scripts/vikunja-alert-tasks.py
+          mode: exclusive
+        - id: ws0291_sftpgo_impl
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/sftpgo_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/sftpgo_runtime/**
+            - playbooks/sftpgo.yml
+            - playbooks/services/sftpgo.yml
+            - scripts/sftpgo_bootstrap.py
+            - tests/test_sftpgo_playbook.py
+            - tests/test_sftpgo_postgres_role.py
+            - tests/test_sftpgo_runtime_role.py
+          mode: exclusive
+        - id: ws0286_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: ws0286-adr-index-v1
+        - id: ws0286_generated_diagrams
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: ws0286-generated-diagrams-v1
+    ready_to_merge: true
+    live_applied: false
+  - id: ws-0275-live-apply
+    adr: '0275'
+    title: Refresh Apache Tika exact-main live-apply truth after the runtime-ai
+      pool migration
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0275-main-closeout-r8
+    worktree_path: .worktrees/ws-0275-main-closeout-r8
+    doc: docs/workstreams/ws-0275-live-apply.md
+    depends_on:
+      - adr-0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline
+      - adr-0319-runtime-pools-as-the-service-partition-boundary
+      - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
       - docs/workstreams/ws-0275-live-apply.md
       - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
       - docs/runbooks/configure-tika.md
-      mode: shared_contract
-      contract: ws-0275-docs-v1
-    - id: ws0275_adr_index
-      paths:
       - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: adr-index-generator-v1
-    - id: ws0275_release_surfaces
-      paths:
       - README.md
       - RELEASE.md
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
       - docs/release-notes/*.md
-      mode: shared_contract
-      contract: release-management-v1
-    - id: ws0275_platform_truth_generation
-      paths:
       - versions/stack.yaml
       - build/platform-manifest.json
-      mode: shared_contract
-      contract: canonical-truth-v1
-    - id: ws0275_generated_truth
-      paths:
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/site-generated/architecture/dependency-graph.md
       - receipts/ops-portal-snapshot.html
-      mode: shared_contract
-      contract: latest-main-generated-truth-v1
-    - id: ws0275_runtime_validation_contracts
-      paths:
       - tests/test_tika_playbook.py
       - tests/test_tesseract_ocr_runtime_role.py
       - tests/test_gotenberg_runtime_role.py
-      mode: shared_contract
-      contract: runtime-ai-document-playbooks-v1
-    - id: ws0275_receipts
-      paths:
       - receipts/security-reports/*.json
       - receipts/live-applies/*0275*
       - receipts/live-applies/evidence/*ws-0275*
       - receipts/restic-backups/20260403T063547Z.json
       - receipts/restic-snapshots-latest.json
       - receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
-      mode: shared_contract
-      contract: live-apply-receipts-v1
-  blockers: []
-  ready_to_merge: true
-  live_applied: true
-  canonical_truth:
-    changelog_entry: refreshes ADR 0275 on the latest exact mainline by replacing
-      the shared runtime-ai pool receipt with a dedicated Apache Tika receipt, re-verifying
-      the private extraction path on runtime-ai-lv3, and aligning the document-runtime
-      validation tests with the syntax-check-safe host selection contract
-    release_bump: patch
-    included_in_repo_version: 0.177.151
-    latest_receipts:
-      tika: 2026-04-03-adr-0275-apache-tika-mainline-live-apply
-- id: ws-0269-live-apply
-  adr: 0269
-  title: Vulnerability budgets and image-host freshness promotion gates
-  status: ready_for_merge
-  owner: codex
-  branch: codex/adr-0269-live-apply
-  worktree_path: .worktrees/ws-0269-live-apply
-  doc: docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
-  depends_on:
-  - adr-0068-container-image-policy-and-supply-chain-integrity
-  - adr-0102-security-posture-reporting
-  - adr-0230-policy-decisions-via-open-policy-agent-and-conftest
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
-  - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
-  - docs/adr/.index.yaml
-  - docs/release-notes/0.177.84.md
-  - workstreams.yaml
-  - config/vulnerability-budget-policy.json
-  - config/image-catalog.json
-  - docs/schema/vulnerability-budget-policy.schema.json
-  - scripts/vulnerability_budget.py
-  - scripts/promotion_pipeline.py
-  - scripts/security_posture_report.py
-  - scripts/container_image_policy.py
-  - scripts/upgrade_container_image.py
-  - policy/decisions/release_promotion.rego
-  - policy/tests/release_promotion_test.rego
-  - Makefile
-  - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
-  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-  - docs/runbooks/configure-windmill.md
-  - docs/runbooks/vulnerability-budget-gates.md
-  - docs/runbooks/container-image-policy.md
-  - docs/runbooks/security-posture-reporting.md
-  - docs/runbooks/environment-promotion-pipeline.md
-  - tests/test_vulnerability_budget.py
-  - tests/test_container_image_policy.py
-  - tests/test_promotion_pipeline.py
-  - tests/test_security_posture_report.py
-  - receipts/ops-portal-snapshot.html
-  - receipts/security-reports/20260329T*.json
-  - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-live-apply.json
-  - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
-  - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
-  - receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_0269_budget_gate
-      paths:
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws0275_docs_and_adr
+          paths:
+            - docs/workstreams/ws-0275-live-apply.md
+            - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+            - docs/runbooks/configure-tika.md
+          mode: shared_contract
+          contract: ws-0275-docs-v1
+        - id: ws0275_adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: ws0275_release_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: ws0275_platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: ws0275_generated_truth
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
+        - id: ws0275_runtime_validation_contracts
+          paths:
+            - tests/test_tika_playbook.py
+            - tests/test_tesseract_ocr_runtime_role.py
+            - tests/test_gotenberg_runtime_role.py
+          mode: shared_contract
+          contract: runtime-ai-document-playbooks-v1
+        - id: ws0275_receipts
+          paths:
+            - receipts/security-reports/*.json
+            - receipts/live-applies/*0275*
+            - receipts/live-applies/evidence/*ws-0275*
+            - receipts/restic-backups/20260403T063547Z.json
+            - receipts/restic-snapshots-latest.json
+            - receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    blockers: []
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: refreshes ADR 0275 on the latest exact mainline by
+        replacing the shared runtime-ai pool receipt with a dedicated Apache
+        Tika receipt, re-verifying the private extraction path on
+        runtime-ai-lv3, and aligning the document-runtime validation tests with
+        the syntax-check-safe host selection contract
+      release_bump: patch
+      included_in_repo_version: 0.177.151
+      latest_receipts:
+        tika: 2026-04-03-adr-0275-apache-tika-mainline-live-apply
+  - id: ws-0269-live-apply
+    adr: 0269
+    title: Vulnerability budgets and image-host freshness promotion gates
+    status: ready_for_merge
+    owner: codex
+    branch: codex/adr-0269-live-apply
+    worktree_path: ../worktree-adr-0269-live-apply
+    doc:
+      ../worktree-adr-0269-live-apply/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    depends_on:
+      - adr-0068-container-image-policy-and-supply-chain-integrity
+      - adr-0102-security-posture-reporting
+      - adr-0230-policy-decisions-via-open-policy-agent-and-conftest
+    conflicts_with: []
+    shared_surfaces:
       - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
       - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+      - docs/adr/.index.yaml
+      - docs/release-notes/0.177.84.md
+      - workstreams.yaml
       - config/vulnerability-budget-policy.json
       - config/image-catalog.json
       - docs/schema/vulnerability-budget-policy.schema.json
@@ -710,247 +1005,184 @@ workstreams:
       - tests/test_container_image_policy.py
       - tests/test_promotion_pipeline.py
       - tests/test_security_posture_report.py
-      mode: exclusive
-    - id: adr_0269_registry_contracts
-      paths:
-      - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: adr-index-generator-v1
-    - id: adr_0269_live_evidence
-      paths:
+      - receipts/ops-portal-snapshot.html
       - receipts/security-reports/20260329T*.json
       - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-live-apply.json
       - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
       - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
       - receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
-      mode: exclusive
-    - id: adr_0269_generated_portal_surfaces
-      paths:
-      - receipts/ops-portal-snapshot.html
-      mode: exclusive
-    - id: adr_0269_mainline_integration
-      paths:
-      - docs/release-notes/0.177.8[45].md
-      - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
-      mode: exclusive
-  ready_to_merge: true
-  live_applied: true
-- id: ws-0254-serverclaw-runtime-fix
-  adr: '0254'
-  title: Fix ServerClaw OIDC login, hairpin NAT, model access, and Keycloak network
-    IaC
-  status: ready_for_merge
-  owner: claude
-  branch: claude/great-mestorf
-  worktree_path: .claude/worktrees/great-mestorf
-  doc: docs/runbooks/configure-serverclaw.md
-  depends_on:
-  - adr-0060-open-webui
-  - adr-0097-keycloak-identity
-  - adr-0145-nginx-edge-publication
-  - adr-0254-serverclaw
-  conflicts_with: []
-  shared_surfaces:
-  - docs/runbooks/configure-serverclaw.md
-  - inventory/group_vars/all.yml
-  - playbooks/serverclaw.yml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: serverclaw_runtime_fix
-      paths:
-      - playbooks/serverclaw.yml
-      - docs/runbooks/configure-serverclaw.md
-      - inventory/group_vars/all.yml
-      - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/open-webui.env.j2
-      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
-      mode: exclusive
-    - id: serverclaw_shared_generated_contract
-      paths:
-      - workstreams.yaml
-      - workstreams/active/ws-0254-serverclaw-runtime-fix.yaml
-      - build/platform-manifest.json
-      - changelog.md
-      - docs/adr/.index.yaml
-      - docs/adr/index/*
-      - docs/diagrams/*
-      - .repo-structure.yaml
-      - .config-locations.yaml
-      - build/onboarding/*
-      - receipts/sbom/*
-      mode: shared_contract
-      contract: mainline-release-integration-v1
-  ready_to_merge: true
-  live_applied: true
-  canonical_truth:
-    changelog_entry: fixed ServerClaw OIDC login by moving runtime.env to persistent
-      /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support
-      to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model
-      visibility, and made Keycloak startup idempotent by auto-creating the external
-      Docker network
-    release_bump: patch
-- id: ws-0224-repo-intake
-  adr: '0224'
-  title: Self-service repo intake and agent-assisted app deployments
-  status: ready_for_merge
-  owner: codex
-  branch: codex/ws-0224-repo-intake
-  worktree_path: .worktrees/ws-0224-repo-intake
-  doc: docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
-  depends_on:
-  - adr-0156-agent-session-workspace-isolation
-  - adr-0185-branch-scoped-ephemeral-preview-environments
-  - adr-0194-coolify-paas-deploy-from-repo
-  - adr-0204-self-correcting-automation-loops
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
-  - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
-  - docs/adr/.index.yaml
-  - docs/runbooks/configure-coolify.md
-  - inventory/group_vars/platform.yml
-  - playbooks/coolify.yml
-  - scripts/generate_platform_vars.py
-  - scripts/coolify_tool.py
-  - scripts/lv3_cli.py
-  - tests/test_generate_platform_vars.py
-  - tests/test_coolify_playbook.py
-  - tests/test_coolify_tool.py
-  - tests/test_lv3_cli.py
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: repo_intake_architecture_docs
-      paths:
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0269_budget_gate
+          paths:
+            - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+            - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+            - config/vulnerability-budget-policy.json
+            - config/image-catalog.json
+            - docs/schema/vulnerability-budget-policy.schema.json
+            - scripts/vulnerability_budget.py
+            - scripts/promotion_pipeline.py
+            - scripts/security_posture_report.py
+            - scripts/container_image_policy.py
+            - scripts/upgrade_container_image.py
+            - policy/decisions/release_promotion.rego
+            - policy/tests/release_promotion_test.rego
+            - Makefile
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/vulnerability-budget-gates.md
+            - docs/runbooks/container-image-policy.md
+            - docs/runbooks/security-posture-reporting.md
+            - docs/runbooks/environment-promotion-pipeline.md
+            - tests/test_vulnerability_budget.py
+            - tests/test_container_image_policy.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_security_posture_report.py
+          mode: exclusive
+        - id: adr_0269_registry_contracts
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0269_live_evidence
+          paths:
+            - receipts/security-reports/20260329T*.json
+            - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
+            - receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
+          mode: exclusive
+        - id: adr_0269_generated_portal_surfaces
+          paths:
+            - receipts/ops-portal-snapshot.html
+          mode: exclusive
+        - id: adr_0269_mainline_integration
+          paths:
+            - docs/release-notes/0.177.8[45].md
+            - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+  - id: ws-0224-repo-intake
+    adr: '0224'
+    title: Self-service repo intake and agent-assisted app deployments
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0224-repo-intake
+    worktree_path: .worktrees/ws-0224-repo-intake
+    doc:
+      docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    depends_on:
+      - adr-0156-agent-session-workspace-isolation
+      - adr-0185-branch-scoped-ephemeral-preview-environments
+      - adr-0194-coolify-paas-deploy-from-repo
+      - adr-0204-self-correcting-automation-loops
+    conflicts_with: []
+    shared_surfaces:
       - docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
       - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
-      mode: exclusive
-    - id: repo_intake_runtime_wrapper
-      paths:
+      - docs/adr/.index.yaml
       - docs/runbooks/configure-coolify.md
       - inventory/group_vars/platform.yml
       - playbooks/coolify.yml
+      - scripts/generate_platform_vars.py
       - scripts/coolify_tool.py
+      - scripts/lv3_cli.py
+      - tests/test_generate_platform_vars.py
       - tests/test_coolify_playbook.py
       - tests/test_coolify_tool.py
       - tests/test_lv3_cli.py
-      mode: exclusive
-    - id: repo_intake_platform_contract
-      paths:
-      - scripts/generate_platform_vars.py
-      - tests/test_generate_platform_vars.py
-      mode: shared_contract
-      contract: platform-topology-v1
-    - id: adr_index_generation
-      paths:
-      - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: adr-index-generator-v1
-  ready_to_merge: true
-  live_applied: true
-  canonical_truth:
-    changelog_entry: implemented ADR 0224 by extending the governed Coolify lane with
-      private-repo Docker Compose intake, wildcard app DNS publication, HTTPS wildcard
-      edge routing, and Docker pull hardening that keeps education-wemeshup serving
-      the full 1056-activity catalog from main
-    release_bump: patch
-    included_in_repo_version: 0.177.68
-    latest_receipts:
-      coolify: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
-      coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
-- id: ws-0197-live-apply
-  adr: 0197
-  title: Dify visual workflow canvas live apply
-  status: ready
-  owner: codex
-  branch: codex/ws-0197-main-finish
-  worktree_path: .worktrees/ws-0197-main-finish
-  doc: docs/workstreams/ws-0197-live-apply.md
-  depends_on:
-  - adr-0044-windmill
-  - adr-0146-langfuse
-  conflicts_with:
-  - adr-0198-qdrant-vector-search-semantic-rag
-  shared_surfaces:
-  - workstreams.yaml
-  - README.md
-  - RELEASE.md
-  - VERSION
-  - changelog.md
-  - versions/stack.yaml
-  - build/platform-manifest.json
-  - docs/release-notes/
-  - docs/diagrams/
-  - docs/site-generated/architecture/dependency-graph.md
-  - inventory/host_vars/proxmox_florin.yml
-  - inventory/group_vars/postgres_guests.yml
-  - config/service-capability-catalog.json
-  - config/health-probe-catalog.json
-  - config/subdomain-catalog.json
-  - config/subdomain-exposure-registry.json
-  - config/controller-local-secrets.json
-  - config/secret-catalog.json
-  - config/image-catalog.json
-  - config/workflow-catalog.json
-  - platform/__init__.py
-  - platform/use_cases/
-  - playbooks/keycloak.yml
-  - playbooks/langfuse.yml
-  - playbooks/mattermost.yml
-  - playbooks/n8n.yml
-  - playbooks/outline.yml
-  - playbooks/plane.yml
-  - playbooks/vaultwarden.yml
-  - scripts/api_gateway/main.py
-  - collections/ansible_collections/lv3/platform/playbooks/keycloak.yml
-  - collections/ansible_collections/lv3/platform/playbooks/mattermost.yml
-  - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
-  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
-  - docs/runbooks/configure-dify.md
-  - tests/test_dify_smoke.py
-  - tests/test_postgres_vm_access_policy.py
-  - tests/test_runbook_use_cases.py
-  - receipts/live-applies/
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
       - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: dify_repo_surface
-      paths:
-      - docs/adr/0197-dify-visual-llm-workflow-canvas.md
-      - docs/workstreams/ws-0197-live-apply.md
-      - docs/runbooks/configure-dify.md
-      - playbooks/dify.yml
-      - playbooks/services/dify.yml
-      - collections/ansible_collections/lv3/platform/playbooks/dify.yml
-      - collections/ansible_collections/lv3/platform/playbooks/services/dify.yml
-      - collections/ansible_collections/lv3/platform/roles/dify_postgres/*
-      - collections/ansible_collections/lv3/platform/roles/dify_runtime/*
-      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
-      - scripts/dify_api.py
-      - scripts/dify_smoke.py
-      - scripts/generate_platform_vars.py
-      - scripts/sync_tools_to_dify.py
-      - tests/test_dify_api.py
-      - tests/test_dify_smoke.py
-      - tests/test_dify_runtime_role.py
-      - tests/test_generate_platform_vars.py
-      - tests/test_postgres_vm_access_policy.py
-      - tests/test_runbook_use_cases.py
-      - tests/test_sync_tools_to_dify.py
-      - platform/__init__.py
-      - platform/use_cases/*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: repo_intake_architecture_docs
+          paths:
+            - docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
+            - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
+          mode: exclusive
+        - id: repo_intake_runtime_wrapper
+          paths:
+            - docs/runbooks/configure-coolify.md
+            - inventory/group_vars/platform.yml
+            - playbooks/coolify.yml
+            - scripts/coolify_tool.py
+            - tests/test_coolify_playbook.py
+            - tests/test_coolify_tool.py
+            - tests/test_lv3_cli.py
+          mode: exclusive
+        - id: repo_intake_platform_contract
+          paths:
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0224 by extending the governed Coolify
+        lane with private-repo Docker Compose intake, wildcard app DNS
+        publication, HTTPS wildcard edge routing, and Docker pull hardening that
+        keeps education-wemeshup serving the full 1056-activity catalog from
+        main
+      release_bump: patch
+      included_in_repo_version: 0.177.68
+      latest_receipts:
+        coolify:
+          2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
+        coolify_apps:
+          2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
+  - id: ws-0197-live-apply
+    adr: 0197
+    title: Dify visual workflow canvas live apply
+    status: ready
+    owner: codex
+    branch: codex/ws-0197-main-finish
+    worktree_path: .worktrees/ws-0197-main-finish
+    doc: docs/workstreams/ws-0197-live-apply.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0146-langfuse
+    conflicts_with:
+      - adr-0198-qdrant-vector-search-semantic-rag
+    shared_surfaces:
+      - workstreams.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/
+      - docs/diagrams/
+      - docs/site-generated/architecture/dependency-graph.md
+      - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/postgres_guests.yml
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/controller-local-secrets.json
+      - config/secret-catalog.json
+      - config/image-catalog.json
+      - config/workflow-catalog.json
+      - platform/__init__.py
+      - platform/use_cases/
       - playbooks/keycloak.yml
       - playbooks/langfuse.yml
       - playbooks/mattermost.yml
@@ -958,465 +1190,452 @@ workstreams:
       - playbooks/outline.yml
       - playbooks/plane.yml
       - playbooks/vaultwarden.yml
+      - scripts/api_gateway/main.py
       - collections/ansible_collections/lv3/platform/playbooks/keycloak.yml
       - collections/ansible_collections/lv3/platform/playbooks/mattermost.yml
       - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
-      - platform/dify-workflows/*
-      - receipts/live-applies/2026-03-28-adr-0197-dify-live-apply.json
-      - receipts/live-applies/2026-03-28-adr-0197-dify-mainline-live-apply.json
-      - receipts/image-scans/2026-03-28-dify-*.json
-      - receipts/image-scans/2026-03-28-dify-*.trivy.json
-      mode: exclusive
-    - id: dify_service_catalog_contract
-      paths:
-      - config/service-capability-catalog.json
-      - config/health-probe-catalog.json
-      - config/subdomain-catalog.json
-      - config/subdomain-exposure-registry.json
-      - config/service-completeness.json
-      - config/service-redundancy-catalog.json
-      - config/controller-local-secrets.json
-      - config/secret-catalog.json
-      - config/image-catalog.json
-      - config/dependency-graph.json
-      - config/workflow-catalog.json
-      - config/command-catalog.json
-      - config/ansible-execution-scopes.yaml
-      - config/ansible-role-idempotency.yml
-      - config/uptime-kuma/monitors.json
-      - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: service-catalog-and-automation-contract-v1
-    - id: dify_runtime_topology_contract
-      paths:
-      - inventory/host_vars/proxmox_florin.yml
-      - inventory/group_vars/platform.yml
-      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/*
-      - scripts/api_gateway/main.py
-      - tests/test_api_gateway.py
-      - tests/test_api_gateway_runtime_role.py
-      - Makefile
-      mode: shared_contract
-      contract: runtime-topology-and-entrypoints-v1
-    - id: dify_mainline_release_contract
-      paths:
-      - README.md
-      - RELEASE.md
-      - VERSION
-      - changelog.md
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - docs/release-notes/README.md
-      - docs/release-notes/*.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/diagrams/service-dependency-graph.excalidraw
-      - docs/site-generated/architecture/dependency-graph.md
-      mode: shared_contract
-      contract: mainline-release-integration-v1
-  ready_to_merge: true
-  live_applied: true
-  canonical_truth:
-    changelog_entry: integrated ADR 0197 by replaying the repo-managed Dify visual
-      workflow canvas on current main, re-verifying the public `agents.lv3.org` edge
-      plus governed `api.lv3.org` tool bridge, and recording the worktree-safe smoke
-      trace path and packaged API gateway runbook compatibility repair
-    release_bump: patch
-    included_in_repo_version: 0.177.48
-    latest_receipts:
-      dify: 2026-03-28-adr-0197-dify-mainline-live-apply
-- id: ws-realtime-dynamic-children
-  adr: 0196
-  title: Auto-discover all production hosts as Netdata streaming children
-  status: in_progress
-  owner: claude
-  branch: claude/relaxed-mcnulty
-  worktree_path: .claude/worktrees/relaxed-mcnulty
-  doc: docs/workstreams/ws-realtime-dynamic-children.md
-  depends_on: []
-  conflicts_with: []
-  shared_surfaces:
-  - workstreams.yaml
-  - workstreams/active/ws-realtime-dynamic-children.yaml
-  - docs/workstreams/ws-realtime-dynamic-children.md
-  - build/platform-manifest.json
-  - docs/site-generated/architecture/dependency-graph.md
-  - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
-  - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
-  - .config-locations.yaml
-  - .repo-structure.yaml
-  - build/onboarding/agent-core.yaml
-  - build/onboarding/automation.yaml
-  - build/onboarding/service-catalog.yaml
-  - docs/discovery/repo-structure/cross-cutting-concerns.yaml
-  - docs/diagrams/agent-coordination-map.excalidraw
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws_realtime_dynamic_children_registry_source
-      paths:
-      - workstreams/active/ws-realtime-dynamic-children.yaml
-      mode: exclusive
-    - id: ws_realtime_dynamic_children_doc
-      paths:
-      - docs/workstreams/ws-realtime-dynamic-children.md
-      mode: exclusive
-    - id: ws_realtime_dynamic_children_netdata
-      paths:
-      - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
-      - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
-      mode: exclusive
-    - id: ws_realtime_dynamic_children_generated
-      paths:
-      - build/platform-manifest.json
-      - docs/site-generated/architecture/dependency-graph.md
-      mode: shared_contract
-      contract: ws-realtime-dynamic-children-generated-v1
-    - id: ws_realtime_dynamic_children_discovery
-      paths:
-      - .config-locations.yaml
-      - .repo-structure.yaml
-      - build/onboarding/agent-core.yaml
-      - build/onboarding/automation.yaml
-      - build/onboarding/service-catalog.yaml
-      - docs/discovery/repo-structure/cross-cutting-concerns.yaml
-      - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: ws-realtime-dynamic-children-generated-v1
-  canonical_truth:
-    changelog_entry: replaces the static Netdata child host list with a dynamic inventory-group
-      expression so all production hosts stream to realtime.lv3.org automatically
-      when new VMs are added to the inventory
-    release_bump: patch
-    included_in_repo_version: null
-    latest_receipts: {}
-  blockers: []
-  ready_to_merge: false
-  live_applied: false
-- id: adr-0095-unified-search
-  adr: 0095
-  title: Unified search across platform services
-  status: ready
-  owner: codex
-  branch: codex/adr-0095-unified-search
-  worktree_path: .worktrees/adr-0095-unified-search
-  doc: docs/workstreams/adr-0095-unified-search.md
-  depends_on:
-  - adr-0092-platform-api-gateway
-  - adr-0054-netbox
-  - adr-0066-mutation-audit-log
-  - adr-0069-agent-tool-registry
-  conflicts_with: []
-  shared_surfaces:
-  - config/agent-tool-registry.json
-  - config/api-gateway-catalog.json
-  - Compose stack docker-runtime-lv3
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: unified_search_repo_surface
-      paths:
-      - scripts/search_fabric/**
-      - scripts/api_gateway/main.py
-      - scripts/lv3_cli.py
-      - docs/adr/0095-unified-platform-search.md
-      - docs/workstreams/adr-0095-unified-search.md
-      mode: exclusive
-    - id: agent_tool_registry_contract
-      paths:
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+      - docs/runbooks/configure-dify.md
+      - tests/test_dify_smoke.py
+      - tests/test_postgres_vm_access_policy.py
+      - tests/test_runbook_use_cases.py
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: dify_repo_surface
+          paths:
+            - docs/adr/0197-dify-visual-llm-workflow-canvas.md
+            - docs/workstreams/ws-0197-live-apply.md
+            - docs/runbooks/configure-dify.md
+            - playbooks/dify.yml
+            - playbooks/services/dify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/dify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/dify.yml
+            - collections/ansible_collections/lv3/platform/roles/dify_postgres/*
+            - collections/ansible_collections/lv3/platform/roles/dify_runtime/*
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - scripts/dify_api.py
+            - scripts/dify_smoke.py
+            - scripts/generate_platform_vars.py
+            - scripts/sync_tools_to_dify.py
+            - tests/test_dify_api.py
+            - tests/test_dify_smoke.py
+            - tests/test_dify_runtime_role.py
+            - tests/test_generate_platform_vars.py
+            - tests/test_postgres_vm_access_policy.py
+            - tests/test_runbook_use_cases.py
+            - tests/test_sync_tools_to_dify.py
+            - platform/__init__.py
+            - platform/use_cases/*
+            - inventory/group_vars/postgres_guests.yml
+            - playbooks/keycloak.yml
+            - playbooks/langfuse.yml
+            - playbooks/mattermost.yml
+            - playbooks/n8n.yml
+            - playbooks/outline.yml
+            - playbooks/plane.yml
+            - playbooks/vaultwarden.yml
+            - collections/ansible_collections/lv3/platform/playbooks/keycloak.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mattermost.yml
+            - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
+            - platform/dify-workflows/*
+            - receipts/live-applies/2026-03-28-adr-0197-dify-live-apply.json
+            - receipts/live-applies/2026-03-28-adr-0197-dify-mainline-live-apply.json
+            - receipts/image-scans/2026-03-28-dify-*.json
+            - receipts/image-scans/2026-03-28-dify-*.trivy.json
+          mode: exclusive
+        - id: dify_service_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/controller-local-secrets.json
+            - config/secret-catalog.json
+            - config/image-catalog.json
+            - config/dependency-graph.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - config/uptime-kuma/monitors.json
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: service-catalog-and-automation-contract-v1
+        - id: dify_runtime_topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/*
+            - scripts/api_gateway/main.py
+            - tests/test_api_gateway.py
+            - tests/test_api_gateway_runtime_role.py
+            - Makefile
+          mode: shared_contract
+          contract: runtime-topology-and-entrypoints-v1
+        - id: dify_mainline_release_contract
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: mainline-release-integration-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrated ADR 0197 by replaying the repo-managed Dify
+        visual workflow canvas on current main, re-verifying the public
+        `agents.lv3.org` edge plus governed `api.lv3.org` tool bridge, and
+        recording the worktree-safe smoke trace path and packaged API gateway
+        runbook compatibility repair
+      release_bump: patch
+      included_in_repo_version: 0.177.48
+      latest_receipts:
+        dify: 2026-03-28-adr-0197-dify-mainline-live-apply
+  - id: adr-0095-unified-search
+    adr: 0095
+    title: Unified search across platform services
+    status: ready
+    owner: codex
+    branch: codex/adr-0095-unified-search
+    worktree_path: ../proxmox_florin_server-unified-search
+    doc: docs/workstreams/adr-0095-unified-search.md
+    depends_on:
+      - adr-0092-platform-api-gateway
+      - adr-0054-netbox
+      - adr-0066-mutation-audit-log
+      - adr-0069-agent-tool-registry
+    conflicts_with: []
+    shared_surfaces:
       - config/agent-tool-registry.json
-      mode: shared_contract
-      contract: agent-tool-registry-v1
-    - id: api_gateway_catalog_contract
-      paths:
       - config/api-gateway-catalog.json
-      mode: shared_contract
-      contract: api-gateway-catalog-v1
-    - id: health_probe_catalog_contract
-      paths:
-      - config/health-probe-catalog.json
-      mode: shared_contract
-      contract: health-probe-catalog-v1
-    - id: integration_truth
-      paths:
-      - README.md
-      - VERSION
-      - changelog.md
-      - versions/stack.yaml
-      mode: generated
-  ready_to_merge: false
-  live_applied: false
-- id: adr-0066-mutation-audit-log
-  adr: '0066'
-  title: Structured mutation audit log
-  status: ready
-  owner: codex
-  branch: codex/adr-0066-mutation-audit-log
-  worktree_path: .worktrees/adr-0066-mutation-audit-log
-  doc: docs/workstreams/adr-0066-mutation-audit-log.md
-  depends_on:
-  - adr-0052-loki-logs
-  - adr-0048-command-catalog
-  - adr-0044-windmill
-  - adr-0043-openbao
-  conflicts_with: []
-  shared_surfaces:
-  - callback_plugins/
-  - docs/schema/mutation-audit-event.json
-  - scripts/mutation_audit.py
-  - Loki mutation-audit label
-  - Windmill workflow template
-  - command-catalog scripts
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: mutation_audit_repo_surface
-      paths:
-      - callback_plugins/mutation_audit.py
+      - Compose stack docker-runtime-lv3
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: unified_search_repo_surface
+          paths:
+            - scripts/search_fabric/**
+            - scripts/api_gateway/main.py
+            - scripts/lv3_cli.py
+            - docs/adr/0095-unified-platform-search.md
+            - docs/workstreams/adr-0095-unified-search.md
+          mode: exclusive
+        - id: agent_tool_registry_contract
+          paths:
+            - config/agent-tool-registry.json
+          mode: shared_contract
+          contract: agent-tool-registry-v1
+        - id: api_gateway_catalog_contract
+          paths:
+            - config/api-gateway-catalog.json
+          mode: shared_contract
+          contract: api-gateway-catalog-v1
+        - id: health_probe_catalog_contract
+          paths:
+            - config/health-probe-catalog.json
+          mode: shared_contract
+          contract: health-probe-catalog-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
+    ready_to_merge: false
+    live_applied: false
+  - id: adr-0066-mutation-audit-log
+    adr: '0066'
+    title: Structured mutation audit log
+    status: ready
+    owner: codex
+    branch: codex/adr-0066-mutation-audit-log
+    worktree_path: ../proxmox_florin_server-mutation-audit-log
+    doc: docs/workstreams/adr-0066-mutation-audit-log.md
+    depends_on:
+      - adr-0052-loki-logs
+      - adr-0048-command-catalog
+      - adr-0044-windmill
+      - adr-0043-openbao
+    conflicts_with: []
+    shared_surfaces:
+      - callback_plugins/
       - docs/schema/mutation-audit-event.json
       - scripts/mutation_audit.py
-      - docs/runbooks/mutation-audit-log.md
-      - config/windmill/scripts/lv3-mutation-audit.py
-      - docs/adr/0066-structured-mutation-audit-log.md
-      - docs/workstreams/adr-0066-mutation-audit-log.md
-      mode: exclusive
-    - id: ansible_cfg_contract
-      paths:
-      - ansible.cfg
-      mode: shared_contract
-      contract: ansible-controller-config-v1
-    - id: workflow_catalog_contract
-      paths:
-      - config/workflow-catalog.json
-      mode: shared_contract
-      contract: workflow-catalog-v1
-    - id: command_catalog_contract
-      paths:
-      - config/command-catalog.json
-      mode: shared_contract
-      contract: command-catalog-v1
-    - id: integration_truth
-      paths:
-      - README.md
-      - VERSION
-      - changelog.md
-      - versions/stack.yaml
-      mode: generated
-  ready_to_merge: false
-  live_applied: false
-- id: adr-0061-glitchtip-failure-signals
-  adr: '0061'
-  title: GlitchTip for application exceptions and task failures
-  status: ready
-  owner: codex
-  branch: codex/adr-0061-glitchtip-failure-signals
-  worktree_path: .worktrees/adr-0061-glitchtip-failure-signals
-  doc: docs/workstreams/adr-0061-glitchtip-failure-signals.md
-  depends_on:
-  - adr-0026-postgres-vm
-  - adr-0049-private-api-publication
-  - adr-0053-tempo-traces
-  conflicts_with: []
-  shared_surfaces:
-  - application errors
-  - workflow failures
-  - issue notifications
-  - release regressions
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_0061_docs
-      paths:
-      - docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
-      - docs/workstreams/adr-0061-glitchtip-failure-signals.md
-      mode: exclusive
-    - id: visual_agent_operations_runbook
-      paths:
-      - docs/runbooks/plan-visual-agent-operations.md
-      mode: shared_contract
-      contract: visual-agent-operations-runbook-v1
-    - id: integration_truth
-      paths:
-      - README.md
-      - VERSION
-      - changelog.md
-      - versions/stack.yaml
-      mode: generated
-  ready_to_merge: false
-  live_applied: false
-- id: adr-0058-nats-event-bus
-  adr: 0058
-  title: NATS JetStream for internal event bus and agent coordination
-  status: ready
-  owner: codex
-  branch: codex/adr-0058-nats-event-bus
-  worktree_path: .worktrees/adr-0058-nats-event-bus
-  doc: docs/workstreams/adr-0058-nats-event-bus.md
-  depends_on:
-  - adr-0045-communication-lanes
-  - adr-0046-identity-classes
-  - adr-0047-short-lived-creds
-  conflicts_with: []
-  shared_surfaces:
-  - workflow events
-  - alert events
-  - agent handoffs
-  - internal consumers
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_0058_docs
-      paths:
-      - docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
-      - docs/workstreams/adr-0058-nats-event-bus.md
-      mode: exclusive
-    - id: visual_agent_operations_runbook
-      paths:
-      - docs/runbooks/plan-visual-agent-operations.md
-      mode: shared_contract
-      contract: visual-agent-operations-runbook-v1
-    - id: integration_truth
-      paths:
-      - README.md
-      - VERSION
-      - changelog.md
-      - versions/stack.yaml
-      mode: generated
-  ready_to_merge: false
-  live_applied: false
-- id: naughty-jepsen-ops-fixes
-  adr: '0043'
-  title: "Operational fixes \u2014 OpenBao unseal watcher, Keycloak VM migration,\
-    \ oauth2-proxy"
-  status: in_progress
-  ready_to_merge: false
-  live_applied: false
-  owner: claude
-  branch: claude/naughty-jepsen
-  worktree_path: .claude/worktrees/naughty-jepsen
-  doc: docs/workstreams/naughty-jepsen-ops-fixes.md
-  depends_on:
-  - adr-0043-openbao-for-secrets-transit-and-dynamic-credentials
-  - adr-0056-keycloak-for-operator-and-agent-sso
-  - adr-0077-compose-runtime-secrets-injection
-  - adr-0133-portal-authentication-by-default
-  conflicts_with: []
-  shared_surfaces:
-  - collections/ansible_collections/lv3/platform/roles/openbao_runtime/
-  - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/
-  - config/health-probe-catalog.json
-  - inventory/host_vars/proxmox_florin.yml
-  - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
-  - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
-  ownership_manifest:
-    owned_surfaces:
-    - id: openbao_unseal_watcher
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/setup_unseal_watcher.yml
-      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/templates/openbao-unseal-watcher.sh.j2
-      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/templates/openbao-unseal-watcher.service.j2
-      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
-      mode: exclusive
-    - id: keycloak_vm_topology
-      paths:
-      - inventory/host_vars/proxmox_florin.yml
+      - Loki mutation-audit label
+      - Windmill workflow template
+      - command-catalog scripts
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: mutation_audit_repo_surface
+          paths:
+            - callback_plugins/mutation_audit.py
+            - docs/schema/mutation-audit-event.json
+            - scripts/mutation_audit.py
+            - docs/runbooks/mutation-audit-log.md
+            - config/windmill/scripts/lv3-mutation-audit.py
+            - docs/adr/0066-structured-mutation-audit-log.md
+            - docs/workstreams/adr-0066-mutation-audit-log.md
+          mode: exclusive
+        - id: ansible_cfg_contract
+          paths:
+            - ansible.cfg
+          mode: shared_contract
+          contract: ansible-controller-config-v1
+        - id: workflow_catalog_contract
+          paths:
+            - config/workflow-catalog.json
+          mode: shared_contract
+          contract: workflow-catalog-v1
+        - id: command_catalog_contract
+          paths:
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: command-catalog-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
+    ready_to_merge: false
+    live_applied: false
+  - id: adr-0061-glitchtip-failure-signals
+    adr: '0061'
+    title: GlitchTip for application exceptions and task failures
+    status: ready
+    owner: codex
+    branch: codex/adr-0061-glitchtip-failure-signals
+    worktree_path: ../proxmox_florin_server-glitchtip-failure-signals
+    doc: docs/workstreams/adr-0061-glitchtip-failure-signals.md
+    depends_on:
+      - adr-0026-postgres-vm
+      - adr-0049-private-api-publication
+      - adr-0053-tempo-traces
+    conflicts_with: []
+    shared_surfaces:
+      - application errors
+      - workflow failures
+      - issue notifications
+      - release regressions
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0061_docs
+          paths:
+            - docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+            - docs/workstreams/adr-0061-glitchtip-failure-signals.md
+          mode: exclusive
+        - id: visual_agent_operations_runbook
+          paths:
+            - docs/runbooks/plan-visual-agent-operations.md
+          mode: shared_contract
+          contract: visual-agent-operations-runbook-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
+    ready_to_merge: false
+    live_applied: false
+  - id: adr-0058-nats-event-bus
+    adr: 0058
+    title: NATS JetStream for internal event bus and agent coordination
+    status: ready
+    owner: codex
+    branch: codex/adr-0058-nats-event-bus
+    worktree_path: ../proxmox_florin_server-nats-event-bus
+    doc: docs/workstreams/adr-0058-nats-event-bus.md
+    depends_on:
+      - adr-0045-communication-lanes
+      - adr-0046-identity-classes
+      - adr-0047-short-lived-creds
+    conflicts_with: []
+    shared_surfaces:
+      - workflow events
+      - alert events
+      - agent handoffs
+      - internal consumers
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0058_docs
+          paths:
+            - docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+            - docs/workstreams/adr-0058-nats-event-bus.md
+          mode: exclusive
+        - id: visual_agent_operations_runbook
+          paths:
+            - docs/runbooks/plan-visual-agent-operations.md
+          mode: shared_contract
+          contract: visual-agent-operations-runbook-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
+    ready_to_merge: false
+    live_applied: false
+  - id: naughty-jepsen-ops-fixes
+    adr: '0043'
+    title: "Operational fixes — OpenBao unseal watcher, Keycloak VM migration, oauth2-proxy"
+    status: in_progress
+    ready_to_merge: false
+    live_applied: false
+    owner: claude
+    branch: claude/naughty-jepsen
+    worktree_path: .claude/worktrees/naughty-jepsen
+    doc: docs/workstreams/naughty-jepsen-ops-fixes.md
+    depends_on:
+      - adr-0043-openbao-for-secrets-transit-and-dynamic-credentials
+      - adr-0056-keycloak-for-operator-and-agent-sso
+      - adr-0077-compose-runtime-secrets-injection
+      - adr-0133-portal-authentication-by-default
+    conflicts_with: []
+    shared_surfaces:
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/
+      - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/
       - config/health-probe-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
       - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
       - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
-      mode: shared_contract
-      contract: topology-v1
-    - id: dozzle_runtime_healthcheck_fix
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2
-      mode: exclusive
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      - workstreams/active/naughty-jepsen-ops-fixes.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: discovery_artifacts_generated
-      paths:
-      - .repo-structure.yaml
-      - .config-locations.yaml
-      - build/onboarding/agent-core.yaml
-      - build/onboarding/automation.yaml
-      - build/onboarding/service-catalog.yaml
-      mode: shared_contract
-      contract: discovery-artifacts-v1
-    - id: adr_index_generated
-      paths:
-      - docs/adr/.index.yaml
-      - docs/adr/index/by-concern/agent-coordination.yaml
-      - docs/adr/index/by-concern/agent-discovery.yaml
-      - docs/adr/index/by-concern/api.yaml
-      - docs/adr/index/by-concern/automation.yaml
-      - docs/adr/index/by-concern/bootstrap.yaml
-      - docs/adr/index/by-concern/ci-cd.yaml
-      - docs/adr/index/by-concern/documentation.yaml
-      - docs/adr/index/by-concern/host-os.yaml
-      - docs/adr/index/by-concern/identity.yaml
-      - docs/adr/index/by-concern/monitoring.yaml
-      - docs/adr/index/by-concern/networking.yaml
-      - docs/adr/index/by-concern/platform.yaml
-      - docs/adr/index/by-concern/release.yaml
-      - docs/adr/index/by-concern/resilience.yaml
-      - docs/adr/index/by-concern/security.yaml
-      - docs/adr/index/by-concern/storage.yaml
-      - docs/adr/index/by-concern/testing.yaml
-      - docs/adr/index/by-concern/vm-topology.yaml
-      - docs/adr/index/by-range/0000-0099.yaml
-      - docs/adr/index/by-range/0100-0199.yaml
-      - docs/adr/index/by-range/0200-0299.yaml
-      - docs/adr/index/by-range/0300-0399.yaml
-      - docs/adr/index/by-status/accepted.yaml
-      - docs/adr/index/by-status/deprecated.yaml
-      - docs/adr/index/by-status/implemented.yaml
-      - docs/adr/index/by-status/not-implemented.yaml
-      - docs/adr/index/by-status/partial.yaml
-      mode: shared_contract
-      contract: adr-index-v1
-    - id: parallel_adr_sync_surfaces
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/excalidraw_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/netbox.env.ctmpl.j2
-      - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/docker-compose.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2
-      - docs/adr/0346-postgresql-domain-clustering.md
-      - docs/adr/0347-docker-runtime-workload-split.md
-      - inventory/group_vars/platform.yml
-      - inventory/hosts.yml
-      - playbooks/livekit.yml
-      - playbooks/matrix-synapse.yml
-      - playbooks/mattermost.yml
-      - playbooks/nextcloud.yml
-      - playbooks/redpanda.yml
-      - playbooks/runtime-apps-pool.yml
-      - playbooks/runtime-comms-pool.yml
-      - playbooks/services/runtime-apps-pool.yml
-      - playbooks/services/runtime-comms-pool.yml
-      mode: shared_contract
-      contract: topology-v1
+    ownership_manifest:
+      owned_surfaces:
+        - id: openbao_unseal_watcher
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/setup_unseal_watcher.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/templates/openbao-unseal-watcher.sh.j2
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/templates/openbao-unseal-watcher.service.j2
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+          mode: exclusive
+        - id: keycloak_vm_topology
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - config/health-probe-catalog.json
+            - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+            - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
+          mode: shared_contract
+          contract: topology-v1
+        - id: dozzle_runtime_healthcheck_fix
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2
+          mode: exclusive
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+            - workstreams/active/naughty-jepsen-ops-fixes.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: yaml_lint_bulk_fix
+          paths:
+            - workstreams/archive/2026/*
+            - workstreams/active/*
+            - workstreams/policy.yaml
+            - docs/discovery/*
+            - docs/discovery/**/*
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: discovery_artifacts_generated
+          paths:
+            - .repo-structure.yaml
+            - .config-locations.yaml
+            - build/onboarding/agent-core.yaml
+            - build/onboarding/automation.yaml
+            - build/onboarding/service-catalog.yaml
+          mode: shared_contract
+          contract: discovery-artifacts-v1
+        - id: adr_index_generated
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/index/by-concern/agent-coordination.yaml
+            - docs/adr/index/by-concern/agent-discovery.yaml
+            - docs/adr/index/by-concern/api.yaml
+            - docs/adr/index/by-concern/automation.yaml
+            - docs/adr/index/by-concern/bootstrap.yaml
+            - docs/adr/index/by-concern/ci-cd.yaml
+            - docs/adr/index/by-concern/documentation.yaml
+            - docs/adr/index/by-concern/host-os.yaml
+            - docs/adr/index/by-concern/identity.yaml
+            - docs/adr/index/by-concern/monitoring.yaml
+            - docs/adr/index/by-concern/networking.yaml
+            - docs/adr/index/by-concern/platform.yaml
+            - docs/adr/index/by-concern/release.yaml
+            - docs/adr/index/by-concern/resilience.yaml
+            - docs/adr/index/by-concern/security.yaml
+            - docs/adr/index/by-concern/storage.yaml
+            - docs/adr/index/by-concern/testing.yaml
+            - docs/adr/index/by-concern/vm-topology.yaml
+            - docs/adr/index/by-range/0000-0099.yaml
+            - docs/adr/index/by-range/0100-0199.yaml
+            - docs/adr/index/by-range/0200-0299.yaml
+            - docs/adr/index/by-range/0300-0399.yaml
+            - docs/adr/index/by-status/accepted.yaml
+            - docs/adr/index/by-status/deprecated.yaml
+            - docs/adr/index/by-status/implemented.yaml
+            - docs/adr/index/by-status/not-implemented.yaml
+            - docs/adr/index/by-status/partial.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: parallel_adr_sync_surfaces
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/excalidraw_runtime/templates/docker-compose.yml.j2
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/docker-compose.yml.j2
+            - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/templates/docker-compose.yml.j2
+            - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/netbox.env.ctmpl.j2
+            - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/docker-compose.yml.j2
+            - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2
+            - docs/adr/0346-postgresql-domain-clustering.md
+            - docs/adr/0347-docker-runtime-workload-split.md
+            - inventory/group_vars/platform.yml
+            - inventory/hosts.yml
+            - playbooks/livekit.yml
+            - playbooks/matrix-synapse.yml
+            - playbooks/mattermost.yml
+            - playbooks/nextcloud.yml
+            - playbooks/redpanda.yml
+            - playbooks/runtime-apps-pool.yml
+            - playbooks/runtime-comms-pool.yml
+            - playbooks/services/runtime-apps-pool.yml
+            - playbooks/services/runtime-comms-pool.yml
+          mode: shared_contract
+          contract: topology-v1
