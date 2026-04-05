@@ -31,7 +31,8 @@ ownership_manifest:
   - id: workstream_source
     paths:
     - workstreams/active/adr-0360-openbao-cert-hardening.yaml
-    mode: exclusive
+    mode: shared_contract
+    contract: workstream-registry-v1
   - id: release_integration
     paths:
     - workstreams.yaml

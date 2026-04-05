@@ -54,7 +54,8 @@ workstreams:
     - id: workstream_source
       paths:
       - workstreams/active/adr-0360-openbao-cert-hardening.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: workstream-registry-v1
     - id: release_integration
       paths:
       - workstreams.yaml
@@ -185,7 +186,8 @@ workstreams:
     - id: workstream_source
       paths:
       - workstreams/active/adr-0346-centralized-port-registry.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: workstream-registry-v1
     - id: release_management
       paths:
       - README.md
