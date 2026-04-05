@@ -1,4 +1,4 @@
-# ADR 0366: Service Registry and Derived Defaults
+# ADR 0373: Service Registry and Derived Defaults
 
 - **Date**: 2026-04-06
 - **Status**: Proposed
@@ -346,6 +346,6 @@ If a role's migration breaks, the fix is to temporarily re-add the removed defau
 
 ## Related
 
-- ADR 0361 (Compose Macro Library) — macros use derived variables like `{{ directus_openbao_agent_image }}`
-- ADR 0363 (Service Lifecycle Task Includes) — shared tasks use derived variables
-- ADR 0367 (Cross-Cutting Service Manifest) — extends this registry with DNS, SSO, certs, proxy declarations
+- ADR 0368 (Compose Macro Library) — macros use derived variables like `{{ directus_openbao_agent_image }}`
+- ADR 0370 (Service Lifecycle Task Includes) — shared tasks use derived variables
+- ADR 0374 (Cross-Cutting Service Manifest) — extends this registry with DNS, SSO, certs, proxy declarations

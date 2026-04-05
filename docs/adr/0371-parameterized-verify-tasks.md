@@ -1,4 +1,4 @@
-# ADR 0364: Parameterized Service Verification Tasks
+# ADR 0371: Parameterized Service Verification Tasks
 
 - **Date**: 2026-04-06
 - **Status**: Proposed
@@ -262,5 +262,5 @@ None — this is a self-contained addition to the `common` role.
 
 ## Related
 
-- ADR 0363 (Service Lifecycle Task Includes) — handles the main.yml duplication; this ADR handles verify.yml
+- ADR 0370 (Service Lifecycle Task Includes) — handles the main.yml duplication; this ADR handles verify.yml
 - ADR 0289 (Health Probe Catalog) — defines the health endpoints this ADR verifies

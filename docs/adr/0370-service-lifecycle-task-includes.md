@@ -1,4 +1,4 @@
-# ADR 0363: Service Lifecycle Task Includes
+# ADR 0370: Service Lifecycle Task Includes
 
 - **Date**: 2026-04-06
 - **Status**: Proposed
@@ -48,7 +48,7 @@ All new files go under `collections/ansible_collections/lv3/platform/roles/commo
 common/tasks/check_local_secrets.yml      — Phase 2
 common/tasks/manage_service_secrets.yml    — Phases 4-6
 common/tasks/docker_compose_converge.yml   — Phases 9-11
-common/tasks/verify_service_health.yml     — Phases 12-13 (see also ADR 0364)
+common/tasks/verify_service_health.yml     — Phases 12-13 (see also ADR 0371)
 ```
 
 Phase 1 (input validation) is already handled by `common/tasks/assert_vars.yml`.
@@ -490,7 +490,7 @@ git add collections/ansible_collections/lv3/platform/roles/common/tasks/check_lo
 git add collections/ansible_collections/lv3/platform/roles/common/tasks/manage_service_secrets.yml
 git add collections/ansible_collections/lv3/platform/roles/common/tasks/docker_compose_converge.yml
 git add collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
-git commit -m "feat(common): add shared service lifecycle task includes — ADR 0363"
+git commit -m "feat(common): add shared service lifecycle task includes — ADR 0370"
 ```
 
 #### Phase 2: Migrate `directus_runtime` as reference implementation (1 commit)
@@ -559,6 +559,6 @@ make validate-ansible-syntax
 
 ## Related
 
-- ADR 0361 (Compose Macro Library) — handles template-level duplication; this ADR handles task-level duplication
-- ADR 0364 (Parameterized Verify Tasks) — handles the verify.yml duplication
+- ADR 0368 (Compose Macro Library) — handles template-level duplication; this ADR handles task-level duplication
+- ADR 0371 (Parameterized Verify Tasks) — handles the verify.yml duplication
 - ADR 0359 (Declarative PostgreSQL Client Registry) — same "extract shared role from N identical roles" pattern

@@ -1,4 +1,4 @@
-# ADR 0362: Agent Service API Gateway — Governed Pattern for Internal Service Tools
+# ADR 0369: Agent Service API Gateway — Governed Pattern for Internal Service Tools
 
 - Status: Accepted
 - Implementation Status: Not Implemented
@@ -21,7 +21,7 @@ have REST API clients in the repository:
 - Nomad, Portainer, and the platform-context API already have ad-hoc tool
   integrations in `scripts/agent_tool_registry.py`
 
-The Nomad tools added in ADR 0361 established a working pattern but did not
+The Nomad tools added in ADR 0368 established a working pattern but did not
 formalize it. Each new service integration re-invents credential discovery,
 client construction, error handling, and governance classification. As the
 number of internal services grows (Dify, Netbox, Keycloak admin, Woodpecker),
@@ -133,6 +133,6 @@ directory name.
 ## Related ADRs
 
 - ADR 0069: Agent tool registry and governed tool calls (framework)
-- ADR 0361: Nomad OIDC and agent tools (first service API tools, ad-hoc)
+- ADR 0368: Nomad OIDC and agent tools (first service API tools, ad-hoc)
 - ADR 0360: Plane as Agent Task HQ (Plane integration context)
-- ADR 0363: Plane agent tools (first formal implementation of this pattern)
+- ADR 0370: Plane agent tools (first formal implementation of this pattern)

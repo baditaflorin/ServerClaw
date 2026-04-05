@@ -1,4 +1,4 @@
-# ADR 0365: Data-Driven Playbook Composition
+# ADR 0372: Data-Driven Playbook Composition
 
 - **Date**: 2026-04-06
 - **Status**: Proposed
@@ -357,7 +357,7 @@ converge-directus:
 mkdir -p collections/ansible_collections/lv3/platform/playbooks/_includes
 # Write all four files
 git add playbooks/_includes/
-git commit -m "feat(playbooks): add shared playbook includes for DNS, postgres, docker, nginx — ADR 0365"
+git commit -m "feat(playbooks): add shared playbook includes for DNS, postgres, docker, nginx — ADR 0372"
 ```
 
 #### Phase 2: Create the `vars/` directory and service descriptor for `directus`
@@ -437,5 +437,5 @@ After migrating each playbook, update its `make converge-<service>` target to pa
 
 ## Related
 
-- ADR 0363 (Service Lifecycle Task Includes) — handles role-level task duplication; this ADR handles playbook-level duplication
-- ADR 0366 (Service Registry) — the vars files this ADR introduces are precursors to the full service registry
+- ADR 0370 (Service Lifecycle Task Includes) — handles role-level task duplication; this ADR handles playbook-level duplication
+- ADR 0373 (Service Registry) — the vars files this ADR introduces are precursors to the full service registry

@@ -2,14 +2,14 @@
 
 These prompts are designed to be passed to a downstream model (e.g., ChatGPT Codex, Claude Sonnet) one at a time, in order. Each prompt is self-contained and references the specific ADR that governs the implementation.
 
-**Implementation order matters.** ADR 0362 has zero dependencies; ADR 0367 depends on everything before it. Do not skip or reorder.
+**Implementation order matters.** ADR 0369 has zero dependencies; ADR 0374 depends on everything before it. Do not skip or reorder.
 
 ---
 
-## Prompt 1: ADR 0362 — Python Validation Toolkit
+## Prompt 1: ADR 0369 — Python Validation Toolkit
 
 ```
-You are implementing ADR 0362 from this repository. Read `docs/adr/0362-python-validation-toolkit.md` completely before writing any code. Follow it exactly — do not deviate from the function signatures, error message formats, or migration procedure described in the ADR.
+You are implementing ADR 0369 from this repository. Read `docs/adr/0369-python-validation-toolkit.md` completely before writing any code. Follow it exactly — do not deviate from the function signatures, error message formats, or migration procedure described in the ADR.
 
 ## Your task
 
@@ -28,7 +28,7 @@ You are implementing ADR 0362 from this repository. Read `docs/adr/0362-python-v
    c. Add `from validation_toolkit import require_str, require_mapping, require_list, ...` (only the functions actually used)
    d. Ensure the script has a `sys.path.insert(0, str(Path(__file__).resolve().parent))` line (or equivalent) so the import resolves correctly
    e. Run the script's own validation mode to verify it still works (most scripts support `--check` or have a `if __name__ == "__main__"` block)
-   f. Commit the single script migration: `git add scripts/validation_toolkit.py scripts/<script_name>.py && git commit -m "refactor(<script_name>): use shared validation_toolkit — ADR 0362"`
+   f. Commit the single script migration: `git add scripts/validation_toolkit.py scripts/<script_name>.py && git commit -m "refactor(<script_name>): use shared validation_toolkit — ADR 0369"`
 
 5. After ALL scripts are migrated, run `make validate-schemas` to verify the full gate passes.
 
@@ -45,10 +45,10 @@ You are implementing ADR 0362 from this repository. Read `docs/adr/0362-python-v
 
 ---
 
-## Prompt 2: ADR 0361 — Docker Compose Jinja2 Macro Library
+## Prompt 2: ADR 0368 — Docker Compose Jinja2 Macro Library
 
 ```
-You are implementing ADR 0361 from this repository. Read `docs/adr/0361-docker-compose-jinja2-macro-library.md` completely before writing any code. Follow it exactly.
+You are implementing ADR 0368 from this repository. Read `docs/adr/0368-docker-compose-jinja2-macro-library.md` completely before writing any code. Follow it exactly.
 
 ## Your task
 
@@ -118,10 +118,10 @@ For each role: add the import line, replace the sidecar block, replace logging b
 
 ---
 
-## Prompt 3: ADR 0364 — Parameterized Service Verification Tasks
+## Prompt 3: ADR 0371 — Parameterized Service Verification Tasks
 
 ```
-You are implementing ADR 0364 from this repository. Read `docs/adr/0364-parameterized-verify-tasks.md` completely before writing any code. Follow it exactly.
+You are implementing ADR 0371 from this repository. Read `docs/adr/0371-parameterized-verify-tasks.md` completely before writing any code. Follow it exactly.
 
 ## Your task
 
@@ -198,14 +198,14 @@ Work through medium and complex roles. For roles with custom verification logic 
 
 ---
 
-## Prompt 4: ADR 0363 — Service Lifecycle Task Includes
+## Prompt 4: ADR 0370 — Service Lifecycle Task Includes
 
 ```
-You are implementing ADR 0363 from this repository. Read `docs/adr/0363-service-lifecycle-task-includes.md` completely before writing any code. Follow it exactly.
+You are implementing ADR 0370 from this repository. Read `docs/adr/0370-service-lifecycle-task-includes.md` completely before writing any code. Follow it exactly.
 
 ## Prerequisites
 
-ADR 0364 (verify tasks) should be implemented first. If it hasn't been done yet, do it before starting this one.
+ADR 0371 (verify tasks) should be implemented first. If it hasn't been done yet, do it before starting this one.
 
 ## Your task
 
@@ -282,14 +282,14 @@ The role does NOT become empty. It becomes a shorter orchestration file that cal
 
 ---
 
-## Prompt 5: ADR 0365 — Data-Driven Playbook Composition
+## Prompt 5: ADR 0372 — Data-Driven Playbook Composition
 
 ```
-You are implementing ADR 0365 from this repository. Read `docs/adr/0365-data-driven-playbook-composition.md` completely before writing any code. Follow it exactly.
+You are implementing ADR 0372 from this repository. Read `docs/adr/0372-data-driven-playbook-composition.md` completely before writing any code. Follow it exactly.
 
 ## Prerequisites
 
-ADR 0363 (lifecycle task includes) should be implemented first.
+ADR 0370 (lifecycle task includes) should be implemented first.
 
 ## Your task
 
@@ -374,14 +374,14 @@ ansible-playbook playbooks/<service>.yml -e @playbooks/vars/<service>.yml -e env
 
 ---
 
-## Prompt 6: ADR 0366 — Service Registry and Derived Defaults
+## Prompt 6: ADR 0373 — Service Registry and Derived Defaults
 
 ```
-You are implementing ADR 0366 from this repository. Read `docs/adr/0366-service-registry-and-derived-defaults.md` completely before writing any code. Follow it exactly.
+You are implementing ADR 0373 from this repository. Read `docs/adr/0373-service-registry-and-derived-defaults.md` completely before writing any code. Follow it exactly.
 
 ## Prerequisites
 
-ADR 0363 (lifecycle task includes) should be implemented first. ADR 0362 (validation toolkit) is needed for the validation script.
+ADR 0370 (lifecycle task includes) should be implemented first. ADR 0369 (validation toolkit) is needed for the validation script.
 
 ## Your task
 
@@ -410,7 +410,7 @@ Create `scripts/validate_service_registry.py` that:
 3. Cross-references image_catalog_key against the container image catalog
 4. Warns about *_runtime roles that have no registry entry
 
-Use `from validation_toolkit import require_str, require_mapping, require_int` (from ADR 0362).
+Use `from validation_toolkit import require_str, require_mapping, require_int` (from ADR 0369).
 
 The script must support:
 - `python scripts/validate_service_registry.py --check` — validate and exit
@@ -464,14 +464,14 @@ Add `python scripts/validate_service_registry.py --check` to the validation gate
 
 ---
 
-## Prompt 7: ADR 0367 — Cross-Cutting Service Manifest
+## Prompt 7: ADR 0374 — Cross-Cutting Service Manifest
 
 ```
-You are implementing ADR 0367 from this repository. Read `docs/adr/0367-cross-cutting-service-manifest.md` completely before writing any code. Follow it exactly.
+You are implementing ADR 0374 from this repository. Read `docs/adr/0374-cross-cutting-service-manifest.md` completely before writing any code. Follow it exactly.
 
 ## Prerequisites
 
-ADRs 0361, 0362, and 0366 must be implemented first. This ADR extends the service registry (0366) with cross-cutting declarations and uses the validation toolkit (0362) and compose macros (0361).
+ADRs 0368, 0369, and 0373 must be implemented first. This ADR extends the service registry (0373) with cross-cutting declarations and uses the validation toolkit (0369) and compose macros (0368).
 
 ## Your task — PHASE 1 ONLY (Hairpin concern)
 
@@ -530,7 +530,7 @@ The script must:
 # Generate the hairpin variable:
 python scripts/generate_cross_cutting_artifacts.py --write --only hairpin
 
-# Compare with the manually maintained list from ADR 0361:
+# Compare with the manually maintained list from ADR 0368:
 # The generated list should match or be a superset of platform_hairpin_nat_hosts
 diff inventory/group_vars/platform_hairpin.yml <previous manual version>
 ```
@@ -539,7 +539,7 @@ diff inventory/group_vars/platform_hairpin.yml <previous manual version>
 
 For each compose template that has manual `extra_hosts`, verify that:
 1. All its hostname entries are now in the generated `platform_hairpin_nat_hosts`
-2. The `hairpin_hosts()` macro from ADR 0361 is being used (or add it if ADR 0361 migration hasn't reached this role yet)
+2. The `hairpin_hosts()` macro from ADR 0368 is being used (or add it if ADR 0368 migration hasn't reached this role yet)
 
 ### Step 5: Add to gate validation
 
@@ -547,7 +547,7 @@ Add `python scripts/generate_cross_cutting_artifacts.py --check` to the validati
 
 ## DO NOT implement Phases 2-5 (DNS, TLS, Proxy, SSO) in this session
 
-Those require further design discussion. Only implement the hairpin concern. If you have time remaining, write stub functions for the other concerns that raise `NotImplementedError("Phase N not yet implemented — see ADR 0367")`.
+Those require further design discussion. Only implement the hairpin concern. If you have time remaining, write stub functions for the other concerns that raise `NotImplementedError("Phase N not yet implemented — see ADR 0374")`.
 
 ## Rules you must follow
 

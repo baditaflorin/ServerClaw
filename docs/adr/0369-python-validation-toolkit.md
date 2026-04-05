@@ -1,4 +1,4 @@
-# ADR 0362: Python Validation Toolkit
+# ADR 0369: Python Validation Toolkit
 
 - **Date**: 2026-04-06
 - **Status**: Proposed
@@ -227,7 +227,7 @@ make validate-schemas
 
 ```bash
 git add scripts/validation_toolkit.py scripts/<script_name>.py
-git commit -m "refactor(<script_name>): use shared validation_toolkit — ADR 0362"
+git commit -m "refactor(<script_name>): use shared validation_toolkit — ADR 0369"
 ```
 
 ### Import path considerations

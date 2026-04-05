@@ -1,4 +1,4 @@
-# ADR 0367: Cross-Cutting Service Manifest
+# ADR 0374: Cross-Cutting Service Manifest
 
 - **Date**: 2026-04-06
 - **Status**: Proposed
@@ -30,15 +30,15 @@ Each step is owned by a different role/file and must be done manually. There is 
 
 ### What already exists
 
-- ADR 0366 introduces `platform_service_registry` with core service identity (image, port, host).
-- ADR 0361 introduces `platform_hairpin_nat_hosts` as a centrally managed list.
+- ADR 0373 introduces `platform_service_registry` with core service identity (image, port, host).
+- ADR 0368 introduces `platform_hairpin_nat_hosts` as a centrally managed list.
 - `config/subdomain-catalog.json` exists but is disconnected from the service lifecycle.
 - `config/certificate-catalog.json` exists but is manually maintained.
 - Keycloak client registration is scattered across individual runtime roles.
 
 ## Decision
 
-Extend the **platform service registry** (ADR 0366) with **cross-cutting concern declarations**. Each service declares what it needs from DNS, nginx, TLS, and SSO — in one place. Dedicated roles and generators consume these declarations to converge the actual state.
+Extend the **platform service registry** (ADR 0373) with **cross-cutting concern declarations**. Each service declares what it needs from DNS, nginx, TLS, and SSO — in one place. Dedicated roles and generators consume these declarations to converge the actual state.
 
 ### Extended registry format
 
@@ -47,7 +47,7 @@ In `inventory/group_vars/platform_services.yml`, each service entry gains option
 ```yaml
 platform_service_registry:
   directus:
-    # --- Core identity (ADR 0366) ---
+    # --- Core identity (ADR 0373) ---
     image_catalog_key: directus_runtime
     internal_port: 8055
     host_group: docker-runtime-lv3
@@ -101,7 +101,7 @@ platform_service_registry:
 
     hairpin:
       # Declares that this service needs internal name resolution entries
-      # in other services' compose files (via the hairpin_hosts() macro from ADR 0361).
+      # in other services' compose files (via the hairpin_hosts() macro from ADR 0368).
       publish:
         - hostname: data.lv3.org
           address_host: nginx-lv3    # Resolved to IP via platform_guest_catalog
@@ -161,7 +161,7 @@ python scripts/generate_cross_cutting_artifacts.py --write --only hairpin
 
 #### Hairpin concern
 
-1. **Generates** `platform_hairpin_nat_hosts` (from ADR 0361) by aggregating all `hairpin.publish` entries across all services, resolving hostnames to IPs.
+1. **Generates** `platform_hairpin_nat_hosts` (from ADR 0368) by aggregating all `hairpin.publish` entries across all services, resolving hostnames to IPs.
 2. **Writes** the result into `inventory/group_vars/platform_hairpin.yml`:
    ```yaml
    # GENERATED — do not edit. Source: platform_service_registry hairpin declarations.
@@ -212,7 +212,7 @@ git add inventory/group_vars/platform_services.yml \
         config/certificate-catalog.json \
         config/generated/ \
         inventory/group_vars/platform_hairpin.yml
-git commit -m "feat(new-service): register cross-cutting infrastructure — ADR 0367"
+git commit -m "feat(new-service): register cross-cutting infrastructure — ADR 0374"
 
 # 6. Create the runtime role and playbook (separate commit)
 # ... standard role development ...
@@ -225,23 +225,23 @@ Compare this with the current workflow which requires edits to 4-6 disconnected 
 - **Must NOT** make live API calls (no Hetzner DNS API, no Keycloak API, no cert issuance). The generator only produces files that Ansible roles consume during `make converge-*`.
 - **Must NOT** modify files outside of `config/generated/`, `config/subdomain-catalog.json`, `config/certificate-catalog.json`, and `inventory/group_vars/platform_hairpin.yml`.
 - **Must NOT** import `requests` at module load time (same constraint as `agent_tool_registry.py` — breaks `--export-mcp` validation container).
-- **Must** use functions from `validation_toolkit.py` (ADR 0362) for all input validation.
+- **Must** use functions from `validation_toolkit.py` (ADR 0369) for all input validation.
 
 ### Migration strategy
 
-This ADR layers on top of ADR 0366 (service registry). It can be implemented incrementally — start with the hairpin concern (simplest, highest impact), then DNS, then TLS, then proxy, then SSO.
+This ADR layers on top of ADR 0373 (service registry). It can be implemented incrementally — start with the hairpin concern (simplest, highest impact), then DNS, then TLS, then proxy, then SSO.
 
 #### Phase 1: Hairpin (immediate win)
 
 1. Add `hairpin.publish` entries to existing `platform_service_registry` entries.
 2. Implement the hairpin generator.
-3. Replace all manual `extra_hosts` in compose templates with the `hairpin_hosts()` macro from ADR 0361.
+3. Replace all manual `extra_hosts` in compose templates with the `hairpin_hosts()` macro from ADR 0368.
 
 #### Phase 2: DNS
 
 1. Add `dns.records` entries.
 2. Implement the DNS validator/generator.
-3. Replace the 16 duplicated DNS plays in playbooks with the shared include from ADR 0365.
+3. Replace the 16 duplicated DNS plays in playbooks with the shared include from ADR 0372.
 
 #### Phase 3: TLS
 
@@ -296,10 +296,10 @@ This ADR layers on top of ADR 0366 (service registry). It can be implemented inc
 
 ## Depends on
 
-- ADR 0361 (Compose Macro Library) — `hairpin_hosts()` macro consumes the generated `platform_hairpin_nat_hosts`
-- ADR 0362 (Validation Toolkit) — generator uses shared validation functions
-- ADR 0365 (Data-Driven Playbook Composition) — shared DNS/postgres/nginx plays are replaced by generated includes
-- ADR 0366 (Service Registry) — this ADR extends the registry with cross-cutting sections
+- ADR 0368 (Compose Macro Library) — `hairpin_hosts()` macro consumes the generated `platform_hairpin_nat_hosts`
+- ADR 0369 (Validation Toolkit) — generator uses shared validation functions
+- ADR 0372 (Data-Driven Playbook Composition) — shared DNS/postgres/nginx plays are replaced by generated includes
+- ADR 0373 (Service Registry) — this ADR extends the registry with cross-cutting sections
 
 ## Related
 

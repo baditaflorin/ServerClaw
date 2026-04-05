@@ -1,4 +1,4 @@
-# ADR 0361: Docker Compose Jinja2 Macro Library
+# ADR 0368: Docker Compose Jinja2 Macro Library
 
 - **Date**: 2026-04-06
 - **Status**: Proposed
@@ -357,5 +357,5 @@ make validate-yaml
 
 ## Related
 
-- ADR 0363 (Service Lifecycle Task Includes) — extracts the Ansible task-level duplication that wraps these templates
-- ADR 0366 (Service Registry) — the registry this ADR's `hairpin_hosts()` variable anticipates
+- ADR 0370 (Service Lifecycle Task Includes) — extracts the Ansible task-level duplication that wraps these templates
+- ADR 0373 (Service Registry) — the registry this ADR's `hairpin_hosts()` variable anticipates

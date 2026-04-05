@@ -1,4 +1,4 @@
-# ADR 0363: Plane Agent Tools — Programmatic Task Management for Agents
+# ADR 0370: Plane Agent Tools — Programmatic Task Management for Agents
 
 - Status: Accepted
 - Implementation Status: Not Implemented
@@ -11,7 +11,7 @@
 ## Context
 
 ADR 0360 established Plane as the Agent Task HQ. ADR 0069 provides the governed
-tool registry. ADR 0362 defines the reusable pattern for service API tools.
+tool registry. ADR 0369 defines the reusable pattern for service API tools.
 
 Currently, the only way for agents to interact with Plane is through
 `sync_plane_agent_issues.py`, which operates at the workstream level. Agents
@@ -29,7 +29,7 @@ DNS brownout blocks scheduler.lv3.org deployment") without human intervention.
 
 ### Tools added to the agent tool registry
 
-Five Plane tools, following the ADR 0362 gateway pattern:
+Five Plane tools, following the ADR 0369 gateway pattern:
 
 | Tool name | Category | approval_required | PlaneClient method |
 |---|---|---|---|
@@ -80,7 +80,7 @@ Add a comment to an existing issue.
 
 ### Credential and context resolution
 
-Following ADR 0362:
+Following ADR 0369:
 
 - Auth file: `.local/plane/admin-auth.json` (already exists, contains
   `base_url`, `api_token`, `workspace_slug`, `verify_ssl`)
@@ -116,5 +116,5 @@ Following ADR 0362:
 
 - ADR 0069: Agent tool registry and governed tool calls
 - ADR 0360: Plane as Agent Task HQ
-- ADR 0362: Agent Service API Gateway pattern
-- ADR 0361: Nomad OIDC and agent tools (prior art)
+- ADR 0369: Agent Service API Gateway pattern
+- ADR 0368: Nomad OIDC and agent tools (prior art)
