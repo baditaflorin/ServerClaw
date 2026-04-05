@@ -15,7 +15,7 @@ live_apply_evidence:
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    api_gateway: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -23,12 +23,12 @@ live_apply_evidence:
     falco: 2026-04-03-adr-0300-falco-mainline-live-apply
     gitea: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     grist: 2026-04-04-ws-0335-service-recovery-followup-live-apply
-    homepage: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    homepage: 2026-04-03-ws-0332-homepage-triage-mainline-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
-    uptime_kuma: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    uptime_kuma: 2026-04-03-ws-0332-homepage-triage-mainline-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     backup_coverage: 2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply
@@ -39,9 +39,9 @@ live_apply_evidence:
     mail_platform: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     step_ca: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     openbao: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    vaultwarden: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    vaultwarden: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    windmill: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    windmill: 2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply
     woodpecker: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     self_correcting_automation_loops: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
     budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
@@ -61,7 +61,7 @@ live_apply_evidence:
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    keycloak: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
@@ -121,9 +121,9 @@ live_apply_evidence:
     operator_access_guided_onboarding: 2026-03-28-adr-0242-guided-human-onboarding-live-apply
     runtime_state_semantics: 2026-03-28-adr-0246-runtime-state-semantics-live-apply
     docs_portal: 2026-04-02-adr-0313-contextual-help-mainline-live-apply
-    harbor: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    harbor: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
-    nomad_scheduler: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    nomad_scheduler: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     serverclaw: 2026-04-01-adr-0294-one-api-mainline-live-apply
     serverclaw_memory: 2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply
     route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply

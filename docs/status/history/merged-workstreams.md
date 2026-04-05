@@ -9,6 +9,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
+| `0319` | Guarded live apply for the remaining runtime pool transition | `live_applied` | [ws-0331-runtime-pool-live-apply.md](../../workstreams/ws-0331-runtime-pool-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
@@ -164,7 +165,6 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
-| `0319` | Guarded live apply for the remaining runtime pool transition | `live_applied` | [ws-0331-runtime-pool-live-apply.md](../../workstreams/ws-0331-runtime-pool-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](../../workstreams/ws-0330-main-closeout.md) |
 | `0314` | Live apply resumable multi-step flows and return-to-task reentry from latest origin/main | `live_applied` | [ws-0314-live-apply.md](../../workstreams/ws-0314-live-apply.md) |
 | `0346` | Enforce health-gated compose dependencies for more predictable service recovery | `live_applied` | [ws-0332-resilience-predictability.md](../../workstreams/ws-0332-resilience-predictability.md) |

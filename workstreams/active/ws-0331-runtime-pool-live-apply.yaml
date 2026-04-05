@@ -16,27 +16,44 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
 - workstreams.yaml
+- workstreams/active/ws-0331-runtime-pool-live-apply.yaml
 - workstreams/archive/2026/ws-0331-runtime-pool-live-apply.yaml
 - docs/workstreams/ws-0331-runtime-pool-live-apply.md
+- docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
 - docs/adr/0319-runtime-pools-as-the-service-partition-boundary.md
 - docs/adr/0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes.md
 - docs/adr/0321-runtime-pool-memory-envelopes-and-reserved-host-headroom.md
 - docs/adr/0322-memory-pressure-autoscaling-for-elastic-runtime-pools.md
 - docs/adr/0323-service-mobility-tiers-and-migration-waves-for-runtime-pools.md
 - docs/adr/.index.yaml
+- docs/adr/index/*/*.yaml
 - docs/runbooks/configure-runtime-general-pool.md
 - docs/runbooks/configure-runtime-control-pool.md
 - docs/runbooks/runtime-pool-capacity-rebalance.md
 - docs/runbooks/runtime-pool-memory-governance.md
 - docs/runbooks/configure-runtime-pool-autoscaling.md
+- docs/runbooks/*.md
+- docs/status/history/*.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- Makefile
+- RELEASE.md
 - playbooks/runtime-pool-capacity-rebalance.yml
 - playbooks/services/runtime-pool-capacity-rebalance.yml
 - playbooks/runtime-general-pool.yml
 - playbooks/services/runtime-general-pool.yml
 - playbooks/runtime-control-pool.yml
 - playbooks/services/runtime-control-pool.yml
+- playbooks/*.yml
+- playbooks/tasks/*.yml
+- collections/ansible_collections/lv3/platform/playbooks/*.yml
+- collections/ansible_collections/lv3/platform/playbooks/tasks/*.yml
+- collections/ansible_collections/lv3/platform/roles/*/defaults/*.yml
+- collections/ansible_collections/lv3/platform/roles/*/tasks/*.yml
+- collections/ansible_collections/lv3/platform/roles/*/meta/*.yml
 - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2
 - inventory/hosts.yml
+- config/*.yaml
+- config/*.json
 - inventory/host_vars/proxmox_florin.yml
 - inventory/group_vars/platform.yml
 - config/capacity-model.json
@@ -47,6 +64,15 @@ shared_surfaces:
 - VERSION
 - changelog.md
 - docs/release-notes/*.md
+- platform/ansible/execution_scopes.py
+- scripts/*.py
+- scripts/*.json
+- tests/test_*.py
+- receipts/cve/*.json
+- receipts/image-scans/*.json
+- receipts/restic-backups/*.json
+- receipts/restic-snapshots-latest.json
+- receipts/sbom/*.json
 - tests/test_step_ca_runtime_role.py
 - receipts/live-applies/*
 - receipts/live-applies/evidence/*
@@ -59,7 +85,7 @@ ownership_manifest:
     contract: workstream-registry-v1
   - id: ws0331_registry_source
     paths:
-    - workstreams/archive/2026/ws-0331-runtime-pool-live-apply.yaml
+    - workstreams/active/ws-0331-runtime-pool-live-apply.yaml
     mode: exclusive
   - id: adr_index_generation
     paths:
@@ -115,6 +141,35 @@ ownership_manifest:
     - receipts/live-applies/*
     - receipts/live-applies/evidence/*
     mode: exclusive
+  - id: ws0331_integration_delta
+    paths:
+    - workstreams/archive/2026/ws-0331-runtime-pool-live-apply.yaml
+    - Makefile
+    - RELEASE.md
+    - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+    - docs/adr/index/*/*.yaml
+    - docs/runbooks/*.md
+    - docs/status/history/*.md
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - playbooks/*.yml
+    - playbooks/tasks/*.yml
+    - collections/ansible_collections/lv3/platform/playbooks/*.yml
+    - collections/ansible_collections/lv3/platform/playbooks/tasks/*.yml
+    - collections/ansible_collections/lv3/platform/roles/*/defaults/*.yml
+    - collections/ansible_collections/lv3/platform/roles/*/tasks/*.yml
+    - collections/ansible_collections/lv3/platform/roles/*/meta/*.yml
+    - config/*.yaml
+    - config/*.json
+    - platform/ansible/execution_scopes.py
+    - scripts/*.py
+    - scripts/*.json
+    - tests/test_*.py
+    - receipts/cve/*.json
+    - receipts/image-scans/*.json
+    - receipts/restic-backups/*.json
+    - receipts/restic-snapshots-latest.json
+    - receipts/sbom/*.json
+    mode: exclusive
 blockers: []
 ready_to_merge: true
 live_applied: true
@@ -123,7 +178,7 @@ canonical_truth:
     runtime-general and runtime-control online, rebalancing host memory to satisfy
     ADR 0321, and capturing the verified platform truth from exact mainline
   release_bump: patch
-  included_in_repo_version: 0.178.6
+  included_in_repo_version:
   latest_receipts:
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     docker_runtime: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
