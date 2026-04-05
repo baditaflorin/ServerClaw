@@ -193,67 +193,6 @@ def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path)
     return payload
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
-    repo_root = Path(repo_path)
-    gate_script = repo_root / "scripts" / "run_gate.py"
-    manifest_path = repo_root / "config" / "validation-gate.json"
-    status_path = repo_root / ".local" / "validation-gate" / "post-merge-last-run.json"
-
-    if not gate_script.exists() or not manifest_path.exists():
-        return {
-            "status": "blocked",
-            "reason": "validation gate surfaces are missing from the worker checkout",
-            "expected_repo_path": str(repo_root),
-        }
-
-    command = [
-        "python3",
-        str(gate_script),
-        "--manifest",
-        str(manifest_path),
-        "--workspace",
-        str(repo_root),
-        "--status-file",
-        str(status_path),
-        "--source",
-        "windmill-post-merge",
-        "--print-json",
-    ]
-    previous_runner_id = os.environ.get("LV3_VALIDATION_RUNNER_ID")
-    os.environ["LV3_VALIDATION_RUNNER_ID"] = VALIDATION_RUNNER_ID
-    try:
-        result = _run(command, cwd=repo_root)
-    finally:
-        if previous_runner_id is None:
-            os.environ.pop("LV3_VALIDATION_RUNNER_ID", None)
-        else:
-            os.environ["LV3_VALIDATION_RUNNER_ID"] = previous_runner_id
-    gate_status = _load_gate_status(status_path)
-    payload: dict[str, Any] = {
-        "status": "ok"
-        if result.returncode == 0 and (gate_status is None or gate_status.get("status") == "passed")
-        else "error",
-        "command": " ".join(shlex.quote(part) for part in command),
-        "returncode": result.returncode,
-        "stdout": result.stdout.strip(),
-        "stderr": result.stderr.strip(),
-    }
-    if gate_status is not None:
-        payload["gate_status"] = gate_status
-    runner_startup_failed = _runner_image_pull_failed(result.stdout, result.stderr) or _gate_status_runner_startup_failed(
-        gate_status
-    )
-    if payload["status"] == "error" and runner_startup_failed:
-        payload["primary_gate_error"] = {
-            "command": payload["command"],
-            "returncode": result.returncode,
-            "stdout": payload["stdout"],
-            "stderr": payload["stderr"],
-        }
-        return _run_local_fallback(repo_root, manifest_path, status_path) | {"primary_gate_error": payload["primary_gate_error"]}
-    return payload
-
-
 def _publish_to_outline(repo_root: Path, payload: dict[str, Any]) -> None:
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
