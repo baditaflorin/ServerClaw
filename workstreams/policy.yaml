@@ -12,3 +12,9 @@ release_policy:
   changelog_working_section: Unreleased
   versions_stack_branch_policy: main_only
   breaking_change_criteria: config/version-semantics.json
+surface_ownership:
+  global_mutable_paths:
+    - receipts/gate-bypasses/*
+    - receipts/restic-backups/*
+    - receipts/restic-snapshots-latest.json
+    - receipts/sbom/*

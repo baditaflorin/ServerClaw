@@ -314,12 +314,21 @@ def validate_branch_ownership(
     if source_record is not None and source_record.location != "compatibility":
         implicit_mutable_paths.add(source_record.path.relative_to(repo_root).as_posix())
 
+    global_mutable_patterns: tuple[str, ...] = tuple(
+        str(p)
+        for p in (
+            registry.get("surface_ownership") or {}
+        ).get("global_mutable_paths", [])
+    )
+
     mutable_surfaces = [surface for surface in ownership.owned_surfaces if surface.mode in MUTABLE_SURFACE_MODES]
     immutable_surfaces = [surface for surface in ownership.owned_surfaces if surface.mode not in MUTABLE_SURFACE_MODES]
     failures: list[str] = []
 
     for changed_file in changed_files:
         if changed_file in implicit_mutable_paths:
+            continue
+        if global_mutable_patterns and _matches_any_pattern(changed_file, global_mutable_patterns):
             continue
         matched_mutable = [surface for surface in mutable_surfaces if _matches_any_pattern(changed_file, surface.paths)]
         matched_immutable = [surface for surface in immutable_surfaces if _matches_any_pattern(changed_file, surface.paths)]

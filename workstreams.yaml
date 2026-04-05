@@ -1511,3 +1511,9 @@ workstreams:
       - playbooks/services/runtime-comms-pool.yml
       mode: shared_contract
       contract: topology-v1
+surface_ownership:
+  global_mutable_paths:
+  - receipts/gate-bypasses/*
+  - receipts/restic-backups/*
+  - receipts/restic-snapshots-latest.json
+  - receipts/sbom/*

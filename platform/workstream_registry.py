@@ -163,11 +163,14 @@ def load_policy(
     paths = resolve_paths(repo_root=repo_root, compatibility_path=compatibility_path)
     if paths.policy_path.exists():
         payload = _require_mapping(load_yaml(paths.policy_path), str(paths.policy_path))
-        return {
+        result: dict[str, Any] = {
             "schema_version": payload.get("schema_version", "1.0.0"),
             "delivery_model": _require_mapping(payload.get("delivery_model"), "workstreams/policy.yaml.delivery_model"),
             "release_policy": _require_mapping(payload.get("release_policy"), "workstreams/policy.yaml.release_policy"),
         }
+        if "surface_ownership" in payload:
+            result["surface_ownership"] = payload["surface_ownership"]
+        return result
 
     payload = _require_mapping(load_yaml(paths.compatibility_path), str(paths.compatibility_path))
     return {
@@ -352,6 +355,8 @@ def assemble_registry(
         "archive_summary": build_archive_summary(archive_records),
         "workstreams": _sort_workstreams([_clean_payload(record.payload) for record in active_records]),
     }
+    if "surface_ownership" in policy:
+        payload["surface_ownership"] = policy["surface_ownership"]
     if include_archive:
         payload["workstreams"] = _sort_workstreams(
             [_clean_payload(record.payload) for record in active_records]
@@ -378,11 +383,13 @@ def _write_text(path: Path, content: str) -> None:
 
 
 def _write_policy(policy: dict[str, Any], *, paths: RegistryPaths) -> Path:
-    payload = {
+    payload: dict[str, Any] = {
         "schema_version": policy.get("schema_version", "1.0.0"),
         "delivery_model": policy["delivery_model"],
         "release_policy": policy["release_policy"],
     }
+    if "surface_ownership" in policy:
+        payload["surface_ownership"] = policy["surface_ownership"]
     _write_text(paths.policy_path, _dump_yaml(payload))
     return paths.policy_path
 
