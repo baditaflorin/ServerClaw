@@ -11,6 +11,11 @@
 # Outputs:
 #   - Proxmox platform packages, host access, networking, security, API access, backup policy, and host control-loop systemd units converged from repo truth.
 #
+# Post-provisioning dependency:
+#   - After adding or removing a VM in lv3_guests, run `make live-apply-service service=realtime`
+#     so Netdata is installed on the new guest and it appears on realtime.lv3.org.
+#     Running `site.yml` (full converge) satisfies this automatically via the observability group.
+#
 # Idempotency: Fully idempotent
 #
 # Dependencies:

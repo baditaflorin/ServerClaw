@@ -160,6 +160,20 @@ The pre-push gate (`scripts/validate_repo.sh agent-standards`) enforces:
 - `docs/adr/.index.yaml` must be current when ADR files change
   - Regenerate: `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
 
+## Cross-Service Wiring Rules
+
+Some services derive their configuration dynamically from the inventory host list.
+After any change to `inventory/hosts.yml` that adds or removes a VM from `lv3_guests`,
+re-converge the services below or the running state will drift from inventory truth.
+
+| Trigger | Required follow-up | Why |
+|---|---|---|
+| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology is derived from `lv3_guests`; new VMs won't stream metrics until Netdata is installed on them |
+
+Running `site.yml` (full-stack converge) satisfies all of the above automatically because
+`playbooks/groups/observability.yml` imports the realtime service playbook.
+For targeted VM-only runs (`make provision-guests`), apply the realtime service manually afterwards.
+
 ## Lessons Learned
 
 - Proxmox guest network identity must be deterministic. Reapplying `qm set --net0 virtio,bridge=...` without an explicit MAC can assign a new MAC address, while Debian 13 cloud-init or systemd-networkd may still match the previous MAC in generated network config. The result is a guest that boots with no usable network even though the intended static config exists.
