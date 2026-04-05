@@ -51,7 +51,7 @@ openbao_tls_certificate_subject: "{{ platform_host.management.tailscale_ipv4 }}"
 openbao_tls_server_sans:
   - "{{ openbao_controller_url | urlsplit('hostname') }}"
   - "{{ platform_host.management.tailscale_ipv4 }}"
-openbao_tls_certificate_not_after: 24h
+openbao_tls_certificate_not_after: 72h
 openbao_tls_cert_renew_before_seconds: 21600
 openbao_tls_renewal_timer_name: lv3-openbao-cert-renew
 openbao_tls_renewal_script_path: "/usr/local/libexec/{{ openbao_tls_renewal_timer_name }}.sh"

@@ -63,7 +63,7 @@ groups:
 
       - alert: CertificateExpiringSoon
         expr: |
-          (probe_ssl_earliest_cert_expiry{service=~"grafana|keycloak|mail_platform|portainer|step_ca|uptime_kuma|vaultwarden"} - time())
+          (probe_ssl_earliest_cert_expiry{service=~"grafana|keycloak|mail_platform|openbao|portainer|step_ca|uptime_kuma|vaultwarden"} - time())
           < (14 * 24 * 60 * 60)
         for: 15m
         labels:
@@ -74,6 +74,19 @@ groups:
           description: 'The earliest observed TLS certificate for {{ $labels.service }} is approaching expiry.'
           runbook_url: https://docs.lv3.org/runbooks/cert-expired/
           dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+
+      - alert: TlsCertificateExpiryCritical
+        expr: |
+          (probe_ssl_earliest_cert_expiry{service=~"openbao"} - time())
+          < (4 * 60 * 60)
+        for: 5m
+        labels:
+          severity: critical
+          service: '{{ $labels.service }}'
+        annotations:
+          summary: 'The {{ $labels.service }} certificate expires within 4 hours.'
+          description: 'The short-lived TLS certificate for {{ $labels.service }} is expiring imminently. The renewal timer may have failed. Run make converge-openbao immediately.'
+          runbook_url: https://docs.lv3.org/runbooks/openbao-cert-renewal/
 
   - name: postgres-audit
     rules:
