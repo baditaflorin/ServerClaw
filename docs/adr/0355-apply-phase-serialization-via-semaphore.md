@@ -3,6 +3,7 @@
 - Status: Accepted
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Scoping Note (2026-04-06): Merge into existing ADR 0153 lock registry as a coarser lock level (vm:101:apply). Do not build a separate semaphore system — the existing hierarchical S/X/I locks already support this granularity.
 - Tags: agent-coordination, locking, semaphore, apply-safety, atomicity
 
 ## Context

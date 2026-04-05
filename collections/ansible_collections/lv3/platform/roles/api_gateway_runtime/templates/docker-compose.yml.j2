@@ -1,3 +1,4 @@
+# managed-by: role=api_gateway_runtime adr=0350 agent={{ lookup('env','LV3_AGENT_SESSION') | default('operator') }}
 services:
   api-gateway:
     image: {{ api_gateway_image_name }}:latest

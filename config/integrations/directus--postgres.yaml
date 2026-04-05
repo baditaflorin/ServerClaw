@@ -1,0 +1,30 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0353 role=directus_postgres
+schema_version: "1.0.0"
+contract_id: directus--postgres
+consumer: directus_runtime
+provider: postgres_vm
+integration_type: postgres
+adr: "0143"
+
+connection:
+  host_var: platform_port_assignments.postgres_host
+  port_var: platform_port_assignments.postgres_port
+  database: directus
+  user: directus
+  ssl_mode: require
+
+secrets:
+  - path: openbao/postgres/directus/password
+    env_var: DB_PASSWORD
+
+health_check:
+  query: "SELECT 1"
+  timeout_seconds: 5
+
+pre_flight:
+  - check: postgres_schema_exists
+    schema: directus
+  - check: role_exists
+    role: directus

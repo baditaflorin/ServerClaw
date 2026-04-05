@@ -1,0 +1,30 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0353 role=keycloak_postgres
+schema_version: "1.0.0"
+contract_id: keycloak--postgres
+consumer: keycloak_runtime
+provider: postgres_vm
+integration_type: postgres
+adr: "0200"
+
+connection:
+  host_var: platform_port_assignments.postgres_host
+  port_var: platform_port_assignments.postgres_port
+  database: keycloak
+  user: keycloak
+  ssl_mode: require
+
+secrets:
+  - path: openbao/postgres/keycloak/password
+    env_var: KEYCLOAK_DB_PASSWORD
+
+health_check:
+  query: "SELECT 1"
+  timeout_seconds: 5
+
+pre_flight:
+  - check: postgres_schema_exists
+    schema: keycloak
+  - check: role_exists
+    role: keycloak

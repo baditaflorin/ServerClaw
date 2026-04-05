@@ -1,0 +1,28 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0353 role=dify_runtime
+schema_version: "1.0.0"
+contract_id: dify--minio
+consumer: dify_runtime
+provider: minio_runtime
+integration_type: s3
+adr: "0179"
+
+connection:
+  endpoint_var: platform_port_assignments.minio_api_url
+  bucket: dify
+  region: us-east-1
+
+secrets:
+  - path: openbao/minio/dify/access_key
+    env_var: S3_ACCESS_KEY
+  - path: openbao/minio/dify/secret_key
+    env_var: S3_SECRET_KEY
+
+health_check:
+  method: head_bucket
+  timeout_seconds: 5
+
+pre_flight:
+  - check: bucket_exists
+    bucket: dify

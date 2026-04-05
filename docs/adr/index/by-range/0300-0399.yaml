@@ -1145,8 +1145,8 @@ adrs:
     implemented_in_repo_version: 0.179.0
   - adr: 0348
     title: Per-Service LLM Context File (service.llm.yaml)
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Superseded
+    implementation_status: Will Not Implement
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1165,7 +1165,7 @@ adrs:
     path: docs/adr/0348-per-service-llm-context-file.md
   - adr: 0349
     title: Agent Capability Manifest and Peer Discovery
-    status: Accepted
+    status: Deferred
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1223,8 +1223,8 @@ adrs:
     path: docs/adr/0351-change-provenance-tagging.md
   - adr: '0352'
     title: Token-Budgeted Agent Onboarding Packs
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Superseded
+    implementation_status: Will Not Implement
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1260,7 +1260,7 @@ adrs:
     path: docs/adr/0353-service-integration-contract-registry.md
   - adr: '0354'
     title: Structured Agent Mutation Audit Log
-    status: Accepted
+    status: Deferred
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1297,8 +1297,8 @@ adrs:
     path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
   - adr: '0356'
     title: LLM Inference Routing and Model Registry
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Superseded
+    implementation_status: Will Not Implement
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1336,7 +1336,7 @@ adrs:
     path: docs/adr/0357-idempotent-workstream-apply-receipts.md
   - adr: 0358
     title: Platform Health Contract and Inter-Service Dependency SLO
-    status: Accepted
+    status: Deferred
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
