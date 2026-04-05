@@ -1,6 +1,9 @@
 id: naughty-jepsen-ops-fixes
+adr: '0043'
 title: Operational fixes — OpenBao unseal watcher, Keycloak VM migration, oauth2-proxy
 status: in_progress
+ready_to_merge: false
+live_applied: false
 owner: claude
 branch: claude/naughty-jepsen
 worktree_path: .claude/worktrees/naughty-jepsen

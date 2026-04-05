@@ -444,6 +444,92 @@
         "/"
       ],
       "notes": "Reserved planned capacity for ADR 0098."
+    },
+    {
+      "vmid": 152,
+      "name": "postgres-apps-lv3",
+      "status": "planned",
+      "environment": "production",
+      "metrics_host": "postgres-apps-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 128
+      },
+      "capacity_class": "ha_reserved",
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Reserved planned capacity for ADR 0346 PostgreSQL domain clustering."
+    },
+    {
+      "vmid": 154,
+      "name": "postgres-data-lv3",
+      "status": "planned",
+      "environment": "production",
+      "metrics_host": "postgres-data-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 128
+      },
+      "capacity_class": "ha_reserved",
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Reserved planned capacity for ADR 0346 PostgreSQL domain clustering."
+    },
+    {
+      "vmid": 121,
+      "name": "runtime-comms-lv3",
+      "status": "planned",
+      "environment": "production",
+      "metrics_host": "runtime-comms-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 64
+      },
+      "budget": {
+        "ram_gb": 16,
+        "vcpu": 8,
+        "disk_gb": 128
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Reserved planned capacity for ADR 0347 docker-runtime workload split."
+    },
+    {
+      "vmid": 122,
+      "name": "runtime-apps-lv3",
+      "status": "planned",
+      "environment": "production",
+      "metrics_host": "runtime-apps-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 64
+      },
+      "budget": {
+        "ram_gb": 16,
+        "vcpu": 8,
+        "disk_gb": 128
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Reserved planned capacity for ADR 0347 docker-runtime workload split."
     }
   ],
   "runtime_pool_memory": {
