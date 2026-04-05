@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.3",
   "platform_version": "0.130.98",
-  "generated_at": "2026-04-04T14:00:51Z",
-  "next_refresh_at": "2026-04-04T15:00:51Z",
+  "generated_at": "2026-04-05T11:53:48Z",
+  "next_refresh_at": "2026-04-05T12:53:48Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6156,7 +6156,7 @@
   },
   "recent_changes": {
     "last_version": "0.178.2",
-    "deployed_at": "2026-04-04",
+    "deployed_at": "2026-04-05",
     "summary": "proves ADR 0318 end to end from a dedicated worktree by making the fallback onboarding script worktree-safe, role-contract aligned, and recoverable with ephemeral runtime secret overrides while live-provisioning and auditing the temporary admin operator florin-tmp-002 implements ADR 0326 by making per-workstream shard files the authored source of truth, generating a compact active-only workstreams.yaml compatibility surface, and teaching release and validation automation to consume the sharded registry safely",
     "release_notes_url": "docs/release-notes/0.178.3.md"
   },
