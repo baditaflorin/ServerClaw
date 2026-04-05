@@ -84,5 +84,5 @@ langfuse_minio_access_key_id: langfuseapp
 langfuse_minio_bucket_name: langfuse-exports
 langfuse_minio_private_endpoint: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'internal') }}"
 langfuse_minio_public_endpoint: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'public') }}"
-langfuse_disable_signup: true
+langfuse_disable_signup: false
 langfuse_telemetry_enabled: false
