@@ -556,7 +556,7 @@
       "service": "repowise",
       "name": "Repowise Semantic Code Search",
       "vm": "docker-runtime-lv3",
-      "tier": 2,
+      "tier": 1,
       "category": "automation",
       "adr": "0346"
     },
