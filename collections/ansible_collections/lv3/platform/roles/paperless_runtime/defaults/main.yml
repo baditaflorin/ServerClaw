@@ -66,31 +66,31 @@ paperless_volume_names:
   consume: paperless-consume
 paperless_default_sso_group: lv3-platform-users
 paperless_default_sso_group_permissions:
-  - documents.view_document
-  - documents.add_document
-  - documents.change_document
-  - documents.delete_document
-  - documents.view_tag
-  - documents.add_tag
-  - documents.change_tag
-  - documents.view_correspondent
-  - documents.add_correspondent
-  - documents.change_correspondent
-  - documents.view_documenttype
-  - documents.add_documenttype
-  - documents.change_documenttype
-  - documents.view_savedview
-  - documents.add_savedview
-  - documents.change_savedview
-  - documents.delete_savedview
-  - documents.view_uisettings
-  - documents.add_uisettings
-  - documents.change_uisettings
-  - documents.delete_uisettings
-  - documents.view_sharingtoken
-  - documents.add_sharingtoken
-  - documents.change_sharingtoken
-  - documents.delete_sharingtoken
+  - view_document
+  - add_document
+  - change_document
+  - delete_document
+  - view_tag
+  - add_tag
+  - change_tag
+  - view_correspondent
+  - add_correspondent
+  - change_correspondent
+  - view_documenttype
+  - add_documenttype
+  - change_documenttype
+  - view_savedview
+  - add_savedview
+  - change_savedview
+  - delete_savedview
+  - view_uisettings
+  - add_uisettings
+  - change_uisettings
+  - delete_uisettings
+  - view_sharelink
+  - add_sharelink
+  - change_sharelink
+  - delete_sharelink
 
 paperless_taxonomy_manifest:
   schema_version: "1.0.0"
