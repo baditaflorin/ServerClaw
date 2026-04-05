@@ -1,0 +1,72 @@
+id: ws-0364-service-api-agent-tools
+title: "Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR 0362 follow-up)"
+status: planned
+owner: unassigned
+priority: medium
+
+description: |
+  ADR 0362 (Agent Service API Gateway) is implemented for Plane (ADR 0363) but three
+  gaps remain before the pattern is fully reusable:
+
+  1. Generic _resolve_service_auth(service_name) helper is missing — only Plane-specific
+     _resolve_plane_auth() exists. Must be built before other services can be added without
+     copy-pasting credential discovery logic.
+
+  2. Outline tools (wiki.lv3.org) — existing REST client at scripts/outline_client.py,
+     no governed tool surface yet.
+
+  3. Netbox tools — network source of truth, agents can't query IP allocations.
+
+  4. Dify tools — agents can't trigger workflows programmatically.
+
+  Plane task creation was attempted but Plane API returned 502 at time of writing.
+  Run sync_plane_agent_issues.py once Plane recovers to register this workstream.
+
+tasks:
+  - id: task-1
+    title: "Implement generic _resolve_service_auth(service_name) helper"
+    priority: medium
+    description: |
+      Add _resolve_service_auth(service_name: str) -> dict to scripts/agent_tool_registry.py.
+      Precedence: env LV3_{SERVICE}_AUTH_FILE → .local/{service}/admin-auth.json → .local/{service}/api-token.txt
+      Refactor _resolve_plane_auth() to delegate to this helper.
+      File: scripts/agent_tool_registry.py ~line 720
+      ADR: docs/adr/0362-agent-service-api-gateway-pattern.md
+
+  - id: task-2
+    title: "Build Outline agent tools (list/search/get/create)"
+    priority: medium
+    description: |
+      Tools: list-outline-collections, search-outline-documents, get-outline-document,
+             create-outline-document (approval_required: true)
+      Existing client: scripts/outline_client.py
+      Auth: .local/outline/admin-auth.json (base_url, api_token)
+      Registry: config/agent-tool-registry.json
+      Write ADR 0364 for Outline agent tools.
+      Prior art: Plane handlers in scripts/agent_tool_registry.py lines ~720-895
+
+  - id: task-3
+    title: "Build Netbox agent tools (list-devices, get-device, list-prefixes)"
+    priority: low
+    description: |
+      Tools: list-netbox-devices, get-netbox-device, list-netbox-prefixes,
+             create-netbox-ip-address (approval_required: true)
+      Auth: .local/netbox/admin-auth.json (base_url, api_token)
+      Netbox REST API v3: /api/dcim/devices/, /api/ipam/prefixes/
+
+  - id: task-4
+    title: "Build Dify agent tools (list-apps, get-app, trigger-workflow)"
+    priority: low
+    description: |
+      Tools: list-dify-apps, get-dify-app, trigger-dify-workflow (approval_required: true)
+      IMPORTANT: use internal URL http://10.10.10.20:8094 — agents.lv3.org is behind oauth2-proxy
+      Auth: .local/dify/admin-auth.json (base_url, api_token = Dify API key)
+
+adr_refs:
+  - "0362"
+  - "0363"
+
+notes: |
+  Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py
+  step was skipped. Run it to register in Plane once the service recovers:
+    python scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools
