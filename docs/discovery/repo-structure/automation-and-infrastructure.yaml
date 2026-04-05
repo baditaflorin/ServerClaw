@@ -2,8 +2,10 @@ schema_version: 1
 section:
   id: automation-and-infrastructure
   title: Automation And Infrastructure Surfaces
-  summary: Ansible, IaC, policy, inventory, scripts, and tests that define and validate the platform.
-  when_to_read: Use this section when changing provisioning, topology, repo automation, or validation logic.
+  summary: Ansible, IaC, policy, inventory, scripts, and tests that define and
+    validate the platform.
+  when_to_read: Use this section when changing provisioning, topology, repo
+    automation, or validation logic.
 entries:
   directories:
     playbooks:
@@ -11,13 +13,14 @@ entries:
       contains: site.yml, bootstrap.yml, per-service playbooks, groups/
       concern: automation, infrastructure-deployment
       keywords:
-      - ansible
-      - playbooks
-      - deployment
-      - automation
-      - idempotent
-      - provision
-      for_agents: 'Check metadata header (first 30 lines) of each playbook for Purpose, Inputs, Outputs, Dependencies. Template at playbooks/.metadata-template.yml
+        - ansible
+        - playbooks
+        - deployment
+        - automation
+        - idempotent
+        - provision
+      for_agents: 'Check metadata header (first 30 lines) of each playbook for Purpose,
+        Inputs, Outputs, Dependencies. Template at playbooks/.metadata-template.yml
 
         '
       key_files:
@@ -29,11 +32,12 @@ entries:
       contains: Reusable role implementations
       concern: automation, shared-logic
       keywords:
-      - roles
-      - reusable
-      - task-groups
-      - handlers
-      for_agents: 'Most roles live in collections/ansible_collections/lv3/platform/roles/. Check meta/main.yml for each role''s documented contract.
+        - roles
+        - reusable
+        - task-groups
+        - handlers
+      for_agents: 'Most roles live in collections/ansible_collections/lv3/platform/roles/.
+        Check meta/main.yml for each role''s documented contract.
 
         '
     collections/ansible_collections/lv3/platform:
@@ -41,25 +45,26 @@ entries:
       contains: roles/, plugins/, modules/ specific to this infrastructure
       concern: shared-automation, extensibility
       keywords:
-      - collection
-      - custom
-      - modules
-      - plugins
-      - reusable
-      - lv3
+        - collection
+        - custom
+        - modules
+        - plugins
+        - reusable
+        - lv3
       for_agents: PRIMARY location for roles; check roles/ subdirectory
     inventory:
       purpose: Ansible inventory, host groups, and variable definitions
       contains: hosts.yml, group_vars/, host_vars/, examples/
       concern: infrastructure-topology, declarative-state
       keywords:
-      - inventory
-      - hosts
-      - groups
-      - variables
-      - topology
-      - ansible
-      for_agents: 'hosts.yml defines all VMs; group_vars/all.yml has shared vars; host_vars/<name>.yml has per-host overrides.
+        - inventory
+        - hosts
+        - groups
+        - variables
+        - topology
+        - ansible
+      for_agents: 'hosts.yml defines all VMs; group_vars/all.yml has shared vars;
+        host_vars/<name>.yml has per-host overrides.
 
         '
     reference-deployments:
@@ -79,29 +84,34 @@ entries:
       contains: Per-service config directories for all deployed services plus examples/
       concern: service-configuration, applications
       keywords:
-      - config
-      - templates
-      - services
-      - settings
-      - configuration
-      for_agents: 'One subdirectory per service (e.g., config/gitea/, config/keycloak/). Read .config-locations.yaml for which file controls which behaviour.
+        - config
+        - templates
+        - services
+        - settings
+        - configuration
+      for_agents: 'One subdirectory per service (e.g., config/gitea/, config/keycloak/).
+        Read .config-locations.yaml for which file controls which behaviour.
 
         '
       key_files:
-        network-impairment-matrix.yaml: ADR 0189 governed preview/staging network impairment catalog
-        stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites mapped to service/environment bindings
+        network-impairment-matrix.yaml: ADR 0189 governed preview/staging
+          network impairment catalog
+        stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites
+          mapped to service/environment bindings
     policy:
       purpose: Shared Rego policy bundles and tests for OPA and Conftest
       contains: decisions/, conftest/, tests/
       concern: policy, validation, shared-decision-logic
       keywords:
-      - policy
-      - opa
-      - conftest
-      - rego
-      - approvals
-      - promotion
-      for_agents: 'Shared decision logic lives here for command approval, promotion eligibility, and repository invariants. Validate changes with scripts/policy_checks.py before updating callers.
+        - policy
+        - opa
+        - conftest
+        - rego
+        - approvals
+        - promotion
+      for_agents: 'Shared decision logic lives here for command approval, promotion
+        eligibility, and repository invariants. Validate changes with scripts/policy_checks.py
+        before updating callers.
 
         '
     scripts:
@@ -109,86 +119,97 @@ entries:
       contains: Validation, data generation, CI helpers, operational utilities
       concern: automation, tooling, ci
       keywords:
-      - scripts
-      - utilities
-      - helpers
-      - tools
-      - validation
-      - python
-      for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json.
+        - scripts
+        - utilities
+        - helpers
+        - tools
+        - validation
+        - python
+      for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates
+        docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR
+        shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json.
 
         '
       key_files:
-        adr_query_tool.py: ADR 0325 discovery query helper and reservation-safe ADR window allocator
-        generate_adr_index.py: ADR 0325 generator for docs/adr/.index.yaml and docs/adr/index/ shards
-        network_impairment_matrix.py: ADR 0189 CLI and validation helper for governed network impairment scenarios
-        policy_checks.py: ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain
-        stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence
+        adr_query_tool.py: ADR 0325 discovery query helper and reservation-safe
+          ADR window allocator
+        generate_adr_index.py: ADR 0325 generator for docs/adr/.index.yaml and
+          docs/adr/index/ shards
+        network_impairment_matrix.py: ADR 0189 CLI and validation helper for
+          governed network impairment scenarios
+        policy_checks.py: ADR 0230 validator for the shared OPA and Conftest
+          policy bundle and toolchain
+        stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped
+          smoke suite catalogs and receipt-ready evidence
     tests:
       purpose: Test suites for automated validation
       contains: pytest unit + integration tests, molecule scenarios
       concern: validation, quality-assurance
       keywords:
-      - tests
-      - validation
-      - pytest
-      - molecule
-      - integration
-      for_agents: Run 'pytest tests/' before pushing; check tests/ for test patterns
+        - tests
+        - validation
+        - pytest
+        - molecule
+        - integration
+      for_agents: Run 'pytest tests/' before pushing; check tests/ for test
+        patterns
     tofu:
       purpose: OpenTofu/Terraform infrastructure code
       contains: Infrastructure-as-code for cloud resources
       concern: infrastructure-provisioning, iac
       keywords:
-      - tofu
-      - terraform
-      - provisioning
-      - iac
-      - cloud
+        - tofu
+        - terraform
+        - provisioning
+        - iac
+        - cloud
       for_agents: Find infrastructure code for cloud provisioning
     packer:
       purpose: Packer templates for VM image building
       contains: Debian cloud-init templates, image build configurations
       concern: image-building, templates
       keywords:
-      - packer
-      - image
-      - template
-      - vm
-      - cloud-init
+        - packer
+        - image
+        - template
+        - vm
+        - cloud-init
       for_agents: Understand how VM images are built from templates
     molecule:
       purpose: Molecule test scenarios for Ansible role testing
       contains: Test scenarios for validating Ansible roles in containers
       concern: testing, role-validation
       keywords:
-      - molecule
-      - testing
-      - scenarios
-      - validation
-      - ansible-role
+        - molecule
+        - testing
+        - scenarios
+        - validation
+        - ansible-role
       for_agents: Find role-testing configurations and scenarios
     migrations:
       purpose: Database and schema migration scripts
       contains: Timestamped migration files for data changes
       concern: data-management, backward-compatibility
       keywords:
-      - migrations
-      - database
-      - schema
-      - evolution
+        - migrations
+        - database
+        - schema
+        - evolution
       for_agents: Find data schema changes and migration history
     platform:
       purpose: Platform management tooling (CLI, utilities)
       contains: Platform CLI and helper utilities
       concern: tooling, platform-management
       keywords:
-      - platform
-      - cli
-      - tooling
-      - management
+        - platform
+        - cli
+        - tooling
+        - management
       for_agents: Platform-level management utilities
       key_files:
-        faults/network_impairment_matrix.py: ADR 0189 typed loader and execution helpers for governed network impairment profiles
-        policy/engine.py: ADR 0230 shared OPA evaluation helpers for command approval and promotion gating
-        runtime_assurance/declared_live_attestation.py: ADR 0245 declared-to-live witness collection shared by the CLI and API gateway
+        faults/network_impairment_matrix.py: ADR 0189 typed loader and execution
+          helpers for governed network impairment profiles
+        policy/engine.py: ADR 0230 shared OPA evaluation helpers for command
+          approval and promotion gating
+        runtime_assurance/declared_live_attestation.py: ADR 0245
+          declared-to-live witness collection shared by the CLI and API gateway

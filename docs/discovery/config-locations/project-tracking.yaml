@@ -2,21 +2,25 @@ schema_version: 1
 section:
   id: project-tracking
   title: Project Tracking
-  summary: Workstream coordination state and the narrative planning documents tied to active branches.
-  when_to_read: Use this section when starting, handing off, or finishing a workstream.
+  summary: Workstream coordination state and the narrative planning documents
+    tied to active branches.
+  when_to_read: Use this section when starting, handing off, or finishing a
+    workstream.
 entries:
   workstreams.yaml:
-    purpose: "Active workstream registry \u2014 branch, assignee, status, ADR ref"
+    purpose: "Active workstream registry — branch, assignee, status, ADR ref"
     owner: human and automation
-    format: "YAML \u2014 workstream definitions"
+    format: "YAML — workstream definitions"
     use_for: Tracking parallel work and current projects
     update_when: Starting or completing a workstream
     update_by: Agent at start/end of branch work
-    structure: "workstreams:\n  - name: workstream-name\n    branch: codex/adr-XXXX-description\n    assignee: claude | codex | human\n    status: in-progress | blocked | review-ready | complete\n    adr_reference: docs/workstreams/adr-XXXX-workstream-name.md\n"
+    structure: "workstreams:\n  - name: workstream-name\n    branch: codex/adr-XXXX-description\n\
+      \    assignee: claude | codex | human\n    status: in-progress | blocked | review-ready
+      | complete\n    adr_reference: docs/workstreams/adr-XXXX-workstream-name.md\n"
   docs/workstreams/:
     purpose: ADR-style planning documents for active workstreams
     owner: human and automation
-    format: "Markdown \u2014 follows ADR format"
+    format: "Markdown — follows ADR format"
     use_for: Detailed workstream planning and decision records
     creation: Create when starting a new workstream branch
     naming_convention: adr-XXXX-workstream-name.md

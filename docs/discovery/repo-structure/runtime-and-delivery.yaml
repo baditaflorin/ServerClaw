@@ -2,8 +2,10 @@ schema_version: 1
 section:
   id: runtime-and-delivery
   title: Runtime Packaging And Delivery
-  summary: Container, workflow, credential, dependency, and CI surfaces used to package and deliver the platform.
-  when_to_read: Use this section when tracing runtime composition, workflow automation, or CI execution paths.
+  summary: Container, workflow, credential, dependency, and CI surfaces used to
+    package and deliver the platform.
+  when_to_read: Use this section when tracing runtime composition, workflow
+    automation, or CI execution paths.
 entries:
   directories:
     docker:
@@ -11,65 +13,65 @@ entries:
       contains: docker-compose.yml variants per VM
       concern: containerisation, service-deployment
       keywords:
-      - docker
-      - container
-      - compose
-      - image
-      - stack
+        - docker
+        - container
+        - compose
+        - image
+        - stack
       for_agents: Find container and compose definitions for deployed services
     windmill:
       purpose: Windmill workflow definitions and scheduled automations
       contains: YAML workflow definitions for scheduled and triggered tasks
       concern: workflow-automation, scheduling
       keywords:
-      - windmill
-      - workflow
-      - automation
-      - scheduled
-      - trigger
+        - windmill
+        - workflow
+        - automation
+        - scheduled
+        - trigger
       for_agents: Find scheduled automation and workflow configuration
     keys:
       purpose: SSH keys and cryptographic material (bootstrap and automation)
       contains: bootstrap keys, operator keys, automation keys
       concern: security, credentials
       keywords:
-      - keys
-      - ssh
-      - credentials
-      - security
-      - cryptographic
+        - keys
+        - ssh
+        - credentials
+        - security
+        - cryptographic
       for_agents: Understand key structure - NEVER expose or log key content
     requirements:
       purpose: Python, system, and dependency specifications
       contains: requirements.txt, requirements-dev.txt, system package lists
       concern: dependencies, versions
       keywords:
-      - requirements
-      - dependencies
-      - packages
-      - versions
-      - python
+        - requirements
+        - dependencies
+        - packages
+        - versions
+        - python
       for_agents: Check Python dependencies and their versions
     .github:
       purpose: GitHub Actions workflows (legacy/external mirror)
       contains: GitHub Actions YAML workflows
       concern: ci, external-automation
       keywords:
-      - github
-      - ci
-      - actions
-      - workflows
-      - external
+        - github
+        - ci
+        - actions
+        - workflows
+        - external
       for_agents: Legacy CI - primary CI runs on Gitea (.gitea/)
     .gitea:
       purpose: Gitea Actions workflows (PRIMARY local CI)
       contains: Gitea Actions YAML workflows running on self-hosted runner
       concern: ci, local-automation
       keywords:
-      - gitea
-      - ci
-      - actions
-      - workflows
-      - local
-      - primary
+        - gitea
+        - ci
+        - actions
+        - workflows
+        - local
+        - primary
       for_agents: PRIMARY CI - runs on docker-build-lv3 self-hosted runner

@@ -3,19 +3,20 @@ section:
   id: inventory
   title: Inventory And Topology
   summary: Host, group, and topology inputs for the platform inventory model.
-  when_to_read: Use this section when changing hosts, groups, host vars, or topology declarations.
+  when_to_read: Use this section when changing hosts, groups, host vars, or
+    topology declarations.
 entries:
   inventory/hosts.yml:
-    purpose: "Ansible inventory \u2014 defines all hosts and group memberships"
+    purpose: "Ansible inventory — defines all hosts and group memberships"
     owner: human
-    format: "YAML \u2014 Ansible hosts and groups"
+    format: "YAML — Ansible hosts and groups"
     use_for: Defining which hosts exist and their relationships
     update_when: Adding/removing hosts or changing group memberships
     validation: ansible-inventory --list
   inventory/group_vars/all.yml:
     purpose: Variables applied to ALL hosts
     owner: human and automation
-    format: "YAML \u2014 variable definitions"
+    format: "YAML — variable definitions"
     use_for: Shared infrastructure settings across all hosts
     update_when: Changing default behaviour across all hosts
     coverage: All hosts inherit these variables
@@ -39,7 +40,7 @@ entries:
   inventory/host_vars/:
     purpose: Per-host overrides to group_vars
     owner: human
-    format: "YAML \u2014 one file per host named after hostname"
+    format: "YAML — one file per host named after hostname"
     use_for: Per-host customisation that differs from group defaults
     structure: 'One file per host: inventory/host_vars/<hostname>.yml'
   reference-deployments/catalog.yaml:

@@ -2,138 +2,184 @@ schema_version: 1
 section:
   id: service-configuration
   title: Service Configuration
-  summary: Per-service configuration roots and the files that drive service runtime behavior.
-  when_to_read: Use this section when changing a service-specific config file or template.
+  summary: Per-service configuration roots and the files that drive service
+    runtime behavior.
+  when_to_read: Use this section when changing a service-specific config file or
+    template.
 entries:
   config/:
     purpose: Service configuration files for all deployed services
     owner: human
-    format: "YAML/JSON/CONF \u2014 service-specific formats"
+    format: "YAML/JSON/CONF — service-specific formats"
     use_for: Service-level customisation beyond environment defaults
     update_when: Changing service behaviour
     structure: 'One subdirectory per service: config/<service>/'
     deployment: Copied to service at deploy time via Ansible
   config/falco/:
-    purpose: Repo-managed Falco runtime rules, suppressions, and smoke-test inputs for ADR 0300
+    purpose: Repo-managed Falco runtime rules, suppressions, and smoke-test
+      inputs for ADR 0300
     owner: human
     format: YAML
-    use_for: Declaring the governed Falco ruleset, suppressions, and bridge-forwarded runtime-anomaly policy
-    update_when: Adding Falco rules, tuning suppressions, or changing the smoke-test contract
+    use_for: Declaring the governed Falco ruleset, suppressions, and
+      bridge-forwarded runtime-anomaly policy
+    update_when: Adding Falco rules, tuning suppressions, or changing the
+      smoke-test contract
     validation: make validate-data-models
     related_files:
-    - 'playbooks/falco.yml: convergence entrypoint for the Falco runtime and private bridge'
-    - 'collections/ansible_collections/lv3/platform/roles/falco_runtime/: package, config, and service automation'
-    - 'collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/: private bridge automation'
-    - 'docs/runbooks/configure-falco-runtime.md: operator procedure'
+      - 'playbooks/falco.yml: convergence entrypoint for the Falco runtime and private
+        bridge'
+      - 'collections/ansible_collections/lv3/platform/roles/falco_runtime/: package,
+        config, and service automation'
+      - 'collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/:
+        private bridge automation'
+      - 'docs/runbooks/configure-falco-runtime.md: operator procedure'
   config/service-capability-catalog.json:
     purpose: Machine-readable catalog of all service capabilities
     owner: automation
     format: JSON
-    use_for: Declaring service metadata, environment bindings, and ADR 0251 stage-ready smoke suite ids per environment
+    use_for: Declaring service metadata, environment bindings, and ADR 0251
+      stage-ready smoke suite ids per environment
     update_by: scripts/service_catalog.py --write
   config/stage-smoke-suites.json:
-    purpose: Canonical ADR 0251 catalog of stage-scoped smoke suites mapped to service ids and environments
+    purpose: Canonical ADR 0251 catalog of stage-scoped smoke suites mapped to
+      service ids and environments
     owner: human
     format: JSON
-    use_for: Declaring which smoke suites exist, which integration targets they run, and which services can claim stage-ready evidence
-    update_when: Adding a new smoke suite, changing test selection, or promoting a service/environment into ADR 0251 enforcement
+    use_for: Declaring which smoke suites exist, which integration targets they
+      run, and which services can claim stage-ready evidence
+    update_when: Adding a new smoke suite, changing test selection, or promoting
+      a service/environment into ADR 0251 enforcement
     validation: python3 scripts/stage_smoke_suites.py --validate
     related_files:
-    - 'docs/schema/stage-smoke-suites.schema.json: JSON schema for the smoke-suite catalog'
-    - 'config/service-capability-catalog.json: environment bindings that reference smoke_suite_ids'
-    - 'scripts/stage_smoke_suites.py: catalog validation and execution runner'
-    - 'docs/runbooks/integration-test-suite.md: operator workflow'
+      - 'docs/schema/stage-smoke-suites.schema.json: JSON schema for the smoke-suite
+        catalog'
+      - 'config/service-capability-catalog.json: environment bindings that reference
+        smoke_suite_ids'
+      - 'scripts/stage_smoke_suites.py: catalog validation and execution runner'
+      - 'docs/runbooks/integration-test-suite.md: operator workflow'
   config/capability-contract-catalog.json:
-    purpose: Contract-first catalog for critical shared platform capabilities and their current product selections
+    purpose: Contract-first catalog for critical shared platform capabilities
+      and their current product selections
     owner: human
     format: JSON
-    use_for: Defining capability requirements before selecting or replacing a critical product surface
-    update_when: Adding or changing a critical product selection, or tightening the shared capability contract
-    validation: uv run --with pyyaml --with jsonschema python scripts/capability_contracts.py --validate
+    use_for: Defining capability requirements before selecting or replacing a
+      critical product surface
+    update_when: Adding or changing a critical product selection, or tightening
+      the shared capability contract
+    validation: uv run --with pyyaml --with jsonschema python
+      scripts/capability_contracts.py --validate
     related_files:
-    - 'docs/schema/capability-contract-catalog.schema.json: JSON Schema for the contract catalog'
-    - 'scripts/capability_contracts.py: Validation, CLI inspection, and manifest summaries'
-    - 'docs/runbooks/capability-contract-catalog.md: Operator workflow for contract-first product choices'
+      - 'docs/schema/capability-contract-catalog.schema.json: JSON Schema for the
+        contract catalog'
+      - 'scripts/capability_contracts.py: Validation, CLI inspection, and manifest
+        summaries'
+      - 'docs/runbooks/capability-contract-catalog.md: Operator workflow for contract-first
+        product choices'
   config/immutable-guest-replacement-catalog.json:
-    purpose: Guest-level ADR 0191 policy for immutable replacement, validation mode, and documented in-place exceptions
+    purpose: Guest-level ADR 0191 policy for immutable replacement, validation
+      mode, and documented in-place exceptions
     owner: human
     format: JSON
-    use_for: Determining which production guests default to immutable replacement instead of in-place mutation
-    update_when: Changing the replacement policy, preview method, or rollback window for a governed guest
-    validation: uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --validate
+    use_for: Determining which production guests default to immutable
+      replacement instead of in-place mutation
+    update_when: Changing the replacement policy, preview method, or rollback
+      window for a governed guest
+    validation: uv run --with pyyaml --with jsonschema python
+      scripts/immutable_guest_replacement.py --validate
     related_files:
-    - 'docs/schema/immutable-guest-replacement-catalog.schema.json: JSON Schema for the catalog'
-    - 'scripts/immutable_guest_replacement.py: Validation, planning, and live-apply guard'
-    - 'docs/runbooks/immutable-guest-replacement.md: Operator workflow and exception path'
+      - 'docs/schema/immutable-guest-replacement-catalog.schema.json: JSON Schema
+        for the catalog'
+      - 'scripts/immutable_guest_replacement.py: Validation, planning, and live-apply
+        guard'
+      - 'docs/runbooks/immutable-guest-replacement.md: Operator workflow and exception
+        path'
   config/dependency-graph.json:
     purpose: Service dependency graph
     owner: automation
     format: JSON
     update_by: python scripts/generate_dependency_diagram.py --write
   config/validation-gate.json:
-    purpose: Validation gate configuration for local, remote, and worker post-merge checks
+    purpose: Validation gate configuration for local, remote, and worker
+      post-merge checks
     owner: human
     format: JSON
-    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation, ADR 0251 smoke-catalog validation, ADR 0301 Semgrep SAST, and ADR 0306 IaC policy scanning on controller, build-server, and Windmill worker paths
+    use_for: Controlling which validation checks are active, including ADR 0230
+      policy-validation, ADR 0251 smoke-catalog validation, ADR 0301 Semgrep
+      SAST, and ADR 0306 IaC policy scanning on controller, build-server, and
+      Windmill worker paths
     validation: python3 scripts/gate_status.py --repo-path .
     related_files:
-    - 'config/build-server.json: remote-validate and remote-pre-push command wiring'
-    - 'config/validation-lanes.yaml: ADR 0264 lane-to-surface catalog that selects blocking checks'
-    - 'config/check-runner-manifest.json: runner-image check definitions'
-    - 'config/semgrep/rules/: local Semgrep rule packs for the semgrep-sast gate'
-    - 'config/checkov/policy-gate.yaml: ADR 0306 blocking levels and scan surfaces'
-    - 'config/checkov/skip-checks.yaml: ADR 0306 suppression governance catalog'
-    - 'scripts/run_gate.py: gate orchestrator'
-    - 'scripts/iac_policy_scan.py: ADR 0306 Checkov wrapper and SARIF emitter'
-    - 'scripts/semgrep_gate.py: shared Semgrep wrapper'
-    - 'scripts/validation_lanes.py: lane catalog loader and selector'
-    - 'scripts/policy_checks.py: ADR 0230 policy-validation stage'
-    - 'scripts/stage_smoke_suites.py: ADR 0251 catalog validation stage'
-    - 'docs/runbooks/validation-gate.md: operator procedure'
+      - 'config/build-server.json: remote-validate and remote-pre-push command wiring'
+      - 'config/validation-lanes.yaml: ADR 0264 lane-to-surface catalog that selects
+        blocking checks'
+      - 'config/check-runner-manifest.json: runner-image check definitions'
+      - 'config/semgrep/rules/: local Semgrep rule packs for the semgrep-sast gate'
+      - 'config/checkov/policy-gate.yaml: ADR 0306 blocking levels and scan surfaces'
+      - 'config/checkov/skip-checks.yaml: ADR 0306 suppression governance catalog'
+      - 'scripts/run_gate.py: gate orchestrator'
+      - 'scripts/iac_policy_scan.py: ADR 0306 Checkov wrapper and SARIF emitter'
+      - 'scripts/semgrep_gate.py: shared Semgrep wrapper'
+      - 'scripts/validation_lanes.py: lane catalog loader and selector'
+      - 'scripts/policy_checks.py: ADR 0230 policy-validation stage'
+      - 'scripts/stage_smoke_suites.py: ADR 0251 catalog validation stage'
+      - 'docs/runbooks/validation-gate.md: operator procedure'
   config/validation-lanes.yaml:
     purpose: ADR 0264 failure-domain-isolated validation-lane catalog
     owner: human
     format: YAML
-    use_for: Mapping mutable repository surface classes to blocking validation lanes and fast global invariants
-    update_when: Adjusting lane coverage, fast-global invariants, or the changed-surface routing policy
+    use_for: Mapping mutable repository surface classes to blocking validation
+      lanes and fast global invariants
+    update_when: Adjusting lane coverage, fast-global invariants, or the
+      changed-surface routing policy
     validation: python3 scripts/validation_lanes.py --validate
     related_files:
-    - 'config/validation-gate.json: runnable check manifest consumed by the lanes'
-    - 'scripts/validation_lanes.py: catalog loader, validator, and lane resolver'
-    - 'scripts/run_gate.py: lane-aware gate orchestrator'
-    - 'docs/runbooks/validation-gate.md: operator procedure'
+      - 'config/validation-gate.json: runnable check manifest consumed by the lanes'
+      - 'scripts/validation_lanes.py: catalog loader, validator, and lane resolver'
+      - 'scripts/run_gate.py: lane-aware gate orchestrator'
+      - 'docs/runbooks/validation-gate.md: operator procedure'
   config/build-server.json:
     purpose: Canonical build-server remote automation command catalog
     owner: human
     format: JSON
-    use_for: Declaring remote lint, validate, pre-push, and image-build entrypoints plus their local fallback commands
-    update_when: Adjusting build-server automation or local fallback command contracts
+    use_for: Declaring remote lint, validate, pre-push, and image-build
+      entrypoints plus their local fallback commands
+    update_when: Adjusting build-server automation or local fallback command
+      contracts
     validation: python3 scripts/policy_checks.py --validate
     related_files:
-    - 'config/check-runner-manifest.json: runner image check definitions consumed by remote validate'
-    - 'config/validation-gate.json: authoritative enabled gate checks'
-    - 'config/validation-lanes.yaml: ADR 0264 lane-selection contract'
-    - 'scripts/remote_exec.sh: dispatch wrapper'
+      - 'config/check-runner-manifest.json: runner image check definitions consumed
+        by remote validate'
+      - 'config/validation-gate.json: authoritative enabled gate checks'
+      - 'config/validation-lanes.yaml: ADR 0264 lane-selection contract'
+      - 'scripts/remote_exec.sh: dispatch wrapper'
   config/check-runner-manifest.json:
-    purpose: Canonical manifest of runner-backed validation checks for remote gate execution
+    purpose: Canonical manifest of runner-backed validation checks for remote
+      gate execution
     owner: human
     format: JSON
-    use_for: Declaring the exact commands and container images used by the build-server check runners, including the Python-runner Semgrep SAST contract and the shared security runner for Trivy, Gitleaks, and Checkov
-    update_when: Adding or changing remote validation checks or their toolchain images
+    use_for: Declaring the exact commands and container images used by the
+      build-server check runners, including the Python-runner Semgrep SAST
+      contract and the shared security runner for Trivy, Gitleaks, and Checkov
+    update_when: Adding or changing remote validation checks or their toolchain
+      images
     validation: python3 scripts/policy_checks.py --validate
     related_files:
-    - 'config/build-server.json: remote-validate entrypoint that invokes the manifest'
-    - 'config/semgrep/rules/: local rule packs mounted into the semgrep-sast check'
-    - 'config/checkov/policy-gate.yaml: ADR 0306 scan-group and severity mapping contract'
-    - 'scripts/policy_checks.py: ADR 0230 policy-validation check command'
-    - 'scripts/iac_policy_scan.py: ADR 0306 runner-backed Checkov wrapper'
-    - 'docs/runbooks/validation-gate.md: remote gate procedure'
+      - 'config/build-server.json: remote-validate entrypoint that invokes the manifest'
+      - 'config/semgrep/rules/: local rule packs mounted into the semgrep-sast check'
+      - 'config/checkov/policy-gate.yaml: ADR 0306 scan-group and severity mapping
+        contract'
+      - 'scripts/policy_checks.py: ADR 0230 policy-validation check command'
+      - 'scripts/iac_policy_scan.py: ADR 0306 runner-backed Checkov wrapper'
+      - 'docs/runbooks/validation-gate.md: remote gate procedure'
   receipts/checkov/:
-    purpose: Repo-managed Checkov JSON and SARIF outputs from ADR 0306 IaC policy scans
+    purpose: Repo-managed Checkov JSON and SARIF outputs from ADR 0306 IaC
+      policy scans
     owner: automation
     format: JSON and SARIF
-    use_for: Inspecting the latest repo-local IaC policy findings and the emitted SARIF artifact from a governed scan
-    update_when: After every `iac-policy-scan` runner execution or direct `scripts/iac_policy_scan.py` replay
+    use_for: Inspecting the latest repo-local IaC policy findings and the
+      emitted SARIF artifact from a governed scan
+    update_when: After every `iac-policy-scan` runner execution or direct
+      `scripts/iac_policy_scan.py` replay
     update_by: scripts/iac_policy_scan.py
     validation: Manual review
     naming_convention: <git-sha>.json and <git-sha>.sarif.json

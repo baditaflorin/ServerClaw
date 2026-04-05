@@ -2,8 +2,10 @@ schema_version: 1
 section:
   id: root-entrypoints
   title: Root Entrypoints And Governance
-  summary: The top-level files every agent reads first, plus release and workflow control surfaces.
-  when_to_read: Start here when orienting a worktree, checking repo-wide rules, or finding the primary human entrypoints.
+  summary: The top-level files every agent reads first, plus release and
+    workflow control surfaces.
+  when_to_read: Start here when orienting a worktree, checking repo-wide rules,
+    or finding the primary human entrypoints.
 entries:
   top_level_files:
     README.md:
@@ -19,7 +21,8 @@ entries:
       purpose: Current repository semantic version (X.Y.Z)
       for_agents: Bump when merging to main; read to identify release boundaries
     changelog.md:
-      purpose: Human-readable changelog index pointing to versioned release notes
+      purpose: Human-readable changelog index pointing to versioned release
+        notes
       for_agents: Update when cutting a new version
     workstreams.yaml:
       purpose: Active workstream registry - branch, assignee, status, ADR ref

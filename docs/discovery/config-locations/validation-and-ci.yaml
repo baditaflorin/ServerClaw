@@ -2,8 +2,10 @@ schema_version: 1
 section:
   id: validation-and-ci
   title: Validation And CI
-  summary: Validation entrypoints, CI workflows, and the scripts that enforce repo-wide standards.
-  when_to_read: Use this section when changing validation, CI, or generated-repo contract enforcement.
+  summary: Validation entrypoints, CI workflows, and the scripts that enforce
+    repo-wide standards.
+  when_to_read: Use this section when changing validation, CI, or generated-repo
+    contract enforcement.
 entries:
   Makefile:
     purpose: Development and operational task runners
@@ -11,10 +13,10 @@ entries:
     format: GNU Make
     use_for: Common tasks (validate, test, build, deploy, generate)
     key_targets:
-    - make validate-data-models
-    - make test
-    - make generate-docs
-    - make pre-push-gate
+      - make validate-data-models
+      - make test
+      - make generate-docs
+      - make pre-push-gate
   scripts/validate_repo.sh:
     purpose: Local validation runner (called by pre-push hook)
     owner: human
@@ -34,19 +36,24 @@ entries:
     use_for: Local CI on self-hosted Gitea runner
     runs_on: docker-build-lv3 self-hosted runner
   .github/workflows/:
-    purpose: "GitHub Actions workflows (LEGACY \u2014 mirrors Gitea)"
+    purpose: "GitHub Actions workflows (LEGACY — mirrors Gitea)"
     owner: human
     format: GitHub Actions YAML
-    use_for: "External CI (not primary \u2014 Gitea is primary)"
+    use_for: "External CI (not primary — Gitea is primary)"
   scripts/generate_discovery_artifacts.py:
-    purpose: Assembler for ADR 0327 discovery entrypoints and generated onboarding packs
+    purpose: Assembler for ADR 0327 discovery entrypoints and generated
+      onboarding packs
     owner: human and automation
     format: Python
-    use_for: Rendering .repo-structure.yaml, .config-locations.yaml, and build/onboarding/* from docs/discovery/
-    update_when: Changing discovery source schemas, root output shape, or onboarding-pack generation logic
+    use_for: Rendering .repo-structure.yaml, .config-locations.yaml, and
+      build/onboarding/* from docs/discovery/
+    update_when: Changing discovery source schemas, root output shape, or
+      onboarding-pack generation logic
   scripts/validate_public_entrypoints.py:
     purpose: Public-entrypoint and onboarding-surface leakage validator
     owner: human and automation
     format: Python
-    use_for: Rejecting absolute paths and deployment-specific identifiers in public-safe discovery entrypoints and packs
-    update_when: Changing which discovery surfaces are protected or which leakage patterns must fail the gate
+    use_for: Rejecting absolute paths and deployment-specific identifiers in
+      public-safe discovery entrypoints and packs
+    update_when: Changing which discovery surfaces are protected or which
+      leakage patterns must fail the gate
