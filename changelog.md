@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR triage 0347-0358: implement 6 CPU-only ADRs — Integration Contract Registry (config/integrations/, validate_integrations.py), Nginx Fragment Config role (write-validate-reload), File-Domain Locking + Apply Semaphore (platform/locking/file_domain.py extending ADR 0153), Workstream Apply Receipts state machine (platform/workstream_receipts.py), Change Provenance Tagging (Jinja2 macro + check_provenance_headers.py); mark 3 ADRs Superseded (LLM-heavy: 0348, 0352, 0356) and 3 Deferred (0349, 0354, 0358)
 - ADR 0375: Certificate validation and concordance enforcement — automated SSL checking for all edge-published domains, pre-push gate integration, Uptime Kuma monitors, and fix playbook for NGINX edge certificate hostname mismatches (ci.lv3.org, bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org, ntfy.lv3.org).
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
@@ -21,10 +22,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.20 release notes](docs/release-notes/0.178.20.md)
+- [0.178.21 release notes](docs/release-notes/0.178.21.md)
 
 ## Previous Releases
 
+- [0.178.20 release notes](docs/release-notes/0.178.20.md)
 - [0.178.19 release notes](docs/release-notes/0.178.19.md)
 - [0.178.18 release notes](docs/release-notes/0.178.18.md)
 - [0.178.17 release notes](docs/release-notes/0.178.17.md)
@@ -36,9 +38,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.11 release notes](docs/release-notes/0.178.11.md)
 - [0.178.10 release notes](docs/release-notes/0.178.10.md)
 - [0.178.9 release notes](docs/release-notes/0.178.9.md)
-- [0.178.8 release notes](docs/release-notes/0.178.8.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (359 releases)](docs/release-notes/index/2026.md)
+- [2026 (360 releases)](docs/release-notes/index/2026.md)
