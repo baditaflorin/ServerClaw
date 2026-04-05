@@ -9,7 +9,7 @@ host    all             all             ::1/128                 scram-sha-256
 {% set ns = namespace(seen_vms=[]) %}
 {% for client in platform_postgres_clients | default([]) %}
 {% set client_ip = platform_guest_catalog.by_name[client.source_vm].ipv4 + '/32' %}
-host    {{ client.database | ljust(20) }} {{ client.user | ljust(20) }} {{ client_ip | ljust(20) }} scram-sha-256
+host    {{ client.database }}  {{ client.user }}  {{ client_ip }}  scram-sha-256
 {% endfor %}
 # Docker bridge network fallback for containerised workloads that MASQUERADE to the host IP.
 {% for cidr in postgres_vm_client_allowed_sources_extra_bridge | default(['172.16.0.0/12', '192.168.0.0/16', '10.200.0.0/16']) %}
