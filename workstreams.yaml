@@ -83,7 +83,7 @@ workstreams:
       - docs/adr/index/by-concern/*.yaml
       - docs/adr/index/by-status/*.yaml
       mode: shared_contract
-      contract: adr-index-generator-v2
+      contract: adr-index-generator-v1
     - id: generated_truth
       paths:
       - docs/diagrams/agent-coordination-map.excalidraw
