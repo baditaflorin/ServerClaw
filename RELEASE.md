@@ -1,8 +1,9 @@
-# Release 0.178.19
+# Release 0.178.20
 
 - Date: 2026-04-06
 
 ## Summary
+- ADR 0375: Certificate validation and concordance enforcement — automated SSL checking for all edge-published domains, pre-push gate integration, Uptime Kuma monitors, and fix playbook for NGINX edge certificate hostname mismatches (ci.lv3.org, bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org, ntfy.lv3.org).
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
 - removed dead Plausible OIDC config (OIDC_DISCOVERY_URI, OIDC_CLIENT_SECRET, extra_hosts, /login redirect) — Plausible CE v3.x dropped community OIDC; auth is now exclusively via oauth2-proxy at the NGINX edge
