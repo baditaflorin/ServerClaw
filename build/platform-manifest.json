@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.5",
   "platform_version": "0.130.99",
-  "generated_at": "2026-04-04T21:06:22Z",
-  "next_refresh_at": "2026-04-04T22:06:22Z",
+  "generated_at": "2026-04-05T12:06:37Z",
+  "next_refresh_at": "2026-04-05T13:06:37Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6156,7 +6156,7 @@
   },
   "recent_changes": {
     "last_version": "0.178.4",
-    "deployed_at": "2026-04-04",
+    "deployed_at": "2026-04-05",
     "summary": "closes out ADR 0330 public GitHub readiness by making the controller-local secret contract repo-relative, adding fork-first example inventory and provider/publication profiles, and surfacing the public reference tier through discovery-driven onboarding implements ADR 0314 by turning the shared runbook execution path into a resumable human task surface with durable progress, deep-link return-to-task entry, and portal reentry summaries",
     "release_notes_url": "docs/release-notes/0.178.5.md"
   },

@@ -10,7 +10,7 @@ generated: '2026-04-05'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 331
+total_adrs: 332
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -5577,6 +5577,24 @@ adrs:
     path: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
     implemented_in_platform_version: 0.130.97
     implemented_on: '2026-04-03'
+  - adr: 0319
+    title: Dynamic Inventory as Source of Truth for Topology-Tracking Services
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: vm-topology
+    keywords:
+      - dynamic
+      - inventory
+      - as
+      - source
+      - truth
+      - topology-tracking
+      - services
+    summary: Any service that installs agents on managed VMs MUST derive its host list from
+    filename: 0319-dynamic-inventory-as-source-of-truth-for-topology-tracking-services.md
+    path: docs/adr/0319-dynamic-inventory-as-source-of-truth-for-topology-tracking-services.md
+    implemented_in_repo_version: 0.178.5
   - adr: 0319
     title: Runtime Pools As The Service Partition Boundary
     status: Accepted

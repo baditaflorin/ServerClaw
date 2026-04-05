@@ -23,7 +23,6 @@ from deployment_history import query_deployment_history
 from governed_command import execute_governed_command
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
 from maintenance_window_tool import list_active_windows_best_effort
-from portainer_tool import PortainerClient
 from platform.use_cases.serverclaw_skills import list_serverclaw_skill_packs
 from workflow_catalog import (
     load_secret_manifest,
@@ -617,6 +616,7 @@ def tool_run_governed_command(_tool: dict[str, Any], args: dict[str, Any]) -> tu
 
 
 def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    from portainer_tool import PortainerClient  # lazy import — requests not required at registry load time
     include_stopped = bool(args.get("include_stopped", False))
     client = PortainerClient(resolve_portainer_auth())
     client.login()
@@ -635,6 +635,7 @@ def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[st
 
 
 def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    from portainer_tool import PortainerClient  # lazy import — requests not required at registry load time
     container = require_str(args.get("container"), "arguments.container")
     tail = require_int(args.get("tail", 100), "arguments.tail", 1)
     client = PortainerClient(resolve_portainer_auth())
