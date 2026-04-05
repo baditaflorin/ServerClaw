@@ -100,13 +100,74 @@ New agent? Read these files in order - all six take under 2 minutes:
 
 > Token tip: These six reads replace hours of tree exploration.
 
+## Plane Task Board Protocol (ADR 0360)
+
+`tasks.lv3.org` is the **Agent Work HQ**. Every non-trivial agent session gets a
+Plane issue in the **AW** project. This applies to all agents: Claude, Codex,
+GPT, Gemini, or any automated script that writes workstream YAML files.
+
+### Session start (any agent)
+
+```bash
+# 1. Open a workstream YAML in workstreams/active/<id>.yaml
+# 2. Sync it to Plane — creates the AW issue and writes plane_issue_id back:
+python scripts/sync_plane_agent_issues.py --workstream <id>
+```
+
+### During work — milestone comments
+
+```bash
+python scripts/sync_plane_agent_issues.py --workstream <id> \
+    --comment "Converge complete. Plane proxy port binding fixed."
+```
+
+### On block
+
+Update `status: blocked` in the workstream YAML, then:
+
+```bash
+python scripts/sync_plane_agent_issues.py --workstream <id> \
+    --comment "Blocked: waiting for postgres migration to complete."
+```
+
+### On completion / merge
+
+The workstream close step (updating `status: merged`) triggers a final sync:
+
+```bash
+python scripts/sync_plane_agent_issues.py --workstream <id> \
+    --comment "Merged to main at <commit>. Live-apply pending."
+```
+
+### Rules
+
+- **Git is authoritative.** Plane is a projection. If `tasks.lv3.org` is down,
+  continue without it — the workstream YAML is the fallback.
+- `plane_issue_id` is written into the workstream YAML after issue creation.
+  Subsequent calls use it directly (no re-scan of the issue list).
+- Agents **do not** create issues manually in the Plane UI. The script is the
+  only write path so external_id stays canonical.
+- Humans can add Plane comments to interact with a running agent. Agents read
+  their own issue at session start if `plane_issue_id` is present.
+- Skip Plane for single-commit housekeeping (version bumps, manifest regen).
+
+### AW project bootstrap (one-time, already done on this instance)
+
+```bash
+python scripts/sync_plane_agent_issues.py --bootstrap-only
+# Creates AW project + labels if missing; writes .local/plane/aw-auth.json
+```
+
+---
+
 ## Handoff Protocol (ADR 0167)
 
 Follow this before ending any session:
 
 **Starting work:**
 - Create a git worktree: `git worktree add .worktrees/<name> main && git checkout -b <branch>`
-- Add an entry to `workstreams.yaml` with `status: in-progress`
+- Add an entry to `workstreams/active/<id>.yaml` with `status: in_progress`
+- Run `python scripts/sync_plane_agent_issues.py --workstream <id>` to register in Plane
 - Create `docs/workstreams/adr-XXXX-<name>.md` for major decisions
 
 **During work:**
@@ -125,6 +186,7 @@ Follow this before ending any session:
 **Ending a session:**
 - [ ] All work committed, branch pushed to origin
 - [ ] `workstreams.yaml` updated with current status
+- [ ] Plane issue updated: `python scripts/sync_plane_agent_issues.py --workstream <id> --comment "Session end: <summary>"`
 - [ ] README.md updated if deployed state changed
 - [ ] Blockers documented in workstreams.yaml if any
 - [ ] Receipts created in `receipts/live-applies/` for any live changes
@@ -134,12 +196,12 @@ Follow this before ending any session:
 
 | Situation | Action |
 |---|---|
-| Starting new work | Create branch + worktree, add to workstreams.yaml |
+| Starting new work | Create branch + worktree, add to workstreams/active/, sync to Plane |
 | Making a change | Commit with Purpose/Scope/Status/Next |
 | Infrastructure change | Create receipt in receipts/live-applies/ |
 | Major decision | Create ADR in docs/workstreams/ |
 | Merging to main | Bump VERSION, update changelog, clear commit |
-| Work blocked | Mark status: blocked, document blocker, push branch |
+| Work blocked | Mark status: blocked, document blocker, push branch, sync to Plane |
 
 ## Playbook / Role Metadata Standard (ADR 0165)
 

@@ -7,51 +7,52 @@ branch: codex/adr-0095-unified-search
 worktree_path: .worktrees/adr-0095-unified-search
 doc: docs/workstreams/adr-0095-unified-search.md
 depends_on:
-  - adr-0092-platform-api-gateway
-  - adr-0054-netbox
-  - adr-0066-mutation-audit-log
-  - adr-0069-agent-tool-registry
+- adr-0092-platform-api-gateway
+- adr-0054-netbox
+- adr-0066-mutation-audit-log
+- adr-0069-agent-tool-registry
 conflicts_with: []
 shared_surfaces:
-  - config/agent-tool-registry.json
-  - config/api-gateway-catalog.json
-  - Compose stack docker-runtime-lv3
+- config/agent-tool-registry.json
+- config/api-gateway-catalog.json
+- Compose stack docker-runtime-lv3
 ownership_manifest:
   owned_surfaces:
-    - id: workstream_registry
-      paths:
-        - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: unified_search_repo_surface
-      paths:
-        - scripts/search_fabric/**
-        - scripts/api_gateway/main.py
-        - scripts/lv3_cli.py
-        - docs/adr/0095-unified-platform-search.md
-        - docs/workstreams/adr-0095-unified-search.md
-      mode: exclusive
-    - id: agent_tool_registry_contract
-      paths:
-        - config/agent-tool-registry.json
-      mode: shared_contract
-      contract: agent-tool-registry-v1
-    - id: api_gateway_catalog_contract
-      paths:
-        - config/api-gateway-catalog.json
-      mode: shared_contract
-      contract: api-gateway-catalog-v1
-    - id: health_probe_catalog_contract
-      paths:
-        - config/health-probe-catalog.json
-      mode: shared_contract
-      contract: health-probe-catalog-v1
-    - id: integration_truth
-      paths:
-        - README.md
-        - VERSION
-        - changelog.md
-        - versions/stack.yaml
-      mode: generated
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: unified_search_repo_surface
+    paths:
+    - scripts/search_fabric/**
+    - scripts/api_gateway/main.py
+    - scripts/lv3_cli.py
+    - docs/adr/0095-unified-platform-search.md
+    - docs/workstreams/adr-0095-unified-search.md
+    mode: exclusive
+  - id: agent_tool_registry_contract
+    paths:
+    - config/agent-tool-registry.json
+    mode: shared_contract
+    contract: agent-tool-registry-v1
+  - id: api_gateway_catalog_contract
+    paths:
+    - config/api-gateway-catalog.json
+    mode: shared_contract
+    contract: api-gateway-catalog-v1
+  - id: health_probe_catalog_contract
+    paths:
+    - config/health-probe-catalog.json
+    mode: shared_contract
+    contract: health-probe-catalog-v1
+  - id: integration_truth
+    paths:
+    - README.md
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    mode: generated
 ready_to_merge: false
 live_applied: false
+plane_issue_id: 3dc83890-945f-41eb-9ca7-b21f7ff54c40

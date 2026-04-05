@@ -88,3 +88,4 @@ ownership_manifest:
     contract: latest-main-generated-truth-v1
 ready_to_merge: true
 live_applied: true
+plane_issue_id: 1252ea02-4ff0-4c83-9752-33c1428ddb77

@@ -1,5 +1,5 @@
 id: plausible-drop-oidc
-adr: '0283'
+adr: 0283
 title: Remove dead Plausible OIDC config — CE v3.x uses oauth2-proxy auth only
 status: ready_for_merge
 owner: claude
@@ -62,3 +62,4 @@ canonical_truth:
     extra_hosts, /login redirect) — Plausible CE v3.x dropped community OIDC; auth
     is now exclusively via oauth2-proxy at the NGINX edge
   release_bump: patch
+plane_issue_id: 83c9164f-bea1-4a95-b6a5-d482015c605e

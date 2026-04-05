@@ -1,112 +1,111 @@
 id: ws-0275-live-apply
 adr: '0275'
-title: Refresh Apache Tika exact-main live-apply truth after the runtime-ai pool
-  migration
+title: Refresh Apache Tika exact-main live-apply truth after the runtime-ai pool migration
 status: ready_for_merge
 owner: codex
 branch: codex/ws-0275-main-closeout-r8
 worktree_path: .worktrees/ws-0275-main-closeout-r8
 doc: docs/workstreams/ws-0275-live-apply.md
 depends_on:
-  - adr-0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline
-  - adr-0319-runtime-pools-as-the-service-partition-boundary
-  - adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
+- adr-0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline
+- adr-0319-runtime-pools-as-the-service-partition-boundary
+- adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes
 conflicts_with: []
 shared_surfaces:
-  - workstreams.yaml
-  - docs/workstreams/ws-0275-live-apply.md
-  - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
-  - docs/runbooks/configure-tika.md
-  - docs/adr/.index.yaml
-  - README.md
-  - RELEASE.md
-  - VERSION
-  - changelog.md
-  - docs/release-notes/README.md
-  - docs/release-notes/*.md
-  - versions/stack.yaml
-  - build/platform-manifest.json
-  - docs/diagrams/agent-coordination-map.excalidraw
-  - docs/site-generated/architecture/dependency-graph.md
-  - receipts/ops-portal-snapshot.html
-  - tests/test_tika_playbook.py
-  - tests/test_tesseract_ocr_runtime_role.py
-  - tests/test_gotenberg_runtime_role.py
-  - receipts/security-reports/*.json
-  - receipts/live-applies/*0275*
-  - receipts/live-applies/evidence/*ws-0275*
-  - receipts/restic-backups/20260403T063547Z.json
-  - receipts/restic-snapshots-latest.json
-  - receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
+- workstreams.yaml
+- docs/workstreams/ws-0275-live-apply.md
+- docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+- docs/runbooks/configure-tika.md
+- docs/adr/.index.yaml
+- README.md
+- RELEASE.md
+- VERSION
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/*.md
+- versions/stack.yaml
+- build/platform-manifest.json
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/site-generated/architecture/dependency-graph.md
+- receipts/ops-portal-snapshot.html
+- tests/test_tika_playbook.py
+- tests/test_tesseract_ocr_runtime_role.py
+- tests/test_gotenberg_runtime_role.py
+- receipts/security-reports/*.json
+- receipts/live-applies/*0275*
+- receipts/live-applies/evidence/*ws-0275*
+- receipts/restic-backups/20260403T063547Z.json
+- receipts/restic-snapshots-latest.json
+- receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
 ownership_manifest:
   owned_surfaces:
-    - id: workstream_registry
-      paths:
-        - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0275_docs_and_adr
-      paths:
-        - docs/workstreams/ws-0275-live-apply.md
-        - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
-        - docs/runbooks/configure-tika.md
-      mode: shared_contract
-      contract: ws-0275-docs-v1
-    - id: ws0275_adr_index
-      paths:
-        - docs/adr/.index.yaml
-      mode: shared_contract
-      contract: adr-index-generator-v1
-    - id: ws0275_release_surfaces
-      paths:
-        - README.md
-        - RELEASE.md
-        - VERSION
-        - changelog.md
-        - docs/release-notes/README.md
-        - docs/release-notes/*.md
-      mode: shared_contract
-      contract: release-management-v1
-    - id: ws0275_platform_truth_generation
-      paths:
-        - versions/stack.yaml
-        - build/platform-manifest.json
-      mode: shared_contract
-      contract: canonical-truth-v1
-    - id: ws0275_generated_truth
-      paths:
-        - docs/diagrams/agent-coordination-map.excalidraw
-        - docs/site-generated/architecture/dependency-graph.md
-        - receipts/ops-portal-snapshot.html
-      mode: shared_contract
-      contract: latest-main-generated-truth-v1
-    - id: ws0275_runtime_validation_contracts
-      paths:
-        - tests/test_tika_playbook.py
-        - tests/test_tesseract_ocr_runtime_role.py
-        - tests/test_gotenberg_runtime_role.py
-      mode: shared_contract
-      contract: runtime-ai-document-playbooks-v1
-    - id: ws0275_receipts
-      paths:
-        - receipts/security-reports/*.json
-        - receipts/live-applies/*0275*
-        - receipts/live-applies/evidence/*ws-0275*
-        - receipts/restic-backups/20260403T063547Z.json
-        - receipts/restic-snapshots-latest.json
-        - receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
-      mode: shared_contract
-      contract: live-apply-receipts-v1
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0275_docs_and_adr
+    paths:
+    - docs/workstreams/ws-0275-live-apply.md
+    - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    - docs/runbooks/configure-tika.md
+    mode: shared_contract
+    contract: ws-0275-docs-v1
+  - id: ws0275_adr_index
+    paths:
+    - docs/adr/.index.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: ws0275_release_surfaces
+    paths:
+    - README.md
+    - RELEASE.md
+    - VERSION
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/*.md
+    mode: shared_contract
+    contract: release-management-v1
+  - id: ws0275_platform_truth_generation
+    paths:
+    - versions/stack.yaml
+    - build/platform-manifest.json
+    mode: shared_contract
+    contract: canonical-truth-v1
+  - id: ws0275_generated_truth
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/site-generated/architecture/dependency-graph.md
+    - receipts/ops-portal-snapshot.html
+    mode: shared_contract
+    contract: latest-main-generated-truth-v1
+  - id: ws0275_runtime_validation_contracts
+    paths:
+    - tests/test_tika_playbook.py
+    - tests/test_tesseract_ocr_runtime_role.py
+    - tests/test_gotenberg_runtime_role.py
+    mode: shared_contract
+    contract: runtime-ai-document-playbooks-v1
+  - id: ws0275_receipts
+    paths:
+    - receipts/security-reports/*.json
+    - receipts/live-applies/*0275*
+    - receipts/live-applies/evidence/*ws-0275*
+    - receipts/restic-backups/20260403T063547Z.json
+    - receipts/restic-snapshots-latest.json
+    - receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
+    mode: shared_contract
+    contract: live-apply-receipts-v1
 blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: refreshes ADR 0275 on the latest exact mainline by replacing
-    the shared runtime-ai pool receipt with a dedicated Apache Tika receipt,
-    re-verifying the private extraction path on runtime-ai-lv3, and aligning the
-    document-runtime validation tests with the syntax-check-safe host selection
-    contract
+  changelog_entry: refreshes ADR 0275 on the latest exact mainline by replacing the
+    shared runtime-ai pool receipt with a dedicated Apache Tika receipt, re-verifying
+    the private extraction path on runtime-ai-lv3, and aligning the document-runtime
+    validation tests with the syntax-check-safe host selection contract
   release_bump: patch
   included_in_repo_version: 0.177.151
   latest_receipts:
     tika: 2026-04-03-adr-0275-apache-tika-mainline-live-apply
+plane_issue_id: ba2b4148-1bc1-4c3d-a055-fc127624a44c

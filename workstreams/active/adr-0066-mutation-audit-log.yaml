@@ -7,56 +7,57 @@ branch: codex/adr-0066-mutation-audit-log
 worktree_path: .worktrees/adr-0066-mutation-audit-log
 doc: docs/workstreams/adr-0066-mutation-audit-log.md
 depends_on:
-  - adr-0052-loki-logs
-  - adr-0048-command-catalog
-  - adr-0044-windmill
-  - adr-0043-openbao
+- adr-0052-loki-logs
+- adr-0048-command-catalog
+- adr-0044-windmill
+- adr-0043-openbao
 conflicts_with: []
 shared_surfaces:
-  - callback_plugins/
-  - docs/schema/mutation-audit-event.json
-  - scripts/mutation_audit.py
-  - Loki mutation-audit label
-  - Windmill workflow template
-  - command-catalog scripts
+- callback_plugins/
+- docs/schema/mutation-audit-event.json
+- scripts/mutation_audit.py
+- Loki mutation-audit label
+- Windmill workflow template
+- command-catalog scripts
 ownership_manifest:
   owned_surfaces:
-    - id: workstream_registry
-      paths:
-        - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: mutation_audit_repo_surface
-      paths:
-        - callback_plugins/mutation_audit.py
-        - docs/schema/mutation-audit-event.json
-        - scripts/mutation_audit.py
-        - docs/runbooks/mutation-audit-log.md
-        - config/windmill/scripts/lv3-mutation-audit.py
-        - docs/adr/0066-structured-mutation-audit-log.md
-        - docs/workstreams/adr-0066-mutation-audit-log.md
-      mode: exclusive
-    - id: ansible_cfg_contract
-      paths:
-        - ansible.cfg
-      mode: shared_contract
-      contract: ansible-controller-config-v1
-    - id: workflow_catalog_contract
-      paths:
-        - config/workflow-catalog.json
-      mode: shared_contract
-      contract: workflow-catalog-v1
-    - id: command_catalog_contract
-      paths:
-        - config/command-catalog.json
-      mode: shared_contract
-      contract: command-catalog-v1
-    - id: integration_truth
-      paths:
-        - README.md
-        - VERSION
-        - changelog.md
-        - versions/stack.yaml
-      mode: generated
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: mutation_audit_repo_surface
+    paths:
+    - callback_plugins/mutation_audit.py
+    - docs/schema/mutation-audit-event.json
+    - scripts/mutation_audit.py
+    - docs/runbooks/mutation-audit-log.md
+    - config/windmill/scripts/lv3-mutation-audit.py
+    - docs/adr/0066-structured-mutation-audit-log.md
+    - docs/workstreams/adr-0066-mutation-audit-log.md
+    mode: exclusive
+  - id: ansible_cfg_contract
+    paths:
+    - ansible.cfg
+    mode: shared_contract
+    contract: ansible-controller-config-v1
+  - id: workflow_catalog_contract
+    paths:
+    - config/workflow-catalog.json
+    mode: shared_contract
+    contract: workflow-catalog-v1
+  - id: command_catalog_contract
+    paths:
+    - config/command-catalog.json
+    mode: shared_contract
+    contract: command-catalog-v1
+  - id: integration_truth
+    paths:
+    - README.md
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    mode: generated
 ready_to_merge: false
 live_applied: false
+plane_issue_id: 05869a95-3d87-490f-95d5-70410d3c97f1

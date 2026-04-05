@@ -1,6 +1,7 @@
 id: ws-0254-serverclaw-runtime-fix
 adr: '0254'
-title: Fix ServerClaw OIDC login, hairpin NAT, model access, and Keycloak network IaC
+title: Fix ServerClaw OIDC login, hairpin NAT, model access, and Keycloak network
+  IaC
 status: ready_for_merge
 owner: claude
 branch: claude/great-mestorf
@@ -53,3 +54,4 @@ canonical_truth:
     visibility, and made Keycloak startup idempotent by auto-creating the external
     Docker network
   release_bump: patch
+plane_issue_id: 58c91151-c631-45b7-aed2-64365e4e27f0

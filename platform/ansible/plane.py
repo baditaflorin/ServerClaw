@@ -234,6 +234,42 @@ class PlaneClient:
         )
         return response
 
+    def list_comments(self, workspace_slug: str, project_id: str, issue_id: str) -> list[dict[str, Any]]:
+        return self._collect(f"/api/v1/workspaces/{workspace_slug}/projects/{project_id}/issues/{issue_id}/comments/")
+
+    def add_comment(self, workspace_slug: str, project_id: str, issue_id: str, comment_html: str) -> dict[str, Any]:
+        _status, response = self._request(
+            f"/api/v1/workspaces/{workspace_slug}/projects/{project_id}/issues/{issue_id}/comments/",
+            method="POST",
+            payload={"comment_html": comment_html},
+            expected_statuses={201},
+        )
+        return response
+
+    def list_labels(self, workspace_slug: str, project_id: str) -> list[dict[str, Any]]:
+        return self._collect(f"/api/v1/workspaces/{workspace_slug}/projects/{project_id}/labels/")
+
+    def create_label(self, workspace_slug: str, project_id: str, name: str, color: str = "#6b7280") -> dict[str, Any]:
+        _status, response = self._request(
+            f"/api/v1/workspaces/{workspace_slug}/projects/{project_id}/labels/",
+            method="POST",
+            payload={"name": name, "color": color},
+            expected_statuses={201},
+        )
+        return response
+
+    def ensure_project_by_identifier(self, workspace_slug: str, name: str, identifier: str, description: str = "") -> dict[str, Any]:
+        """Return existing project matching identifier, or create it."""
+        for project in self.list_projects(workspace_slug):
+            if project.get("identifier") == identifier:
+                return project
+        return self.create_project(workspace_slug, {
+            "name": name,
+            "identifier": identifier,
+            "description": description,
+            "network": 0,
+        })
+
 
 class PlaneSessionClient:
     def __init__(self, base_url: str, *, verify_ssl: bool = True, timeout: int = 20):
@@ -617,4 +653,115 @@ def ensure_issue_for_adr(
         ):
             return issue
         return client.update_issue(workspace_slug, project_id, issue_id, payload)
+    return client.create_issue(workspace_slug, project_id, payload)
+
+
+# ---------------------------------------------------------------------------
+# Agent Work (AW) project — workstream issue helpers
+# ---------------------------------------------------------------------------
+
+AW_STATUS_MAP: dict[str, str] = {
+    "in_progress": "In Progress",
+    "planned": "In Progress",
+    "blocked": "In Progress",  # surfaced via "blocked" label
+    "ready": "In Review",
+    "ready_for_merge": "In Review",
+    "merged": "Done",
+    "implemented": "Done",
+    "live_applied": "Done",
+}
+
+AW_LABEL_COLORS: dict[str, str] = {
+    "agent": "#7c3aed",
+    "blocked": "#dc2626",
+    "claude": "#f59e0b",
+    "codex": "#3b82f6",
+    "human": "#10b981",
+}
+
+
+def state_name_for_workstream(status: str) -> str:
+    return AW_STATUS_MAP.get(status, "In Progress")
+
+
+def render_workstream_description(ws: dict[str, Any]) -> str:
+    ws_id = html.escape(str(ws.get("id", "")))
+    title = html.escape(str(ws.get("title", "")))
+    branch = html.escape(str(ws.get("branch", "")))
+    owner = html.escape(str(ws.get("owner", "")))
+    adr = ws.get("adr")
+    adr_line = f"<p><strong>ADR:</strong> {html.escape(str(adr))}</p>" if adr else ""
+    doc = ws.get("doc", "")
+    doc_line = f"<p><strong>Doc:</strong> <code>{html.escape(str(doc))}</code></p>" if doc else ""
+    return (
+        f"<p><strong>Workstream:</strong> <code>{ws_id}</code></p>"
+        f"<p><strong>Title:</strong> {title}</p>"
+        f"<p><strong>Branch:</strong> <code>{branch}</code></p>"
+        f"<p><strong>Owner / Agent:</strong> {owner}</p>"
+        f"{adr_line}{doc_line}"
+    )
+
+
+def ensure_labels(client: PlaneClient, workspace_slug: str, project_id: str, names: list[str]) -> dict[str, str]:
+    """Ensure labels exist in the project; return name→id mapping."""
+    existing = {lbl["name"]: lbl["id"] for lbl in client.list_labels(workspace_slug, project_id)}
+    result: dict[str, str] = {}
+    for name in names:
+        if name in existing:
+            result[name] = existing[name]
+        else:
+            color = AW_LABEL_COLORS.get(name, "#6b7280")
+            created = client.create_label(workspace_slug, project_id, name, color)
+            result[name] = created["id"]
+    return result
+
+
+def ensure_issue_for_workstream(
+    client: PlaneClient,
+    *,
+    workspace_slug: str,
+    project_id: str,
+    states_by_name: dict[str, str],
+    labels_by_name: dict[str, str],
+    ws: dict[str, Any],
+    existing_issue_id: str | None = None,
+) -> dict[str, Any]:
+    status = str(ws.get("status", "in_progress"))
+    state_name = state_name_for_workstream(status)
+    state_id = states_by_name.get(state_name)
+    if state_id is None:
+        state_id = states_by_name.get("In Progress") or next(iter(states_by_name.values()))
+
+    owner = str(ws.get("owner", "agent"))
+    ws_id = str(ws.get("id", ""))
+    label_ids = [labels_by_name["agent"]] if "agent" in labels_by_name else []
+    if status == "blocked" and "blocked" in labels_by_name:
+        label_ids.append(labels_by_name["blocked"])
+    if owner in labels_by_name:
+        label_ids.append(labels_by_name[owner])
+
+    payload: dict[str, Any] = {
+        "name": f"[{owner}/{ws_id}] {ws.get('title', ws_id)}",
+        "description_html": render_workstream_description(ws),
+        "external_source": "repo_workstream",
+        "external_id": ws_id,
+        "state_id": state_id,
+        "label_ids": label_ids,
+    }
+
+    if existing_issue_id:
+        return client.update_issue(workspace_slug, project_id, existing_issue_id, payload)
+
+    # Search by external_id
+    for candidate in client.list_issues(workspace_slug, project_id):
+        if candidate.get("external_source") == "repo_workstream" and candidate.get("external_id") == ws_id:
+            issue_id = candidate["id"]
+            current_state = candidate.get("state_id") or candidate.get("state")
+            if (
+                candidate.get("name") == payload["name"]
+                and current_state == state_id
+            ):
+                return candidate
+            return client.update_issue(workspace_slug, project_id, issue_id, payload)
+
     return client.create_issue(workspace_slug, project_id, payload)

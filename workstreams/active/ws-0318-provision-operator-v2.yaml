@@ -8,26 +8,27 @@ branch: claude/provision-operator-v2
 worktree_path: .worktrees/provision-v2-worktree
 doc: docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md
 depends_on:
-  - adr-0318-repeatable-operator-onboarding-with-cc-audit-trail
+- adr-0318-repeatable-operator-onboarding-with-cc-audit-trail
 conflicts_with: []
 shared_surfaces:
-  - scripts/provision_operator.py
-  - workstreams.yaml
+- scripts/provision_operator.py
+- workstreams.yaml
 ownership_manifest:
   owned_surfaces:
-    - id: workstream_registry
-      paths:
-        - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws0318v2_provision_script
-      paths:
-        - scripts/provision_operator.py
-      mode: exclusive
-    - id: ws0318v2_generated_diagrams
-      paths:
-        - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: ws0318v2-generated-diagrams-v1
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0318v2_provision_script
+    paths:
+    - scripts/provision_operator.py
+    mode: exclusive
+  - id: ws0318v2_generated_diagrams
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    mode: shared_contract
+    contract: ws0318v2-generated-diagrams-v1
 ready_to_merge: true
 live_applied: false
+plane_issue_id: 092bfaaf-3939-4af1-bbcb-ab6eb81b16ef

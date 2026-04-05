@@ -1,5 +1,5 @@
 id: ws-realtime-dynamic-children
-adr: '0196'
+adr: 0196
 title: Auto-discover all production hosts as Netdata streaming children
 status: in_progress
 owner: claude
@@ -64,11 +64,12 @@ ownership_manifest:
     contract: ws-realtime-dynamic-children-generated-v1
 canonical_truth:
   changelog_entry: replaces the static Netdata child host list with a dynamic inventory-group
-    expression so all production hosts stream to realtime.lv3.org automatically
-    when new VMs are added to the inventory
+    expression so all production hosts stream to realtime.lv3.org automatically when
+    new VMs are added to the inventory
   release_bump: patch
   included_in_repo_version: null
   latest_receipts: {}
 blockers: []
 ready_to_merge: false
 live_applied: false
+plane_issue_id: 27265749-5306-4790-b09c-4a056a18e089

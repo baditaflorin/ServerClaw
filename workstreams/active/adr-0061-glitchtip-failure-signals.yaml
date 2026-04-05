@@ -7,38 +7,39 @@ branch: codex/adr-0061-glitchtip-failure-signals
 worktree_path: .worktrees/adr-0061-glitchtip-failure-signals
 doc: docs/workstreams/adr-0061-glitchtip-failure-signals.md
 depends_on:
-  - adr-0026-postgres-vm
-  - adr-0049-private-api-publication
-  - adr-0053-tempo-traces
+- adr-0026-postgres-vm
+- adr-0049-private-api-publication
+- adr-0053-tempo-traces
 conflicts_with: []
 shared_surfaces:
-  - application errors
-  - workflow failures
-  - issue notifications
-  - release regressions
+- application errors
+- workflow failures
+- issue notifications
+- release regressions
 ownership_manifest:
   owned_surfaces:
-    - id: workstream_registry
-      paths:
-        - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_0061_docs
-      paths:
-        - docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
-        - docs/workstreams/adr-0061-glitchtip-failure-signals.md
-      mode: exclusive
-    - id: visual_agent_operations_runbook
-      paths:
-        - docs/runbooks/plan-visual-agent-operations.md
-      mode: shared_contract
-      contract: visual-agent-operations-runbook-v1
-    - id: integration_truth
-      paths:
-        - README.md
-        - VERSION
-        - changelog.md
-        - versions/stack.yaml
-      mode: generated
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_0061_docs
+    paths:
+    - docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+    - docs/workstreams/adr-0061-glitchtip-failure-signals.md
+    mode: exclusive
+  - id: visual_agent_operations_runbook
+    paths:
+    - docs/runbooks/plan-visual-agent-operations.md
+    mode: shared_contract
+    contract: visual-agent-operations-runbook-v1
+  - id: integration_truth
+    paths:
+    - README.md
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    mode: generated
 ready_to_merge: false
 live_applied: false
+plane_issue_id: 97be14a8-3c27-409c-840c-70727a2ccc09
