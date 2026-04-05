@@ -1538,6 +1538,10 @@ workstreams:
       - inventory/host_vars/proxmox_florin.yml
       - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
       - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
+      - workstreams/archive/2026/**
+      - workstreams/active/**
+      - workstreams/policy.yaml
+      - docs/discovery/**
     ownership_manifest:
       owned_surfaces:
         - id: openbao_unseal_watcher
@@ -1572,11 +1576,10 @@ workstreams:
           contract: workstream-registry-v1
         - id: yaml_lint_bulk_fix
           paths:
-            - workstreams/archive/2026/*
-            - workstreams/active/*
+            - workstreams/archive/2026/**
+            - workstreams/active/**
             - workstreams/policy.yaml
-            - docs/discovery/*
-            - docs/discovery/**/*
+            - docs/discovery/**
           mode: shared_contract
           contract: workstream-registry-v1
         - id: discovery_artifacts_generated
