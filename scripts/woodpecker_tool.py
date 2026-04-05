@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json, load_operator_auth
 from platform.ansible.woodpecker import (
     GiteaClient,
     GiteaError,
@@ -24,10 +24,6 @@ from platform.ansible.woodpecker import (
 
 
 DEFAULT_AUTH_FILE = repo_path(".local", "woodpecker", "admin-auth.json")
-
-
-def load_auth(path: str) -> dict:
-    return load_json(Path(path).expanduser())
 
 
 def load_text(path: str | None) -> str | None:
@@ -51,7 +47,7 @@ def persist_auth(auth_file: str, auth: dict) -> None:
 
 
 def build_client(auth_file: str) -> tuple[WoodpeckerClient, dict]:
-    auth = load_auth(auth_file)
+    auth = load_operator_auth(auth_file)
     base_url = str(auth["base_url"]).rstrip("/")
     login_base_url = str(auth.get("login_base_url") or auth.get("public_url") or base_url).rstrip("/")
     verify_ssl = bool(auth.get("verify_ssl", True))

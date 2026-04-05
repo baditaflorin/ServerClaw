@@ -13,19 +13,15 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json
+from controller_automation_toolkit import emit_cli_error, load_json, load_operator_auth
 from platform.ansible.plane import PlaneClient, PlaneError, PlaneSessionClient, bootstrap_plane, ensure_issue_for_adr, parse_adr
 
 
 DEFAULT_AUTH_FILE = REPO_ROOT / ".local" / "plane" / "admin-auth.json"
 
 
-def load_auth(path: str) -> dict[str, Any]:
-    return load_json(Path(path).expanduser())
-
-
 def build_client(auth_file: str) -> tuple[PlaneClient, dict]:
-    auth = load_auth(auth_file)
+    auth = load_operator_auth(auth_file)
     api_token = str(auth.get("api_token", "")).strip()
     client = PlaneClient(auth["base_url"], api_token, verify_ssl=bool(auth.get("verify_ssl", True)))
     if client.verify_api_key():
