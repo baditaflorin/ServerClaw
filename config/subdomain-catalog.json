@@ -2,13 +2,20 @@
   "schema_version": "1.0.0",
   "reserved_prefixes": [
     {
-      "prefix": "ops",
-      "owner_adr": "0074",
+      "prefix": "agents",
+      "owner_adr": "0197",
       "allowed_fqdns": [
-        "ops.lv3.org",
-        "ops.staging.lv3.org"
+        "agents.lv3.org"
       ],
-      "notes": "Reserved for the generated operations portal and its staged hostname."
+      "notes": "Reserved for the Dify visual workflow canvas edge surface."
+    },
+    {
+      "prefix": "api",
+      "owner_adr": "0049",
+      "allowed_fqdns": [
+        "api.lv3.org"
+      ],
+      "notes": "Reserved for a future governed API gateway surface."
     },
     {
       "prefix": "docs",
@@ -35,48 +42,14 @@
       "notes": "Reserved for the private self-hosted Gitea control-plane surface."
     },
     {
-      "prefix": "internal",
-      "owner_adr": "0076",
-      "notes": "Reserved for future internal-only routing or split-horizon publication."
-    },
-    {
-      "prefix": "staging",
-      "owner_adr": "0072",
-      "notes": "Reserved for environment delegation and should not become a service hostname."
-    },
-    {
-      "prefix": "api",
-      "owner_adr": "0049",
-      "allowed_fqdns": [
-        "api.lv3.org"
-      ],
-      "notes": "Reserved for a future governed API gateway surface."
-    },
-    {
-      "prefix": "agents",
-      "owner_adr": "0197",
-      "allowed_fqdns": [
-        "agents.lv3.org"
-      ],
-      "notes": "Reserved for the Dify visual workflow canvas edge surface."
-    },
-    {
-      "prefix": "smtp",
-      "owner_adr": "0041",
-      "notes": "Reserved for mail submission and transport naming."
-    },
-    {
       "prefix": "imap",
       "owner_adr": "0041",
       "notes": "Reserved for mail retrieval naming."
     },
     {
-      "prefix": "mail",
-      "owner_adr": "0041",
-      "allowed_fqdns": [
-        "mail.lv3.org"
-      ],
-      "notes": "Reserved for the primary platform mail surface."
+      "prefix": "internal",
+      "owner_adr": "0076",
+      "notes": "Reserved for future internal-only routing or split-horizon publication."
     },
     {
       "prefix": "logs",
@@ -87,12 +60,47 @@
       "notes": "Reserved for the Dozzle real-time container log surface."
     },
     {
+      "prefix": "mail",
+      "owner_adr": "0041",
+      "allowed_fqdns": [
+        "mail.lv3.org"
+      ],
+      "notes": "Reserved for the primary platform mail surface."
+    },
+    {
+      "prefix": "ops",
+      "owner_adr": "0074",
+      "allowed_fqdns": [
+        "ops.lv3.org",
+        "ops.staging.lv3.org"
+      ],
+      "notes": "Reserved for the generated operations portal and its staged hostname."
+    },
+    {
       "prefix": "registry",
       "owner_adr": "0201",
       "allowed_fqdns": [
         "registry.lv3.org"
       ],
       "notes": "Reserved for the Harbor-backed container registry surface."
+    },
+    {
+      "prefix": "scheduler",
+      "owner_adr": "0361",
+      "allowed_fqdns": [
+        "scheduler.lv3.org"
+      ],
+      "notes": "Reserved for the Nomad scheduler UI edge surface with native OIDC auth."
+    },
+    {
+      "prefix": "smtp",
+      "owner_adr": "0041",
+      "notes": "Reserved for mail submission and transport naming."
+    },
+    {
+      "prefix": "staging",
+      "owner_adr": "0072",
+      "notes": "Reserved for environment delegation and should not become a service hostname."
     }
   ],
   "subdomains": [
