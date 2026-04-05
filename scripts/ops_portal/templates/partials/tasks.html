@@ -18,7 +18,7 @@
     {% if task_panel.attention %}
       <div class="task-card-grid">
       {% for task in task_panel.attention %}
-        <article class="pf-v5-c-card panel task-card task-card--attention">
+        <article class="panel task-card task-card--attention">
           <p class="service-category">{{ task.runbook_id }}</p>
           <h3><a href="{{ task.portal_path }}">{{ task.summary.headline }}</a></h3>
           <p class="muted">{{ task.summary.what_happened }}</p>

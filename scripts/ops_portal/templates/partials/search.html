@@ -1,5 +1,5 @@
 {% from "macros/states.html" import state_message %}
-<div class="pf-v5-c-card panel search-panel" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
+<div class="panel search-panel" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
   <form class="search-form" hx-post="/actions/search" hx-target="#search-panel" hx-swap="innerHTML">
     <div>
       <label class="form-label" for="search-query">Query</label>
@@ -18,7 +18,7 @@
       <div class="muted">
         BM25 plus trigram matching with synonym expansion from `config/search-synonyms.yaml`.
       </div>
-      <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Search</button>
+      <button class="action-button" type="submit">Search</button>
     </div>
   </form>
 
@@ -32,7 +32,7 @@
 
   <div class="search-results">
     {% for result in search_results %}
-    <article class="pf-v5-c-card search-result">
+    <article class="panel search-result">
       <div class="search-result-head">
         <strong>{{ result.title }}</strong>
         <span class="pill">{{ result.collection }} · {{ "%.2f"|format(result.score) }}</span>

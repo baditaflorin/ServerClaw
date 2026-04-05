@@ -1,0 +1,72 @@
+id: ops-portal-patternfly-removal
+adr: '0328'
+title: Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse
+status: ready_for_merge
+owner: claude
+branch: claude/affectionate-galileo
+worktree_path: .claude/worktrees/affectionate-galileo
+doc: docs/adr/0328-ops-portal.md
+depends_on:
+- adr-0328-ops-portal
+conflicts_with: []
+shared_surfaces:
+- scripts/ops_portal/templates/
+- config/service-capability-catalog.json
+- config/dependency-graph.json
+- workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ops_portal_patternfly_removal
+    paths:
+    - scripts/ops_portal/templates/base.html
+    - scripts/ops_portal/templates/index.html
+    - scripts/ops_portal/templates/entry.html
+    - scripts/ops_portal/templates/task_detail.html
+    - scripts/ops_portal/templates/partials/activation.html
+    - scripts/ops_portal/templates/partials/agents.html
+    - scripts/ops_portal/templates/partials/attention.html
+    - scripts/ops_portal/templates/partials/changelog.html
+    - scripts/ops_portal/templates/partials/drift.html
+    - scripts/ops_portal/templates/partials/overview.html
+    - scripts/ops_portal/templates/partials/runbooks.html
+    - scripts/ops_portal/templates/partials/search.html
+    - scripts/ops_portal/templates/partials/tasks.html
+    - scripts/ops_portal/templates/macros/states.html
+    mode: exclusive
+  - id: repowise_catalog_registration
+    paths:
+    - config/service-capability-catalog.json
+    - config/dependency-graph.json
+    mode: shared_contract
+    contract: topology-v1
+  - id: shared_generated_contract
+    paths:
+    - workstreams.yaml
+    - workstreams/active/ops-portal-patternfly-removal.yaml
+    - build/platform-manifest.json
+    - changelog.md
+    - docs/adr/.index.yaml
+    - docs/adr/index/*
+    - docs/diagrams/*
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - build/onboarding/*
+    - receipts/sbom/*
+    - VERSION
+    - RELEASE.md
+    - README.md
+    - versions/stack.yaml
+    - docs/release-notes/*
+    - docs/release-notes/index/*
+    mode: shared_contract
+    contract: mainline-release-integration-v1
+ready_to_merge: true
+live_applied: false
+canonical_truth:
+  changelog_entry: removed all PatternFly v5 CSS framework classes from ops portal
+    templates (base, index, entry, task_detail, all partials and macros); portal
+    now uses only custom portal.css classes eliminating the CDN dependency and layout
+    conflicts caused by pf-v5-c-page__sidebar translateX collapse; added repowise
+    to service-capability-catalog and dependency-graph (lifecycle_status planned,
+    ADR 0346)
+  release_bump: patch

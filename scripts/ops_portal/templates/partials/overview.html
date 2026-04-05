@@ -13,7 +13,7 @@
 {% endif %}
 
 <div class="overview-grid">
-  <section class="pf-v5-c-card panel summary-panel">
+  <section class="panel summary-panel">
     <div class="stat-block">
       <span class="label">Maintenance</span>
       <strong>{{ maintenance_count }}</strong>
@@ -28,7 +28,7 @@
     </div>
   </section>
 
-  <section class="pf-v5-c-card panel summary-panel">
+  <section class="panel summary-panel">
     <h3>Active Maintenance Windows</h3>
     {% if maintenance_windows %}
     <ul class="compact-list">
@@ -44,7 +44,7 @@
     {% endif %}
   </section>
 
-  <section class="pf-v5-c-card panel summary-panel">
+  <section class="panel summary-panel">
     <h3>Runtime Assurance</h3>
     <div class="stat-block">
       <span class="label">Portfolio</span>
@@ -60,7 +60,7 @@
     </div>
   </section>
 
-  <section class="pf-v5-c-card panel summary-panel">
+  <section class="panel summary-panel">
     <h3>Capability Contracts</h3>
     {% if capability_contract_summary.total %}
     <div class="stat-block">
@@ -82,7 +82,7 @@
 </div>
 
 <div class="chart-grid">
-  <section class="pf-v5-c-card panel chart-panel">
+  <section class="panel chart-panel">
     <div class="section-head">
       <div>
         <p class="section-kicker">Health Mix</p>
@@ -95,7 +95,7 @@
     <p class="muted chart-caption">Healthy, degraded, critical, and unknown services stay in one shared visual language.</p>
   </section>
 
-  <section class="pf-v5-c-card panel chart-panel">
+  <section class="panel chart-panel">
     <div class="section-head">
       <div>
         <p class="section-kicker">Topology Focus</p>
@@ -113,7 +113,7 @@
   </section>
 </div>
 
-<section class="pf-v5-c-card panel">
+<section class="panel">
   <div class="section-head">
     <div>
       <p class="section-kicker">Runtime Assurance</p>
@@ -200,7 +200,7 @@
   {% endif %}
 </section>
 
-<section class="pf-v5-c-card panel">
+<section class="panel">
   <div class="section-head">
     <div>
       <p class="section-kicker">Capability Contracts</p>
@@ -250,7 +250,7 @@
   {% endif %}
 </section>
 
-<section class="pf-v5-c-card panel">
+<section class="panel">
   <div class="section-head">
     <div>
       <p class="section-kicker">Service Actions</p>
@@ -259,7 +259,7 @@
   </div>
 <div class="service-grid">
   {% for service in services %}
-  <article class="pf-v5-c-card service-card">
+  <article class="panel service-card">
     <div class="service-head">
       <div>
         <p class="service-category">{{ service.category }}</p>
@@ -325,7 +325,7 @@
       {% set rotate_locked = service.actions_locked and "rotate_secret" in service.locked_actions %}
       {% set restart_locked = service.actions_locked and "restart" in service.locked_actions %}
       <button
-        class="pf-v5-c-button pf-m-primary action-button"
+        class="action-button"
         hx-post="/actions/services/{{ service.id }}/deploy"
         hx-target="#action-result-{{ service.id }}"
         hx-swap="innerHTML"
@@ -334,14 +334,14 @@
         Deploy
       </button>
       <button
-        class="pf-v5-c-button pf-m-secondary action-button"
+        class="action-button secondary"
         hx-post="/actions/services/{{ service.id }}/health-check"
         hx-target="#action-result-{{ service.id }}"
         hx-swap="innerHTML">
         Health check
       </button>
       <button
-        class="pf-v5-c-button pf-m-secondary action-button"
+        class="action-button secondary"
         hx-post="/actions/services/{{ service.id }}/rotate-secret"
         hx-target="#action-result-{{ service.id }}"
         hx-swap="innerHTML"
@@ -350,7 +350,7 @@
         Rotate secret
       </button>
       <button
-        class="pf-v5-c-button pf-m-secondary action-button"
+        class="action-button secondary"
         hx-post="/actions/services/{{ service.id }}/deploy"
         hx-target="#action-result-{{ service.id }}"
         hx-vals='{"restart_only":"true"}'
@@ -359,7 +359,7 @@
         {% if restart_locked %}disabled title="Complete the activation checklist or reveal advanced tools for this session before restarting services."{% endif %}>
         Restart
       </button>
-      <a class="pf-v5-c-button pf-m-link action-button ghost" href="{{ service.logs_url }}" target="_blank" rel="noreferrer">View logs</a>
+      <a class="action-button ghost" href="{{ service.logs_url }}" target="_blank" rel="noreferrer">View logs</a>
     </div>
 
     {% if service.actions_locked %}

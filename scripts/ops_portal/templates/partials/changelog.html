@@ -1,6 +1,6 @@
 {% from "macros/states.html" import empty_state %}
 <div class="changelog-grid" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
-  <section class="pf-v5-c-card panel chart-panel">
+  <section class="panel chart-panel">
     <div class="section-head">
       <div>
         <p class="section-kicker">Live Apply Cadence</p>
@@ -13,7 +13,7 @@
     <p class="muted chart-caption">Bars show receipt count per day, while the line tracks how many unique services were touched.</p>
   </section>
 
-  <section class="pf-v5-c-card panel">
+  <section class="panel">
     <h3>Recent Activity</h3>
     {% if activities %}
     <ul class="timeline">
@@ -38,7 +38,7 @@
     {% endif %}
   </section>
 
-  <section class="pf-v5-c-card panel">
+  <section class="panel">
     <h3>Unreleased Notes</h3>
     {% if changelog_notes %}
     <ul class="compact-list">

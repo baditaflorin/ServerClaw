@@ -4,21 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}LV3 Ops Portal{% endblock %}</title>
-  <link rel="stylesheet" href="https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css">
   <link rel="stylesheet" href="/static/portal.css">
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   <script src="https://unpkg.com/echarts@5.6.0/dist/echarts.min.js"></script>
   <script src="/static/portal.js" defer></script>
 </head>
 <body class="portal-app-body">
-  <div class="pf-v5-c-page portal-page" id="portal-page">
+  <div class="portal-page" id="portal-page">
     <a class="portal-skip-link" href="#portal-main">Skip to main content</a>
 
-    <header class="pf-v5-c-masthead portal-masthead" role="banner">
+    <header class="portal-masthead" role="banner">
       <div class="portal-toolbar">
         <div class="portal-brand">
           <button
-            class="pf-v5-c-button pf-m-plain portal-nav-toggle"
+            class="portal-nav-toggle"
             type="button"
             aria-controls="portal-sidebar"
             aria-expanded="false"
@@ -37,7 +36,7 @@
         <div class="portal-toolbar-actions">
           <button
             id="launcher-toggle"
-            class="pf-v5-c-button pf-m-secondary launcher-toggle portal-toolbar-link"
+            class="launcher-toggle portal-toolbar-link"
             type="button"
             aria-expanded="false"
             aria-controls="launcher-shell">
@@ -47,7 +46,7 @@
           {% if contextual_help %}
           <button
             id="contextual-help-toggle"
-            class="pf-v5-c-button pf-m-link portal-toolbar-link contextual-help-toggle"
+            class="portal-toolbar-link contextual-help-toggle"
             type="button"
             aria-expanded="false"
             aria-controls="contextual-help-drawer">
@@ -55,18 +54,18 @@
           </button>
           {% endif %}
           <a
-            class="pf-v5-c-button pf-m-link portal-toolbar-link"
+            class="portal-toolbar-link"
             href="{{ docs_base_url }}/runbooks/ops-portal-down.md"
             target="_blank"
             rel="noreferrer">
             Help
           </a>
-          <a class="pf-v5-c-button pf-m-secondary portal-toolbar-link" href="#attention">
+          <a class="portal-toolbar-link" href="#attention">
             Notifications
             <span id="portal-toolbar-attention-count" class="portal-toolbar-badge">{{ attention_summary.active_count }}</span>
           </a>
           <details class="portal-user-menu">
-            <summary class="pf-v5-c-button pf-m-plain portal-user-menu__toggle">
+            <summary class="portal-user-menu__toggle">
               <span class="portal-user-menu__label">Operator</span>
               <strong>{{ operator.operator_id }}</strong>
             </summary>
@@ -95,7 +94,7 @@
       </div>
     </header>
 
-    <aside class="pf-v5-c-page__sidebar portal-sidebar" id="portal-sidebar" data-portal-sidebar>
+    <aside class="portal-sidebar" id="portal-sidebar" data-portal-sidebar>
       <div class="portal-sidebar__inner">
         <section class="portal-sidebar-card">
           <p class="portal-sidebar-kicker">Shared Navigation</p>
@@ -106,13 +105,13 @@
           </p>
         </section>
 
-        <nav class="pf-v5-c-nav portal-shell-nav" aria-label="Primary">
-          <section class="pf-v5-c-nav__section" aria-labelledby="portal-nav-primary">
-            <h2 class="pf-v5-c-nav__section-title" id="portal-nav-primary">This portal</h2>
-            <ul class="pf-v5-c-nav__list">
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#activation">
-                  <span class="pf-v5-c-nav__link-text">Activation</span>
+        <nav class="portal-shell-nav" aria-label="Primary">
+          <section class="portal-nav-section">
+            <h2 class="portal-nav-section-title">This portal</h2>
+            <ul class="portal-nav-list">
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#activation">
+                  <span >Activation</span>
                   <span class="portal-shell-nav-count">
                     {% if activation.required_complete %}
                     0
@@ -122,57 +121,57 @@
                   </span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#overview" aria-current="page">
-                  <span class="pf-v5-c-nav__link-text">Overview</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#overview" aria-current="page">
+                  <span >Overview</span>
                   <span class="portal-shell-nav-count">{{ services|length }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#attention">
-                  <span class="pf-v5-c-nav__link-text">Attention</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#attention">
+                  <span >Attention</span>
                   <span id="portal-nav-attention-count" class="portal-shell-nav-count">{{ attention_summary.active_count }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#deployments">
-                  <span class="pf-v5-c-nav__link-text">Deployments</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#deployments">
+                  <span >Deployments</span>
                   <span class="portal-shell-nav-count">{{ deployments|length }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#tasks">
-                  <span class="pf-v5-c-nav__link-text">Tasks</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#tasks">
+                  <span >Tasks</span>
                   <span class="portal-shell-nav-count">{{ task_panel.attention_count }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#agents">
-                  <span class="pf-v5-c-nav__link-text">Agents</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#agents">
+                  <span >Agents</span>
                   <span class="portal-shell-nav-count">{{ coordination.summary.count }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#drift">
-                  <span class="pf-v5-c-nav__link-text">Drift</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#drift">
+                  <span >Drift</span>
                   <span class="portal-shell-nav-count">{{ drift_summary.unsuppressed_count or 0 }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#search">
-                  <span class="pf-v5-c-nav__link-text">Search</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#search">
+                  <span >Search</span>
                   <span class="portal-shell-nav-count">{{ search_collections|length }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#runbooks">
-                  <span class="pf-v5-c-nav__link-text">Runbooks</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#runbooks">
+                  <span >Runbooks</span>
                   <span class="portal-shell-nav-count">{{ runbooks|length }}</span>
                 </a>
               </li>
-              <li class="pf-v5-c-nav__item">
-                <a class="pf-v5-c-nav__link" href="#changelog">
-                  <span class="pf-v5-c-nav__link-text">Activity</span>
+              <li class="portal-nav-item">
+                <a class="portal-nav-link" href="#changelog">
+                  <span >Activity</span>
                   <span class="portal-shell-nav-count">{{ activities|length }}</span>
                 </a>
               </li>
@@ -212,7 +211,7 @@
       </div>
     </aside>
 
-    <main class="pf-v5-c-page__main portal-main-layout" id="portal-main">
+    <main class="portal-main-layout" id="portal-main">
       <section id="launcher-shell" class="launcher-shell" hidden>
         {% include "partials/launcher.html" %}
       </section>
@@ -225,7 +224,7 @@
             <h2>{{ contextual_help.title }}</h2>
           </div>
           <button
-            class="pf-v5-c-button pf-m-plain contextual-help-close"
+            class="contextual-help-close"
             type="button"
             aria-label="Close contextual help"
             data-contextual-help-dismiss>

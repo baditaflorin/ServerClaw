@@ -1,5 +1,5 @@
 {% from "macros/states.html" import empty_state %}
-<section class="pf-v5-c-card panel drift-panel" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
+<section class="panel drift-panel" data-primary-lane="{{ page_lane.primary_lane if page_lane else '' }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv if page_lane else '' }}" data-next-success-lane="{{ page_lane.next_success_lane if page_lane else '' }}" data-next-failure-lane="{{ page_lane.next_failure_lane if page_lane else '' }}">
   <div class="drift-summary">
     <div>
       <span class="label">Latest drift run</span>
@@ -16,7 +16,7 @@
   </div>
 
   {% if drift_report.records %}
-  <table class="pf-v5-c-table pf-m-grid-md data-table" role="grid">
+  <table class="data-table" role="grid">
     <thead>
       <tr>
         <th>Service</th>
@@ -36,7 +36,7 @@
         <td>
           {% if item.service %}
           <button
-            class="pf-v5-c-button pf-m-secondary action-button"
+            class="action-button secondary"
             hx-post="/actions/services/{{ item.service }}/deploy"
             hx-target="#drift-reconcile-result"
             hx-swap="innerHTML"

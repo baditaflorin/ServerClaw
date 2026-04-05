@@ -9,7 +9,7 @@
 {% endif %}
 
 <div class="overview-grid">
-  <section class="pf-v5-c-card panel summary-panel">
+  <section class="panel summary-panel">
     <div class="stat-block">
       <span class="label">Sessions</span>
       <strong>{{ coordination.summary.count }}</strong>
@@ -28,7 +28,7 @@
     </div>
   </section>
 
-  <section class="pf-v5-c-card panel summary-panel">
+  <section class="panel summary-panel">
     <h3>Snapshot</h3>
     <p class="muted">
       {% if coordination.summary.generated_at %}
@@ -56,7 +56,7 @@
 <div class="service-grid">
   {% if coordination.entries %}
     {% for entry in coordination.entries %}
-    <article class="pf-v5-c-card service-card">
+    <article class="panel service-card">
       <div class="service-head">
         <div>
           <p class="service-category">agent session</p>

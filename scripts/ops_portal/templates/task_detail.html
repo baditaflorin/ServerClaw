@@ -4,7 +4,7 @@
 {% block title %}Return To Task{% endblock %}
 
 {% block content %}
-  <section class="pf-v5-c-page__main-section portal-section">
+  <section class="portal-section">
     <div class="section-head">
       <div>
         <p class="section-kicker">Return To Task</p>
@@ -22,7 +22,7 @@
     {% endif %}
 
     <div class="task-detail-layout">
-      <article class="pf-v5-c-card panel task-detail-card">
+      <article class="panel task-detail-card">
         <p class="service-category">Resume summary</p>
         <p>{{ task.summary.what_happened }}</p>
         <dl class="task-meta-list">
@@ -53,13 +53,13 @@
         </dl>
         {% if task.resume_available %}
         <form method="post" action="/tasks/runbooks/{{ task.run_id }}/resume">
-          <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Resume task</button>
+          <button class="action-button" type="submit">Resume task</button>
         </form>
         {% endif %}
         <p class="muted">Direct deep link: <a href="{{ task.portal_path }}">{{ task.portal_path }}</a></p>
       </article>
 
-      <article class="pf-v5-c-card panel task-detail-card">
+      <article class="panel task-detail-card">
         <p class="service-category">Draft vs committed state</p>
         <p>The browser draft stays separate from the saved run state. The values below are the committed task parameters and evidence used for reentry.</p>
         <pre class="task-json">{{ task.params | tojson(indent=2) }}</pre>
@@ -67,7 +67,7 @@
     </div>
 
     <div class="task-detail-layout">
-      <article class="pf-v5-c-card panel task-detail-card">
+      <article class="panel task-detail-card">
         <p class="service-category">Evidence</p>
         {% if task.evidence %}
           <ul class="task-evidence-list">
@@ -89,7 +89,7 @@
         {% endif %}
       </article>
 
-      <article class="pf-v5-c-card panel task-detail-card">
+      <article class="panel task-detail-card">
         <p class="service-category">Activity Timeline</p>
         {% if task.activity %}
           <ul class="timeline">

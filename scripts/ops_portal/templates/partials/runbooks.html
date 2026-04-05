@@ -14,13 +14,13 @@
 
 <div class="runbook-grid">
   {% if page_lane %}
-  <section class="pf-v5-c-card panel runbook-card" data-primary-lane="{{ page_lane.primary_lane }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv }}" data-next-success-lane="{{ page_lane.next_success_lane }}" data-next-failure-lane="{{ page_lane.next_failure_lane }}">
+  <section class="panel runbook-card" data-primary-lane="{{ page_lane.primary_lane }}" data-secondary-lanes="{{ page_lane.secondary_lanes_csv }}" data-next-success-lane="{{ page_lane.next_success_lane }}" data-next-failure-lane="{{ page_lane.next_failure_lane }}">
     {{ lane_banner(page_lane) }}
   </section>
   {% endif %}
   {% if runbooks %}
   {% for runbook in runbooks %}
-  <article class="pf-v5-c-card panel runbook-card">
+  <article class="panel runbook-card">
     <div class="runbook-head">
       <div>
         <p class="service-category">{{ runbook.live_impact }}</p>
@@ -51,9 +51,9 @@
       <textarea id="params-{{ runbook.id }}" name="parameters" rows="4" data-runbook-draft-input>{}</textarea>
       <div class="runbook-form-meta">
         <span class="muted" data-draft-status-for="{{ runbook.id }}">Drafts stay in this browser until you clear them.</span>
-        <button class="pf-v5-c-button pf-m-link pf-m-inline" type="button" data-clear-runbook-draft="{{ runbook.id }}">Clear draft</button>
+        <button class="action-button action-button--inline" type="button" data-clear-runbook-draft="{{ runbook.id }}">Clear draft</button>
       </div>
-      <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Launch</button>
+      <button class="action-button" type="submit">Launch</button>
     </form>
     <div id="runbook-result-{{ runbook.id }}"></div>
   </article>
@@ -63,7 +63,7 @@
   {% endif %}
 
   {% for runbook in locked_runbooks %}
-  <article class="pf-v5-c-card panel runbook-card runbook-card--locked">
+  <article class="panel runbook-card runbook-card--locked">
     <div class="runbook-head">
       <div>
         <p class="service-category">{{ runbook.live_impact }}</p>

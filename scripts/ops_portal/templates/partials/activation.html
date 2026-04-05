@@ -1,5 +1,5 @@
 {% from "macros/states.html" import state_message %}
-<div id="activation-panel" class="pf-v5-c-card panel activation-panel">
+<div id="activation-panel" class="panel activation-panel">
   <div class="activation-summary">
     <div>
       <p class="section-kicker">First-Run Activation</p>
@@ -36,7 +36,7 @@
       hx-target="#activation-panel"
       hx-swap="outerHTML">
       <input type="hidden" name="enabled" value="{% if activation.advanced_override %}false{% else %}true{% endif %}">
-      <button class="pf-v5-c-button {% if activation.advanced_override %}pf-m-secondary{% else %}pf-m-primary{% endif %} action-button" type="submit">
+      <button class="action-button {% if activation.advanced_override %}secondary{% endif %}" type="submit">
         {% if activation.advanced_override %}
         Restore guardrails
         {% else %}
@@ -93,21 +93,21 @@
               hx-target="#activation-panel"
               hx-swap="outerHTML">
               <input type="hidden" name="status" value="completed">
-              <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Mark done</button>
+              <button class="action-button" type="submit">Mark done</button>
             </form>
             <form
               hx-post="/actions/activation/items/{{ item.id }}"
               hx-target="#activation-panel"
               hx-swap="outerHTML">
               <input type="hidden" name="status" value="skipped">
-              <button class="pf-v5-c-button pf-m-secondary action-button" type="submit">Skip</button>
+              <button class="action-button secondary" type="submit">Skip</button>
             </form>
             <form
               hx-post="/actions/activation/items/{{ item.id }}"
               hx-target="#activation-panel"
               hx-swap="outerHTML">
               <input type="hidden" name="status" value="todo">
-              <button class="pf-v5-c-button pf-m-link action-button ghost" type="submit">Reset</button>
+              <button class="action-button ghost" type="submit">Reset</button>
             </form>
           </div>
         </section>

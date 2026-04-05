@@ -111,6 +111,80 @@ workstreams:
       contract: latest-main-generated-truth-v1
   ready_to_merge: true
   live_applied: true
+  plane_issue_id: 1252ea02-4ff0-4c83-9752-33c1428ddb77
+- id: ops-portal-patternfly-removal
+  adr: 0328
+  title: "Remove PatternFly v5 CSS from ops portal templates \u2014 eliminate layout\
+    \ collapse"
+  status: ready_for_merge
+  owner: claude
+  branch: claude/affectionate-galileo
+  worktree_path: .claude/worktrees/affectionate-galileo
+  doc: docs/adr/0328-ops-portal.md
+  depends_on:
+  - adr-0328-ops-portal
+  conflicts_with: []
+  shared_surfaces:
+  - scripts/ops_portal/templates/
+  - config/service-capability-catalog.json
+  - config/dependency-graph.json
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ops_portal_patternfly_removal
+      paths:
+      - scripts/ops_portal/templates/base.html
+      - scripts/ops_portal/templates/index.html
+      - scripts/ops_portal/templates/entry.html
+      - scripts/ops_portal/templates/task_detail.html
+      - scripts/ops_portal/templates/partials/activation.html
+      - scripts/ops_portal/templates/partials/agents.html
+      - scripts/ops_portal/templates/partials/attention.html
+      - scripts/ops_portal/templates/partials/changelog.html
+      - scripts/ops_portal/templates/partials/drift.html
+      - scripts/ops_portal/templates/partials/overview.html
+      - scripts/ops_portal/templates/partials/runbooks.html
+      - scripts/ops_portal/templates/partials/search.html
+      - scripts/ops_portal/templates/partials/tasks.html
+      - scripts/ops_portal/templates/macros/states.html
+      mode: exclusive
+    - id: repowise_catalog_registration
+      paths:
+      - config/service-capability-catalog.json
+      - config/dependency-graph.json
+      mode: shared_contract
+      contract: topology-v1
+    - id: shared_generated_contract
+      paths:
+      - workstreams.yaml
+      - workstreams/active/ops-portal-patternfly-removal.yaml
+      - build/platform-manifest.json
+      - changelog.md
+      - docs/adr/.index.yaml
+      - docs/adr/index/*
+      - docs/diagrams/*
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/*
+      - receipts/sbom/*
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - versions/stack.yaml
+      - docs/release-notes/*
+      - docs/release-notes/index/*
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+  ready_to_merge: true
+  live_applied: false
+  canonical_truth:
+    changelog_entry: removed all PatternFly v5 CSS framework classes from ops portal
+      templates (base, index, entry, task_detail, all partials and macros); portal
+      now uses only custom portal.css classes eliminating the CDN dependency and layout
+      conflicts caused by pf-v5-c-page__sidebar translateX collapse; added repowise
+      to service-capability-catalog and dependency-graph (lifecycle_status planned,
+      ADR 0346)
+    release_bump: patch
 - id: ws-0318-provision-operator-v2
   adr: 0318
   title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding
@@ -144,6 +218,7 @@ workstreams:
       contract: ws0318v2-generated-diagrams-v1
   ready_to_merge: true
   live_applied: false
+  plane_issue_id: 092bfaaf-3939-4af1-bbcb-ab6eb81b16ef
 - id: ws-0318-operator-onboarding-iac
   adr: 0318
   title: Repeatable operator onboarding with provision_operator.py and CC audit trail
@@ -196,6 +271,7 @@ workstreams:
       contract: ws0318-generated-artifacts-v1
   ready_to_merge: true
   live_applied: false
+  plane_issue_id: 30142dfa-8b2f-4433-9d86-d9cae7092408
 - id: ws-0317-keycloak-provisioning-adr
   adr: '0317'
   title: Keycloak direct-API operator provisioning via SSH proxy
@@ -237,6 +313,7 @@ workstreams:
       contract: ws0317-generated-artifacts-v1
   ready_to_merge: true
   live_applied: false
+  plane_issue_id: 075347ed-54ba-4ff1-aaf9-9c37ab40039a
 - id: ws-0308-live-apply
   adr: 0308
   title: Live apply ADR 0308 operator provisioning execution surface and connectivity
@@ -373,6 +450,7 @@ workstreams:
     included_in_repo_version: 0.177.138
     latest_receipts:
       operator_provisioning_connectivity: 2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply
+  plane_issue_id: 6997483c-3f49-47ce-b341-d4f2252ce562
 - id: ws-0307-0308-operator-adrs
   adr: '0307'
   title: Temporary guest operator accounts and LLM agent execution surface contracts
@@ -445,6 +523,7 @@ workstreams:
     included_in_repo_version: 0.177.120
     latest_receipts:
       k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
+  plane_issue_id: 645a7e34-0584-4ff9-9a32-e8cbcb0336fa
 - id: ws-0286-0291-vikunja-sftpgo-live-apply
   adr: 0286
   title: Live apply Vikunja task management and SFTPGo managed file transfer
@@ -519,6 +598,7 @@ workstreams:
       contract: ws0286-generated-diagrams-v1
   ready_to_merge: true
   live_applied: false
+  plane_issue_id: a4c66e7d-0c17-405a-9ecf-c0869374dead
 - id: plausible-drop-oidc
   adr: 0283
   title: "Remove dead Plausible OIDC config \u2014 CE v3.x uses oauth2-proxy auth\
@@ -584,6 +664,7 @@ workstreams:
       \ extra_hosts, /login redirect) \u2014 Plausible CE v3.x dropped community OIDC;\
       \ auth is now exclusively via oauth2-proxy at the NGINX edge"
     release_bump: patch
+  plane_issue_id: 83c9164f-bea1-4a95-b6a5-d482015c605e
 - id: ws-0275-live-apply
   adr: '0275'
   title: Refresh Apache Tika exact-main live-apply truth after the runtime-ai pool
@@ -695,6 +776,7 @@ workstreams:
     included_in_repo_version: 0.177.151
     latest_receipts:
       tika: 2026-04-03-adr-0275-apache-tika-mainline-live-apply
+  plane_issue_id: ba2b4148-1bc1-4c3d-a055-fc127624a44c
 - id: ws-0269-live-apply
   adr: 0269
   title: Vulnerability budgets and image-host freshness promotion gates
@@ -800,6 +882,7 @@ workstreams:
       mode: exclusive
   ready_to_merge: true
   live_applied: true
+  plane_issue_id: 09f536c9-d223-45df-b2cf-6261d914864a
 - id: ws-0254-serverclaw-runtime-fix
   adr: '0254'
   title: Fix ServerClaw OIDC login, hairpin NAT, model access, and Keycloak network
@@ -856,6 +939,7 @@ workstreams:
       visibility, and made Keycloak startup idempotent by auto-creating the external
       Docker network
     release_bump: patch
+  plane_issue_id: 58c91151-c631-45b7-aed2-64365e4e27f0
 - id: ws-0224-repo-intake
   adr: '0224'
   title: Self-service repo intake and agent-assisted app deployments
@@ -930,6 +1014,7 @@ workstreams:
     latest_receipts:
       coolify: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
       coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
+  plane_issue_id: 26c90b00-d1af-454d-9a47-d644e1b0c164
 - id: ws-0197-live-apply
   adr: 0197
   title: Dify visual workflow canvas live apply
@@ -1090,6 +1175,7 @@ workstreams:
     included_in_repo_version: 0.177.48
     latest_receipts:
       dify: 2026-03-28-adr-0197-dify-mainline-live-apply
+  plane_issue_id: ff915411-296e-4c68-ab8d-aab492a19fa9
 - id: ws-realtime-dynamic-children
   adr: 0196
   title: Auto-discover all production hosts as Netdata streaming children
@@ -1164,6 +1250,7 @@ workstreams:
   blockers: []
   ready_to_merge: false
   live_applied: false
+  plane_issue_id: 27265749-5306-4790-b09c-4a056a18e089
 - id: adr-0095-unified-search
   adr: 0095
   title: Unified search across platform services
@@ -1221,6 +1308,7 @@ workstreams:
       mode: generated
   ready_to_merge: false
   live_applied: false
+  plane_issue_id: 3dc83890-945f-41eb-9ca7-b21f7ff54c40
 - id: adr-0066-mutation-audit-log
   adr: '0066'
   title: Structured mutation audit log
@@ -1283,6 +1371,7 @@ workstreams:
       mode: generated
   ready_to_merge: false
   live_applied: false
+  plane_issue_id: 05869a95-3d87-490f-95d5-70410d3c97f1
 - id: adr-0061-glitchtip-failure-signals
   adr: '0061'
   title: GlitchTip for application exceptions and task failures
@@ -1327,6 +1416,7 @@ workstreams:
       mode: generated
   ready_to_merge: false
   live_applied: false
+  plane_issue_id: 97be14a8-3c27-409c-840c-70727a2ccc09
 - id: adr-0058-nats-event-bus
   adr: 0058
   title: NATS JetStream for internal event bus and agent coordination
@@ -1371,6 +1461,7 @@ workstreams:
       mode: generated
   ready_to_merge: false
   live_applied: false
+  plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
 - id: naughty-jepsen-ops-fixes
   adr: '0043'
   title: "Operational fixes \u2014 OpenBao unseal watcher, Keycloak VM migration,\
@@ -1511,6 +1602,7 @@ workstreams:
       - playbooks/services/runtime-comms-pool.yml
       mode: shared_contract
       contract: topology-v1
+  plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*
