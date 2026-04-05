@@ -46,6 +46,7 @@ ownership_manifest:
         - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
         - docs/diagrams/agent-coordination-map.excalidraw
         - docs/workstreams/naughty-jepsen-ops-fixes.md
+        - build/platform-manifest.json
       mode: shared_contract
       contract: topology-v1
     - id: dozzle_runtime_healthcheck_fix
