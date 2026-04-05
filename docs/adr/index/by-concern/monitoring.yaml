@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-05'
+generated: '2026-04-06'
 facet: concern
 concern: monitoring
 total_adrs: 10

@@ -1,7 +1,7 @@
 id: ops-portal-patternfly-removal
 adr: 0328
 title: Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse
-status: ready_for_merge
+status: merged
 owner: claude
 branch: claude/affectionate-galileo
 worktree_path: .claude/worktrees/affectionate-galileo
@@ -61,7 +61,8 @@ ownership_manifest:
     mode: shared_contract
     contract: mainline-release-integration-v1
 ready_to_merge: true
-live_applied: false
+live_applied: true
+included_in_repo_version: 0.178.15
 canonical_truth:
   changelog_entry: removed all PatternFly v5 CSS framework classes from ops portal
     templates (base, index, entry, task_detail, all partials and macros); portal now

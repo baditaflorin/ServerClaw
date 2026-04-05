@@ -79,6 +79,60 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: repowise-semantic-search
+  adr: '0346'
+  title: "Repowise \u2014 local semantic code search over the git repo (Ollama + Qdrant,\
+    \ no third-party APIs)"
+  status: ready_for_merge
+  owner: claude
+  branch: claude/affectionate-galileo
+  worktree_path: .claude/worktrees/affectionate-galileo
+  depends_on:
+  - adr-0198-qdrant-vector-search-semantic-rag
+  conflicts_with: []
+  shared_surfaces:
+  - scripts/repowise_corpus.py
+  - scripts/repowise_index.py
+  - scripts/repowise_service.py
+  - collections/ansible_collections/lv3/platform/roles/repowise_runtime/
+  - playbooks/repowise.yml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: repowise_scripts
+      paths:
+      - scripts/repowise_corpus.py
+      - scripts/repowise_index.py
+      - scripts/repowise_service.py
+      mode: exclusive
+    - id: repowise_ansible_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/repowise_runtime/
+      - playbooks/repowise.yml
+      mode: exclusive
+    - id: shared_generated_contract
+      paths:
+      - workstreams.yaml
+      - workstreams/active/repowise-semantic-search.yaml
+      - changelog.md
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - versions/stack.yaml
+      - docs/release-notes/*
+      - docs/release-notes/index/*
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+  ready_to_merge: true
+  live_applied: false
+  canonical_truth:
+    changelog_entry: "adds repowise semantic code search \u2014 local corpus builder\
+      \ (repowise_corpus.py) chunks 19k code/doc segments by language, indexer (repowise_index.py)\
+      \ embeds via Ollama nomic-embed-text and stores in Qdrant repowise collection,\
+      \ FastAPI service (repowise_service.py) serves /search with language and document_kind\
+      \ filters; Ansible role repowise_runtime deploys on docker-runtime-lv3; no third-party\
+      \ APIs"
+    release_bump: patch
 - id: adr-0346-centralized-port-registry
   adr: '0346'
   title: "Centralized port registry \u2014 eliminate hardcoded platform port numbers"
@@ -174,7 +228,7 @@ workstreams:
   adr: 0328
   title: "Remove PatternFly v5 CSS from ops portal templates \u2014 eliminate layout\
     \ collapse"
-  status: ready_for_merge
+  status: merged
   owner: claude
   branch: claude/affectionate-galileo
   worktree_path: .claude/worktrees/affectionate-galileo
@@ -234,7 +288,8 @@ workstreams:
       mode: shared_contract
       contract: mainline-release-integration-v1
   ready_to_merge: true
-  live_applied: false
+  live_applied: true
+  included_in_repo_version: 0.178.15
   canonical_truth:
     changelog_entry: removed all PatternFly v5 CSS framework classes from ops portal
       templates (base, index, entry, task_detail, all partials and macros); portal
@@ -243,6 +298,7 @@ workstreams:
       to service-capability-catalog and dependency-graph (lifecycle_status planned,
       ADR 0346)
     release_bump: patch
+  plane_issue_id: ca0a8137-c27a-46bf-95b4-2809209dd449
 - id: ws-0318-provision-operator-v2
   adr: 0318
   title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding

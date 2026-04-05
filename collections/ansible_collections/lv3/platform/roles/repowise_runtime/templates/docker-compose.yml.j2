@@ -1,0 +1,45 @@
+# repowise — semantic code search service
+# Managed by Ansible role: repowise_runtime
+
+services:
+  repowise:
+    image: {{ repowise_python_image }}
+    container_name: {{ repowise_container_name }}
+    restart: unless-stopped
+    working_dir: /service
+    command: >
+      sh -c "
+        pip install fastapi uvicorn qdrant-client pydantic --quiet --no-cache-dir 2>/dev/null &&
+        python3 repowise_service.py
+      "
+    environment:
+      REPOWISE_QDRANT_URL: "http://{{ repowise_qdrant_host }}:{{ repowise_qdrant_port }}"
+      REPOWISE_OLLAMA_URL: "{{ repowise_ollama_url }}"
+      REPOWISE_MODEL: "{{ repowise_model }}"
+      REPOWISE_COLLECTION: "{{ repowise_collection }}"
+      REPOWISE_REPO_ROOT: "/repo"
+      REPOWISE_PORT: "{{ repowise_port }}"
+{% if repowise_api_token %}
+      REPOWISE_API_TOKEN: "{{ repowise_api_token }}"
+{% endif %}
+    volumes:
+      - {{ repowise_service_dir }}:/service:ro
+      - {{ repowise_repo_dir }}:/repo:ro
+      - {{ repowise_data_dir }}:/data
+    ports:
+      - "127.0.0.1:{{ repowise_port }}:{{ repowise_port }}"
+    networks:
+      - default
+      - platform-context
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:{{ repowise_port }}/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+networks:
+  default: {}
+  platform-context:
+    external: true
+    name: "{{ repowise_qdrant_network }}"

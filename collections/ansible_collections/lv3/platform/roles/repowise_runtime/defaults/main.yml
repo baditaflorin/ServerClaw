@@ -1,0 +1,36 @@
+---
+# repowise_runtime — semantic code search for the platform git repo
+
+# Deployment paths
+repowise_base_dir: /opt/repowise
+repowise_service_dir: "{{ repowise_base_dir }}/service"
+repowise_repo_dir: "{{ repowise_base_dir }}/repo"
+repowise_data_dir: "{{ repowise_base_dir }}/data"
+
+# Git repo to index
+repowise_git_repo: "https://gitea.lv3.org/lv3/proxmox-florin-server.git"
+repowise_git_branch: main
+
+# Service networking
+repowise_port: 7070
+repowise_container_name: repowise
+
+# Embedding (reuse existing Ollama)
+repowise_ollama_url: "http://{{ ansible_default_ipv4.address }}:11434"
+repowise_model: nomic-embed-text
+
+# Vector store — reuse existing platform-context Qdrant
+repowise_qdrant_network: platform-context_default
+repowise_qdrant_host: qdrant
+repowise_qdrant_port: 6333
+repowise_collection: repowise
+
+# Auth token (set in vault or environment, leave empty to disable auth)
+repowise_api_token: ""
+
+# Docker image for the service
+repowise_python_image: python:3.12-slim
+
+# Index rebuild schedule (cron, runs on the server)
+repowise_rebuild_cron_hour: "3"
+repowise_rebuild_cron_minute: "0"

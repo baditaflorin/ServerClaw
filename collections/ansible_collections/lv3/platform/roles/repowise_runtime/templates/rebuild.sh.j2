@@ -1,0 +1,24 @@
+#!/bin/bash
+# Rebuild the repowise semantic index.
+# Runs inside a temporary container sharing the same network as the service.
+set -e
+
+echo "[repowise-rebuild] Pulling latest repo…"
+git -C "{{ repowise_repo_dir }}" pull --ff-only origin {{ repowise_git_branch }} || \
+  git clone --depth=1 --branch {{ repowise_git_branch }} \
+    {{ repowise_git_repo }} "{{ repowise_repo_dir }}"
+
+echo "[repowise-rebuild] Running indexer…"
+docker run --rm \
+  --network {{ repowise_qdrant_network }} \
+  -v "{{ repowise_service_dir }}:/service:ro" \
+  -v "{{ repowise_repo_dir }}:/repo:ro" \
+  -e REPOWISE_QDRANT_URL="http://{{ repowise_qdrant_host }}:{{ repowise_qdrant_port }}" \
+  -e REPOWISE_OLLAMA_URL="{{ repowise_ollama_url }}" \
+  -e REPOWISE_MODEL="{{ repowise_model }}" \
+  -e REPOWISE_COLLECTION="{{ repowise_collection }}" \
+  -e REPOWISE_REPO_ROOT="/repo" \
+  {{ repowise_python_image }} \
+  sh -c "pip install qdrant-client --quiet --no-cache-dir && python3 /service/repowise_index.py --repo-root /repo"
+
+echo "[repowise-rebuild] Done."

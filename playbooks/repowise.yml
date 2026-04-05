@@ -1,0 +1,22 @@
+---
+# Deploy the repowise semantic code search service.
+# Target: docker-runtime-lv3 (same host as Qdrant + Ollama)
+#
+# Usage:
+#   ansible-playbook playbooks/repowise.yml -i inventory/hosts.yml --limit docker-runtime-lv3
+
+- name: Converge repowise on the Docker runtime VM
+  hosts: docker_runtime
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Assert required host selectors resolve in the inventory
+      ansible.builtin.assert:
+        that: item in groups['all']
+        fail_msg: "Required host '{{ item }}' not found in inventory"
+        quiet: true
+      loop: "{{ ansible_play_hosts }}"
+
+  roles:
+    - role: lv3.platform.repowise_runtime

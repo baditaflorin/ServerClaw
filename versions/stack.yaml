@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.178.16
+repo_version: 0.178.17
 platform_version: 0.131.0
 
 live_apply_evidence:
@@ -38,7 +38,7 @@ live_apply_evidence:
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     step_ca: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    openbao: 2026-04-06-adr-0360-openbao-tls-cert-hardening-72h-live-apply
+    openbao: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     vaultwarden: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     windmill: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -1189,7 +1189,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.16
+    current: 0.178.17
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.98

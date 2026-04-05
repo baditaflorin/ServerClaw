@@ -1,0 +1,69 @@
+---
+# repowise_runtime — deploy semantic code search service
+
+- name: Create repowise directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: ops
+    group: ops
+    mode: "0755"
+  loop:
+    - "{{ repowise_base_dir }}"
+    - "{{ repowise_service_dir }}"
+    - "{{ repowise_repo_dir }}"
+    - "{{ repowise_data_dir }}"
+
+- name: Sync repowise Python scripts to service dir
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ repowise_service_dir }}/{{ item | basename }}"
+    owner: ops
+    group: ops
+    mode: "0644"
+  loop:
+    - "{{ playbook_dir }}/../scripts/repowise_corpus.py"
+    - "{{ playbook_dir }}/../scripts/repowise_index.py"
+    - "{{ playbook_dir }}/../scripts/repowise_service.py"
+  notify: restart repowise
+
+- name: Clone or update the platform git repo for indexing
+  ansible.builtin.git:
+    repo: "{{ repowise_git_repo }}"
+    dest: "{{ repowise_repo_dir }}"
+    version: "{{ repowise_git_branch }}"
+    depth: 1
+    force: false
+  become: false
+
+- name: Write docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ repowise_base_dir }}/docker-compose.yml"
+    owner: ops
+    group: ops
+    mode: "0644"
+  notify: restart repowise
+
+- name: Write rebuild script
+  ansible.builtin.template:
+    src: rebuild.sh.j2
+    dest: "{{ repowise_base_dir }}/rebuild.sh"
+    owner: ops
+    group: ops
+    mode: "0755"
+
+- name: Start repowise service
+  community.docker.docker_compose_v2:
+    project_src: "{{ repowise_base_dir }}"
+    state: present
+    pull: missing
+
+- name: Schedule nightly index rebuild (cron)
+  ansible.builtin.cron:
+    name: repowise-rebuild
+    hour: "{{ repowise_rebuild_cron_hour }}"
+    minute: "{{ repowise_rebuild_cron_minute }}"
+    job: "{{ repowise_base_dir }}/rebuild.sh >> /var/log/repowise-rebuild.log 2>&1"
+    state: present
+    user: ops

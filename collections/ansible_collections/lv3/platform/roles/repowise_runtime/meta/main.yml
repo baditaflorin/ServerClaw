@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  role_name: repowise_runtime
+  author: lv3
+  description: Semantic code search for the platform git repository (Ollama + Qdrant, no third-party APIs)
+  min_ansible_version: "2.15"
+dependencies: []
