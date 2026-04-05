@@ -62,3 +62,9 @@ argument_specs:
       paperless_api_token_local_file:
         type: path
         required: true
+      paperless_default_sso_group:
+        type: str
+        required: true
+      paperless_default_sso_group_permissions:
+        type: list
+        required: true
