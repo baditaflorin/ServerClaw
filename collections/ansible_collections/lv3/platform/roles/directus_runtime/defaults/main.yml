@@ -30,7 +30,7 @@ directus_public_hostname_overrides:
 directus_compose_project_name: directus
 directus_compose_network_name: "{{ directus_compose_project_name }}_default"
 directus_container_name: directus
-directus_container_port: 8055
+directus_container_port: "{{ platform_service_topology | platform_service_port('directus', 'internal') }}"
 directus_image: "{{ container_image_catalog.images.directus_runtime.ref }}"
 directus_database_name: directus
 directus_database_user: directus

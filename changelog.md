@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- implements ADR 0346 by establishing a centralized port registry, fixing the Gitea ROOT_URL bug that broke Keycloak SSO login (port 3009 leaked into public URL), adding keycloak_internal_http_port to platform_port_assignments, adding _host_proxy_port collision detection to the generator, and migrating 12 role defaults away from hardcoded platform port numbers
+
 ## Latest Release
 
 - [0.178.6 release notes](docs/release-notes/0.178.6.md)

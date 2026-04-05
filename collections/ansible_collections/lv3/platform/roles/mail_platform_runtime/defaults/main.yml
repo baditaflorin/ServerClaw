@@ -41,9 +41,9 @@ mail_platform_stalwart_container_name: lv3-mail-stalwart
 mail_platform_gateway_container_name: lv3-mail-gateway
 mail_platform_stalwart_image: "{{ container_image_catalog.images.mail_platform_stalwart_runtime.ref }}"
 mail_platform_gateway_base_image: "{{ container_image_catalog.images.mail_platform_gateway_python_base.ref }}"
-mail_platform_gateway_port: 8081
+mail_platform_gateway_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_gateway_port }}"
 mail_platform_stalwart_http_port: 8080
-mail_platform_internal_submission_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+mail_platform_internal_submission_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port }}"
 mail_platform_submission_auth_retries: 12
 mail_platform_submission_auth_delay_seconds: 5
 mail_platform_secret_dir: /etc/lv3/mail-platform
@@ -63,7 +63,7 @@ mail_platform_brevo_api_url: https://api.brevo.com/v3/smtp/email
 mail_platform_brevo_sender_email: florin@badita.org
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
-mail_platform_gateway_bind_port: 8081
+mail_platform_gateway_bind_port: "{{ mail_platform_gateway_port }}"
 mail_platform_gateway_force_brevo_fallback: true
 mail_platform_gateway_attempt_local_first: false
 mail_platform_gateway_uvicorn_workers: 1

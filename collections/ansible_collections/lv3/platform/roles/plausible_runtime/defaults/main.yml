@@ -58,7 +58,7 @@ plausible_secret_key_base_remote_file: "{{ plausible_secret_dir }}/secret-key-ba
 plausible_bootstrap_user_password_remote_file: "{{ plausible_secret_dir }}/bootstrap-user-password.txt"
 plausible_mailbox_password_local_file: "{{ mail_platform_mailbox_password_local_file }}"
 plausible_smtp_host: 10.10.10.20
-plausible_smtp_port: 1587
+plausible_smtp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port }}"
 plausible_smtp_username: server
 plausible_mailer_email: server@lv3.org
 plausible_mailer_name: LV3 Plausible

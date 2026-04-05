@@ -31,7 +31,7 @@ keycloak_database_name: keycloak
 keycloak_database_user: keycloak
 keycloak_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 keycloak_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/database-password.txt
-keycloak_internal_http_port: 8091
+keycloak_internal_http_port: "{{ platform_service_topology | platform_service_port('keycloak', 'internal') }}"
 keycloak_local_http_port: 18080
 keycloak_local_management_port: 19000
 keycloak_bootstrap_admin_username: lv3-bootstrap-admin
