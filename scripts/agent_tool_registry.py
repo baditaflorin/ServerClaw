@@ -714,6 +714,159 @@ def tool_dispatch_nomad_job(_tool: dict[str, Any], args: dict[str, Any]) -> dict
     }
 
 
+# ---------------------------------------------------------------------------
+# Plane tools (ADR 0362 gateway pattern, ADR 0363)
+# ---------------------------------------------------------------------------
+
+DEFAULT_PLANE_AUTH_FILE: Final[Path] = REPO_ROOT / ".local" / "plane" / "admin-auth.json"
+PLANE_AUTH_FILE_ENV: Final[str] = "LV3_PLANE_AUTH_FILE"
+
+
+def _resolve_plane_auth() -> dict[str, Any]:
+    auth_path = Path(os.environ.get(PLANE_AUTH_FILE_ENV, str(DEFAULT_PLANE_AUTH_FILE)))
+    if not auth_path.is_file():
+        raise RuntimeError(f"Plane auth file not found at {auth_path}")
+    return json.loads(auth_path.read_text())
+
+
+def _plane_client():  # type: ignore[return]
+    from platform.ansible.plane import PlaneClient  # lazy import
+
+    auth = _resolve_plane_auth()
+    return PlaneClient(
+        base_url=auth["base_url"],
+        api_token=auth["api_token"],
+        verify_ssl=auth.get("verify_ssl", True),
+    ), auth
+
+
+def _resolve_plane_project(client, workspace_slug: str, identifier: str) -> str:
+    projects = client.list_projects(workspace_slug)
+    for p in projects:
+        if p.get("identifier") == identifier:
+            return p["id"]
+    raise RuntimeError(f"Plane project with identifier '{identifier}' not found")
+
+
+def _resolve_state_id(client, workspace_slug: str, project_id: str, state_name: str) -> str:
+    states = client.list_states(workspace_slug, project_id)
+    for s in states:
+        if s.get("name", "").lower() == state_name.lower():
+            return s["id"]
+    available = ", ".join(s.get("name", "") for s in states)
+    raise RuntimeError(f"Plane state '{state_name}' not found; available: {available}")
+
+
+def tool_list_plane_tasks(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    issues = client.list_issues(ws, project_id)
+    state_filter = args.get("state_name")
+    if state_filter:
+        states = client.list_states(ws, project_id)
+        state_map = {s["id"]: s.get("name", "") for s in states}
+        issues = [i for i in issues if state_map.get(i.get("state"), "").lower() == state_filter.lower()]
+    else:
+        states = client.list_states(ws, project_id)
+        state_map = {s["id"]: s.get("name", "") for s in states}
+    tasks = [
+        {
+            "id": i.get("id", ""),
+            "name": i.get("name", ""),
+            "state_name": state_map.get(i.get("state"), ""),
+            "priority": i.get("priority"),
+            "created_at": i.get("created_at", ""),
+        }
+        for i in issues
+    ]
+    return {"count": len(tasks), "project": identifier, "tasks": tasks}
+
+
+def tool_get_plane_task(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    issue_id = require_str(args.get("issue_id"), "arguments.issue_id")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    _status, issue = client._request(
+        f"/api/v1/workspaces/{ws}/projects/{project_id}/issues/{issue_id}/",
+    )
+    states = client.list_states(ws, project_id)
+    state_map = {s["id"]: s.get("name", "") for s in states}
+    issue["state_name"] = state_map.get(issue.get("state"), "")
+    return issue
+
+
+def tool_create_plane_task(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    title = require_str(args.get("title"), "arguments.title")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    payload: dict[str, Any] = {"name": title}
+    if "description_html" in args:
+        payload["description_html"] = args["description_html"]
+    if "priority" in args:
+        payload["priority"] = args["priority"]
+    state_name = args.get("state_name", "Todo")
+    payload["state"] = _resolve_state_id(client, ws, project_id, state_name)
+    if "label_names" in args:
+        existing_labels = client.list_labels(ws, project_id)
+        label_map = {lb.get("name", "").lower(): lb["id"] for lb in existing_labels}
+        label_ids = []
+        for name in args["label_names"]:
+            lid = label_map.get(name.lower())
+            if not lid:
+                new_label = client.create_label(ws, project_id, name)
+                lid = new_label["id"]
+            label_ids.append(lid)
+        payload["labels"] = label_ids
+    issue = client.create_issue(ws, project_id, payload)
+    return {
+        "id": issue.get("id", ""),
+        "name": issue.get("name", ""),
+        "state_name": state_name,
+        "project_identifier": identifier,
+    }
+
+
+def tool_update_plane_task(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    issue_id = require_str(args.get("issue_id"), "arguments.issue_id")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    payload: dict[str, Any] = {}
+    if "name" in args:
+        payload["name"] = args["name"]
+    if "description_html" in args:
+        payload["description_html"] = args["description_html"]
+    if "priority" in args:
+        payload["priority"] = args["priority"]
+    if "state_name" in args:
+        payload["state"] = _resolve_state_id(client, ws, project_id, args["state_name"])
+    if not payload:
+        raise ValueError("At least one field to update must be provided")
+    issue = client.update_issue(ws, project_id, issue_id, payload)
+    return {
+        "id": issue.get("id", ""),
+        "name": issue.get("name", ""),
+    }
+
+
+def tool_add_plane_comment(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    issue_id = require_str(args.get("issue_id"), "arguments.issue_id")
+    comment_html = require_str(args.get("comment_html"), "arguments.comment_html")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    comment = client.add_comment(ws, project_id, issue_id, comment_html)
+    return {"id": comment.get("id", "")}
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -733,6 +886,11 @@ HANDLERS: Final[dict[str, Any]] = {
     "list_nomad_jobs": tool_list_nomad_jobs,
     "get_nomad_job_status": tool_get_nomad_job_status,
     "dispatch_nomad_job": tool_dispatch_nomad_job,
+    "list_plane_tasks": tool_list_plane_tasks,
+    "get_plane_task": tool_get_plane_task,
+    "create_plane_task": tool_create_plane_task,
+    "update_plane_task": tool_update_plane_task,
+    "add_plane_comment": tool_add_plane_comment,
 }
 
 

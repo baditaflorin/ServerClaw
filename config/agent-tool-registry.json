@@ -1139,19 +1139,34 @@
       "output_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["count", "jobs"],
+        "required": [
+          "count",
+          "jobs"
+        ],
         "properties": {
-          "count": { "type": "integer" },
+          "count": {
+            "type": "integer"
+          },
           "jobs": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" },
-                "type": { "type": "string" },
-                "status": { "type": "string" },
-                "namespace": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "namespace": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -1182,7 +1197,9 @@
       "input_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["job_id"],
+        "required": [
+          "job_id"
+        ],
         "properties": {
           "job_id": {
             "type": "string",
@@ -1198,13 +1215,26 @@
       "output_schema": {
         "type": "object",
         "additionalProperties": true,
-        "required": ["id", "status"],
+        "required": [
+          "id",
+          "status"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "type": { "type": "string" },
-          "status": { "type": "string" },
-          "namespace": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          }
         }
       },
       "implementation": {
@@ -1232,7 +1262,9 @@
       "input_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["job_id"],
+        "required": [
+          "job_id"
+        ],
         "properties": {
           "job_id": {
             "type": "string",
@@ -1252,10 +1284,17 @@
       "output_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["dispatch_id", "eval_id"],
+        "required": [
+          "dispatch_id",
+          "eval_id"
+        ],
         "properties": {
-          "dispatch_id": { "type": "string" },
-          "eval_id": { "type": "string" }
+          "dispatch_id": {
+            "type": "string"
+          },
+          "eval_id": {
+            "type": "string"
+          }
         }
       },
       "implementation": {
@@ -1269,6 +1308,323 @@
         "openWorldHint": true
       },
       "runbook": "docs/runbooks/configure-nomad.md"
+    },
+    {
+      "name": "list-plane-tasks",
+      "title": "List Plane Tasks",
+      "description": "List issues in a Plane project with optional state filter. Defaults to the Agent Work (AW) project.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW). Use ADR for architecture decisions."
+          },
+          "state_name": {
+            "type": "string",
+            "description": "Filter tasks by state name (e.g. Todo, In Progress, Done)."
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "project": {
+            "type": "string"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "state_name": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_plane_tasks"
+      }
+    },
+    {
+      "name": "get-plane-task",
+      "title": "Get Plane Task Details",
+      "description": "Get full details of a single Plane issue by its UUID.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "description": "UUID of the Plane issue to retrieve."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          }
+        },
+        "required": [
+          "issue_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state_name": {
+            "type": "string"
+          },
+          "description_html": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_plane_task"
+      }
+    },
+    {
+      "name": "create-plane-task",
+      "title": "Create Plane Task",
+      "description": "Create a new issue in a Plane project. Use this to track blockers, follow-up tasks, and operational findings.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Issue title."
+          },
+          "description_html": {
+            "type": "string",
+            "description": "HTML description body."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          },
+          "state_name": {
+            "type": "string",
+            "description": "Initial state name (default: Todo)."
+          },
+          "label_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Label names to apply. Missing labels are auto-created."
+          },
+          "priority": {
+            "type": "string",
+            "description": "Priority: none, low, medium, high, urgent."
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state_name": {
+            "type": "string"
+          },
+          "project_identifier": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "create_plane_task"
+      }
+    },
+    {
+      "name": "update-plane-task",
+      "title": "Update Plane Task",
+      "description": "Update the status, title, description, or priority of an existing Plane issue.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "description": "UUID of the Plane issue to update."
+          },
+          "state_name": {
+            "type": "string",
+            "description": "New state name (e.g. In Progress, Done, Blocked)."
+          },
+          "name": {
+            "type": "string",
+            "description": "New issue title."
+          },
+          "description_html": {
+            "type": "string",
+            "description": "New HTML description body."
+          },
+          "priority": {
+            "type": "string",
+            "description": "New priority: none, low, medium, high, urgent."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          }
+        },
+        "required": [
+          "issue_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "update_plane_task"
+      }
+    },
+    {
+      "name": "add-plane-comment",
+      "title": "Add Plane Comment",
+      "description": "Add a comment to an existing Plane issue. Use for milestone updates, status notes, or blockers.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "description": "UUID of the Plane issue to comment on."
+          },
+          "comment_html": {
+            "type": "string",
+            "description": "HTML comment body."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          }
+        },
+        "required": [
+          "issue_id",
+          "comment_html"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "add_plane_comment"
+      }
     }
   ]
 }

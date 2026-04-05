@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-06'
 facet: concern
 concern: security
-total_adrs: 29
+total_adrs: 30
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -552,3 +552,23 @@ adrs:
     summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
+  - adr: '0362'
+    title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - agents
+      - tools
+      - api
+      - governance
+      - credentials
+      - pattern
+      - agent
+      - service
+      - gateway
+      - governed
+    summary: All agent-callable service tools discover credentials from the .local/
+    filename: 0362-agent-service-api-gateway-pattern.md
+    path: docs/adr/0362-agent-service-api-gateway-pattern.md

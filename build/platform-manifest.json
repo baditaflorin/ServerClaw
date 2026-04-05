@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.19",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-05T22:06:47Z",
-  "next_refresh_at": "2026-04-05T23:06:47Z",
+  "generated_at": "2026-04-05T22:26:54Z",
+  "next_refresh_at": "2026-04-05T23:26:54Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -499,7 +499,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://100.64.0.1:8013",
+        "primary_url": "https://scheduler.lv3.org",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
       "ntfy": {
@@ -719,6 +719,17 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "kafka://10.10.10.20:9092",
+        "last_live_apply": "2026-04-05T00:00:00Z"
+      },
+      "repowise": {
+        "service_name": "Repowise Semantic Code Search",
+        "status": "degraded",
+        "score": 0.75,
+        "safe_to_act": false,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://repowise.lv3.org",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
       "searxng": {

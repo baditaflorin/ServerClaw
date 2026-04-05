@@ -158,6 +158,21 @@ python scripts/sync_plane_agent_issues.py --bootstrap-only
 # Creates AW project + labels if missing; writes .local/plane/aw-auth.json
 ```
 
+### Plane Agent Tools (ADR 0363)
+
+Five governed tools for programmatic Plane access via the agent tool registry:
+
+| Tool | Category | Use case |
+|------|----------|----------|
+| `list-plane-tasks` | observe | List tasks in AW or ADR project, optionally filtered by state |
+| `get-plane-task` | observe | Get full details of a single task by UUID |
+| `create-plane-task` | execute (approval required) | Create blockers, follow-up tasks, operational findings |
+| `update-plane-task` | execute | Update task status, title, priority |
+| `add-plane-comment` | execute | Add milestone comments, status notes |
+
+These tools use `.local/plane/admin-auth.json` for credentials and default to the AW project.
+Pass `"project": "ADR"` to operate on the architecture decisions project.
+
 ---
 
 ## Handoff Protocol (ADR 0167)
