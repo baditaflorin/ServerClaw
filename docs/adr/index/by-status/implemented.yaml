@@ -10,7 +10,7 @@ generated: '2026-04-05'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 332
+total_adrs: 333
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6131,3 +6131,23 @@ adrs:
     implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: Outline Programmatic Wiki API and Automation Hooks
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: automation
+    keywords:
+      - outline
+      - programmatic
+      - wiki
+      - api
+      - automation
+      - hooks
+    summary: 'Extract the OutlineClient, OutlineError, and API helper functions (collectionsbyname, documentsincollection,
+      ensuredocument, loadapitoken) into a shared module '
+    filename: 0346-outline-programmatic-wiki-api-and-automation-hooks.md
+    path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
+    implemented_in_repo_version: 0.178.4
+    implemented_in_platform_version: 0.178.4
+    implemented_on: '2026-04-05'

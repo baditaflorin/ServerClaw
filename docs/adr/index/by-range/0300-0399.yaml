@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 67
+total_adrs: 68
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1047,6 +1047,26 @@ adrs:
     implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: Outline Programmatic Wiki API and Automation Hooks
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: automation
+    keywords:
+      - outline
+      - programmatic
+      - wiki
+      - api
+      - automation
+      - hooks
+    summary: 'Extract the OutlineClient, OutlineError, and API helper functions (collectionsbyname, documentsincollection,
+      ensuredocument, loadapitoken) into a shared module '
+    filename: 0346-outline-programmatic-wiki-api-and-automation-hooks.md
+    path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
+    implemented_in_repo_version: 0.178.4
+    implemented_in_platform_version: 0.178.4
+    implemented_on: '2026-04-05'
   - adr: '0346'
     title: PostgreSQL Domain Clustering
     status: Accepted

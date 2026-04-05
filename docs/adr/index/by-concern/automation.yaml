@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: automation
-total_adrs: 23
+total_adrs: 24
 adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
@@ -426,3 +426,23 @@ adrs:
     path: docs/adr/0343-operator-tool-interface-contract.md
     implemented_in_repo_version: 0.178.5
     implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: Outline Programmatic Wiki API and Automation Hooks
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: automation
+    keywords:
+      - outline
+      - programmatic
+      - wiki
+      - api
+      - automation
+      - hooks
+    summary: 'Extract the OutlineClient, OutlineError, and API helper functions (collectionsbyname, documentsincollection,
+      ensuredocument, loadapitoken) into a shared module '
+    filename: 0346-outline-programmatic-wiki-api-and-automation-hooks.md
+    path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
+    implemented_in_repo_version: 0.178.4
+    implemented_in_platform_version: 0.178.4
+    implemented_on: '2026-04-05'
