@@ -13,13 +13,18 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Unreleased
 
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
+- adds Dify SSO bootstrap (idempotent OIDC config via `scripts/dify_sso_bootstrap.py` wired into `dify_runtime` Ansible role)
+- adds `list-containers` and `get-container-logs` agent tools backed by Portainer API (`scripts/portainer_tool.py`, `scripts/agent_tool_registry.py`)
+- adds `LV3_PORTAINER_*` env vars to `api_gateway_runtime` role and deploys them to production API gateway
+- adds `CLAUDE.md` session protocol for automated merge-to-main and live-apply checklists
 
 ## Latest Release
 
-- [0.178.7 release notes](docs/release-notes/0.178.7.md)
+- [0.178.8 release notes](docs/release-notes/0.178.8.md)
 
 ## Previous Releases
 
+- [0.178.7 release notes](docs/release-notes/0.178.7.md)
 - [0.178.6 release notes](docs/release-notes/0.178.6.md)
 - [0.178.5 release notes](docs/release-notes/0.178.5.md)
 - [0.178.4 release notes](docs/release-notes/0.178.4.md)
@@ -31,9 +36,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.177.152 release notes](docs/release-notes/0.177.152.md)
 - [0.177.151 release notes](docs/release-notes/0.177.151.md)
 - [0.177.150 release notes](docs/release-notes/0.177.150.md)
-- [0.177.149 release notes](docs/release-notes/0.177.149.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (346 releases)](docs/release-notes/index/2026.md)
+- [2026 (347 releases)](docs/release-notes/index/2026.md)
