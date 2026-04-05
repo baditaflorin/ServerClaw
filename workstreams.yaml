@@ -1724,11 +1724,13 @@ workstreams:
   owner: claude
   branch: claude/relaxed-mcnulty
   worktree_path: .claude/worktrees/relaxed-mcnulty
+  doc: docs/workstreams/ws-realtime-dynamic-children.md
   depends_on: []
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
   - workstreams/active/ws-realtime-dynamic-children.yaml
+  - docs/workstreams/ws-realtime-dynamic-children.md
   - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
   - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
   ownership_manifest:
