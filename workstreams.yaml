@@ -1694,6 +1694,7 @@ workstreams:
       - docs/adr/index/by-status/implemented.yaml
       - docs/adr/index/by-status/not-implemented.yaml
       - docs/adr/index/by-status/partial.yaml
+      - docs/adr/index/by-status/proposed.yaml
       mode: shared_contract
       contract: adr-index-v1
     - id: parallel_adr_sync_surfaces
@@ -1735,8 +1736,20 @@ workstreams:
       - docs/release-notes/README.md
       - docs/release-notes/index/2026.md
       - docs/release-notes/index/README.md
+      - README.md
+      - versions/stack.yaml
       mode: shared_contract
       contract: release-management-v1
+    - id: gate_fix_skills
+      paths:
+      - config/serverclaw/skills/shared/human-review-queue/SKILL.md
+      mode: exclusive
+    - id: gate_fix_generated_config
+      paths:
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/subdomain-exposure-registry.json
+      mode: shared_contract
+      contract: discovery-artifacts-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
 surface_ownership:
   global_mutable_paths:

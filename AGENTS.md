@@ -229,9 +229,9 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 
 | Resource | Location |
 |---|---|
-| **UI** | `https://scheduler.lv3.org` (OIDC login via Keycloak) |
-| **API proxy** | `https://100.64.0.1:8013` (Tailscale, requires management token) |
-| **Server** | `monitoring-lv3` (10.10.10.40:4646) |
+| **UI** | Nomad scheduler web UI (OIDC login via Keycloak) |
+| **API proxy** | Tailscale mesh management proxy (requires management token) |
+| **Server** | monitoring-lv3 (see inventory for host details) |
 | **Clients** | docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, runtime-control-lv3, docker-build-lv3 |
 | **CLI wrapper** | `/usr/local/bin/lv3-nomad` on all cluster nodes (auto-loads token) |
 | **Playbook** | `playbooks/nomad.yml` |
