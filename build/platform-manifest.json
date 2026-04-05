@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.8",
+  "repo_version": "0.178.9",
   "platform_version": "0.130.99",
-  "generated_at": "2026-04-05T13:18:43Z",
-  "next_refresh_at": "2026-04-05T14:18:43Z",
+  "generated_at": "2026-04-05T13:53:49Z",
+  "next_refresh_at": "2026-04-05T14:53:49Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.7",
+    "last_version": "0.178.8",
     "deployed_at": "2026-04-05",
-    "summary": "adds Dify SSO bootstrap (idempotent OIDC config via `scripts/dify_sso_bootstrap.py` wired into `dify_runtime` Ansible role) adds `list-containers` and `get-container-logs` agent tools backed by Portainer API (`scripts/portainer_tool.py`, `scripts/agent_tool_registry.py`)",
-    "release_notes_url": "docs/release-notes/0.178.8.md"
+    "summary": "label_studio_runtime: add CSRF_TRUSTED_ORIGINS to env templates (fixes 403 on login behind oauth2_proxy) langfuse_runtime: set langfuse_disable_signup=false for automatic Keycloak SSO user provisioning; add extra_hosts hairpin NAT fix for sso.lv3.org in both langfuse-web and langfuse-worker",
+    "release_notes_url": "docs/release-notes/0.178.9.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

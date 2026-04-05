@@ -12,14 +12,19 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
+- label_studio_runtime: add CSRF_TRUSTED_ORIGINS to env templates (fixes 403 on login behind oauth2_proxy)
+- langfuse_runtime: set langfuse_disable_signup=false for automatic Keycloak SSO user provisioning; add extra_hosts hairpin NAT fix for sso.lv3.org in both langfuse-web and langfuse-worker
+- adds scripts/langfuse_to_label_studio.py — stdlib sync pipeline from Langfuse traces to Label Studio annotation tasks with deduplication
+- adds config/windmill/scripts/langfuse-label-studio-sync.py — Windmill scheduled job wrapper for the sync pipeline
+- adds config/serverclaw/skills/shared/human-review-queue/SKILL.md — agent skill for self-queuing decisions for human review
 
 ## Latest Release
 
-- [0.178.8 release notes](docs/release-notes/0.178.8.md)
+- [0.178.9 release notes](docs/release-notes/0.178.9.md)
 
 ## Previous Releases
 
+- [0.178.8 release notes](docs/release-notes/0.178.8.md)
 - [0.178.7 release notes](docs/release-notes/0.178.7.md)
 - [0.178.6 release notes](docs/release-notes/0.178.6.md)
 - [0.178.5 release notes](docs/release-notes/0.178.5.md)
@@ -31,9 +36,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.177.153 release notes](docs/release-notes/0.177.153.md)
 - [0.177.152 release notes](docs/release-notes/0.177.152.md)
 - [0.177.151 release notes](docs/release-notes/0.177.151.md)
-- [0.177.150 release notes](docs/release-notes/0.177.150.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (347 releases)](docs/release-notes/index/2026.md)
+- [2026 (348 releases)](docs/release-notes/index/2026.md)
