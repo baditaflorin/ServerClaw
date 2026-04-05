@@ -70,13 +70,23 @@ class OllamaEmbedder:
     def _embed_batch(self, texts: list[str]) -> list[list[float]]:
         if not texts:
             return []
-        try:
-            return self._extract(self._request("/api/embed", {"model": self.model_name, "input": texts}))
-        except Exception:
-            if len(texts) == 1:
-                return self._extract(self._request("/api/embeddings", {"model": self.model_name, "prompt": texts[0]}))
-            mid = max(1, len(texts) // 2)
-            return self._embed_batch(texts[:mid]) + self._embed_batch(texts[mid:])
+        for attempt in range(5):
+            try:
+                return self._extract(self._request("/api/embed", {"model": self.model_name, "input": texts}))
+            except Exception:
+                if attempt < 4:
+                    time.sleep(10 * (attempt + 1))
+        # Final fallback: single-text endpoint
+        if len(texts) == 1:
+            for attempt in range(3):
+                try:
+                    return self._extract(self._request("/api/embeddings", {"model": self.model_name, "prompt": texts[0]}))
+                except Exception:
+                    if attempt < 2:
+                        time.sleep(15)
+            raise RuntimeError(f"Ollama embed failed after retries for single text")
+        mid = max(1, len(texts) // 2)
+        return self._embed_batch(texts[:mid]) + self._embed_batch(texts[mid:])
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         out: list[list[float]] = []
