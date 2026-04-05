@@ -23,7 +23,7 @@
 # Related Runbooks: docs/runbooks/configure-netdata.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-03-27
+# Last Updated: 2026-04-05
 
 - name: Publish Netdata through the shared NGINX edge
   hosts: nginx-lv3
@@ -126,8 +126,8 @@
       vars:
         playbook_execution_notification_service: realtime
 
-- name: Converge Netdata child agents on the Proxmox host and selected guests
-  hosts: proxmox_florin:nginx-lv3:docker-runtime-lv3:postgres-lv3
+- name: Converge Netdata child agents on all production hosts
+  hosts: "proxmox_hosts:lv3_guests:&production:!monitoring-lv3"
   become: true
   gather_facts: true
   vars_files:
@@ -146,9 +146,7 @@
         playbook_execution_audit_target: realtime
         required_hosts:
           - "{{ playbook_execution_required_hosts.proxmox_hosts[playbook_execution_env] }}"
-          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
-          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.lv3_guests[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.linux_guest_firewall
