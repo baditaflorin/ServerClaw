@@ -2351,13 +2351,28 @@ lv3_service_topology:
     service_name: nomad
     owning_vm: monitoring-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
-    exposure_model: private-only
+    public_hostname: scheduler.lv3.org
+    exposure_model: edge-published
     observability:
       guest_dashboard: false
       service_telemetry: false
+    dns:
+      managed: true
+      name: scheduler
+      type: A
+      target: "{{ public_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:4646"
+      upstream_ssl_verify: false
     access:
       kind: tailscale-tcp-proxy
       url: "{{ nomad_controller_url }}"
+    urls:
+      public: https://scheduler.lv3.org
   gitea:
     service_name: gitea
     owning_vm: runtime-control-lv3
