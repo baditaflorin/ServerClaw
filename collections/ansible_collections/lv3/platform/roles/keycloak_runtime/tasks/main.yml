@@ -1540,12 +1540,15 @@
   failed_when: false
   when: keycloak_mail_platform_submission_recovery_enabled
 
-- name: Remove the mail-platform compose network if its labels are stale before relay recovery
+- name: Remove a stale mail-platform network with missing compose labels before relay recovery
   ansible.builtin.shell: |
     net="{{ keycloak_mail_platform_docker_network_name }}"
     if docker network inspect "$net" >/dev/null 2>&1; then
       label="$(docker network inspect "$net" --format '{{ "{{" }}index .Labels "com.docker.compose.network"{{ "}}" }}')"
       if [ "$label" != "default" ]; then
+        for container in $(docker network inspect "$net" --format '{{ "{{" }}range .Containers{{ "}}" }}{{ "{{" }}.Name{{ "}}" }} {{ "{{" }}end{{ "}}" }}'); do
+          docker network disconnect -f "$net" "$container" 2>/dev/null || true
+        done
         docker network rm "$net" && echo changed || true
       fi
     fi
