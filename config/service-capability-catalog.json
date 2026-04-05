@@ -1651,13 +1651,15 @@
     {
       "id": "nomad",
       "name": "Nomad",
-      "description": "Private distributed scheduler for durable batch jobs and long-running internal workloads.",
+      "description": "Distributed scheduler for durable batch jobs and long-running internal workloads with operator dashboard at scheduler.lv3.org.",
       "category": "automation",
       "lifecycle_status": "active",
       "vm": "monitoring-lv3",
       "vmid": 140,
       "internal_url": "https://100.64.0.1:8013",
-      "exposure": "private-only",
+      "public_url": "https://scheduler.lv3.org",
+      "subdomain": "scheduler.lv3.org",
+      "exposure": "edge-published",
       "health_probe_id": "nomad",
       "secret_catalog_ids": [
         "nomad_acl_management_token",
