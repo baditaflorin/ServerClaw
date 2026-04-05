@@ -88,7 +88,14 @@
 
 - name: Converge the dedicated Open WebUI Keycloak client
   module_defaults:
-    group/community.general.keycloak:
+    community.general.keycloak_client:
+      connection_timeout: "{{ keycloak_admin_connection_timeout }}"
+      auth_client_id: "{{ keycloak_admin_client_id }}"
+      auth_client_secret: "{{ keycloak_admin_client_secret }}"
+      auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+      auth_realm: master
+      validate_certs: false
+    community.general.keycloak_clientsecret_info:
       connection_timeout: "{{ keycloak_admin_connection_timeout }}"
       auth_client_id: "{{ keycloak_admin_client_id }}"
       auth_client_secret: "{{ keycloak_admin_client_secret }}"

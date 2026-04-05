@@ -2,3 +2,4 @@
 collections:
   - name: ansible.posix
   - name: community.general
+    version: 12.4.0
