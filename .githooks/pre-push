@@ -2,6 +2,18 @@
 
 set -euo pipefail
 
+# Ensure Homebrew-managed tools (uv, uvx) are on PATH.
+# Git hooks run in a non-interactive, non-login shell that does not source
+# ~/.zprofile or ~/.zshrc, so /opt/homebrew/bin is not automatically added
+# on Apple Silicon Macs (arm64). /usr/local/bin is checked as a fallback
+# for Intel Macs or manual installations.
+for _hb_path in /opt/homebrew/bin /usr/local/bin; do
+  if [[ -x "$_hb_path/uv" && ":$PATH:" != *":$_hb_path:"* ]]; then
+    export PATH="$_hb_path:$PATH"
+  fi
+done
+unset _hb_path
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
