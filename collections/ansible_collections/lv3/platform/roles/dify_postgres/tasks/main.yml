@@ -1,89 +1,17 @@
-# Purpose: Provision the Dify PostgreSQL role, password artifact, and backing database on the shared postgres VM.
-# Use case: Run before converging the Dify runtime so application containers have a ready database and credential.
-# Inputs: Dify database name, Dify database user, and the controller-local file used to persist the generated password.
-# Outputs: Creates or updates the PostgreSQL role and database and stores the generated password locally.
-# Idempotency: Partially idempotent because password generation happens only once locally, while database creation is conditional.
-# Dependencies: ADR 0165, ADR 0026, and ADR 0197.
 ---
-- name: Validate Dify PostgreSQL inputs
-  ansible.builtin.assert:
-    that:
-      - dify_database_name | length > 0
-      - dify_database_user | length > 0
-      - dify_database_password_local_file | length > 0
-    fail_msg: "dify_postgres requires the target database name, role, and controller-local password path."
-
-- name: Ensure the controller-local Dify artifact directory exists
-  ansible.builtin.file:
-    path: "{{ dify_database_password_local_file | dirname }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Generate the Dify database password when missing
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ dify_database_password_local_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ dify_database_password_local_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  delegate_to: localhost
-  become: false
-  register: dify_database_password_generation
-  changed_when: "'changed' in dify_database_password_generation.stdout"
-  no_log: true
-
-- name: Create the Dify database role
-  ansible.builtin.command:
-    argv:
-      - psql
-      - -d
-      - postgres
-      - -v
-      - ON_ERROR_STOP=1
-      - -c
-      - >-
-        DO $$ BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{ dify_database_user }}') THEN
-            CREATE ROLE {{ dify_database_user }} LOGIN PASSWORD '{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}';
-          ELSE
-            ALTER ROLE {{ dify_database_user }} WITH LOGIN PASSWORD '{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}';
-          END IF;
-        END $$;
-  become: true
-  become_user: postgres
-  changed_when: false
-  no_log: true
-
-- name: Create the Dify PostgreSQL database
-  ansible.builtin.command:
-    argv:
-      - psql
-      - -d
-      - postgres
-      - -tAc
-      - >-
-        SELECT 1 FROM pg_database WHERE datname = '{{ dify_database_name }}'
-  become: true
-  become_user: postgres
-  register: dify_database_exists
-  changed_when: false
-
-- name: Create the Dify PostgreSQL database
-  ansible.builtin.command:
-    argv:
-      - psql
-      - -d
-      - postgres
-      - -v
-      - ON_ERROR_STOP=1
-      - -c
-      - "CREATE DATABASE {{ dify_database_name }} OWNER {{ dify_database_user }}"
-  become: true
-  become_user: postgres
-  when: dify_database_exists.stdout | trim != '1'
-  changed_when: true
+# Purpose: Provision the dify PostgreSQL database using the shared postgres_client role (ADR 0359).
+# Use case: Called during dify deployment to ensure the database, role, and credentials exist.
+# Inputs: dify_* variables from defaults/main.yml; resolves registry entry from platform_postgres_clients.
+# Outputs: dify PostgreSQL role, database, and credential files converged on postgres-lv3.
+# Idempotency: Yes; postgres_client role handles all idempotency.
+# Dependencies: ADR 0359 postgres_client role, platform_postgres_clients registry.
+- name: Provision the dify database via the shared postgres_client role
+  ansible.builtin.include_role:
+    name: lv3.platform.postgres_client
+  vars:
+    postgres_client_service: "{{ dify_database_name }}"
+    postgres_client_database: "{{ dify_database_name }}"
+    postgres_client_user: "{{ dify_database_user }}"
+    postgres_client_password_local_file: "{{ dify_database_password_local_file }}"
+    postgres_client_password_remote_dir: "{{ dify_postgres_secret_dir }}"
+    postgres_client_password_remote_file: "{{ dify_postgres_password_file }}"

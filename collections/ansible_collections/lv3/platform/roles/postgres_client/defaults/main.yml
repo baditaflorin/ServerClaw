@@ -1,0 +1,20 @@
+# Purpose: Define the default variables for the shared postgres_client role (ADR 0359).
+# Use case: Loaded whenever the postgres_client role provisions or verifies a service database.
+# Inputs: May be overridden by the calling role or playbook for each service.
+# Outputs: Supplies stable defaults for the shared database bootstrap tasks.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0359.
+---
+postgres_client_service: ""
+postgres_client_database: ""
+postgres_client_user: ""
+postgres_client_password_local_file: ""
+postgres_client_password_remote_dir: ""
+postgres_client_password_remote_file: ""
+postgres_client_support_role: ""
+postgres_client_role_options: ""
+postgres_client_database_collation: ""
+postgres_client_database_ctype: ""
+postgres_client_database_template: ""
+postgres_client_extensions: []
+postgres_client_extension_packages: []

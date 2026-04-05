@@ -1,0 +1,225 @@
+# Purpose: Provision a PostgreSQL role, database, and credential files for any platform service (ADR 0359).
+# Use case: Called by each {service}_postgres thin-wrapper role to replace the 27 near-identical implementations.
+# Inputs: postgres_client_* variables; see meta/argument_specs.yml for the full contract.
+# Outputs: Service PostgreSQL role, database, and credential files converged on postgres-lv3.
+# Idempotency: Fully idempotent; existence checks guard all create operations; secrets reuse stable generated values.
+# Dependencies: ADR 0359 postgres_client registry, requires a writable PostgreSQL primary.
+---
+- name: Validate postgres_client required inputs for {{ postgres_client_service }}
+  ansible.builtin.assert:
+    that:
+      - postgres_client_service | length > 0
+      - postgres_client_database | length > 0
+      - postgres_client_user | length > 0
+      - postgres_client_password_local_file | length > 0
+      - postgres_client_password_remote_dir | length > 0
+      - postgres_client_password_remote_file | length > 0
+    fail_msg: >-
+      postgres_client requires postgres_client_service, postgres_client_database,
+      postgres_client_user, postgres_client_password_local_file,
+      postgres_client_password_remote_dir, and postgres_client_password_remote_file.
+
+- name: Ensure the controller-local artifact directory exists for {{ postgres_client_service }}
+  ansible.builtin.file:
+    path: "{{ postgres_client_password_local_file | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the {{ postgres_client_service }} database password when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ postgres_client_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ postgres_client_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: postgres_client_password_generation
+  changed_when: "'changed' in postgres_client_password_generation.stdout"
+  no_log: true
+
+- name: Read the {{ postgres_client_service }} database password from controller
+  ansible.builtin.slurp:
+    src: "{{ postgres_client_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: postgres_client_password_raw
+  no_log: true
+
+- name: Record the {{ postgres_client_service }} database password
+  ansible.builtin.set_fact:
+    postgres_client_password: "{{ postgres_client_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure the {{ postgres_client_service }} PostgreSQL secret directory exists on the guest
+  ansible.builtin.file:
+    path: "{{ postgres_client_password_remote_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Mirror the {{ postgres_client_service }} database password to the guest
+  ansible.builtin.copy:
+    dest: "{{ postgres_client_password_remote_file }}"
+    content: "{{ postgres_client_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Mirror the {{ postgres_client_service }} database password back to the controller
+  ansible.builtin.copy:
+    dest: "{{ postgres_client_password_local_file }}"
+    content: "{{ postgres_client_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable for {{ postgres_client_service }}
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: postgres_client_writable_check
+  changed_when: false
+
+- name: Install {{ postgres_client_service }} PostgreSQL extension packages
+  ansible.builtin.apt:
+    name: "{{ postgres_client_extension_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+  when:
+    - postgres_client_extension_packages | length > 0
+    - postgres_client_writable_check.stdout | trim == "1"
+
+- name: Ensure the {{ postgres_client_service }} support role exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE ROLE IF NOT EXISTS {{ postgres_client_support_role }} NOLOGIN"
+  changed_when: false
+  when:
+    - postgres_client_support_role | length > 0
+    - postgres_client_writable_check.stdout | trim == "1"
+
+- name: Ensure the {{ postgres_client_service }} primary role exists with correct password
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        DO $$ BEGIN
+          IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '{{ postgres_client_user }}') THEN
+            CREATE ROLE {{ postgres_client_user }} LOGIN
+            PASSWORD '{{ postgres_client_password }}'
+            {{ postgres_client_role_options }}
+            {% if postgres_client_support_role | length > 0 %}IN ROLE {{ postgres_client_support_role }}{% endif %};
+          ELSE
+            ALTER ROLE {{ postgres_client_user }}
+            PASSWORD '{{ postgres_client_password }}'
+            {{ postgres_client_role_options }};
+          END IF;
+        END $$;
+  changed_when: false
+  no_log: true
+  when: postgres_client_writable_check.stdout | trim == "1"
+
+- name: Create the {{ postgres_client_service }} PostgreSQL extensions
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ postgres_client_database }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE EXTENSION IF NOT EXISTS {{ item }}"
+  loop: "{{ postgres_client_extensions }}"
+  changed_when: false
+  when:
+    - postgres_client_extensions | length > 0
+    - postgres_client_writable_check.stdout | trim == "1"
+
+- name: Check whether the {{ postgres_client_service }} PostgreSQL database exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ postgres_client_database }}'"
+  register: postgres_client_database_check
+  changed_when: false
+  when: postgres_client_writable_check.stdout | trim == "1"
+
+- name: Create the {{ postgres_client_service }} PostgreSQL database (standard)
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE DATABASE {{ postgres_client_database }} OWNER {{ postgres_client_user }}"
+  changed_when: true
+  when:
+    - postgres_client_writable_check.stdout | trim == "1"
+    - postgres_client_database_check.stdout | trim != "1"
+    - not (postgres_client_database_collation | length > 0 or postgres_client_database_ctype | length > 0 or postgres_client_database_template | length > 0)
+
+- name: Create the {{ postgres_client_service }} PostgreSQL database (with locale/template)
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE DATABASE {{ postgres_client_database }}
+        OWNER {{ postgres_client_user }}
+        {% if postgres_client_database_template | length > 0 %}TEMPLATE {{ postgres_client_database_template }}{% endif %}
+        {% if postgres_client_database_collation | length > 0 %}LC_COLLATE '{{ postgres_client_database_collation }}'{% endif %}
+        {% if postgres_client_database_ctype | length > 0 %}LC_CTYPE '{{ postgres_client_database_ctype }}'{% endif %}
+  changed_when: true
+  when:
+    - postgres_client_writable_check.stdout | trim == "1"
+    - postgres_client_database_check.stdout | trim != "1"
+    - postgres_client_database_collation | length > 0 or postgres_client_database_ctype | length > 0 or postgres_client_database_template | length > 0
+
+- name: Ensure the {{ postgres_client_service }} database owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DATABASE {{ postgres_client_database }} OWNER TO {{ postgres_client_user }}"
+  changed_when: false
+  when: postgres_client_writable_check.stdout | trim == "1"

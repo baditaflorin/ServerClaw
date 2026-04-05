@@ -1,0 +1,79 @@
+# Purpose: Declare the required inputs for the shared postgres_client role so automation and docs share one contract.
+# Use case: Evaluated by Ansible role argument validation before the database tasks run.
+# Inputs: Service database name, role name, password paths, and optional flags for extensions and role options.
+# Outputs: Enforces the role interface and documents the required variables for operators and automation.
+# Idempotency: Fully idempotent because this file only declares argument metadata.
+# Dependencies: ADR 0359.
+---
+argument_specs:
+  main:
+    short_description: Provision a PostgreSQL role and database for any platform service (ADR 0359).
+    options:
+      postgres_client_service:
+        type: str
+        required: true
+        description: >-
+          Logical service name used in log messages and task names.
+      postgres_client_database:
+        type: str
+        required: true
+        description: >-
+          PostgreSQL database name to create and assign to the service role.
+      postgres_client_user:
+        type: str
+        required: true
+        description: >-
+          PostgreSQL login role name to create or reconcile.
+      postgres_client_password_local_file:
+        type: str
+        required: true
+        description: >-
+          Absolute path on the Ansible controller where the generated password is persisted.
+      postgres_client_password_remote_dir:
+        type: str
+        required: true
+        description: >-
+          Absolute path on the target host for the secret directory that holds the password file.
+      postgres_client_password_remote_file:
+        type: str
+        required: true
+        description: >-
+          Absolute path on the target host where the password is mirrored for the service runtime.
+      postgres_client_support_role:
+        type: str
+        required: false
+        description: >-
+          Optional no-login support role to create and grant to the primary login role.
+          Leave empty to skip support-role provisioning.
+      postgres_client_role_options:
+        type: str
+        required: false
+        description: >-
+          Optional PostgreSQL role attribute string appended to CREATE/ALTER ROLE statements.
+          Examples: CREATEDB, BYPASSRLS.
+      postgres_client_database_collation:
+        type: str
+        required: false
+        description: >-
+          LC_COLLATE value for database creation. Leave empty to use the cluster default.
+      postgres_client_database_ctype:
+        type: str
+        required: false
+        description: >-
+          LC_CTYPE value for database creation. Leave empty to use the cluster default.
+      postgres_client_database_template:
+        type: str
+        required: false
+        description: >-
+          TEMPLATE clause for database creation. Leave empty to use the cluster default.
+      postgres_client_extensions:
+        type: list
+        required: false
+        description: >-
+          List of PostgreSQL extension names to CREATE IF NOT EXISTS in the service database.
+      postgres_client_extension_packages:
+        type: list
+        required: false
+        description: >-
+          List of apt packages to install before enabling extensions. Installed only when
+          postgres_client_extensions is non-empty and the host is writable.

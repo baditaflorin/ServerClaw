@@ -1,9 +1,17 @@
-# Managed by Ansible.
+# Managed by Ansible — ADR 0359. Do not edit by hand.
+# Source: inventory/group_vars/platform_postgres.yml (platform_postgres_clients)
 local   all             postgres                                peer
 local   all             {{ postgres_vm_admin_role }}            peer
 local   all             all                                     peer
 host    all             all             127.0.0.1/32            scram-sha-256
 host    all             all             ::1/128                 scram-sha-256
-{% for cidr in postgres_vm_client_allowed_sources %}
+# Per-service least-privilege entries derived from platform_postgres_clients registry.
+{% set ns = namespace(seen_vms=[]) %}
+{% for client in platform_postgres_clients | default([]) %}
+{% set client_ip = platform_guest_catalog.by_name[client.source_vm].ipv4 + '/32' %}
+host    {{ client.database | ljust(20) }} {{ client.user | ljust(20) }} {{ client_ip | ljust(20) }} scram-sha-256
+{% endfor %}
+# Docker bridge network fallback for containerised workloads that MASQUERADE to the host IP.
+{% for cidr in postgres_vm_client_allowed_sources_extra_bridge | default(['172.16.0.0/12', '192.168.0.0/16', '10.200.0.0/16']) %}
 host    all             all             {{ cidr }}              scram-sha-256
 {% endfor %}

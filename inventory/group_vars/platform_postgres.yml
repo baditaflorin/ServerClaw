@@ -1,0 +1,232 @@
+---
+# ADR 0359: Declarative PostgreSQL client registry.
+# Single source of truth for all service database relationships.
+# Add one entry per service. source_vm must match a key in platform_guest_catalog.by_name.
+# This drives: pg_hba.conf (least-privilege), nftables allowed_inbound, and postgres_client role.
+platform_postgres_clients:
+  - service: dify
+    database: dify
+    user: dify
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/dify/database-password.txt"
+    password_remote_dir: /etc/lv3/dify
+    password_remote_file: /etc/lv3/dify/database-password
+
+  - service: directus
+    database: directus
+    user: directus
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/directus/database-password.txt"
+    password_remote_dir: /etc/lv3/directus
+    password_remote_file: /etc/lv3/directus/database-password
+
+  - service: flagsmith
+    database: flagsmith
+    user: flagsmith
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/flagsmith/database-password.txt"
+    password_remote_dir: /etc/lv3/flagsmith
+    password_remote_file: /etc/lv3/flagsmith/database-password.txt
+
+  - service: gitea
+    database: gitea
+    user: gitea
+    source_vm: runtime-control-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/gitea/database-password.txt"
+    password_remote_dir: /etc/lv3/gitea
+    password_remote_file: /etc/lv3/gitea/database-password
+
+  - service: glitchtip
+    database: glitchtip
+    user: glitchtip
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/glitchtip/database-password.txt"
+    password_remote_dir: /etc/lv3/glitchtip
+    password_remote_file: /etc/lv3/glitchtip/database-password
+
+  - service: keycloak
+    database: keycloak
+    user: keycloak
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/keycloak/database-password.txt"
+    password_remote_dir: /etc/lv3/keycloak
+    password_remote_file: /etc/lv3/keycloak/database-password
+
+  - service: label_studio
+    database: label_studio
+    user: label_studio
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/label-studio/database-password.txt"
+    password_remote_dir: /etc/lv3/label-studio
+    password_remote_file: /etc/lv3/label-studio/database-password
+
+  - service: lago
+    database: lago
+    user: lago
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/lago/database-password.txt"
+    password_remote_dir: /etc/lv3/lago
+    password_remote_file: /etc/lv3/lago/database-password
+    role_options: CREATEDB
+
+  - service: langfuse
+    database: langfuse
+    user: langfuse
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/langfuse/database-password.txt"
+    password_remote_dir: /etc/lv3/langfuse
+    password_remote_file: /etc/lv3/langfuse/database-password
+
+  - service: matrix_synapse
+    database: matrix_synapse
+    user: matrix_synapse
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/matrix-synapse/database-password.txt"
+    password_remote_dir: /etc/lv3/matrix-synapse
+    password_remote_file: /etc/lv3/matrix-synapse/database-password.txt
+    database_collation: C
+    database_ctype: C
+    database_template: template0
+
+  - service: mattermost
+    database: mattermost
+    user: mattermost_admin
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/mattermost/database-password.txt"
+    password_remote_dir: /etc/lv3/mattermost
+    password_remote_file: /etc/lv3/mattermost/database-password
+    support_role: mattermost_user
+
+  - service: n8n
+    database: n8n
+    user: n8n
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/n8n/database-password.txt"
+    password_remote_dir: /etc/lv3/n8n
+    password_remote_file: /etc/lv3/n8n/database-password
+
+  - service: netbox
+    database: netbox
+    user: netbox
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/netbox/database-password.txt"
+    password_remote_dir: /etc/lv3/netbox
+    password_remote_file: /etc/lv3/netbox/database-password
+
+  - service: nextcloud
+    database: nextcloud
+    user: nextcloud
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/nextcloud/database-password.txt"
+    password_remote_dir: /etc/lv3/nextcloud
+    password_remote_file: /etc/lv3/nextcloud/database-password
+
+  - service: one_api
+    database: oneapi
+    user: oneapi
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/one-api/database-password.txt"
+    password_remote_dir: /etc/lv3/one-api
+    password_remote_file: /etc/lv3/one-api/database-password
+
+  - service: openfga
+    database: openfga
+    user: openfga
+    source_vm: runtime-control-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/openfga/database-password.txt"
+    password_remote_dir: /etc/lv3/openfga
+    password_remote_file: /etc/lv3/openfga/database-password
+
+  - service: outline
+    database: outline
+    user: outline
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/outline/database-password.txt"
+    password_remote_dir: /etc/lv3/outline
+    password_remote_file: /etc/lv3/outline/database-password
+
+  - service: paperless
+    database: paperless
+    user: paperless
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/paperless/database-password.txt"
+    password_remote_dir: /etc/lv3/paperless
+    password_remote_file: /etc/lv3/paperless/database-password
+
+  - service: plane
+    database: plane
+    user: plane_admin
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/plane/database-password.txt"
+    password_remote_dir: /etc/lv3/plane
+    password_remote_file: /etc/lv3/plane/database-password
+    support_role: plane_user
+
+  - service: semaphore
+    database: semaphore
+    user: semaphore_admin
+    source_vm: runtime-control-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/semaphore/database-password.txt"
+    password_remote_dir: /etc/lv3/semaphore
+    password_remote_file: /etc/lv3/semaphore/database-password
+    support_role: semaphore_user
+
+  - service: sftpgo
+    database: sftpgo
+    user: sftpgo
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/sftpgo/database-password.txt"
+    password_remote_dir: /etc/lv3/sftpgo
+    password_remote_file: /etc/lv3/sftpgo/database-password
+
+  - service: superset
+    database: superset
+    user: superset
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/superset/database-password.txt"
+    password_remote_dir: /etc/lv3/superset
+    password_remote_file: /etc/lv3/superset/database-password.txt
+
+  - service: temporal
+    database: temporal
+    user: temporal
+    source_vm: runtime-control-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/temporal/database-password.txt"
+    password_remote_dir: /etc/lv3/temporal
+    password_remote_file: /etc/lv3/temporal/database-password
+
+  - service: vaultwarden
+    database: vaultwarden
+    user: vaultwarden_admin
+    source_vm: runtime-control-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/vaultwarden/database-password.txt"
+    password_remote_dir: /etc/lv3/vaultwarden
+    password_remote_file: /etc/lv3/vaultwarden/database-password.txt
+    support_role: vaultwarden_support
+
+  - service: vikunja
+    database: vikunja
+    user: vikunja_admin
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/vikunja/database-password.txt"
+    password_remote_dir: /etc/lv3/vikunja
+    password_remote_file: /etc/lv3/vikunja/database-password
+    support_role: vikunja_user
+
+  - service: windmill
+    database: windmill
+    user: windmill_admin
+    source_vm: runtime-control-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/windmill/database-password.txt"
+    password_remote_dir: /etc/lv3/windmill
+    password_remote_file: /etc/lv3/windmill/database-password
+    support_role: windmill_user
+    role_options: BYPASSRLS
+
+  - service: woodpecker
+    database: woodpecker
+    user: woodpecker
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/woodpecker/database-password.txt"
+    password_remote_dir: /etc/lv3/woodpecker
+    password_remote_file: /etc/lv3/woodpecker/database-password
