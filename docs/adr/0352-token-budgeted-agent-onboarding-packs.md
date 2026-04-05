@@ -1,8 +1,9 @@
 # ADR 0352: Token-Budgeted Agent Onboarding Packs
 
-- Status: Accepted
-- Implementation Status: Not Implemented
+- Status: Superseded
+- Implementation Status: Will Not Implement
 - Date: 2026-04-05
+- Superseded: 2026-04-06 — Depends on ADR 0348 (superseded). Existing 4 onboarding packs in build/onboarding/ are sufficient. Dynamic nano/micro/standard pack generation adds recursive complexity for diminishing returns.
 - Tags: llm, token-budget, agent-discovery, onboarding, performance
 
 ## Context

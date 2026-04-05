@@ -1,8 +1,9 @@
 # ADR 0354: Structured Agent Mutation Audit Log
 
-- Status: Accepted
+- Status: Deferred
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Deferred: 2026-04-06 — Audit data already exists in git (file mutations), journalctl (service restarts), and existing callback plugins (mutation_audit.py, structured_log.py). Build a query tool over existing logs before adding a third audit pipeline.
 - Tags: audit, agent-coordination, observability, compliance, mutation-tracking
 
 ## Context

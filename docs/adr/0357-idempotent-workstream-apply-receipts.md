@@ -3,6 +3,7 @@
 - Status: Accepted
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Scoping Note (2026-04-06): Pure state machine — YAML receipt file with in_progress/completed/failed/partial states + guard clauses in apply logic. Add to existing workstream system. Priority 5 in implementation order.
 - Tags: workstreams, audit, idempotency, agent-coordination, receipts, infrastructure
 
 ## Context

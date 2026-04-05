@@ -1,8 +1,9 @@
 # ADR 0356: LLM Inference Routing and Model Registry
 
-- Status: Accepted
-- Implementation Status: Not Implemented
+- Status: Superseded
+- Implementation Status: Will Not Implement
 - Date: 2026-04-05
+- Superseded: 2026-04-06 — Premature optimization: platform has 1 Ollama instance + 1 Claude API. Routing registry for 2 backends adds operational complexity without proportional benefit. Token budgets better enforced at api-gateway proxy level.
 - Tags: llm, ollama, open-webui, ai, token-budget, inference, agent-coordination
 
 ## Context

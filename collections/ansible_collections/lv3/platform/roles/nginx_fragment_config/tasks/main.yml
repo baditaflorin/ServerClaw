@@ -1,0 +1,84 @@
+---
+# ADR 0350: Nginx Fragment-Based Atomic Configuration
+# managed-by: adr=0350 role=nginx_fragment_config
+
+- name: nginx_fragment_config | assert required variables
+  ansible.builtin.assert:
+    that:
+      - nginx_fragment_service_name | length > 0
+      - nginx_fragment_content | length > 0
+    fail_msg: "nginx_fragment_service_name and nginx_fragment_content are required"
+  when: nginx_fragment_state == "present"
+
+- name: nginx_fragment_config | ensure fragment directory exists
+  ansible.builtin.file:
+    path: "{{ nginx_fragment_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: nginx_fragment_config | set fragment paths
+  ansible.builtin.set_fact:
+    _fragment_active: "{{ nginx_fragment_dir }}/{{ nginx_fragment_service_name }}.conf"
+    _fragment_staging: "{{ nginx_fragment_dir }}/{{ nginx_fragment_service_name }}.conf.new"
+
+- name: nginx_fragment_config | write staging fragment
+  ansible.builtin.copy:
+    content: |
+      # managed-by: adr=0350 role=nginx_fragment_config service={{ nginx_fragment_service_name }}
+      {{ nginx_fragment_content }}
+    dest: "{{ _fragment_staging }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: nginx_fragment_state == "present"
+  register: _staging_write
+
+- name: nginx_fragment_config | validate nginx config with staging fragment
+  ansible.builtin.command:
+    cmd: >-
+      {{ nginx_fragment_nginx_binary }} -t -c {{ nginx_fragment_nginx_config }}
+  changed_when: false
+  when:
+    - nginx_fragment_state == "present"
+    - nginx_fragment_validate | bool
+    - _staging_write is changed
+  register: _nginx_validate
+
+- name: nginx_fragment_config | activate fragment (atomic rename)
+  ansible.builtin.command:
+    cmd: mv {{ _fragment_staging }} {{ _fragment_active }}
+  when:
+    - nginx_fragment_state == "present"
+    - _staging_write is changed
+  notify: reload nginx
+
+- name: nginx_fragment_config | remove staging fragment on failure (cleanup)
+  ansible.builtin.file:
+    path: "{{ _fragment_staging }}"
+    state: absent
+  when:
+    - nginx_fragment_state == "present"
+    - _staging_write is changed
+    - _nginx_validate is defined
+    - _nginx_validate is failed
+
+- name: nginx_fragment_config | fail if nginx validation failed
+  ansible.builtin.fail:
+    msg: "nginx -t failed for fragment '{{ nginx_fragment_service_name }}': {{ _nginx_validate.stderr | default('') }}"
+  when:
+    - nginx_fragment_state == "present"
+    - _nginx_validate is defined
+    - _nginx_validate is failed
+
+- name: nginx_fragment_config | remove fragment (absent)
+  ansible.builtin.file:
+    path: "{{ _fragment_active }}"
+    state: absent
+  when: nginx_fragment_state == "absent"
+  notify: reload nginx
+
+- name: nginx_fragment_config | flush handlers to apply reload
+  ansible.builtin.meta: flush_handlers
+  when: nginx_fragment_reload | bool

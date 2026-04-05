@@ -3,6 +3,7 @@
 - Status: Accepted
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Scoping Note (2026-04-06): Pure ops, zero LLM. One Ansible role implementing write-validate(nginx -t)-rename-reload pattern. Standalone, high immediate value. Priority 2 in implementation order.
 - Tags: nginx, atomicity, infrastructure, agent-coordination, include-dirs
 
 ## Context

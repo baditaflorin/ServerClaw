@@ -1,10 +1,10 @@
 # ADR 0369: Agent Service API Gateway — Governed Pattern for Internal Service Tools
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not applicable
-- Implemented In Platform Version: not applicable
-- Implemented On: not applicable
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.19
+- Implemented In Platform Version: not yet applied
+- Implemented On: 2026-04-06
 - Date: 2026-04-06
 - Tags: agents, tools, api, governance, credentials, pattern
 

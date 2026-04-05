@@ -1,8 +1,9 @@
 # ADR 0358: Platform Health Contract and Inter-Service Dependency SLO
 
-- Status: Accepted
+- Status: Deferred
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Deferred: 2026-04-06 — Compose health gates (ADR 0346) already implemented. Full dependency-graph SLO enforcement requires the Integration Contract Registry (ADR 0353) as foundation. Implement 0353 first, then revisit.
 - Tags: health, slo, contracts, integration, observability, agent-coordination
 
 ## Context

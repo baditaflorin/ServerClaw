@@ -853,6 +853,23 @@
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
     },
     {
+      "fqdn": "repowise.lv3.org",
+      "service_id": "repowise",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0346",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required."
+    },
+    {
       "fqdn": "scheduler.lv3.org",
       "service_id": "nomad",
       "environment": "production",

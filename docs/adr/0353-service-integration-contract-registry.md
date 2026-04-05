@@ -3,6 +3,7 @@
 - Status: Accepted
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Scoping Note (2026-04-06): Foundation ADR — other kept ADRs depend on this. Pure YAML data files + Python validation script. Priority 1 in implementation order. Enables ADR 0358 (Health Contract) when ready.
 - Tags: integration, contracts, infrastructure, dry, service-catalog, validation
 
 ## Context

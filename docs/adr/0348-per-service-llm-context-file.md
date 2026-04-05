@@ -1,8 +1,9 @@
 # ADR 0348: Per-Service LLM Context File (service.llm.yaml)
 
-- Status: Accepted
-- Implementation Status: Not Implemented
+- Status: Superseded
+- Implementation Status: Will Not Implement
 - Date: 2026-04-05
+- Superseded: 2026-04-06 — Triage review determined Claude Code glob/grep provides on-demand context without maintaining 60+ summary files that drift from source of truth. See ADR index triage notes.
 - Tags: llm, agent-discovery, token-budget, documentation, service-catalog, dry
 
 ## Context
