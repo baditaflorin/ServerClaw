@@ -46,7 +46,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.18` |
+| Repository version | `0.178.19` |
 | Platform version | `0.131.0` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -60,15 +60,15 @@ rewriting one operator's workstation paths.
 | Running guest count | 10 |
 | Template VM present | `true` |
 | Declared services | 72 |
-| Publicly published services | 45 |
+| Publicly published services | 46 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 36 |
+| `edge-published` | 37 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
-| `private-only` | 31 |
+| `private-only` | 30 |
 
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
@@ -173,7 +173,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.18` |
+| Repository version | `0.178.19` |
 | Platform version | `0.131.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
