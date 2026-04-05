@@ -1428,6 +1428,11 @@ network_policy:
           ports:
             - 5432
           description: Application databases and secret rotation
+        - source: runtime-control-lv3
+          protocol: tcp
+          ports:
+            - 5432
+          description: Keycloak database on runtime-control-lv3
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
