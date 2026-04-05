@@ -1427,9 +1427,32 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(payload, indent=2))
             if args.print_report_json:
                 print("REPORT_JSON=" + json.dumps(payload, separators=(",", ":")))
+            _publish_receipt_to_outline(backup_receipt_path)
             return 0
     except (OSError, ValueError, RuntimeError, json.JSONDecodeError, subprocess.SubprocessError) as exc:
         return emit_cli_error("Restic config backup", exc)
+
+
+def _publish_receipt_to_outline(receipt_path: Path) -> None:
+    import os as _os, subprocess as _sp, sys as _sys
+    token = _os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = Path(__file__).resolve().parent / "outline_tool.py"
+    if not outline_tool.exists() or not receipt_path.exists():
+        return
+    try:
+        _sp.run(
+            [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
+            capture_output=True, check=False,
+            env={**_os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

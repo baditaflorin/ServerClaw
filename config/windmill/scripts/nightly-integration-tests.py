@@ -134,6 +134,54 @@ def load_integration_env_overrides(repo_root: Path) -> dict[str, str]:
     return overrides if isinstance(overrides, dict) else {}
 
 
+def publish_to_outline(repo_root: Path, payload: dict[str, Any]) -> None:
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        return
+    outline_tool = repo_root / "scripts" / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    date = payload.get("executed_at", "")[:10] or __import__("datetime").date.today().isoformat()
+    title = f"nightly-tests-{date}"
+    status = payload.get("status", "unknown")
+    summary = payload.get("summary", {})
+    tests = payload.get("tests", [])
+    failed_tests = [t.get("nodeid", "") for t in tests if t.get("outcome") == "failed"]
+    icon = "✅" if status == "passed" else "❌"
+    md_lines = [
+        f"# Nightly Integration Tests: {date}\n\n",
+        f"| Field | Value |\n|---|---|\n",
+        f"| Status | {icon} {status} |\n",
+        f"| Environment | {payload.get('environment', '?')} |\n",
+        f"| Mode | {payload.get('mode', 'nightly')} |\n",
+        f"| Duration | {payload.get('duration_seconds', 0):.1f}s |\n\n",
+        f"## Summary\n\n",
+        f"| Metric | Count |\n|---|---|\n",
+        f"| Passed | {summary.get('passed', 0)} |\n",
+        f"| Failed | {summary.get('failed', 0)} |\n",
+        f"| Skipped | {summary.get('skipped', 0)} |\n\n",
+    ]
+    if failed_tests:
+        md_lines.append("## Failed Tests\n\n")
+        for t in failed_tests:
+            md_lines.append(f"- `{t}`\n")
+        md_lines.append("\n")
+    md_content = "".join(md_lines)
+    try:
+        subprocess.run(
+            [sys.executable, str(outline_tool), "document.publish",
+             "--collection", "Automation Runs", "--title", title, "--stdin"],
+            input=md_content,
+            text=True,
+            capture_output=True,
+            check=False,
+            cwd=repo_root,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
+
+
 def publish_notifications(repo_root: Path, payload: dict[str, Any]) -> None:
     mattermost_url = (
         os.environ.get("LV3_MATTERMOST_INTEGRATION_TEST_WEBHOOK_URL")
@@ -211,6 +259,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "") -
     report_file = repo_root / ".local" / "integration-tests" / "nightly-last-run.json"
     payload = execute_suite(repo_root, effective_environment, report_file)
     publish_notifications(repo_root, payload)
+    publish_to_outline(repo_root, payload)
     return payload
 
 

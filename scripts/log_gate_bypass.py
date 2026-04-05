@@ -122,7 +122,32 @@ def main() -> int:
     )
     receipt_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(receipt_path)
+    _publish_to_outline(receipt_path)
     return 0
+
+
+def _publish_to_outline(receipt_path: Path) -> None:
+    """Best-effort: publish the receipt to the Outline wiki if OUTLINE_API_TOKEN is set."""
+    import os
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = REPO_ROOT / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = SCRIPT_DIR / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    try:
+        subprocess.run(
+            [sys.executable, str(outline_tool), "bypass.publish", "--file", str(receipt_path)],
+            capture_output=True,
+            check=False,
+            env={**__import__("os").environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

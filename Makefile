@@ -161,7 +161,13 @@ pre-push-gate:
 	$(REPO_ROOT)/scripts/remote_exec.sh pre-push-gate --local-fallback
 
 gate-status:
-	python3 $(REPO_ROOT)/scripts/gate_status.py
+	python3 $(REPO_ROOT)/scripts/gate_status.py | tee /tmp/gate-status-out.txt; \
+	if [ -n "$$OUTLINE_API_TOKEN" ]; then \
+	  DATE=$$(date -u +%Y-%m-%d); \
+	  { printf '# Gate Status: %s\n\n```\n' "$$DATE"; cat /tmp/gate-status-out.txt; printf '```\n'; } | \
+	  python3 $(REPO_ROOT)/scripts/outline_tool.py document.publish \
+	    --collection "Automation Runs" --title "gate-status-$$DATE" --stdin || true; \
+	fi
 
 dr-status:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_dr_report.py

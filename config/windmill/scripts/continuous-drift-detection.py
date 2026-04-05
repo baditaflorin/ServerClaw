@@ -61,4 +61,61 @@ def main(
     if report is not None:
         payload["report"] = report
         payload["summary"] = report.get("summary", {})
+    _publish_to_outline(payload, repo_root)
     return payload
+
+
+def _publish_to_outline(payload: dict, repo_root: Path) -> None:
+    import os, datetime
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = repo_root / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = repo_root / "scripts" / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    import sys
+    date = datetime.date.today().isoformat()
+    environment = payload.get("environment", "production")
+    title = f"drift-report-{environment}-{date}"
+    status = payload.get("status", "unknown")
+    icon = "✅" if status == "ok" else "❌"
+    summary = payload.get("summary", {})
+    md_lines = [
+        f"# Drift Report: {environment} — {date}",
+        "",
+        "| Field | Value |",
+        "|---|---|",
+        f"| Status | {icon} {status} |",
+        f"| Environment | `{environment}` |",
+    ]
+    if isinstance(summary, dict):
+        for k, v in summary.items():
+            md_lines.append(f"| {k} | `{v}` |")
+    report = payload.get("report", {})
+    if isinstance(report, dict):
+        events = report.get("events", [])
+        if events:
+            md_lines += ["", f"## Drift Events ({len(events)})", ""]
+            for ev in events[:15]:
+                if isinstance(ev, dict):
+                    sev = ev.get("severity", "")
+                    src = ev.get("source", "")
+                    msg = ev.get("message") or ev.get("resource", "")
+                    md_lines.append(f"- **[{sev}]** `{src}` — {msg}")
+            if len(events) > 15:
+                md_lines.append(f"- *({len(events) - 15} more events)*")
+    md_lines.append("")
+    content = "\n".join(md_lines)
+    try:
+        subprocess.run(
+            [sys.executable, str(outline_tool), "document.publish",
+             "--collection", "Platform Findings", "--title", title, "--stdin"],
+            input=content, text=True, capture_output=True, check=False,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass

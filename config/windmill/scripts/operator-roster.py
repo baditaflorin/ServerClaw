@@ -2,6 +2,7 @@ import json
 import os
 import shlex
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -77,10 +78,55 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
     active = sum(1 for item in items if item["status"] == "active")
     inactive = sum(1 for item in items if item["status"] == "inactive")
 
-    return {
+    result = {
         "status": "ok",
         "operator_count": len(items),
         "active_count": active,
         "inactive_count": inactive,
         "operators": items,
     }
+    _publish_roster_to_outline(result, repo_root)
+    return result
+
+
+def _publish_roster_to_outline(result: dict, repo_root: Path) -> None:
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = repo_root / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = repo_root / "scripts" / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    from datetime import datetime, timezone
+    date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    operators = result.get("operators", [])
+    lines = [
+        f"# Operator Roster — {date}",
+        "",
+        f"**Total:** {result.get('operator_count', 0)}  "
+        f"**Active:** {result.get('active_count', 0)}  "
+        f"**Inactive:** {result.get('inactive_count', 0)}",
+        "",
+        "| ID | Name | Email | Role | Status | SSH | Onboarded |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for op in operators:
+        lines.append(
+            f"| {op.get('id','')} | {op.get('name','')} | {op.get('email','')} "
+            f"| {op.get('role','')} | {op.get('status','')} "
+            f"| {'yes' if op.get('ssh_enabled') else 'no'} | {op.get('onboarded_at','')} |"
+        )
+    title = f"operator-roster-{date}"[:100]
+    markdown = "\n".join(lines)
+    try:
+        subprocess.run(
+            [sys.executable, str(outline_tool), "document.publish",
+             "--collection", "Platform Findings", "--title", title],
+            input=markdown, text=True, capture_output=True, check=False,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass

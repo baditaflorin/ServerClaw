@@ -254,6 +254,113 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
     return payload
 
 
+def _publish_to_outline(repo_root: Path, payload: dict[str, Any]) -> None:
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        return
+    outline_tool = repo_root / "scripts" / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    title = f"post-merge-gate-{date}"
+    status = payload.get("status", "unknown")
+    gate_status = payload.get("gate_status", {})
+    checks = gate_status.get("checks", []) if isinstance(gate_status, dict) else []
+    lane_rows = ""
+    for check in checks:
+        if isinstance(check, dict):
+            icon = "✅" if check.get("status") == "passed" else "❌"
+            lane_rows += f"| {check.get('id', '?')} | {icon} {check.get('status', '?')} |\n"
+    md_lines = [
+        f"# Post-Merge Gate: {date}\n",
+        f"| Field | Value |\n|---|---|\n",
+        f"| Status | {status} |\n",
+        f"| Source | windmill-post-merge |\n",
+        f"| Run date | {datetime.now(timezone.utc).isoformat()} |\n\n",
+    ]
+    if lane_rows:
+        md_lines.append("## Gate Checks\n\n| Lane | Result |\n|---|---|\n")
+        md_lines.append(lane_rows + "\n")
+    md_content = "".join(md_lines)
+    try:
+        subprocess.run(
+            [sys.executable, str(outline_tool), "document.publish",
+             "--collection", "Automation Runs", "--title", title, "--stdin"],
+            input=md_content,
+            text=True,
+            capture_output=True,
+            check=False,
+            cwd=repo_root,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
+
+
+def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
+    repo_root = Path(repo_path)
+    gate_script = repo_root / "scripts" / "run_gate.py"
+    manifest_path = repo_root / "config" / "validation-gate.json"
+    status_path = repo_root / ".local" / "validation-gate" / "post-merge-last-run.json"
+
+    if not gate_script.exists() or not manifest_path.exists():
+        return {
+            "status": "blocked",
+            "reason": "validation gate surfaces are missing from the worker checkout",
+            "expected_repo_path": str(repo_root),
+        }
+
+    command = [
+        "python3",
+        str(gate_script),
+        "--manifest",
+        str(manifest_path),
+        "--workspace",
+        str(repo_root),
+        "--status-file",
+        str(status_path),
+        "--source",
+        "windmill-post-merge",
+        "--print-json",
+    ]
+    previous_runner_id = os.environ.get("LV3_VALIDATION_RUNNER_ID")
+    os.environ["LV3_VALIDATION_RUNNER_ID"] = VALIDATION_RUNNER_ID
+    try:
+        result = _run(command, cwd=repo_root)
+    finally:
+        if previous_runner_id is None:
+            os.environ.pop("LV3_VALIDATION_RUNNER_ID", None)
+        else:
+            os.environ["LV3_VALIDATION_RUNNER_ID"] = previous_runner_id
+    gate_status = _load_gate_status(status_path)
+    payload: dict[str, Any] = {
+        "status": "ok"
+        if result.returncode == 0 and (gate_status is None or gate_status.get("status") == "passed")
+        else "error",
+        "command": " ".join(shlex.quote(part) for part in command),
+        "returncode": result.returncode,
+        "stdout": result.stdout.strip(),
+        "stderr": result.stderr.strip(),
+    }
+    if gate_status is not None:
+        payload["gate_status"] = gate_status
+    runner_startup_failed = _runner_image_pull_failed(result.stdout, result.stderr) or _gate_status_runner_startup_failed(
+        gate_status
+    )
+    if payload["status"] == "error" and runner_startup_failed:
+        payload["primary_gate_error"] = {
+            "command": payload["command"],
+            "returncode": result.returncode,
+            "stdout": payload["stdout"],
+            "stderr": payload["stderr"],
+        }
+        result_payload = _run_local_fallback(repo_root, manifest_path, status_path) | {"primary_gate_error": payload["primary_gate_error"]}
+        _publish_to_outline(repo_root, result_payload)
+        return result_payload
+    _publish_to_outline(repo_root, payload)
+    return payload
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the repository validation gate after merge.")
     parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")

@@ -648,6 +648,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.write_receipt:
             receipt_path = write_receipt(report, args.receipts_dir)
             report["receipt_path"] = _display_path(receipt_path)
+            _publish_receipt_to_outline(receipt_path)
         if args.format == "json":
             print(json.dumps(report, indent=2))
         else:
@@ -657,6 +658,28 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if args.strict and (report["summary"]["degraded"] or report["summary"]["uncovered"]) else 0
     except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
         return emit_cli_error("Backup coverage ledger", exc)
+
+
+def _publish_receipt_to_outline(receipt_path: Path) -> None:
+    import subprocess, sys as _sys, os as _os
+    token = _os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = Path(__file__).resolve().parent / "outline_tool.py"
+    if not outline_tool.exists() or not receipt_path.exists():
+        return
+    try:
+        subprocess.run(
+            [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
+            capture_output=True, check=False,
+            env={**_os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

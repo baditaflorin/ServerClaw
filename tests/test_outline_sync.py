@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
+import outline_client as _outline_client
 import sync_docs_to_outline as outline_sync
 
 
@@ -69,7 +70,7 @@ def test_outline_client_uses_urlopen_when_bearer_token_auth_is_used(
         captured["timeout"] = timeout
         return FakeResponse('{"ok": true}', req.full_url)
 
-    monkeypatch.setattr(outline_sync.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(_outline_client.request, "urlopen", fake_urlopen)
 
     client = outline_sync.OutlineClient("https://wiki.example", api_token="outline-api-token")
     response = client.call("collections.list", {})

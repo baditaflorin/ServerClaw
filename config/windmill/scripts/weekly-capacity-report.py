@@ -77,7 +77,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server", no_live_metrics: bool = 
     try:
         model = capacity_report.load_capacity_model(model_path)
         report = capacity_report.build_report(model, with_live_metrics=not no_live_metrics)
-        return {
+        payload = {
             "status": "ok",
             "channel": "#platform-ops",
             "metrics_source": report.metrics_source,
@@ -86,7 +86,34 @@ def main(repo_path: str = "/srv/proxmox_florin_server", no_live_metrics: bool = 
     except RuntimeError as exc:
         if "Missing dependency: PyYAML" not in str(exc):
             raise
-        return _run_capacity_report_with_uv(repo_root, no_live_metrics)
+        payload = _run_capacity_report_with_uv(repo_root, no_live_metrics)
+    _publish_to_outline(payload.get("markdown", ""), repo_root)
+    return payload
+
+
+def _publish_to_outline(markdown: str, repo_root: Path) -> None:
+    import os, datetime
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = repo_root / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token or not markdown:
+        return
+    outline_tool = repo_root / "scripts" / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    date = datetime.date.today().isoformat()
+    title = f"capacity-report-{date}"
+    try:
+        subprocess.run(
+            [sys.executable, str(outline_tool), "document.publish",
+             "--collection", "Platform Findings", "--title", title, "--stdin"],
+            input=markdown, text=True, capture_output=True, check=False,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

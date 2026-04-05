@@ -435,7 +435,49 @@ def main(argv: list[str] | None = None) -> int:
         print(render_release_status(report))
     else:
         print(render_dr_report(report))
+    _publish_dr_report_to_outline(report)
     return 1 if args.strict and report["overall_status"] != "pass" else 0
+
+
+def _publish_dr_report_to_outline(report: dict) -> None:
+    import os, subprocess, sys as _sys
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = Path(__file__).resolve().parent / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    import datetime
+    date = datetime.date.today().isoformat()
+    status = report.get("overall_status", "unknown")
+    icon = "✅" if status == "pass" else "❌"
+    title = f"dr-status-{date}"
+    summary = report.get("summary", {})
+    md_lines = [
+        f"# DR Status: {date}",
+        "",
+        f"| Field | Value |",
+        f"|---|---|",
+        f"| Status | {icon} {status} |",
+    ]
+    if isinstance(summary, dict):
+        for k, v in summary.items():
+            md_lines.append(f"| {k} | `{v}` |")
+    md_lines.append("")
+    content = "\n".join(md_lines)
+    try:
+        subprocess.run(
+            [_sys.executable, str(outline_tool), "document.publish",
+             "--collection", "DR & Backup Status", "--title", title, "--stdin"],
+            input=content, text=True, capture_output=True, check=False,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

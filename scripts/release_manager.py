@@ -38,6 +38,7 @@ WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 ADR_DIR = repo_path("docs", "adr")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 OUTLINE_SYNC_SCRIPT = repo_path("scripts", "sync_docs_to_outline.py")
+OUTLINE_TOOL_SCRIPT = repo_path("scripts", "outline_tool.py")
 OUTLINE_API_TOKEN_PATH = repo_path(".local", "outline", "api-token.txt")
 OUTLINE_BASE_URL = "https://wiki.lv3.org"
 OUTLINE_SYNC_DISABLE_ENV = "LV3_SKIP_OUTLINE_SYNC"
@@ -387,6 +388,18 @@ def default_platform_impact() -> str:
     return "no live platform version bump; this release updates repository automation, release metadata, and operator tooling only"
 
 
+def _outline_tool_cmd(args: list[str]) -> list[str]:
+    return [
+        "python3",
+        str(OUTLINE_TOOL_SCRIPT),
+        *args,
+        "--base-url",
+        OUTLINE_BASE_URL,
+        "--token-file",
+        str(OUTLINE_API_TOKEN_PATH),
+    ]
+
+
 def sync_outline_knowledge_surface() -> None:
     if os.environ.get(OUTLINE_SYNC_DISABLE_ENV) == "1":
         return
@@ -409,6 +422,46 @@ def sync_outline_knowledge_surface() -> None:
     if result.returncode != 0:
         detail = (result.stderr or result.stdout or "unknown error").strip()
         raise ValueError(f"outline knowledge sync failed: {detail}")
+
+
+def publish_release_to_outline(version: str) -> None:
+    """Push the changelog and per-version release notes to the Outline wiki."""
+    if os.environ.get(OUTLINE_SYNC_DISABLE_ENV) == "1":
+        return
+    if not OUTLINE_TOOL_SCRIPT.exists() or not OUTLINE_API_TOKEN_PATH.exists():
+        return
+
+    # Push full changelog under a versioned title so history accumulates
+    changelog_result = run_command(
+        _outline_tool_cmd(["changelog.push", "--title", f"Changelog (as of v{version})"]),
+        cwd=REPO_ROOT,
+    )
+    if changelog_result.returncode != 0:
+        detail = (changelog_result.stderr or changelog_result.stdout or "unknown error").strip()
+        raise ValueError(f"outline changelog push failed: {detail}")
+
+    # Push the individual release notes file if it exists
+    release_notes_path = REPO_ROOT / "docs" / "release-notes" / f"{version}.md"
+    if release_notes_path.exists():
+        import subprocess
+        with open(release_notes_path, encoding="utf-8") as fh:
+            content = fh.read()
+        proc = subprocess.run(
+            _outline_tool_cmd([
+                "document.publish",
+                "--collection", "Changelogs",
+                "--title", f"Release Notes {version}",
+                "--rewrite-links",
+                "--stdin",
+            ]),
+            input=content,
+            capture_output=True,
+            text=True,
+            cwd=REPO_ROOT,
+        )
+        if proc.returncode != 0:
+            detail = (proc.stderr or proc.stdout or "unknown error").strip()
+            raise ValueError(f"outline release notes push failed: {detail}")
 
 
 def refresh_generated_truth_surfaces() -> None:
@@ -503,6 +556,7 @@ def write_release(version: str, *, platform_impact: str, released_on: str | None
     write_root_summary_documents()
     refresh_generated_truth_surfaces()
     sync_outline_knowledge_surface()
+    publish_release_to_outline(version)
     return {"version": version, "notes": notes}
 
 

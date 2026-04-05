@@ -144,6 +144,29 @@ jobs:
           cat "${artifact_list}"
           ls -lh .local/validation-gate/gitea-validation-receipts.tar.gz
 
+      - name: Publish validation summary to Outline wiki
+        if: always()
+        env:
+          OUTLINE_API_TOKEN: ${{ secrets.OUTLINE_API_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          if [ -z "${OUTLINE_API_TOKEN:-}" ]; then exit 0; fi
+          STATUS="success"
+          if [ "${JOB_STATUS:-}" != "success" ]; then STATUS="failure"; fi
+          SHA7="${GITHUB_SHA:0:7}"
+          BRANCH="${GITHUB_REF_NAME:-unknown}"
+          TITLE="ci-validate-${BRANCH}-${SHA7}"
+          DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python3 scripts/outline_tool.py ci.publish \
+            --collection "Automation Runs" \
+            --title "${TITLE}" \
+            --status "${STATUS}" \
+            --branch "${BRANCH}" \
+            --sha "${GITHUB_SHA:-unknown}" \
+            --date "${DATE}" \
+            --gate-json ".local/validation-gate/gitea-last-run.json" || true
+
       - name: Notify ntfy on validation failure
         if: failure()
         env:

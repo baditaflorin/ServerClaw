@@ -174,7 +174,53 @@ def main(
             payload["status"] = "drift"
         elif report_status == "clean":
             payload["status"] = "ok"
+    _publish_drift_to_outline(payload, repo_root)
     return payload
+
+
+def _publish_drift_to_outline(payload: dict, repo_root: Path) -> None:
+    import sys as _sys
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = repo_root / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = repo_root / "scripts" / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    from datetime import datetime, timezone
+    date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    status = payload.get("status", "unknown")
+    report = payload.get("report") or {}
+    drift_items = report.get("drift", []) if isinstance(report.get("drift"), list) else []
+    lines = [
+        f"# Atlas Drift Check — {date}",
+        "",
+        f"**Status:** {status}",
+        "",
+    ]
+    if drift_items:
+        lines += ["## Drift Items", "", "| Resource | Expected | Actual |", "|---|---|---|"]
+        for item in drift_items[:20]:
+            res = str(item.get("resource", "")).replace("|", "\\|")
+            exp = str(item.get("expected", "")).replace("|", "\\|")
+            act = str(item.get("actual", "")).replace("|", "\\|")
+            lines.append(f"| {res} | {exp} | {act} |")
+        lines.append("")
+    title = f"atlas-drift-{date}"[:100]
+    markdown = "\n".join(lines)
+    try:
+        proc = subprocess.run(
+            [_sys.executable, str(outline_tool), "document.publish",
+             "--collection", "Platform Findings", "--title", title],
+            input=markdown, text=True, capture_output=True, check=False,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+        _ = proc
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

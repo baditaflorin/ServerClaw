@@ -56,7 +56,52 @@ def main(
             "stdout": result.stdout.strip(),
             "stderr": result.stderr.strip(),
         }
-    return _parse_json(result.stdout)
+    payload = _parse_json(result.stdout)
+    _publish_to_outline(payload, repo_root)
+    return payload
+
+
+def _publish_to_outline(payload: dict, repo_root: Path) -> None:
+    import os, sys as _sys
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token:
+        token_file = repo_root / ".local" / "outline" / "api-token.txt"
+        if token_file.exists():
+            token = token_file.read_text(encoding="utf-8").strip()
+    if not token:
+        return
+    outline_tool = repo_root / "scripts" / "outline_tool.py"
+    if not outline_tool.exists():
+        return
+    from datetime import datetime, timezone
+    date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    status = payload.get("status", "unknown")
+    scenarios = payload.get("scenarios", []) if isinstance(payload.get("scenarios"), list) else []
+    lines = [
+        f"# Fault Injection Run — {date}",
+        "",
+        f"**Status:** {status}",
+        "",
+    ]
+    if scenarios:
+        lines += ["## Scenarios", "", "| Scenario | Result | Duration |", "|---|---|---|"]
+        for sc in scenarios:
+            name = str(sc.get("name", "")).replace("|", "\\|")
+            res = str(sc.get("result", "")).replace("|", "\\|")
+            dur = str(sc.get("duration_seconds", "")).replace("|", "\\|")
+            lines.append(f"| {name} | {res} | {dur} |")
+        lines.append("")
+    title = f"fault-injection-{date}"[:100]
+    markdown = "\n".join(lines)
+    try:
+        subprocess.run(
+            [_sys.executable, str(outline_tool), "document.publish",
+             "--collection", "Automation Runs", "--title", title],
+            input=markdown, text=True, capture_output=True, check=False,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

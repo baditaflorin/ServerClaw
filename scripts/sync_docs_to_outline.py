@@ -3,36 +3,54 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import html.parser
-import json
 import sys
 import time
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from urllib import error, parse, request
-from http import cookiejar
+from urllib import parse, request
 
+from outline_client import (
+    DEFAULT_BASE_URL,
+    DEFAULT_TOKEN_FILE,
+    OutlineClient,
+    OutlineError,
+    collections_by_name,
+    deterministic_id,
+    documents_in_collection,
+    ensure_document,
+    load_api_token,
+    load_file,
+)
 
-DEFAULT_BASE_URL = "https://wiki.lv3.org"
-DEFAULT_TOKEN_FILE = Path(".local/outline/api-token.txt")
-DEFAULT_USERNAME = "outline.automation"
-DEFAULT_PASSWORD_FILE = Path(".local/keycloak/outline.automation-password.txt")
 API_TOKEN_SCOPES = [
     "collections.create",
     "collections.delete",
     "collections.info",
     "collections.list",
     "collections.update",
+    "collections.memberships",
+    "collections.addUser",
+    "collections.removeUser",
+    "collections.addGroup",
+    "collections.removeGroup",
     "documents.create",
     "documents.delete",
     "documents.info",
     "documents.list",
     "documents.update",
+    "groups.create",
+    "groups.delete",
+    "groups.info",
+    "groups.list",
+    "groups.update",
+    "groups.memberships",
+    "groups.addUser",
+    "groups.removeUser",
+    "users.list",
+    "users.read",
 ]
-UUID_NAMESPACE = uuid.UUID("e7dc945f-7c87-4a79-aaab-9a1c6655a7aa")
 
 
 @dataclass(frozen=True)
@@ -80,6 +98,55 @@ COLLECTION_SPECS = [
         landing_title="Architecture Overview",
         landing_markdown="",
     ),
+    CollectionSpec(
+        slug="changelogs",
+        name="Changelogs",
+        description="Release notes, version history, and automated changelog entries for the LV3 platform.",
+        landing_title="Changelog Index",
+        landing_markdown="",
+    ),
+    CollectionSpec(
+        slug="automation-runs",
+        name="Automation Runs",
+        description="Programmatically generated outputs from live playbook runs, CI/CD pipelines, and agent executions.",
+        landing_title="Automation Runs Guide",
+        landing_markdown="",
+    ),
+    CollectionSpec(
+        slug="gate-bypass-waivers",
+        name="Gate Bypass Waivers",
+        description="Every validation gate bypass waiver receipt logged by log_gate_bypass.py.",
+        landing_title="Gate Bypass Waivers Index",
+        landing_markdown="",
+    ),
+    CollectionSpec(
+        slug="security-compliance",
+        name="Security & Compliance",
+        description="CVE scans, SBOM, security posture reports, TLS assurance, and subdomain exposure audits.",
+        landing_title="Security & Compliance Index",
+        landing_markdown="",
+    ),
+    CollectionSpec(
+        slug="dr-backup-status",
+        name="DR & Backup Status",
+        description="Disaster recovery table-top reviews, restore verifications, and backup coverage ledger reports.",
+        landing_title="DR & Backup Status Index",
+        landing_markdown="",
+    ),
+    CollectionSpec(
+        slug="platform-findings",
+        name="Platform Findings",
+        description="Daily findings digests, weekly capacity reports, mutation audit summaries, and drift reports.",
+        landing_title="Platform Findings Index",
+        landing_markdown="",
+    ),
+    CollectionSpec(
+        slug="platform-tools",
+        name="Platform Tools",
+        description="Auto-generated index of all scripts, Windmill jobs, outline_tool.py commands, and Makefile targets available to operators and LLM agents.",
+        landing_title="Platform Tools Index",
+        landing_markdown="",
+    ),
 ]
 
 
@@ -106,61 +173,12 @@ class KeycloakLoginFormParser(html.parser.HTMLParser):
             self.in_login_form = False
 
 
-class OutlineError(RuntimeError):
-    pass
+GITHUB_REPO_BASE = "https://github.com/baditaflorin/proxmox_florin_server/blob/main"
 
 
-class OutlineClient:
-    def __init__(
-        self,
-        base_url: str,
-        *,
-        api_token: str | None = None,
-        app_token: str | None = None,
-        opener: request.OpenerDirector | None = None,
-        csrf_token: str | None = None,
-    ) -> None:
-        self.base_url = base_url.rstrip("/")
-        self.api_token = api_token
-        self.app_token = app_token
-        self.opener = opener
-        self.csrf_token = csrf_token
-
-    def call(self, endpoint: str, payload: dict[str, Any], *, use_app_token: bool = False) -> dict[str, Any]:
-        body = json.dumps(payload).encode("utf-8")
-        token = self.app_token if use_app_token else self.api_token
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-        elif self.csrf_token:
-            headers["X-CSRF-Token"] = self.csrf_token
-        req = request.Request(
-            f"{self.base_url}/api/{endpoint}",
-            data=body,
-            headers=headers,
-            method="POST",
-        )
-        try:
-            if self.opener is not None:
-                response_ctx = self.opener.open(req, timeout=60)
-            else:
-                response_ctx = request.urlopen(req, timeout=60)  # noqa: S310
-            with response_ctx as response:
-                return json.loads(response.read().decode("utf-8"))
-        except error.HTTPError as exc:  # noqa: PERF203
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise OutlineError(f"{endpoint} failed with HTTP {exc.code}: {detail}") from exc
-
-
-def deterministic_id(prefix: str, value: str) -> str:
-    return str(uuid.uuid5(UUID_NAMESPACE, f"{prefix}:{value}"))
-
-
-def repo_link(repo_root: Path, path: Path) -> str:
-    return str((repo_root / path).resolve())
+def repo_link(repo_root: Path, path: Path) -> str:  # noqa: ARG001
+    """Return a publicly-accessible GitHub URL for a repo-relative path."""
+    return f"{GITHUB_REPO_BASE}/{path}"
 
 
 def parse_markdown_title(path: Path) -> str:
@@ -276,6 +294,270 @@ def render_agent_findings_guide(_repo_root: Path) -> str:
     )
 
 
+def render_changelog_index(repo_root: Path) -> str:
+    lines = [
+        "# Changelog Index",
+        "",
+        "Release notes and version history for the LV3 platform.",
+        "The canonical source of truth is `changelog.md` in the repository.",
+        "",
+        "Use `outline_tool.py changelog.push` to publish the current changelog here.",
+        "",
+    ]
+    changelog_path = repo_root / "changelog.md"
+    if changelog_path.exists():
+        lines.append(f"- [changelog.md]({repo_link(repo_root, Path('changelog.md'))})")
+    release_notes_root = repo_root / "docs/release-notes"
+    if release_notes_root.exists():
+        for path in sorted(release_notes_root.glob("*.md")):
+            title = parse_markdown_title(path)
+            lines.append(f"- [{title}]({repo_link(repo_root, path.relative_to(repo_root))})")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def render_bypass_waivers_index(repo_root: Path) -> str:
+    receipt_dir = repo_root / "receipts" / "gate-bypasses"
+    lines = [
+        "# Gate Bypass Waivers Index",
+        "",
+        "Every validation gate bypass waiver is logged here automatically when `log_gate_bypass.py` runs.",
+        "",
+        "Each document in this collection corresponds to one receipt file in `receipts/gate-bypasses/`.",
+        "",
+        f"- [Gate Bypass Schema]({repo_link(repo_root, Path('docs/schema/gate-bypass-waiver-receipt.schema.json'))})",
+        f"- [Waiver Catalog]({repo_link(repo_root, Path('config/gate-bypass-waiver-catalog.json'))})",
+        f"- [ADR 0267]({repo_link(repo_root, Path('docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md'))})",
+        "",
+    ]
+    if receipt_dir.exists():
+        receipts = sorted(receipt_dir.glob("*.json"), reverse=True)
+        lines.append(f"## Recent Receipts ({len(receipts)} total)")
+        lines.append("")
+        for path in receipts[:20]:
+            lines.append(f"- `{path.name}`")
+        if len(receipts) > 20:
+            lines.append(f"- *(and {len(receipts) - 20} more — browse the collection documents)*")
+        lines.append("")
+    lines.append("Use `outline_tool.py bypass.backfill` to upload all existing receipts.")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def render_automation_runs_guide(_repo_root: Path) -> str:
+    return "\n".join(
+        [
+            "# Automation Runs Guide",
+            "",
+            "This collection receives programmatically generated outputs from the LV3 platform automation layer.",
+            "",
+            "Sources that publish here:",
+            "",
+            "- Live Ansible playbook runs (via `outline_tool.py document.publish`)",
+            "- CI/CD pipeline summaries",
+            "- Agent-triggered deployments and verification outputs",
+            "- Scheduled automation jobs",
+            "",
+            "Naming convention: `<service>-<YYYY-MM-DD>[-<run-id>]`",
+            "",
+            "Use `outline_tool.py document.publish --collection 'Automation Runs' --title <title> --stdin` to publish run output.",
+            "",
+        ]
+    )
+
+
+def _receipt_count(repo_root: Path, subdir: str) -> int:
+    d = repo_root / "receipts" / subdir
+    return len(list(d.glob("*.json"))) if d.exists() else 0
+
+
+def render_security_compliance_index(repo_root: Path) -> str:
+    lines = [
+        "# Security & Compliance Index",
+        "",
+        "Security scan outputs published automatically by the LV3 platform scripts.",
+        "Every document in this collection corresponds to one scan run.",
+        "",
+        "## Sources",
+        "",
+        "| Source | Script | Receipt Dir | Collection Key |",
+        "|---|---|---|---|",
+        f"| CVE / SBOM scans | `scripts/sbom_refresh.py` | `receipts/cve/`, `receipts/sbom/` | {_receipt_count(repo_root, 'cve')} CVE + {_receipt_count(repo_root, 'sbom')} SBOM receipts |",
+        f"| Security posture | `scripts/security_posture_report.py` | `receipts/security-reports/` | {_receipt_count(repo_root, 'security-reports')} receipts |",
+        f"| HTTPS/TLS assurance | `scripts/https_tls_assurance.py` | `receipts/https-tls-assurance/` | {_receipt_count(repo_root, 'https-tls-assurance')} receipts |",
+        f"| Subdomain exposure | `scripts/subdomain_exposure_audit.py` | `receipts/subdomain-exposure-audit/` | {_receipt_count(repo_root, 'subdomain-exposure-audit')} receipts |",
+        "",
+        "## Key References",
+        "",
+        f"- [ADR 0346 — Outline automation hooks]({repo_link(repo_root, Path('docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md'))})",
+        f"- [config/image-catalog.json]({repo_link(repo_root, Path('config/image-catalog.json'))})",
+        "",
+        "Use `outline_tool.py receipt.backfill --collection 'Security & Compliance' --receipt-dir receipts/cve` to upload existing receipts.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def render_dr_backup_index(repo_root: Path) -> str:
+    lines = [
+        "# DR & Backup Status Index",
+        "",
+        "Disaster recovery and backup health outputs published automatically by platform scripts.",
+        "",
+        "## Sources",
+        "",
+        "| Source | Script | Receipt Dir | Count |",
+        "|---|---|---|---|",
+        f"| Restore verifications | `scripts/restore_verification.py` | `receipts/restore-verifications/` | {_receipt_count(repo_root, 'restore-verifications')} |",
+        f"| Backup coverage ledger | `scripts/backup_coverage_ledger.py` | `receipts/backup-coverage/` | {_receipt_count(repo_root, 'backup-coverage')} |",
+        f"| Restic backups | `scripts/restic_config_backup.py` | `receipts/restic-backups/` | {_receipt_count(repo_root, 'restic-backups')} |",
+        f"| DR table-top reviews | `scripts/generate_dr_report.py` | `receipts/dr-table-top-reviews/` | {_receipt_count(repo_root, 'dr-table-top-reviews')} |",
+        "",
+        "## Key References",
+        "",
+        f"- [ADR 0100 — Disaster recovery]({repo_link(repo_root, Path('docs/adr/0100-disaster-recovery-runbook.md'))})" if (repo_root / "docs/adr/0100-disaster-recovery-runbook.md").exists() else "",
+        f"- [config/dr-targets.yaml]({repo_link(repo_root, Path('config/dr-targets.yaml'))})" if (repo_root / "config/dr-targets.yaml").exists() else "",
+        "",
+        "Use `outline_tool.py receipt.backfill --collection 'DR & Backup Status' --receipt-dir receipts/restore-verifications` to upload existing receipts.",
+        "",
+    ]
+    return "\n".join(line for line in lines if line is not None)
+
+
+def render_platform_findings_index(_repo_root: Path) -> str:
+    return "\n".join([
+        "# Platform Findings Index",
+        "",
+        "Automated findings, digests, and drift reports published by the LV3 platform.",
+        "",
+        "## Sources",
+        "",
+        "| Source | Windmill Script | Cadence |",
+        "|---|---|---|",
+        "| Daily findings digest | `platform-findings-daily-digest.py` | Daily |",
+        "| Weekly capacity report | `weekly-capacity-report.py` | Weekly |",
+        "| Mutation audit summary | `lv3-mutation-audit.py` | Per-event |",
+        "| Drift reports (infra/DNS/Docker/TLS) | `continuous-drift-detection.py` | Scheduled |",
+        "| Weekly security scan | `weekly-security-scan.py` | Weekly |",
+        "",
+        "## Naming Convention",
+        "",
+        "Documents follow the pattern: `{report-type}-{YYYY-MM-DD}`",
+        "",
+        "Examples: `findings-digest-2026-04-05`, `capacity-report-2026-04-05`, `drift-report-2026-04-05`",
+        "",
+    ])
+
+
+def _script_docstring(path: Path) -> str:
+    """Extract the module docstring from a Python script."""
+    import re as _re
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")[:600]
+        # Try triple-double-quoted docstring (single or multi-line — take first line)
+        m = _re.search(r'"""(.*?)(?:"""|$)', text, _re.DOTALL)
+        if m:
+            first_line = m.group(1).strip().splitlines()[0].strip() if m.group(1).strip() else ""
+            if first_line:
+                return first_line[:120]
+        # Try triple-single-quoted docstring
+        m = _re.search(r"'''(.*?)(?:'''|$)", text, _re.DOTALL)
+        if m:
+            first_line = m.group(1).strip().splitlines()[0].strip() if m.group(1).strip() else ""
+            if first_line:
+                return first_line[:120]
+        # Fall back to first non-shebang comment
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#!"):
+                continue
+            if stripped.startswith("#"):
+                return stripped.lstrip("#").strip()[:120]
+    except OSError:
+        pass
+    return ""
+
+
+def render_platform_tools_index(repo_root: Path) -> str:
+    lines = [
+        "# Platform Tools Index",
+        "",
+        "Auto-generated index of all scripts, Windmill jobs, and CLI tools available to operators and LLM agents.",
+        "Updated on every `sync_docs_to_outline.py sync` run.",
+        "",
+        "## outline_tool.py — Agent Wiki API",
+        "",
+        "All commands output `{\"ok\": true/false, ...}` JSON. Auth via `OUTLINE_API_TOKEN` env var.",
+        "",
+        "| Command | Purpose |",
+        "|---|---|",
+        "| `collection.list/create/delete` | Manage wiki collections |",
+        "| `collection.members/grant/revoke` | User access control |",
+        "| `collection.grant-group/revoke-group` | Group access control |",
+        "| `document.list/publish/get/delete/search` | Document CRUD |",
+        "| `changelog.push` | Push `changelog.md` to Changelogs collection |",
+        "| `bypass.publish/backfill` | Publish gate bypass receipts |",
+        "| `receipt.publish/backfill` | Publish any JSON receipt file |",
+        "| `user.list` | List workspace users |",
+        "| `group.list/create/delete/members/add-user/remove-user` | Group management |",
+        "",
+        f"Source: [`scripts/outline_tool.py`]({repo_link(repo_root, Path('scripts/outline_tool.py'))})",
+        "",
+    ]
+
+    # Scripts index
+    scripts_dir = repo_root / "scripts"
+    scripts = sorted(p for p in scripts_dir.glob("*.py") if not p.name.startswith("_"))
+    lines += [
+        "## scripts/ — Operator & Automation Scripts",
+        "",
+        "| Script | Purpose |",
+        "|---|---|",
+    ]
+    for path in scripts:
+        doc = _script_docstring(path)
+        link = f"[`{path.name}`]({repo_link(repo_root, path.relative_to(repo_root))})"
+        lines.append(f"| {link} | {doc} |")
+    lines.append("")
+
+    # Windmill scripts index
+    windmill_dir = repo_root / "config" / "windmill" / "scripts"
+    if windmill_dir.exists():
+        windmill_scripts = sorted(windmill_dir.glob("*.py"))
+        lines += [
+            "## config/windmill/scripts/ — Windmill Jobs",
+            "",
+            "| Script | Purpose |",
+            "|---|---|",
+        ]
+        for path in windmill_scripts:
+            doc = _script_docstring(path)
+            link = f"[`{path.name}`]({repo_link(repo_root, path.relative_to(repo_root))})"
+            lines.append(f"| {link} | {doc} |")
+        lines.append("")
+
+    # Makefile targets
+    makefile = repo_root / "Makefile"
+    if makefile.exists():
+        targets: list[str] = []
+        for line in makefile.read_text(encoding="utf-8").splitlines():
+            if line and not line.startswith("\t") and not line.startswith("#") and not line.startswith(".") and ":" in line:
+                target = line.split(":")[0].strip()
+                if target and " " not in target and target not in ("PHONY", "all"):
+                    targets.append(target)
+        if targets:
+            lines += [
+                "## Makefile Targets",
+                "",
+                ", ".join(f"`{t}`" for t in targets[:60]),
+                "",
+                f"Full list: [`Makefile`]({repo_link(repo_root, Path('Makefile'))})",
+                "",
+            ]
+
+    return "\n".join(lines)
+
+
 def extract_metadata(path: Path) -> dict[str, str]:
     metadata: dict[str, str] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -302,11 +584,21 @@ def landing_docs(repo_root: Path) -> list[tuple[CollectionSpec, str]]:
             rendered.append((spec, render_agent_findings_guide(repo_root)))
         elif spec.slug == "architecture":
             rendered.append((spec, render_architecture_overview(repo_root)))
+        elif spec.slug == "changelogs":
+            rendered.append((spec, render_changelog_index(repo_root)))
+        elif spec.slug == "automation-runs":
+            rendered.append((spec, render_automation_runs_guide(repo_root)))
+        elif spec.slug == "gate-bypass-waivers":
+            rendered.append((spec, render_bypass_waivers_index(repo_root)))
+        elif spec.slug == "security-compliance":
+            rendered.append((spec, render_security_compliance_index(repo_root)))
+        elif spec.slug == "dr-backup-status":
+            rendered.append((spec, render_dr_backup_index(repo_root)))
+        elif spec.slug == "platform-findings":
+            rendered.append((spec, render_platform_findings_index(repo_root)))
+        elif spec.slug == "platform-tools":
+            rendered.append((spec, render_platform_tools_index(repo_root)))
     return rendered
-
-
-def load_file(path: Path) -> str:
-    return path.read_text(encoding="utf-8").strip()
 
 
 def write_file(path: Path, content: str) -> None:
@@ -314,20 +606,16 @@ def write_file(path: Path, content: str) -> None:
     path.write_text(content.rstrip() + "\n", encoding="utf-8")
 
 
-def load_api_token(path: Path) -> str:
-    if not path.exists():
-        raise OutlineError(f"missing API token file: {path}")
-    return load_file(path)
+def build_opener() -> tuple[request.OpenerDirector, Any]:
+    from http import cookiejar
 
-
-def build_opener() -> tuple[request.OpenerDirector, cookiejar.CookieJar]:
     jar = cookiejar.CookieJar()
     opener = request.build_opener(request.HTTPCookieProcessor(jar))
     opener.addheaders = [("User-Agent", "lv3-outline-sync/1.0")]
     return opener, jar
 
 
-def find_cookie(jar: cookiejar.CookieJar, name: str) -> str | None:
+def find_cookie(jar: Any, name: str) -> str | None:
     for cookie in jar:
         if cookie.name == name:
             return cookie.value
@@ -378,16 +666,6 @@ def bootstrap_token(base_url: str, username: str, password_file: Path, token_nam
     return 0
 
 
-def collections_by_name(client: OutlineClient) -> dict[str, dict[str, Any]]:
-    response = client.call("collections.list", {})
-    return {item["name"]: item for item in response.get("data", [])}
-
-
-def documents_in_collection(client: OutlineClient, collection_id: str) -> list[dict[str, Any]]:
-    response = client.call("documents.list", {"collectionId": collection_id})
-    return list(response.get("data", []))
-
-
 def cleanup_bootstrap_collections(client: OutlineClient) -> list[str]:
     outcomes: list[str] = []
     welcome = collections_by_name(client).get("Welcome")
@@ -408,7 +686,8 @@ def ensure_collection(client: OutlineClient, spec: CollectionSpec, *, dry_run: b
                 "id": current["id"],
                 "name": spec.name,
                 "description": spec.description,
-                "sharing": False,
+                "permission": "read",
+                "sharing": True,
             },
         )
         return current["id"], "updated"
@@ -419,51 +698,11 @@ def ensure_collection(client: OutlineClient, spec: CollectionSpec, *, dry_run: b
         {
             "name": spec.name,
             "description": spec.description,
-            "sharing": False,
+            "permission": "read",
+            "sharing": True,
         },
     )
     return created["data"]["id"], "created"
-
-
-def ensure_document(
-    client: OutlineClient,
-    *,
-    collection_id: str,
-    title: str,
-    markdown: str,
-    dry_run: bool,
-) -> str:
-    matching = [item for item in documents_in_collection(client, collection_id) if item.get("title") == title]
-    current = matching[0] if matching else None
-    duplicates = matching[1:]
-    if dry_run:
-        return "updated" if current else "created"
-    if current:
-        client.call(
-            "documents.update",
-            {
-                "id": current["id"],
-                "title": title,
-                "text": markdown,
-                "publish": True,
-                "done": True,
-            },
-        )
-        outcome = "updated"
-    else:
-        client.call(
-            "documents.create",
-            {
-                "collectionId": collection_id,
-                "title": title,
-                "text": markdown,
-                "publish": True,
-            },
-        )
-        outcome = "created"
-    for duplicate in duplicates:
-        client.call("documents.delete", {"id": duplicate["id"]})
-    return outcome
 
 
 def sync(repo_root: Path, base_url: str, api_token_file: Path, *, dry_run: bool) -> int:
@@ -508,8 +747,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     bootstrap = subparsers.add_parser("bootstrap-token", help="Create the repo-managed Outline API token through OIDC.")
     bootstrap.add_argument("--base-url", default=DEFAULT_BASE_URL)
-    bootstrap.add_argument("--username", default=DEFAULT_USERNAME)
-    bootstrap.add_argument("--password-file", type=Path, default=DEFAULT_PASSWORD_FILE)
+    bootstrap.add_argument("--username", default="outline.automation")
+    bootstrap.add_argument("--password-file", type=Path, default=Path(".local/keycloak/outline.automation-password.txt"))
     bootstrap.add_argument("--token-name", default="lv3-outline-sync")
     bootstrap.add_argument("--token-file", type=Path, default=DEFAULT_TOKEN_FILE)
     bootstrap.add_argument("--scope", default=",".join(API_TOKEN_SCOPES))

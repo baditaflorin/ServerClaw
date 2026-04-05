@@ -67,11 +67,26 @@ outline_api_token_scopes:
   - collections.info
   - collections.list
   - collections.update
+  - collections.memberships
+  - collections.addUser
+  - collections.removeUser
+  - collections.addGroup
+  - collections.removeGroup
   - documents.create
   - documents.delete
   - documents.info
   - documents.list
   - documents.update
+  - groups.create
+  - groups.delete
+  - groups.info
+  - groups.list
+  - groups.update
+  - groups.memberships
+  - groups.addUser
+  - groups.removeUser
+  - users.list
+  - users.read
 outline_app_name: LV3 Knowledge Wiki
 outline_force_https: true
 outline_enable_updates: false
