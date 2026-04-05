@@ -21,6 +21,59 @@ archive_summary:
   by_year:
     '2026': 301
 workstreams:
+- id: adr-0346-centralized-port-registry
+  adr: '0346'
+  title: "Centralized port registry \u2014 eliminate hardcoded platform port numbers"
+  status: ready
+  owner: claude
+  branch: claude/modest-northcutt
+  worktree_path: .claude/worktrees/modest-northcutt
+  doc: docs/workstreams/adr-0346-centralized-port-registry.md
+  depends_on:
+  - adr-0165-role-interface-contracts
+  - adr-0344-single-source-environment-topology
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/host_vars/proxmox_florin.yml
+  - inventory/group_vars/platform.yml
+  - scripts/generate_platform_vars.py
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0346_docs
+      paths:
+      - docs/adr/0346-centralized-port-registry.md
+      - docs/workstreams/adr-0346-centralized-port-registry.md
+      mode: exclusive
+    - id: port_registry
+      paths:
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/playbooks/secret-rotation.yml
+      mode: exclusive
+    - id: integration_truth
+      paths:
+      - README.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      mode: generated
+  ready_to_merge: true
+  live_applied: true
 - id: ws-0318-provision-operator-v2
   adr: 0318
   title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding
