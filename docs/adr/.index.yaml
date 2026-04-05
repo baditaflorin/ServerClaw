@@ -8,20 +8,20 @@
 schema_version: 2
 generated: '2026-04-05'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 383
+total_adrs: 384
 adr_number_range:
   first: '0001'
-  last: 0359
-  next_available: '0360'
+  last: '0360'
+  next_available: '0361'
 implementation_status_summary:
   Implemented: 332
   Partial: 7
   Not Implemented: 39
   Deprecated: 1
-  Accepted: 3
+  Accepted: 4
   Proposed: 1
 decision_status_summary:
-  Accepted: 326
+  Accepted: 327
   Proposed: 5
   Deprecated: 2
   Implemented: 50
@@ -44,9 +44,9 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 66
+      count: 67
       first_adr: '0300'
-      last_adr: 0359
+      last_adr: '0360'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -77,7 +77,7 @@ facets:
       count: 5
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
-      count: 9
+      count: 10
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
       count: 25
@@ -122,7 +122,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 3
+      count: 4
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
@@ -132,8 +132,13 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0360'
+  next_available_adr: '0361'
 latest_adrs:
+  - adr: '0360'
+    title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
+    implementation_status: Accepted
+    concern: monitoring
+    path: docs/adr/0360-plane-as-agent-task-hq.md
   - adr: 0359
     title: Declarative PostgreSQL Client Registry
     implementation_status: Proposed
@@ -179,11 +184,6 @@ latest_adrs:
     implementation_status: Not Implemented
     concern: networking
     path: docs/adr/0351-change-provenance-tagging.md
-  - adr: '0350'
-    title: Nginx Fragment-Based Atomic Configuration
-    implementation_status: Not Implemented
-    concern: networking
-    path: docs/adr/0350-nginx-fragment-based-atomic-config.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

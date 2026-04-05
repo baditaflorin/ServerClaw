@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 66
+total_adrs: 67
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1331,3 +1331,23 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
+  - adr: '0360'
+    title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-05'
+    concern: monitoring
+    keywords:
+      - platform
+      - plane
+      - agents
+      - observability
+      - workflow
+      - automation
+      - as
+      - agent
+      - task
+      - hq
+    summary: Plane becomes the primary human-visible and agent-visible surface for
+    filename: 0360-plane-as-agent-task-hq.md
+    path: docs/adr/0360-plane-as-agent-task-hq.md

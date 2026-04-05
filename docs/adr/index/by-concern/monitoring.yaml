@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: monitoring
-total_adrs: 9
+total_adrs: 10
 adrs:
   - adr: '0041'
     title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
@@ -179,3 +179,23 @@ adrs:
     implemented_in_repo_version: 0.177.109
     implemented_in_platform_version: 0.130.72
     implemented_on: '2026-03-30'
+  - adr: '0360'
+    title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-05'
+    concern: monitoring
+    keywords:
+      - platform
+      - plane
+      - agents
+      - observability
+      - workflow
+      - automation
+      - as
+      - agent
+      - task
+      - hq
+    summary: Plane becomes the primary human-visible and agent-visible surface for
+    filename: 0360-plane-as-agent-task-hq.md
+    path: docs/adr/0360-plane-as-agent-task-hq.md
