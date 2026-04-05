@@ -215,6 +215,9 @@ server {
     location = / {
         proxy_pass {{ site.upstream }}{{ site.root_proxy_path }};
         proxy_http_version 1.1;
+{% if site.upstream_ssl_verify is defined and not site.upstream_ssl_verify %}
+        proxy_ssl_verify off;
+{% endif %}
 {{ hide_upstream_security_headers(site) }}
 {{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;
@@ -245,6 +248,9 @@ server {
     location ^~ {{ route.path }} {
         proxy_pass {{ route.upstream }};
         proxy_http_version 1.1;
+{% if site.upstream_ssl_verify is defined and not site.upstream_ssl_verify %}
+        proxy_ssl_verify off;
+{% endif %}
 {{ hide_upstream_security_headers() }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -265,6 +271,9 @@ server {
     location / {
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
+{% if site.upstream_ssl_verify is defined and not site.upstream_ssl_verify %}
+        proxy_ssl_verify off;
+{% endif %}
 {{ hide_upstream_security_headers(site) }}
 {{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;
@@ -449,6 +458,9 @@ server {
     location = / {
         proxy_pass {{ site.upstream }}{{ site.root_proxy_path }};
         proxy_http_version 1.1;
+{% if site.upstream_ssl_verify is defined and not site.upstream_ssl_verify %}
+        proxy_ssl_verify off;
+{% endif %}
 {{ hide_upstream_security_headers(site) }}
 {{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;
@@ -492,6 +504,9 @@ server {
 {% endif %}
         proxy_pass {{ route.upstream }};
         proxy_http_version 1.1;
+{% if site.upstream_ssl_verify is defined and not site.upstream_ssl_verify %}
+        proxy_ssl_verify off;
+{% endif %}
 {{ hide_upstream_security_headers() }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -522,6 +537,9 @@ server {
 {% endif %}
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
+{% if site.upstream_ssl_verify is defined and not site.upstream_ssl_verify %}
+        proxy_ssl_verify off;
+{% endif %}
 {{ hide_upstream_security_headers(site) }}
 {{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;

@@ -644,6 +644,76 @@ def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict
     return {"container": container, "tail": tail, "logs": logs}
 
 
+DEFAULT_NOMAD_API_URL: Final[str] = "https://100.64.0.1:8013"
+DEFAULT_NOMAD_TOKEN_PATH: Final[Path] = REPO_ROOT / ".local" / "nomad" / "tokens" / "bootstrap-management.token"
+DEFAULT_NOMAD_CA_CERT_PATH: Final[Path] = REPO_ROOT / ".local" / "nomad" / "tls" / "nomad-agent-ca.pem"
+
+
+def _nomad_request(method: str, path: str, *, params: dict | None = None, json_body: dict | None = None) -> dict[str, Any]:
+    import requests  # lazy import
+
+    token_file = DEFAULT_NOMAD_TOKEN_PATH
+    if not token_file.is_file():
+        raise RuntimeError(f"Nomad management token not found at {token_file}")
+    token = token_file.read_text().strip()
+    ca_cert = str(DEFAULT_NOMAD_CA_CERT_PATH) if DEFAULT_NOMAD_CA_CERT_PATH.is_file() else False
+    url = f"{DEFAULT_NOMAD_API_URL}{path}"
+    resp = requests.request(
+        method, url,
+        headers={"X-Nomad-Token": token},
+        params=params,
+        json=json_body,
+        verify=ca_cert,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def tool_list_nomad_jobs(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    namespace = args.get("namespace", "*")
+    jobs_raw = _nomad_request("GET", "/v1/jobs", params={"namespace": namespace})
+    jobs = [
+        {
+            "id": j.get("ID", ""),
+            "name": j.get("Name", ""),
+            "type": j.get("Type", ""),
+            "status": j.get("Status", ""),
+            "namespace": j.get("Namespace", "default"),
+        }
+        for j in jobs_raw
+    ]
+    return {"count": len(jobs), "jobs": jobs}
+
+
+def tool_get_nomad_job_status(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    job_id = require_str(args.get("job_id"), "arguments.job_id")
+    namespace = args.get("namespace", "default")
+    job = _nomad_request("GET", f"/v1/job/{job_id}", params={"namespace": namespace})
+    return {
+        "id": job.get("ID", ""),
+        "name": job.get("Name", ""),
+        "type": job.get("Type", ""),
+        "status": job.get("Status", ""),
+        "namespace": job.get("Namespace", "default"),
+    }
+
+
+def tool_dispatch_nomad_job(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    job_id = require_str(args.get("job_id"), "arguments.job_id")
+    meta = args.get("meta", {})
+    namespace = args.get("namespace", "default")
+    result = _nomad_request(
+        "POST", f"/v1/job/{job_id}/dispatch",
+        params={"namespace": namespace},
+        json_body={"Meta": meta},
+    )
+    return {
+        "dispatch_id": result.get("DispatchedJobID", ""),
+        "eval_id": result.get("EvalID", ""),
+    }
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -660,6 +730,9 @@ HANDLERS: Final[dict[str, Any]] = {
     "run_governed_command": tool_run_governed_command,
     "list_containers": tool_list_containers,
     "get_container_logs": tool_get_container_logs,
+    "list_nomad_jobs": tool_list_nomad_jobs,
+    "get_nomad_job_status": tool_get_nomad_job_status,
+    "dispatch_nomad_job": tool_dispatch_nomad_job,
 }
 
 

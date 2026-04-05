@@ -219,3 +219,9 @@ keycloak_dify_root_url: https://agents.lv3.org
 keycloak_dify_post_logout_redirect_uris:
   - "{{ keycloak_dify_root_url }}"
   - "{{ keycloak_dify_root_url }}/"
+keycloak_nomad_client_id: nomad
+keycloak_nomad_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/nomad-client-secret.txt
+keycloak_nomad_root_url: https://scheduler.lv3.org
+keycloak_nomad_post_logout_redirect_uris:
+  - "{{ keycloak_nomad_root_url }}/ui"
+  - "{{ keycloak_nomad_root_url }}"

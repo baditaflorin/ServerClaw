@@ -1114,6 +1114,161 @@
         "idempotentHint": true
       },
       "runbook": "docs/runbooks/container-ops.md"
+    },
+    {
+      "name": "list-nomad-jobs",
+      "title": "List Nomad Jobs",
+      "description": "List all jobs in the Nomad cluster with their current status, type, and allocation summary.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "service://nomad/v1/jobs",
+      "auth": "nomad-management-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "description": "Filter jobs by namespace. Use '*' for all namespaces.",
+            "default": "*"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["count", "jobs"],
+        "properties": {
+          "count": { "type": "integer" },
+          "jobs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "type": { "type": "string" },
+                "status": { "type": "string" },
+                "namespace": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_nomad_jobs"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "runbook": "docs/runbooks/configure-nomad.md"
+    },
+    {
+      "name": "get-nomad-job-status",
+      "title": "Get Nomad Job Status",
+      "description": "Get detailed status of a specific Nomad job including allocations and deployment state.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "service://nomad/v1/job/{job_id}",
+      "auth": "nomad-management-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["job_id"],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The Nomad job ID to query."
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Namespace of the job.",
+            "default": "default"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["id", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "status": { "type": "string" },
+          "namespace": { "type": "string" }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_nomad_job_status"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "runbook": "docs/runbooks/configure-nomad.md"
+    },
+    {
+      "name": "dispatch-nomad-job",
+      "title": "Dispatch Nomad Batch Job",
+      "description": "Dispatch a parameterized Nomad batch job with the given metadata. Only works for jobs with a parameterized stanza.",
+      "category": "execute",
+      "transport": "controller_local",
+      "endpoint": "service://nomad/v1/job/{job_id}/dispatch",
+      "auth": "nomad-management-token",
+      "approval_required": true,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["job_id"],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The parameterized Nomad job ID to dispatch."
+          },
+          "meta": {
+            "type": "object",
+            "description": "Key-value metadata to pass to the dispatched job."
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Namespace of the job.",
+            "default": "default"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["dispatch_id", "eval_id"],
+        "properties": {
+          "dispatch_id": { "type": "string" },
+          "eval_id": { "type": "string" }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "dispatch_nomad_job"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false,
+        "openWorldHint": true
+      },
+      "runbook": "docs/runbooks/configure-nomad.md"
     }
   ]
 }

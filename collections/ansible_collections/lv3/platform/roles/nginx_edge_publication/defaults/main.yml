@@ -244,6 +244,15 @@ public_edge_security_headers_overrides:
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:; connect-src 'self'
       https://uptime.lv3.org ws://uptime.lv3.org wss://uptime.lv3.org; manifest-src 'self'
+  scheduler.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self' https://sso.lv3.org;
+      frame-ancestors 'none'; object-src 'none';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:;
+      connect-src 'self' https://scheduler.lv3.org wss://scheduler.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
 public_edge_extra_sites:
   - hostname: minio-console.lv3.org
     kind: proxy

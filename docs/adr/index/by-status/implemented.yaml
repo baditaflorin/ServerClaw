@@ -10,7 +10,7 @@ generated: '2026-04-05'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 333
+total_adrs: 334
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6150,4 +6150,21 @@ adrs:
     path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
     implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.178.4
+    implemented_on: '2026-04-05'
+  - adr: '0360'
+    title: OpenBao TLS Cert Lifetime And Renewal Hardening
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: security
+    keywords:
+      - openbao
+      - tls
+      - cert
+      - lifetime
+      - renewal
+      - hardening
+    summary: 'Setting openbaotlscertificatenotafter: 72h keeps the renewal logic'
+    filename: 0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
+    path: docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
     implemented_on: '2026-04-05'

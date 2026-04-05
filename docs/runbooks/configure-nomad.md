@@ -76,9 +76,49 @@ Run these checks after converge or after the guarded live apply:
 14. `make live-apply-service service=nomad env=production`
 15. `make live-apply-service service=nomad env=production ALLOW_IN_PLACE_MUTATION=true`
 
+## OIDC Authentication (ADR 0361)
+
+The Nomad UI at `https://scheduler.lv3.org` uses Nomad's native OIDC auth method
+backed by Keycloak. No oauth2-proxy is used — Nomad handles login directly.
+
+### How it works
+
+1. User opens `https://scheduler.lv3.org`
+2. Nomad UI shows "Sign In with OIDC" button
+3. Click redirects to Keycloak (`sso.lv3.org`) for authentication
+4. On success, Nomad exchanges the OIDC token for a Nomad ACL token
+5. Token is stored in the browser; user can view/manage jobs
+
+### Access levels
+
+- **lv3-platform-admins** Keycloak group → `platform-admin` role (full write)
+- All other authenticated users → `platform-reader` role (read-only)
+
+### Converging OIDC auth
+
+```bash
+# Run the OIDC-specific tier only:
+make converge-nomad  # or with tags:
+ansible-playbook playbooks/nomad.yml --tags service-nomad-oidc -e env=production
+```
+
+### Verifying OIDC
+
+```bash
+# Check auth method exists:
+curl -sS https://100.64.0.1:8013/v1/acl/auth-method/keycloak \
+  --cacert .local/nomad/tls/nomad-agent-ca.pem \
+  -H "X-Nomad-Token: $(cat .local/nomad/tokens/bootstrap-management.token)" | jq .Name
+
+# List binding rules:
+curl -sS https://100.64.0.1:8013/v1/acl/binding-rules \
+  --cacert .local/nomad/tls/nomad-agent-ca.pem \
+  -H "X-Nomad-Token: $(cat .local/nomad/tokens/bootstrap-management.token)" | jq '.[] | {AuthMethod, BindName, Selector}'
+```
+
 ## Notes
 
-- Nomad remains private-only in this rollout. There is no public DNS record or public edge publication for the scheduler.
+- The Nomad UI is edge-published at `scheduler.lv3.org` with OIDC auth (ADR 0361). The Tailscale proxy at `100.64.0.1:8013` remains available for API-level access with the management token.
 - The `lv3-nomad` systemd unit intentionally runs as `root` so the agent can read the root-owned TLS key and use the Docker driver reliably on the client nodes.
 - The controller-local bootstrap token is the branch-safe source of truth; if the local token is missing but the mirrored server token still exists, rerun the playbook to restore it automatically.
 - The smoke service is pinned to the build client and is verified through the build node's advertised address `10.10.10.30:18180`, not `127.0.0.1`.

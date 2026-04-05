@@ -83,6 +83,7 @@ def service_topology_edge_sites(catalog):
                 "root_proxy_path",
                 "security_headers_enabled",
                 "server_sent_events",
+                "upstream_ssl_verify",
             ):
                 if optional_field in edge:
                     site[optional_field] = edge[optional_field]

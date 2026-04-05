@@ -222,6 +222,27 @@ The pre-push gate (`scripts/validate_repo.sh agent-standards`) enforces:
 - `docs/adr/.index.yaml` must be current when ADR files change
   - Regenerate: `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
 
+## Nomad Scheduler (ADR 0232, ADR 0361)
+
+The platform runs a private Nomad cluster for durable batch and long-running
+internal jobs. Agents and operators can view, dispatch, and manage jobs.
+
+| Resource | Location |
+|---|---|
+| **UI** | `https://scheduler.lv3.org` (OIDC login via Keycloak) |
+| **API proxy** | `https://100.64.0.1:8013` (Tailscale, requires management token) |
+| **Server** | `monitoring-lv3` (10.10.10.40:4646) |
+| **Clients** | docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, runtime-control-lv3, docker-build-lv3 |
+| **CLI wrapper** | `/usr/local/bin/lv3-nomad` on all cluster nodes (auto-loads token) |
+| **Playbook** | `playbooks/nomad.yml` |
+| **Job definitions** | `config/nomad/jobs/` |
+| **Bootstrap token** | `.local/nomad/tokens/bootstrap-management.token` |
+
+**Agent tools:** `list-nomad-jobs`, `get-nomad-job-status`, `dispatch-nomad-job`
+
+When creating or modifying Nomad jobs, place the job spec in `config/nomad/jobs/`
+and register it through the Nomad playbook or the `lv3-nomad job run` wrapper.
+
 ## Cross-Service Wiring Rules
 
 Some services derive their configuration dynamically from the inventory host list.

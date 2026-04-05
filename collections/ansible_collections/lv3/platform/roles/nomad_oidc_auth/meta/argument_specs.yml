@@ -1,0 +1,30 @@
+---
+argument_specs:
+  main:
+    short_description: Configure Nomad OIDC auth method with Keycloak SSO.
+    options:
+      nomad_oidc_auth_server_url:
+        type: str
+        required: true
+      nomad_oidc_auth_ca_cert_file:
+        type: path
+        required: true
+      nomad_oidc_auth_bootstrap_token_remote_file:
+        type: path
+        required: true
+      nomad_oidc_auth_keycloak_client_id:
+        type: str
+        required: true
+      nomad_oidc_auth_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      nomad_oidc_auth_oidc_discovery_url:
+        type: str
+        required: true
+      nomad_oidc_auth_allowed_redirect_uris:
+        type: list
+        elements: str
+        required: true
+      nomad_oidc_auth_admin_group:
+        type: str
+        required: true

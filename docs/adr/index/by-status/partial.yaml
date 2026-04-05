@@ -10,7 +10,7 @@ generated: '2026-04-05'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 7
+total_adrs: 8
 adrs:
   - adr: '0014'
     title: Operator Access To Private Guest Network
@@ -140,3 +140,21 @@ adrs:
     summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
     filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
     path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+  - adr: '0361'
+    title: Nomad OIDC Auth and Edge Publication
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-05'
+    concern: security
+    keywords:
+      - nomad
+      - oidc
+      - keycloak
+      - edge
+      - sso
+      - scheduler
+      - auth
+      - publication
+    summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
+    filename: 0361-nomad-oidc-edge-publication.md
+    path: docs/adr/0361-nomad-oidc-edge-publication.md

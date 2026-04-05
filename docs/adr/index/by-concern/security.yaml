@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-05'
 facet: concern
 concern: security
-total_adrs: 28
+total_adrs: 29
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -534,3 +534,21 @@ adrs:
     filename: 0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
     path: docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
     implemented_on: '2026-04-05'
+  - adr: '0361'
+    title: Nomad OIDC Auth and Edge Publication
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-05'
+    concern: security
+    keywords:
+      - nomad
+      - oidc
+      - keycloak
+      - edge
+      - sso
+      - scheduler
+      - auth
+      - publication
+    summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
+    filename: 0361-nomad-oidc-edge-publication.md
+    path: docs/adr/0361-nomad-oidc-edge-publication.md

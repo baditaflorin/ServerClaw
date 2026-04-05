@@ -1,0 +1,338 @@
+---
+# Purpose: Configure Nomad's native OIDC auth method with Keycloak SSO.
+# Use case: Allows platform admins to sign into the Nomad UI at scheduler.lv3.org via Keycloak OIDC.
+# Idempotency: All API calls use PUT or check-before-create patterns.
+# Dependencies: Nomad cluster must be running with ACL enabled; Keycloak client must exist.
+
+- name: Validate Nomad OIDC auth inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - nomad_oidc_auth_server_url
+      - nomad_oidc_auth_ca_cert_file
+      - nomad_oidc_auth_bootstrap_token_remote_file
+      - nomad_oidc_auth_keycloak_client_id
+      - nomad_oidc_auth_keycloak_client_secret_local_file
+      - nomad_oidc_auth_oidc_discovery_url
+      - nomad_oidc_auth_allowed_redirect_uris
+      - nomad_oidc_auth_admin_group
+    common_assert_vars_fail_msg: >-
+      nomad_oidc_auth requires the Nomad server URL, bootstrap token, Keycloak client ID and secret,
+      OIDC discovery URL, redirect URIs, and admin group name.
+
+- name: Read the Nomad bootstrap management token
+  ansible.builtin.slurp:
+    src: "{{ nomad_oidc_auth_bootstrap_token_remote_file }}"
+  register: nomad_oidc_auth_bootstrap_token_raw
+  no_log: true
+
+- name: Record the bootstrap token
+  ansible.builtin.set_fact:
+    nomad_oidc_auth_token: "{{ nomad_oidc_auth_bootstrap_token_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Read the Keycloak client secret from the control machine
+  ansible.builtin.set_fact:
+    nomad_oidc_auth_client_secret: "{{ lookup('ansible.builtin.file', nomad_oidc_auth_keycloak_client_secret_local_file) | trim }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+# --- ACL Policies ---
+
+- name: Create the platform-admin ACL policy
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/policy/{{ nomad_oidc_auth_admin_policy_name }}"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      Name: "{{ nomad_oidc_auth_admin_policy_name }}"
+      Description: Full access for platform admins authenticated via Keycloak OIDC.
+      Rules: |
+        namespace "*" {
+          policy = "write"
+        }
+        node {
+          policy = "write"
+        }
+        agent {
+          policy = "write"
+        }
+        operator {
+          policy = "write"
+        }
+        quota {
+          policy = "write"
+        }
+        host_volume "*" {
+          policy = "write"
+        }
+    validate_certs: false
+    status_code: [200]
+  register: nomad_oidc_auth_admin_policy_result
+
+- name: Create the platform-reader ACL policy
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/policy/{{ nomad_oidc_auth_reader_policy_name }}"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      Name: "{{ nomad_oidc_auth_reader_policy_name }}"
+      Description: Read-only access for OIDC-authenticated platform users.
+      Rules: |
+        namespace "*" {
+          policy = "read"
+        }
+        node {
+          policy = "read"
+        }
+        agent {
+          policy = "read"
+        }
+    validate_certs: false
+    status_code: [200]
+  register: nomad_oidc_auth_reader_policy_result
+
+# --- ACL Roles ---
+
+- name: Check whether the platform-admin ACL role exists
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/role/name/{{ nomad_oidc_auth_admin_role_name }}"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200, 404]
+  register: nomad_oidc_auth_admin_role_check
+
+- name: Create the platform-admin ACL role
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/role"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      Name: "{{ nomad_oidc_auth_admin_role_name }}"
+      Description: Role for OIDC-authenticated platform admins.
+      Policies:
+        - Name: "{{ nomad_oidc_auth_admin_policy_name }}"
+    validate_certs: false
+    status_code: [200]
+  when: nomad_oidc_auth_admin_role_check.status == 404
+
+- name: Update the platform-admin ACL role
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/role/{{ nomad_oidc_auth_admin_role_check.json.ID }}"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      ID: "{{ nomad_oidc_auth_admin_role_check.json.ID }}"
+      Name: "{{ nomad_oidc_auth_admin_role_name }}"
+      Description: Role for OIDC-authenticated platform admins.
+      Policies:
+        - Name: "{{ nomad_oidc_auth_admin_policy_name }}"
+    validate_certs: false
+    status_code: [200]
+  when: nomad_oidc_auth_admin_role_check.status == 200
+
+- name: Check whether the platform-reader ACL role exists
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/role/name/{{ nomad_oidc_auth_reader_role_name }}"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200, 404]
+  register: nomad_oidc_auth_reader_role_check
+
+- name: Create the platform-reader ACL role
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/role"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      Name: "{{ nomad_oidc_auth_reader_role_name }}"
+      Description: Role for OIDC-authenticated platform readers.
+      Policies:
+        - Name: "{{ nomad_oidc_auth_reader_policy_name }}"
+    validate_certs: false
+    status_code: [200]
+  when: nomad_oidc_auth_reader_role_check.status == 404
+
+- name: Update the platform-reader ACL role
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/role/{{ nomad_oidc_auth_reader_role_check.json.ID }}"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      ID: "{{ nomad_oidc_auth_reader_role_check.json.ID }}"
+      Name: "{{ nomad_oidc_auth_reader_role_name }}"
+      Description: Role for OIDC-authenticated platform readers.
+      Policies:
+        - Name: "{{ nomad_oidc_auth_reader_policy_name }}"
+    validate_certs: false
+    status_code: [200]
+  when: nomad_oidc_auth_reader_role_check.status == 200
+
+# --- OIDC Auth Method ---
+
+- name: Check whether the Keycloak OIDC auth method exists
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ nomad_oidc_auth_method_name }}"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200, 404]
+  register: nomad_oidc_auth_method_check
+
+- name: Create the Keycloak OIDC auth method
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      Name: "{{ nomad_oidc_auth_method_name }}"
+      Type: OIDC
+      TokenLocality: global
+      MaxTokenTTL: "{{ nomad_oidc_auth_max_token_ttl }}"
+      Default: true
+      Config:
+        OIDCDiscoveryURL: "{{ nomad_oidc_auth_oidc_discovery_url }}"
+        OIDCClientID: "{{ nomad_oidc_auth_keycloak_client_id }}"
+        OIDCClientSecret: "{{ nomad_oidc_auth_client_secret }}"
+        BoundAudiences:
+          - "{{ nomad_oidc_auth_keycloak_client_id }}"
+        AllowedRedirectURIs: "{{ nomad_oidc_auth_allowed_redirect_uris }}"
+        ListClaimMappings:
+          groups: groups
+        ClaimMappings:
+          preferred_username: username
+    validate_certs: false
+    status_code: [200]
+  when: nomad_oidc_auth_method_check.status == 404
+  no_log: true
+
+- name: Update the Keycloak OIDC auth method
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ nomad_oidc_auth_method_name }}"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      Name: "{{ nomad_oidc_auth_method_name }}"
+      Type: OIDC
+      TokenLocality: global
+      MaxTokenTTL: "{{ nomad_oidc_auth_max_token_ttl }}"
+      Default: true
+      Config:
+        OIDCDiscoveryURL: "{{ nomad_oidc_auth_oidc_discovery_url }}"
+        OIDCClientID: "{{ nomad_oidc_auth_keycloak_client_id }}"
+        OIDCClientSecret: "{{ nomad_oidc_auth_client_secret }}"
+        BoundAudiences:
+          - "{{ nomad_oidc_auth_keycloak_client_id }}"
+        AllowedRedirectURIs: "{{ nomad_oidc_auth_allowed_redirect_uris }}"
+        ListClaimMappings:
+          groups: groups
+        ClaimMappings:
+          preferred_username: username
+    validate_certs: false
+    status_code: [200]
+  when: nomad_oidc_auth_method_check.status == 200
+  no_log: true
+
+# --- Binding Rules ---
+
+- name: List existing OIDC binding rules
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/binding-rules"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200]
+  register: nomad_oidc_auth_binding_rules_list
+
+- name: Identify existing admin binding rule
+  ansible.builtin.set_fact:
+    nomad_oidc_auth_admin_binding_exists: >-
+      {{ nomad_oidc_auth_binding_rules_list.json | default([])
+         | selectattr('AuthMethod', 'equalto', nomad_oidc_auth_method_name)
+         | selectattr('BindName', 'equalto', nomad_oidc_auth_admin_role_name)
+         | list | length > 0 }}
+    nomad_oidc_auth_reader_binding_exists: >-
+      {{ nomad_oidc_auth_binding_rules_list.json | default([])
+         | selectattr('AuthMethod', 'equalto', nomad_oidc_auth_method_name)
+         | selectattr('BindName', 'equalto', nomad_oidc_auth_reader_role_name)
+         | list | length > 0 }}
+
+- name: Create the admin OIDC binding rule
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/binding-rule"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      AuthMethod: "{{ nomad_oidc_auth_method_name }}"
+      Description: "Map {{ nomad_oidc_auth_admin_group }} Keycloak group to platform-admin role."
+      BindType: role
+      BindName: "{{ nomad_oidc_auth_admin_role_name }}"
+      Selector: "\"{{ nomad_oidc_auth_admin_group }}\" in list.groups"
+    validate_certs: false
+    status_code: [200]
+  when: not (nomad_oidc_auth_admin_binding_exists | bool)
+
+- name: Create the default reader OIDC binding rule
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/binding-rule"
+    method: POST
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    body_format: json
+    body:
+      AuthMethod: "{{ nomad_oidc_auth_method_name }}"
+      Description: Default read-only role for any OIDC-authenticated user.
+      BindType: role
+      BindName: "{{ nomad_oidc_auth_reader_role_name }}"
+      Selector: ""
+    validate_certs: false
+    status_code: [200]
+  when: not (nomad_oidc_auth_reader_binding_exists | bool)
+
+- name: Verify the OIDC auth method is configured
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ nomad_oidc_auth_method_name }}"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200]
+  register: nomad_oidc_auth_verify
+
+- name: Assert the OIDC auth method is active
+  ansible.builtin.assert:
+    that:
+      - nomad_oidc_auth_verify.status == 200
+      - nomad_oidc_auth_verify.json.Name == nomad_oidc_auth_method_name
+      - nomad_oidc_auth_verify.json.Type == "OIDC"
+      - nomad_oidc_auth_verify.json.Default | bool
+    fail_msg: >-
+      The Nomad OIDC auth method '{{ nomad_oidc_auth_method_name }}' was not found or is not configured
+      as the default auth method. Users will not see the OIDC login button in the Nomad UI.
