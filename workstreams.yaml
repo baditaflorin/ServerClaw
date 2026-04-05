@@ -1309,6 +1309,21 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/open-webui.env.j2
       - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
       mode: exclusive
+    - id: serverclaw_shared_generated_contract
+      paths:
+      - workstreams.yaml
+      - workstreams/active/ws-0254-serverclaw-runtime-fix.yaml
+      - build/platform-manifest.json
+      - changelog.md
+      - docs/adr/.index.yaml
+      - docs/adr/index/*
+      - docs/diagrams/*
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/*
+      - receipts/sbom/*
+      mode: shared_contract
+      contract: mainline-release-integration-v1
   ready_to_merge: true
   live_applied: true
   canonical_truth:
