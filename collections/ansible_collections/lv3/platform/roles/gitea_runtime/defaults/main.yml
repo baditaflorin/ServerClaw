@@ -41,7 +41,7 @@ gitea_container_name: gitea
 gitea_http_port: "{{ platform_service_topology | platform_service_port('gitea', 'internal') }}"
 gitea_host_proxy_port: "{{ platform_service_topology | platform_service_port('gitea', 'controller') }}"
 gitea_public_hostname: "{{ gitea_service_topology.public_hostname }}"
-gitea_root_url: "{{ gitea_service_topology.urls.public | default(gitea_controller_url) }}"
+gitea_root_url: "{{ gitea_service_topology.urls.public | default('https://' + gitea_public_hostname) }}"
 gitea_private_base_url: "{{ platform_service_topology | platform_service_url('gitea', 'internal') }}"
 gitea_controller_url: "{{ platform_service_topology | platform_service_url('gitea', 'controller') }}"
 gitea_database_name: gitea
@@ -51,8 +51,8 @@ gitea_database_port: 5432
 gitea_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/database-password.txt
 gitea_oidc_client_id: gitea-oauth
 gitea_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/gitea-client-secret.txt
-gitea_oidc_discovery_url: "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
-gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"
+gitea_oidc_discovery_url: "{{ gitea_keycloak_service_topology.urls.public }}/realms/lv3/.well-known/openid-configuration"
+gitea_oidc_internal_discovery_url: "{{ gitea_keycloak_service_topology.urls.internal }}/realms/lv3/.well-known/openid-configuration"
 gitea_oidc_required_claim_name: groups
 gitea_oidc_required_claim_value: lv3-platform-admins
 gitea_minio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('minio') }}"

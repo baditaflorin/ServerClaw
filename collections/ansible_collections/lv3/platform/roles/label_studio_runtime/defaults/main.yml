@@ -52,19 +52,24 @@ label_studio_projects:
     label_config: |-
       <View>
         <Header value="Langfuse Trace Review"/>
+        <HyperText name="trace_link" value="$trace_url" inline="true"/>
+        <Header value="Agent Input (Prompt)"/>
         <Text name="prompt" value="$prompt"/>
+        <Header value="Agent Output (Response)"/>
         <Text name="response" value="$response"/>
+        <Header value="Quality"/>
         <Choices name="quality" toName="response" choice="single-radio" showInline="true">
           <Choice value="accept"/>
           <Choice value="needs_follow_up"/>
           <Choice value="reject"/>
         </Choices>
+        <Header value="Safety"/>
         <Choices name="safety" toName="response" choice="single-radio" showInline="true">
           <Choice value="safe"/>
           <Choice value="unsafe"/>
           <Choice value="uncertain"/>
         </Choices>
-        <TextArea name="notes" toName="response" editable="true" maxSubmissions="1" placeholder="Annotation notes"/>
+        <TextArea name="notes" toName="response" editable="true" maxSubmissions="1" placeholder="Annotation notes — reason for rejection, follow-up action, etc."/>
       </View>
   - id: rag_relevance_review
     title: RAG Relevance Review

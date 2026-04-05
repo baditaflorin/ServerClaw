@@ -4,6 +4,10 @@
     {
       "id": "n8n:incident-enrichment",
       "description": "Repo-managed n8n flow used for bounded incident enrichment and webhook-driven case context."
+    },
+    {
+      "id": "label-studio:human-review-queue",
+      "description": "Label Studio annotation queue for human review of agent decisions. Agents submit tasks via the human-review-queue skill; operators annotate at https://annotate.lv3.org."
     }
   ],
   "browser_refs": [

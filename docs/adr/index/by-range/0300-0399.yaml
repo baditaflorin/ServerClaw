@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 50
+total_adrs: 51
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1006,6 +1006,24 @@ adrs:
     path: docs/adr/0345-layered-operator-tool-separation.md
     implemented_in_repo_version: 0.178.5
     implemented_on: '2026-04-04'
+  - adr: '0346'
+    title: Centralized Port Registry
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-05'
+    concern: platform
+    keywords:
+      - platform
+      - ports
+      - configuration
+      - dry
+      - contracts
+      - centralized
+      - port
+      - registry
+    summary: 'A port is "platform-managed" if it is:'
+    filename: 0346-centralized-port-registry.md
+    path: docs/adr/0346-centralized-port-registry.md
   - adr: '0346'
     title: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
     status: Accepted

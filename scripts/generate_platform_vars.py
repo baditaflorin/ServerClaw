@@ -125,7 +125,8 @@ PORT_KEYS = (
     "tesseract_ocr_port",
     "headscale_http_port",
     "vaultwarden_https_port",
-    "headscale_http_port",
+    "keycloak_internal_http_port",
+    "mail_platform_internal_submission_port",
 )
 
 MANAGEMENT_IPV4_TOKEN = "{{ management_ipv4 }}"
@@ -481,10 +482,7 @@ def build_service_urls(
     public_hostname = service.get("public_hostname")
     console_public_hostname = service.get("console_public_hostname")
     if public_hostname:
-        if service_id == "gitea":
-            urls["public"] = service_url("http", public_hostname, ports["gitea_host_proxy_port"])
-        else:
-            urls["public"] = f"https://{public_hostname}"
+        urls["public"] = f"https://{public_hostname}"
 
     if service_id == "alertmanager":
         urls["internal"] = service_url("http", private_ip, ports["alertmanager_port"])
@@ -506,8 +504,8 @@ def build_service_urls(
         urls["internal"] = service_url("http", private_ip, extract_port(service["edge"]["upstream"], "edge.upstream"))
         port_map["internal"] = extract_port(service["edge"]["upstream"], "edge.upstream")
     elif service_id == "keycloak":
-        urls["internal"] = service_url("http", private_ip, extract_port(service["edge"]["upstream"], "edge.upstream"))
-        port_map["internal"] = extract_port(service["edge"]["upstream"], "edge.upstream")
+        urls["internal"] = service_url("http", private_ip, ports["keycloak_internal_http_port"])
+        port_map["internal"] = ports["keycloak_internal_http_port"]
     elif service_id == "mail_platform":
         urls["private_api"] = require_string(
             stack["desired_state"]["mail"]["api_private_url"],
@@ -560,6 +558,9 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["gitea_host_proxy_port"])
         port_map["internal"] = ports["gitea_http_port"]
         port_map["controller"] = ports["gitea_host_proxy_port"]
+    elif service_id == "keycloak":
+        urls["internal"] = service_url("http", private_ip, ports["keycloak_internal_http_port"])
+        port_map["internal"] = ports["keycloak_internal_http_port"]
     elif service_id == "netbox":
         urls["internal"] = service_url("http", private_ip, ports["netbox_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
@@ -950,6 +951,31 @@ def build_platform_session_authority(service_topology: dict[str, Any]) -> dict[s
     }
 
 
+def _assert_no_host_proxy_port_collisions(resolved_ports: dict[str, int]) -> None:
+    """Fail if any two _host_proxy_port keys share the same port number.
+
+    All host-proxy ports bind on the same controller host interface, so a
+    collision causes a silent service outage rather than a startup error.
+    """
+    proxy_ports: dict[int, str] = {}
+    collisions: list[str] = []
+    for key, value in resolved_ports.items():
+        if not key.endswith("_host_proxy_port"):
+            continue
+        if value in proxy_ports:
+            collisions.append(
+                f"  port {value}: {proxy_ports[value]!r} and {key!r}"
+            )
+        else:
+            proxy_ports[value] = key
+    if collisions:
+        raise ValueError(
+            "Duplicate _host_proxy_port values found in platform_port_assignments "
+            "(all host-proxy ports share one controller interface):\n"
+            + "\n".join(collisions)
+        )
+
+
 def build_platform_vars(
     stack: dict[str, Any] | None = None,
     host_vars: dict[str, Any] | None = None,
@@ -959,6 +985,7 @@ def build_platform_vars(
 
     ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
     resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+    _assert_no_host_proxy_port_collisions(resolved_ports)
     guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
     service_classification_by_id = load_service_classification_map()
     service_topology = build_service_topology(

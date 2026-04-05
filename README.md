@@ -46,8 +46,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.6` |
-| Platform version | `0.130.100` |
+| Repository version | `0.178.7` |
+| Platform version | `0.130.98` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -57,7 +57,7 @@ rewriting one operator's workstation paths.
 | Field | Value |
 | --- | --- |
 | Managed guest count | 13 |
-| Running guest count | 12 |
+| Running guest count | 10 |
 | Template VM present | `true` |
 | Declared services | 72 |
 | Publicly published services | 45 |
@@ -173,8 +173,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.6` |
-| Platform version | `0.130.100` |
+| Repository version | `0.178.7` |
+| Platform version | `0.130.98` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

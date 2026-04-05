@@ -1856,7 +1856,7 @@
           "service_id": "homepage",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:9080",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}",
           "target_port": 443
         }
       },
@@ -1896,8 +1896,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:9080",
-          "root_proxy_path": "/homepage"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3326,7 +3325,7 @@
           "service_id": "keycloak",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:8091",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}",
           "target_port": 443
         }
       },
@@ -3366,7 +3365,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:8091"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
         },
         "tls": {
           "provider": "letsencrypt",

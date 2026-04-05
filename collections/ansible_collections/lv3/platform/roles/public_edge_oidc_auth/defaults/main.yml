@@ -13,7 +13,7 @@ public_edge_oidc_auth_client_id: ops-portal-oauth
 public_edge_oidc_auth_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/ops-portal-client-secret.txt
 public_edge_oidc_auth_issuer_url: https://sso.lv3.org/realms/lv3
 public_edge_oidc_auth_public_login_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth
-public_edge_oidc_auth_internal_base_url: "http://{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.private_ip }}:8091"
+public_edge_oidc_auth_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('keycloak', 'internal') }}"
 public_edge_oidc_auth_redirect_url: https://ops.lv3.org/oauth2/callback
 public_edge_oidc_auth_allowed_groups:
   - /lv3-platform-admins

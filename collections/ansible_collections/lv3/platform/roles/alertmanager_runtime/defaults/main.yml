@@ -5,8 +5,8 @@ alertmanager_runtime_env_file: /etc/default/prometheus-alertmanager
 alertmanager_runtime_config_template: "{{ inventory_dir | dirname }}/config/alertmanager/alertmanager.yml"
 alertmanager_runtime_config_file: /etc/alertmanager/alertmanager.yml
 alertmanager_runtime_data_dir: /var/lib/prometheus/alertmanager
-alertmanager_runtime_port: 9093
-alertmanager_runtime_url: http://127.0.0.1:9093
+alertmanager_runtime_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.alertmanager_port }}"
+alertmanager_runtime_url: "http://127.0.0.1:{{ alertmanager_runtime_port }}"
 alertmanager_runtime_rules_dir: /etc/prometheus/rules
 alertmanager_runtime_platform_rules_source: "{{ inventory_dir | dirname }}/config/alertmanager/rules/platform.yml"
 alertmanager_runtime_ntfy_username: alertmanager

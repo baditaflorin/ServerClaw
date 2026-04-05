@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.6
-platform_version: 0.130.100
+repo_version: 0.178.7
+platform_version: 0.130.98
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -77,7 +77,6 @@ live_apply_evidence:
     ops_portal: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
-    runbook_task_reentry: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
@@ -175,6 +174,7 @@ live_apply_evidence:
     fork_first_workstream_metadata: 2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply
     private_overlay_contract: 2026-04-04-adr-0333-private-overlay-mainline-live-apply
     reference_deployment_samples: 2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply
+    runbook_task_reentry: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     public_github_readiness: 2026-04-04-adr-0330-public-github-readiness-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
@@ -689,11 +689,11 @@ observed_state:
       - vmid: 191
         name: runtime-general-lv3
         ipv4: 10.10.10.91
-        running: true
+        running: false
       - vmid: 192
         name: runtime-control-lv3
         ipv4: 10.10.10.92
-        running: true
+        running: false
     access:
       ssh_proxyjump_via_proxmox_host_working: true
   monitoring:
@@ -846,7 +846,7 @@ observed_state:
     governed_wrapper_verified: true
     system_status_version: 2.39.1
   step_ca:
-    runtime_vm: 10.10.10.92
+    runtime_vm: 10.10.10.20
     api_port: 9000
     host_tailscale_proxy_url: https://100.64.0.1:9443
     container_running: true
@@ -868,7 +868,7 @@ observed_state:
       - services
       - hosts
   openbao:
-    runtime_vm: 10.10.10.92
+    runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
     raft_storage: true
     host_tailscale_proxy_url: https://100.64.0.1:8200
@@ -893,10 +893,10 @@ observed_state:
       - agents/controller/monitoring
       - services/mail-platform/runtime
   keycloak:
-    runtime_vm: 10.10.10.92
+    runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
     public_url: https://sso.lv3.org
-    internal_http_url: http://10.10.10.92:8091
+    internal_http_url: http://10.10.10.20:8091
     realm: lv3
     container_running: true
     public_discovery_verified: true
@@ -1189,8 +1189,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.6
+    current: 0.178.7
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.100
+    current: 0.130.98
     meaning: intended platform release for the actual server configuration
