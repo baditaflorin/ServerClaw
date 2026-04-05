@@ -552,6 +552,15 @@
       "adr": "0196"
     },
     {
+      "id": "repowise",
+      "service": "repowise",
+      "name": "Repowise Semantic Code Search",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0346"
+    },
+    {
       "id": "searxng",
       "service": "searxng",
       "name": "SearXNG",
