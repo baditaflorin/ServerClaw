@@ -1,4 +1,5 @@
 id: ws-realtime-dynamic-children
+adr: '0196'
 title: Auto-discover all production hosts as Netdata streaming children
 status: in_progress
 owner: claude
@@ -11,6 +12,8 @@ shared_surfaces:
 - workstreams.yaml
 - workstreams/active/ws-realtime-dynamic-children.yaml
 - docs/workstreams/ws-realtime-dynamic-children.md
+- build/platform-manifest.json
+- docs/site-generated/architecture/dependency-graph.md
 - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
 - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
 ownership_manifest:
@@ -24,11 +27,21 @@ ownership_manifest:
     paths:
     - workstreams/active/ws-realtime-dynamic-children.yaml
     mode: exclusive
+  - id: ws_realtime_dynamic_children_doc
+    paths:
+    - docs/workstreams/ws-realtime-dynamic-children.md
+    mode: exclusive
   - id: ws_realtime_dynamic_children_netdata
     paths:
     - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
     - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
     mode: exclusive
+  - id: ws_realtime_dynamic_children_generated
+    paths:
+    - build/platform-manifest.json
+    - docs/site-generated/architecture/dependency-graph.md
+    mode: shared_contract
+    contract: ws-realtime-dynamic-children-generated-v1
 canonical_truth:
   changelog_entry: replaces the static Netdata child host list with a dynamic inventory-group
     expression so all production hosts stream to realtime.lv3.org automatically
