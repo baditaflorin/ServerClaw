@@ -999,6 +999,23 @@
   failed_when: false
   when: keycloak_mail_platform_submission_recovery_enabled
 
+- name: Remove the mail-platform compose network if its labels are stale before relay recovery
+  ansible.builtin.shell: |
+    net="{{ keycloak_mail_platform_docker_network_name }}"
+    if docker network inspect "$net" >/dev/null 2>&1; then
+      label="$(docker network inspect "$net" --format '{{ "{{" }}index .Labels "com.docker.compose.network"{{ "}}" }}')"
+      if [ "$label" != "default" ]; then
+        docker network rm "$net" && echo changed || true
+      fi
+    fi
+  args:
+    executable: /bin/bash
+  register: keycloak_mail_platform_network_label_cleanup
+  changed_when: "'changed' in keycloak_mail_platform_network_label_cleanup.stdout"
+  when:
+    - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_submission_host_lookup_initial.rc != 0
+
 - name: Recover the internal mail-platform submission relay before Keycloak SMTP verification
   ansible.builtin.command:
     argv:
