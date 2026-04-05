@@ -8,7 +8,7 @@
 schema_version: 2
 generated: '2026-04-05'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 380
+total_adrs: 382
 adr_number_range:
   first: '0001'
   last: 0358
@@ -18,9 +18,9 @@ implementation_status_summary:
   Partial: 7
   Not Implemented: 39
   Deprecated: 1
-  Accepted: 1
+  Accepted: 3
 decision_status_summary:
-  Accepted: 324
+  Accepted: 326
   Proposed: 4
   Deprecated: 2
   Implemented: 50
@@ -43,7 +43,7 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 63
+      count: 65
       first_adr: '0300'
       last_adr: 0358
   by_concern:
@@ -100,7 +100,7 @@ facets:
       count: 3
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 35
+      count: 37
   by_status:
     - implementation_status: Implemented
       slug: implemented
@@ -121,7 +121,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 1
+      count: 3
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0

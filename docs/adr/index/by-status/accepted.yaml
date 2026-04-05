@@ -10,7 +10,7 @@ generated: '2026-04-05'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 1
+total_adrs: 3
 adrs:
   - adr: '0346'
     title: Centralized Port Registry
@@ -30,3 +30,41 @@ adrs:
     summary: 'A port is "platform-managed" if it is:'
     filename: 0346-centralized-port-registry.md
     path: docs/adr/0346-centralized-port-registry.md
+  - adr: '0346'
+    title: PostgreSQL Domain Clustering
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - postgres
+      - infrastructure
+      - vm-separation
+      - reliability
+      - blast-radius
+      - postgresql
+      - domain
+      - clustering
+    summary: Split the single PostgreSQL cluster into three purpose-specific clusters,
+    filename: 0346-postgresql-domain-clustering.md
+    path: docs/adr/0346-postgresql-domain-clustering.md
+    implemented_in_repo_version: 0.179.0
+  - adr: '0347'
+    title: Docker Runtime Workload Split
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-04'
+    concern: vm-topology
+    keywords:
+      - infrastructure
+      - vm-separation
+      - reliability
+      - blast-radius
+      - docker
+      - runtime
+      - workload
+      - split
+    summary: Split docker-runtime-lv3 into three purpose-scoped VMs aligned to workload
+    filename: 0347-docker-runtime-workload-split.md
+    path: docs/adr/0347-docker-runtime-workload-split.md
+    implemented_in_repo_version: 0.179.0
