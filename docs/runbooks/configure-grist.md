@@ -133,6 +133,52 @@ https://sso.lv3.org/realms/lv3` and `loginMiddlewareComment: oidc`.
 - Grist uses the named Keycloak operator email as the repo-managed first-admin path.
 - Do not store platform-authoritative host, network, or release truth only inside Grist; continue to keep canonical platform state in repo-managed files and governed systems such as NetBox or PostgreSQL.
 - Treat `.local/grist/` and `.local/keycloak/grist-client-secret.txt` as sensitive controller-only material.
-- Keep `grist.lv3.org/status` publicly reachable through the shared edge for health verification, but treat document routes as authenticated operator surfaces.
+- Keep `grist.lv3.org/status` publicly reachable through the shared edge for health verification.
+- Document routes require authentication for the org workspace; individual documents that the owner marks as public are reachable without login via the share link.
 - If the first publication run fails before Hetzner DNS state is observable, confirm `grist.lv3.org` resolves to `65.108.75.123` and rerun the scoped playbook; the DNS and edge publication path is idempotent once the record exists.
 - If Grist ever serves the blocked auth page with `No login system is configured`, rerun the repo-managed play first. The current role is expected to recover that startup race automatically by rechecking Keycloak discovery and force-recreating only the Grist container.
+- When adding a new user to the `lv3` org, the recommended path is through the Grist UI (Admin panel → Users). Direct SQLite edits to `home.sqlite3` are a break-glass measure only and must be followed by a managed live-apply to restore idempotent state.
+- Always use `docker compose up -d --force-recreate` to apply env file changes. `docker compose restart` reuses the cached container environment and will not pick up changes made to `grist.env`.
+
+## Postmortem: 2026-04-05 Grist SSO incident
+
+### Timeline
+
+| UTC | Event |
+|-----|-------|
+| ~11:30 | Grist at `grist.lv3.org` returns "Something went wrong / There was an unknown error" |
+| ~11:45 | Root cause identified: `grist.env` was correct but the container had been running for 19+ hours without picking up OIDC env. Container restart resolved `No login system is configured` |
+| ~12:00 | Second issue: user `busui.matei1994@gmail.com` receives "Access denied". Fix: direct SQLite `INSERT INTO group_users` to add user to the `lv3` org editors group |
+| ~12:15 | Third issue: JS error `Cannot figure out what organization the URL is for`. Added `GRIST_SERVE_SAME_ORIGIN=true` to template and env. Error persists |
+| ~12:30 | Root cause isolated: NGINX CSP header `script-src 'self'` blocks Grist's inline `<script>window.gristConfig = {...}</script>`. Without gristConfig, client-side URL→org resolution fails before login even starts |
+| ~12:45 | Added `grist.lv3.org` CSP override to `nginx_edge_publication/defaults/main.yml` with `script-src 'self' 'unsafe-inline'` |
+| ~13:00 | Discovered `nginx_edge_publication` preliminary render fails with `public_edge_site_tls_materials is undefined`. Added `{}` default to role defaults |
+| ~13:10 | Discovered `public-edge.yml` playbook fails on missing `build/changelog-portal/` dir (worktree has no built portal). Bypassed with `-e public_edge_sync_generated_static_dirs=false` |
+| ~13:15 | Public-edge playbook succeeds (ok=87 changed=4). Grist loads and SSO login works |
+| ~13:30 | Separate request: public shared documents blocked by `GRIST_FORCE_LOGIN=true`. Set to `false` with `GRIST_ANONYMOUS_PLAYGROUND=false`. Applied via `docker compose up -d --force-recreate` |
+
+### Root causes
+
+1. **Grist's inline bootstrap script blocked by default NGINX CSP.** The platform default `script-src 'self'` is correct for most services but incompatible with Grist's architecture. Grist injects org and config metadata as an inline script on every HTML response. A per-service CSP override for `grist.lv3.org` was missing from `nginx_edge_publication/defaults/main.yml`.
+
+2. **`GRIST_FORCE_LOGIN=true` default too restrictive for public document sharing.** Setting force-login blocks even documents that the document owner has explicitly granted public access to. The correct posture is `GRIST_FORCE_LOGIN=false` + `GRIST_ANONYMOUS_PLAYGROUND=false`: public doc links work, but the org workspace and doc creation remain authenticated.
+
+3. **Missing `public_edge_site_tls_materials` default caused preliminary render failure.** The `nginx_edge_publication` role runs a preliminary NGINX config render before Let's Encrypt certificate issuance, then a final render after TLS materials are collected. The template referenced `public_edge_site_tls_materials` without a default, making the preliminary render always fail on a first run or after a cert refresh.
+
+4. **`docker compose restart` does not re-read env files.** The stale OIDC config in the long-running container was not a config drift issue — the file was correct — but the container had not been recreated since before the env was written. This delayed diagnosis by hiding the true state.
+
+### Fixes applied
+
+| File | Change |
+|------|--------|
+| `roles/nginx_edge_publication/defaults/main.yml` | Added `grist.lv3.org` CSP override: `script-src 'self' 'unsafe-inline'`, `connect-src` includes `https://sso.lv3.org` |
+| `roles/nginx_edge_publication/defaults/main.yml` | Added `public_edge_site_tls_materials: {}` default |
+| `roles/grist_runtime/templates/grist.env.j2` | Added `GRIST_SERVE_SAME_ORIGIN=true`, `GRIST_ANONYMOUS_PLAYGROUND` |
+| `roles/grist_runtime/defaults/main.yml` | Changed `grist_force_login: true` → `false`; added `grist_anonymous_playground: false` |
+
+### Action items
+
+- [ ] Run `make live-apply-service service=grist` from `main` once the branch merges to encode all changes in the canonical truth surface
+- [ ] Run `make live-apply-service service=public-edge` from `main` to push the CSP override and TLS default through the governed path
+- [ ] Add CSP validation for `'unsafe-inline'` requirement to the Grist role tests
+- [ ] Document the `--force-recreate` requirement in the ansible role's `argument_specs.yml` usage notes
