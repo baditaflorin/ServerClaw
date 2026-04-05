@@ -4,6 +4,7 @@ title: Repowise — local semantic code search over the git repo (Ollama + Qdran
 status: ready_for_merge
 owner: claude
 branch: claude/affectionate-galileo
+doc: docs/adr/0346-repowise-semantic-search.md
 worktree_path: .claude/worktrees/affectionate-galileo
 depends_on:
 - adr-0198-qdrant-vector-search-semantic-rag
