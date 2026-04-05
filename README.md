@@ -46,7 +46,7 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.17` |
+| Repository version | `0.178.18` |
 | Platform version | `0.131.0` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -173,7 +173,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.17` |
+| Repository version | `0.178.18` |
 | Platform version | `0.131.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -194,11 +194,12 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 298 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 299 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
+| `0328` | Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse | `merged` | [0093-interactive-ops-portal.md](docs/adr/0093-interactive-ops-portal.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -222,7 +223,6 @@ Showing 25 of 298 merged or live-applied workstreams. Full history: [merged work
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 | `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
 | `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](docs/workstreams/adr-0166-canonical-error-response-format.md) |
-| `0165` | Workflow idempotency keys and double-execution prevention | `live_applied` | [adr-0165-workflow-idempotency.md](docs/workstreams/adr-0165-workflow-idempotency.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

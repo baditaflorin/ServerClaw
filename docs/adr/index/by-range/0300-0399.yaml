@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 70
+total_adrs: 71
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1086,6 +1086,24 @@ adrs:
     filename: 0346-postgresql-domain-clustering.md
     path: docs/adr/0346-postgresql-domain-clustering.md
     implemented_in_repo_version: 0.179.0
+  - adr: '0346'
+    title: '— Repowise: local semantic code search over the git repo'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: documentation
+    keywords:
+      - repowise
+      - local
+      - semantic
+      - code
+      - search
+      - over
+      - git
+      - repo
+    summary: 'Deploy repowise — a local semantic code search service — using:'
+    filename: 0346-repowise-semantic-search.md
+    path: docs/adr/0346-repowise-semantic-search.md
   - adr: '0347'
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted
