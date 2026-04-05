@@ -31,9 +31,9 @@ Retrieves the tail of stdout/stderr logs for a named container.
 
 ## Canonical Sources
 
-- tool registry: [config/agent-tool-registry.json](../../../config/agent-tool-registry.json)
-- handler: [scripts/agent_tool_registry.py](../../../scripts/agent_tool_registry.py) (`tool_list_containers`, `tool_get_container_logs`)
-- Portainer client: [scripts/portainer_tool.py](../../../scripts/portainer_tool.py)
+- tool registry: [config/agent-tool-registry.json](../../config/agent-tool-registry.json)
+- handler: [scripts/agent_tool_registry.py](../../scripts/agent_tool_registry.py) (`tool_list_containers`, `tool_get_container_logs`)
+- Portainer client: [scripts/portainer_tool.py](../../scripts/portainer_tool.py)
 - API gateway env vars: `LV3_PORTAINER_BASE_URL`, `LV3_PORTAINER_USERNAME`, `LV3_PORTAINER_PASSWORD`, `LV3_PORTAINER_ENDPOINT_ID`
 
 ## Prerequisites
