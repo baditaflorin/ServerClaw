@@ -504,8 +504,8 @@ def build_service_urls(
         urls["internal"] = service_url("http", private_ip, extract_port(service["edge"]["upstream"], "edge.upstream"))
         port_map["internal"] = extract_port(service["edge"]["upstream"], "edge.upstream")
     elif service_id == "keycloak":
-        urls["internal"] = service_url("http", private_ip, extract_port(service["edge"]["upstream"], "edge.upstream"))
-        port_map["internal"] = extract_port(service["edge"]["upstream"], "edge.upstream")
+        urls["internal"] = service_url("http", private_ip, ports["keycloak_internal_http_port"])
+        port_map["internal"] = ports["keycloak_internal_http_port"]
     elif service_id == "mail_platform":
         urls["private_api"] = require_string(
             stack["desired_state"]["mail"]["api_private_url"],

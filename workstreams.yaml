@@ -78,7 +78,7 @@ workstreams:
       - README.md
       - VERSION
       - changelog.md
-      - docs/release-notes/0.178.4.md
+      - docs/release-notes/0.178.7.md
       - docs/release-notes/README.md
       - docs/release-notes/index/*.md
       mode: shared_contract
