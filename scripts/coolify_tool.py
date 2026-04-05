@@ -24,7 +24,7 @@ from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, proxmox_guest_exec
 from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 try:
@@ -33,10 +33,14 @@ except ImportError:
     load_operator_auth = None  # type: ignore[assignment]
 
 try:
-    from proxmox_tool import ProxmoxClient, load_auth as load_proxmox_auth  # type: ignore[import]
+    from controller_automation_toolkit import load_proxmox_auth  # type: ignore[import]
+except ImportError:
+    load_proxmox_auth = None  # type: ignore[assignment]
+
+try:
+    from proxmox_tool import ProxmoxClient  # type: ignore[import]
 except ImportError:
     ProxmoxClient = None  # type: ignore[assignment]
-    load_proxmox_auth = None  # type: ignore[assignment]
 
 
 DEFAULT_AUTH_FILE = repo_path(".local", "coolify", "admin-auth.json")
@@ -1065,10 +1069,18 @@ def _safe_identifier(value: str, field: str) -> str:
 
 
 def _make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> "ProxmoxClient":
-    """Build a ProxmoxClient from the given auth file."""
-    if ProxmoxClient is None or load_proxmox_auth is None:
+    """Build a ProxmoxClient from the given auth file.
+
+    Uses load_proxmox_auth from controller_automation_toolkit (ADR 0343).
+    Falls back to the local implementation in proxmox_tool if the toolkit is unavailable.
+    """
+    if ProxmoxClient is None:
         raise ImportError(
             "proxmox_tool.py is required for guest-exec operations but could not be imported"
+        )
+    if load_proxmox_auth is None:
+        raise ImportError(
+            "controller_automation_toolkit is required for load_proxmox_auth but could not be imported"
         )
     auth = load_proxmox_auth(proxmox_auth_file)
     return ProxmoxClient(
@@ -1092,7 +1104,8 @@ def _psql_query(
     Uses psql -t -A (tuple-only, unaligned) for clean programmatic output.
     Raises RuntimeError if the command exits non-zero.
     """
-    exit_code, stdout, stderr = client.guest_exec(
+    exit_code, stdout, stderr = proxmox_guest_exec(
+        client,
         vmid,
         ["docker", "exec", container, "psql", "-U", db_user, "-t", "-A", "-c", sql],
         timeout=timeout,
@@ -1117,7 +1130,8 @@ def command_db_exec(args: argparse.Namespace) -> int:
     container = args.container or "coolify-db"
     db_user = args.db_user or "coolify"
 
-    exit_code, stdout, stderr = client.guest_exec(
+    exit_code, stdout, stderr = proxmox_guest_exec(
+        client,
         vmid,
         ["docker", "exec", container, "psql", "-U", db_user, "-c", args.sql],
         timeout=args.timeout,
@@ -1149,7 +1163,8 @@ def command_clear_cache(args: argparse.Namespace) -> int:
     container = args.coolify_container or "coolify"
 
     script = "cd /var/www/html && php artisan cache:clear && php artisan config:clear"
-    exit_code, stdout, stderr = client.guest_exec(
+    exit_code, stdout, stderr = proxmox_guest_exec(
+        client,
         vmid,
         ["docker", "exec", container, "bash", "-c", script],
         timeout=60,
@@ -1261,7 +1276,8 @@ def command_migrate_apps(args: argparse.Namespace) -> int:
         cache_script = (
             "cd /var/www/html && php artisan cache:clear && php artisan config:clear"
         )
-        cache_rc, _, cache_err = client.guest_exec(
+        cache_rc, _, cache_err = proxmox_guest_exec(
+            client,
             vmid,
             ["docker", "exec", app_container, "bash", "-c", cache_script],
             timeout=60,
@@ -1303,7 +1319,8 @@ def command_install_deploy_key(args: argparse.Namespace) -> int:
     pubkey = args.pubkey.strip()
 
     # Read current authorized_keys (create empty string if absent)
-    _, existing, _ = client.guest_exec(
+    _, existing, _ = proxmox_guest_exec(
+        client,
         vmid,
         ["bash", "-c", "cat /root/.ssh/authorized_keys 2>/dev/null || true"],
         timeout=15,
@@ -1326,8 +1343,8 @@ def command_install_deploy_key(args: argparse.Namespace) -> int:
         f"echo {shlex.quote(pubkey)} >> /root/.ssh/authorized_keys && "
         "chmod 600 /root/.ssh/authorized_keys"
     )
-    exit_code, _, stderr = client.guest_exec(
-        vmid, ["bash", "-c", script], timeout=15
+    exit_code, _, stderr = proxmox_guest_exec(
+        client, vmid, ["bash", "-c", script], timeout=15
     )
     if exit_code != 0:
         print(

@@ -261,10 +261,11 @@ def _resolve_topology(
     args: argparse.Namespace, auth: dict
 ) -> dict:
     """
-    Merge topology from three sources (lowest to highest priority):
+    Merge topology from four sources (lowest to highest priority):
       1. Hardcoded defaults
       2. auth file 'topology' key (if present — legacy single-env support)
-      3. topology file keyed by --env (if --topology-file is provided)
+      3. topology snapshot (ADR 0344) — auto-discovered from scripts/topology-snapshot.json,
+         or explicit --topology-file if given (preferred over old YAML format)
       4. Explicit CLI flags on args
 
     Returns a dict with the resolved topology values.
@@ -280,10 +281,29 @@ def _resolve_topology(
     # Layer 1: topology key embedded in auth file (backward compat)
     topo.update(auth.get("topology", {}))
 
-    # Layer 2: topology file
+    # Layer 2: topology snapshot (ADR 0344) — auto-discovered if no explicit file given
     topo_file = getattr(args, "topology_file", None)
     env = getattr(args, "env", "prod")
-    if topo_file:
+    snapshot_default = Path(__file__).parent / "topology-snapshot.json"
+    effective_snapshot = topo_file or (str(snapshot_default) if snapshot_default.exists() else None)
+    if effective_snapshot and load_topology_snapshot is not None:
+        snapshot_topo = load_topology_snapshot(effective_snapshot, env)
+        # Map snapshot VM entries to flat topology keys
+        vms = snapshot_topo.get("vms", {})
+        if "coolify-lv3" in vms:
+            topo["coolify_vmid"] = vms["coolify-lv3"].get("vmid", topo["coolify_vmid"])
+        if "coolify-apps-lv3" in vms:
+            topo["coolify_apps_vmid"] = vms["coolify-apps-lv3"].get("vmid", topo["coolify_apps_vmid"])
+        services = snapshot_topo.get("services", {})
+        if "coolify" in services:
+            svc = services["coolify"]
+            topo.setdefault("coolify_db_container", svc.get("db_container", topo["coolify_db_container"]))
+            topo.setdefault("coolify_db_user", svc.get("db_user", topo["coolify_db_user"]))
+            topo.setdefault("coolify_container", svc.get("app_container", topo["coolify_container"]))
+        if "api_url" in snapshot_topo and "api_url" not in auth:
+            topo["api_url"] = snapshot_topo["api_url"]
+    elif topo_file:
+        # Fallback: explicit topology-file in old YAML format
         topo.update(load_topology(topo_file, env))
 
     # Layer 3: explicit CLI overrides
@@ -448,7 +468,10 @@ def _add_topology_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--topology-file",
         metavar="FILE",
-        help="Path to topology YAML file (.local/proxmox-api/topology.yaml).",
+        help=(
+            "Path to a topology snapshot JSON (ADR 0344, preferred) or legacy YAML file. "
+            "If omitted, scripts/topology-snapshot.json is used automatically when present."
+        ),
     )
     parser.add_argument(
         "--env",
@@ -481,7 +504,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--topology-file",
         metavar="FILE",
-        help="Path to topology YAML file (.local/proxmox-api/topology.yaml).",
+        help=(
+            "Path to a topology snapshot JSON (ADR 0344, preferred) or legacy YAML file. "
+            "If omitted, scripts/topology-snapshot.json is used automatically when present."
+        ),
     )
     parser.add_argument(
         "--env",
