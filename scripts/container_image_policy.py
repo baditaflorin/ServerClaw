@@ -15,6 +15,11 @@ from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_list, require_mapping, require_str
+
 
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 IMAGE_SCAN_RECEIPTS_DIR = repo_path("receipts", "image-scans")
@@ -25,24 +30,6 @@ IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 ALLOWED_KINDS = {"runtime", "build_base"}
 ALLOWED_SCAN_STATUSES = {"pass_no_critical", "exception_open"}
 ALLOWED_SCANNERS = {"grype", "trivy"}
-
-
-def require_mapping(value: Any, path: str) -> dict:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def require_string_list(value: Any, path: str) -> list[str]:

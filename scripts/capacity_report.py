@@ -14,6 +14,12 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import REPO_ROOT, load_json, load_yaml
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_list, require_mapping, require_str
+
 from shared_policy_packs import load_shared_policy_packs
 
 
@@ -29,24 +35,6 @@ REQUESTER_CLASS_ALIASES = SHARED_POLICIES.requester_class_aliases
 PRIMARY_CLASS_FOR_REQUESTER = SHARED_POLICIES.primary_capacity_class_by_requester
 DECLARED_DRILL_BORROW_BY_REQUESTER = SHARED_POLICIES.declared_drill_borrow_by_requester
 BREAK_GLASS_BORROW_BY_REQUESTER = SHARED_POLICIES.break_glass_borrow_by_requester
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def require_number(value: Any, path: str, minimum: float | None = None) -> float:
