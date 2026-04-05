@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.7",
-  "platform_version": "0.130.98",
-  "generated_at": "2026-04-05T12:47:15Z",
-  "next_refresh_at": "2026-04-05T13:47:15Z",
+  "repo_version": "0.178.8",
+  "platform_version": "0.130.99",
+  "generated_at": "2026-04-05T13:18:43Z",
+  "next_refresh_at": "2026-04-05T14:18:43Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.6",
+    "last_version": "0.178.7",
     "deployed_at": "2026-04-05",
-    "summary": "implements ADR 0346 by establishing a centralized port registry, fixing the Gitea ROOT_URL bug that broke Keycloak SSO login (port 3009 leaked into public URL), adding keycloak_internal_http_port to platform_port_assignments, adding _host_proxy_port collision detection to the generator, and migrating 12 role defaults away from hardcoded platform port numbers",
-    "release_notes_url": "docs/release-notes/0.178.7.md"
+    "summary": "adds Dify SSO bootstrap (idempotent OIDC config via `scripts/dify_sso_bootstrap.py` wired into `dify_runtime` Ansible role) adds `list-containers` and `get-container-logs` agent tools backed by Portainer API (`scripts/portainer_tool.py`, `scripts/agent_tool_registry.py`)",
+    "release_notes_url": "docs/release-notes/0.178.8.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
