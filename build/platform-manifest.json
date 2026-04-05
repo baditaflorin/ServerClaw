@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.9",
-  "platform_version": "0.130.99",
-  "generated_at": "2026-04-05T16:29:54Z",
-  "next_refresh_at": "2026-04-05T17:29:54Z",
+  "repo_version": "0.178.10",
+  "platform_version": "0.131.0",
+  "generated_at": "2026-04-05T19:13:45Z",
+  "next_refresh_at": "2026-04-05T20:13:45Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6155,10 +6155,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.8",
+    "last_version": "0.178.9",
     "deployed_at": "2026-04-05",
-    "summary": "label_studio_runtime: add CSRF_TRUSTED_ORIGINS to env templates (fixes 403 on login behind oauth2_proxy) langfuse_runtime: set langfuse_disable_signup=false for automatic Keycloak SSO user provisioning; add extra_hosts hairpin NAT fix for sso.lv3.org in both langfuse-web and langfuse-worker",
-    "release_notes_url": "docs/release-notes/0.178.9.md"
+    "summary": "removed dead Plausible OIDC config (OIDC_DISCOVERY_URI, OIDC_CLIENT_SECRET, extra_hosts, /login redirect) \u2014 Plausible CE v3.x dropped community OIDC; auth is now exclusively via oauth2-proxy at the NGINX edge fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network",
+    "release_notes_url": "docs/release-notes/0.178.10.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
