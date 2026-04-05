@@ -715,18 +715,47 @@ def tool_dispatch_nomad_job(_tool: dict[str, Any], args: dict[str, Any]) -> dict
 
 
 # ---------------------------------------------------------------------------
+# Generic service auth helper (ADR 0362)
+# ---------------------------------------------------------------------------
+
+
+def _resolve_service_auth(service_name: str) -> dict[str, Any]:
+    """Discover credentials for a named service following the ADR 0362 convention.
+
+    Precedence:
+      1. LV3_{SERVICE}_AUTH_FILE env var (absolute path to auth JSON)
+      2. .local/{service}/admin-auth.json  (structured: base_url + api_token + extras)
+      3. .local/{service}/api-token.txt    (single token; base_url from JSON if present)
+    """
+    env_var = f"LV3_{service_name.upper()}_AUTH_FILE"
+    env_override = os.environ.get(env_var)
+    if env_override:
+        auth_path = Path(env_override)
+        if not auth_path.is_file():
+            raise RuntimeError(f"{env_var} points to missing file: {auth_path}")
+        return json.loads(auth_path.read_text())
+
+    admin_auth = REPO_ROOT / ".local" / service_name / "admin-auth.json"
+    if admin_auth.is_file():
+        return json.loads(admin_auth.read_text())
+
+    token_file = REPO_ROOT / ".local" / service_name / "api-token.txt"
+    if token_file.is_file():
+        return {"api_token": token_file.read_text().strip()}
+
+    raise RuntimeError(
+        f"No credentials found for service '{service_name}'. "
+        f"Expected {admin_auth} or {token_file}, or set {env_var}."
+    )
+
+
+# ---------------------------------------------------------------------------
 # Plane tools (ADR 0362 gateway pattern, ADR 0363)
 # ---------------------------------------------------------------------------
 
-DEFAULT_PLANE_AUTH_FILE: Final[Path] = REPO_ROOT / ".local" / "plane" / "admin-auth.json"
-PLANE_AUTH_FILE_ENV: Final[str] = "LV3_PLANE_AUTH_FILE"
-
 
 def _resolve_plane_auth() -> dict[str, Any]:
-    auth_path = Path(os.environ.get(PLANE_AUTH_FILE_ENV, str(DEFAULT_PLANE_AUTH_FILE)))
-    if not auth_path.is_file():
-        raise RuntimeError(f"Plane auth file not found at {auth_path}")
-    return json.loads(auth_path.read_text())
+    return _resolve_service_auth("plane")
 
 
 def _plane_client():  # type: ignore[return]
@@ -867,6 +896,95 @@ def tool_add_plane_comment(_tool: dict[str, Any], args: dict[str, Any]) -> dict[
     return {"id": comment.get("id", "")}
 
 
+# ---------------------------------------------------------------------------
+# Outline tools (ADR 0362 gateway pattern, ADR 0364)
+# ---------------------------------------------------------------------------
+
+
+def _outline_client():  # type: ignore[return]
+    from outline_client import OutlineClient  # lazy import
+
+    auth = _resolve_service_auth("outline")
+    base_url = auth.get("base_url", "https://wiki.lv3.org")
+    api_token = auth.get("api_token") or auth.get("token")
+    if not api_token:
+        raise RuntimeError("Outline auth missing 'api_token' field")
+    return OutlineClient(base_url=base_url, api_token=api_token)
+
+
+def tool_list_outline_collections(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client = _outline_client()
+    response = client.call("collections.list", {})
+    collections = [
+        {
+            "id": c.get("id", ""),
+            "name": c.get("name", ""),
+            "description": c.get("description", ""),
+            "documents_count": c.get("documentsCount", 0),
+        }
+        for c in response.get("data", [])
+    ]
+    return {"count": len(collections), "collections": collections}
+
+
+def tool_search_outline_documents(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    query = require_str(args.get("query"), "arguments.query")
+    client = _outline_client()
+    payload: dict[str, Any] = {"query": query, "limit": args.get("limit", 25)}
+    if "collection_id" in args:
+        payload["collectionId"] = args["collection_id"]
+    response = client.call("documents.search", payload)
+    results = [
+        {
+            "id": r.get("document", {}).get("id", ""),
+            "title": r.get("document", {}).get("title", ""),
+            "collection_id": r.get("document", {}).get("collectionId", ""),
+            "url": r.get("document", {}).get("url", ""),
+            "ranking": r.get("ranking"),
+        }
+        for r in response.get("data", [])
+    ]
+    return {"count": len(results), "query": query, "results": results}
+
+
+def tool_get_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    doc_id = require_str(args.get("document_id"), "arguments.document_id")
+    client = _outline_client()
+    response = client.call("documents.info", {"id": doc_id})
+    doc = response.get("data", {})
+    return {
+        "id": doc.get("id", ""),
+        "title": doc.get("title", ""),
+        "text": doc.get("text", ""),
+        "collection_id": doc.get("collectionId", ""),
+        "url": doc.get("url", ""),
+        "created_at": doc.get("createdAt", ""),
+        "updated_at": doc.get("updatedAt", ""),
+    }
+
+
+def tool_create_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    title = require_str(args.get("title"), "arguments.title")
+    collection_id = require_str(args.get("collection_id"), "arguments.collection_id")
+    client = _outline_client()
+    payload: dict[str, Any] = {
+        "title": title,
+        "collectionId": collection_id,
+        "text": args.get("text", ""),
+        "publish": args.get("publish", True),
+    }
+    if "parent_document_id" in args:
+        payload["parentDocumentId"] = args["parent_document_id"]
+    response = client.call("documents.create", payload)
+    doc = response.get("data", {})
+    return {
+        "id": doc.get("id", ""),
+        "title": doc.get("title", ""),
+        "url": doc.get("url", ""),
+        "collection_id": doc.get("collectionId", ""),
+    }
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -891,6 +1009,10 @@ HANDLERS: Final[dict[str, Any]] = {
     "create_plane_task": tool_create_plane_task,
     "update_plane_task": tool_update_plane_task,
     "add_plane_comment": tool_add_plane_comment,
+    "list_outline_collections": tool_list_outline_collections,
+    "search_outline_documents": tool_search_outline_documents,
+    "get_outline_document": tool_get_outline_document,
+    "create_outline_document": tool_create_outline_document,
 }
 
 

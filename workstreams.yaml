@@ -49,6 +49,29 @@ workstreams:
     automated remediation playbooks.
 
     '
+- id: ws-0364-outline-agent-tools
+  title: 'Outline agent tools: list/search/get/create documents (ADR 0362 + 0364)'
+  status: in_progress
+  owner: claude
+  branch: claude/implement-aw22-23
+  adr: '0364'
+  description: "Implements AW-22 and AW-23 from the Plane task board.\n\nAW-22: Generic\
+    \ _resolve_service_auth(service_name) helper\n- Adds shared credential discovery\
+    \ to scripts/agent_tool_registry.py\n- Refactors _resolve_plane_auth() to delegate\
+    \ to this helper\n- Enables Outline and future services to follow ADR 0362 without\
+    \ copy-paste\n\nAW-23: Four Outline agent tools\n- list-outline-collections (observe)\n\
+    - search-outline-documents (observe)\n- get-outline-document (observe)\n- create-outline-document\
+    \ (execute, approval_required: true)\n\nExisting client: scripts/outline_client.py\n\
+    Auth: .local/outline/admin-auth.json (needs fresh token \u2014 see ADR 0364)\n"
+  blocker: ".local/outline/api-token.txt has insufficient scope for search/get (only\
+    \ public\ncollections.list works without real auth). Operator needs to generate\
+    \ a fresh API\ntoken in Outline Settings \u2192 API \u2192 Personal access token\
+    \ and save to:\n  .local/outline/admin-auth.json:\n    { \"base_url\": \"https://wiki.lv3.org\"\
+    , \"api_token\": \"<token>\" }\n"
+  adr_refs:
+  - '0362'
+  - '0363'
+  - '0364'
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
@@ -1782,6 +1805,76 @@ workstreams:
       mode: shared_contract
       contract: discovery-artifacts-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
+- id: ws-0375-certificate-validation-codification
+  workstream_id: ws-0375
+  status: in_progress
+  priority: high
+  date_opened: '2026-04-06'
+  date_target_completion: '2026-04-13'
+  owner: platform-infrastructure
+  title: Certificate Validation and Concordance Enforcement (ADR 0375)
+  description: 'Implement automated certificate validation and concordance enforcement
+    per ADR 0101
+
+    and ADR 0273. Fixes hostname mismatch errors (ci.lv3.org, etc.) and codifies
+
+    certificate monitoring as part of the standard deployment workflow.
+
+    '
+  objectives:
+  - Implement certificate validator script for all edge-published domains
+  - Create Ansible playbooks for validation and automatic remediation
+  - Integrate with Uptime Kuma for continuous monitoring
+  - Fix immediate certificate issues (ci.lv3.org, bi.lv3.org, etc.)
+  - Create ADR 0375 documenting the implementation
+  - Integrate into pre-deployment checks and CI/CD gates
+  success_criteria:
+  - "All 53 edge-published domains show \u2713 Valid in certificate validator"
+  - No "CERT_MISMATCH" issues reported by validator
+  - Playbook fix-edge-certificate.yml successfully regenerates cert with all domains
+  - Uptime Kuma monitors created for all edge-published domains
+  - ADR 0375 committed and accepted
+  - Documentation complete (runbook, setup guide, quick reference)
+  artifacts:
+  - scripts/certificate_validator.py
+  - scripts/add-certificate-monitors-to-uptime-kuma.py
+  - playbooks/certificate-validation.yml
+  - playbooks/fix-edge-certificate.yml
+  - docs/adr/0361-certificate-validation-and-concordance-enforcement.md
+  - docs/runbooks/certificate-monitoring.md
+  - docs/certificate-monitoring-setup.md
+  - CERTIFICATE-MONITORING.md
+  - ACTION_PLAN.md
+  blockers: []
+  notes: 'Implements the missing validation layer from ADR 0101 and ADR 0273.
+
+
+    Recent operational issue: ci.lv3.org, bi.lv3.org, grist.lv3.org,
+
+    paperless.lv3.org, annotate.lv3.org, and ntfy.lv3.org all have
+
+    hostname mismatch errors because they are in subdomain-catalog.json
+
+    but missing from the NGINX edge certificate SANs.
+
+
+    This workstream provides:
+
+    1. Programmatic detection of such mismatches
+
+    2. Automated remediation via certificate regeneration
+
+    3. Continuous monitoring via Uptime Kuma
+
+    4. Documentation and runbooks
+
+    '
+  related_adrs:
+  - ADR 0101: Automated certificate lifecycle management
+  - ADR 0273: Public endpoint admission control
+  - ADR 0021: Public subdomain publication at NGINX edge
+  branch: claude/nervous-feistel
+  worktree: nervous-feistel
 - id: ws-0364-service-api-agent-tools
   title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
     0362 follow-up)'

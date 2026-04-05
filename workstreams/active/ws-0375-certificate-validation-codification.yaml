@@ -3,8 +3,9 @@
 # Codify certificate monitoring and validation as architectural requirement
 # Fix certificate hostname mismatch issues (ci.lv3.org, bi.lv3.org, etc.)
 
+id: ws-0375-certificate-validation-codification
 workstream_id: ws-0375
-status: in-progress
+status: in_progress
 priority: high
 date_opened: "2026-04-06"
 date_target_completion: "2026-04-13"

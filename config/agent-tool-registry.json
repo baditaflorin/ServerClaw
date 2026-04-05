@@ -1625,6 +1625,214 @@
         "kind": "handler",
         "handler": "add_plane_comment"
       }
+    },
+    {
+      "name": "list-outline-collections",
+      "title": "List Outline Collections",
+      "description": "List all document collections in the Outline wiki (wiki.lv3.org).",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "description": { "type": "string" },
+                "documents_count": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/collections.list",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_outline_collections"
+      }
+    },
+    {
+      "name": "search-outline-documents",
+      "title": "Search Outline Documents",
+      "description": "Full-text search across Outline wiki documents. Optionally scope to a collection.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query string."
+          },
+          "collection_id": {
+            "type": "string",
+            "description": "Optional collection UUID to scope the search."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum results to return (default: 25).",
+            "default": 25
+          }
+        },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "query": { "type": "string" },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "collection_id": { "type": "string" },
+                "url": { "type": "string" },
+                "ranking": {}
+              }
+            }
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.search",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "search_outline_documents"
+      }
+    },
+    {
+      "name": "get-outline-document",
+      "title": "Get Outline Document",
+      "description": "Retrieve the full content (title, markdown text, metadata) of an Outline wiki document by its UUID.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "description": "UUID of the document to retrieve."
+          }
+        },
+        "required": ["document_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "text": { "type": "string" },
+          "collection_id": { "type": "string" },
+          "url": { "type": "string" },
+          "created_at": { "type": "string" },
+          "updated_at": { "type": "string" }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.info",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_outline_document"
+      }
+    },
+    {
+      "name": "create-outline-document",
+      "title": "Create Outline Document",
+      "description": "Create a new document in an Outline wiki collection. Published immediately unless publish=false.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Document title."
+          },
+          "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection to create the document in."
+          },
+          "text": {
+            "type": "string",
+            "description": "Document body in Markdown format."
+          },
+          "parent_document_id": {
+            "type": "string",
+            "description": "Optional UUID of a parent document (creates a nested document)."
+          },
+          "publish": {
+            "type": "boolean",
+            "description": "Publish immediately (default: true).",
+            "default": true
+          }
+        },
+        "required": ["title", "collection_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "collection_id": { "type": "string" }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.create",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "create_outline_document"
+      }
     }
   ]
 }
