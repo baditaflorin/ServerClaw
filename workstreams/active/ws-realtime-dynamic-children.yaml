@@ -41,6 +41,8 @@ ownership_manifest:
   - id: ws_realtime_dynamic_children_netdata
     paths:
     - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
+    - collections/ansible_collections/lv3/platform/playbooks/services/realtime.yml
+    - collections/ansible_collections/lv3/platform/playbooks/groups/observability.yml
     - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
     mode: exclusive
   - id: ws_realtime_dynamic_children_generated

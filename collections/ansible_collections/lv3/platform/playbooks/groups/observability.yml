@@ -6,4 +6,5 @@
 - import_playbook: ../services/docker-build-observability.yml
 - import_playbook: ../services/docker-runtime-observability.yml
 - import_playbook: ../services/guest-log-shipping.yml
+- import_playbook: ../services/realtime.yml
 - import_playbook: ../services/uptime-kuma.yml
