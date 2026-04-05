@@ -56,6 +56,21 @@
       "model_mapping": {
         "text-embedding-3-small": "nomic-embed-text"
       }
+    },
+    {
+      "name": "anthropic-claude",
+      "type": 14,
+      "key_file": ".local/one-api/anthropic-api-key.txt",
+      "status": 1,
+      "weight": 100,
+      "priority": 30,
+      "base_url": "https://api.anthropic.com",
+      "group": "default",
+      "models": [
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-haiku-4-5-20251001"
+      ]
     }
   ],
   "tokens": [
@@ -68,7 +83,10 @@
       "models": [
         "gpt-4o-mini",
         "gpt-4.1-mini",
-        "text-embedding-3-small"
+        "text-embedding-3-small",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-haiku-4-5-20251001"
       ]
     },
     {
@@ -80,7 +98,10 @@
       "models": [
         "gpt-4o-mini",
         "gpt-4.1-mini",
-        "text-embedding-3-small"
+        "text-embedding-3-small",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-haiku-4-5-20251001"
       ],
       "provider_env_path": ".local/open-webui/provider.env",
       "provider_base_url": "http://host.docker.internal:8101/v1"
@@ -94,9 +115,28 @@
       "models": [
         "gpt-4o-mini",
         "gpt-4.1-mini",
-        "text-embedding-3-small"
+        "text-embedding-3-small",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-haiku-4-5-20251001"
       ],
       "provider_env_path": ".local/serverclaw/provider.env",
+      "provider_base_url": "http://10.10.10.20:8101/v1"
+    },
+    {
+      "name": "codex-cli",
+      "status": 1,
+      "expired_time": -1,
+      "remain_quota": -1,
+      "unlimited_quota": true,
+      "models": [
+        "gpt-4o-mini",
+        "gpt-4.1-mini",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-haiku-4-5-20251001"
+      ],
+      "provider_env_path": ".local/codex-cli/provider.env",
       "provider_base_url": "http://10.10.10.20:8101/v1"
     }
   ],

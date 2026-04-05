@@ -246,11 +246,21 @@ def find_exact_by_name(items: list[dict[str, Any]], name: str) -> dict[str, Any]
     return exact[0] if exact else None
 
 
+def resolve_channel_key(spec: dict[str, Any]) -> str:
+    """Return the channel API key, reading from a file if key_file is set."""
+    if spec.get("key_file"):
+        path = repo_path(str(spec["key_file"]))
+        if not path.exists():
+            raise BootstrapError(f"key_file {path} for channel {spec['name']!r} does not exist")
+        return read_text(path)
+    return spec["key"]
+
+
 def channel_payload_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
     payload = {
         "name": spec["name"],
         "type": int(spec["type"]),
-        "key": spec["key"],
+        "key": resolve_channel_key(spec),
         "status": int(spec.get("status", 1)),
         "weight": int(spec.get("weight", 100)),
         "priority": int(spec.get("priority", 0)),
