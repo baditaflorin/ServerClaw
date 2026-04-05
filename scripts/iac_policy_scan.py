@@ -17,6 +17,11 @@ from typing import Any
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_list, require_mapping, require_str
+
 try:
     import yaml  # type: ignore[import-untyped]
 except ModuleNotFoundError as exc:
@@ -156,24 +161,6 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--write-sarif", type=Path, help="Write the SARIF report here.")
     parser.add_argument("--print-json", action="store_true", help="Print the JSON summary to stdout.")
     return parser.parse_args(argv)
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be a mapping")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value.strip()
 
 
 def require_level(value: Any, path: str) -> str:

@@ -18,6 +18,11 @@ from typing import Any
 
 from script_bootstrap import ensure_repo_root_on_path
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_mapping
+
 REPO_ROOT = ensure_repo_root_on_path(__file__)
 
 from platform.datetime_compat import UTC, datetime, timedelta
@@ -79,18 +84,6 @@ def require_string(value: object, path: str) -> str:
     return value
 
 
-def require_int(value: object, path: str, minimum: int = 1) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
-
-
-def require_mapping(value: object, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
 
 
 def state_file_path() -> Path | None:
@@ -306,7 +299,7 @@ def validate_maintenance_window(window: dict[str, Any], path: str = "maintenance
     validate_opened_by_class(opened_by.get("class"), f"{path}.opened_by.class")
     require_string(opened_by.get("id"), f"{path}.opened_by.id")
     parse_datetime(require_string(window.get("opened_at"), f"{path}.opened_at"))
-    require_int(window.get("expected_duration_minutes"), f"{path}.expected_duration_minutes", 1)
+    require_int(window.get("expected_duration_minutes"), f"{path}.expected_duration_minutes", minimum=1)
     parse_datetime(require_string(window.get("auto_close_at"), f"{path}.auto_close_at"))
     correlation_id = window.get("correlation_id")
     if correlation_id is not None:
@@ -329,7 +322,7 @@ def build_maintenance_window(
 ) -> dict[str, Any]:
     service_id = validate_service_id(service_id)
     reason = require_string(reason, "reason")
-    duration_minutes = require_int(duration_minutes, "duration_minutes", 1)
+    duration_minutes = require_int(duration_minutes, "duration_minutes", minimum=1)
     opened_by_class = validate_opened_by_class(opened_by_class, "opened_by_class")
     opened_by_id = require_string(opened_by_id, "opened_by_id")
     now = now or utc_now()

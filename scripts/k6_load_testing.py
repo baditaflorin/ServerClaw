@@ -15,6 +15,12 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import load_json
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
+
 from container_image_policy import load_image_catalog
 from platform.events.publisher import publish_nats_events
 from platform.slo import error_budget_ratio, load_slo_catalog
@@ -45,24 +51,6 @@ DEFAULT_NTFY_PUBLISHER = "windmill"
 DEFAULT_NTFY_WARN_TOPIC = "platform-slo-warn"
 
 
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
 def require_number(value: Any, path: str, *, minimum: float | None = None) -> float:
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         raise ValueError(f"{path} must be numeric")
@@ -70,14 +58,6 @@ def require_number(value: Any, path: str, *, minimum: float | None = None) -> fl
     if minimum is not None and number < minimum:
         raise ValueError(f"{path} must be >= {minimum}")
     return number
-
-
-def require_int(value: Any, path: str, *, minimum: int | None = None) -> int:
-    if not isinstance(value, int) or isinstance(value, bool):
-        raise ValueError(f"{path} must be an integer")
-    if minimum is not None and value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def utc_now() -> dt.datetime:
