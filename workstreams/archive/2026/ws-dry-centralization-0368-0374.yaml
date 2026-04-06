@@ -1,4 +1,5 @@
 id: ws-dry-centralization-0368-0374
+adr: "0368"
 title: "DRY Centralization — ADRs 0368–0374"
 status: merged
 owner: platform-infrastructure
