@@ -1,27 +1,17 @@
 ---
-- name: Verify OpenBao responds on the local health endpoint
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: openbao_verify_seal_status
-  changed_when: false
-
-- name: Assert OpenBao is unsealed
-  ansible.builtin.assert:
-    that:
-      - not (openbao_verify_seal_status.json.sealed | bool)
-    fail_msg: "OpenBao health probe returned a sealed node."
-
-- name: Verify OpenBao is active and ready for traffic
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: openbao_verify_active_health
-  retries: 30
-  delay: 2
-  until: openbao_verify_active_health.status == 200
-  changed_when: false
+# Dependencies: ADR 0165 and ADR 0371.
+- name: Verify the OpenBao runtime
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: openbao
+    common_verify_port: "{{ openbao_http_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    common_verify_health_assertions:
+      - "not (common_verify_health_response.json.sealed | bool)"
+    common_verify_health_assertion_msg: "OpenBao health probe returned a sealed node."
+    common_verify_extra_endpoints:
+      - url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+        retries: 30
+        delay: 2
