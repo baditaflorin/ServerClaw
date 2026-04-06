@@ -17,10 +17,89 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 301
+  total_workstreams: 302
   by_year:
-    '2026': 301
+    '2026': 302
 workstreams:
+- id: ws-0375-certificate-validation-codification
+  adr: '0375'
+  workstream_id: ws-0375
+  status: in_progress
+  priority: high
+  date_opened: '2026-04-06'
+  date_target_completion: '2026-04-13'
+  owner: platform-infrastructure
+  title: Certificate Validation and Concordance Enforcement (ADR 0375)
+  description: 'Implement automated certificate validation and concordance enforcement
+    per ADR 0101
+
+    and ADR 0273. Fixes hostname mismatch errors (ci.lv3.org, etc.) and codifies
+
+    certificate monitoring as part of the standard deployment workflow.
+
+    '
+  objectives:
+  - Implement certificate validator script for all edge-published domains
+  - Create Ansible playbooks for validation and automatic remediation
+  - Integrate with Uptime Kuma for continuous monitoring
+  - Fix immediate certificate issues (ci.lv3.org, bi.lv3.org, etc.)
+  - Create ADR 0375 documenting the implementation
+  - Integrate into pre-deployment checks and CI/CD gates
+  success_criteria:
+  - "All 53 edge-published domains show \u2713 Valid in certificate validator"
+  - No "CERT_MISMATCH" issues reported by validator
+  - Playbook fix-edge-certificate.yml successfully regenerates cert with all domains
+  - Uptime Kuma monitors created for all edge-published domains
+  - ADR 0375 committed and accepted
+  - Documentation complete (runbook, setup guide, quick reference)
+  artifacts:
+  - scripts/certificate_validator.py
+  - scripts/add-certificate-monitors-to-uptime-kuma.py
+  - playbooks/certificate-validation.yml
+  - playbooks/fix-edge-certificate.yml
+  - docs/adr/0361-certificate-validation-and-concordance-enforcement.md
+  - docs/runbooks/certificate-monitoring.md
+  - docs/certificate-monitoring-setup.md
+  - CERTIFICATE-MONITORING.md
+  - ACTION_PLAN.md
+  blockers: []
+  notes: 'Implements the missing validation layer from ADR 0101 and ADR 0273.
+
+
+    Recent operational issue: ci.lv3.org, bi.lv3.org, grist.lv3.org,
+
+    paperless.lv3.org, annotate.lv3.org, and ntfy.lv3.org all have
+
+    hostname mismatch errors because they are in subdomain-catalog.json
+
+    but missing from the NGINX edge certificate SANs.
+
+
+    This workstream provides:
+
+    1. Programmatic detection of such mismatches
+
+    2. Automated remediation via certificate regeneration
+
+    3. Continuous monitoring via Uptime Kuma
+
+    4. Documentation and runbooks
+
+    '
+  related_adrs:
+  - ADR 0101: Automated certificate lifecycle management
+  - ADR 0273: Public endpoint admission control
+  - ADR 0021: Public subdomain publication at NGINX edge
+  branch: claude/nervous-feistel
+  worktree: nervous-feistel
+  doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0375_cert_validation_codification_workstream
+      paths:
+      - workstreams/active/ws-0375-certificate-validation-codification.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
 - id: ws-0375-certificate-validation
   adr: '0375'
   title: Certificate Validation and Concordance Enforcement
@@ -109,6 +188,7 @@ workstreams:
       - workstreams/active/ws-adr-0364-native-gate.yaml
       - workstreams/active/ws-0375-certificate-validation.yaml
       - workstreams/active/ws-0364-outline-agent-tools.yaml
+      - workstreams/archive/2026/ws-0364-outline-agent-tools.yaml
       - workstreams/active/ws-0375-certificate-validation-codification.yaml
       - workstreams/active/ws-0364-service-api-agent-tools.yaml
       mode: shared_contract
@@ -133,7 +213,7 @@ workstreams:
       - docs/diagrams/agent-coordination-map.excalidraw
       mode: shared_contract
       contract: latest-main-generated-truth-v1
-  ready_to_merge: false
+  ready_to_merge: true
   live_applied: false
   canonical_truth:
     changelog_entry: "adds ADR 0364 native build server gate execution \u2014 LV3_NATIVE_EXECUTION\
@@ -142,38 +222,69 @@ workstreams:
       \ to pin gate tool versions"
     release_bump: minor
     included_in_repo_version: null
-- id: ws-0364-outline-agent-tools
-  title: 'Outline agent tools: list/search/get/create documents (ADR 0362 + 0364)'
-  status: in_progress
-  owner: claude
-  branch: claude/implement-aw22-23
-  adr: '0364'
+- id: ws-0364-service-api-agent-tools
+  adr: '0362'
+  title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
+    0362 follow-up)'
+  status: planned
+  owner: unassigned
+  priority: medium
+  branch: main
   doc: docs/adr/0362-agent-service-api-gateway-pattern.md
-  description: "Implements AW-22 and AW-23 from the Plane task board.\n\nAW-22: Generic\
-    \ _resolve_service_auth(service_name) helper\n- Adds shared credential discovery\
-    \ to scripts/agent_tool_registry.py\n- Refactors _resolve_plane_auth() to delegate\
-    \ to this helper\n- Enables Outline and future services to follow ADR 0362 without\
-    \ copy-paste\n\nAW-23: Four Outline agent tools\n- list-outline-collections (observe)\n\
-    - search-outline-documents (observe)\n- get-outline-document (observe)\n- create-outline-document\
-    \ (execute, approval_required: true)\n\nExisting client: scripts/outline_client.py\n\
-    Auth: .local/outline/admin-auth.json (needs fresh token \u2014 see ADR 0364)\n"
-  blocker: ".local/outline/api-token.txt has insufficient scope for search/get (only\
-    \ public\ncollections.list works without real auth). Operator needs to generate\
-    \ a fresh API\ntoken in Outline Settings \u2192 API \u2192 Personal access token\
-    \ and save to:\n  .local/outline/admin-auth.json:\n    { \"base_url\": \"https://wiki.lv3.org\"\
-    , \"api_token\": \"<token>\" }\n"
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0364_service_api_agent_tools_workstream
+      paths:
+      - workstreams/active/ws-0364-service-api-agent-tools.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  description: "ADR 0362 (Agent Service API Gateway) is implemented for Plane (ADR\
+    \ 0363) but three\ngaps remain before the pattern is fully reusable:\n\n1. Generic\
+    \ _resolve_service_auth(service_name) helper is missing \u2014 only Plane-specific\n\
+    \   _resolve_plane_auth() exists. Must be built before other services can be added\
+    \ without\n   copy-pasting credential discovery logic.\n\n2. Outline tools (wiki.lv3.org)\
+    \ \u2014 existing REST client at scripts/outline_client.py,\n   no governed tool\
+    \ surface yet.\n\n3. Netbox tools \u2014 network source of truth, agents can't\
+    \ query IP allocations.\n\n4. Dify tools \u2014 agents can't trigger workflows\
+    \ programmatically.\n\nPlane task creation was attempted but Plane API returned\
+    \ 502 at time of writing.\nRun sync_plane_agent_issues.py once Plane recovers\
+    \ to register this workstream.\n"
+  tasks:
+  - id: task-1
+    title: Implement generic _resolve_service_auth(service_name) helper
+    priority: medium
+    description: "Add _resolve_service_auth(service_name: str) -> dict to scripts/agent_tool_registry.py.\n\
+      Precedence: env LV3_{SERVICE}_AUTH_FILE \u2192 .local/{service}/admin-auth.json\
+      \ \u2192 .local/{service}/api-token.txt\nRefactor _resolve_plane_auth() to delegate\
+      \ to this helper.\nFile: scripts/agent_tool_registry.py ~line 720\nADR: docs/adr/0362-agent-service-api-gateway-pattern.md\n"
+  - id: task-2
+    title: Build Outline agent tools (list/search/get/create)
+    priority: medium
+    description: "Tools: list-outline-collections, search-outline-documents, get-outline-document,\n\
+      \       create-outline-document (approval_required: true)\nExisting client:\
+      \ scripts/outline_client.py\nAuth: .local/outline/admin-auth.json (base_url,\
+      \ api_token)\nRegistry: config/agent-tool-registry.json\nWrite ADR 0364 for\
+      \ Outline agent tools.\nPrior art: Plane handlers in scripts/agent_tool_registry.py\
+      \ lines ~720-895\n"
+  - id: task-3
+    title: Build Netbox agent tools (list-devices, get-device, list-prefixes)
+    priority: low
+    description: "Tools: list-netbox-devices, get-netbox-device, list-netbox-prefixes,\n\
+      \       create-netbox-ip-address (approval_required: true)\nAuth: .local/netbox/admin-auth.json\
+      \ (base_url, api_token)\nNetbox REST API v3: /api/dcim/devices/, /api/ipam/prefixes/\n"
+  - id: task-4
+    title: Build Dify agent tools (list-apps, get-app, trigger-workflow)
+    priority: low
+    description: "Tools: list-dify-apps, get-dify-app, trigger-dify-workflow (approval_required:\
+      \ true)\nIMPORTANT: use internal URL http://10.10.10.20:8094 \u2014 agents.lv3.org\
+      \ is behind oauth2-proxy\nAuth: .local/dify/admin-auth.json (base_url, api_token\
+      \ = Dify API key)\n"
   adr_refs:
   - '0362'
   - '0363'
-  - '0364'
-  plane_issue_id: e1823bea-0c9d-4cac-94b8-eb729eba065d
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0364_outline_tools_workstream
-      paths:
-      - workstreams/active/ws-0364-outline-agent-tools.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
+  notes: "Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py\n\
+    step was skipped. Run it to register in Plane once the service recovers:\n  python\
+    \ scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools\n"
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
@@ -1907,146 +2018,6 @@ workstreams:
       mode: shared_contract
       contract: discovery-artifacts-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
-- id: ws-0375-certificate-validation-codification
-  workstream_id: ws-0375
-  status: in_progress
-  priority: high
-  date_opened: '2026-04-06'
-  date_target_completion: '2026-04-13'
-  owner: platform-infrastructure
-  title: Certificate Validation and Concordance Enforcement (ADR 0375)
-  description: 'Implement automated certificate validation and concordance enforcement
-    per ADR 0101
-
-    and ADR 0273. Fixes hostname mismatch errors (ci.lv3.org, etc.) and codifies
-
-    certificate monitoring as part of the standard deployment workflow.
-
-    '
-  objectives:
-  - Implement certificate validator script for all edge-published domains
-  - Create Ansible playbooks for validation and automatic remediation
-  - Integrate with Uptime Kuma for continuous monitoring
-  - Fix immediate certificate issues (ci.lv3.org, bi.lv3.org, etc.)
-  - Create ADR 0375 documenting the implementation
-  - Integrate into pre-deployment checks and CI/CD gates
-  success_criteria:
-  - "All 53 edge-published domains show \u2713 Valid in certificate validator"
-  - No "CERT_MISMATCH" issues reported by validator
-  - Playbook fix-edge-certificate.yml successfully regenerates cert with all domains
-  - Uptime Kuma monitors created for all edge-published domains
-  - ADR 0375 committed and accepted
-  - Documentation complete (runbook, setup guide, quick reference)
-  artifacts:
-  - scripts/certificate_validator.py
-  - scripts/add-certificate-monitors-to-uptime-kuma.py
-  - playbooks/certificate-validation.yml
-  - playbooks/fix-edge-certificate.yml
-  - docs/adr/0361-certificate-validation-and-concordance-enforcement.md
-  - docs/runbooks/certificate-monitoring.md
-  - docs/certificate-monitoring-setup.md
-  - CERTIFICATE-MONITORING.md
-  - ACTION_PLAN.md
-  blockers: []
-  notes: 'Implements the missing validation layer from ADR 0101 and ADR 0273.
-
-
-    Recent operational issue: ci.lv3.org, bi.lv3.org, grist.lv3.org,
-
-    paperless.lv3.org, annotate.lv3.org, and ntfy.lv3.org all have
-
-    hostname mismatch errors because they are in subdomain-catalog.json
-
-    but missing from the NGINX edge certificate SANs.
-
-
-    This workstream provides:
-
-    1. Programmatic detection of such mismatches
-
-    2. Automated remediation via certificate regeneration
-
-    3. Continuous monitoring via Uptime Kuma
-
-    4. Documentation and runbooks
-
-    '
-  related_adrs:
-  - ADR 0101: Automated certificate lifecycle management
-  - ADR 0273: Public endpoint admission control
-  - ADR 0021: Public subdomain publication at NGINX edge
-  branch: claude/nervous-feistel
-  worktree: nervous-feistel
-  doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0375_cert_validation_codification_workstream
-      paths:
-      - workstreams/active/ws-0375-certificate-validation-codification.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-- id: ws-0364-service-api-agent-tools
-  title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
-    0362 follow-up)'
-  status: planned
-  owner: unassigned
-  priority: medium
-  branch: main
-  doc: docs/adr/0362-agent-service-api-gateway-pattern.md
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0364_service_api_agent_tools_workstream
-      paths:
-      - workstreams/active/ws-0364-service-api-agent-tools.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-  description: "ADR 0362 (Agent Service API Gateway) is implemented for Plane (ADR\
-    \ 0363) but three\ngaps remain before the pattern is fully reusable:\n\n1. Generic\
-    \ _resolve_service_auth(service_name) helper is missing \u2014 only Plane-specific\n\
-    \   _resolve_plane_auth() exists. Must be built before other services can be added\
-    \ without\n   copy-pasting credential discovery logic.\n\n2. Outline tools (wiki.lv3.org)\
-    \ \u2014 existing REST client at scripts/outline_client.py,\n   no governed tool\
-    \ surface yet.\n\n3. Netbox tools \u2014 network source of truth, agents can't\
-    \ query IP allocations.\n\n4. Dify tools \u2014 agents can't trigger workflows\
-    \ programmatically.\n\nPlane task creation was attempted but Plane API returned\
-    \ 502 at time of writing.\nRun sync_plane_agent_issues.py once Plane recovers\
-    \ to register this workstream.\n"
-  tasks:
-  - id: task-1
-    title: Implement generic _resolve_service_auth(service_name) helper
-    priority: medium
-    description: "Add _resolve_service_auth(service_name: str) -> dict to scripts/agent_tool_registry.py.\n\
-      Precedence: env LV3_{SERVICE}_AUTH_FILE \u2192 .local/{service}/admin-auth.json\
-      \ \u2192 .local/{service}/api-token.txt\nRefactor _resolve_plane_auth() to delegate\
-      \ to this helper.\nFile: scripts/agent_tool_registry.py ~line 720\nADR: docs/adr/0362-agent-service-api-gateway-pattern.md\n"
-  - id: task-2
-    title: Build Outline agent tools (list/search/get/create)
-    priority: medium
-    description: "Tools: list-outline-collections, search-outline-documents, get-outline-document,\n\
-      \       create-outline-document (approval_required: true)\nExisting client:\
-      \ scripts/outline_client.py\nAuth: .local/outline/admin-auth.json (base_url,\
-      \ api_token)\nRegistry: config/agent-tool-registry.json\nWrite ADR 0364 for\
-      \ Outline agent tools.\nPrior art: Plane handlers in scripts/agent_tool_registry.py\
-      \ lines ~720-895\n"
-  - id: task-3
-    title: Build Netbox agent tools (list-devices, get-device, list-prefixes)
-    priority: low
-    description: "Tools: list-netbox-devices, get-netbox-device, list-netbox-prefixes,\n\
-      \       create-netbox-ip-address (approval_required: true)\nAuth: .local/netbox/admin-auth.json\
-      \ (base_url, api_token)\nNetbox REST API v3: /api/dcim/devices/, /api/ipam/prefixes/\n"
-  - id: task-4
-    title: Build Dify agent tools (list-apps, get-app, trigger-workflow)
-    priority: low
-    description: "Tools: list-dify-apps, get-dify-app, trigger-dify-workflow (approval_required:\
-      \ true)\nIMPORTANT: use internal URL http://10.10.10.20:8094 \u2014 agents.lv3.org\
-      \ is behind oauth2-proxy\nAuth: .local/dify/admin-auth.json (base_url, api_token\
-      \ = Dify API key)\n"
-  adr_refs:
-  - '0362'
-  - '0363'
-  notes: "Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py\n\
-    step was skipped. Run it to register in Plane once the service recovers:\n  python\
-    \ scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools\n"
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*

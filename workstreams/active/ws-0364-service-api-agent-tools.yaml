@@ -1,4 +1,5 @@
 id: ws-0364-service-api-agent-tools
+adr: '0362'
 title: "Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR 0362 follow-up)"
 status: planned
 owner: unassigned
