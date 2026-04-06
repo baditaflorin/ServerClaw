@@ -2409,7 +2409,7 @@
         "runtime-control-lv3 is reachable"
       ],
       "evidence": {
-        "live_apply_receipt_required": false,
+        "live_apply_receipt_required": true,
         "notes": "Verify lv3-identity-watchdog.timer is active and /var/lib/lv3-identity-watchdog/status.json shows all services healthy."
       },
       "failure_guidance": {

@@ -1,6 +1,7 @@
 id: ws-0364-service-api-agent-tools
 title: "Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR 0362 follow-up)"
 status: planned
+branch: main
 owner: unassigned
 priority: medium
 
@@ -68,7 +69,8 @@ ownership_manifest:
     paths:
     - scripts/agent_tool_registry.py
     - config/agent-tool-registry.json
-    mode: shared
+    mode: shared_contract
+    contract: workstream-registry-v1
 
 doc: docs/adr/0362-agent-service-api-gateway-pattern.md
 adr_refs:
