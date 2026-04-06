@@ -1884,6 +1884,204 @@
         "kind": "handler",
         "handler": "provision_outline_api_token"
       }
+    },
+    {
+      "name": "list-outline-documents",
+      "title": "List Outline Documents",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "description": "List all documents in an Outline collection by collection ID. Returns id, title, url, parent_document_id, and updated_at for each document. Paginates automatically.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.list",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection to list documents from"
+          }
+        },
+        "required": ["collection_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "collection_id": {"type": "string"},
+          "count": {"type": "integer"},
+          "documents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "title": {"type": "string"},
+                "url": {"type": "string"},
+                "updated_at": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_outline_documents"
+      }
+    },
+    {
+      "name": "update-outline-document",
+      "title": "Update Outline Document",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "description": "Update an existing Outline document by document ID. Accepts title and/or text. At least one must be provided. Marks the document as done and published.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.update",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "description": "UUID of the document to update"
+          },
+          "title": {
+            "type": "string",
+            "description": "New title for the document (optional)"
+          },
+          "text": {
+            "type": "string",
+            "description": "New Markdown content for the document (optional)"
+          }
+        },
+        "required": ["document_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "url": {"type": "string"},
+          "collection_id": {"type": "string"},
+          "updated_at": {"type": "string"}
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "update_outline_document"
+      }
+    },
+    {
+      "name": "upsert-outline-document",
+      "title": "Upsert Outline Document",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "description": "Create or update an Outline document by title within a collection (idempotent). If a document with the given title already exists in the collection it is updated; otherwise a new document is created. Returns outcome: 'created' or 'updated'.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.create|documents.update",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Document title (used as the unique key within the collection)"
+          },
+          "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection"
+          },
+          "text": {
+            "type": "string",
+            "description": "Markdown content for the document"
+          },
+          "parent_document_id": {
+            "type": "string",
+            "description": "UUID of parent document for nesting (optional, create-only)"
+          }
+        },
+        "required": ["title", "collection_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "url": {"type": "string"},
+          "collection_id": {"type": "string"},
+          "outcome": {"type": "string", "enum": ["created", "updated"]}
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "upsert_outline_document"
+      }
+    },
+    {
+      "name": "delete-outline-document",
+      "title": "Delete Outline Document",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "description": "Permanently delete an Outline document by document ID. This action is irreversible. Requires human approval.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.delete",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "description": "UUID of the document to delete"
+          }
+        },
+        "required": ["document_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "deleted": {"type": "boolean"},
+          "document_id": {"type": "string"}
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "delete_outline_document"
+      }
     }
   ]
 }

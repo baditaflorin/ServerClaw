@@ -985,6 +985,136 @@ def tool_create_outline_document(_tool: dict[str, Any], args: dict[str, Any]) ->
     }
 
 
+def tool_list_outline_documents(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    collection_id = require_str(args.get("collection_id"), "arguments.collection_id")
+    client = _outline_client()
+    # Paginate through all documents in the collection
+    offset = 0
+    limit = 100
+    all_docs: list[dict[str, Any]] = []
+    while True:
+        response = client.call("documents.list", {
+            "collectionId": collection_id,
+            "limit": limit,
+            "offset": offset,
+        })
+        batch = response.get("data", [])
+        all_docs.extend(batch)
+        if len(batch) < limit:
+            break
+        offset += limit
+    return {
+        "collection_id": collection_id,
+        "count": len(all_docs),
+        "documents": [
+            {
+                k: v for k, v in {
+                    "id": d.get("id", ""),
+                    "title": d.get("title", ""),
+                    "url": d.get("url", ""),
+                    "parent_document_id": d.get("parentDocumentId"),
+                    "updated_at": d.get("updatedAt", ""),
+                }.items() if v is not None
+            }
+            for d in all_docs
+        ],
+    }
+
+
+def tool_update_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    document_id = require_str(args.get("document_id"), "arguments.document_id")
+    client = _outline_client()
+    payload: dict[str, Any] = {"id": document_id, "publish": True, "done": True}
+    if "title" in args:
+        payload["title"] = args["title"]
+    if "text" in args:
+        payload["text"] = args["text"]
+    if not any(k in payload for k in ("title", "text")):
+        raise ValueError("update-outline-document: at least one of 'title' or 'text' is required")
+    response = client.call("documents.update", payload)
+    doc = response.get("data", {})
+    return {
+        "id": doc.get("id", document_id),
+        "title": doc.get("title", ""),
+        "url": doc.get("url", ""),
+        "collection_id": doc.get("collectionId", ""),
+        "updated_at": doc.get("updatedAt", ""),
+    }
+
+
+def tool_upsert_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Create-or-update by title within a collection (idempotent).
+
+    Mirrors outline_tool.py document.publish: if a document with this title
+    already exists in the collection, update it; otherwise create it.
+    """
+    title = require_str(args.get("title"), "arguments.title")
+    collection_id = require_str(args.get("collection_id"), "arguments.collection_id")
+    text = args.get("text", "")
+    client = _outline_client()
+
+    # Find existing document by title
+    offset = 0
+    limit = 100
+    existing_id: str | None = None
+    while True:
+        response = client.call("documents.list", {
+            "collectionId": collection_id,
+            "limit": limit,
+            "offset": offset,
+        })
+        batch = response.get("data", [])
+        for d in batch:
+            if d.get("title") == title:
+                existing_id = d["id"]
+                break
+        if existing_id or len(batch) < limit:
+            break
+        offset += limit
+
+    if existing_id:
+        response = client.call("documents.update", {
+            "id": existing_id,
+            "title": title,
+            "text": text,
+            "publish": True,
+            "done": True,
+        })
+        doc = response.get("data", {})
+        return {
+            "id": doc.get("id", existing_id),
+            "title": title,
+            "url": doc.get("url", ""),
+            "collection_id": collection_id,
+            "outcome": "updated",
+        }
+    else:
+        payload: dict[str, Any] = {
+            "collectionId": collection_id,
+            "title": title,
+            "text": text,
+            "publish": True,
+        }
+        if "parent_document_id" in args:
+            payload["parentDocumentId"] = args["parent_document_id"]
+        response = client.call("documents.create", payload)
+        doc = response.get("data", {})
+        return {
+            "id": doc.get("id", ""),
+            "title": title,
+            "url": doc.get("url", ""),
+            "collection_id": collection_id,
+            "outcome": "created",
+        }
+
+
+def tool_delete_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    document_id = require_str(args.get("document_id"), "arguments.document_id")
+    client = _outline_client()
+    client.call("documents.delete", {"id": document_id})
+    return {"deleted": True, "document_id": document_id}
+
+
 def tool_provision_outline_api_token(
     _tool: dict[str, Any], args: dict[str, Any]
 ) -> dict[str, Any]:
@@ -1042,6 +1172,10 @@ HANDLERS: Final[dict[str, Any]] = {
     "search_outline_documents": tool_search_outline_documents,
     "get_outline_document": tool_get_outline_document,
     "create_outline_document": tool_create_outline_document,
+    "list_outline_documents": tool_list_outline_documents,
+    "update_outline_document": tool_update_outline_document,
+    "upsert_outline_document": tool_upsert_outline_document,
+    "delete_outline_document": tool_delete_outline_document,
     "provision_outline_api_token": tool_provision_outline_api_token,
 }
 
