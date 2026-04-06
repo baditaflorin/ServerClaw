@@ -11,6 +11,11 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Final
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
+
 from api_publication import load_api_publication_catalog
 from command_catalog import (
     ALLOWED_IDENTITY_CLASSES,
@@ -52,38 +57,6 @@ DEFAULT_PORTAINER_AUTH_FILE_PATH: Final[Path] = REPO_ROOT / ".local" / "portaine
 SUPPORTED_SCHEMA_VERSION: Final[str] = "1.0.0"
 ALLOWED_TOOL_CATEGORIES: Final[set[str]] = {"observe", "report", "execute", "approve"}
 ALLOWED_TRANSPORTS: Final[set[str]] = {"controller_local", "http", "nats", "ansible"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int | None = None) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if minimum is not None and value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def validate_json_schema_shape(
@@ -159,7 +132,7 @@ def validate_instance(instance: Any, schema: dict[str, Any], path: str) -> None:
         return
 
     if schema_type == "integer":
-        value = require_int(instance, path, schema.get("minimum"))
+        value = require_int(instance, path, minimum=schema.get("minimum"))
         if "enum" in schema and value not in schema["enum"]:
             raise ValueError(f"{path} must be one of {schema['enum']}")
         return
@@ -422,7 +395,7 @@ def tool_get_platform_status(_tool: dict[str, Any], _args: dict[str, Any]) -> di
 def tool_list_recent_receipts(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     validate_receipts()
     limit = args.get("limit", 5)
-    require_int(limit, "arguments.limit", 1)
+    require_int(limit, "arguments.limit", minimum=1)
     receipts: list[dict[str, Any]] = []
     for path in sorted(iter_receipt_paths(), reverse=True)[:limit]:
         receipt = load_receipt(path)
@@ -446,7 +419,7 @@ def tool_get_deployment_history(_tool: dict[str, Any], args: dict[str, Any]) -> 
     environment = args.get("environment")
     if environment is not None:
         environment = require_str(environment, "arguments.environment")
-    days = require_int(args.get("days", 30), "arguments.days", 1)
+    days = require_int(args.get("days", 30), "arguments.days", minimum=1)
     return query_deployment_history(service_id=service_id, environment=environment, days=days)
 
 
@@ -492,7 +465,7 @@ def tool_export_mcp_tools(registry: dict[str, Any], args: dict[str, Any]) -> dic
 
 def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     question = require_str(args.get("question"), "arguments.question")
-    top_k = require_int(args.get("top_k", 5), "arguments.top_k", 1)
+    top_k = require_int(args.get("top_k", 5), "arguments.top_k", minimum=1)
     token = read_secret_file(resolve_platform_context_token_path(), "platform-context API token")
     request = urllib.request.Request(
         require_str(tool.get("endpoint"), f"{tool['name']}.endpoint"),
@@ -525,7 +498,7 @@ def tool_browser_run_session(_tool: dict[str, Any], args: dict[str, Any]) -> dic
     timeout_seconds = require_int(
         args.get("timeout_seconds", DEFAULT_TIMEOUT_SECONDS),
         "arguments.timeout_seconds",
-        1,
+        minimum=1,
     )
     payload = dict(args)
     return run_session(base_url, payload, timeout_seconds=timeout_seconds)
@@ -637,7 +610,7 @@ def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[st
 def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     from portainer_tool import PortainerClient  # lazy import — requests not required at registry load time
     container = require_str(args.get("container"), "arguments.container")
-    tail = require_int(args.get("tail", 100), "arguments.tail", 1)
+    tail = require_int(args.get("tail", 100), "arguments.tail", minimum=1)
     client = PortainerClient(resolve_portainer_auth())
     client.login()
     logs = client.container_logs(container, tail)

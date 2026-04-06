@@ -1,5 +1,13 @@
 ---
 # Purpose: Render and run the repo-managed ops portal runtime on the docker guest with its required directories, secrets, and image build context.
+- name: Derive Ops Portal conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: ops_portal
+
+
 - name: Validate ops portal runtime inputs
   ansible.builtin.include_role:
     name: lv3.platform.common

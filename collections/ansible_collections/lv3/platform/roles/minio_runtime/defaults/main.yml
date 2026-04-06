@@ -5,21 +5,10 @@
 # Idempotency: Fully idempotent; defaults describe desired values only.
 # Dependencies: ADR 0077, ADR 0165, ADR 0274, and the minio_runtime role.
 ---
-minio_site_dir: /opt/minio
-minio_data_dir: "{{ minio_site_dir }}/data"
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 minio_policy_dir: "{{ minio_site_dir }}/policies"
-minio_secret_dir: /etc/lv3/minio
-minio_compose_file: "{{ minio_site_dir }}/docker-compose.yml"
-minio_env_file: "{{ compose_runtime_secret_root }}/minio/runtime.env"
-minio_legacy_env_file: "{{ minio_site_dir }}/minio.env"
-minio_openbao_agent_dir: "{{ minio_site_dir }}/openbao"
-minio_openbao_agent_image: "{{ openbao_agent_image }}"
-minio_openbao_agent_container_name: minio-openbao-agent
-minio_openbao_secret_path: services/minio/runtime-env
-minio_openbao_policy_name: lv3-service-minio-runtime
-minio_openbao_approle_name: minio-runtime
-minio_container_name: minio
-minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
 minio_api_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('minio', 'internal') }}"
 minio_console_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('minio', 'console') }}"
 minio_private_api_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'internal') }}"
@@ -27,7 +16,6 @@ minio_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology 
 minio_console_private_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'console_internal') }}"
 minio_console_public_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'console_public') }}"
 minio_root_user: minio-root
-minio_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/minio
 minio_root_password_local_file: "{{ minio_local_artifact_dir }}/root-password.txt"
 minio_root_password_remote_file: "{{ minio_secret_dir }}/root-password.txt"
 minio_mc_url: https://dl.min.io/client/mc/release/linux-amd64/mc
@@ -36,7 +24,7 @@ minio_mc_bin: /usr/local/bin/mc
 minio_mc_config_dir: "{{ minio_site_dir }}/mc"
 minio_langfuse_access_key_id: langfuseapp
 minio_langfuse_secret_key_remote_file: "{{ minio_secret_dir }}/langfuse-secret-key.txt"
-minio_langfuse_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/minio-secret-key.txt
+minio_langfuse_secret_key_local_file: "{{ repo_shared_local_root }}/langfuse/minio-secret-key.txt"
 minio_langfuse_bucket_name: langfuse-exports
 minio_langfuse_policy_name: langfuse-exports
 minio_langfuse_allowed_origins:
@@ -64,7 +52,7 @@ minio_langfuse_policy_document:
         - "arn:aws:s3:::{{ minio_langfuse_bucket_name }}/*"
 minio_gitea_access_key_id: gitealfs
 minio_gitea_secret_key_remote_file: "{{ minio_secret_dir }}/gitea-secret-key.txt"
-minio_gitea_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/minio-secret-key.txt
+minio_gitea_secret_key_local_file: "{{ repo_shared_local_root }}/gitea/minio-secret-key.txt"
 minio_gitea_bucket_name: gitea-lfs
 minio_gitea_policy_name: gitea-lfs
 minio_gitea_policy_document:
@@ -89,7 +77,7 @@ minio_gitea_policy_document:
         - "arn:aws:s3:::{{ minio_gitea_bucket_name }}/*"
 minio_loki_access_key_id: lokichunks
 minio_loki_secret_key_remote_file: "{{ minio_secret_dir }}/loki-secret-key.txt"
-minio_loki_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/loki-minio-secret-key.txt
+minio_loki_secret_key_local_file: "{{ repo_shared_local_root }}/monitoring/loki-minio-secret-key.txt"
 minio_loki_bucket_name: loki-chunks
 minio_loki_policy_name: loki-chunks
 minio_loki_policy_document:

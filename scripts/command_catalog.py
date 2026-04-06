@@ -9,8 +9,12 @@ from typing import Final
 
 if str(Path(__file__).resolve().parents[1]) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
+
+from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 from correction_loops import (
@@ -48,30 +52,6 @@ def load_command_catalog() -> dict:
     return load_json(COMMAND_CATALOG_PATH)
 
 
-def require_str(value: object, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: object, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
-def require_list(value: object, path: str) -> list:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_mapping(value: object, path: str) -> dict:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
 def validate_string_mapping(value: object, path: str) -> dict[str, str]:
     mapping = require_mapping(value, path)
     result: dict[str, str] = {}
@@ -79,14 +59,6 @@ def validate_string_mapping(value: object, path: str) -> dict[str, str]:
         normalized_key = require_str(key, f"{path} key")
         result[normalized_key] = require_str(item, f"{path}.{normalized_key}")
     return result
-
-
-def require_int(value: object, path: str, minimum: int = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def validate_identity_class_list(value: object, path: str) -> list[str]:
@@ -154,7 +126,7 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
             policy.get("allowed_approver_classes"),
             f"approval_policies.{policy_id}.allowed_approver_classes",
         )
-        require_int(policy.get("minimum_approvals"), f"approval_policies.{policy_id}.minimum_approvals", 1)
+        require_int(policy.get("minimum_approvals"), f"approval_policies.{policy_id}.minimum_approvals", minimum=1)
         require_bool(policy.get("require_preflight"), f"approval_policies.{policy_id}.require_preflight")
         require_bool(policy.get("require_validation"), f"approval_policies.{policy_id}.require_validation")
         require_bool(policy.get("require_receipt_plan"), f"approval_policies.{policy_id}.require_receipt_plan")
@@ -249,7 +221,7 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
             raise ValueError(
                 f"commands.{command_id}.execution.profile references unknown execution profile '{profile_id}'"
             )
-        require_int(execution.get("timeout_seconds"), f"commands.{command_id}.execution.timeout_seconds", 1)
+        require_int(execution.get("timeout_seconds"), f"commands.{command_id}.execution.timeout_seconds", minimum=1)
         if workflows[workflow_id]["preferred_entrypoint"]["kind"] != "make_target":
             raise ValueError(
                 f"commands.{command_id}.workflow_id must use a make_target preferred entrypoint for this execution model"

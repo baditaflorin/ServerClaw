@@ -5,16 +5,14 @@
 # Idempotency: N/A for defaults file because it only declares variables that other tasks consume.
 # Dependencies: ADR 0165, ADR 0043, ADR 0101, and ADR 0231.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 openbao_version: 2.5.1
-openbao_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
-openbao_container_name: lv3-openbao
-openbao_site_dir: /opt/openbao
 openbao_config_dir: "{{ openbao_site_dir }}/config"
-openbao_data_dir: "{{ openbao_site_dir }}/data"
 openbao_log_dir: "{{ openbao_site_dir }}/logs"
 openbao_policy_dir: "{{ openbao_site_dir }}/policies"
 openbao_tls_dir: "{{ openbao_site_dir }}/tls"
-openbao_compose_file: "{{ openbao_site_dir }}/docker-compose.yml"
 openbao_default_network_name: "{{ openbao_site_dir | basename }}_default"
 openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
 openbao_tls_enabled: true
@@ -69,7 +67,6 @@ openbao_runtime_chain_recheck_delay_seconds: 2
 openbao_runtime_post_active_settle_seconds: 60
 openbao_migration_enabled: false
 openbao_migration_source_host: docker-runtime-lv3
-openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
 openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"
 openbao_breakglass_password_local_file: "{{ openbao_local_artifact_dir }}/breakglass-password.txt"

@@ -1,0 +1,20 @@
+id: ws-dry-centralization-0368-0374
+title: "DRY Centralization — ADRs 0368–0374"
+status: ready
+owner: platform-infrastructure
+branch: claude/objective-bose
+worktree_path: .claude/worktrees/objective-bose
+adrs:
+  - "0368"
+  - "0369"
+  - "0370"
+  - "0371"
+  - "0372"
+  - "0373"
+  - "0374"
+description: |
+  Implements 7 ADRs eliminating duplication across Ansible roles, scripts, and
+  playbooks. Extracts shared patterns into: Python validation toolkit, Jinja2
+  compose macros, shared lifecycle/verify task includes, service registry with
+  derived defaults, data-driven playbook composition, and cross-cutting service
+  manifest (hairpin, DNS, TLS, nginx, SSO).

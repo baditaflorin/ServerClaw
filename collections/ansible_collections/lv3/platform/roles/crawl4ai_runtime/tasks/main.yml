@@ -4,6 +4,14 @@
 # Outputs: Rendered config and compose files plus a running Crawl4AI container that serves health, monitoring, and markdown crawl endpoints.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack, config, and host port binding.
 # Dependencies: ADR 0288 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
+- name: Derive Crawl4ai conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: crawl4ai
+
+
 - name: Validate Crawl4AI runtime inputs
   ansible.builtin.assert:
     that:

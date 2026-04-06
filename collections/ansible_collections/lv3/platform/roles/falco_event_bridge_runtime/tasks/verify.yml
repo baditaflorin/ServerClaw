@@ -14,13 +14,13 @@
     falco_event_bridge_service_status.rc not in [0, 3]
     or falco_event_bridge_service_status.stdout | trim not in ["active", "activating", "inactive", "failed"]
 
-- name: Verify the Falco event bridge health endpoint responds
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ falco_event_bridge_listen_port }}/healthz"
-    method: GET
-    status_code: 200
-  register: falco_event_bridge_health
-  retries: 20
-  delay: 2
-  until: falco_event_bridge_health.status == 200
-  changed_when: false
+- name: Verify the Falco event bridge runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: falco-event-bridge
+    common_verify_port: "{{ falco_event_bridge_listen_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ falco_event_bridge_listen_port }}/healthz"
+    common_verify_health_retries: 20
+    common_verify_health_delay: 2

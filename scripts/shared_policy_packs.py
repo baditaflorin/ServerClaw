@@ -2,48 +2,22 @@
 
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Final
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import load_json, repo_path
 
 
 SHARED_POLICY_PACKS_PATH: Final = repo_path("config", "shared-policy-packs.json")
 SHARED_POLICY_PACKS_SCHEMA_PATH: Final = repo_path("docs", "schema", "shared-policy-packs.schema.json")
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value.strip()
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_string_list(value: Any, path: str) -> list[str]:
@@ -130,7 +104,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
         tier_id = require_str(entry.get("id"), f"{path_str}.packs.service_redundancy.tiers[{index}].id")
         if tier_id in tier_order:
             raise ValueError(f"duplicate shared policy redundancy tier '{tier_id}'")
-        order = require_int(entry.get("order"), f"{path_str}.packs.service_redundancy.tiers[{index}].order", 0)
+        order = require_int(entry.get("order"), f"{path_str}.packs.service_redundancy.tiers[{index}].order", minimum=0)
         if order in seen_orders:
             raise ValueError(f"duplicate shared policy redundancy tier order {order}")
         seen_orders.add(order)
@@ -199,7 +173,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
         minimum_count = require_int(
             threshold.get("minimum_failure_domain_count"),
             f"{path_str}.packs.service_redundancy.max_supported_tier_by_failure_domain_count[{index}].minimum_failure_domain_count",
-            1,
+            minimum=1,
         )
         if minimum_count in seen_counts:
             raise ValueError(f"duplicate failure-domain threshold {minimum_count} in shared policy packs")

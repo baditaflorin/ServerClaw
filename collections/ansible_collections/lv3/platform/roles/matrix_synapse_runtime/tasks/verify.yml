@@ -1,42 +1,16 @@
 ---
 # Purpose: Verify the Matrix Synapse runtime and bootstrap login locally after convergence.
-# Use case: Imported by the matrix_synapse_runtime role and the shared post-verify workflow.
-#
-# Inputs (required):
-#   - matrix_synapse_internal_base_url (str, required): Guest-local base URL for verification.
-#   - matrix_synapse_admin_localpart (str, required): Bootstrap admin localpart.
-#   - matrix_synapse_admin_user_id (str, required): Expected fully-qualified Matrix user id.
-#   - matrix_synapse_ops_password (str, required): Bootstrap admin password mirrored by the runtime role.
-#
-# Inputs (optional):
-#   - none
-#
-# Outputs:
-#   - Local HTTP readiness, password login verification, and bridge container health for Matrix Synapse.
-#
-# Idempotency: Fully idempotent
-#              Verification-only tasks do not mutate runtime state.
-#
-# Dependencies:
-#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
-#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
-#   - Role: matrix_synapse_runtime — sets the facts consumed here.
-#
-# Related ADRs: 0165, 0255, 0256
-# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
-#
-# Author: LV3 Platform
-# Last Updated: 2026-03-29
-- name: Verify the Matrix Synapse client versions endpoint
-  ansible.builtin.uri:
-    url: "{{ matrix_synapse_internal_base_url }}/_matrix/client/versions"
-    method: GET
-    status_code: 200
-  register: matrix_synapse_verify_versions
-  retries: 24
-  delay: 5
-  until: matrix_synapse_verify_versions.status == 200
-  changed_when: false
+# Dependencies: ADR 0255, ADR 0256, ADR 0165, ADR 0371.
+- name: Verify the Matrix Synapse runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: matrix-synapse
+    common_verify_port: "{{ matrix_synapse_port }}"
+    common_verify_health_url: "{{ matrix_synapse_internal_base_url }}/_matrix/client/versions"
+    common_verify_health_retries: 24
+    common_verify_health_delay: 5
 
 - name: Verify Matrix Synapse ops admin sign-in works
   ansible.builtin.uri:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -12,6 +13,11 @@ from urllib.parse import urlparse
 from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_mapping
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
@@ -118,12 +124,6 @@ def load_publication_registry(path: Path | None = None) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"{path or PUBLICATION_REGISTRY_PATH} must be an object")
     return payload
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
 
 
 def require_string(value: Any, path: str) -> str:

@@ -6513,3 +6513,17 @@ tika_port: 9998
 tesseract_ocr_port: 3008
 keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587
+
+# Centralized hairpin NAT host entries for Docker Compose templates — ADR 0368.
+# Services that need to reach internal domains (which resolve publicly to the
+# WAN IP but must hit the internal nginx proxy) must include these extra_hosts.
+# Use the hairpin_hosts() macro in compose_macros.j2 to emit this list.
+platform_hairpin_nat_hosts:
+  - hostname: sso.lv3.org
+    address: "{{ platform_host.network.public_edge_ipv4 }}"
+  - hostname: agents.lv3.org
+    address: "{{ platform_host.network.public_edge_ipv4 }}"
+  - hostname: dify.lv3.org
+    address: "{{ platform_host.network.public_edge_ipv4 }}"
+  - hostname: data.lv3.org
+    address: "{{ platform_host.network.public_edge_ipv4 }}"

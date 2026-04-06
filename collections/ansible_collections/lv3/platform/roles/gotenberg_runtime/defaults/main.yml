@@ -5,6 +5,9 @@
 # Idempotency: Fully idempotent; defaults describe desired values only.
 # Dependencies: ADR 0165 metadata standard, ADR 0278, and the gotenberg_runtime role.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 gotenberg_runtime_site_dir: /opt/gotenberg
 gotenberg_runtime_compose_file: "{{ gotenberg_runtime_site_dir }}/docker-compose.yml"
 gotenberg_runtime_container_name: gotenberg

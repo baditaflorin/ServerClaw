@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the shared defaults for converging the Woodpecker runtime, Gitea OAuth bootstrap, and controller-local access paths.
 # Use case: Used whenever the woodpecker_runtime role renders the Woodpecker stack, secrets, and verification commands.
 #
@@ -26,20 +29,8 @@
 # Last Updated: 2026-03-30
 woodpecker_service_topology: "{{ platform_service_topology | service_topology_get('woodpecker') }}"
 woodpecker_gitea_service_topology: "{{ platform_service_topology | service_topology_get('gitea') }}"
-woodpecker_site_dir: /opt/woodpecker
-woodpecker_data_dir: "{{ woodpecker_site_dir }}/data"
 woodpecker_server_data_dir: "{{ woodpecker_data_dir }}/server"
 woodpecker_agent_data_dir: "{{ woodpecker_data_dir }}/agent"
-woodpecker_secret_dir: /etc/lv3/woodpecker
-woodpecker_compose_file: "{{ woodpecker_site_dir }}/docker-compose.yml"
-woodpecker_env_file: "{{ compose_runtime_secret_root }}/woodpecker/runtime.env"
-woodpecker_legacy_env_file: "{{ woodpecker_site_dir }}/woodpecker.env"
-woodpecker_openbao_agent_dir: "{{ woodpecker_site_dir }}/openbao"
-woodpecker_openbao_agent_image: "{{ openbao_agent_image }}"
-woodpecker_openbao_agent_container_name: woodpecker-openbao-agent
-woodpecker_openbao_secret_path: services/woodpecker/runtime-env
-woodpecker_openbao_policy_name: lv3-service-woodpecker-runtime
-woodpecker_openbao_approle_name: woodpecker-runtime
 woodpecker_http_port: "{{ woodpecker_service_topology.ports.internal }}"
 woodpecker_host_proxy_port: "{{ woodpecker_service_topology.ports.controller }}"
 woodpecker_internal_url: "{{ woodpecker_service_topology.urls.internal }}"
@@ -55,19 +46,18 @@ woodpecker_database_name: woodpecker
 woodpecker_database_user: woodpecker
 woodpecker_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 woodpecker_database_port: 5432
-woodpecker_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/database-password.txt
-woodpecker_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker
-woodpecker_gitea_admin_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt
-woodpecker_gitea_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-password.txt
+woodpecker_database_password_local_file: "{{ woodpecker_local_artifact_dir }}/database-password.txt"
+woodpecker_gitea_admin_token_local_file: "{{ repo_shared_local_root }}/gitea/admin-token.txt"
+woodpecker_gitea_admin_password_local_file: "{{ repo_shared_local_root }}/gitea/admin-password.txt"
 woodpecker_gitea_oauth_app_name: LV3 Woodpecker
-woodpecker_gitea_client_id_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/gitea-client-id.txt
-woodpecker_gitea_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/gitea-client-secret.txt
-woodpecker_agent_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/agent-secret.txt
+woodpecker_gitea_client_id_local_file: "{{ woodpecker_local_artifact_dir }}/gitea-client-id.txt"
+woodpecker_gitea_client_secret_local_file: "{{ woodpecker_local_artifact_dir }}/gitea-client-secret.txt"
+woodpecker_agent_secret_local_file: "{{ woodpecker_local_artifact_dir }}/agent-secret.txt"
 woodpecker_agent_secret_guest_file: "{{ woodpecker_secret_dir }}/agent-secret"
-woodpecker_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/api-token.txt
-woodpecker_admin_auth_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/admin-auth.json
-woodpecker_bootstrap_spec_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/bootstrap-spec.json
-woodpecker_secret_smoke_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/repo-secret-smoke.txt
+woodpecker_api_token_local_file: "{{ woodpecker_local_artifact_dir }}/api-token.txt"
+woodpecker_admin_auth_local_file: "{{ woodpecker_local_artifact_dir }}/admin-auth.json"
+woodpecker_bootstrap_spec_local_file: "{{ woodpecker_local_artifact_dir }}/bootstrap-spec.json"
+woodpecker_secret_smoke_local_file: "{{ woodpecker_local_artifact_dir }}/repo-secret-smoke.txt"
 woodpecker_admin_username: ops-gitea
 woodpecker_admins:
   - ops-gitea

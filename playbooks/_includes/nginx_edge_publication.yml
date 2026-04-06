@@ -1,0 +1,24 @@
+---
+# _includes/nginx_edge_publication.yml
+# Purpose: Publish a service through the shared NGINX edge.
+# Input: service_audit_name (string) — service name for logging (e.g., "directus")
+# Usage: import_playbook with -e @playbooks/vars/<service>.yml
+
+- name: "Publish {{ service_audit_name }} through the NGINX edge"
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../../inventory/group_vars/platform.yml"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication

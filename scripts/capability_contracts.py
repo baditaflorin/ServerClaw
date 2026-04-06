@@ -8,6 +8,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_list, require_mapping, require_str
+
 try:
     import jsonschema
 except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
@@ -30,24 +35,6 @@ def load_json(path: Path) -> Any:
 def emit_cli_error(label: str, exc: Exception) -> int:
     print(f"{label} error: {exc}", file=sys.stderr)
     return 1
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def require_string_list(value: Any, path: str) -> list[str]:

@@ -1,26 +1,16 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Default runtime inputs for the repo-managed JupyterHub notebook service.
 
 jupyterhub_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('jupyterhub') }}"
 jupyterhub_session_authority: "{{ platform_session_authority }}"
-jupyterhub_site_dir: /opt/jupyterhub
 jupyterhub_hub_build_dir: "{{ jupyterhub_site_dir }}/hub"
 jupyterhub_singleuser_build_dir: "{{ jupyterhub_site_dir }}/singleuser"
-jupyterhub_data_dir: "{{ jupyterhub_site_dir }}/data"
 jupyterhub_hub_data_dir: "{{ jupyterhub_data_dir }}/hub"
 jupyterhub_minio_data_dir: "{{ jupyterhub_data_dir }}/minio"
-jupyterhub_secret_dir: /etc/lv3/jupyterhub
-jupyterhub_compose_file: "{{ jupyterhub_site_dir }}/docker-compose.yml"
 jupyterhub_config_file: "{{ jupyterhub_site_dir }}/jupyterhub_config.py"
-jupyterhub_env_file: "{{ compose_runtime_secret_root }}/jupyterhub/runtime.env"
-jupyterhub_legacy_env_file: "{{ jupyterhub_site_dir }}/jupyterhub.env"
-jupyterhub_openbao_agent_dir: "{{ jupyterhub_site_dir }}/openbao"
-jupyterhub_openbao_agent_image: "{{ openbao_agent_image }}"
-jupyterhub_openbao_agent_container_name: jupyterhub-openbao-agent
-jupyterhub_openbao_secret_path: services/jupyterhub/runtime-env
-jupyterhub_openbao_policy_name: lv3-service-jupyterhub-runtime
-jupyterhub_openbao_approle_name: jupyterhub-runtime
-jupyterhub_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.jupyterhub_port }}"
 jupyterhub_internal_base_url: "http://127.0.0.1:{{ jupyterhub_internal_port }}"
 jupyterhub_public_base_url: "https://{{ jupyterhub_service_topology.public_hostname }}"
 jupyterhub_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
@@ -29,7 +19,6 @@ jupyterhub_public_hostname_overrides:
     address: "{{ jupyterhub_public_edge_private_ip }}"
   - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ jupyterhub_public_edge_private_ip }}"
-jupyterhub_container_name: jupyterhub
 jupyterhub_minio_container_name: jupyterhub-minio
 jupyterhub_compose_network_name: jupyterhub_default
 jupyterhub_hub_image_name: lv3/jupyterhub-hub
@@ -38,10 +27,9 @@ jupyterhub_hub_base_image: quay.io/jupyterhub/jupyterhub:5.4.4@sha256:a4860afa5c
 jupyterhub_singleuser_base_image: quay.io/jupyter/scipy-notebook:python-3.12@sha256:d0a76193887ed48cdc9adcc2cf042ae189901187226bf0466793acac1822ea78
 jupyterhub_base_image_pull_timeout_seconds: 180
 jupyterhub_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtime.ref }}"
-jupyterhub_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub
-jupyterhub_service_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub/service-api-token.txt
-jupyterhub_minio_root_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub/minio-root-password.txt
-jupyterhub_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/jupyterhub-client-secret.txt
+jupyterhub_service_api_token_local_file: "{{ jupyterhub_local_artifact_dir }}/service-api-token.txt"
+jupyterhub_minio_root_password_local_file: "{{ jupyterhub_local_artifact_dir }}/minio-root-password.txt"
+jupyterhub_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/jupyterhub-client-secret.txt"
 jupyterhub_platform_context_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
 jupyterhub_service_api_token_remote_file: "{{ jupyterhub_secret_dir }}/service-api-token.txt"
 jupyterhub_proxy_auth_token_remote_file: "{{ jupyterhub_secret_dir }}/proxy-auth-token.txt"

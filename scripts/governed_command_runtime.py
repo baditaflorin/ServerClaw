@@ -18,36 +18,15 @@ from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
+
 from platform.datetime_compat import UTC, datetime
 
 def utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def decode_payload(payload_base64: str) -> dict[str, Any]:
@@ -133,7 +112,7 @@ def build_systemd_run_command(payload: dict[str, Any], stdout_log: Path, stderr_
         f"--description=LV3 governed command {require_str(payload.get('command_id'), 'payload.command_id')}",
         f"--uid={require_str(payload.get('effective_user'), 'payload.effective_user')}",
         f"--property=WorkingDirectory={require_str(payload.get('working_directory'), 'payload.working_directory')}",
-        f"--property=RuntimeMaxSec={require_int(payload.get('timeout_seconds'), 'payload.timeout_seconds', 1)}s",
+        f"--property=RuntimeMaxSec={require_int(payload.get('timeout_seconds'), 'payload.timeout_seconds', minimum=1)}s",
         f"--property=KillMode={require_str(payload.get('kill_mode'), 'payload.kill_mode')}",
         f"--property=StandardOutput=append:{stdout_log}",
         f"--property=StandardError=append:{stderr_log}",

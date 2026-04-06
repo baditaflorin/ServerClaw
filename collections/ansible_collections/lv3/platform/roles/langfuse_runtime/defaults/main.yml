@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the shared defaults for converging Langfuse, its backing services, and the shared MinIO upload contract.
 # Use case: Load whenever the langfuse_runtime role renders compose state, runtime secrets, and bootstrap metadata.
 #
@@ -19,22 +22,9 @@
 #   - ADR 0165: Requires metadata headers on managed playbook and role surfaces.
 #   - ADR 0274: Moves Langfuse uploads to the shared MinIO object layer.
 langfuse_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('langfuse') }}"
-langfuse_site_dir: /opt/langfuse
-langfuse_data_dir: "{{ langfuse_site_dir }}/data"
 langfuse_clickhouse_data_dir: "{{ langfuse_data_dir }}/clickhouse"
 langfuse_clickhouse_log_dir: "{{ langfuse_data_dir }}/clickhouse-logs"
 langfuse_redis_data_dir: "{{ langfuse_data_dir }}/redis"
-langfuse_secret_dir: /etc/lv3/langfuse
-langfuse_compose_file: "{{ langfuse_site_dir }}/docker-compose.yml"
-langfuse_env_file: "{{ compose_runtime_secret_root }}/langfuse/runtime.env"
-langfuse_legacy_env_file: "{{ langfuse_site_dir }}/langfuse.env"
-langfuse_openbao_agent_dir: "{{ langfuse_site_dir }}/openbao"
-langfuse_openbao_agent_image: "{{ openbao_agent_image }}"
-langfuse_openbao_agent_container_name: langfuse-openbao-agent
-langfuse_openbao_secret_path: services/langfuse/runtime-env
-langfuse_openbao_policy_name: lv3-service-langfuse-runtime
-langfuse_openbao_approle_name: langfuse-runtime
-langfuse_internal_port: "{{ platform_service_topology | platform_service_port('langfuse', 'internal') }}"
 langfuse_internal_base_url: "{{ platform_service_topology | platform_service_url('langfuse', 'internal') }}"
 langfuse_public_base_url: "https://{{ langfuse_service_topology.public_hostname }}"
 langfuse_web_container_name: langfuse-web
@@ -50,19 +40,18 @@ langfuse_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.
 langfuse_database_name: langfuse
 langfuse_database_user: langfuse
 langfuse_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-langfuse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/database-password.txt
-langfuse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse
-langfuse_nextauth_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/nextauth-secret.txt
-langfuse_salt_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/salt.txt
-langfuse_encryption_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/encryption-key.txt
-langfuse_clickhouse_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/clickhouse-password.txt
-langfuse_redis_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/redis-password.txt
-langfuse_minio_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/minio-secret-key.txt
-langfuse_bootstrap_user_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/bootstrap-user-password.txt
-langfuse_project_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/project-public-key.txt
-langfuse_project_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/project-secret-key.txt
-langfuse_project_id_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/project-id.txt
-langfuse_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/langfuse-client-secret.txt
+langfuse_database_password_local_file: "{{ langfuse_local_artifact_dir }}/database-password.txt"
+langfuse_nextauth_secret_local_file: "{{ langfuse_local_artifact_dir }}/nextauth-secret.txt"
+langfuse_salt_local_file: "{{ langfuse_local_artifact_dir }}/salt.txt"
+langfuse_encryption_key_local_file: "{{ langfuse_local_artifact_dir }}/encryption-key.txt"
+langfuse_clickhouse_password_local_file: "{{ langfuse_local_artifact_dir }}/clickhouse-password.txt"
+langfuse_redis_password_local_file: "{{ langfuse_local_artifact_dir }}/redis-password.txt"
+langfuse_minio_secret_key_local_file: "{{ langfuse_local_artifact_dir }}/minio-secret-key.txt"
+langfuse_bootstrap_user_password_local_file: "{{ langfuse_local_artifact_dir }}/bootstrap-user-password.txt"
+langfuse_project_public_key_local_file: "{{ langfuse_local_artifact_dir }}/project-public-key.txt"
+langfuse_project_secret_key_local_file: "{{ langfuse_local_artifact_dir }}/project-secret-key.txt"
+langfuse_project_id_local_file: "{{ langfuse_local_artifact_dir }}/project-id.txt"
+langfuse_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/langfuse-client-secret.txt"
 langfuse_nextauth_secret_remote_file: "{{ langfuse_secret_dir }}/nextauth-secret.txt"
 langfuse_salt_remote_file: "{{ langfuse_secret_dir }}/salt.txt"
 langfuse_encryption_key_remote_file: "{{ langfuse_secret_dir }}/encryption-key.txt"

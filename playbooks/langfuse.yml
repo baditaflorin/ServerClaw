@@ -23,8 +23,12 @@
 # Related ADRs: 0146, 0197
 # Related Runbooks: docs/runbooks/configure-langfuse.md
 #
+# Invocation: ansible-playbook playbooks/langfuse.yml -e @playbooks/vars/langfuse.yml -e env=production
+#
 # Author: LV3 Platform
-# Last Updated: 2026-03-28
+# Last Updated: 2026-04-06
+
+# --- Langfuse-specific DNS play (uses hetzner_dns_records role, not catalog-based) ---
 
 - name: Ensure Hetzner DNS publication for Langfuse
   hosts: proxmox_hosts
@@ -40,61 +44,12 @@
           become: false
       run_once: true
 
-- name: Prepare PostgreSQL for Langfuse
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
-  become: true
-  gather_facts: true
+# --- Standard plays (driven by vars/langfuse.yml) ---
 
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+- import_playbook: _includes/postgres_preparation.yml
+  when: service_needs_postgres | default(false)
 
-  roles:
-    - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.postgres_vm
-    - role: lv3.platform.langfuse_postgres
+- import_playbook: _includes/docker_runtime_converge.yml
 
-- name: Converge Langfuse on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
-  become: true
-  gather_facts: true
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_audit_action: playbook.start.langfuse
-        playbook_execution_audit_target: langfuse
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
-    - role: lv3.platform.langfuse_runtime
-
-- name: Publish Langfuse through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
-  become: true
-  gather_facts: true
-  vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.nginx_edge_publication
+- import_playbook: _includes/nginx_edge_publication.yml
+  when: service_needs_nginx_edge | default(false)

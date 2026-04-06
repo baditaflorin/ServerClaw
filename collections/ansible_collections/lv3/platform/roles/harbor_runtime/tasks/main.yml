@@ -29,6 +29,14 @@
 #   - Task file: verify.yml — runs read-only Harbor verification after convergence.
 #
 # Related ADRs: 0165, 0201
+- name: Derive Harbor conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: harbor
+
+
 - name: Validate Harbor runtime inputs
   ansible.builtin.assert:
     that:

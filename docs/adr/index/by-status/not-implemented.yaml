@@ -10,7 +10,7 @@ generated: '2026-04-06'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 39
+total_adrs: 36
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline

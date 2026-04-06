@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file, openbao_*,
+# container_name, internal_port, local_artifact_dir) are derived from
+# platform_service_registry — ADR 0373.
 # Purpose: Declare the shared defaults for converging the private platform-context RAG runtime, mirrored corpus, and controller token artifacts.
 # Use case: Used whenever the rag_context_runtime role renders the compose stack, mirrored corpus inputs, and verification endpoints.
 #

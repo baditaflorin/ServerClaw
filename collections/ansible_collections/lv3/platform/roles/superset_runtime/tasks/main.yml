@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because compose restarts and managed metadata reconciliation occur when the declared runtime or bootstrap inputs change.
 # Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0063, ADR 0077, and ADR 0292.
 ---
+- name: Derive Superset conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: superset
+
+
 - name: Validate Superset runtime inputs
   ansible.builtin.assert:
     that:
@@ -32,75 +40,27 @@
       superset_runtime requires runtime paths, pinned image refs, PostgreSQL
       auth, the datasource catalog, and the mirrored Keycloak client secret.
 
-- name: Check whether the Superset metadata database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ superset_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: superset_database_password_local
-
-- name: Check whether the Superset reader password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ superset_reader_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: superset_reader_password_local
-
-- name: Check whether the Superset PostgreSQL catalog exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ superset_postgres_database_catalog_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: superset_database_catalog_local
-
-- name: Check whether the Superset Keycloak client secret exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ superset_keycloak_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: superset_keycloak_client_secret_local
-
-- name: Check whether the Superset bootstrap helper exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ superset_controller_bootstrap_script_local_path }}"
-  delegate_to: localhost
-  become: false
-  register: superset_bootstrap_helper_local
-
-- name: Fail if the Superset metadata database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ superset_database_password_local_file }} is missing on the control machine.
-      Converge superset_postgres before deploying Superset.
-  when: not superset_database_password_local.stat.exists
-
-- name: Fail if the Superset reader password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ superset_reader_password_local_file }} is missing on the control machine.
-      Converge superset_postgres before deploying Superset.
-  when: not superset_reader_password_local.stat.exists
-
-- name: Fail if the Superset PostgreSQL catalog is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ superset_postgres_database_catalog_local_file }} is missing on the control machine.
-      Converge superset_postgres before deploying Superset.
-  when: not superset_database_catalog_local.stat.exists
-
-- name: Fail if the Superset Keycloak client secret is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ superset_keycloak_client_secret_local_file }} is missing on the control machine.
-      Converge the Keycloak runtime before deploying Superset.
-  when: not superset_keycloak_client_secret_local.stat.exists
-
-- name: Fail if the Superset bootstrap helper is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ superset_controller_bootstrap_script_local_path }} is missing on the control machine.
-      The repo bootstrap helper must exist before deploying Superset.
-  when: not superset_bootstrap_helper_local.stat.exists
+- name: Check Superset prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ superset_database_password_local_file }}"
+        description: "Superset metadata database password"
+        prerequisite: "Converge superset_postgres before deploying Superset"
+      - path: "{{ superset_reader_password_local_file }}"
+        description: "Superset reader password"
+        prerequisite: "Converge superset_postgres before deploying Superset"
+      - path: "{{ superset_postgres_database_catalog_local_file }}"
+        description: "Superset PostgreSQL database catalog"
+        prerequisite: "Converge superset_postgres before deploying Superset"
+      - path: "{{ superset_keycloak_client_secret_local_file }}"
+        description: "Superset Keycloak client secret"
+        prerequisite: "Converge the Keycloak runtime before deploying Superset"
+      - path: "{{ superset_controller_bootstrap_script_local_path }}"
+        description: "Superset bootstrap helper script"
+        prerequisite: "Ensure the repo bootstrap helper exists before deploying Superset"
 
 - name: Ensure the Superset runtime packages are present
   ansible.builtin.apt:
@@ -132,46 +92,34 @@
     - path: "{{ superset_secret_dir }}"
       mode: "0700"
 
-- name: Ensure the local Superset artefact directory exists
-  ansible.builtin.file:
-    path: "{{ superset_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Generate the Superset runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ superset_secret_key_remote_file }}"
-      command: "openssl rand -hex 32"
-    - path: "{{ superset_admin_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
-  register: superset_secret_generation
-  changed_when: "'changed' in superset_secret_generation.stdout"
-  no_log: true
-
-- name: Read the Superset runtime secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  register: superset_secret_reads
-  loop:
-    - "{{ superset_secret_key_remote_file }}"
-    - "{{ superset_admin_password_remote_file }}"
+- name: Manage Superset runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ superset_secret_key_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "superset-secret-key"
+      - path: "{{ superset_admin_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "superset-admin-password"
+    common_manage_service_secrets_read:
+      - "{{ superset_secret_key_remote_file }}"
+      - "{{ superset_admin_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ superset_secret_key_local_file }}"
+        content_index: 0
+      - dest: "{{ superset_admin_password_local_file }}"
+        content_index: 1
+    common_manage_service_secrets_local_artifact_dir: "{{ superset_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "superset_decoded_secrets"
   no_log: true
 
 - name: Record the Superset runtime inputs and managed secrets
   ansible.builtin.set_fact:
-    superset_secret_key: "{{ superset_secret_reads.results[0].content | b64decode | trim }}"
-    superset_admin_password: "{{ superset_secret_reads.results[1].content | b64decode | trim }}"
+    superset_secret_key: "{{ superset_decoded_secrets[0] }}"
+    superset_admin_password: "{{ superset_decoded_secrets[1] }}"
     superset_database_password: "{{ lookup('ansible.builtin.file', superset_database_password_local_file) | trim }}"
     superset_reader_password: "{{ lookup('ansible.builtin.file', superset_reader_password_local_file) | trim }}"
     superset_keycloak_client_secret: "{{ lookup('ansible.builtin.file', superset_keycloak_client_secret_local_file) | trim }}"
@@ -183,29 +131,15 @@
         ('-csearch_path=' ~ superset_database_schema ~ ',public') | urlencode
       }}
     superset_runtime_secret_payload:
-      SUPERSET_SECRET_KEY: "{{ superset_secret_reads.results[0].content | b64decode | trim }}"
+      SUPERSET_SECRET_KEY: "{{ superset_decoded_secrets[0] }}"
       SUPERSET_DATABASE_URI: >-
         postgresql+psycopg2://{{ superset_database_user }}:{{
           (lookup('ansible.builtin.file', superset_database_password_local_file) | trim) | urlencode
         }}@{{ superset_database_host }}:{{ superset_database_port }}/{{ superset_database_name }}?options={{
           ('-csearch_path=' ~ superset_database_schema ~ ',public') | urlencode
         }}
-      SUPERSET_ADMIN_PASSWORD: "{{ superset_secret_reads.results[1].content | b64decode | trim }}"
+      SUPERSET_ADMIN_PASSWORD: "{{ superset_decoded_secrets[1] }}"
       SUPERSET_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', superset_keycloak_client_secret_local_file) | trim }}"
-  no_log: true
-
-- name: Mirror the Superset runtime secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ superset_secret_key_local_file }}"
-      content: "{{ superset_secret_key }}"
-    - dest: "{{ superset_admin_password_local_file }}"
-      content: "{{ superset_admin_password }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Superset
@@ -269,6 +203,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: superset_compose_template
 
 - name: Render the Superset Dockerfile

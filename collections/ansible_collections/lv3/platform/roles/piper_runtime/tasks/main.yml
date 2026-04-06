@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and rebuild the local image only when repo inputs change.
 # Dependencies: ADR 0284 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
 ---
+- name: Derive Piper conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: piper
+
+
 - name: Validate Piper runtime inputs
   ansible.builtin.assert:
     that:

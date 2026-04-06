@@ -1,0 +1,110 @@
+---
+# Purpose: Derive all conventional runtime variables for a registered platform service.
+# Use case: Include at the top of every *_runtime role's tasks/main.yml to avoid repeating
+#           15-25 identical variable definitions across 50+ roles.
+# Inputs:
+#   common_derive_service_name (str, required) — must match a key in platform_service_registry
+#   platform_service_registry  (dict, required) — loaded from inventory/group_vars/platform_services.yml
+# Outputs: Sets {service}_site_dir, {service}_data_dir, {service}_secret_dir, {service}_compose_file,
+#          {service}_env_file, {service}_legacy_env_file, {service}_container_name, {service}_image,
+#          {service}_internal_port, {service}_internal_base_url, {service}_local_artifact_dir,
+#          and (when needs_openbao is true) all {service}_openbao_* variables.
+#          Also sets any extra_defaults declared in the registry entry.
+# Idempotency: Fully idempotent — only calls set_fact.
+# Dependencies: ADR 0373 (Service Registry and Derived Defaults).
+
+- name: "Validate {{ common_derive_service_name }} exists in platform_service_registry"
+  ansible.builtin.assert:
+    that:
+      - common_derive_service_name in platform_service_registry
+    fail_msg: >-
+      Service '{{ common_derive_service_name }}' not found in platform_service_registry.
+      Add it to inventory/group_vars/platform_services.yml.
+    quiet: true
+
+- name: "Derive conventional defaults for {{ common_derive_service_name }}"
+  ansible.builtin.set_fact:
+    "{{ common_derive_service_name }}_site_dir": >-
+      {{ platform_service_registry[common_derive_service_name].site_dir
+         | default('/opt/' + common_derive_service_name) }}
+    "{{ common_derive_service_name }}_data_dir": >-
+      {{ (platform_service_registry[common_derive_service_name].site_dir
+          | default('/opt/' + common_derive_service_name)) + '/data' }}
+    "{{ common_derive_service_name }}_secret_dir": >-
+      {{ platform_service_registry[common_derive_service_name].secret_dir
+         | default('/etc/lv3/' + common_derive_service_name) }}
+    "{{ common_derive_service_name }}_compose_file": >-
+      {{ (platform_service_registry[common_derive_service_name].site_dir
+          | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
+    "{{ common_derive_service_name }}_env_file": >-
+      {{ compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env' }}
+    "{{ common_derive_service_name }}_legacy_env_file": >-
+      {{ (platform_service_registry[common_derive_service_name].site_dir
+          | default('/opt/' + common_derive_service_name)) + '/' + common_derive_service_name + '.env' }}
+    "{{ common_derive_service_name }}_container_name": >-
+      {{ platform_service_registry[common_derive_service_name].container_name
+         | default(common_derive_service_name) }}
+    "{{ common_derive_service_name }}_image": >-
+      {{ container_image_catalog.images[platform_service_registry[common_derive_service_name].image_catalog_key].ref }}
+    "{{ common_derive_service_name }}_internal_port": >-
+      {{ platform_service_registry[common_derive_service_name].internal_port }}
+    "{{ common_derive_service_name }}_internal_base_url": >-
+      {{ 'http://127.0.0.1:' + (platform_service_registry[common_derive_service_name].internal_port | string) }}
+    "{{ common_derive_service_name }}_local_artifact_dir": >-
+      {{ repo_shared_local_root + '/' + (platform_service_registry[common_derive_service_name].local_artifact_dir
+         | default(common_derive_service_name)) }}
+  when: platform_service_registry[common_derive_service_name].image_catalog_key | default('') | length > 0
+
+- name: "Derive conventional defaults for {{ common_derive_service_name }} (no image catalog entry)"
+  ansible.builtin.set_fact:
+    "{{ common_derive_service_name }}_site_dir": >-
+      {{ platform_service_registry[common_derive_service_name].site_dir
+         | default('/opt/' + common_derive_service_name) }}
+    "{{ common_derive_service_name }}_data_dir": >-
+      {{ (platform_service_registry[common_derive_service_name].site_dir
+          | default('/opt/' + common_derive_service_name)) + '/data' }}
+    "{{ common_derive_service_name }}_secret_dir": >-
+      {{ platform_service_registry[common_derive_service_name].secret_dir
+         | default('/etc/lv3/' + common_derive_service_name) }}
+    "{{ common_derive_service_name }}_compose_file": >-
+      {{ (platform_service_registry[common_derive_service_name].site_dir
+          | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
+    "{{ common_derive_service_name }}_env_file": >-
+      {{ compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env' }}
+    "{{ common_derive_service_name }}_legacy_env_file": >-
+      {{ (platform_service_registry[common_derive_service_name].site_dir
+          | default('/opt/' + common_derive_service_name)) + '/' + common_derive_service_name + '.env' }}
+    "{{ common_derive_service_name }}_container_name": >-
+      {{ platform_service_registry[common_derive_service_name].container_name
+         | default(common_derive_service_name) }}
+    "{{ common_derive_service_name }}_internal_port": >-
+      {{ platform_service_registry[common_derive_service_name].internal_port }}
+    "{{ common_derive_service_name }}_internal_base_url": >-
+      {{ 'http://127.0.0.1:' + (platform_service_registry[common_derive_service_name].internal_port | string) }}
+    "{{ common_derive_service_name }}_local_artifact_dir": >-
+      {{ repo_shared_local_root + '/' + (platform_service_registry[common_derive_service_name].local_artifact_dir
+         | default(common_derive_service_name)) }}
+  when: platform_service_registry[common_derive_service_name].image_catalog_key | default('') | length == 0
+
+- name: "Derive OpenBao defaults for {{ common_derive_service_name }}"
+  ansible.builtin.set_fact:
+    "{{ common_derive_service_name }}_openbao_agent_dir": >-
+      {{ (platform_service_registry[common_derive_service_name].site_dir
+          | default('/opt/' + common_derive_service_name)) + '/openbao' }}
+    "{{ common_derive_service_name }}_openbao_agent_image": "{{ openbao_agent_image }}"
+    "{{ common_derive_service_name }}_openbao_agent_container_name": >-
+      {{ common_derive_service_name }}-openbao-agent
+    "{{ common_derive_service_name }}_openbao_secret_path": >-
+      services/{{ common_derive_service_name }}/runtime-env
+    "{{ common_derive_service_name }}_openbao_policy_name": >-
+      lv3-service-{{ common_derive_service_name }}-runtime
+    "{{ common_derive_service_name }}_openbao_approle_name": >-
+      {{ common_derive_service_name }}-runtime
+  when: platform_service_registry[common_derive_service_name].needs_openbao | default(true)
+
+- name: "Apply extra defaults for {{ common_derive_service_name }}"
+  ansible.builtin.set_fact:
+    "{{ item.key }}": "{{ item.value }}"
+  loop: "{{ platform_service_registry[common_derive_service_name].extra_defaults | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

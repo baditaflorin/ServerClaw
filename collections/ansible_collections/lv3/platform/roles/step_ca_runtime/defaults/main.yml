@@ -1,13 +1,13 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 step_ca_name: LV3 Internal CA
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
-step_ca_image: "{{ container_image_catalog.images.step_ca_runtime.ref }}"
 step_ca_cli_download_url: >-
   https://github.com/smallstep/cli/releases/download/v{{ step_ca_cli_version }}/step_linux_{{ step_ca_cli_version }}_amd64.tar.gz
-step_ca_site_dir: /opt/step-ca
 step_ca_home: /opt/step-ca/home
-step_ca_compose_file: /opt/step-ca/docker-compose.yml
 step_ca_password_dir: /opt/step-ca/secrets
 step_ca_container_uid: "1000"
 step_ca_container_gid: "1000"
@@ -38,21 +38,20 @@ step_ca_server_names:
   - 127.0.0.1
   - "{{ step_ca_service_topology | platform_service_host('step_ca') }}"
   - "{{ platform_host.management.tailscale_ipv4 }}"
-step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
-step_ca_local_certs_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs
-step_ca_local_ssh_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh
-step_ca_local_secrets_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets
-step_ca_local_provisioner_secrets_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners
-step_ca_local_root_certificate_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt
-step_ca_local_ssh_user_ca_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/ssh_user_ca.pub
-step_ca_local_ssh_host_ca_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/ssh_host_ca.pub
-step_ca_local_known_hosts_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh/known_hosts
-step_ca_local_bootstrap_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/bootstrap.json
-step_ca_local_ca_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/ca-password.txt
-step_ca_local_humans_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/humans-password.txt
-step_ca_local_agents_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/agents-password.txt
-step_ca_local_services_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/services-password.txt
-step_ca_local_hosts_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/hosts-password.txt
+step_ca_local_certs_dir: "{{ repo_shared_local_root }}/step-ca/certs"
+step_ca_local_ssh_dir: "{{ repo_shared_local_root }}/step-ca/ssh"
+step_ca_local_secrets_dir: "{{ repo_shared_local_root }}/step-ca/secrets"
+step_ca_local_provisioner_secrets_dir: "{{ repo_shared_local_root }}/step-ca/secrets/provisioners"
+step_ca_local_root_certificate_file: "{{ repo_shared_local_root }}/step-ca/certs/root_ca.crt"
+step_ca_local_ssh_user_ca_file: "{{ repo_shared_local_root }}/step-ca/certs/ssh_user_ca.pub"
+step_ca_local_ssh_host_ca_file: "{{ repo_shared_local_root }}/step-ca/certs/ssh_host_ca.pub"
+step_ca_local_known_hosts_file: "{{ repo_shared_local_root }}/step-ca/ssh/known_hosts"
+step_ca_local_bootstrap_file: "{{ repo_shared_local_root }}/step-ca/bootstrap.json"
+step_ca_local_ca_password_file: "{{ repo_shared_local_root }}/step-ca/secrets/ca-password.txt"
+step_ca_local_humans_password_file: "{{ repo_shared_local_root }}/step-ca/secrets/provisioners/humans-password.txt"
+step_ca_local_agents_password_file: "{{ repo_shared_local_root }}/step-ca/secrets/provisioners/agents-password.txt"
+step_ca_local_services_password_file: "{{ repo_shared_local_root }}/step-ca/secrets/provisioners/services-password.txt"
+step_ca_local_hosts_password_file: "{{ repo_shared_local_root }}/step-ca/secrets/provisioners/hosts-password.txt"
 step_ca_runtime_packages:
   - curl
   - jq
