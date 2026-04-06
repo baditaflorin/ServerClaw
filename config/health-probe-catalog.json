@@ -3846,6 +3846,51 @@
           ]
         }
       }
+    },
+    "repowise": {
+      "service_name": "repowise",
+      "owning_vm": "docker-runtime-lv3",
+      "role": null,
+      "liveness": {
+        "kind": "http",
+        "description": "Repowise semantic search service responds on its local health endpoint.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:7070/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Repowise search endpoint accepts queries after the vector index is loaded.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:7070/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Repowise Private",
+          "type": "http",
+          "url": "http://10.10.10.20:7070/health",
+          "description": "Private Repowise health endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
     }
   }
 }

@@ -2262,7 +2262,7 @@ platform_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: edge-published
+    exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: true
@@ -2273,16 +2273,6 @@ platform_service_topology:
       type: A
       target: 100.64.0.1
       ttl: 60
-    edge:
-      enabled: true
-      kind: proxy
-      tls: true
-      noindex: true
-      upstream: http://10.10.10.92:3003
-      client_max_body_size: 0
-      proxy_request_buffering: false
-      proxy_read_timeout_seconds: 600
-      proxy_send_timeout_seconds: 600
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
@@ -3852,6 +3842,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:7070
     service_id: repowise
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/repowise.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports: {}
     urls:
       public: https://repowise.lv3.org
@@ -4718,7 +4713,7 @@ public_edge_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: edge-published
+    exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: true
@@ -4729,16 +4724,6 @@ public_edge_service_topology:
       type: A
       target: 100.64.0.1
       ttl: 60
-    edge:
-      enabled: true
-      kind: proxy
-      tls: true
-      noindex: true
-      upstream: http://10.10.10.92:3003
-      client_max_body_size: 0
-      proxy_request_buffering: false
-      proxy_read_timeout_seconds: 600
-      proxy_send_timeout_seconds: 600
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
@@ -6308,6 +6293,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:7070
     service_id: repowise
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/repowise.yml
+    restart_domain: runtime-general-automation
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: movable_singleton
     ports: {}
     urls:
       public: https://repowise.lv3.org
@@ -6396,7 +6386,7 @@ matrix_synapse_controller_url: http://100.64.0.1:8015
 matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
-gitea_root_url: http://100.64.0.1:3009
+gitea_root_url: https://git.lv3.org
 gitea_private_base_url: http://10.10.10.92:3003
 gitea_controller_url: http://100.64.0.1:3009
 minio_public_url: https://minio.lv3.org
@@ -6513,17 +6503,3 @@ tika_port: 9998
 tesseract_ocr_port: 3008
 keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587
-
-# Centralized hairpin NAT host entries for Docker Compose templates — ADR 0368.
-# Services that need to reach internal domains (which resolve publicly to the
-# WAN IP but must hit the internal nginx proxy) must include these extra_hosts.
-# Use the hairpin_hosts() macro in compose_macros.j2 to emit this list.
-platform_hairpin_nat_hosts:
-  - hostname: sso.lv3.org
-    address: "{{ platform_host.network.public_edge_ipv4 }}"
-  - hostname: agents.lv3.org
-    address: "{{ platform_host.network.public_edge_ipv4 }}"
-  - hostname: dify.lv3.org
-    address: "{{ platform_host.network.public_edge_ipv4 }}"
-  - hostname: data.lv3.org
-    address: "{{ platform_host.network.public_edge_ipv4 }}"

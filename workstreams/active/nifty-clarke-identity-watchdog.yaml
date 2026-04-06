@@ -2,6 +2,8 @@ id: nifty-clarke-identity-watchdog
 adr: "0376"
 title: "Identity-core watchdog — 30s OIDC probe + oauth2-proxy auto-restart"
 status: ready_for_merge
+ready_to_merge: true
+live_applied: false
 owner: claude
 branch: claude/nifty-clarke
 worktree_path: .claude/worktrees/nifty-clarke

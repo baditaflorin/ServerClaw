@@ -1,7 +1,9 @@
 id: ws-0364-service-api-agent-tools
+adr: "0364"
 title: "Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR 0362 follow-up)"
 status: planned
 branch: main
+worktree_path: .claude/worktrees/service-api-agent-tools
 owner: unassigned
 priority: medium
 
@@ -63,6 +65,13 @@ tasks:
       IMPORTANT: use internal URL http://10.10.10.20:8094 — agents.lv3.org is behind oauth2-proxy
       Auth: .local/dify/admin-auth.json (base_url, api_token = Dify API key)
 
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/agent_tool_registry.py
+  - config/agent-tool-registry.json
+ready_to_merge: false
+live_applied: false
 ownership_manifest:
   owned_surfaces:
   - id: service_api_agent_tools

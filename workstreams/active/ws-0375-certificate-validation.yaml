@@ -2,6 +2,8 @@ id: ws-0375-certificate-validation
 adr: "0375"
 title: "Certificate Validation and Concordance Enforcement"
 status: ready
+ready_to_merge: false
+live_applied: false
 owner: platform-infrastructure
 branch: claude/nervous-feistel
 worktree_path: .claude/worktrees/nervous-feistel

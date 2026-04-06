@@ -198,10 +198,14 @@ desired_state:
   guest_network_plan:
     nginx_vm: 10.10.10.10
     docker_runtime_vm: 10.10.10.20
+    runtime_comms_vm: 10.10.10.21
+    runtime_apps_vm: 10.10.10.22
     docker_build_vm: 10.10.10.30
     monitoring_vm: 10.10.10.40
     postgres_vm: 10.10.10.50
     postgres_replica_vm: 10.10.10.51
+    postgres_apps_vm: 10.10.10.52
+    postgres_data_vm: 10.10.10.54
     backup_vm: 10.10.10.60
     coolify_vm: 10.10.10.70
     coolify_apps_vm: 10.10.10.71
@@ -215,10 +219,14 @@ desired_state:
     guest_vmids:
       nginx_vm: 110
       docker_runtime_vm: 120
+      runtime_comms_vm: 121
+      runtime_apps_vm: 122
       docker_build_vm: 130
       monitoring_vm: 140
       postgres_vm: 150
       postgres_replica_vm: 151
+      postgres_apps_vm: 152
+      postgres_data_vm: 154
       backup_vm: 160
       coolify_vm: 170
       coolify_apps_vm: 171
@@ -651,6 +659,14 @@ observed_state:
         name: docker-runtime-lv3
         ipv4: 10.10.10.20
         running: true
+      - vmid: 121
+        name: runtime-comms-lv3
+        ipv4: 10.10.10.21
+        running: false
+      - vmid: 122
+        name: runtime-apps-lv3
+        ipv4: 10.10.10.22
+        running: false
       - vmid: 130
         name: docker-build-lv3
         ipv4: 10.10.10.30
@@ -666,6 +682,14 @@ observed_state:
       - vmid: 151
         name: postgres-replica-lv3
         ipv4: 10.10.10.51
+        running: false
+      - vmid: 152
+        name: postgres-apps-lv3
+        ipv4: 10.10.10.52
+        running: false
+      - vmid: 154
+        name: postgres-data-lv3
+        ipv4: 10.10.10.54
         running: false
       - vmid: 160
         name: backup-lv3
@@ -1193,5 +1217,5 @@ release_tracks:
     current: 0.178.19
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.131.0
+    current: 0.131.1
     meaning: intended platform release for the actual server configuration

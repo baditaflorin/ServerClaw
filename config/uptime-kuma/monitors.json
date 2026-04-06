@@ -624,5 +624,18 @@
     "accepted_statuscodes": [
       "200-299"
     ]
+  },
+  {
+    "name": "Repowise Private",
+    "type": "http",
+    "url": "http://10.10.10.20:7070/health",
+    "description": "Private Repowise health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   }
 ]
