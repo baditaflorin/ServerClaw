@@ -36,47 +36,21 @@
       glitchtip_runtime requires runtime paths, image refs, database auth,
       bootstrap artifact paths, and the repo-managed Keycloak client secret.
 
-- name: Check whether the GlitchTip database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ glitchtip_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: glitchtip_database_password_local
-
-- name: Check whether the GlitchTip Keycloak client secret exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ glitchtip_keycloak_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: glitchtip_keycloak_client_secret_local
-
-- name: Check whether the GlitchTip mail submission password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ glitchtip_mail_submission_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: glitchtip_mail_submission_password_local
-
-- name: Fail if the GlitchTip database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ glitchtip_database_password_local_file }} is missing on the control machine.
-      Converge glitchtip_postgres before deploying GlitchTip.
-  when: not glitchtip_database_password_local.stat.exists
-
-- name: Fail if the GlitchTip Keycloak client secret is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ glitchtip_keycloak_client_secret_local_file }} is missing on the control machine.
-      Converge the Keycloak runtime before deploying GlitchTip.
-  when: not glitchtip_keycloak_client_secret_local.stat.exists
-
-- name: Fail if the GlitchTip mail submission password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ glitchtip_mail_submission_password_local_file }} is missing on the control machine.
-      Converge the mail platform before deploying GlitchTip.
-  when: not glitchtip_mail_submission_password_local.stat.exists
+- name: Check GlitchTip prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ glitchtip_database_password_local_file }}"
+        description: "GlitchTip database password"
+        prerequisite: "Converge glitchtip_postgres before deploying GlitchTip"
+      - path: "{{ glitchtip_keycloak_client_secret_local_file }}"
+        description: "GlitchTip Keycloak client secret"
+        prerequisite: "Converge the Keycloak runtime before deploying GlitchTip"
+      - path: "{{ glitchtip_mail_submission_password_local_file }}"
+        description: "GlitchTip mail submission password"
+        prerequisite: "Converge the mail platform before deploying GlitchTip"
 
 - name: Ensure the GlitchTip runtime packages are present
   ansible.builtin.apt:
