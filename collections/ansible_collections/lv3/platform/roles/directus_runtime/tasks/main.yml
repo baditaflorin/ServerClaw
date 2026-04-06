@@ -162,6 +162,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: directus_compose_template
 
 - name: Converge the Directus Docker stack
