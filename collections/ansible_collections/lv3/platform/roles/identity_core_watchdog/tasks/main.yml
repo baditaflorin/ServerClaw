@@ -1,0 +1,84 @@
+---
+# Purpose: Install the identity-core health watchdog on runtime-control-lv3 (ADR 0376).
+# Use case: Probes Keycloak, Step-CA, OpenBao, and API Gateway every 15 seconds.
+#   Auto-restarts services on consecutive health failures with rate limiting and ntfy alerts.
+# Inputs:
+#   - identity_watchdog_* variables from defaults/main.yml
+# Outputs:
+#   - Health check script, systemd timer+service, and state directories on the target VM.
+# Idempotency: Fully idempotent.
+# Dependencies:
+#   - ADR 0376: Identity core VM isolation and watchdog.
+#   - Role: lv3.platform.common — reused for systemd unit activation.
+# Related ADRs: 0376, 0226
+
+- name: Validate identity watchdog inputs
+  ansible.builtin.assert:
+    that:
+      - identity_watchdog_services | length > 0
+      - identity_watchdog_probe_interval_sec | int > 0
+      - identity_watchdog_failure_threshold | int > 0
+      - identity_watchdog_max_restarts_per_hour | int > 0
+      - identity_watchdog_script_path | length > 0
+    fail_msg: "identity_core_watchdog requires valid services list and probe configuration."
+
+- name: Ensure the identity watchdog directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  loop:
+    - "{{ identity_watchdog_root }}"
+    - "{{ identity_watchdog_state_dir }}"
+
+- name: Ensure the identity watchdog script directory exists
+  ansible.builtin.file:
+    path: "{{ identity_watchdog_script_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the identity watchdog health check script
+  ansible.builtin.template:
+    src: lv3-identity-watchdog.sh.j2
+    dest: "{{ identity_watchdog_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the identity watchdog systemd service
+  ansible.builtin.template:
+    src: lv3-identity-watchdog.service.j2
+    dest: "/etc/systemd/system/{{ identity_watchdog_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the identity watchdog systemd timer
+  ansible.builtin.template:
+    src: lv3-identity-watchdog.timer.j2
+    dest: "/etc/systemd/system/{{ identity_watchdog_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Clear any stale failed state for the identity watchdog service
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - reset-failed
+      - "{{ identity_watchdog_service_name }}"
+  changed_when: false
+  failed_when: false
+
+- name: Ensure the identity watchdog timer is enabled and active
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ identity_watchdog_timer_name }}"
+    common_systemd_unit_daemon_reload: true
+    common_systemd_unit_verify_active: true

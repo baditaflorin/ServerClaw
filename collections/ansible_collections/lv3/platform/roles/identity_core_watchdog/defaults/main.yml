@@ -1,0 +1,72 @@
+---
+# Purpose: Declare defaults for the identity-core health watchdog (ADR 0376).
+# Use case: Installs a systemd timer on runtime-control-lv3 that probes Keycloak, Step-CA,
+#   OpenBao, and API Gateway every 15 seconds and auto-restarts on failure.
+# Inputs:
+#   - identity_watchdog_services (list): Services to monitor with health endpoints and compose project info.
+#   - identity_watchdog_probe_interval_sec (int): Seconds between probe cycles.
+#   - identity_watchdog_failure_threshold (int): Consecutive failures before auto-restart.
+#   - identity_watchdog_max_restarts_per_hour (int): Rate limit to prevent restart storms.
+# Outputs:
+#   - Systemd timer + service + health script on the target VM.
+#   - Machine-readable status file at identity_watchdog_status_file.
+# Idempotency: Fully idempotent.
+# Dependencies:
+#   - ADR 0376: Identity core VM isolation and watchdog.
+#   - ADR 0226: Systemd as host-resident supervisor.
+# Related ADRs: 0376, 0226, 0056, 0101
+
+identity_watchdog_root: /var/lib/lv3-identity-watchdog
+identity_watchdog_status_file: "{{ identity_watchdog_root }}/status.json"
+identity_watchdog_state_dir: "{{ identity_watchdog_root }}/state"
+identity_watchdog_script_path: /usr/local/libexec/lv3-identity-watchdog.sh
+identity_watchdog_service_name: lv3-identity-watchdog.service
+identity_watchdog_timer_name: lv3-identity-watchdog.timer
+identity_watchdog_syslog_identifier: lv3-identity-watchdog
+identity_watchdog_description: LV3 identity-core health watchdog (ADR 0376)
+
+identity_watchdog_probe_interval_sec: 15
+identity_watchdog_probe_timeout_sec: 5
+identity_watchdog_failure_threshold: 2
+identity_watchdog_max_restarts_per_hour: 6
+identity_watchdog_timer_accuracy_sec: 1
+
+# ntfy notification settings
+identity_watchdog_ntfy_enabled: true
+identity_watchdog_ntfy_url: "http://127.0.0.1:2586"
+identity_watchdog_ntfy_topic: platform-identity-critical
+identity_watchdog_ntfy_priority: "5"
+identity_watchdog_ntfy_title: "LV3 Identity Watchdog"
+
+# Services to monitor — each entry must have:
+#   name: human-readable identifier
+#   compose_dir: path to the docker-compose project directory
+#   compose_service: service name within the compose file to restart
+#   health_url: HTTP(S) URL to probe
+#   health_method: curl flags (e.g. -k for TLS ignore)
+#   expected_status: HTTP status code(s) that mean healthy
+identity_watchdog_services:
+  - name: keycloak
+    compose_dir: /opt/keycloak
+    compose_service: keycloak
+    health_url: "http://127.0.0.1:19000/health/live"
+    health_method: ""
+    expected_status: "200"
+  - name: step-ca
+    compose_dir: /opt/step-ca
+    compose_service: step-ca
+    health_url: "https://127.0.0.1:9000/health"
+    health_method: "-k"
+    expected_status: "200"
+  - name: openbao
+    compose_dir: /opt/openbao
+    compose_service: openbao
+    health_url: "http://127.0.0.1:8201/v1/sys/health"
+    health_method: ""
+    expected_status: "200"
+  - name: api-gateway
+    compose_dir: /opt/api-gateway
+    compose_service: api-gateway
+    health_url: "http://127.0.0.1:8083/healthz"
+    health_method: ""
+    expected_status: "200"

@@ -1,0 +1,11 @@
+[Unit]
+Description={{ identity_watchdog_description }} timer
+
+[Timer]
+OnActiveSec=0
+OnUnitActiveSec={{ identity_watchdog_probe_interval_sec }}
+AccuracySec={{ identity_watchdog_timer_accuracy_sec }}s
+Unit={{ identity_watchdog_service_name }}
+
+[Install]
+WantedBy=timers.target

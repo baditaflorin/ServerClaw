@@ -83,6 +83,14 @@ topics:
     default_tags:
       - ci
       - rotating_light
+  platform-identity-critical:
+    description: Identity-core watchdog alerts for Keycloak, Step-CA, OpenBao, and API Gateway failures and recoveries (ADR 0376).
+    default_title: LV3 Identity Watchdog
+    default_priority: 5
+    default_tags:
+      - rotating_light
+      - shield
+      - skull
   platform-watchdog-critical:
     description: Watchdog or stale-job escalations bridged from NATS through Windmill.
     default_title: LV3 watchdog escalation
@@ -133,6 +141,11 @@ users:
       - platform-slo-warn
       - platform-security-critical
       - platform-watchdog-critical
+  identity-watchdog:
+    username: identity-watchdog
+    password_secret_id: ntfy_identity_watchdog_password
+    publish_topics:
+      - platform-identity-critical
   ops:
     username: ops
     password_secret_id: ntfy_ops_password
@@ -143,6 +156,7 @@ users:
       - platform-security-warn
       - platform-backup-critical
       - platform-security-critical
+      - platform-identity-critical
       - platform-ansible-info
       - platform-ansible-warn
       - platform-ansible-critical
