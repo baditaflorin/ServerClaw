@@ -12,7 +12,7 @@ total_adrs: 399
 adr_number_range:
   first: '0001'
   last: '0375'
-  next_available: '0376'
+  next_available: '0377'
 implementation_status_summary:
   Implemented: 338
   Partial: 8
@@ -134,6 +134,12 @@ reservation_ledger:
   expired_candidates: 0
   next_available_adr: '0376'
 latest_adrs:
+  - adr: '0376'
+    title: Credential Isolation and Agent Safety for .local/ Secrets
+    implementation_status: Implemented
+    concern: security
+    path: docs/adr/0376-credential-isolation-and-agent-safety.md
+    implemented_on: '2026-04-06'
   - adr: '0375'
     title: Certificate Validation And Concordance Enforcement
     implementation_status: Implemented

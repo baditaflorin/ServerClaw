@@ -1,8 +1,9 @@
-# Release 0.178.27
+# Release 0.178.28
 
 - Date: 2026-04-06
 
 ## Summary
+- ADR 0376: Credential isolation and agent safety — .gitignore hardening for .local symlink blind spot, pre-commit guard to block .local from index, recovery runbook (recover_local_secrets.sh), agent credential access contract, bootstrap key rotation procedure, server migration security checklist
 - wire ADR 0347-0357 agent coordination patterns into all discovery surfaces: AGENTS.md coordination section with code examples, config/integrations/ in .config-locations.yaml, validate_integrations.py + check_provenance_headers.py in scripts discovery, regenerated onboarding packs (service-catalog, automation, fork-bootstrap) now reference all 6 implemented ADRs
 - fix Woodpecker OAuth login: add nginx edge + TLS for git.lv3.org, fix WOODPECKER_GITEA_URL to use private IP (cross-host LAN), remove dead gitea_runtime_default external network from Woodpecker compose
 - AW-22 + AW-23 + provision-outline-api-token: generic _resolve_service_auth() helper (ADR 0362 gap); Outline agent tools — list-outline-collections, search-outline-documents, get-outline-document, create-outline-document (ADR 0364); provision-outline-api-token agent tool for headless credential rotation via DB
