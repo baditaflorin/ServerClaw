@@ -266,10 +266,9 @@
     timeout: "{{ keycloak_admin_connection_timeout }}"
     body_format: form-urlencoded
     body:
-      grant_type: password
-      client_id: admin-cli
-      username: "{{ keycloak_bootstrap_admin_username }}"
-      password: "{{ keycloak_bootstrap_admin_password }}"
+      grant_type: client_credentials
+      client_id: "{{ keycloak_admin_client_id }}"
+      client_secret: "{{ keycloak_admin_client_secret }}"
     return_content: true
     status_code: 200
   register: keycloak_repo_user_outline_admin_token
