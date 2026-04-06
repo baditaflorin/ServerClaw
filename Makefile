@@ -954,7 +954,7 @@ converge-directus:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/directus.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/directus.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/directus.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-jupyterhub:
 	$(MAKE) preflight WORKFLOW=converge-jupyterhub
