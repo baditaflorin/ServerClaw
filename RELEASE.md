@@ -1,8 +1,9 @@
-# Release 0.178.32
+# Release 0.178.33
 
 - Date: 2026-04-06
 
 ## Summary
+- fix: Open WebUI system prompt injection 422 — add required model config fields (DEFAULT_PINNED_MODELS, MODEL_ORDER_LIST, DEFAULT_MODEL_METADATA) to POST /api/v1/configs/models; fix endpoint from /configs/default/models; ignore ACME plugin update errors when HETZNER_DNS_API_TOKEN not forwarded
 - fix(cert-validator): TLS 1.3 support via uv run python3, DER cert parsing for internal CA (step-ca), correct fqdn/target field mapping, warn_hours policy support for short-lived certs (OpenBao), OpenBao renewal script fixed (72h→24h, deduplicated SAN)
 - fix: Gitea OAuth2 login — ROOT_URL changed to Tailscale access URL (http://100.64.0.1:3009) to fix OAuth2 state cookie mismatch; remove invalid `groups` scope from OPENID_CONNECT_SCOPES in ctmpl template
 - Fixed browser-runner service accessibility — added firewall rules to open port 8096 on docker-runtime-lv3 from management network, all guests, and Docker bridge networks; service now accessible from headscale at http://10.10.10.20:8096/
