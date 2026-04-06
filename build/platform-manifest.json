@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.24",
+  "repo_version": "0.178.25",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-06T00:20:29Z",
-  "next_refresh_at": "2026-04-06T01:20:29Z",
+  "generated_at": "2026-04-06T00:29:27Z",
+  "next_refresh_at": "2026-04-06T01:29:27Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6166,10 +6166,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.23",
+    "last_version": "0.178.24",
     "deployed_at": "2026-04-06",
     "summary": "fix Woodpecker OAuth login: add nginx edge + TLS for git.lv3.org, fix WOODPECKER_GITEA_URL to use private IP (cross-host LAN), remove dead gitea_runtime_default external network from Woodpecker compose AW-22 + AW-23 + provision-outline-api-token: generic _resolve_service_auth() helper (ADR 0362 gap); Outline agent tools \u2014 list-outline-collections, search-outline-documents, get-outline-document, create-outline-document (ADR 0364); provision-outline-api-token agent tool for headless credential rotation via DB",
-    "release_notes_url": "docs/release-notes/0.178.24.md"
+    "release_notes_url": "docs/release-notes/0.178.25.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
