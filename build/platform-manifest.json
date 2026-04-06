@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.28",
+  "repo_version": "0.178.22",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-06T09:52:52Z",
-  "next_refresh_at": "2026-04-06T10:52:52Z",
+  "generated_at": "2026-04-06T00:14:44Z",
+  "next_refresh_at": "2026-04-06T01:14:44Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6166,10 +6166,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.27",
+    "last_version": "0.178.21",
     "deployed_at": "2026-04-06",
-    "summary": "ADR 0376: Credential isolation and agent safety \u2014 .gitignore hardening for .local symlink blind spot, pre-commit guard to block .local from index, recovery runbook (recover_local_secrets.sh), agent credential access contract, bootstrap key rotation procedure, server migration security checklist wire ADR 0347-0357 agent coordination patterns into all discovery surfaces: AGENTS.md coordination section with code examples, config/integrations/ in .config-locations.yaml, validate_integrations.py + check_provenance_headers.py in scripts discovery, regenerated onboarding packs (service-catalog, automation, fork-bootstrap) now reference all 6 implemented ADRs",
-    "release_notes_url": "docs/release-notes/0.178.28.md"
+    "summary": "AW-22 + AW-23: generic _resolve_service_auth() helper (ADR 0362 gap); Outline agent tools \u2014 list-outline-collections, search-outline-documents, get-outline-document, create-outline-document (ADR 0364) ADR triage 0347-0358: implement 6 CPU-only ADRs \u2014 Integration Contract Registry (config/integrations/, validate_integrations.py), Nginx Fragment Config role (write-validate-reload), File-Domain Locking + Apply Semaphore (platform/locking/file_domain.py extending ADR 0153), Workstream Apply Receipts state machine (platform/workstream_receipts.py), Change Provenance Tagging (Jinja2 macro + check_provenance_headers.py); mark 3 ADRs Superseded (LLM-heavy: 0348, 0352, 0356) and 3 Deferred (0349, 0354, 0358)",
+    "release_notes_url": "docs/release-notes/0.178.22.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -10,7 +10,7 @@ generated: '2026-04-06'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 9
+total_adrs: 10
 adrs:
   - adr: '0346'
     title: '— Repowise: local semantic code search over the git repo'
@@ -45,6 +45,21 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
+  - adr: '0364'
+    title: Native Build Server Gate Execution
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - native
+      - build
+      - server
+      - gate
+      - execution
+    summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
+    filename: 0364-native-build-server-gate-execution.md
+    path: docs/adr/0364-native-build-server-gate-execution.md
   - adr: 0368
     title: Docker Compose Jinja2 Macro Library
     status: Proposed
