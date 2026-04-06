@@ -1,25 +1,6 @@
+{% from 'compose_macros.j2' import openbao_sidecar %}
 services:
-  openbao-agent:
-    image: {{ livekit_openbao_agent_image }}
-    container_name: {{ livekit_openbao_agent_container_name }}
-    user: "0:0"
-    environment:
-      BAO_SKIP_DROP_ROOT: "true"
-    command:
-      - agent
-      - -config=/openbao-agent/agent.hcl
-    network_mode: host
-    restart: unless-stopped
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - test -s {{ livekit_env_file }}
-      interval: 10s
-      timeout: 3s
-      retries: 12
-    volumes:
-      - {{ livekit_openbao_agent_dir }}:/openbao-agent:ro
-      - {{ livekit_env_file | dirname }}:{{ livekit_env_file | dirname }}
+{{ openbao_sidecar("livekit") }}
 
   livekit:
     image: {{ livekit_image }}
