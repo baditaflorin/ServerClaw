@@ -410,16 +410,15 @@
         src: "{{ open_webui_site_dir }}/system-prompt.md"
       register: open_webui_system_prompt_content
 
-    - name: Create or update serverclaw Ollama modelfile
+    - name: Create or update serverclaw Ollama model (from + system fields, Ollama ≥0.5 API)
       ansible.builtin.uri:
         url: "http://{{ ansible_host }}:11434/api/create"
         method: POST
         body_format: json
         body:
           name: "serverclaw:latest"
-          modelfile: |
-            FROM {{ open_webui_serverclaw_base_model }}
-            SYSTEM """{{ open_webui_system_prompt_content.content | b64decode }}"""
+          from: "{{ open_webui_serverclaw_base_model }}"
+          system: "{{ open_webui_system_prompt_content.content | b64decode }}"
         status_code:
           - 200
       changed_when: true
