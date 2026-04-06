@@ -1097,6 +1097,26 @@ network_policy:
           ports:
             - 4647
           description: Nomad server RPC to docker-runtime-lv3
+        - source: management
+          protocol: tcp
+          ports:
+            - 8096
+          description: Operator and headscale access to the private browser-runner API
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8096
+          description: Private guest-to-guest access to the browser-runner API
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 8096
+          description: Local Docker workloads that call the browser-runner API
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 8096
+          description: Local Docker workloads that call the browser-runner API
         - source: postgres-lv3
           protocol: tcp
           ports:
