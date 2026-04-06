@@ -46,7 +46,7 @@ open_webui_enable_login_form: true
 open_webui_enable_password_auth: true
 open_webui_default_user_role: pending
 open_webui_enable_openai_api: false
-open_webui_enable_ollama_api: false
+open_webui_enable_ollama_api: true
 open_webui_ollama_base_url: http://host.docker.internal:11434
 open_webui_enable_web_search: true
 open_webui_web_search_engine: searxng
@@ -69,3 +69,15 @@ open_webui_auth_cookie_secure: false
 open_webui_audit_log_level: METADATA
 open_webui_extra_hosts: []
 open_webui_public_models: []
+# RAG and Qdrant integration (ADR 0376)
+open_webui_enable_rag: true
+open_webui_rag_vector_db: qdrant
+open_webui_rag_qdrant_uri: http://host.docker.internal:6333
+open_webui_rag_embedding_engine: ollama
+open_webui_rag_embedding_model: nomic-embed-text
+open_webui_rag_top_k: 5
+open_webui_rag_relevance_threshold: "0.2"
+open_webui_rag_hybrid_search: true
+# System prompt for ServerClaw identity (ADR 0376)
+open_webui_enable_system_prompt_injection: true
+open_webui_system_prompt_template: system-prompt.md.j2

@@ -8,18 +8,18 @@
 schema_version: 2
 generated: '2026-04-06'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 399
+total_adrs: 401
 adr_number_range:
   first: '0001'
-  last: '0375'
-  next_available: '0377'
+  last: '0378'
+  next_available: '0379'
 implementation_status_summary:
   Implemented: 338
   Partial: 8
-  Not Implemented: 36
+  Not Implemented: 38
   Deprecated: 4
   Accepted: 4
-  Proposed: 9
+  Proposed: 11
 decision_status_summary:
   Accepted: 328
   Proposed: 16
@@ -44,16 +44,16 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 82
+      count: 84
       first_adr: '0300'
-      last_adr: '0375'
+      last_adr: '0378'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
       count: 2
     - concern: agent-discovery
       path: docs/adr/index/by-concern/agent-discovery.yaml
-      count: 22
+      count: 24
     - concern: api
       path: docs/adr/index/by-concern/api.yaml
       count: 10
@@ -132,8 +132,18 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0376'
+  next_available_adr: '0379'
 latest_adrs:
+  - adr: '0378'
+    title: ServerClaw Tool Surface In Open WebUI
+    implementation_status: Not Implemented
+    concern: agent-discovery
+    path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+  - adr: '0377'
+    title: Open WebUI Platform Knowledge Integration
+    implementation_status: Not Implemented
+    concern: agent-discovery
+    path: docs/adr/0377-open-webui-platform-knowledge-integration.md
   - adr: '0376'
     title: Credential Isolation and Agent Safety for .local/ Secrets
     implementation_status: Implemented

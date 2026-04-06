@@ -389,5 +389,52 @@
       changed_when: false
       no_log: true
 
+- name: Inject ServerClaw system prompt into Open WebUI
+  when:
+    - open_webui_enable_system_prompt_injection | default(false) | bool
+    - open_webui_enable_password_auth | bool
+  block:
+    - name: Render the ServerClaw system prompt
+      ansible.builtin.template:
+        src: "{{ open_webui_system_prompt_template }}"
+        dest: "{{ open_webui_site_dir }}/system-prompt.md"
+        owner: root
+        group: root
+        mode: "0644"
+      register: open_webui_system_prompt_rendered
+
+    - name: Read the rendered system prompt
+      ansible.builtin.slurp:
+        src: "{{ open_webui_site_dir }}/system-prompt.md"
+      register: open_webui_system_prompt_content
+
+    - name: Sign in as Open WebUI admin for system prompt injection
+      ansible.builtin.uri:
+        url: "{{ open_webui_internal_base_url }}/api/v1/auths/signin"
+        method: POST
+        body_format: json
+        body:
+          email: "{{ open_webui_admin_email }}"
+          password: "{{ open_webui_admin_password }}"
+        return_content: true
+        status_code: 200
+      register: open_webui_prompt_admin_signin
+      changed_when: false
+      no_log: true
+
+    - name: Set the default system prompt via Open WebUI admin config
+      ansible.builtin.uri:
+        url: "{{ open_webui_internal_base_url }}/api/v1/configs/default/models"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ open_webui_prompt_admin_signin.json.token }}"
+        body_format: json
+        body:
+          system: "{{ open_webui_system_prompt_content.content | b64decode }}"
+        status_code:
+          - 200
+          - 201
+      changed_when: open_webui_system_prompt_rendered is changed
+
 - name: Verify Open WebUI health probes
   ansible.builtin.import_tasks: verify.yml

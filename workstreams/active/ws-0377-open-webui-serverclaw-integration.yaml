@@ -1,0 +1,32 @@
+id: ws-0377-open-webui-serverclaw-integration
+adr: '0377'
+title: Open WebUI platform knowledge and ServerClaw tool integration
+status: proposed
+owner: claude
+branch: claude/elastic-curie
+worktree_path: .claude/worktrees/elastic-curie
+doc: docs/workstreams/ws-0377-open-webui-serverclaw-integration.md
+depends_on:
+- adr-0198-qdrant-vector-search
+- adr-0254-serverclaw-product
+- adr-0257-openclaw-skill-packs
+- adr-0263-serverclaw-memory-substrate
+conflicts_with: []
+shared_surfaces:
+- collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/open-webui.env.j2
+ownership_manifest:
+  owned_surfaces:
+  - id: adr_0377_0378_docs
+    paths:
+    - docs/adr/0377-open-webui-platform-knowledge-integration.md
+    - docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+    - docs/workstreams/ws-0377-open-webui-serverclaw-integration.md
+    mode: exclusive
+  - id: workstream_source
+    paths:
+    - workstreams/active/ws-0377-open-webui-serverclaw-integration.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+ready_to_merge: false
+live_applied: false
