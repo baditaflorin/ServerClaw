@@ -5,6 +5,13 @@
 # Idempotency: Partially idempotent because bootstrap, corpus sync, and runtime restarts may refresh live state.
 # Dependencies: ADR 0165, ADR 0198, and the platform-context service catalogs.
 ---
+- name: Derive Rag Context conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: rag_context
+
 - name: Validate platform context runtime inputs
   ansible.builtin.assert:
     that:
@@ -165,6 +172,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
 
 - name: Render the platform context API Dockerfile
   ansible.builtin.copy:

@@ -1,5 +1,12 @@
 ---
 # Purpose: Deploy Paperless-ngx and reconcile the repo-managed document taxonomy.
+- name: Derive Paperless conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: paperless
+
 
 - name: Validate Paperless runtime inputs
   ansible.builtin.assert:
@@ -246,6 +253,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: paperless_compose_template
 
 - name: Pull the Paperless images
