@@ -15,7 +15,7 @@
 #              Reruns reconcile the same runtime stack, bootstrap secrets, and MinIO upload settings.
 #
 # Dependencies:
-#   - ADR 0146, ADR 0165, and ADR 0274.
+#   - ADR 0146, ADR 0165, ADR 0274, and ADR 0370.
 - name: Validate Langfuse runtime inputs
   ansible.builtin.assert:
     that:
@@ -37,47 +37,21 @@
       langfuse_runtime requires runtime paths, pinned image refs, database auth,
       and the repo-managed Keycloak client secret.
 
-- name: Check whether the Langfuse database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ langfuse_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: langfuse_database_password_local
-
-- name: Check whether the Langfuse Keycloak client secret exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ langfuse_keycloak_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: langfuse_keycloak_client_secret_local
-
-- name: Check whether the Langfuse MinIO secret key exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ langfuse_minio_secret_key_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: langfuse_minio_secret_key_local
-
-- name: Fail if the Langfuse database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ langfuse_database_password_local_file }} is missing on the control machine.
-      Converge langfuse_postgres before deploying Langfuse.
-  when: not langfuse_database_password_local.stat.exists
-
-- name: Fail if the Langfuse Keycloak client secret is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ langfuse_keycloak_client_secret_local_file }} is missing on the control machine.
-      Converge the Keycloak runtime before deploying Langfuse.
-  when: not langfuse_keycloak_client_secret_local.stat.exists
-
-- name: Fail if the Langfuse MinIO secret key is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ langfuse_minio_secret_key_local_file }} is missing on the control machine.
-      Converge MinIO before deploying Langfuse so shared object storage is available.
-  when: not langfuse_minio_secret_key_local.stat.exists
+- name: Check Langfuse prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ langfuse_database_password_local_file }}"
+        description: "Langfuse database password"
+        prerequisite: "Converge langfuse_postgres before deploying Langfuse"
+      - path: "{{ langfuse_keycloak_client_secret_local_file }}"
+        description: "Langfuse Keycloak client secret"
+        prerequisite: "Converge the Keycloak runtime before deploying Langfuse"
+      - path: "{{ langfuse_minio_secret_key_local_file }}"
+        description: "Langfuse MinIO secret key"
+        prerequisite: "Converge MinIO before deploying Langfuse so shared object storage is available"
 
 - name: Ensure the Langfuse runtime packages are present
   ansible.builtin.apt:
@@ -115,117 +89,103 @@
     - path: "{{ langfuse_secret_dir }}"
       mode: "0700"
 
-- name: Generate the Langfuse runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ langfuse_nextauth_secret_remote_file }}"
-      command: "openssl rand -base64 36 | tr -d '\n'"
-    - path: "{{ langfuse_salt_remote_file }}"
-      command: "openssl rand -hex 16"
-    - path: "{{ langfuse_encryption_key_remote_file }}"
-      command: "openssl rand -hex 32"
-    - path: "{{ langfuse_clickhouse_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\n'"
-    - path: "{{ langfuse_redis_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\n'"
-    - path: "{{ langfuse_bootstrap_user_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\n'"
-    - path: "{{ langfuse_project_public_key_remote_file }}"
-      command: "python3 -c \"from uuid import uuid4; print(f'pk-lf-{uuid4()}')\""
-    - path: "{{ langfuse_project_secret_key_remote_file }}"
-      command: "python3 -c \"from uuid import uuid4; print(f'sk-lf-{uuid4()}')\""
-  register: langfuse_secret_generation
-  changed_when: "'changed' in langfuse_secret_generation.stdout"
+- name: Manage Langfuse runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ langfuse_nextauth_secret_remote_file }}"
+        command: "openssl rand -base64 36 | tr -d '\\n'"
+        label: "langfuse-nextauth-secret"
+      - path: "{{ langfuse_salt_remote_file }}"
+        command: "openssl rand -hex 16"
+        label: "langfuse-salt"
+      - path: "{{ langfuse_encryption_key_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "langfuse-encryption-key"
+      - path: "{{ langfuse_clickhouse_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "langfuse-clickhouse-password"
+      - path: "{{ langfuse_redis_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "langfuse-redis-password"
+      - path: "{{ langfuse_bootstrap_user_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "langfuse-bootstrap-user-password"
+      - path: "{{ langfuse_project_public_key_remote_file }}"
+        command: "python3 -c \"from uuid import uuid4; print(f'pk-lf-{uuid4()}')\""
+        label: "langfuse-project-public-key"
+      - path: "{{ langfuse_project_secret_key_remote_file }}"
+        command: "python3 -c \"from uuid import uuid4; print(f'sk-lf-{uuid4()}')\""
+        label: "langfuse-project-secret-key"
+    common_manage_service_secrets_read:
+      - "{{ langfuse_nextauth_secret_remote_file }}"
+      - "{{ langfuse_salt_remote_file }}"
+      - "{{ langfuse_encryption_key_remote_file }}"
+      - "{{ langfuse_clickhouse_password_remote_file }}"
+      - "{{ langfuse_redis_password_remote_file }}"
+      - "{{ langfuse_bootstrap_user_password_remote_file }}"
+      - "{{ langfuse_project_public_key_remote_file }}"
+      - "{{ langfuse_project_secret_key_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ langfuse_nextauth_secret_local_file }}"
+        content_index: 0
+      - dest: "{{ langfuse_salt_local_file }}"
+        content_index: 1
+      - dest: "{{ langfuse_encryption_key_local_file }}"
+        content_index: 2
+      - dest: "{{ langfuse_clickhouse_password_local_file }}"
+        content_index: 3
+      - dest: "{{ langfuse_redis_password_local_file }}"
+        content_index: 4
+      - dest: "{{ langfuse_bootstrap_user_password_local_file }}"
+        content_index: 5
+      - dest: "{{ langfuse_project_public_key_local_file }}"
+        content_index: 6
+      - dest: "{{ langfuse_project_secret_key_local_file }}"
+        content_index: 7
+    common_manage_service_secrets_local_artifact_dir: "{{ langfuse_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "langfuse_decoded_secrets"
   no_log: true
 
-- name: Read the Langfuse runtime secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  register: langfuse_secret_reads
-  loop:
-    - "{{ langfuse_nextauth_secret_remote_file }}"
-    - "{{ langfuse_salt_remote_file }}"
-    - "{{ langfuse_encryption_key_remote_file }}"
-    - "{{ langfuse_clickhouse_password_remote_file }}"
-    - "{{ langfuse_redis_password_remote_file }}"
-    - "{{ langfuse_bootstrap_user_password_remote_file }}"
-    - "{{ langfuse_project_public_key_remote_file }}"
-    - "{{ langfuse_project_secret_key_remote_file }}"
-  no_log: true
+- name: Mirror the Langfuse project ID to the control machine
+  ansible.builtin.copy:
+    dest: "{{ langfuse_project_id_local_file }}"
+    content: "{{ langfuse_init_project_id }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
 
 - name: Record the Langfuse runtime secrets
   ansible.builtin.set_fact:
-    langfuse_nextauth_secret: "{{ langfuse_secret_reads.results[0].content | b64decode | trim }}"
-    langfuse_salt: "{{ langfuse_secret_reads.results[1].content | b64decode | trim }}"
-    langfuse_encryption_key: "{{ langfuse_secret_reads.results[2].content | b64decode | trim }}"
-    langfuse_clickhouse_password: "{{ langfuse_secret_reads.results[3].content | b64decode | trim }}"
-    langfuse_redis_password: "{{ langfuse_secret_reads.results[4].content | b64decode | trim }}"
-    langfuse_bootstrap_user_password: "{{ langfuse_secret_reads.results[5].content | b64decode | trim }}"
-    langfuse_project_public_key: "{{ langfuse_secret_reads.results[6].content | b64decode | trim }}"
-    langfuse_project_secret_key: "{{ langfuse_secret_reads.results[7].content | b64decode | trim }}"
+    langfuse_nextauth_secret: "{{ langfuse_decoded_secrets[0] }}"
+    langfuse_salt: "{{ langfuse_decoded_secrets[1] }}"
+    langfuse_encryption_key: "{{ langfuse_decoded_secrets[2] }}"
+    langfuse_clickhouse_password: "{{ langfuse_decoded_secrets[3] }}"
+    langfuse_redis_password: "{{ langfuse_decoded_secrets[4] }}"
+    langfuse_bootstrap_user_password: "{{ langfuse_decoded_secrets[5] }}"
+    langfuse_project_public_key: "{{ langfuse_decoded_secrets[6] }}"
+    langfuse_project_secret_key: "{{ langfuse_decoded_secrets[7] }}"
     langfuse_database_password: "{{ lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim }}"
     langfuse_keycloak_client_secret: "{{ lookup('ansible.builtin.file', langfuse_keycloak_client_secret_local_file) | trim }}"
     langfuse_minio_secret_key: "{{ lookup('ansible.builtin.file', langfuse_minio_secret_key_local_file) | trim }}"
     langfuse_database_url: >-
       postgresql://{{ langfuse_database_user }}:{{ (lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim) | urlencode }}@{{ langfuse_database_host }}:5432/{{ langfuse_database_name }}
     langfuse_runtime_secret_payload:
-      NEXTAUTH_SECRET: "{{ langfuse_secret_reads.results[0].content | b64decode | trim }}"
-      SALT: "{{ langfuse_secret_reads.results[1].content | b64decode | trim }}"
-      ENCRYPTION_KEY: "{{ langfuse_secret_reads.results[2].content | b64decode | trim }}"
-      CLICKHOUSE_PASSWORD: "{{ langfuse_secret_reads.results[3].content | b64decode | trim }}"
-      REDIS_AUTH: "{{ langfuse_secret_reads.results[4].content | b64decode | trim }}"
+      NEXTAUTH_SECRET: "{{ langfuse_decoded_secrets[0] }}"
+      SALT: "{{ langfuse_decoded_secrets[1] }}"
+      ENCRYPTION_KEY: "{{ langfuse_decoded_secrets[2] }}"
+      CLICKHOUSE_PASSWORD: "{{ langfuse_decoded_secrets[3] }}"
+      REDIS_AUTH: "{{ langfuse_decoded_secrets[4] }}"
       LANGFUSE_S3_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', langfuse_minio_secret_key_local_file) | trim }}"
-      LANGFUSE_INIT_USER_PASSWORD: "{{ langfuse_secret_reads.results[5].content | b64decode | trim }}"
-      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: "{{ langfuse_secret_reads.results[6].content | b64decode | trim }}"
-      LANGFUSE_INIT_PROJECT_SECRET_KEY: "{{ langfuse_secret_reads.results[7].content | b64decode | trim }}"
+      LANGFUSE_INIT_USER_PASSWORD: "{{ langfuse_decoded_secrets[5] }}"
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: "{{ langfuse_decoded_secrets[6] }}"
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: "{{ langfuse_decoded_secrets[7] }}"
       DATABASE_PASSWORD: "{{ lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim }}"
       DATABASE_URL: >-
         postgresql://{{ langfuse_database_user }}:{{ (lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim) | urlencode }}@{{ langfuse_database_host }}:5432/{{ langfuse_database_name }}
       AUTH_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', langfuse_keycloak_client_secret_local_file) | trim }}"
-  no_log: true
-
-- name: Ensure the local Langfuse artifact directory exists
-  ansible.builtin.file:
-    path: "{{ langfuse_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the Langfuse bootstrap and API secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ langfuse_nextauth_secret_local_file }}"
-      content: "{{ langfuse_nextauth_secret }}"
-    - dest: "{{ langfuse_salt_local_file }}"
-      content: "{{ langfuse_salt }}"
-    - dest: "{{ langfuse_encryption_key_local_file }}"
-      content: "{{ langfuse_encryption_key }}"
-    - dest: "{{ langfuse_clickhouse_password_local_file }}"
-      content: "{{ langfuse_clickhouse_password }}"
-    - dest: "{{ langfuse_redis_password_local_file }}"
-      content: "{{ langfuse_redis_password }}"
-    - dest: "{{ langfuse_bootstrap_user_password_local_file }}"
-      content: "{{ langfuse_bootstrap_user_password }}"
-    - dest: "{{ langfuse_project_public_key_local_file }}"
-      content: "{{ langfuse_project_public_key }}"
-    - dest: "{{ langfuse_project_secret_key_local_file }}"
-      content: "{{ langfuse_project_secret_key }}"
-    - dest: "{{ langfuse_project_id_local_file }}"
-      content: "{{ langfuse_init_project_id }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Langfuse

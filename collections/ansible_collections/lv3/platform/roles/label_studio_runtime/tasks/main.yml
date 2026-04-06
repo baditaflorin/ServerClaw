@@ -3,7 +3,7 @@
 # Inputs: Runtime paths, image refs, PostgreSQL credentials, and repo-managed project catalog defaults.
 # Outputs: The live Label Studio container, OpenBao-backed runtime env, and repo-managed annotation projects match repo truth.
 # Idempotency: Partially idempotent because compose restarts and project syncs are performed when the declared runtime or project catalog changes.
-# Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0077, and ADR 0289.
+# Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0077, ADR 0289, and ADR 0370.
 ---
 - name: Validate Label Studio runtime inputs
   ansible.builtin.assert:
@@ -31,19 +31,15 @@
       label_studio_runtime requires runtime paths, PostgreSQL auth, local admin
       credentials, and the repo-managed sync inputs.
 
-- name: Check whether the Label Studio database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ label_studio_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: label_studio_database_password_local
-
-- name: Fail if the Label Studio database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ label_studio_database_password_local_file }} is missing on the control machine.
-      Converge label_studio_postgres before deploying Label Studio.
-  when: not label_studio_database_password_local.stat.exists
+- name: Check Label Studio prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ label_studio_database_password_local_file }}"
+        description: "Label Studio database password"
+        prerequisite: "Converge label_studio_postgres before deploying Label Studio"
 
 - name: Ensure the Label Studio runtime packages are present
   ansible.builtin.apt:
@@ -214,162 +210,21 @@
     mode: "0644"
   register: label_studio_compose_template
 
-- name: Pull the Label Studio image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ label_studio_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ label_studio_site_dir }}"
-  register: label_studio_pull
-  retries: 5
-  delay: 5
-  until: label_studio_pull.rc == 0
-  changed_when: >-
-    'Pulling' in label_studio_pull.stdout
-    or 'Downloaded newer image' in label_studio_pull.stdout
-    or 'Pull complete' in label_studio_pull.stdout
-
-- name: Check whether the Docker nat chain exists before Label Studio startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: label_studio_docker_nat_chain
-  changed_when: false
-  failed_when: false
-
-- name: Restore Docker networking when the nat chain is missing before Label Studio startup
-  ansible.builtin.service:
-    name: docker
-    state: restarted
-  when: label_studio_docker_nat_chain.rc != 0
-
-- name: Recheck the Docker nat chain before Label Studio startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: label_studio_docker_nat_chain_recheck
-  changed_when: false
-  failed_when: label_studio_docker_nat_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
-  until: label_studio_docker_nat_chain_recheck.rc == 0
-  when: label_studio_docker_nat_chain.rc != 0
-
-- name: Wait for the Docker daemon to answer after networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - info
-      - --format
-      - '{{ "{{.ServerVersion}}" }}'
-  register: label_studio_docker_info
-  changed_when: false
-  retries: 10
-  delay: 2
-  until: label_studio_docker_info.rc == 0
-  when: label_studio_docker_nat_chain.rc != 0
-
-- name: Verify the Docker nat chain after networking recovery before Label Studio startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: label_studio_docker_nat_chain_verify
-  changed_when: false
-  failed_when: label_studio_docker_nat_chain_verify.rc not in [0, 1]
-  when: label_studio_docker_nat_chain.rc != 0
-
-- name: Assert Docker nat chain is present before Label Studio startup
-  ansible.builtin.assert:
-    that:
-      - label_studio_docker_nat_chain.rc == 0 or (label_studio_docker_nat_chain_verify.rc | default(1)) == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; Label Studio published ports will fail."
-
-- name: Check whether the Label Studio local port is already published
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ label_studio_internal_port }}"
-    delay: 0
-    timeout: 1
-  register: label_studio_local_port_probe
-  changed_when: false
-  failed_when: false
-
-- name: Check whether the current Label Studio version endpoint is healthy before startup
-  ansible.builtin.uri:
-    url: "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
-    method: GET
-    status_code: 200
-  register: label_studio_health_probe
-  changed_when: false
-  failed_when: false
-
-- name: Record whether the Label Studio startup needs a force recreate
-  ansible.builtin.set_fact:
-    label_studio_force_recreate: >-
-      {{
-        label_studio_docker_nat_chain.rc != 0
-        or (label_studio_env_template.changed | default(false))
-        or (label_studio_project_catalog_template.changed | default(false))
-        or (label_studio_compose_template.changed | default(false))
-        or (label_studio_pull.changed | default(false))
-        or (label_studio_local_port_probe.failed | default(false))
-        or (label_studio_health_probe.status | default(0)) != 200
-      }}
-
-- name: Start the Label Studio stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ label_studio_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ label_studio_site_dir }}"
-  register: label_studio_up
-  changed_when: >-
-    'Creating' in label_studio_up.stdout
-    or 'Recreating' in label_studio_up.stdout
-    or 'Starting' in label_studio_up.stdout
-  when: not label_studio_force_recreate
-
-- name: Force-recreate the Label Studio stack after runtime drift or Docker recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ label_studio_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
-  args:
-    chdir: "{{ label_studio_site_dir }}"
-  register: label_studio_force_recreate_up
-  changed_when: >-
-    'Creating' in label_studio_force_recreate_up.stdout
-    or 'Recreating' in label_studio_force_recreate_up.stdout
-    or 'Starting' in label_studio_force_recreate_up.stdout
-  when: label_studio_force_recreate
+- name: Converge the Label Studio Docker stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ label_studio_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ label_studio_site_dir }}"
+    common_docker_compose_converge_service_name: label-studio
+    common_docker_compose_converge_template_results:
+      - "{{ label_studio_env_template }}"
+      - "{{ label_studio_project_catalog_template }}"
+      - "{{ label_studio_compose_template }}"
+    common_docker_compose_converge_health_port: "{{ label_studio_internal_port }}"
+    common_docker_compose_converge_health_url: "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
+    common_docker_compose_converge_force_recreate_service: label-studio
 
 - name: Verify the Label Studio runtime before project synchronization
   ansible.builtin.import_tasks: verify.yml
