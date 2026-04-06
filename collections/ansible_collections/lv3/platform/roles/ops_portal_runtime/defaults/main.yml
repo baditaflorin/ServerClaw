@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the shared defaults for converging the interactive ops portal runtime, synced portal data, and live verification endpoints.
 # Use case: Run from the managed ops-portal playbook when the repo-managed dashboard, templates, or supporting portal data contracts change.
 #
@@ -23,22 +26,15 @@
 # Related Runbooks: docs/runbooks/ops-portal-down.md
 
 ops_portal_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
-ops_portal_site_dir: /opt/ops-portal
 ops_portal_service_dir: "{{ ops_portal_site_dir }}/service"
 ops_portal_build_context_dir: "{{ ops_portal_site_dir }}/build-context"
-ops_portal_data_dir: "{{ ops_portal_site_dir }}/data"
 ops_portal_state_dir: "{{ ops_portal_site_dir }}/state"
-ops_portal_secret_dir: /etc/lv3/ops-portal
-ops_portal_compose_file: "{{ ops_portal_site_dir }}/docker-compose.yml"
-ops_portal_env_file: "{{ ops_portal_site_dir }}/ops-portal.env"
 ops_portal_session_secret_file: "{{ ops_portal_secret_dir }}/session-secret.txt"
 ops_portal_attention_state_file: "{{ ops_portal_state_dir }}/attention-state.json"
-ops_portal_container_name: ops-portal
 ops_portal_network_mode: host
 ops_portal_bind_address: 0.0.0.0
 ops_portal_container_port: "{{ ops_portal_internal_port }}"
 ops_portal_verify_address: "{{ ansible_host | default('127.0.0.1') }}"
-ops_portal_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.ops_portal_port | default(8092) }}"
 ops_portal_gateway_substrate_owner_vm: runtime-control-lv3
 ops_portal_gateway_substrate_port: 9080
 ops_portal_gateway_substrate_path: /api-gateway

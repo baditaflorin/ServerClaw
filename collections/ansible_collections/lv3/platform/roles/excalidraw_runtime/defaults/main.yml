@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Define the Excalidraw runtime defaults, pinned images, local ports, and shared edge hostname.
 # Inputs: Inventory facts, platform topology helpers, and the managed image catalog.
 # Outputs: Role defaults consumed by the Excalidraw runtime converge and verification tasks.

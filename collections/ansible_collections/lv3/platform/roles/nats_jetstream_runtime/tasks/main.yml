@@ -5,6 +5,14 @@
 # Outputs: /opt/nats-jetstream config and compose files, a running lv3-nats-jetstream container, and a healthy loopback monitor endpoint.
 # Idempotency: Yes; the role re-renders config deterministically and replays docker compose safely.
 # Dependencies: ADR 0079, ADR 0124, ADR 0276, and the docker runtime being available on docker-runtime-lv3.
+- name: Derive Nats Jetstream conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: nats_jetstream
+
+
 - name: Validate NATS JetStream runtime inputs
   ansible.builtin.assert:
     that:

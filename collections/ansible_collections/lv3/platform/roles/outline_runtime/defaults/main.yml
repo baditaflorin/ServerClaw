@@ -1,22 +1,12 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file, openbao_*,
+# container_name, internal_port, local_artifact_dir) are derived from
+# platform_service_registry — ADR 0373.
 # Purpose: Default runtime inputs for the Outline knowledge wiki.
 
 outline_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('outline') }}"
 outline_session_authority: "{{ platform_session_authority }}"
-outline_site_dir: /opt/outline
-outline_data_dir: "{{ outline_site_dir }}/data"
 outline_minio_data_dir: "{{ outline_data_dir }}/minio"
-outline_secret_dir: /etc/lv3/outline
-outline_compose_file: "{{ outline_site_dir }}/docker-compose.yml"
-outline_env_file: "{{ compose_runtime_secret_root }}/outline/runtime.env"
-outline_legacy_env_file: "{{ outline_site_dir }}/outline.env"
-outline_openbao_agent_dir: "{{ outline_site_dir }}/openbao"
-outline_openbao_agent_image: "{{ openbao_agent_image }}"
-outline_openbao_agent_container_name: outline-openbao-agent
-outline_openbao_secret_path: services/outline/runtime-env
-outline_openbao_policy_name: lv3-service-outline-runtime
-outline_openbao_approle_name: outline-runtime
-outline_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.outline_port }}"
 outline_internal_base_url: "http://127.0.0.1:{{ outline_internal_port }}"
 outline_public_base_url: "https://{{ outline_service_topology.public_hostname }}"
 outline_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
@@ -25,24 +15,21 @@ outline_public_hostname_overrides:
     address: "{{ outline_public_edge_private_ip }}"
   - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ outline_public_edge_private_ip }}"
-outline_container_name: outline
 outline_redis_container_name: outline-redis
 outline_minio_container_name: outline-minio
-outline_image: "{{ container_image_catalog.images.outline_runtime.ref }}"
 outline_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
 outline_minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
 outline_database_name: outline
 outline_database_user: outline
 outline_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-outline_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/database-password.txt
-outline_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline
-outline_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/secret-key.txt
-outline_utils_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/utils-secret.txt
-outline_redis_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/redis-password.txt
-outline_minio_root_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/minio-root-password.txt
-outline_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/api-token.txt
-outline_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline-client-secret.txt
-outline_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
+outline_database_password_local_file: "{{ outline_local_artifact_dir }}/database-password.txt"
+outline_secret_key_local_file: "{{ outline_local_artifact_dir }}/secret-key.txt"
+outline_utils_secret_local_file: "{{ outline_local_artifact_dir }}/utils-secret.txt"
+outline_redis_password_local_file: "{{ outline_local_artifact_dir }}/redis-password.txt"
+outline_minio_root_password_local_file: "{{ outline_local_artifact_dir }}/minio-root-password.txt"
+outline_api_token_local_file: "{{ outline_local_artifact_dir }}/api-token.txt"
+outline_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/outline-client-secret.txt"
+outline_operator_password_local_file: "{{ repo_shared_local_root }}/keycloak/outline.automation-password.txt"
 outline_secret_key_remote_file: "{{ outline_secret_dir }}/secret-key.txt"
 outline_utils_secret_remote_file: "{{ outline_secret_dir }}/utils-secret.txt"
 outline_redis_password_remote_file: "{{ outline_secret_dir }}/redis-password.txt"

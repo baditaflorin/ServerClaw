@@ -4,6 +4,14 @@
 # Outputs: Rendered compose files, patched frontend bootstrap script, and running Excalidraw containers.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and reapply the deterministic frontend patch.
 # Dependencies: ADR 0202, ADR 0165; requires docker_runtime and shared nginx_edge_publication outputs.
+- name: Derive Excalidraw conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: excalidraw
+
+
 - name: Validate Excalidraw runtime inputs
   ansible.builtin.assert:
     that:

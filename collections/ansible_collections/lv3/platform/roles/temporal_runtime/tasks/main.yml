@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because namespace bootstrap report mirroring and runtime secret refreshes may intentionally update artifacts.
 # Dependencies: ADR 0165, ADR 0077, ADR 0270, and ADR 0293.
 ---
+- name: Derive Temporal conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: temporal
+
+
 - name: Validate Temporal runtime inputs
   ansible.builtin.assert:
     that:
@@ -129,6 +137,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: temporal_compose_render
 
 - name: Ensure Docker bridge networking chains are present before Temporal startup

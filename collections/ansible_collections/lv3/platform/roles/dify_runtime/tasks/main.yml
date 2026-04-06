@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because one-time secret generation and compose restarts occur only when runtime inputs change.
 # Dependencies: ADR 0165, ADR 0043, ADR 0044, ADR 0146, and ADR 0197.
 ---
+- name: Derive Dify conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: dify
+
+
 - name: Validate Dify runtime inputs
   ansible.builtin.assert:
     that:

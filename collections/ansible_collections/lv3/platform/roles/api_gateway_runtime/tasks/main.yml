@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because some downstream sync and container restart steps intentionally refresh deployed state.
 # Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
 ---
+- name: Derive Api Gateway conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: api_gateway
+
+
 - name: Validate API gateway runtime inputs
   ansible.builtin.assert:
     that:

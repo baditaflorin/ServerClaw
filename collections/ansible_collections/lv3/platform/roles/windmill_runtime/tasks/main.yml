@@ -6,6 +6,14 @@
 # Dependencies: ADR 0077, ADR 0106, ADR 0113, ADR 0165; requires openbao_runtime and windmill_postgres outputs.
 # Related Runbooks: docs/runbooks/configure-windmill.md, docs/runbooks/world-state-materializer.md
 
+- name: Derive Windmill conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: windmill
+
+
 - name: Validate Windmill runtime inputs
   ansible.builtin.include_role:
     name: lv3.platform.common

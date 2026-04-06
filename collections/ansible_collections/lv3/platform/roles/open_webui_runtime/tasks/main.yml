@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because bootstrap state and runtime restarts may intentionally refresh live state.
 # Dependencies: ADR 0165, ADR 0060, ADR 0145, and ADR 0148.
 ---
+- name: Derive Open Webui conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: open_webui
+
+
 - name: Validate Open WebUI runtime inputs
   ansible.builtin.assert:
     that:

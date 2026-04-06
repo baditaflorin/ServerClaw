@@ -5,6 +5,14 @@
 # Outputs: Rendered compose runtime, synchronized model bootstrap inputs, and a running Ollama service.
 # Idempotency: Partially idempotent; reruns reconcile the same runtime and model bootstrap configuration.
 # Dependencies: ADR 0165, ADR 0198, and the shared Docker runtime contract.
+- name: Derive Ollama conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: ollama
+
+
 - name: Validate Ollama runtime inputs
   ansible.builtin.assert:
     that:

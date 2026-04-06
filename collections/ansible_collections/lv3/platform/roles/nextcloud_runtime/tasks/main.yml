@@ -1,5 +1,6 @@
 ---
 # Purpose: Converge the Nextcloud runtime, bootstrap local secrets, and enforce the repo-managed DAV publication contract.
+# ADR 0373: derive_service_defaults called at top.
 # Use case: Run during Nextcloud deployment, upgrade, or replay on docker-runtime-lv3 once PostgreSQL, OpenBao, and the shared edge exist.
 #
 # Inputs (required):
@@ -26,6 +27,14 @@
 #   - Task file: verify.yml — performs the post-start local verification flow.
 #
 # Related ADRs: 0077, 0165, 0260
+
+- name: Derive Nextcloud conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: nextcloud
+
 
 - name: Validate Nextcloud runtime inputs
   ansible.builtin.assert:

@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because password generation and compose restarts only occur when required state is missing or changed.
 # Dependencies: ADR 0165, ADR 0023, and lv3.platform.ntfy_runtime defaults.
 ---
+- name: Derive Ntfy conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: ntfy
+
+
 - name: Validate ntfy runtime inputs
   ansible.builtin.assert:
     that:

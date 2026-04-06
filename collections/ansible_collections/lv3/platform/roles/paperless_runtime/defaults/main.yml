@@ -1,23 +1,14 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file, openbao_*,
+# container_name, internal_port, local_artifact_dir) are derived from
+# platform_service_registry — ADR 0373.
 # Purpose: Default runtime inputs for the Paperless document archive and API.
 
 paperless_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('paperless') }}"
-paperless_site_dir: /opt/paperless
-paperless_secret_dir: /etc/lv3/paperless
-paperless_compose_file: "{{ paperless_site_dir }}/docker-compose.yml"
-paperless_env_file: "{{ compose_runtime_secret_root }}/paperless/runtime.env"
-paperless_legacy_env_file: "{{ paperless_site_dir }}/paperless.env"
-paperless_openbao_agent_dir: "{{ paperless_site_dir }}/openbao"
-paperless_openbao_agent_image: "{{ openbao_agent_image }}"
-paperless_openbao_agent_container_name: paperless-openbao-agent
-paperless_openbao_secret_path: services/paperless/runtime-env
 paperless_openbao_api_token_path: services/paperless/api-token
-paperless_openbao_policy_name: lv3-service-paperless-runtime
-paperless_openbao_approle_name: paperless-runtime
 paperless_openbao_runtime_compose_file: "{{ openbao_compose_file | default('/opt/openbao/docker-compose.yml') }}"
 paperless_openbao_runtime_service_name: openbao
 paperless_openbao_runtime_recovery_enabled: "{{ paperless_openbao_runtime_compose_file | length > 0 }}"
-paperless_internal_port: "{{ paperless_service_topology.ports.internal }}"
 paperless_internal_base_url: "http://127.0.0.1:{{ paperless_internal_port }}"
 paperless_public_base_url: "https://{{ paperless_service_topology.public_hostname }}"
 paperless_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
@@ -26,25 +17,22 @@ paperless_public_hostname_overrides:
     address: "{{ paperless_public_edge_private_ip }}"
   - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ paperless_public_edge_private_ip }}"
-paperless_container_name: paperless
 paperless_redis_container_name: paperless-redis
-paperless_image: "{{ container_image_catalog.images.paperless_runtime.ref }}"
 paperless_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
 paperless_image_pull_retries: 5
 paperless_image_pull_delay_seconds: 5
 paperless_database_name: paperless
 paperless_database_user: paperless
 paperless_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-paperless_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless
-paperless_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/database-password.txt
-paperless_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/secret-key.txt
-paperless_redis_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/redis-password.txt
-paperless_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/admin-password.txt
-paperless_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/api-token.txt
-paperless_taxonomy_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/taxonomy.json
-paperless_sync_report_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/sync-report.json
-paperless_smoke_report_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/smoke-upload-report.json
-paperless_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/paperless-client-secret.txt
+paperless_database_password_local_file: "{{ paperless_local_artifact_dir }}/database-password.txt"
+paperless_secret_key_local_file: "{{ paperless_local_artifact_dir }}/secret-key.txt"
+paperless_redis_password_local_file: "{{ paperless_local_artifact_dir }}/redis-password.txt"
+paperless_admin_password_local_file: "{{ paperless_local_artifact_dir }}/admin-password.txt"
+paperless_api_token_local_file: "{{ paperless_local_artifact_dir }}/api-token.txt"
+paperless_taxonomy_local_file: "{{ paperless_local_artifact_dir }}/taxonomy.json"
+paperless_sync_report_local_file: "{{ paperless_local_artifact_dir }}/sync-report.json"
+paperless_smoke_report_local_file: "{{ paperless_local_artifact_dir }}/smoke-upload-report.json"
+paperless_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/paperless-client-secret.txt"
 paperless_secret_key_remote_file: "{{ paperless_secret_dir }}/secret-key.txt"
 paperless_redis_password_remote_file: "{{ paperless_secret_dir }}/redis-password.txt"
 paperless_admin_password_remote_file: "{{ paperless_secret_dir }}/admin-password.txt"

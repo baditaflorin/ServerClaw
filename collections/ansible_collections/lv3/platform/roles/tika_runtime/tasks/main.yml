@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and recover stale Docker state when possible.
 # Dependencies: ADR 0275 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
 ---
+- name: Derive Tika conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: tika
+
+
 - name: Validate Apache Tika runtime inputs
   ansible.builtin.assert:
     that:

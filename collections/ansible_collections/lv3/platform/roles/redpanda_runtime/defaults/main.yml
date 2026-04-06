@@ -1,22 +1,13 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 redpanda_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('redpanda') }}"
-redpanda_site_dir: /opt/redpanda
 redpanda_config_dir: "{{ redpanda_site_dir }}/config"
-redpanda_compose_file: "{{ redpanda_site_dir }}/docker-compose.yml"
 redpanda_compose_env_file: "{{ compose_runtime_secret_root }}/redpanda/runtime.env"
-redpanda_legacy_env_file: "{{ redpanda_site_dir }}/runtime.env"
-redpanda_openbao_agent_dir: "{{ redpanda_site_dir }}/openbao"
-redpanda_openbao_agent_image: "{{ openbao_agent_image }}"
-redpanda_openbao_agent_container_name: redpanda-openbao-agent
-redpanda_openbao_secret_path: services/redpanda/runtime-env
-redpanda_openbao_policy_name: lv3-service-redpanda-runtime
-redpanda_openbao_approle_name: redpanda-runtime
-redpanda_image: "{{ container_image_catalog.images.redpanda_runtime.ref }}"
-redpanda_container_name: lv3-redpanda
 redpanda_volume_name: lv3-redpanda-data
 redpanda_bootstrap_file: "{{ redpanda_config_dir }}/.bootstrap.yaml"
 redpanda_start_script_file: "{{ redpanda_config_dir }}/start-redpanda.sh"
-redpanda_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/redpanda
 redpanda_admin_password_local_file: "{{ redpanda_local_artifact_dir }}/admin-password.txt"
 redpanda_platform_password_local_file: "{{ redpanda_local_artifact_dir }}/platform-password.txt"
 redpanda_admin_user: redpanda-admin

@@ -36,6 +36,14 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-29
+- name: Derive Matrix Synapse conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: matrix_synapse
+
+
 - name: Validate Matrix Synapse runtime inputs
   ansible.builtin.assert:
     that:

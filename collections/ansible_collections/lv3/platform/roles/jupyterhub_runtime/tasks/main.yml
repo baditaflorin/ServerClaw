@@ -1,6 +1,14 @@
 ---
 # Purpose: Build the repo-managed JupyterHub images, converge the runtime stack, and verify a smoke single-user spawn.
 
+- name: Derive Jupyterhub conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: jupyterhub
+
+
 - name: Validate JupyterHub runtime inputs
   ansible.builtin.assert:
     that:

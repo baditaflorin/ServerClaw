@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because compose restarts and managed metadata reconciliation occur when the declared runtime or bootstrap inputs change.
 # Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0063, ADR 0077, and ADR 0292.
 ---
+- name: Derive Superset conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: superset
+
+
 - name: Validate Superset runtime inputs
   ansible.builtin.assert:
     that:
@@ -269,6 +277,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: superset_compose_template
 
 - name: Render the Superset Dockerfile

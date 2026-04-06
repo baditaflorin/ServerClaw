@@ -5,6 +5,9 @@
 # Idempotency: Fully idempotent because this file only declares desired defaults.
 # Dependencies: ADR 0165 and ADR 0340.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 coolify_app_image: ghcr.io/coollabsio/coolify:latest
 coolify_realtime_image: ghcr.io/coollabsio/coolify-realtime:1.0.11
 coolify_postgres_image: postgres:15-alpine
@@ -19,11 +22,8 @@ coolify_proxy_image: traefik:v3.6
 coolify_container_uid: "9999"
 coolify_container_gid: "9999"
 
-coolify_site_dir: /opt/coolify
 coolify_bootstrap_dir: /etc/coolify/bootstrap
 coolify_data_root: /data/coolify
-coolify_compose_file: "{{ coolify_site_dir }}/docker-compose.yml"
-coolify_env_file: "{{ coolify_data_root }}/source/.env"
 coolify_bootstrap_private_key_file: "{{ coolify_bootstrap_dir }}/server-key"
 coolify_proxy_path: "{{ coolify_data_root }}/proxy"
 
@@ -54,7 +54,6 @@ coolify_server_host: host.docker.internal
 coolify_server_port: 22
 coolify_server_proxy_type: TRAEFIK
 
-coolify_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify
 coolify_root_password_local_file: "{{ coolify_local_artifact_dir }}/root-password.txt"
 coolify_api_token_local_file: "{{ coolify_local_artifact_dir }}/api-token.txt"
 coolify_server_key_local_file: "{{ coolify_local_artifact_dir }}/server-key"

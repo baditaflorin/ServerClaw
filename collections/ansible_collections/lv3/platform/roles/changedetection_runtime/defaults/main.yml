@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 changedetection_runtime_site_dir: /opt/changedetection
 changedetection_runtime_secret_dir: /etc/lv3/changedetection
 changedetection_runtime_compose_file: "{{ changedetection_runtime_site_dir }}/docker-compose.yml"
@@ -15,7 +18,7 @@ changedetection_runtime_internal_base_url: "{{ hostvars['proxmox_florin'].platfo
 changedetection_runtime_base_url: "{{ changedetection_runtime_internal_base_url }}"
 changedetection_runtime_recheck_minimum_seconds: 3600
 changedetection_runtime_volume_name: changedetection-datastore
-changedetection_runtime_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/changedetection-password.txt
+changedetection_runtime_ntfy_password_local_file: "{{ repo_shared_local_root }}/ntfy/changedetection-password.txt"
 changedetection_runtime_ntfy_username: changedetection
 changedetection_runtime_ntfy_topic: platform-security-warn
 changedetection_runtime_ntfy_host: "{{ hostvars['proxmox_florin'].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}"

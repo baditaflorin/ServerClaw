@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Default runtime inputs for the LiveKit deployment used by voice-enabled agent sessions.
 # Use case: Consumed whenever the LiveKit runtime, verification helper, or public edge publication must match repo truth.
 #
@@ -26,19 +29,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 livekit_service_topology: "{{ platform_service_topology | service_topology_get('livekit') }}"
-livekit_image: "{{ container_image_catalog.images.livekit_runtime.ref }}"
-livekit_container_name: lv3-livekit
-livekit_site_dir: /opt/livekit
-livekit_compose_file: "{{ livekit_site_dir }}/docker-compose.yml"
 livekit_config_file: "{{ livekit_site_dir }}/livekit.yaml"
-livekit_env_file: "{{ compose_runtime_secret_root }}/livekit/runtime.env"
-livekit_legacy_env_file: "{{ livekit_site_dir }}/livekit.env"
-livekit_openbao_agent_dir: "{{ livekit_site_dir }}/openbao"
-livekit_openbao_agent_image: "{{ openbao_agent_image }}"
-livekit_openbao_agent_container_name: livekit-openbao-agent
-livekit_openbao_secret_path: services/livekit/runtime-env
-livekit_openbao_policy_name: lv3-service-livekit-runtime
-livekit_openbao_approle_name: livekit-runtime
 livekit_repo_root: "{{ inventory_dir | dirname }}"
 livekit_shared_local_root: >-
   {{
@@ -51,7 +42,6 @@ livekit_shared_local_root: >-
     )
     ~ '/.local'
   }}
-livekit_local_artifact_dir: "{{ livekit_shared_local_root }}/livekit"
 livekit_api_key_local_file: "{{ livekit_local_artifact_dir }}/api-key.txt"
 livekit_api_secret_local_file: "{{ livekit_local_artifact_dir }}/api-secret.txt"
 livekit_helper_script_local_file: "{{ livekit_repo_root }}/scripts/livekit_tool.py"

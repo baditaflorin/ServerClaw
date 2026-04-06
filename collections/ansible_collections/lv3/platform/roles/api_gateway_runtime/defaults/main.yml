@@ -5,6 +5,9 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 api_gateway_service_topology: >-
   {{
     hostvars['proxmox_florin'].platform_service_topology.api_gateway
@@ -21,17 +24,10 @@ api_gateway_lago_service_topology: >-
       )
   }}
 api_gateway_repo_root: "{{ inventory_dir | dirname }}"
-api_gateway_site_dir: /opt/api-gateway
 api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
 api_gateway_config_dir: "{{ api_gateway_site_dir }}/config"
-api_gateway_data_dir: "{{ api_gateway_site_dir }}/data"
-api_gateway_compose_file: "{{ api_gateway_site_dir }}/docker-compose.yml"
-api_gateway_env_file: "{{ api_gateway_site_dir }}/api-gateway.env"
 api_gateway_image_name: lv3-platform-api-gateway
-api_gateway_container_name: api-gateway
 api_gateway_network_mode: host
-api_gateway_internal_port: 8080
-api_gateway_local_artifact_dir: "{{ api_gateway_repo_root }}/.local/api-gateway"
 api_gateway_shared_local_root: >-
   {{
     (

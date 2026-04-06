@@ -1,6 +1,14 @@
 ---
 # Purpose: Converge the Flagsmith CE runtime, bootstrap identity, environment keys, and repo-managed feature seed state.
 
+- name: Derive Flagsmith conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: flagsmith
+
+
 - name: Validate Flagsmith runtime inputs
   ansible.builtin.assert:
     that:

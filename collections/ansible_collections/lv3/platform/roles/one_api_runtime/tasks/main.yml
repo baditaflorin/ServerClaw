@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because bootstrap assets and runtime secrets may be created or refreshed intentionally.
 # Dependencies: ADR 0165, ADR 0023, ADR 0101, and ADR 0294.
 ---
+- name: Derive One Api conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: one_api
+
+
 - name: Validate One-API runtime inputs
   ansible.builtin.assert:
     that:

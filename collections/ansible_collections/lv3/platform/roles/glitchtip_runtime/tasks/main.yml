@@ -6,6 +6,14 @@
 # Idempotency: Partially idempotent; reruns reconcile the same runtime and refresh bootstrap artifacts while preserving stable generated secrets.
 # Dependencies: ADR 0165 metadata standard, ADR 0281, docker runtime availability, OpenBao secret injection, and the Keycloak client secret mirror.
 
+- name: Derive Glitchtip conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: glitchtip
+
+
 - name: Validate GlitchTip runtime inputs
   ansible.builtin.assert:
     that:

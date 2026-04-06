@@ -5,6 +5,14 @@
 # Idempotency: Partially idempotent because compose restarts and project syncs are performed when the declared runtime or project catalog changes.
 # Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0077, ADR 0289, and ADR 0370.
 ---
+- name: Derive Label Studio conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: label_studio
+
+
 - name: Validate Label Studio runtime inputs
   ansible.builtin.assert:
     that:
