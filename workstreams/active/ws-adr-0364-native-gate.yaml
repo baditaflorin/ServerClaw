@@ -43,6 +43,7 @@ ownership_manifest:
     paths:
     - config/service-completeness.json
     - config/service-redundancy-catalog.json
+    - config/health-probe-catalog.json
     mode: exclusive
   - id: workstream_registry
     paths:

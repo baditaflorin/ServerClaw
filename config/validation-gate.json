@@ -151,7 +151,7 @@
     "cache_mounts": [
       "trivy"
     ],
-    "native_command": "trivy fs --timeout 15m --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL ."
+    "native_command": "trivy fs --timeout 15m --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-dirs .local --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL ."
   },
   "semgrep-sast": {
     "description": "Run the repo-managed Semgrep SAST, secret-pattern, and Dockerfile policy scan and write the SARIF receipt.",

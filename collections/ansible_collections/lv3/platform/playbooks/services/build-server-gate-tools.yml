@@ -45,6 +45,7 @@
           - "types-PyYAML"
           - "checkov=={{ gate_tools_checkov_version }}"
           - "pytest=={{ gate_tools_pytest_version }}"
+          - "httpx"
         state: present
         executable: pip3
         extra_args: "--break-system-packages"
