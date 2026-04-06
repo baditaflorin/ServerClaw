@@ -8,7 +8,11 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+# local_artifact_dir is provided as a stable default below so partial task files
+# (open_webui_client.yml, serverclaw_client.yml) can run on guest hosts without
+# platform_service_registry in scope. derive_service_defaults overrides this when available.
 # Purpose: Default runtime inputs for Keycloak and its repo-managed identity integrations.
+keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
 
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 keycloak_session_authority: "{{ platform_session_authority }}"

@@ -5,13 +5,6 @@
 # Idempotency: Partially idempotent because Keycloak reconciliation may refresh secrets and mirrored artifacts.
 # Dependencies: ADR 0165, ADR 0254, and the repo-managed Keycloak runtime.
 ---
-- name: Derive Keycloak conventional defaults from the service registry
-  ansible.builtin.include_role:
-    name: lv3.platform.common
-    tasks_from: derive_service_defaults
-  vars:
-    common_derive_service_name: keycloak
-
 - name: Ensure the repo-managed Keycloak admin client secret exists on the control machine
   ansible.builtin.stat:
     path: "{{ keycloak_admin_client_secret_local_file }}"
