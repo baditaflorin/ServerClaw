@@ -67,3 +67,11 @@ related_adrs:
 
 branch: claude/nervous-feistel
 worktree: nervous-feistel
+doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0375_cert_validation_codification_workstream
+    paths:
+    - workstreams/active/ws-0375-certificate-validation-codification.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1

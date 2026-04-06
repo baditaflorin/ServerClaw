@@ -3,6 +3,15 @@ title: "Service API agent tools: Outline, Netbox, Dify + generic auth helper (AD
 status: planned
 owner: unassigned
 priority: medium
+branch: main
+doc: docs/adr/0362-agent-service-api-gateway-pattern.md
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0364_service_api_agent_tools_workstream
+    paths:
+    - workstreams/active/ws-0364-service-api-agent-tools.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
 
 description: |
   ADR 0362 (Agent Service API Gateway) is implemented for Plane (ADR 0363) but three

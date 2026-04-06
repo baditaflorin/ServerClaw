@@ -151,7 +151,7 @@
     "cache_mounts": [
       "trivy"
     ],
-    "native_command": "./scripts/validate_repo.sh security-scan"
+    "native_command": "trivy fs --timeout 15m --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL ."
   },
   "semgrep-sast": {
     "description": "Run the repo-managed Semgrep SAST, secret-pattern, and Dockerfile policy scan and write the SARIF receipt.",
@@ -172,7 +172,7 @@
     "command": "python3 scripts/iac_policy_scan.py",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
-    "native_command": "./scripts/validate_repo.sh iac-policy-scan"
+    "native_command": "python3 scripts/iac_policy_scan.py"
   },
   "artifact-secret-scan": {
     "description": "Scan published receipts and generated publication artifacts for secrets with the repo-managed gitleaks rules.",
@@ -181,7 +181,7 @@
     "command": "python scripts/published_artifact_secret_scan.py --repo-root /workspace --enforce-gitleaks",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
-    "native_command": "./scripts/validate_repo.sh artifact-secret-scan"
+    "native_command": "python3 scripts/published_artifact_secret_scan.py --repo-root . --enforce-gitleaks"
   },
   "service-completeness": {
     "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
@@ -208,7 +208,7 @@
     "command": "./scripts/run_python_with_packages.sh mypy pyyaml types-PyYAML httpx -- -m mypy --cache-dir /tmp/mypy-cache scripts/atlas_schema.py scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/atlas-drift-check.py config/windmill/scripts/post-merge-gate.py tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 180,
-    "native_command": "./scripts/validate_repo.sh type-check"
+    "native_command": "python3 -m mypy --cache-dir /tmp/mypy-cache scripts/atlas_schema.py scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/atlas-drift-check.py config/windmill/scripts/post-merge-gate.py tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py"
   },
   "integration-tests": {
     "description": "Run the ADR 0111 non-destructive integration suite against staging if active, or record a repo-managed skip if no integration target is currently available.",
@@ -217,7 +217,7 @@
     "command": "python scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
-    "native_command": "python3 -m pytest tests/ -x -q 2>/dev/null || python3 scripts/run_integration_tests.py >/dev/null"
+    "native_command": "python3 -m pytest tests/ -x -q"
   },
   "yaml-lint": {
     "description": "Run full-repository yamllint across tracked YAML files.",
