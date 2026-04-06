@@ -1,0 +1,632 @@
+---
+# platform_services.yml — service registry — ADR 0373
+# GENERATED: false (maintained by hand, validated by scripts/validate_service_registry.py)
+#
+# Each entry declares a service's identity. The common/tasks/derive_service_defaults.yml
+# task derives all conventional variables (site_dir, image, openbao_*, etc.) from these
+# entries at play time. Roles should NOT define conventional variables in their
+# defaults/main.yml — those are computed here.
+#
+# Required fields per entry:
+#   image_catalog_key  — key in container_image_catalog.images (config/image-catalog.json)
+#   internal_port      — port the container listens on inside the host
+#   host_group         — Ansible host/group this service deploys to (production host name)
+#
+# Optional fields:
+#   site_dir           — override /opt/<service_name>
+#   secret_dir         — override /etc/lv3/<service_name>
+#   container_name     — override <service_name>
+#   needs_openbao      — default true; set false to skip OpenBao variable derivation
+#   needs_redis        — informational, default false
+#   needs_postgres     — informational, default false
+#   local_artifact_dir — relative path under .local/ (default: .local/<service_name>)
+#   extra_defaults     — map of additional key-value variables to set as facts
+
+platform_service_registry:
+
+  # ---------------------------------------------------------------------------
+  # A
+  # ---------------------------------------------------------------------------
+
+  api_gateway:
+    image_catalog_key: ""            # api-gateway is a bespoke binary, no catalog entry
+    internal_port: 8080
+    host_group: runtime-control-lv3
+    site_dir: /opt/api-gateway
+    container_name: api-gateway
+    needs_openbao: false
+    extra_defaults:
+      api_gateway_database_port: 5432
+
+  artifact_cache:
+    image_catalog_key: ""            # uses upstream docker.io/library/registry — no catalog key
+    internal_port: 5001
+    host_group: artifact-cache-lv3
+    site_dir: /opt/artifact-cache
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # B
+  # ---------------------------------------------------------------------------
+
+  browser_runner:
+    image_catalog_key: ""            # built locally from Dockerfile.j2
+    internal_port: 8096
+    host_group: docker-runtime-lv3
+    site_dir: /opt/browser-runner
+    container_name: browser-runner
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # C
+  # ---------------------------------------------------------------------------
+
+  changedetection:
+    image_catalog_key: changedetection_runtime
+    internal_port: 5000
+    host_group: docker-runtime-lv3
+    site_dir: /opt/changedetection
+    container_name: changedetection
+    needs_openbao: false
+
+  coolify:
+    image_catalog_key: ""            # uses upstream ghcr.io/coollabsio/coolify
+    internal_port: 8000
+    host_group: coolify-lv3
+    site_dir: /opt/coolify
+    needs_openbao: false
+
+  crawl4ai:
+    image_catalog_key: crawl4ai_runtime
+    internal_port: 11235
+    host_group: docker-runtime-lv3
+    site_dir: /opt/crawl4ai
+    container_name: crawl4ai
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # D
+  # ---------------------------------------------------------------------------
+
+  dify:
+    image_catalog_key: dify_api_runtime
+    internal_port: 8094
+    host_group: docker-runtime-lv3
+    site_dir: /opt/dify
+    container_name: dify-api
+    needs_openbao: true
+
+  directus:
+    image_catalog_key: directus_runtime
+    internal_port: 8055
+    host_group: docker-runtime-lv3
+    site_dir: /opt/directus
+    container_name: directus
+    needs_openbao: true
+    needs_postgres: true
+    extra_defaults:
+      directus_admin_email: directus.admin@lv3.org
+      directus_health_path: /server/health
+      directus_ping_path: /server/ping
+      directus_graphql_path: /graphql
+      directus_openapi_path: /server/specs/oas
+
+  dozzle:
+    image_catalog_key: dozzle_runtime
+    internal_port: 8089
+    host_group: docker-runtime-lv3
+    site_dir: /opt/dozzle
+    container_name: dozzle
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # E
+  # ---------------------------------------------------------------------------
+
+  excalidraw:
+    image_catalog_key: ""            # uses upstream docker.io/excalidraw/excalidraw
+    internal_port: 3095
+    host_group: docker-runtime-lv3
+    site_dir: /opt/excalidraw
+    container_name: excalidraw-app
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # F
+  # ---------------------------------------------------------------------------
+
+  flagsmith:
+    image_catalog_key: flagsmith_runtime
+    internal_port: 8017
+    host_group: docker-runtime-lv3
+    site_dir: /opt/flagsmith
+    container_name: flagsmith
+    needs_openbao: true
+    needs_postgres: true
+    extra_defaults:
+      flagsmith_health_path: /health
+
+  # ---------------------------------------------------------------------------
+  # G
+  # ---------------------------------------------------------------------------
+
+  gitea:
+    image_catalog_key: ""            # uses upstream docker.io/gitea/gitea — pinned by digest in defaults
+    internal_port: 3003
+    host_group: docker-runtime-lv3
+    site_dir: /opt/gitea
+    container_name: gitea
+    needs_openbao: true
+    needs_postgres: true
+
+  glitchtip:
+    image_catalog_key: glitchtip_runtime
+    internal_port: 3005
+    host_group: docker-runtime-lv3
+    site_dir: /opt/glitchtip
+    container_name: glitchtip
+    needs_openbao: true
+    needs_postgres: true
+
+  gotenberg:
+    image_catalog_key: gotenberg_runtime
+    internal_port: 3007
+    host_group: docker-runtime-lv3
+    site_dir: /opt/gotenberg
+    container_name: gotenberg
+    needs_openbao: false
+
+  grist:
+    image_catalog_key: grist_runtime
+    internal_port: 8484
+    host_group: docker-runtime-lv3
+    site_dir: /opt/grist
+    container_name: grist
+    needs_openbao: true
+    needs_postgres: false
+
+  # ---------------------------------------------------------------------------
+  # H
+  # ---------------------------------------------------------------------------
+
+  harbor:
+    image_catalog_key: ""            # harbor is multi-component, no single catalog key
+    internal_port: 8095
+    host_group: runtime-control-lv3
+    site_dir: /opt/harbor
+    needs_openbao: false
+
+  homepage:
+    image_catalog_key: homepage_runtime
+    internal_port: 3090
+    host_group: runtime-general-lv3
+    site_dir: /opt/homepage
+    container_name: homepage
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # J
+  # ---------------------------------------------------------------------------
+
+  jupyterhub:
+    image_catalog_key: ""            # uses upstream quay.io/jupyterhub/jupyterhub — pinned in defaults
+    internal_port: 8097
+    host_group: docker-runtime-lv3
+    site_dir: /opt/jupyterhub
+    container_name: jupyterhub
+    needs_openbao: true
+
+  # ---------------------------------------------------------------------------
+  # K
+  # ---------------------------------------------------------------------------
+
+  keycloak:
+    image_catalog_key: ""            # uses upstream quay.io/keycloak/keycloak — pinned in defaults
+    internal_port: 8091
+    host_group: docker-runtime-lv3
+    site_dir: /opt/keycloak
+    container_name: keycloak
+    needs_openbao: true
+
+  # ---------------------------------------------------------------------------
+  # L
+  # ---------------------------------------------------------------------------
+
+  label_studio:
+    image_catalog_key: label_studio_runtime
+    internal_port: 8110
+    host_group: docker-runtime-lv3
+    site_dir: /opt/label-studio
+    container_name: label-studio
+    needs_openbao: true
+    needs_postgres: true
+
+  lago:
+    image_catalog_key: lago_api_runtime
+    internal_port: 8099
+    host_group: docker-runtime-lv3
+    site_dir: /opt/lago
+    container_name: lago-api
+    needs_openbao: false
+    needs_postgres: true
+
+  langfuse:
+    image_catalog_key: langfuse_runtime
+    internal_port: 3002
+    host_group: docker-runtime-lv3
+    site_dir: /opt/langfuse
+    container_name: langfuse-web
+    needs_openbao: true
+    needs_postgres: true
+
+  livekit:
+    image_catalog_key: livekit_runtime
+    internal_port: 7880
+    host_group: docker-runtime-lv3
+    site_dir: /opt/livekit
+    container_name: lv3-livekit
+    needs_openbao: true
+
+  # ---------------------------------------------------------------------------
+  # M
+  # ---------------------------------------------------------------------------
+
+  mail_platform:
+    image_catalog_key: mail_platform_stalwart_runtime
+    internal_port: 8081
+    host_group: docker-runtime-lv3
+    site_dir: /opt/mail-platform
+    container_name: lv3-mail-stalwart
+    needs_openbao: true
+
+  mailpit:
+    image_catalog_key: mailpit_runtime
+    internal_port: 8025
+    host_group: runtime-general-lv3
+    site_dir: /opt/dev-tools/mailpit
+    container_name: mailpit
+    needs_openbao: false
+
+  matrix_synapse:
+    image_catalog_key: matrix_synapse_runtime
+    internal_port: 8008
+    host_group: docker-runtime-lv3
+    site_dir: /opt/matrix-synapse
+    container_name: matrix-synapse
+    needs_openbao: true
+    needs_postgres: true
+
+  mattermost:
+    image_catalog_key: ""            # uses upstream mattermost/mattermost-team-edition — pinned in defaults
+    internal_port: 8065
+    host_group: docker-runtime-lv3
+    site_dir: /opt/mattermost
+    container_name: lv3-mattermost
+    needs_openbao: true
+    needs_postgres: true
+
+  minio:
+    image_catalog_key: minio_runtime
+    internal_port: 9010
+    host_group: docker-runtime-lv3
+    site_dir: /opt/minio
+    container_name: minio
+    needs_openbao: true
+
+  # ---------------------------------------------------------------------------
+  # N
+  # ---------------------------------------------------------------------------
+
+  n8n:
+    image_catalog_key: n8n_runtime
+    internal_port: 5678
+    host_group: docker-runtime-lv3
+    site_dir: /opt/n8n
+    container_name: n8n
+    needs_openbao: true
+    needs_postgres: true
+
+  nats_jetstream:
+    image_catalog_key: ""            # uses upstream nats:2.11-alpine
+    internal_port: 4222
+    host_group: runtime-control-lv3
+    site_dir: /opt/nats-jetstream
+    container_name: lv3-nats-jetstream
+    needs_openbao: false
+
+  netbox:
+    image_catalog_key: netbox_runtime
+    internal_port: 8082
+    host_group: docker-runtime-lv3
+    site_dir: /opt/netbox
+    container_name: netbox
+    needs_openbao: true
+    needs_postgres: true
+
+  nextcloud:
+    image_catalog_key: nextcloud_runtime
+    internal_port: 8084
+    host_group: docker-runtime-lv3
+    site_dir: /opt/nextcloud
+    container_name: nextcloud-app
+    needs_openbao: true
+    needs_postgres: true
+
+  ntfy:
+    image_catalog_key: ntfy_runtime
+    internal_port: 2586
+    host_group: docker-runtime-lv3
+    site_dir: /opt/ntfy
+    container_name: ntfy
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # O
+  # ---------------------------------------------------------------------------
+
+  ollama:
+    image_catalog_key: ollama_runtime
+    internal_port: 11434
+    host_group: runtime-ai-lv3
+    site_dir: /opt/ollama
+    container_name: ollama
+    needs_openbao: false
+
+  one_api:
+    image_catalog_key: one_api_runtime
+    internal_port: 8101
+    host_group: docker-runtime-lv3
+    site_dir: /opt/one-api
+    container_name: one-api
+    needs_openbao: true
+
+  open_webui:
+    image_catalog_key: open_webui_runtime
+    internal_port: 8088
+    host_group: docker-runtime-lv3
+    site_dir: /opt/open-webui
+    container_name: open-webui
+    needs_openbao: true
+
+  openbao:
+    image_catalog_key: openbao_runtime
+    internal_port: 8201
+    host_group: docker-runtime-lv3
+    site_dir: /opt/openbao
+    container_name: lv3-openbao
+    needs_openbao: false
+
+  openfga:
+    image_catalog_key: openfga_runtime
+    internal_port: 8098
+    host_group: docker-runtime-lv3
+    site_dir: /opt/openfga
+    container_name: lv3-openfga
+    needs_openbao: true
+
+  ops_portal:
+    image_catalog_key: ""            # ops-portal is a bespoke container built locally
+    internal_port: 8092
+    host_group: docker-runtime-lv3
+    site_dir: /opt/ops-portal
+    container_name: ops-portal
+    needs_openbao: false
+
+  outline:
+    image_catalog_key: outline_runtime
+    internal_port: 3006
+    host_group: docker-runtime-lv3
+    site_dir: /opt/outline
+    container_name: outline
+    needs_openbao: true
+    needs_postgres: true
+
+  # ---------------------------------------------------------------------------
+  # P
+  # ---------------------------------------------------------------------------
+
+  paperless:
+    image_catalog_key: paperless_runtime
+    internal_port: 8018
+    host_group: docker-runtime-lv3
+    site_dir: /opt/paperless
+    container_name: paperless
+    needs_openbao: true
+    needs_postgres: true
+
+  piper:
+    image_catalog_key: ""            # built locally from python base image
+    internal_port: 8106
+    host_group: runtime-ai-lv3
+    site_dir: /opt/piper
+    container_name: piper
+    needs_openbao: false
+
+  plane:
+    image_catalog_key: plane_frontend_runtime
+    internal_port: 8093
+    host_group: docker-runtime-lv3
+    site_dir: /opt/plane
+    container_name: plane-web
+    needs_openbao: true
+    needs_postgres: true
+
+  plausible:
+    image_catalog_key: plausible_runtime
+    internal_port: 8016
+    host_group: docker-runtime-lv3
+    site_dir: /opt/plausible
+    container_name: plausible
+    needs_openbao: true
+
+  portainer:
+    image_catalog_key: portainer_runtime
+    internal_port: 9443
+    host_group: docker-runtime-lv3
+    site_dir: /opt/portainer
+    container_name: portainer
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # R
+  # ---------------------------------------------------------------------------
+
+  rag_context:
+    image_catalog_key: ""            # rag-context uses qdrant/qdrant — no catalog key for main service
+    internal_port: 8010
+    host_group: docker-runtime-lv3
+    site_dir: /opt/platform-context
+    container_name: platform-context
+    needs_openbao: true
+
+  redpanda:
+    image_catalog_key: redpanda_runtime
+    internal_port: 9092
+    host_group: runtime-control-lv3
+    site_dir: /opt/redpanda
+    container_name: lv3-redpanda
+    needs_openbao: true
+
+  repowise:
+    image_catalog_key: ""            # uses upstream python:3.12-slim
+    internal_port: 7070
+    host_group: docker-runtime-lv3
+    site_dir: /opt/repowise
+    container_name: repowise
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # S
+  # ---------------------------------------------------------------------------
+
+  searxng:
+    image_catalog_key: searxng_runtime
+    internal_port: 8881
+    host_group: docker-runtime-lv3
+    site_dir: /opt/searxng
+    container_name: searxng
+    needs_openbao: false
+
+  semaphore:
+    image_catalog_key: semaphore_runtime
+    internal_port: 3004
+    host_group: docker-runtime-lv3
+    site_dir: /opt/semaphore
+    container_name: semaphore
+    needs_openbao: true
+
+  sftpgo:
+    image_catalog_key: ""            # uses upstream drakkan/sftpgo — no catalog key
+    internal_port: 8080
+    host_group: docker-runtime-lv3
+    site_dir: /opt/sftpgo
+    container_name: sftpgo
+    needs_openbao: true
+
+  step_ca:
+    image_catalog_key: step_ca_runtime
+    internal_port: 9000
+    host_group: runtime-control-lv3
+    site_dir: /opt/step-ca
+    container_name: step-ca
+    needs_openbao: false
+
+  superset:
+    image_catalog_key: ""            # uses upstream docker.io/apache/superset — pinned in defaults
+    internal_port: 8105
+    host_group: docker-runtime-lv3
+    site_dir: /opt/superset
+    container_name: superset
+    needs_openbao: true
+    needs_postgres: true
+
+  # ---------------------------------------------------------------------------
+  # T
+  # ---------------------------------------------------------------------------
+
+  temporal:
+    image_catalog_key: temporal_server_runtime
+    internal_port: 7243
+    host_group: docker-runtime-lv3
+    site_dir: /opt/temporal
+    container_name: temporal-server
+    needs_openbao: true
+    needs_postgres: true
+
+  tesseract_ocr:
+    image_catalog_key: ""            # built locally from python base image
+    internal_port: 3008
+    host_group: runtime-ai-lv3
+    site_dir: /opt/tesseract-ocr
+    container_name: tesseract-ocr
+    needs_openbao: false
+
+  tika:
+    image_catalog_key: tika_runtime
+    internal_port: 9998
+    host_group: runtime-ai-lv3
+    site_dir: /opt/tika
+    container_name: tika
+    needs_openbao: false
+
+  typesense:
+    image_catalog_key: typesense_runtime
+    internal_port: 8108
+    host_group: docker-runtime-lv3
+    site_dir: /opt/typesense
+    container_name: typesense
+    needs_openbao: true
+
+  # ---------------------------------------------------------------------------
+  # U
+  # ---------------------------------------------------------------------------
+
+  uptime_kuma:
+    image_catalog_key: uptime_kuma_runtime
+    internal_port: 3001
+    host_group: docker-runtime-lv3
+    site_dir: /opt/uptime-kuma
+    container_name: uptime-kuma
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # V
+  # ---------------------------------------------------------------------------
+
+  vaultwarden:
+    image_catalog_key: vaultwarden_runtime
+    internal_port: 8222
+    host_group: docker-runtime-lv3
+    site_dir: /opt/vaultwarden
+    container_name: vaultwarden
+    needs_openbao: false
+
+  vikunja:
+    image_catalog_key: ""            # uses upstream vikunja/api — no catalog key
+    internal_port: 3456
+    host_group: docker-runtime-lv3
+    site_dir: /opt/vikunja
+    container_name: vikunja
+    needs_openbao: true
+    needs_postgres: true
+
+  # ---------------------------------------------------------------------------
+  # W
+  # ---------------------------------------------------------------------------
+
+  windmill:
+    image_catalog_key: windmill_runtime
+    internal_port: 8000
+    host_group: docker-runtime-lv3
+    site_dir: /opt/windmill
+    container_name: windmill-server
+    needs_openbao: true
+    needs_postgres: true
+
+  woodpecker:
+    image_catalog_key: woodpecker_server_runtime
+    internal_port: 8102
+    host_group: docker-runtime-lv3
+    site_dir: /opt/woodpecker
+    container_name: woodpecker-server
+    needs_openbao: true

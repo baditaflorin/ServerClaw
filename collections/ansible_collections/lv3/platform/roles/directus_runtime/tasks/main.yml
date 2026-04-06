@@ -3,8 +3,15 @@
 # Inputs: Runtime paths, image refs, PostgreSQL credentials, Keycloak client secret, and bootstrap script defaults.
 # Outputs: The live Directus container, OpenBao-backed runtime env, seeded collection schema, and local health endpoints match repo truth.
 # Idempotency: Partially idempotent because compose restarts and schema refreshes are performed when the declared runtime or bootstrap inputs change.
-# Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, ADR 0289, and ADR 0370.
+# Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, ADR 0289, ADR 0370, ADR 0373.
 ---
+- name: Derive Directus conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: directus
+
 - name: Validate Directus runtime inputs
   ansible.builtin.assert:
     that:
