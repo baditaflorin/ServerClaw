@@ -3,18 +3,18 @@
 # Inputs: Open WebUI base URLs, bootstrap credentials, and enabled integration settings.
 # Outputs: Produces runtime assertions for the HTTP surface, admin sign-in, and optional connectors.
 # Idempotency: Idempotent because these tasks only probe live state.
-# Dependencies: ADR 0165 and the converged Open WebUI runtime.
+# Dependencies: ADR 0165, ADR 0371, and the converged Open WebUI runtime.
 ---
-- name: Verify the Open WebUI HTTP surface
-  ansible.builtin.uri:
-    url: "{{ open_webui_internal_base_url }}"
-    method: GET
-    status_code: 200
-  register: open_webui_verify_http
-  retries: 24
-  delay: 5
-  until: open_webui_verify_http.status == 200
-  changed_when: false
+- name: Verify the Open WebUI runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: open-webui
+    common_verify_port: "{{ open_webui_port }}"
+    common_verify_health_url: "{{ open_webui_internal_base_url }}"
+    common_verify_health_retries: 24
+    common_verify_health_delay: 5
 
 - name: Verify Open WebUI admin sign-in works
   ansible.builtin.uri:

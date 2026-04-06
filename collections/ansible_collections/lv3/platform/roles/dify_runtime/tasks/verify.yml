@@ -3,18 +3,18 @@
 # Inputs: The Dify internal base URL and the expected setup state contract.
 # Outputs: Records health and setup probe results and fails fast if Dify is not ready for use.
 # Idempotency: Fully idempotent because these are read-only verification probes.
-# Dependencies: ADR 0165 and ADR 0197.
+# Dependencies: ADR 0165, ADR 0197, ADR 0371.
 ---
-- name: Verify the Dify public health endpoint
-  ansible.builtin.uri:
-    url: "{{ dify_internal_base_url }}/healthz"
-    method: GET
-    status_code: 200
-  register: dify_verify_health
-  retries: 36
-  delay: 5
-  until: dify_verify_health.status == 200
-  changed_when: false
+- name: Verify the Dify runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: dify
+    common_verify_port: "{{ dify_port }}"
+    common_verify_health_url: "{{ dify_internal_base_url }}/healthz"
+    common_verify_health_retries: 36
+    common_verify_health_delay: 5
 
 - name: Verify the Dify setup endpoint is reachable
   ansible.builtin.uri:
