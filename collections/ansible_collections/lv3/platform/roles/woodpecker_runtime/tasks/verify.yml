@@ -46,28 +46,18 @@
       - "'woodpecker-agent' in woodpecker_verify_running.stdout_lines"
     fail_msg: "Woodpecker server or agent is not running."
 
-- name: Verify the Woodpecker local health endpoint
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_healthcheck_path }}"
-    method: GET
-    return_content: true
-    status_code:
-      - 200
-      - 204
-  register: woodpecker_verify_health
-  retries: 30
-  delay: 5
-  until: woodpecker_verify_health.status in [200, 204]
-  changed_when: false
-
-- name: Verify the Woodpecker local version endpoint
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_version_path }}"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: woodpecker_verify_version
-  retries: 30
-  delay: 5
-  until: woodpecker_verify_version.status == 200
-  changed_when: false
+- name: Verify the Woodpecker runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: woodpecker
+    common_verify_port: "{{ woodpecker_http_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_healthcheck_path }}"
+    common_verify_health_retries: 30
+    common_verify_health_delay: 5
+    common_verify_health_status_code: 204
+    common_verify_extra_endpoints:
+      - url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_version_path }}"
+        retries: 30
+        delay: 5
