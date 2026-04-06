@@ -14,8 +14,13 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+_SCRIPTS_DIR = str(Path(__file__).resolve().parent)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
+
+from validation_toolkit import require_list, require_str
 
 from platform.events import load_event_taxonomy, load_topic_index
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
@@ -36,18 +41,6 @@ NTFY_TOPIC_PATTERN = re.compile(r"""\b(platform\.[a-z0-9-]+(?:\.[a-z0-9_.-]+)+)\
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"{path} must be a mapping")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
     return value
 
 

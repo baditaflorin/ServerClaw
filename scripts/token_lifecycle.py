@@ -17,6 +17,11 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+_SCRIPTS_DIR = str(Path(__file__).resolve().parent)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
+from validation_toolkit import require_int, require_list, require_str, require_string_list
 
 from controller_automation_toolkit import load_yaml
 from platform.ledger import LedgerWriter
@@ -68,31 +73,6 @@ def require_mapping(value: Any, path: str) -> dict[str, Any]:
     return value
 
 
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int | None = None) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if minimum is not None and value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    items = require_list(value, path)
-    return [require_str(item, f"{path}[{index}]") for index, item in enumerate(items)]
-
-
 def slugify(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or "token"
 
@@ -119,9 +99,9 @@ def validate_policy_data(payload: Any) -> dict[str, dict[str, Any]]:
         class_name = require_str(item.get("class"), f"{path}.class")
         if class_name in result:
             raise ValueError(f"duplicate token class '{class_name}' in config/token-policy.yaml")
-        require_int(item.get("max_ttl_days"), f"{path}.max_ttl_days", 1)
-        require_int(item.get("warning_window_days"), f"{path}.warning_window_days", 0)
-        require_int(item.get("enforcement_grace_days"), f"{path}.enforcement_grace_days", 0)
+        require_int(item.get("max_ttl_days"), f"{path}.max_ttl_days", minimum=1)
+        require_int(item.get("warning_window_days"), f"{path}.warning_window_days", minimum=0)
+        require_int(item.get("enforcement_grace_days"), f"{path}.enforcement_grace_days", minimum=0)
         require_str(item.get("rotation_trigger"), f"{path}.rotation_trigger")
         require_str(item.get("storage"), f"{path}.storage")
         require_str(item.get("revocation_workflow"), f"{path}.revocation_workflow")
