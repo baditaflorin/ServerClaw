@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.29",
+  "repo_version": "0.178.30",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-06T11:03:01Z",
-  "next_refresh_at": "2026-04-06T12:03:01Z",
+  "generated_at": "2026-04-06T11:57:00Z",
+  "next_refresh_at": "2026-04-06T12:57:00Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6166,10 +6166,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.28",
+    "last_version": "0.178.29",
     "deployed_at": "2026-04-06",
-    "summary": "ADR 0377/0378: Wire platform knowledge and RAG into Open WebUI \u2014 enable Ollama API, Qdrant vector DB backend, nomic-embed-text embeddings, ServerClaw system prompt injection, expose Qdrant port 6333 on host for cross-compose access ADR 0376: Credential isolation and agent safety \u2014 .gitignore hardening for .local symlink blind spot, pre-commit guard to block .local from index, recovery runbook (recover_local_secrets.sh), agent credential access contract, bootstrap key rotation procedure, server migration security checklist",
-    "release_notes_url": "docs/release-notes/0.178.29.md"
+    "summary": "fix: Gitea OAuth2 login \u2014 ROOT_URL changed to Tailscale access URL (http://100.64.0.1:3009) to fix OAuth2 state cookie mismatch; remove invalid `groups` scope from OPENID_CONNECT_SCOPES in ctmpl template ADR 0377/0378: Wire platform knowledge and RAG into Open WebUI \u2014 enable Ollama API, Qdrant vector DB backend, nomic-embed-text embeddings, ServerClaw system prompt injection, expose Qdrant port 6333 on host for cross-compose access",
+    "release_notes_url": "docs/release-notes/0.178.30.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
