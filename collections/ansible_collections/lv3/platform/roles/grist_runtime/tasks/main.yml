@@ -160,6 +160,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: grist_compose_template
 
 - name: Pull the Grist image

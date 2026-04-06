@@ -32,19 +32,15 @@
       dify_runtime requires runtime paths, pinned image refs, the mirrored database password,
       and public URL topology data.
 
-- name: Ensure the Dify database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ dify_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: dify_database_password_local
-
-- name: Fail if the Dify database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ dify_database_password_local_file }} is missing on the control machine.
-      Run the Dify PostgreSQL converge first so the runtime can connect to postgres-lv3.
-  when: not dify_database_password_local.stat.exists
+- name: Check Dify prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ dify_database_password_local_file }}"
+        description: "Dify database password"
+        prerequisite: "Converge dify_postgres before deploying Dify"
 
 - name: Ensure the Dify runtime packages are present
   ansible.builtin.apt:
@@ -96,116 +92,97 @@
     - path: "{{ dify_secret_dir }}"
       mode: "0700"
 
-- name: Generate the Dify runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ dify_init_password_remote_file }}"
-      command: "openssl rand -hex 12"
-    - path: "{{ dify_admin_password_remote_file }}"
-      command: "openssl rand -hex 12"
-    - path: "{{ dify_secret_key_remote_file }}"
-      command: "openssl rand -base64 42 | tr -d '\\n'"
-    - path: "{{ dify_redis_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
-    - path: "{{ dify_qdrant_api_key_remote_file }}"
-      command: "openssl rand -hex 16"
-    - path: "{{ dify_sandbox_api_key_remote_file }}"
-      command: "openssl rand -hex 16"
-    - path: "{{ dify_plugin_daemon_key_remote_file }}"
-      command: "openssl rand -base64 32 | tr -d '\\n'"
-    - path: "{{ dify_plugin_inner_api_key_remote_file }}"
-      command: "openssl rand -base64 32 | tr -d '\\n'"
-    - path: "{{ dify_tools_api_key_remote_file }}"
-      command: "openssl rand -hex 16"
-  register: dify_secret_generation
-  changed_when: "'changed' in dify_secret_generation.stdout"
-  no_log: true
-
-- name: Read the Dify runtime secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  register: dify_secret_reads
-  loop:
-    - "{{ dify_init_password_remote_file }}"
-    - "{{ dify_admin_password_remote_file }}"
-    - "{{ dify_secret_key_remote_file }}"
-    - "{{ dify_redis_password_remote_file }}"
-    - "{{ dify_qdrant_api_key_remote_file }}"
-    - "{{ dify_sandbox_api_key_remote_file }}"
-    - "{{ dify_plugin_daemon_key_remote_file }}"
-    - "{{ dify_plugin_inner_api_key_remote_file }}"
-    - "{{ dify_tools_api_key_remote_file }}"
+- name: Manage Dify runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ dify_init_password_remote_file }}"
+        command: "openssl rand -hex 12"
+        label: "dify-init-password"
+      - path: "{{ dify_admin_password_remote_file }}"
+        command: "openssl rand -hex 12"
+        label: "dify-admin-password"
+      - path: "{{ dify_secret_key_remote_file }}"
+        command: "openssl rand -base64 42 | tr -d '\\n'"
+        label: "dify-secret-key"
+      - path: "{{ dify_redis_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "dify-redis-password"
+      - path: "{{ dify_qdrant_api_key_remote_file }}"
+        command: "openssl rand -hex 16"
+        label: "dify-qdrant-api-key"
+      - path: "{{ dify_sandbox_api_key_remote_file }}"
+        command: "openssl rand -hex 16"
+        label: "dify-sandbox-api-key"
+      - path: "{{ dify_plugin_daemon_key_remote_file }}"
+        command: "openssl rand -base64 32 | tr -d '\\n'"
+        label: "dify-plugin-daemon-key"
+      - path: "{{ dify_plugin_inner_api_key_remote_file }}"
+        command: "openssl rand -base64 32 | tr -d '\\n'"
+        label: "dify-plugin-inner-api-key"
+      - path: "{{ dify_tools_api_key_remote_file }}"
+        command: "openssl rand -hex 16"
+        label: "dify-tools-api-key"
+    common_manage_service_secrets_read:
+      - "{{ dify_init_password_remote_file }}"
+      - "{{ dify_admin_password_remote_file }}"
+      - "{{ dify_secret_key_remote_file }}"
+      - "{{ dify_redis_password_remote_file }}"
+      - "{{ dify_qdrant_api_key_remote_file }}"
+      - "{{ dify_sandbox_api_key_remote_file }}"
+      - "{{ dify_plugin_daemon_key_remote_file }}"
+      - "{{ dify_plugin_inner_api_key_remote_file }}"
+      - "{{ dify_tools_api_key_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ dify_init_password_local_file }}"
+        content_index: 0
+      - dest: "{{ dify_admin_password_local_file }}"
+        content_index: 1
+      - dest: "{{ dify_secret_key_local_file }}"
+        content_index: 2
+      - dest: "{{ dify_redis_password_local_file }}"
+        content_index: 3
+      - dest: "{{ dify_qdrant_api_key_local_file }}"
+        content_index: 4
+      - dest: "{{ dify_sandbox_api_key_local_file }}"
+        content_index: 5
+      - dest: "{{ dify_plugin_daemon_key_local_file }}"
+        content_index: 6
+      - dest: "{{ dify_plugin_inner_api_key_local_file }}"
+        content_index: 7
+      - dest: "{{ dify_tools_api_key_local_file }}"
+        content_index: 8
+    common_manage_service_secrets_local_artifact_dir: "{{ dify_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "dify_decoded_secrets"
   no_log: true
 
 - name: Record the Dify runtime secrets
   ansible.builtin.set_fact:
-    dify_init_password: "{{ dify_secret_reads.results[0].content | b64decode | trim }}"
-    dify_admin_password: "{{ dify_secret_reads.results[1].content | b64decode | trim }}"
-    dify_secret_key: "{{ dify_secret_reads.results[2].content | b64decode | trim }}"
-    dify_redis_password: "{{ dify_secret_reads.results[3].content | b64decode | trim }}"
-    dify_qdrant_api_key: "{{ dify_secret_reads.results[4].content | b64decode | trim }}"
-    dify_sandbox_api_key: "{{ dify_secret_reads.results[5].content | b64decode | trim }}"
-    dify_plugin_daemon_key: "{{ dify_secret_reads.results[6].content | b64decode | trim }}"
-    dify_plugin_inner_api_key: "{{ dify_secret_reads.results[7].content | b64decode | trim }}"
-    dify_tools_api_key: "{{ dify_secret_reads.results[8].content | b64decode | trim }}"
+    dify_init_password: "{{ dify_decoded_secrets[0] }}"
+    dify_admin_password: "{{ dify_decoded_secrets[1] }}"
+    dify_secret_key: "{{ dify_decoded_secrets[2] }}"
+    dify_redis_password: "{{ dify_decoded_secrets[3] }}"
+    dify_qdrant_api_key: "{{ dify_decoded_secrets[4] }}"
+    dify_sandbox_api_key: "{{ dify_decoded_secrets[5] }}"
+    dify_plugin_daemon_key: "{{ dify_decoded_secrets[6] }}"
+    dify_plugin_inner_api_key: "{{ dify_decoded_secrets[7] }}"
+    dify_tools_api_key: "{{ dify_decoded_secrets[8] }}"
     dify_database_password: "{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}"
     dify_smtp_password: "{{ lookup('ansible.builtin.file', dify_smtp_password_local_file) | trim }}"
     dify_runtime_secret_payload:
       DB_PASSWORD: "{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}"
-      INIT_PASSWORD: "{{ dify_secret_reads.results[0].content | b64decode | trim }}"
-      ADMIN_PASSWORD: "{{ dify_secret_reads.results[1].content | b64decode | trim }}"
-      SECRET_KEY: "{{ dify_secret_reads.results[2].content | b64decode | trim }}"
-      REDIS_PASSWORD: "{{ dify_secret_reads.results[3].content | b64decode | trim }}"
-      QDRANT_API_KEY: "{{ dify_secret_reads.results[4].content | b64decode | trim }}"
-      SANDBOX_API_KEY: "{{ dify_secret_reads.results[5].content | b64decode | trim }}"
-      PLUGIN_DAEMON_KEY: "{{ dify_secret_reads.results[6].content | b64decode | trim }}"
-      PLUGIN_DIFY_INNER_API_KEY: "{{ dify_secret_reads.results[7].content | b64decode | trim }}"
-      TOOLS_API_KEY: "{{ dify_secret_reads.results[8].content | b64decode | trim }}"
+      INIT_PASSWORD: "{{ dify_decoded_secrets[0] }}"
+      ADMIN_PASSWORD: "{{ dify_decoded_secrets[1] }}"
+      SECRET_KEY: "{{ dify_decoded_secrets[2] }}"
+      REDIS_PASSWORD: "{{ dify_decoded_secrets[3] }}"
+      QDRANT_API_KEY: "{{ dify_decoded_secrets[4] }}"
+      SANDBOX_API_KEY: "{{ dify_decoded_secrets[5] }}"
+      PLUGIN_DAEMON_KEY: "{{ dify_decoded_secrets[6] }}"
+      PLUGIN_DIFY_INNER_API_KEY: "{{ dify_decoded_secrets[7] }}"
+      TOOLS_API_KEY: "{{ dify_decoded_secrets[8] }}"
       SMTP_PASSWORD: "{{ lookup('ansible.builtin.file', dify_smtp_password_local_file) | trim }}"
-  no_log: true
-
-- name: Ensure the local Dify artifact directory exists
-  ansible.builtin.file:
-    path: "{{ dify_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the Dify bootstrap secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ dify_init_password_local_file }}"
-      content: "{{ dify_init_password }}"
-    - dest: "{{ dify_admin_password_local_file }}"
-      content: "{{ dify_admin_password }}"
-    - dest: "{{ dify_secret_key_local_file }}"
-      content: "{{ dify_secret_key }}"
-    - dest: "{{ dify_redis_password_local_file }}"
-      content: "{{ dify_redis_password }}"
-    - dest: "{{ dify_qdrant_api_key_local_file }}"
-      content: "{{ dify_qdrant_api_key }}"
-    - dest: "{{ dify_sandbox_api_key_local_file }}"
-      content: "{{ dify_sandbox_api_key }}"
-    - dest: "{{ dify_plugin_daemon_key_local_file }}"
-      content: "{{ dify_plugin_daemon_key }}"
-    - dest: "{{ dify_plugin_inner_api_key_local_file }}"
-      content: "{{ dify_plugin_inner_api_key }}"
-    - dest: "{{ dify_tools_api_key_local_file }}"
-      content: "{{ dify_tools_api_key }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Dify
