@@ -1,0 +1,27 @@
+# GENERATED — do not edit by hand.
+# Source: platform_service_registry hairpin declarations — ADR 0374 Phase 1.
+# Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only hairpin
+---
+platform_hairpin_nat_hosts:
+- hostname: agents.lv3.org
+  address: 10.10.10.10
+- hostname: bi.lv3.org
+  address: 10.10.10.10
+- hostname: data.lv3.org
+  address: 10.10.10.10
+- hostname: dify.lv3.org
+  address: 10.10.10.10
+- hostname: files.lv3.org
+  address: 10.10.10.10
+- hostname: grist.lv3.org
+  address: 10.10.10.10
+- hostname: langfuse.lv3.org
+  address: 10.10.10.10
+- hostname: notebooks.lv3.org
+  address: 10.10.10.10
+- hostname: paperless.lv3.org
+  address: 10.10.10.10
+- hostname: sso.lv3.org
+  address: 10.10.10.10
+- hostname: wiki.lv3.org
+  address: 10.10.10.10

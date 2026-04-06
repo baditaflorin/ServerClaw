@@ -636,8 +636,162 @@ def _write_nginx_upstreams_conf(upstreams: list[dict], out_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Stub generators for other concerns (phases 1 and 2)
-# These are called when --only is not specified, so they must exist.
+# Hairpin concern (Phase 1)
+# ---------------------------------------------------------------------------
+
+PLATFORM_YML_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
+HAIRPIN_OUTPUT_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_hairpin.yml"
+
+
+def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
+    """Return platform_guest_catalog.by_name (inventory_hostname -> {ipv4, ...})."""
+    with (repo_root / "inventory" / "group_vars" / "platform.yml").open() as f:
+        data = yaml.safe_load(f)
+    catalog = data.get("platform_guest_catalog", {})
+    by_name = catalog.get("by_name", {})
+    if not by_name:
+        raise ValueError(
+            "platform_guest_catalog.by_name is empty or missing in "
+            "inventory/group_vars/platform.yml"
+        )
+    return by_name
+
+
+def _resolve_catalog_ip(address_host: str, catalog: dict, context: str) -> str:
+    """Resolve an inventory hostname to its IPv4 address via platform_guest_catalog."""
+    if address_host not in catalog:
+        raise ValueError(
+            f"{context}: address_host '{address_host}' is not in "
+            f"platform_guest_catalog.by_name. "
+            f"Available hosts: {', '.join(sorted(catalog))}"
+        )
+    entry = catalog[address_host]
+    ip = entry.get("ipv4") or entry.get("ansible_host") or entry.get("ip")
+    if not ip:
+        raise ValueError(
+            f"{context}: catalog entry for '{address_host}' has no 'ipv4', "
+            f"'ansible_host', or 'ip' field. Keys present: {', '.join(sorted(entry))}"
+        )
+    return str(ip)
+
+
+def generate_hairpin(
+    registry: dict,
+    write: bool = False,
+    repo_root: Path = REPO_ROOT,
+) -> list[dict]:
+    """Aggregate hairpin.publish entries from all services into platform_hairpin_nat_hosts.
+
+    Deduplicates by hostname. If two services declare the same hostname with
+    different addresses, an error is raised.
+
+    In --write mode writes inventory/group_vars/platform_hairpin.yml.
+    In --check mode validates the committed file matches the derived set.
+
+    Returns the sorted list of {hostname, address} dicts.
+    Raises ValueError on any validation or drift error.
+    """
+    catalog = _load_guest_catalog(repo_root)
+    seen: dict[str, str] = {}  # hostname -> resolved IP
+
+    for service_name, service_config in registry.items():
+        require_mapping(service_config, f"platform_service_registry.{service_name}")
+        hairpin = service_config.get("hairpin")
+        if hairpin is None:
+            continue
+
+        require_mapping(hairpin, f"{service_name}.hairpin")
+        publish = hairpin.get("publish")
+        if publish is None:
+            continue
+
+        require_list(publish, f"{service_name}.hairpin.publish")
+
+        for idx, entry in enumerate(publish):
+            ctx = f"{service_name}.hairpin.publish[{idx}]"
+            require_mapping(entry, ctx)
+
+            hostname = require_str(entry.get("hostname"), f"{ctx}.hostname")
+            address_host = require_str(entry.get("address_host"), f"{ctx}.address_host")
+
+            ip = _resolve_catalog_ip(address_host, catalog, ctx)
+
+            if hostname in seen:
+                if seen[hostname] != ip:
+                    raise ValueError(
+                        f"{ctx}: hostname '{hostname}' is declared by multiple services "
+                        f"with conflicting addresses: '{seen[hostname]}' vs '{ip}'"
+                    )
+            else:
+                seen[hostname] = ip
+
+    hosts = [{"hostname": h, "address": a} for h, a in sorted(seen.items())]
+
+    if write:
+        _write_hairpin_file(hosts, repo_root)
+    else:
+        _check_hairpin_file(hosts, repo_root)
+
+    return hosts
+
+
+def _write_hairpin_file(hosts: list[dict], repo_root: Path) -> None:
+    out_path = repo_root / "inventory" / "group_vars" / "platform_hairpin.yml"
+    header = (
+        "# GENERATED — do not edit by hand.\n"
+        "# Source: platform_service_registry hairpin declarations — ADR 0374 Phase 1.\n"
+        "# Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only hairpin\n"
+        "---\n"
+    )
+    body = yaml.dump(
+        {"platform_hairpin_nat_hosts": hosts},
+        default_flow_style=False,
+        sort_keys=False,
+        allow_unicode=True,
+    )
+    out_path.write_text(header + body)
+    print(f"  Wrote {len(hosts)} hairpin entries to {out_path.relative_to(repo_root)}")
+
+
+def _check_hairpin_file(hosts: list[dict], repo_root: Path) -> None:
+    """Validate committed platform_hairpin.yml matches the derived set."""
+    committed_path = repo_root / "inventory" / "group_vars" / "platform_hairpin.yml"
+    if not committed_path.exists():
+        raise ValueError(
+            "platform_hairpin.yml does not exist. Run --write to generate it: "
+            "python scripts/generate_cross_cutting_artifacts.py --write --only hairpin"
+        )
+
+    with committed_path.open() as f:
+        committed_data = yaml.safe_load(f)
+    committed_hosts = committed_data.get("platform_hairpin_nat_hosts", [])
+
+    def _normalise(entries: list) -> list[tuple]:
+        return sorted((e["hostname"], e["address"]) for e in entries)
+
+    derived = _normalise(hosts)
+    committed = _normalise(committed_hosts)
+
+    if derived != committed:
+        derived_set = set(derived)
+        committed_set = set(committed)
+        missing = derived_set - committed_set
+        extra = committed_set - derived_set
+        parts = [
+            "platform_hairpin.yml is stale. "
+            "Run: python scripts/generate_cross_cutting_artifacts.py --write --only hairpin"
+        ]
+        if missing:
+            parts.append(f"  Missing from file: {sorted(missing)}")
+        if extra:
+            parts.append(f"  Extra in file (not in registry): {sorted(extra)}")
+        raise ValueError("\n".join(parts))
+
+    print(f"  Hairpin OK: {len(hosts)} entries match platform_hairpin.yml")
+
+
+# ---------------------------------------------------------------------------
+# Stub generators for other concerns
 # ---------------------------------------------------------------------------
 
 
@@ -700,7 +854,9 @@ def main(argv: list[str] | None = None) -> int:
     for concern in concerns_to_run:
         print(f"\n[{concern.upper()}]")
         try:
-            if concern == "dns":
+            if concern == "hairpin":
+                generate_hairpin(registry, write=write, repo_root=REPO_ROOT)
+            elif concern == "dns":
                 generate_dns_declarations(registry, write=write, repo_root=REPO_ROOT)
             elif concern == "tls":
                 generate_tls_certificates(registry, write=write, repo_root=REPO_ROOT)
