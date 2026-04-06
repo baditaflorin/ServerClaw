@@ -165,7 +165,7 @@ adrs:
     implemented_on: '2026-03-22'
   - adr: '0061'
     title: GlitchTip For Application Exceptions And Task Failures
-    status: Proposed
+    status: Deprecated
     implementation_status: Not Implemented
     date: '2026-03-22'
     concern: platform
