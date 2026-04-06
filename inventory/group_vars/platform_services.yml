@@ -1,5 +1,5 @@
 ---
-# platform_services.yml — service registry — ADR 0373
+# platform_services.yml — service registry — ADR 0373 + ADR 0374
 # GENERATED: false (maintained by hand, validated by scripts/validate_service_registry.py)
 #
 # Each entry declares a service's identity. The common/tasks/derive_service_defaults.yml
@@ -21,6 +21,14 @@
 #   needs_postgres     — informational, default false
 #   local_artifact_dir — relative path under .local/ (default: .local/<service_name>)
 #   extra_defaults     — map of additional key-value variables to set as facts
+#
+# Cross-cutting fields (ADR 0374):
+#   dns                — DNS publication declarations. Generator: scripts/generate_cross_cutting_artifacts.py --only dns
+#     records          — list of DNS records this service needs
+#       fqdn           — fully-qualified domain name
+#       type           — 'public' (edge-published) or 'internal' (private/internal only)
+#       target_host    — platform guest that owns the IP (resolved via platform_guest_catalog)
+#       ttl            — DNS TTL in seconds (default: 3600)
 
 platform_service_registry:
 
@@ -37,6 +45,21 @@ platform_service_registry:
     needs_openbao: false
     extra_defaults:
       api_gateway_database_port: 5432
+    dns:
+      records:
+        - fqdn: api.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: api-gateway
+      client_secret_local_file: .local/keycloak/api-gateway-client-secret.txt
+      redirect_uris: []
+      scopes:
+        - openid
+      public_client: false
 
   artifact_cache:
     image_catalog_key: ""            # uses upstream docker.io/library/registry — no catalog key
@@ -95,6 +118,24 @@ platform_service_registry:
     site_dir: /opt/dify
     container_name: dify-api
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: agents.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: dify
+      client_secret_local_file: .local/keycloak/dify-client-secret.txt
+      redirect_uris:
+        - https://agents.lv3.org/console/api/oauth/login/oidc/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   directus:
     image_catalog_key: directus_runtime
@@ -110,6 +151,24 @@ platform_service_registry:
       directus_ping_path: /server/ping
       directus_graphql_path: /graphql
       directus_openapi_path: /server/specs/oas
+    dns:
+      records:
+        - fqdn: data.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: directus
+      client_secret_local_file: .local/keycloak/directus-client-secret.txt
+      redirect_uris:
+        - https://data.lv3.org/auth/login/keycloak/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   dozzle:
     image_catalog_key: dozzle_runtime
@@ -118,6 +177,12 @@ platform_service_registry:
     site_dir: /opt/dozzle
     container_name: dozzle
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: logs.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   # ---------------------------------------------------------------------------
   # E
@@ -130,6 +195,12 @@ platform_service_registry:
     site_dir: /opt/excalidraw
     container_name: excalidraw-app
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: draw.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   # ---------------------------------------------------------------------------
   # F
@@ -145,6 +216,12 @@ platform_service_registry:
     needs_postgres: true
     extra_defaults:
       flagsmith_health_path: /health
+    dns:
+      records:
+        - fqdn: flags.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   # ---------------------------------------------------------------------------
   # G
@@ -158,6 +235,24 @@ platform_service_registry:
     container_name: gitea
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: git.lv3.org
+          type: internal
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: gitea-oauth
+      client_secret_local_file: .local/keycloak/gitea-client-secret.txt
+      redirect_uris:
+        - https://git.lv3.org/user/oauth2/Keycloak/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   glitchtip:
     image_catalog_key: glitchtip_runtime
@@ -167,6 +262,24 @@ platform_service_registry:
     container_name: glitchtip
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: errors.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: glitchtip
+      client_secret_local_file: .local/keycloak/glitchtip-client-secret.txt
+      redirect_uris:
+        - https://errors.lv3.org/accounts/oidc/keycloak/login/callback/
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   gotenberg:
     image_catalog_key: gotenberg_runtime
@@ -184,6 +297,24 @@ platform_service_registry:
     container_name: grist
     needs_openbao: true
     needs_postgres: false
+    dns:
+      records:
+        - fqdn: grist.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: grist
+      client_secret_local_file: .local/keycloak/grist-client-secret.txt
+      redirect_uris:
+        - https://grist.lv3.org/oauth2/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   # ---------------------------------------------------------------------------
   # H
@@ -195,6 +326,25 @@ platform_service_registry:
     host_group: runtime-control-lv3
     site_dir: /opt/harbor
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: registry.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: harbor
+      client_secret_local_file: .local/keycloak/harbor-client-secret.txt
+      redirect_uris:
+        - https://registry.lv3.org/c/oidc/callback
+      scopes:
+        - openid
+        - profile
+        - email
+        - groups
+      public_client: false
 
   homepage:
     image_catalog_key: homepage_runtime
@@ -215,6 +365,24 @@ platform_service_registry:
     site_dir: /opt/jupyterhub
     container_name: jupyterhub
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: notebooks.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: jupyterhub
+      client_secret_local_file: .local/keycloak/jupyterhub-client-secret.txt
+      redirect_uris:
+        - https://notebooks.lv3.org/hub/oauth_callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   # ---------------------------------------------------------------------------
   # K
@@ -227,6 +395,12 @@ platform_service_registry:
     site_dir: /opt/keycloak
     container_name: keycloak
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: sso.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
 
   # ---------------------------------------------------------------------------
   # L
@@ -240,6 +414,12 @@ platform_service_registry:
     container_name: label-studio
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: annotate.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   lago:
     image_catalog_key: lago_api_runtime
@@ -249,6 +429,12 @@ platform_service_registry:
     container_name: lago-api
     needs_openbao: false
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: billing.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   langfuse:
     image_catalog_key: langfuse_runtime
@@ -258,6 +444,24 @@ platform_service_registry:
     container_name: langfuse-web
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: langfuse.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: langfuse
+      client_secret_local_file: .local/keycloak/langfuse-client-secret.txt
+      redirect_uris:
+        - https://langfuse.lv3.org/api/auth/callback/keycloak
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   livekit:
     image_catalog_key: livekit_runtime
@@ -266,6 +470,12 @@ platform_service_registry:
     site_dir: /opt/livekit
     container_name: lv3-livekit
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: livekit.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
 
   # ---------------------------------------------------------------------------
   # M
@@ -295,6 +505,12 @@ platform_service_registry:
     container_name: matrix-synapse
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: matrix.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   mattermost:
     image_catalog_key: ""            # uses upstream mattermost/mattermost-team-edition — pinned in defaults
@@ -312,6 +528,16 @@ platform_service_registry:
     site_dir: /opt/minio
     container_name: minio
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: minio.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+        - fqdn: minio-console.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   # ---------------------------------------------------------------------------
   # N
@@ -325,6 +551,12 @@ platform_service_registry:
     container_name: n8n
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: n8n.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   nats_jetstream:
     image_catalog_key: ""            # uses upstream nats:2.11-alpine
@@ -342,6 +574,7 @@ platform_service_registry:
     container_name: netbox
     needs_openbao: true
     needs_postgres: true
+    # NOTE: netbox.lv3.org is not in subdomain-catalog.json; no dns section until it is registered.
 
   nextcloud:
     image_catalog_key: nextcloud_runtime
@@ -351,6 +584,12 @@ platform_service_registry:
     container_name: nextcloud-app
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: cloud.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   ntfy:
     image_catalog_key: ntfy_runtime
@@ -359,6 +598,12 @@ platform_service_registry:
     site_dir: /opt/ntfy
     container_name: ntfy
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: ntfy.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   # ---------------------------------------------------------------------------
   # O
@@ -387,6 +632,24 @@ platform_service_registry:
     site_dir: /opt/open-webui
     container_name: open-webui
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: chat.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: open-webui
+      client_secret_local_file: .local/keycloak/open-webui-client-secret.txt
+      redirect_uris:
+        - https://chat.lv3.org/oauth/oidc/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   openbao:
     image_catalog_key: openbao_runtime
@@ -411,6 +674,24 @@ platform_service_registry:
     site_dir: /opt/ops-portal
     container_name: ops-portal
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: ops.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: ops-portal-oauth
+      client_secret_local_file: .local/keycloak/ops-portal-client-secret.txt
+      redirect_uris:
+        - https://ops.lv3.org/oauth2/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   outline:
     image_catalog_key: outline_runtime
@@ -420,6 +701,24 @@ platform_service_registry:
     container_name: outline
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: wiki.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: outline
+      client_secret_local_file: .local/keycloak/outline-client-secret.txt
+      redirect_uris:
+        - https://wiki.lv3.org/auth/oidc.callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   # ---------------------------------------------------------------------------
   # P
@@ -433,6 +732,24 @@ platform_service_registry:
     container_name: paperless
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: paperless.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: paperless
+      client_secret_local_file: .local/keycloak/paperless-client-secret.txt
+      redirect_uris:
+        - https://paperless.lv3.org/accounts/oidc/keycloak/login/callback/
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   piper:
     image_catalog_key: ""            # built locally from python base image
@@ -450,6 +767,12 @@ platform_service_registry:
     container_name: plane-web
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: tasks.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   plausible:
     image_catalog_key: plausible_runtime
@@ -458,6 +781,12 @@ platform_service_registry:
     site_dir: /opt/plausible
     container_name: plausible
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: analytics.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   portainer:
     image_catalog_key: portainer_runtime
@@ -494,6 +823,12 @@ platform_service_registry:
     site_dir: /opt/repowise
     container_name: repowise
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: repowise.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   # ---------------------------------------------------------------------------
   # S
@@ -506,6 +841,12 @@ platform_service_registry:
     site_dir: /opt/searxng
     container_name: searxng
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: search.lv3.org
+          type: internal
+          target_host: nginx-lv3
+          ttl: 3600
 
   semaphore:
     image_catalog_key: semaphore_runtime
@@ -522,6 +863,24 @@ platform_service_registry:
     site_dir: /opt/sftpgo
     container_name: sftpgo
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: files.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: sftpgo
+      client_secret_local_file: .local/keycloak/sftpgo-client-secret.txt
+      redirect_uris:
+        - https://files.lv3.org/web/oidc/redirect
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   step_ca:
     image_catalog_key: step_ca_runtime
@@ -539,6 +898,24 @@ platform_service_registry:
     container_name: superset
     needs_openbao: true
     needs_postgres: true
+    dns:
+      records:
+        - fqdn: bi.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: superset
+      client_secret_local_file: .local/keycloak/superset-client-secret.txt
+      redirect_uris:
+        - https://bi.lv3.org/oauth-authorized/keycloak
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   # ---------------------------------------------------------------------------
   # T
@@ -588,6 +965,12 @@ platform_service_registry:
     site_dir: /opt/uptime-kuma
     container_name: uptime-kuma
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: uptime.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
 
   # ---------------------------------------------------------------------------
   # V
@@ -600,6 +983,12 @@ platform_service_registry:
     site_dir: /opt/vaultwarden
     container_name: vaultwarden
     needs_openbao: false
+    dns:
+      records:
+        - fqdn: vault.lv3.org
+          type: internal
+          target_host: nginx-lv3
+          ttl: 3600
 
   vikunja:
     image_catalog_key: ""            # uses upstream vikunja/api — no catalog key
@@ -609,6 +998,18 @@ platform_service_registry:
     container_name: vikunja
     needs_openbao: true
     needs_postgres: true
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: vikunja
+      client_secret_local_file: .local/keycloak/vikunja-client-secret.txt
+      redirect_uris:
+        - https://tasks.lv3.org/auth/openid/lv3
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
 
   # ---------------------------------------------------------------------------
   # W
@@ -630,3 +1031,9 @@ platform_service_registry:
     site_dir: /opt/woodpecker
     container_name: woodpecker-server
     needs_openbao: true
+    dns:
+      records:
+        - fqdn: ci.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
