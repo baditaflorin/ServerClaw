@@ -14,6 +14,9 @@
 # Purpose: Default runtime inputs for Keycloak and its repo-managed identity integrations.
 keycloak_site_dir: /opt/keycloak
 keycloak_secret_dir: "{{ keycloak_site_dir }}/secrets"
+keycloak_compose_file: "{{ keycloak_site_dir }}/docker-compose.yml"
+keycloak_env_file: "{{ keycloak_site_dir }}/runtime.env"
+keycloak_image: "{{ container_image_catalog.images.keycloak_runtime.ref }}"
 keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
 
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
