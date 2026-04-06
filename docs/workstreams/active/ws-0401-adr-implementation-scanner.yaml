@@ -1,0 +1,36 @@
+id: ws-0401-adr-implementation-scanner
+adr: null
+title: "Create ADR Implementation Scanner"
+description: |
+  Build scripts/adr_implementation_scanner.py to auto-detect actual implementation status of all ADRs
+  by analyzing git history, code patterns, and deployment artifacts. Generate comprehensive reports
+  in docs/adr/implementation-status/ showing what's truly deployed vs. what the ADR index claims.
+status: planned
+owner: claude
+branch: claude/ws-0401-adr-scanner
+worktree_path: .claude/worktrees/ws-0401-adr-scanner
+doc: docs/workstreams/ws-0401-adr-implementation-scanner.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/adr_implementation_scanner.py
+  - docs/adr/implementation-status/
+ownership_manifest:
+  owned_surfaces:
+    - id: scanner_script
+      paths:
+        - scripts/adr_implementation_scanner.py
+      mode: exclusive
+    - id: implementation_status_reports
+      paths:
+        - docs/adr/implementation-status/
+      mode: exclusive
+notes: |
+  - Create scanner that searches git history for ADR references
+  - Analyze code patterns for implementation markers (roles, playbooks, configs)
+  - Generate status reports with actual vs. claimed implementation
+  - Create sample reports for key ADRs (0024, 0025, 0058, 0061, 0214-0223)
+  - Verify scanner output with yaml.safe_load() validation
+  - Commit and push to claude/ws-0401-adr-scanner
+ready_to_merge: false
+live_applied: false
