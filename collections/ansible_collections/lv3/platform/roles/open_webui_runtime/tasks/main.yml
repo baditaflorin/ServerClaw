@@ -413,7 +413,7 @@
 
     - name: Create or update serverclaw Ollama model (from + system fields, Ollama ≥0.5 API)
       ansible.builtin.uri:
-        url: "http://{{ ansible_host }}:11434/api/create"
+        url: "{{ open_webui_ollama_api_url }}/api/create"
         method: POST
         body_format: json
         body:

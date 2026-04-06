@@ -36,6 +36,7 @@ open_webui_default_user_role: pending
 open_webui_enable_openai_api: false
 open_webui_enable_ollama_api: true
 open_webui_ollama_base_url: http://host.docker.internal:11434
+open_webui_ollama_api_url: "http://{{ ansible_host }}:11434"
 open_webui_enable_web_search: true
 open_webui_web_search_engine: searxng
 open_webui_searxng_query_url: "http://host.docker.internal:{{ platform_service_topology | platform_service_port('searxng', 'internal') }}/search?q=<query>&format=json"
