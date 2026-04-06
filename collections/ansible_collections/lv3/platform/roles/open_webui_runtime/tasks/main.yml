@@ -408,6 +408,20 @@
         src: "{{ open_webui_site_dir }}/system-prompt.md"
       register: open_webui_system_prompt_content
 
+    - name: Create or update serverclaw Ollama modelfile
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host }}:11434/api/create"
+        method: POST
+        body_format: json
+        body:
+          name: "serverclaw:latest"
+          modelfile: |
+            FROM {{ open_webui_serverclaw_base_model }}
+            SYSTEM """{{ open_webui_system_prompt_content.content | b64decode }}"""
+        status_code:
+          - 200
+      changed_when: true
+
     - name: Sign in as Open WebUI admin for system prompt injection
       ansible.builtin.uri:
         url: "{{ open_webui_internal_base_url }}/api/v1/auths/signin"
@@ -422,7 +436,7 @@
       changed_when: false
       no_log: true
 
-    - name: Set the default system prompt via Open WebUI admin config
+    - name: Set the default model and system prompt via Open WebUI admin config
       ansible.builtin.uri:
         url: "{{ open_webui_internal_base_url }}/api/v1/configs/models"
         method: POST
@@ -439,7 +453,7 @@
         status_code:
           - 200
           - 201
-      changed_when: open_webui_system_prompt_rendered is changed
+      changed_when: true
 
 - name: Verify Open WebUI health probes
   ansible.builtin.import_tasks: verify.yml

@@ -54,8 +54,8 @@ open_webui_searxng_query_url: "http://host.docker.internal:{{ platform_service_t
 open_webui_web_search_result_count: 3
 open_webui_web_search_concurrent_requests: 1
 open_webui_bypass_web_search_web_loader: true
-open_webui_default_models: ""
-open_webui_default_pinned_models: ""
+open_webui_default_models: "serverclaw:latest"
+open_webui_default_pinned_models: "serverclaw:latest"
 open_webui_user_permissions_workspace_models_access: true
 open_webui_user_permissions_workspace_knowledge_access: false
 open_webui_user_permissions_workspace_prompts_access: false
@@ -78,6 +78,8 @@ open_webui_rag_embedding_model: nomic-embed-text
 open_webui_rag_top_k: 5
 open_webui_rag_relevance_threshold: "0.2"
 open_webui_rag_hybrid_search: true
-# System prompt for ServerClaw identity (ADR 0376)
+# System prompt for ServerClaw identity (ADR 0377)
 open_webui_enable_system_prompt_injection: true
 open_webui_system_prompt_template: system-prompt.md.j2
+# Base model for the serverclaw Ollama model (must be pre-pulled)
+open_webui_serverclaw_base_model: "qwen2.5:7b"
