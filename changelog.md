@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0377/0378: Wire platform knowledge and RAG into Open WebUI — enable Ollama API, Qdrant vector DB backend, nomic-embed-text embeddings, ServerClaw system prompt injection, expose Qdrant port 6333 on host for cross-compose access
 - ADR 0376: Credential isolation and agent safety — .gitignore hardening for .local symlink blind spot, pre-commit guard to block .local from index, recovery runbook (recover_local_secrets.sh), agent credential access contract, bootstrap key rotation procedure, server migration security checklist
 - wire ADR 0347-0357 agent coordination patterns into all discovery surfaces: AGENTS.md coordination section with code examples, config/integrations/ in .config-locations.yaml, validate_integrations.py + check_provenance_headers.py in scripts discovery, regenerated onboarding packs (service-catalog, automation, fork-bootstrap) now reference all 6 implemented ADRs
 - fix Woodpecker OAuth login: add nginx edge + TLS for git.lv3.org, fix WOODPECKER_GITEA_URL to use private IP (cross-host LAN), remove dead gitea_runtime_default external network from Woodpecker compose
@@ -28,10 +29,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.28 release notes](docs/release-notes/0.178.28.md)
+- [0.178.29 release notes](docs/release-notes/0.178.29.md)
 
 ## Previous Releases
 
+- [0.178.28 release notes](docs/release-notes/0.178.28.md)
 - [0.178.27 release notes](docs/release-notes/0.178.27.md)
 - [0.178.26 release notes](docs/release-notes/0.178.26.md)
 - [0.178.25 release notes](docs/release-notes/0.178.25.md)
@@ -43,9 +45,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.19 release notes](docs/release-notes/0.178.19.md)
 - [0.178.18 release notes](docs/release-notes/0.178.18.md)
 - [0.178.17 release notes](docs/release-notes/0.178.17.md)
-- [0.178.16 release notes](docs/release-notes/0.178.16.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (367 releases)](docs/release-notes/index/2026.md)
+- [2026 (368 releases)](docs/release-notes/index/2026.md)
