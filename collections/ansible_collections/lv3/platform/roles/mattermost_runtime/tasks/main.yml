@@ -28,19 +28,15 @@
       - mattermost_channels | length > 0
     fail_msg: "mattermost_runtime requires site, database, admin, and channel inputs."
 
-- name: Ensure the Mattermost database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ mattermost_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: mattermost_database_password_local
-
-- name: Fail if the Mattermost database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ mattermost_database_password_local_file }} is missing on the control machine.
-      Run the Mattermost PostgreSQL converge first so the runtime can connect to postgres-lv3.
-  when: not mattermost_database_password_local.stat.exists
+- name: Check Mattermost prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ mattermost_database_password_local_file }}"
+        description: "Mattermost database password"
+        prerequisite: "Converge mattermost_postgres before deploying Mattermost"
 
 - name: Ensure the Mattermost runtime packages are present
   ansible.builtin.apt:
@@ -108,55 +104,32 @@
       group: 2000
       mode: "0755"
 
-- name: Generate the Mattermost admin password
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ mattermost_admin_password_remote_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 > "{{ mattermost_admin_password_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: mattermost_admin_password_generation
-  changed_when: "'changed' in mattermost_admin_password_generation.stdout"
+- name: Manage Mattermost runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ mattermost_admin_password_remote_file }}"
+        command: "openssl rand -base64 24"
+        label: "mattermost-admin-password"
+    common_manage_service_secrets_read:
+      - "{{ mattermost_admin_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ mattermost_admin_password_local_file }}"
+        content_index: 0
+    common_manage_service_secrets_local_artifact_dir: "{{ mattermost_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "mattermost_decoded_secrets"
   no_log: true
 
-- name: Read the Mattermost admin password
-  ansible.builtin.slurp:
-    src: "{{ mattermost_admin_password_remote_file }}"
-  register: mattermost_admin_password_raw
-  no_log: true
-
-- name: Record Mattermost secret facts
+- name: Record the Mattermost runtime secrets
   ansible.builtin.set_fact:
-    mattermost_admin_password: "{{ mattermost_admin_password_raw.content | b64decode | trim }}"
+    mattermost_admin_password: "{{ mattermost_decoded_secrets[0] }}"
     mattermost_database_password: "{{ lookup('ansible.builtin.file', mattermost_database_password_local_file) | trim }}"
-  no_log: true
-
-- name: Build Mattermost runtime secret payload
-  ansible.builtin.set_fact:
     mattermost_runtime_secret_payload:
       MM_SQLSETTINGS_DATASOURCE: >-
         postgres://{{ mattermost_database_user }}:{{ mattermost_database_password | urlencode | replace('/', '%2F') }}@{{ mattermost_database_host }}:{{ mattermost_database_port }}/{{ mattermost_database_name }}?sslmode=disable&connect_timeout=10
-      MM_ADMIN_PASSWORD: "{{ mattermost_admin_password }}"
-  no_log: true
-
-- name: Ensure the local Mattermost artifact directory exists
-  ansible.builtin.file:
-    path: "{{ mattermost_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the Mattermost admin password to the control machine
-  ansible.builtin.copy:
-    dest: "{{ mattermost_admin_password_local_file }}"
-    content: "{{ mattermost_admin_password }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
+      MM_ADMIN_PASSWORD: "{{ mattermost_decoded_secrets[0] }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Mattermost
