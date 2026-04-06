@@ -1,0 +1,45 @@
+---
+# Neko Remote Desktop Role Defaults
+
+# Docker image configuration
+neko_runtime_image_name: "m1k1o/neko"
+neko_runtime_image_tag: "3.x"
+
+# Container configuration
+neko_runtime_container_name: "neko"
+neko_runtime_restart_policy: "unless-stopped"
+
+# Network configuration
+neko_runtime_port: 8080  # TCP signalling port (proxied via NGINX)
+neko_runtime_data_dir: "/opt/neko"
+
+# Browser configuration
+neko_runtime_browser: "chromium"  # "chromium" or "firefox"
+neko_runtime_res: "1440x900"  # Display resolution
+
+# Session configuration
+neko_runtime_max_connections: 1  # Max concurrent operator sessions
+neko_runtime_password: ""  # Optional session password (empty = no auth)
+
+# Resource limits (applied as Docker constraints)
+neko_runtime_cpu_limit: "8"
+neko_runtime_cpu_request: "4"
+neko_runtime_memory_limit: "16g"
+neko_runtime_memory_request: "8g"
+
+# Health check configuration
+neko_runtime_healthcheck_interval: "30s"
+neko_runtime_healthcheck_timeout: "5s"
+neko_runtime_healthcheck_retries: 3
+
+# Logging
+neko_runtime_log_driver: "json-file"
+neko_runtime_log_max_size: "10m"
+neko_runtime_log_max_file: "3"
+
+# Advanced: WebRTC configuration (optional)
+neko_runtime_stun_server: ""  # Optional STUN server (leave empty for default)
+neko_runtime_turn_servers: []  # Optional TURN servers list
+
+# Change detection (do not edit manually)
+neko_runtime_image_pull_digest: ""

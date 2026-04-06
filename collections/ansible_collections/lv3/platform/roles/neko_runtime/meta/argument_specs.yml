@@ -1,0 +1,124 @@
+---
+argument_specs:
+  main:
+    short_description: "Deploy Neko remote desktop for interactive browser access"
+    description:
+      - "Configures and deploys Neko (m1k1o/neko) WebRTC remote desktop."
+      - "Provides interactive browser access to operators via browser.lv3.org."
+      - "Supports WebRTC media streaming and custom browser/resolution configuration."
+    version_added: "0.178.33"
+    options:
+      neko_runtime_image_name:
+        type: str
+        default: "m1k1o/neko"
+        description: "Docker image name for Neko remote desktop"
+
+      neko_runtime_image_tag:
+        type: str
+        default: "3.x"
+        description: "Docker image tag/version (use specific version for reproducibility)"
+
+      neko_runtime_container_name:
+        type: str
+        default: "neko"
+        description: "Docker container name"
+
+      neko_runtime_restart_policy:
+        type: str
+        default: "unless-stopped"
+        choices: ["no", "always", "on-failure", "unless-stopped"]
+        description: "Docker restart policy"
+
+      neko_runtime_port:
+        type: int
+        default: 8080
+        description: "TCP port for WebRTC signalling (proxied via NGINX at browser.lv3.org)"
+
+      neko_runtime_data_dir:
+        type: str
+        default: "/opt/neko"
+        description: "Persistent storage directory (logs, cache, configuration)"
+
+      neko_runtime_browser:
+        type: str
+        default: "chromium"
+        choices: ["chromium", "firefox"]
+        description: "Browser engine to run (chromium or firefox)"
+
+      neko_runtime_res:
+        type: str
+        default: "1440x900"
+        description: "Display resolution as WIDTHxHEIGHT (e.g., 1920x1080)"
+
+      neko_runtime_max_connections:
+        type: int
+        default: 1
+        description: "Maximum concurrent operator sessions (1 = single-user)"
+
+      neko_runtime_password:
+        type: str
+        default: ""
+        no_log: true
+        description: "Optional WebRTC session password (empty = no authentication)"
+
+      neko_runtime_cpu_limit:
+        type: str
+        default: "8"
+        description: "Docker CPU limit (cores or fraction, e.g., '4' or '2.5')"
+
+      neko_runtime_cpu_request:
+        type: str
+        default: "4"
+        description: "Docker CPU request (minimum guaranteed cores)"
+
+      neko_runtime_memory_limit:
+        type: str
+        default: "16g"
+        description: "Docker memory limit (e.g., '16g', '8192m')"
+
+      neko_runtime_memory_request:
+        type: str
+        default: "8g"
+        description: "Docker memory request (minimum guaranteed memory)"
+
+      neko_runtime_healthcheck_interval:
+        type: str
+        default: "30s"
+        description: "Docker healthcheck interval"
+
+      neko_runtime_healthcheck_timeout:
+        type: str
+        default: "5s"
+        description: "Docker healthcheck timeout"
+
+      neko_runtime_healthcheck_retries:
+        type: int
+        default: 3
+        description: "Docker healthcheck failure retries before marking unhealthy"
+
+      neko_runtime_log_driver:
+        type: str
+        default: "json-file"
+        choices: ["json-file", "syslog", "journald"]
+        description: "Docker logging driver"
+
+      neko_runtime_log_max_size:
+        type: str
+        default: "10m"
+        description: "Maximum log file size before rotation"
+
+      neko_runtime_log_max_file:
+        type: int
+        default: 3
+        description: "Maximum number of rotated log files"
+
+      neko_runtime_stun_server:
+        type: str
+        default: ""
+        description: "Optional STUN server URL for NAT traversal (leave empty for defaults)"
+
+      neko_runtime_turn_servers:
+        type: list
+        elements: str
+        default: []
+        description: "Optional list of TURN server URLs for fallback media relay"

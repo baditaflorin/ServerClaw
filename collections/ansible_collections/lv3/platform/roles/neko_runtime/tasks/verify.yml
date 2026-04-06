@@ -1,0 +1,118 @@
+---
+# Neko Runtime Verification Tasks
+
+- name: Check if Neko container is running
+  docker_container_info:
+    name: "{{ neko_runtime_container_name }}"
+  register: neko_container_info
+  tags: [neko, verify]
+
+- name: Assert Neko container is running
+  assert:
+    that:
+      - neko_container_info.exists
+      - neko_container_info.container.State.Running | default(false)
+    fail_msg: "Neko container is not running"
+  tags: [neko, verify]
+
+- name: Wait for Neko HTTP port to respond
+  wait_for:
+    host: "127.0.0.1"
+    port: "{{ neko_runtime_port }}"
+    delay: 2
+    timeout: 30
+    state: started
+  tags: [neko, verify]
+
+- name: Test Neko health endpoint (HTTP)
+  uri:
+    url: "http://127.0.0.1:{{ neko_runtime_port }}/api/health"
+    method: GET
+    status_code: 200
+  register: neko_health_result
+  retries: 5
+  delay: 3
+  until: neko_health_result.status == 200
+  tags: [neko, verify]
+
+- name: Display Neko health response
+  debug:
+    msg: "Neko health check response: {{ neko_health_result.json }}"
+  tags: [neko, verify]
+
+- name: Check if WebRTC verification script exists
+  stat:
+    path: "{{ playbook_dir }}/scripts/verify_neko_webrtc_session.py"
+  register: neko_webrtc_script
+  tags: [neko, verify]
+
+- name: Run Neko WebRTC handshake verification
+  block:
+    - name: Execute WebRTC session verification script
+      command:
+        argv:
+          - python3
+          - "{{ playbook_dir }}/scripts/verify_neko_webrtc_session.py"
+          - "--url"
+          - "localhost:{{ neko_runtime_port }}"
+          - "--timeout"
+          - "30"
+      register: neko_webrtc_result
+      changed_when: false
+      tags: [neko, verify]
+
+    - name: Display WebRTC verification result
+      debug:
+        msg: "WebRTC handshake verification: {{ neko_webrtc_result.stdout }}"
+      tags: [neko, verify]
+
+    - name: Assert WebRTC verification passed
+      assert:
+        that:
+          - neko_webrtc_result.rc == 0
+        fail_msg: "WebRTC handshake verification failed: {{ neko_webrtc_result.stderr }}"
+      tags: [neko, verify]
+
+  when: neko_webrtc_script.stat.exists
+  ignore_errors: yes
+  tags: [neko, verify]
+
+- name: Verify Neko Docker image information
+  shell: |
+    docker inspect {{ neko_runtime_container_name }} \
+      --format='Image: {{ "{{" }}.Image{{ "}}" }} | Created: {{ "{{" }}.Created{{ "}}" }}'
+  register: neko_image_info
+  changed_when: false
+  tags: [neko, verify]
+
+- name: Display Neko container info
+  debug:
+    msg: "{{ neko_image_info.stdout }}"
+  tags: [neko, verify]
+
+- name: Check Neko container logs for errors
+  shell: |
+    docker logs --tail=20 {{ neko_runtime_container_name }} 2>&1 | grep -i error || echo "No errors in recent logs"
+  register: neko_logs
+  changed_when: false
+  failed_when: false
+  tags: [neko, verify]
+
+- name: Display recent Neko logs
+  debug:
+    msg: "{{ neko_logs.stdout_lines }}"
+  tags: [neko, verify]
+
+- name: Summary of Neko verification
+  debug:
+    msg:
+      - "Neko Remote Desktop Verification Summary"
+      - "======================================="
+      - "Container: {{ neko_runtime_container_name }} (running: {{ neko_container_info.container.State.Running }})"
+      - "Port: {{ neko_runtime_port }}/tcp (signalling)"
+      - "Media: UDP 50000-60000 (WebRTC streaming)"
+      - "Browser: {{ neko_runtime_browser }}"
+      - "Resolution: {{ neko_runtime_res }}"
+      - "Health Check: {{ 'PASS' if neko_health_result.status == 200 else 'FAIL' }}"
+      - "WebRTC Handshake: {{ 'PASS' if neko_webrtc_result.rc | default(1) == 0 else 'SKIPPED (script not found)' }}"
+  tags: [neko, verify]

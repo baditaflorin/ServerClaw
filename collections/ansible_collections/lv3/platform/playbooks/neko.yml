@@ -1,0 +1,174 @@
+---
+# Neko Remote Desktop Deployment Playbook
+#
+# Deploys Neko WebRTC remote desktop for interactive operator browser access.
+# Implements ADR 0380 architecture with separate runtime-comms-lv3 VM.
+#
+# Topology:
+#   Operator (headscale 100.64.0.0/10)
+#       ↓
+#   nginx-lv3 (TLS termination, browser.lv3.org)
+#       ↓
+#   runtime-comms-lv3 (VMID 121)
+#       ├─ Neko signalling (TCP 8080)
+#       └─ WebRTC media (UDP 50000-60000)
+
+- name: "Converge Neko Runtime on runtime-comms-lv3"
+  hosts: "runtime-comms-lv3"
+  become: true
+  gather_facts: true
+  tags: [tier-1, automation, service-neko]
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      import_tasks: tasks/preflight.yml
+      tags: [preflight, neko]
+
+  roles:
+    - role: lv3.platform.common
+      tags: [common, neko]
+      vars:
+        ensure_directories:
+          - path: /opt/neko
+            owner: root
+            group: root
+            mode: '0755'
+            description: "Neko persistent storage (cache, config, logs)"
+
+    - role: lv3.platform.docker_runtime
+      tags: [docker, neko]
+
+    - role: lv3.platform.linux_guest_firewall
+      tags: [firewall, neko]
+
+    - role: lv3.platform.neko_runtime
+      tags: [neko, service-neko]
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      import_tasks: tasks/post-verify.yml
+      tags: [post-verify, neko]
+
+    - name: Run shared completion notifications
+      import_tasks: tasks/notify.yml
+      tags: [notify, neko]
+
+- name: "Publish Neko on NGINX Edge Gateway"
+  hosts: "nginx-lv3"
+  become: true
+  gather_facts: false
+  tags: [tier-2, networking, service-neko]
+  serial: 1
+
+  tasks:
+    - name: Create NGINX site configuration for browser.lv3.org
+      block:
+        - name: Render browser.lv3.org NGINX site configuration
+          template:
+            src: "{{ playbook_dir }}/templates/nginx-site-neko.conf.j2"
+            dest: "/etc/nginx/sites-available/browser.lv3.org.conf"
+            owner: root
+            group: root
+            mode: '0644'
+          register: nginx_neko_site
+
+        - name: Enable browser.lv3.org site
+          file:
+            src: "/etc/nginx/sites-available/browser.lv3.org.conf"
+            dest: "/etc/nginx/sites-enabled/browser.lv3.org.conf"
+            state: link
+            force: yes
+
+        - name: Test NGINX configuration syntax
+          command:
+            argv:
+              - nginx
+              - -t
+          changed_when: false
+
+        - name: Reload NGINX to apply new site
+          service:
+            name: nginx
+            state: reloaded
+
+      tags: [nginx, neko, edge-publication]
+
+    - name: Wait for browser.lv3.org to respond
+      uri:
+        url: "https://browser.lv3.org/api/health"
+        validate_certs: false
+        status_code: 200
+      register: neko_edge_health
+      retries: 5
+      delay: 5
+      until: neko_edge_health.status == 200
+      tags: [nginx, neko, edge-publication]
+
+    - name: Display browser.lv3.org publication status
+      debug:
+        msg:
+          - "Neko NGINX Edge Publication"
+          - "============================="
+          - "Hostname: browser.lv3.org"
+          - "Backend: runtime-comms-lv3:8080"
+          - "Status: {{ 'ONLINE' if neko_edge_health.status == 200 else 'OFFLINE' }}"
+          - "TLS: Let's Encrypt"
+          - "Timeout: 3600s (ADR 0170 exception for long-lived WebRTC streams)"
+      tags: [nginx, neko, edge-publication]
+
+- name: "Post-Deployment Verification"
+  hosts: "localhost"
+  gather_facts: false
+  tags: [tier-3, verify, service-neko]
+
+  tasks:
+    - name: Verify Neko service is accessible end-to-end
+      block:
+        - name: Check local Neko health
+          uri:
+            url: "http://runtime-comms-lv3:8080/api/health"
+            validate_certs: false
+            status_code: 200
+          register: neko_local_health
+          retries: 3
+          delay: 3
+
+        - name: Verify NGINX edge proxy is responding
+          uri:
+            url: "https://browser.lv3.org/api/health"
+            validate_certs: false
+            status_code: 200
+          register: neko_edge_health_final
+
+        - name: Display verification results
+          debug:
+            msg:
+              - "Neko End-to-End Verification"
+              - "============================="
+              - "Local health (runtime-comms-lv3): {{ neko_local_health.status }}"
+              - "Edge proxy health (browser.lv3.org): {{ neko_edge_health_final.status }}"
+              - ""
+              - "DEPLOYMENT COMPLETE"
+              - "Operators can access Neko at: https://browser.lv3.org"
+              - "Access: Management network (Tailscale 100.64.0.0/10) only"
+              - ""
+              - "Architecture:"
+              - "  - Signalling: TLS proxy via NGINX (browser.lv3.org)"
+              - "  - Media: Direct UDP 50000-60000 from Proxmox host"
+              - "  - Firewall: Concurrent-apply safe (ADR 0380, ADR 0153)"
+              - "  - Timeout: 3600s for long-lived streams (ADR 0170 exception)"
+              - ""
+              - "Next: Manual testing from Tailscale client"
+
+      rescue:
+        - name: Display verification failure
+          debug:
+            msg:
+              - "Neko Verification FAILED"
+              - "============================="
+              - "Please check:"
+              - "  1. runtime-comms-lv3 VM is running"
+              - "  2. Neko container is healthy (docker logs neko)"
+              - "  3. Firewall rules allow TCP 8080 from nginx-lv3"
+              - "  4. NGINX site configuration is correct"
+              - "  5. TLS certificate for browser.lv3.org is valid"

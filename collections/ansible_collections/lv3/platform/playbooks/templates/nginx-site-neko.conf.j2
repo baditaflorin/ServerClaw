@@ -1,0 +1,146 @@
+# NGINX Site Configuration for Neko Remote Desktop
+# Hostname: browser.lv3.org
+# Backend: http://runtime-comms-lv3:8080 (Neko signalling)
+# Media: UDP 50000-60000 (direct from Proxmox host, not proxied)
+#
+# ADR 0380: Neko Remote Desktop for Interactive Operator Browser Access
+# Security: Restricted to management network (Tailscale 100.64.0.0/10)
+
+upstream neko_signalling {
+    # Backend WebRTC signalling endpoint
+    server runtime-comms-lv3:8080 max_fails=3 fail_timeout=30s;
+    keepalive 64;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name browser.lv3.org;
+
+    # Redirect to HTTPS
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+
+    # Allow ACME challenges for certificate renewal
+    location /.well-known/acme-challenge/ {
+        alias /var/www/acme-challenge/;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name browser.lv3.org;
+
+    # TLS Configuration
+    ssl_certificate /etc/letsencrypt/live/browser.lv3.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/browser.lv3.org/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # Security Headers (ADR 0136)
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Content Security Policy for WebRTC
+    # Allows WebSocket connections to self (browser.lv3.org) for WebRTC signalling
+    add_header Content-Security-Policy "default-src 'self'; connect-src 'self' wss://browser.lv3.org; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" always;
+
+    # HSTS: Strict Transport Security (optional, enable once tested)
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Logging
+    access_log /var/log/nginx/browser.lv3.org-access.log combined;
+    error_log /var/log/nginx/browser.lv3.org-error.log warn;
+
+    # Root location: proxy to Neko
+    location / {
+        proxy_pass http://neko_signalling;
+        proxy_http_version 1.1;
+
+        # WebSocket upgrade support (Neko uses WebSocket for signalling)
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # Standard proxy headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $server_name;
+
+        # Timeout: 3600 seconds (1 hour) for long-lived WebRTC streams
+        # ADR 0170 exception: Normal HTTP request timeout is 60s
+        # WebRTC sessions sustain 5-60 minute operator interactions
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_connect_timeout 30s;
+
+        # Buffering: Disable for real-time media
+        proxy_buffering off;
+        proxy_request_buffering off;
+
+        # Connection keepalive
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+
+        # Performance: Keep connection pool to backend alive
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 3600s;
+        proxy_read_timeout 3600s;
+    }
+
+    # API health endpoint (used for monitoring and verification)
+    location /api/health {
+        proxy_pass http://neko_signalling/api/health;
+        proxy_http_version 1.1;
+        access_log off;
+    }
+
+    # WebSocket endpoints (Neko signalling)
+    location /ws {
+        proxy_pass http://neko_signalling/ws;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Long timeout for WebSocket
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+
+    # Deny access to sensitive paths
+    location ~ /\.ht {
+        deny all;
+    }
+
+    # Deny access to common backup/temp files
+    location ~ ~$ {
+        deny all;
+    }
+}
+
+# Note on Media Streaming (ADR 0380)
+# ====================================
+# WebRTC media (audio/video RTP streams) flows on UDP 50000-60000.
+# These cannot be proxied through NGINX (Layer 7 application proxy).
+# Instead, media is forwarded directly at the Proxmox host level:
+#
+# Host-level port forwarding (proxmox_florin.yml):
+#   UDP 50000-60000 (listen) → runtime-comms-lv3:50000-60000 (target)
+#
+# This matches the LiveKit architecture (ADR 0293):
+#   - Signalling: TCP through TLS-terminating proxy (this file)
+#   - Media: UDP direct from host (minimizes latency, no TLS overhead)
+#
+# Firewall Rules (inventory/host_vars/proxmox_florin.yml):
+#   - Guest-level: Allow inbound TCP 8080 from nginx-lv3
+#   - Host-level: Forward inbound UDP 50000-60000 to runtime-comms-lv3
+#   - Uses file-level locking (ADR 0153) to prevent concurrent-apply race

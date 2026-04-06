@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- feat(ADR-0380): Neko remote desktop for interactive operator browser access — dedicated runtime-comms-lv3 VM (VMID 121) with WebRTC media streaming (UDP 50000-60000), signalling via NGINX edge at browser.lv3.org, firewall concurrency locking prevents past RTC failures
+
 - fix(cert-catalog): PBS→lan_only, Portainer→tls_pending, step-ca server_name→localhost — validator reports 0 issues across 51 domains
 
 - DRY centralization: ADRs 0368-0374 — shared validation toolkit, Jinja2 compose macros, lifecycle/verify task includes, service registry with derived defaults, data-driven playbook composition, cross-cutting service manifest (hairpin/DNS/TLS/nginx/SSO)

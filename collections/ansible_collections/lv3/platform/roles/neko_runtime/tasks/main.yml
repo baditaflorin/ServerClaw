@@ -1,0 +1,96 @@
+---
+# Neko Runtime Convergence Tasks
+
+- name: Create Neko data directory
+  file:
+    path: "{{ neko_runtime_data_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags: [neko, convergence]
+
+- name: Pull Neko Docker image
+  docker_image:
+    name: "{{ neko_runtime_image_name }}"
+    tag: "{{ neko_runtime_image_tag }}"
+    source: pull
+    pull: yes
+  register: neko_image_pulled
+  tags: [neko, convergence]
+
+- name: Capture Docker image digest for change detection
+  shell: |
+    docker inspect {{ neko_runtime_image_name }}:{{ neko_runtime_image_tag }} \
+      --format='{{ "{{" }}.RepoDigests[0]{{ "}}" }}'
+  register: neko_image_digest_output
+  changed_when: false
+  tags: [neko, convergence]
+
+- name: Set fact for image digest
+  set_fact:
+    neko_runtime_image_pull_digest: "{{ neko_image_digest_output.stdout }}"
+  tags: [neko, convergence]
+
+- name: Render Neko docker-compose template
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ neko_runtime_data_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: '0644'
+  register: neko_compose_rendered
+  tags: [neko, convergence]
+
+- name: Render Neko runtime environment file
+  template:
+    src: runtime.env.j2
+    dest: "{{ neko_runtime_data_dir }}/runtime.env"
+    owner: root
+    group: root
+    mode: '0600'
+  register: neko_env_rendered
+  tags: [neko, convergence]
+
+- name: Stop existing Neko container (if configuration changed)
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: stopped
+  when: neko_compose_rendered.changed or neko_env_rendered.changed
+  ignore_errors: yes
+  tags: [neko, convergence]
+
+- name: Remove existing Neko container (if configuration changed)
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: absent
+  when: neko_compose_rendered.changed or neko_env_rendered.changed
+  ignore_errors: yes
+  tags: [neko, convergence]
+
+- name: Deploy Neko via docker-compose
+  docker_compose:
+    project_src: "{{ neko_runtime_data_dir }}"
+    files:
+      - docker-compose.yml
+    state: present
+    pull: "{{ 'yes' if neko_image_pulled.changed else 'no' }}"
+  environment:
+    # Pass environment variables to docker-compose
+    NEKO_DATA_DIR: "{{ neko_runtime_data_dir }}"
+  register: neko_compose_result
+  tags: [neko, convergence]
+
+- name: Wait for Neko container to be healthy
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: started
+  register: neko_container
+  until: neko_container.container.State.Health.Status | default('') == 'healthy'
+  retries: 10
+  delay: 5
+  tags: [neko, convergence]
+
+- name: Run Neko verify tasks
+  include_tasks: verify.yml
+  tags: [neko, verify]
