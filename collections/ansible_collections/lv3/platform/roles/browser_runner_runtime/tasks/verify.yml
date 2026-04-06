@@ -1,15 +1,16 @@
 ---
 # Purpose: Verify that the local browser runner health endpoint and bounded smoke session API both succeed after convergence.
-- name: Verify the browser runner health endpoint responds locally
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ browser_runner_runtime_internal_port }}/healthz"
-    method: GET
-    status_code: 200
-  register: browser_runner_runtime_health
-  retries: 12
-  delay: 5
-  until: browser_runner_runtime_health.status == 200
-  changed_when: false
+# Dependencies: ADR 0371.
+- name: Verify the browser runner runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: browser-runner
+    common_verify_port: "{{ browser_runner_runtime_internal_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ browser_runner_runtime_internal_port }}/healthz"
+    common_verify_health_retries: 12
+    common_verify_health_delay: 5
 
 - name: Build the browser runner smoke payload
   ansible.builtin.set_fact:
