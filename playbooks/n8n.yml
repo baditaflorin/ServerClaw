@@ -23,87 +23,20 @@
 # Related ADRs: 0151, 0197
 # Related Runbooks: docs/runbooks/configure-n8n.md
 #
+# Invocation: ansible-playbook playbooks/n8n.yml -e @playbooks/vars/n8n.yml -e env=production
+#
 # Author: LV3 Platform
-# Last Updated: 2026-03-28
+# Last Updated: 2026-04-06
 
-- name: Ensure Hetzner DNS publication for n8n
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-    subdomain_fqdn: n8n.lv3.org
+# --- Standard plays (driven by vars/n8n.yml) ---
 
-  tasks:
-    - name: Load controller defaults
-      ansible.builtin.include_vars:
-        file: "{{ inventory_defaults_path }}"
+- import_playbook: _includes/dns_publication.yml
+  when: service_needs_dns | default(false)
 
-    - name: Load the subdomain catalog
-      ansible.builtin.include_vars:
-        file: "{{ subdomain_catalog_path }}"
-        name: subdomain_catalog
+- import_playbook: _includes/postgres_preparation.yml
+  when: service_needs_postgres | default(false)
 
-    - name: Select the n8n subdomain entry
-      ansible.builtin.set_fact:
-        selected_subdomain: >-
-          {{
-            (
-              subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', subdomain_fqdn)
-              | list
-              | first
-            ) | default({})
-          }}
-
-    - name: Assert the n8n subdomain is catalogued
-      ansible.builtin.assert:
-        that:
-          - selected_subdomain != {}
-          - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "n8n.lv3.org must exist in config/subdomain-catalog.json before live apply."
-
-    - name: Derive the managed Hetzner record name
-      ansible.builtin.set_fact:
-        selected_subdomain_record_name: >-
-          {{
-            '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
-            else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
-            )
-          }}
-
-    - name: Converge the n8n Hetzner DNS record
-      ansible.builtin.include_role:
-        name: lv3.platform.hetzner_dns_record
-      vars:
-        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
-        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
-        hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
-        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
-
-- name: Prepare PostgreSQL for n8n
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
-  become: true
-  gather_facts: true
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.postgres_vm
-    - role: lv3.platform.n8n_postgres
+# --- n8n-specific docker runtime play (has post_tasks with post-verify and notify) ---
 
 - name: Converge n8n on the Docker runtime VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
@@ -135,6 +68,8 @@
       ansible.builtin.import_tasks: tasks/notify.yml
       vars:
         playbook_execution_notification_service: n8n
+
+# --- n8n-specific nginx play (has extra var public_edge_sync_generated_static_dirs) ---
 
 - name: Publish n8n through the NGINX edge
   hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
