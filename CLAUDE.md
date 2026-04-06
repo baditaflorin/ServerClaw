@@ -195,3 +195,5 @@ Branch-local changes to these will be overwritten or conflict on merge.
 **Platform manifest must match committed code** — The pre-push gate validates `build/platform-manifest.json` against the current schema. Regenerate it after any structural change (new role, new tool, new playbook).
 
 **Pre-push gate snapshot** — The gate validates a point-in-time snapshot of committed code. Fixes committed after a push attempt starts apply to the *next* push, not the current one.
+
+**`.local/` is sacred** — NEVER symlink, copy, or `git add` the `.local` directory. Worktrees intentionally lack `.local/`; read credentials from the main worktree path if needed. Never generate placeholder secrets that could overwrite real ones. Never use `git add -A` or `git add .` in a directory containing `.local`. A pre-commit hook blocks `.local` from the index but defense in depth matters. See ADR 0376 for the full incident analysis.
