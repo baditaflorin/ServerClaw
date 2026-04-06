@@ -25,7 +25,7 @@ identity_watchdog_timer_name: lv3-identity-watchdog.timer
 identity_watchdog_syslog_identifier: lv3-identity-watchdog
 identity_watchdog_description: LV3 identity-core health watchdog (ADR 0376)
 
-identity_watchdog_probe_interval_sec: 15
+identity_watchdog_probe_interval_sec: 30
 identity_watchdog_probe_timeout_sec: 5
 identity_watchdog_failure_threshold: 2
 identity_watchdog_max_restarts_per_hour: 6
@@ -49,7 +49,7 @@ identity_watchdog_services:
   - name: keycloak
     compose_dir: /opt/keycloak
     compose_service: keycloak
-    health_url: "http://127.0.0.1:19000/health/live"
+    health_url: "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration"
     health_method: ""
     expected_status: "200"
   - name: step-ca
