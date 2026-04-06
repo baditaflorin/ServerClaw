@@ -35,19 +35,26 @@ This script MUST NOT:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml  # noqa: E402 — must come after sys.path adjustment
-from validation_toolkit import require_bool, require_list, require_mapping, require_str  # noqa: E402
+from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_services.yml"
+SUBDOMAIN_CATALOG_PATH = REPO_ROOT / "config" / "subdomain-catalog.json"
+DNS_OUTPUT_PATH = REPO_ROOT / "config" / "generated" / "dns-declarations.yaml"
 
 VALID_CONCERNS = ("hairpin", "dns", "tls", "proxy", "sso")
 VALID_SSO_PROVIDERS = {"keycloak", "oauth2-proxy"}
+VALID_DNS_TYPES = ("public", "internal")
+
+# FQDN must match this pattern: lowercase labels separated by dots, no leading/trailing hyphens.
+_FQDN_RE = re.compile(r"^[a-z0-9]([a-z0-9\-]*\.)+[a-z]{2,}$")
 
 # Scopes considered sensitive — warn when present on a public client
 _SENSITIVE_SCOPES = {"roles", "groups", "offline_access"}
@@ -63,6 +70,163 @@ def _load_registry() -> dict:
         data = yaml.safe_load(f)
     registry = require_mapping(data, str(REGISTRY_PATH))
     return require_mapping(registry.get("platform_service_registry", {}), "platform_service_registry")
+
+
+def _validate_fqdn(fqdn: str, path: str) -> str:
+    """Validate FQDN format. Raises ValueError if malformed."""
+    if not _FQDN_RE.match(fqdn):
+        raise ValueError(
+            f"{path}: invalid FQDN format '{fqdn}'. "
+            r"Must match ^[a-z0-9]([a-z0-9\-]*\.)+[a-z]{2,}$"
+        )
+    return fqdn
+
+
+def _load_subdomain_catalog() -> dict:
+    """Load config/subdomain-catalog.json. Returns the full parsed object."""
+    import json
+
+    with SUBDOMAIN_CATALOG_PATH.open() as f:
+        return json.load(f)
+
+
+# ---------------------------------------------------------------------------
+# DNS concern (Phase 2)
+# ---------------------------------------------------------------------------
+
+
+def generate_dns_declarations(
+    registry: dict,
+    write: bool = False,
+    repo_root: Path = REPO_ROOT,
+) -> dict:
+    """Generate DNS declarations from registry dns sections.
+
+    For each service with a dns section, validates:
+      - Each record has fqdn (valid format), type (public|internal), target_host, ttl.
+      - No two services declare the same FQDN.
+      - Each declared FQDN exists in config/subdomain-catalog.json (warn if not).
+      - Catalog entries with no registry service are warned as potential stale records.
+
+    In --write mode, writes config/generated/dns-declarations.yaml.
+
+    Returns a mapping of fqdn -> declaration dict.
+    Raises ValueError on schema violations or duplicate FQDNs.
+    """
+    declarations: dict[str, dict] = {}
+
+    for service_name, service_config in registry.items():
+        service_config = require_mapping(
+            service_config, f"platform_service_registry.{service_name}"
+        )
+        dns_config = service_config.get("dns")
+        if dns_config is None:
+            continue
+
+        dns_path = f"platform_service_registry.{service_name}.dns"
+        dns_config = require_mapping(dns_config, dns_path)
+
+        records_raw = dns_config.get("records")
+        if records_raw is None:
+            raise ValueError(
+                f"{dns_path}.records is required when dns section is present"
+            )
+        records = require_list(records_raw, f"{dns_path}.records", min_length=1)
+
+        for idx, record in enumerate(records):
+            rec_path = f"{dns_path}.records[{idx}]"
+            record = require_mapping(record, rec_path)
+
+            fqdn = require_str(record.get("fqdn"), f"{rec_path}.fqdn")
+            _validate_fqdn(fqdn, f"{rec_path}.fqdn")
+
+            dns_type = require_str(record.get("type"), f"{rec_path}.type")
+            if dns_type not in VALID_DNS_TYPES:
+                raise ValueError(
+                    f"{rec_path}.type must be one of {VALID_DNS_TYPES!r}, got '{dns_type}'"
+                )
+
+            target_host = require_str(record.get("target_host"), f"{rec_path}.target_host")
+
+            ttl_raw = record.get("ttl", 3600)
+            ttl = require_int(ttl_raw, f"{rec_path}.ttl", minimum=1, maximum=86400)
+
+            if fqdn in declarations:
+                existing = declarations[fqdn]["service"]
+                raise ValueError(
+                    f"Duplicate FQDN '{fqdn}': claimed by both '{existing}' and '{service_name}'"
+                )
+
+            declarations[fqdn] = {
+                "service": service_name,
+                "type": dns_type,
+                "target_host": target_host,
+                "ttl": ttl,
+            }
+
+    # Cross-check against subdomain catalog (warnings only — does not fail)
+    try:
+        catalog = _load_subdomain_catalog()
+        _warn_catalog_drift(declarations, catalog)
+    except OSError as exc:
+        print(f"  WARNING: could not load subdomain catalog for cross-check: {exc}")
+
+    if write:
+        out_dir = (repo_root / "config" / "generated")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / "dns-declarations.yaml"
+        header = (
+            "# GENERATED — do not edit. "
+            "Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only dns\n"
+        )
+        body = yaml.dump(
+            {"dns_records": declarations},
+            default_flow_style=False,
+            sort_keys=True,
+        )
+        out_path.write_text(header + body)
+        print(f"  Wrote {len(declarations)} DNS declarations to {out_path.relative_to(repo_root)}")
+    else:
+        print(f"  DNS: {len(declarations)} declarations validated (no files written)")
+
+    return declarations
+
+
+def _warn_catalog_drift(declarations: dict, catalog: dict) -> None:
+    """Print warnings for catalog drift. Called from generate_dns_declarations."""
+    catalog_fqdns: dict[str, dict] = {}
+    for entry in catalog.get("subdomains", []):
+        fqdn = str(entry.get("fqdn", ""))
+        if fqdn:
+            catalog_fqdns[fqdn] = entry
+
+    # Declared in registry but not in catalog
+    for fqdn, decl in declarations.items():
+        if fqdn not in catalog_fqdns:
+            print(
+                f"  WARN: {fqdn} (service={decl['service']}) declared in registry but "
+                "NOT in config/subdomain-catalog.json — add it before live-apply."
+            )
+        else:
+            status = catalog_fqdns[fqdn].get("status", "")
+            if status != "active":
+                print(
+                    f"  WARN: {fqdn} is in subdomain-catalog.json with "
+                    f"status='{status}' (expected 'active')."
+                )
+
+    # In catalog (edge-published) but no dns declaration in registry
+    registry_services = {d["service"] for d in declarations.values()}
+    for fqdn, entry in catalog_fqdns.items():
+        exposure = entry.get("exposure", "")
+        service_id = entry.get("service_id", "")
+        if exposure in ("informational-only", "private-only"):
+            continue  # Infrastructure FQDNs not managed by service registry
+        if fqdn not in declarations and service_id not in registry_services:
+            print(
+                f"  WARN: {fqdn} (service_id={service_id}) is in subdomain-catalog.json "
+                "with no registry dns declaration — potential stale catalog entry."
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -195,7 +359,284 @@ def _validate_redirect_uris(redirect_uris: list, path_prefix: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Stub generators for other concerns (phases 1-4)
+# TLS concern (Phase 3)
+# ---------------------------------------------------------------------------
+
+VALID_TLS_SOURCES = {"letsencrypt", "openbao", "self-signed", "step-ca"}
+
+
+def generate_tls_certificates(
+    registry: dict,
+    write: bool = False,
+    repo_root: Path = REPO_ROOT,
+) -> dict:
+    """Generate TLS certificate declarations from registry tls sections.
+
+    For each service with a tls section, validates that:
+      - cert_source is one of the valid values
+      - each domain in tls.domains has a corresponding dns.records entry
+      - letsencrypt is not declared for .internal or .local domains
+      - no domain is claimed by more than one service
+
+    In --write mode, writes inventory/group_vars/platform_tls_certs.yml.
+
+    Returns a mapping of fqdn -> certificate declaration dict.
+    """
+    certs: dict[str, dict] = {}
+    domain_owners: dict[str, str] = {}
+
+    for service_name, service_config in registry.items():
+        service_config = require_mapping(service_config, f"platform_service_registry.{service_name}")
+        tls_config = service_config.get("tls")
+        if tls_config is None:
+            continue
+
+        path_prefix = f"platform_service_registry.{service_name}.tls"
+        tls_config = require_mapping(tls_config, path_prefix)
+
+        cert_source = require_str(
+            tls_config.get("cert_source"),
+            f"{path_prefix}.cert_source",
+        )
+        if cert_source not in VALID_TLS_SOURCES:
+            raise ValueError(
+                f"{path_prefix}.cert_source must be one of: "
+                f"{', '.join(sorted(VALID_TLS_SOURCES))}"
+            )
+
+        domains_raw = tls_config.get("domains", [])
+        domains = require_list(domains_raw, f"{path_prefix}.domains", min_length=1)
+        for idx, d in enumerate(domains):
+            require_str(d, f"{path_prefix}.domains[{idx}]")
+
+        wildcard = tls_config.get("wildcard", False)
+        require_bool(wildcard, f"{path_prefix}.wildcard")
+
+        cert_validity_days = tls_config.get("cert_validity_days", 90)
+        require_int(cert_validity_days, f"{path_prefix}.cert_validity_days", minimum=1)
+
+        # Collect DNS FQDNs for cross-check
+        dns_config = service_config.get("dns")
+        dns_fqdns: set[str] = set()
+        if dns_config:
+            dns_config = require_mapping(dns_config, f"platform_service_registry.{service_name}.dns")
+            for rec in dns_config.get("records", []):
+                if isinstance(rec, dict) and "fqdn" in rec:
+                    dns_fqdns.add(rec["fqdn"])
+
+        for fqdn in domains:
+            # Warn if letsencrypt declared for internal/local domain
+            if cert_source == "letsencrypt" and (
+                ".internal" in fqdn or fqdn.endswith(".local")
+            ):
+                print(
+                    f"  WARNING: {path_prefix}: cert_source=letsencrypt but "
+                    f"domain '{fqdn}' looks internal (.internal or .local)"
+                )
+
+            # Duplicate domain check
+            if fqdn in domain_owners:
+                raise ValueError(
+                    f"Duplicate TLS domain '{fqdn}': claimed by "
+                    f"'{domain_owners[fqdn]}' and '{service_name}'"
+                )
+            domain_owners[fqdn] = service_name
+
+            certs[fqdn] = {
+                "service": service_name,
+                "source": cert_source,
+                "wildcard": wildcard,
+                "cert_validity_days": cert_validity_days,
+            }
+
+    if write:
+        out = repo_root / "inventory" / "group_vars" / "platform_tls_certs.yml"
+        header = (
+            "# GENERATED — do not edit. "
+            "Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only tls\n"
+        )
+        body = yaml.dump({"platform_tls_certs": certs}, default_flow_style=False, sort_keys=True)
+        out.write_text(header + body)
+        print(f"  Wrote {len(certs)} TLS cert declarations to {out.relative_to(repo_root)}")
+    else:
+        print(f"  TLS: {len(certs)} cert declarations validated (no files written)")
+
+    return certs
+
+
+# ---------------------------------------------------------------------------
+# Proxy concern (Phase 4)
+# ---------------------------------------------------------------------------
+
+# Host-group to internal IP mapping (from inventory/hosts.yml production section)
+_HOST_GROUP_IPS: dict[str, str] = {
+    "docker-runtime-lv3": "10.10.10.20",
+    "runtime-control-lv3": "10.10.10.92",
+    "runtime-general-lv3": "10.10.10.91",
+    "runtime-ai-lv3": "10.10.10.90",
+    "coolify-lv3": "10.10.10.70",
+    "coolify-apps-lv3": "10.10.10.71",
+    "artifact-cache-lv3": "10.10.10.50",
+    "backup-vm-lv3": "10.10.10.51",
+}
+
+
+def generate_nginx_upstreams(
+    registry: dict,
+    write: bool = False,
+    repo_root: Path = REPO_ROOT,
+) -> list[dict]:
+    """Generate nginx upstream definitions from proxy declarations.
+
+    For each service with proxy.enabled=true, produces:
+      - One upstream block per service
+      - config/generated/nginx-upstreams.yaml for Ansible consumption
+      - config/generated/nginx-upstreams.conf nginx include snippet
+
+    Returns a list of upstream dicts.
+    Raises ValueError on any validation error.
+    """
+    upstreams: list[dict] = []
+    fqdn_owners: dict[str, str] = {}
+
+    for service_name, service_config in sorted(registry.items()):
+        service_config = require_mapping(service_config, f"platform_service_registry.{service_name}")
+        proxy_config = service_config.get("proxy")
+        if proxy_config is None:
+            continue
+
+        path_prefix = f"platform_service_registry.{service_name}.proxy"
+        proxy_config = require_mapping(proxy_config, path_prefix)
+
+        enabled = proxy_config.get("enabled", False)
+        if not require_bool(enabled, f"{path_prefix}.enabled"):
+            continue
+
+        public_fqdn = require_str(proxy_config.get("public_fqdn"), f"{path_prefix}.public_fqdn")
+
+        upstream_port_raw = proxy_config.get("upstream_port") or service_config.get("internal_port")
+        if upstream_port_raw is None:
+            raise ValueError(
+                f"{path_prefix}: proxy.upstream_port or service internal_port is required"
+            )
+        upstream_port = require_int(
+            upstream_port_raw,
+            f"{path_prefix}.upstream_port",
+            minimum=1,
+            maximum=65535,
+        )
+
+        upstream_host = require_str(
+            proxy_config.get("upstream_host") or service_config.get("host_group", ""),
+            f"{path_prefix}.upstream_host",
+        )
+        upstream_ip = _HOST_GROUP_IPS.get(upstream_host)
+        if upstream_ip is None:
+            raise ValueError(
+                f"{path_prefix}.upstream_host: unknown host group '{upstream_host}'. "
+                f"Known groups: {', '.join(sorted(_HOST_GROUP_IPS))}"
+            )
+
+        auth_proxy = proxy_config.get("auth_proxy", False)
+        require_bool(auth_proxy, f"{path_prefix}.auth_proxy")
+
+        websocket = proxy_config.get("websocket", False)
+        require_bool(websocket, f"{path_prefix}.websocket")
+
+        max_body_size = proxy_config.get("max_body_size", "10m")
+        if max_body_size is not None:
+            require_str(max_body_size, f"{path_prefix}.max_body_size")
+
+        extra_fqdns_raw = proxy_config.get("extra_fqdns", [])
+        extra_fqdns = require_list(extra_fqdns_raw, f"{path_prefix}.extra_fqdns")
+        for idx, fqdn in enumerate(extra_fqdns):
+            require_str(fqdn, f"{path_prefix}.extra_fqdns[{idx}]")
+
+        path_prefix_val = proxy_config.get("path_prefix", "/")
+        if path_prefix_val is not None:
+            require_str(path_prefix_val, f"{path_prefix}.path_prefix")
+            if not path_prefix_val.startswith("/"):
+                raise ValueError(
+                    f"{path_prefix}.path_prefix must start with / (got: {path_prefix_val!r})"
+                )
+
+        # Duplicate FQDN detection
+        all_fqdns = [public_fqdn] + list(extra_fqdns)
+        for fqdn in all_fqdns:
+            if fqdn in fqdn_owners:
+                raise ValueError(
+                    f"Duplicate proxy FQDN '{fqdn}': claimed by "
+                    f"'{fqdn_owners[fqdn]}' and '{service_name}'"
+                )
+            fqdn_owners[fqdn] = service_name
+
+        upstream_name = f"{service_name}_upstream"
+
+        upstreams.append({
+            "name": upstream_name,
+            "service_name": service_name,
+            "fqdn": public_fqdn,
+            "extra_fqdns": list(extra_fqdns),
+            "port": upstream_port,
+            "host": upstream_host,
+            "ip": upstream_ip,
+            "auth_proxy": auth_proxy,
+            "websocket": websocket,
+            "max_body_size": max_body_size,
+            "path_prefix": path_prefix_val,
+        })
+
+    if write:
+        out_dir = repo_root / "config" / "generated"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        _write_nginx_upstreams_conf(upstreams, out_dir / "nginx-upstreams.conf")
+
+        yaml_out = out_dir / "nginx-upstreams.yaml"
+        header = (
+            "# GENERATED — do not edit. "
+            "Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only proxy\n"
+        )
+        body = yaml.dump(
+            {"platform_nginx_upstreams": upstreams},
+            default_flow_style=False,
+            sort_keys=False,
+        )
+        yaml_out.write_text(header + body)
+
+        print(
+            f"  Wrote {len(upstreams)} nginx upstreams to "
+            f"{(out_dir / 'nginx-upstreams.conf').relative_to(repo_root)} "
+            f"and {yaml_out.relative_to(repo_root)}"
+        )
+    else:
+        print(f"  Proxy: {len(upstreams)} nginx upstream declarations validated (no files written)")
+
+    return upstreams
+
+
+def _write_nginx_upstreams_conf(upstreams: list[dict], out_path: Path) -> None:
+    """Write the nginx upstream block conf snippet."""
+    lines: list[str] = [
+        "# GENERATED by ADR 0374 Phase 4 — do not edit manually\n",
+        "# Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only proxy\n",
+        "#\n",
+        "# Include from the nginx http block: include /path/to/nginx-upstreams.conf;\n",
+        "\n",
+    ]
+
+    for u in upstreams:
+        all_fqdns = [u["fqdn"]] + u["extra_fqdns"]
+        lines.append(f"# {u['service_name']} — {', '.join(all_fqdns)}\n")
+        lines.append(f"upstream {u['name']} {{\n")
+        lines.append(f"    server {u['ip']}:{u['port']};  # {u['host']}\n")
+        lines.append("}\n\n")
+
+    out_path.write_text("".join(lines))
+
+
+# ---------------------------------------------------------------------------
+# Stub generators for other concerns (phases 1 and 2)
 # These are called when --only is not specified, so they must exist.
 # ---------------------------------------------------------------------------
 
@@ -259,8 +700,14 @@ def main(argv: list[str] | None = None) -> int:
     for concern in concerns_to_run:
         print(f"\n[{concern.upper()}]")
         try:
-            if concern == "sso":
+            if concern == "dns":
+                generate_dns_declarations(registry, write=write, repo_root=REPO_ROOT)
+            elif concern == "tls":
+                generate_tls_certificates(registry, write=write, repo_root=REPO_ROOT)
+            elif concern == "sso":
                 generate_sso_clients(registry, write=write, repo_root=REPO_ROOT)
+            elif concern == "proxy":
+                generate_nginx_upstreams(registry, write=write, repo_root=REPO_ROOT)
             else:
                 _concern_not_implemented(concern, write=write)
         except ValueError as exc:
