@@ -62,6 +62,14 @@ tasks:
       IMPORTANT: use internal URL http://10.10.10.20:8094 — agents.lv3.org is behind oauth2-proxy
       Auth: .local/dify/admin-auth.json (base_url, api_token = Dify API key)
 
+ownership_manifest:
+  owned_surfaces:
+  - id: service_api_agent_tools
+    paths:
+    - scripts/agent_tool_registry.py
+    - config/agent-tool-registry.json
+    mode: shared
+
 adr_refs:
   - "0362"
   - "0363"

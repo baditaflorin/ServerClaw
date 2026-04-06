@@ -15,6 +15,15 @@ shared_surfaces:
   - scripts/certificate_validator.py
   - playbooks/certificate-validation.yml
   - playbooks/fix-edge-certificate.yml
+ownership_manifest:
+  owned_surfaces:
+  - id: certificate_validator
+    paths:
+    - scripts/certificate_validator.py
+    - playbooks/certificate-validation.yml
+    - playbooks/fix-edge-certificate.yml
+    - .githooks/pre-push
+    mode: exclusive
 notes: |
   Implements ADR 0375: automated SSL certificate validation for all 53
   edge-published domains. Fixes hostname mismatches on ci.lv3.org,

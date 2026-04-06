@@ -17,10 +17,58 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 301
+  total_workstreams: 302
   by_year:
-    '2026': 301
+    '2026': 302
 workstreams:
+- id: nifty-clarke-identity-watchdog
+  adr: '0376'
+  title: "Identity-core watchdog \u2014 30s OIDC probe + oauth2-proxy auto-restart"
+  status: ready_for_merge
+  owner: claude
+  branch: claude/nifty-clarke
+  worktree_path: .claude/worktrees/nifty-clarke
+  doc: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
+  depends_on:
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0226-systemd-host-supervisor
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/identity_core_watchdog/
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/keycloak.env.j2
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/
+  - playbooks/identity-core-watchdog.yml
+  - config/ansible-execution-scopes.yaml
+  - config/workflow-catalog.json
+  - config/health-probe-catalog.json
+  - config/ntfy/topics.yaml
+  - config/uptime-kuma/monitors.json
+  - Makefile
+  ownership_manifest:
+    owned_surfaces:
+    - id: identity_core_watchdog_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/identity_core_watchdog/
+      - playbooks/identity-core-watchdog.yml
+      mode: exclusive
+    - id: oauth2_proxy_watchdog_templates
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.sh.j2
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.service.j2
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.timer.j2
+      mode: exclusive
+  notes: 'ADR 0376: Keycloak kept dying. Deployed identity-core watchdog with 30s
+    OIDC
+
+    discovery probe (not just /health/live), auto-restart on 2 failures, 6/hr limit.
+
+    Added KC_CACHE=local to eliminate JGroups TCP loop from stale jgroups_ping rows.
+
+    Added oauth2-proxy watchdog timer on nginx-lv3 to restart on unresponsive proxy.
+
+    Root cause of 500s: Keycloak restart invalidated in-flight auth codes.
+
+    '
 - id: ws-0375-certificate-validation
   adr: '0375'
   title: Certificate Validation and Concordance Enforcement
@@ -38,6 +86,15 @@ workstreams:
   - scripts/certificate_validator.py
   - playbooks/certificate-validation.yml
   - playbooks/fix-edge-certificate.yml
+  ownership_manifest:
+    owned_surfaces:
+    - id: certificate_validator
+      paths:
+      - scripts/certificate_validator.py
+      - playbooks/certificate-validation.yml
+      - playbooks/fix-edge-certificate.yml
+      - .githooks/pre-push
+      mode: exclusive
   notes: 'Implements ADR 0375: automated SSL certificate validation for all 53
 
     edge-published domains. Fixes hostname mismatches on ci.lv3.org,
@@ -49,29 +106,6 @@ workstreams:
     automated remediation playbooks.
 
     '
-- id: ws-0364-outline-agent-tools
-  title: 'Outline agent tools: list/search/get/create documents (ADR 0362 + 0364)'
-  status: in_progress
-  owner: claude
-  branch: claude/implement-aw22-23
-  adr: '0364'
-  description: "Implements AW-22 and AW-23 from the Plane task board.\n\nAW-22: Generic\
-    \ _resolve_service_auth(service_name) helper\n- Adds shared credential discovery\
-    \ to scripts/agent_tool_registry.py\n- Refactors _resolve_plane_auth() to delegate\
-    \ to this helper\n- Enables Outline and future services to follow ADR 0362 without\
-    \ copy-paste\n\nAW-23: Four Outline agent tools\n- list-outline-collections (observe)\n\
-    - search-outline-documents (observe)\n- get-outline-document (observe)\n- create-outline-document\
-    \ (execute, approval_required: true)\n\nExisting client: scripts/outline_client.py\n\
-    Auth: .local/outline/admin-auth.json (needs fresh token \u2014 see ADR 0364)\n"
-  blocker: ".local/outline/api-token.txt has insufficient scope for search/get (only\
-    \ public\ncollections.list works without real auth). Operator needs to generate\
-    \ a fresh API\ntoken in Outline Settings \u2192 API \u2192 Personal access token\
-    \ and save to:\n  .local/outline/admin-auth.json:\n    { \"base_url\": \"https://wiki.lv3.org\"\
-    , \"api_token\": \"<token>\" }\n"
-  adr_refs:
-  - '0362'
-  - '0363'
-  - '0364'
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
@@ -1873,6 +1907,14 @@ workstreams:
   - ADR 0101: Automated certificate lifecycle management
   - ADR 0273: Public endpoint admission control
   - ADR 0021: Public subdomain publication at NGINX edge
+  ownership_manifest:
+    owned_surfaces:
+    - id: certificate_validator_scripts
+      paths:
+      - scripts/certificate_validator.py
+      - playbooks/certificate-validation.yml
+      - playbooks/fix-edge-certificate.yml
+      mode: exclusive
   branch: claude/nervous-feistel
   worktree: nervous-feistel
 - id: ws-0364-service-api-agent-tools
@@ -1922,6 +1964,13 @@ workstreams:
       \ true)\nIMPORTANT: use internal URL http://10.10.10.20:8094 \u2014 agents.lv3.org\
       \ is behind oauth2-proxy\nAuth: .local/dify/admin-auth.json (base_url, api_token\
       \ = Dify API key)\n"
+  ownership_manifest:
+    owned_surfaces:
+    - id: service_api_agent_tools
+      paths:
+      - scripts/agent_tool_registry.py
+      - config/agent-tool-registry.json
+      mode: shared
   adr_refs:
   - '0362'
   - '0363'
