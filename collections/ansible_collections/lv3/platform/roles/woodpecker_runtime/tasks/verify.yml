@@ -18,7 +18,7 @@
 #   - ADR 0287: Requires guest-local Woodpecker verification after deployment.
 #   - Requires: woodpecker_runtime main tasks have rendered and started the stack.
 #
-# Related ADRs: 0165, 0287
+# Related ADRs: 0165, 0287, 0371
 # Related Runbooks: docs/runbooks/configure-woodpecker.md
 #
 # Author: LV3 Platform
