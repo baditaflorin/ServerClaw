@@ -1,0 +1,5 @@
+---
+service_audit_name: searxng
+service_needs_dns: false
+service_needs_postgres: false
+service_needs_nginx_edge: false
