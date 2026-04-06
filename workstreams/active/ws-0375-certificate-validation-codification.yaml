@@ -74,5 +74,6 @@ ownership_manifest:
     - playbooks/fix-edge-certificate.yml
     mode: exclusive
 
+doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
 branch: claude/nervous-feistel
 worktree: nervous-feistel

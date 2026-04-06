@@ -1915,6 +1915,7 @@ workstreams:
       - playbooks/certificate-validation.yml
       - playbooks/fix-edge-certificate.yml
       mode: exclusive
+  doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
   branch: claude/nervous-feistel
   worktree: nervous-feistel
 - id: ws-0364-service-api-agent-tools
@@ -1971,6 +1972,7 @@ workstreams:
       - scripts/agent_tool_registry.py
       - config/agent-tool-registry.json
       mode: shared
+  doc: docs/adr/0362-agent-service-api-gateway-pattern.md
   adr_refs:
   - '0362'
   - '0363'

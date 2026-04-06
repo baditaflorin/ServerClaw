@@ -70,6 +70,7 @@ ownership_manifest:
     - config/agent-tool-registry.json
     mode: shared
 
+doc: docs/adr/0362-agent-service-api-gateway-pattern.md
 adr_refs:
   - "0362"
   - "0363"
