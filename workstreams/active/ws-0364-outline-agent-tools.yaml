@@ -1,6 +1,6 @@
 id: ws-0364-outline-agent-tools
 title: 'Outline agent tools: list/search/get/create documents (ADR 0362 + 0364)'
-status: in_progress
+status: completed
 owner: claude
 branch: claude/implement-aw22-23
 adr: '0364'
@@ -27,16 +27,11 @@ description: 'Implements AW-22 and AW-23 from the Plane task board.
   - create-outline-document (execute, approval_required: true)
 
 
-  Existing client: scripts/outline_client.py
-
-  Auth: .local/outline/admin-auth.json (needs fresh token — see ADR 0364)
+  Auth: .local/outline/admin-auth.json — API token created programmatically via
+  Outline PostgreSQL DB (see scripts/create_outline_api_token.py for automation).
 
   '
-blocker: ".local/outline/api-token.txt has insufficient scope for search/get (only\
-  \ public\ncollections.list works without real auth). Operator needs to generate\
-  \ a fresh API\ntoken in Outline Settings → API → Personal access token and save\
-  \ to:\n  .local/outline/admin-auth.json:\n    { \"base_url\": \"https://wiki.lv3.org\"\
-  , \"api_token\": \"<token>\" }\n"
+blocker: null
 adr_refs:
 - '0362'
 - '0363'

@@ -985,6 +985,35 @@ def tool_create_outline_document(_tool: dict[str, Any], args: dict[str, Any]) ->
     }
 
 
+def tool_provision_outline_api_token(
+    _tool: dict[str, Any], args: dict[str, Any]
+) -> dict[str, Any]:
+    """Provision a new Outline API token via direct DB insertion.
+
+    This is the self-service credential rotation path for agents. When Outline
+    tools return 401, call this first, then retry the failed operation.
+    """
+    # Lazy import to avoid module-load side effects (subprocess calls, etc.)
+    import importlib.util
+    import sys as _sys
+
+    script_path = REPO_ROOT / "scripts" / "provision_outline_api_token.py"
+    spec = importlib.util.spec_from_file_location("provision_outline_api_token", script_path)
+    mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
+
+    name = args.get("name", "agent-automation")
+    dry_run = bool(args.get("dry_run", False))
+
+    token = mod.provision(name=name, dry_run=dry_run)
+
+    auth_file = str(REPO_ROOT / ".local" / "outline" / "admin-auth.json")
+    return {
+        "token_preview": f"{token[:20]}...{token[-4:]}",
+        "auth_file": auth_file,
+    }
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -1013,6 +1042,7 @@ HANDLERS: Final[dict[str, Any]] = {
     "search_outline_documents": tool_search_outline_documents,
     "get_outline_document": tool_get_outline_document,
     "create_outline_document": tool_create_outline_document,
+    "provision_outline_api_token": tool_provision_outline_api_token,
 }
 
 

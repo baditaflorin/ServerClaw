@@ -1833,6 +1833,57 @@
         "kind": "handler",
         "handler": "create_outline_document"
       }
+    },
+    {
+      "name": "provision-outline-api-token",
+      "title": "Provision Outline API Token",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "description": "Provision a new Outline API token by inserting it into the Outline PostgreSQL database via the bootstrap SSH key. Writes the token to .local/outline/admin-auth.json so all Outline agent tools pick it up automatically. Call this when Outline tools return 401 errors or when .local/outline/admin-auth.json is missing. Uses the outline.automation@lv3.org service account.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/admin/apiKeys",
+      "auth": "bootstrap-ssh",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the API key in Outline (default: agent-automation)",
+            "default": "agent-automation"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "If true, print what would happen without making changes",
+            "default": false
+          }
+        },
+        "required": []
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "token_preview": {
+            "type": "string",
+            "description": "First 20 chars + last 4 chars of the provisioned token (never the full token)"
+          },
+          "auth_file": {
+            "type": "string",
+            "description": "Path to the written admin-auth.json file"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "provision_outline_api_token"
+      }
     }
   ]
 }
