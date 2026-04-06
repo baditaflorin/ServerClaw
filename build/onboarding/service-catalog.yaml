@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-05'
+generated: '2026-04-06'
 generated_from:
   - docs/discovery/onboarding-packs.yaml
   - docs/discovery/repo-structure/automation-and-infrastructure.yaml
@@ -102,7 +102,7 @@ repo_structure_sections:
           for_agents: Start here when you need example inventory, publication, and private-overlay starter files instead of one deployment's live truth.
         config:
           purpose: Service and application configuration (YAML/JSON/CONF)
-          contains: Per-service config directories for all deployed services plus examples/
+          contains: Per-service config directories for all deployed services plus examples/; config/integrations/ for cross-service dependency contracts (ADR 0353)
           concern: service-configuration, applications
           keywords:
             - config
@@ -110,12 +110,13 @@ repo_structure_sections:
             - services
             - settings
             - configuration
-          for_agents: 'One subdirectory per service (e.g., config/gitea/, config/keycloak/). Read .config-locations.yaml for which file controls which behaviour.
-
-            '
+            - integrations
+            - contracts
+          for_agents: "One subdirectory per service (e.g., config/gitea/, config/keycloak/). Read .config-locations.yaml for which file controls which behaviour. config/integrations/<consumer>--<provider>.yaml declares every cross-service dependency (ADR 0353) \u2014 check here before changing ports or secrets.\n"
           key_files:
             network-impairment-matrix.yaml: ADR 0189 governed preview/staging network impairment catalog
             stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites mapped to service/environment bindings
+            integrations/: ADR 0353 integration contracts; validate with scripts/validate_integrations.py
         policy:
           purpose: Shared Rego policy bundles and tests for OPA and Conftest
           contains: decisions/, conftest/, tests/
@@ -141,7 +142,7 @@ repo_structure_sections:
             - tools
             - validation
             - python
-          for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json.
+          for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json. validate_integrations.py validates ADR 0353 cross-service contracts. check_provenance_headers.py audits ADR 0351 managed-by headers in templates.
 
             '
           key_files:
@@ -150,6 +151,8 @@ repo_structure_sections:
             network_impairment_matrix.py: ADR 0189 CLI and validation helper for governed network impairment scenarios
             policy_checks.py: ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain
             stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence
+            validate_integrations.py: ADR 0353 validator for config/integrations/ contracts; run with --check-dead to detect stale integrations
+            check_provenance_headers.py: ADR 0351 audit tool reporting which Jinja2 templates lack managed-by provenance headers
         tests:
           purpose: Test suites for automated validation
           contains: pytest unit + integration tests, molecule scenarios
@@ -449,15 +452,37 @@ config_location_sections:
           - 'build/platform-manifest.json: Generated manifest from this file'
           - 'inventory/group_vars/all.yml: Common variables'
         schema_hint: "services:\n  - service: service_name\n    vm: vm_name\n    image: image:version\n    port: port_number\n"
+      config/integrations/:
+        purpose: "ADR 0353 service integration contracts \u2014 canonical declarations of every cross-service dependency (postgres, s3, secrets, oidc, smtp, nats)"
+        owner: human
+        format: "YAML \u2014 one file per consumer/provider pair: <consumer>--<provider>.yaml"
+        use_for: Pre-flight validation, impact analysis, dead-integration detection; run scripts/validate_integrations.py before changing any service port or credential
+        update_when: Adding a new service integration or changing connection details / secrets paths
+        update_by: Agent or human implementing the consuming role
+        validation: python3 scripts/validate_integrations.py --check-dead
+        schema_hint: 'contract_id: consumer--provider
+
+          consumer: role_name
+
+          provider: role_name
+
+          integration_type: postgres|s3|secrets|oidc|smtp|nats|redis|http
+
+          '
+        related_files:
+          - 'scripts/validate_integrations.py: Validates all contracts and detects dead integrations'
+          - 'docs/adr/0353-service-integration-contract-registry.md: ADR governing this pattern'
       receipts/live-applies/:
-        purpose: Operational audit trail of successful live deployments
+        purpose: Operational audit trail of successful live deployments; see also WorkstreamApplyReceipts (platform/workstream_receipts.py) for in-progress state tracking (ADR 0357)
         owner: automation
-        format: "JSON \u2014 timestamp, agent, ADR reference, changes, verification"
-        use_for: Understanding what changed when and confirming deploys succeeded
+        format: "JSON/YAML \u2014 timestamp, agent, ADR reference, changes, verification; workstream receipts use state machine: pending\u2192in_progress\u2192completed/failed/partial"
+        use_for: Understanding what changed when and confirming deploys succeeded; use platform.workstream_receipts.WorkstreamApplyReceipts to guard against duplicate applies
         update_when: After every live-apply run
         update_by: Deployment automation (Ansible/Windmill) or agent
         validation: Manual review
         naming_convention: YYYY-MM-DD-adr-XXXX-description-live-apply.json
+        related_files:
+          - 'platform/workstream_receipts.py: ADR 0357 state machine for in-progress tracking'
       receipts/sast/:
         purpose: Semgrep SARIF receipts emitted by repo validation runs
         owner: automation

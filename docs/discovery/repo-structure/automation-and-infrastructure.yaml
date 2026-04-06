@@ -81,7 +81,7 @@ entries:
       for_agents: Start here when you need example inventory, publication, and private-overlay starter files instead of one deployment's live truth.
     config:
       purpose: Service and application configuration (YAML/JSON/CONF)
-      contains: Per-service config directories for all deployed services plus examples/
+      contains: Per-service config directories for all deployed services plus examples/; config/integrations/ for cross-service dependency contracts (ADR 0353)
       concern: service-configuration, applications
       keywords:
         - config
@@ -89,8 +89,12 @@ entries:
         - services
         - settings
         - configuration
+        - integrations
+        - contracts
       for_agents: 'One subdirectory per service (e.g., config/gitea/, config/keycloak/).
         Read .config-locations.yaml for which file controls which behaviour.
+        config/integrations/<consumer>--<provider>.yaml declares every cross-service
+        dependency (ADR 0353) — check here before changing ports or secrets.
 
         '
       key_files:
@@ -98,6 +102,7 @@ entries:
           network impairment catalog
         stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites
           mapped to service/environment bindings
+        integrations/: ADR 0353 integration contracts; validate with scripts/validate_integrations.py
     policy:
       purpose: Shared Rego policy bundles and tests for OPA and Conftest
       contains: decisions/, conftest/, tests/
@@ -128,6 +133,8 @@ entries:
       for_agents: 'validate_repo.sh runs all local checks. generate_adr_index.py regenerates
         docs/adr/.index.yaml plus docs/adr/index/. adr_query_tool.py reads the ADR
         shards and reservation ledger. platform_manifest.py generates build/platform-manifest.json.
+        validate_integrations.py validates ADR 0353 cross-service contracts.
+        check_provenance_headers.py audits ADR 0351 managed-by headers in templates.
 
         '
       key_files:
@@ -141,6 +148,8 @@ entries:
           policy bundle and toolchain
         stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped
           smoke suite catalogs and receipt-ready evidence
+        validate_integrations.py: ADR 0353 validator for config/integrations/ contracts; run with --check-dead to detect stale integrations
+        check_provenance_headers.py: ADR 0351 audit tool reporting which Jinja2 templates lack managed-by provenance headers
     tests:
       purpose: Test suites for automated validation
       contains: pytest unit + integration tests, molecule scenarios

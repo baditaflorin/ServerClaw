@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- wire ADR 0347-0357 agent coordination patterns into all discovery surfaces: AGENTS.md coordination section with code examples, config/integrations/ in .config-locations.yaml, validate_integrations.py + check_provenance_headers.py in scripts discovery, regenerated onboarding packs (service-catalog, automation, fork-bootstrap) now reference all 6 implemented ADRs
 - fix Woodpecker OAuth login: add nginx edge + TLS for git.lv3.org, fix WOODPECKER_GITEA_URL to use private IP (cross-host LAN), remove dead gitea_runtime_default external network from Woodpecker compose
 
 - AW-22 + AW-23 + provision-outline-api-token: generic _resolve_service_auth() helper (ADR 0362 gap); Outline agent tools — list-outline-collections, search-outline-documents, get-outline-document, create-outline-document (ADR 0364); provision-outline-api-token agent tool for headless credential rotation via DB
@@ -26,10 +27,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.25 release notes](docs/release-notes/0.178.25.md)
+- [0.178.26 release notes](docs/release-notes/0.178.26.md)
 
 ## Previous Releases
 
+- [0.178.25 release notes](docs/release-notes/0.178.25.md)
 - [0.178.24 release notes](docs/release-notes/0.178.24.md)
 - [0.178.23 release notes](docs/release-notes/0.178.23.md)
 - [0.178.22 release notes](docs/release-notes/0.178.22.md)
@@ -41,9 +43,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.16 release notes](docs/release-notes/0.178.16.md)
 - [0.178.15 release notes](docs/release-notes/0.178.15.md)
 - [0.178.14 release notes](docs/release-notes/0.178.14.md)
-- [0.178.13 release notes](docs/release-notes/0.178.13.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (364 releases)](docs/release-notes/index/2026.md)
+- [2026 (365 releases)](docs/release-notes/index/2026.md)

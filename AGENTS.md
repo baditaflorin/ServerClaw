@@ -237,6 +237,97 @@ The pre-push gate (`scripts/validate_repo.sh agent-standards`) enforces:
 - `docs/adr/.index.yaml` must be current when ADR files change
   - Regenerate: `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
 
+## Agent Coordination Patterns (ADR 0347, 0350, 0353, 0355, 0357)
+
+These patterns are **Accepted** and implemented. Use them for all new work.
+
+### File-Domain Locking (ADR 0347) + Apply Serialization (ADR 0355)
+
+Before writing any docker-compose.yml, nginx config, or systemd unit — acquire a lock:
+
+```python
+from platform.locking import file_domain_lock, apply_lock, ResourceLockRegistry
+
+registry = ResourceLockRegistry()
+
+# Lock a specific config file (ADR 0347)
+with file_domain_lock(registry, vmid="101", role="keycloak_runtime",
+                      filename="docker-compose.yml", holder="ws-0347"):
+    # safe to write — no other agent can write this file concurrently
+    ...
+
+# Lock a full VM apply (ADR 0355) — serializes playbook runs
+with apply_lock(registry, vmid="101", holder="ws-0355"):
+    # safe to run full playbook against vm:101
+    ...
+```
+
+Lock key convention: `vm:{vmid}:config:{role}:{filename}` and `vm:{vmid}:apply`
+
+### Service Integration Contracts (ADR 0353)
+
+All cross-service dependencies are declared in `config/integrations/<consumer>--<provider>.yaml`.
+Check here **before** changing any service port, database name, or secret path — changing one endpoint can break multiple consumers.
+
+```bash
+# Validate all contracts
+python3 scripts/validate_integrations.py --check-dead
+
+# Find all consumers of postgres_vm
+grep -l "provider: postgres_vm" config/integrations/
+```
+
+### Workstream Apply Receipts (ADR 0357)
+
+Guard against duplicate applies and track in-progress state:
+
+```python
+from platform.workstream_receipts import WorkstreamApplyReceipts
+
+receipts = WorkstreamApplyReceipts()
+receipts.guard_not_completed("ws-0353")   # raises if already applied
+receipts.guard_not_in_progress("ws-0353") # raises if another agent is mid-apply
+
+receipt = receipts.start("ws-0353", applied_by="claude/eager-buck", adr="0353")
+try:
+    # ... do the apply ...
+    receipts.complete("ws-0353")
+except Exception as e:
+    receipts.fail("ws-0353", errors=[str(e)])
+```
+
+Receipt files live in `receipts/live-applies/<workstream-id>-apply-receipt.yaml`.
+
+### Nginx Fragment Config (ADR 0350)
+
+To add/update a service's nginx config atomically (write-validate-rename-reload):
+
+```yaml
+- name: publish keycloak nginx fragment
+  ansible.builtin.include_role:
+    name: lv3.platform.nginx_fragment_config
+  vars:
+    nginx_fragment_service_name: keycloak
+    nginx_fragment_content: |
+      server {
+        listen 443 ssl;
+        server_name sso.lv3.org;
+        ...
+      }
+```
+
+### Change Provenance Tagging (ADR 0351)
+
+All Jinja2 templates must carry a `# managed-by:` header. Add to new templates:
+
+```
+# managed-by: role=my_runtime adr=XXXX agent={{ lookup('env','LV3_AGENT_SESSION') | default('operator') }}
+```
+
+Audit missing headers: `python3 scripts/check_provenance_headers.py`
+
+---
+
 ## Nomad Scheduler (ADR 0232, ADR 0361)
 
 The platform runs a private Nomad cluster for durable batch and long-running

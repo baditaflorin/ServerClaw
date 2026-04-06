@@ -42,7 +42,7 @@ section_index:
     file: docs/discovery/config-locations/infrastructure-state.yaml
     summary: Canonical deployed-state files, backup evidence, and other durable operational receipts.
     when_to_read: Use this section when you need runtime truth, deployment evidence, or backup-related state.
-    entry_count: 21
+    entry_count: 22
   - id: inventory
     title: Inventory And Topology
     file: docs/discovery/config-locations/inventory.yaml
