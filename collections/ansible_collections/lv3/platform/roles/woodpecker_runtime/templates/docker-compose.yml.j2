@@ -36,7 +36,6 @@ services:
       - {{ woodpecker_server_data_dir }}:/var/lib/woodpecker
     networks:
       - default
-      - gitea
 
   woodpecker-agent:
     image: {{ woodpecker_agent_image }}
@@ -54,11 +53,7 @@ services:
       - {{ woodpecker_agent_data_dir }}:/etc/woodpecker
     networks:
       - default
-      - gitea
 
 networks:
   default:
-    name: woodpecker_default
-  gitea:
-    external: true
     name: {{ woodpecker_backend_network }}

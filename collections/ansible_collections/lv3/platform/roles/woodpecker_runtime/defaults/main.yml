@@ -83,8 +83,8 @@ woodpecker_secret_smoke_events:
 woodpecker_gitea_runtime_url: "{{ gitea_private_base_url }}"
 woodpecker_gitea_api_url: "{{ gitea_controller_url }}"
 woodpecker_gitea_oauth_url: "{{ gitea_root_url }}"
-woodpecker_gitea_internal_api_url: http://gitea:3000
-woodpecker_backend_network: gitea_runtime_default
+woodpecker_gitea_internal_api_url: "{{ gitea_private_base_url }}"
+woodpecker_backend_network: woodpecker_default
 woodpecker_max_workflows: 1
 woodpecker_healthcheck_path: /healthz
 woodpecker_version_path: /version
