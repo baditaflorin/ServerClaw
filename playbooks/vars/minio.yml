@@ -1,0 +1,9 @@
+---
+service_audit_name: minio
+service_runtime_roles:
+  - lv3.platform.linux_guest_firewall
+  - lv3.platform.docker_runtime
+  - lv3.platform.minio_runtime
+service_needs_dns: false
+service_needs_postgres: false
+service_needs_nginx_edge: true

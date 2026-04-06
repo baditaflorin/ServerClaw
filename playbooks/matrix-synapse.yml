@@ -25,8 +25,14 @@
 # Related ADRs: 0149, 0152, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md
 #
-# Author: LV3 Platform
-# Last Updated: 2026-03-29
+# Invocation: ansible-playbook playbooks/matrix-synapse.yml -e @playbooks/vars/matrix-synapse.yml -e env=production
+
+# --- Standard plays (driven by vars/matrix-synapse.yml) ---
+
+- import_playbook: _includes/dns_publication.yml
+  when: service_needs_dns | default(false)
+
+# --- Matrix Synapse-specific plays ---
 
 - name: Converge the Tailscale operator proxy for Matrix Synapse
   hosts: proxmox_hosts
@@ -42,67 +48,6 @@
     - role: lv3.platform.proxmox_security
       vars:
         proxmox_security_manage_acme: false
-
-- name: Ensure Hetzner DNS publication for Matrix Synapse
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-    subdomain_fqdn: matrix.lv3.org
-
-  tasks:
-    - name: Load controller defaults
-      ansible.builtin.include_vars:
-        file: "{{ inventory_defaults_path }}"
-
-    - name: Load the subdomain catalog
-      ansible.builtin.include_vars:
-        file: "{{ subdomain_catalog_path }}"
-        name: subdomain_catalog
-
-    - name: Select the Matrix Synapse subdomain entry
-      ansible.builtin.set_fact:
-        selected_subdomain: >-
-          {{
-            (
-              subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', subdomain_fqdn)
-              | list
-              | first
-            ) | default({})
-          }}
-
-    - name: Assert the Matrix Synapse subdomain is catalogued
-      ansible.builtin.assert:
-        that:
-          - selected_subdomain != {}
-          - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: >-
-          matrix.lv3.org must exist in config/subdomain-catalog.json before live apply.
-
-    - name: Derive the managed Hetzner record name
-      ansible.builtin.set_fact:
-        selected_subdomain_record_name: >-
-          {{
-            '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
-            else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
-            )
-          }}
-
-    - name: Converge the Matrix Synapse Hetzner DNS record
-      ansible.builtin.include_role:
-        name: lv3.platform.hetzner_dns_record
-      vars:
-        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
-        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
-        hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
-        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
 
 - name: Converge PostgreSQL access for Matrix Synapse
   hosts: postgres-apps-lv3
@@ -163,28 +108,8 @@
       vars:
         playbook_execution_notification_service: matrix_synapse
 
-- name: Publish Matrix Synapse through the NGINX edge
-  hosts: nginx-lv3
-  become: true
-  gather_facts: true
-  vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
-  tags:
-    - tier-2
-    - automation
-    - service-matrix-synapse
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - nginx-lv3
-
-  roles:
-    - role: lv3.platform.nginx_edge_publication
+- import_playbook: _includes/nginx_edge_publication.yml
+  when: service_needs_nginx_edge | default(false)
 
 - name: Verify the public Matrix Synapse bridge surfaces
   hosts: localhost
