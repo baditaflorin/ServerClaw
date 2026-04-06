@@ -424,13 +424,15 @@
 
     - name: Set the default system prompt via Open WebUI admin config
       ansible.builtin.uri:
-        url: "{{ open_webui_internal_base_url }}/api/v1/configs/default/models"
+        url: "{{ open_webui_internal_base_url }}/api/v1/configs/models"
         method: POST
         headers:
           Authorization: "Bearer {{ open_webui_prompt_admin_signin.json.token }}"
         body_format: json
         body:
-          system: "{{ open_webui_system_prompt_content.content | b64decode }}"
+          DEFAULT_MODELS: "{{ open_webui_default_models }}"
+          DEFAULT_MODEL_PARAMS:
+            system: "{{ open_webui_system_prompt_content.content | b64decode }}"
         status_code:
           - 200
           - 201
