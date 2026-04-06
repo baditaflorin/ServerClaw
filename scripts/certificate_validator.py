@@ -114,7 +114,7 @@ def domain_in_cert(fqdn: str, cn: str, sans: list) -> bool:
 
 
 def validate(fqdn: str, target: str, port: int, service_id: str,
-             warn_days: int = 21, timeout: int = 10) -> CertValidationResult:
+             warn_days: float = 21, timeout: int = 10) -> CertValidationResult:
     r = CertValidationResult(fqdn=fqdn, target=target, target_port=port,
                              status=CertStatus.UNKNOWN, service_id=service_id)
 
@@ -137,12 +137,14 @@ def validate(fqdn: str, target: str, port: int, service_id: str,
 
     try:
         expiry = datetime.strptime(r.not_after, "%b %d %H:%M:%S %Y %Z")
-        days = (expiry - datetime.utcnow()).days
+        delta = expiry - datetime.utcnow()
+        days_float = delta.total_seconds() / 86400
+        days = int(delta.days)
         r.days_until_expiry = days
-        if days < 0:
+        if days_float < 0:
             r.status = CertStatus.EXPIRED
             r.error_message = f"Expired {abs(days)} days ago"
-        elif days < warn_days:
+        elif days_float < warn_days:
             r.status = CertStatus.EXPIRING_SOON
             r.error_message = f"Expires in {days} days"
         else:
@@ -165,12 +167,16 @@ def load_catalog(path: str) -> list:
             if not ep.get("host") or not ep.get("port"):
                 continue
             policy = cert.get("policy", {})
+            if "warn_hours" in policy and "warn_days" not in policy:
+                warn_days = policy["warn_hours"] / 24
+            else:
+                warn_days = policy.get("warn_days", 21)
             entries.append({
                 "fqdn": ep.get("server_name", ep["host"]),
                 "target": ep["host"],
                 "target_port": ep["port"],
                 "service_id": cert.get("service_id", ""),
-                "warn_days": policy.get("warn_days", 21),
+                "warn_days": warn_days,
                 "status": cert.get("status", "active"),
             })
         return [e for e in entries if e["status"] == "active"]
