@@ -27,7 +27,11 @@ table inet filter {
 {% endif %}
 {% if proxmox_public_ingress_udp_forwards | default([]) | length > 0 %}
 {% for forward in proxmox_public_ingress_udp_forwards %}
+{% if forward.target_port is defined %}
     iifname "{{ proxmox_wan_bridge }}" ip daddr {{ forward.target_host }} udp dport {{ forward.target_port }} accept
+{% elif forward.target_port_range is defined %}
+    iifname "{{ proxmox_wan_bridge }}" ip daddr {{ forward.target_host }} udp dport {{ forward.target_port_range }} accept
+{% endif %}
 {% endfor %}
 {% endif %}
   }
@@ -51,7 +55,11 @@ table ip nat {
 {% endif %}
 {% if proxmox_public_ingress_udp_forwards | default([]) | length > 0 %}
 {% for forward in proxmox_public_ingress_udp_forwards %}
+{% if forward.target_port is defined %}
     iifname "{{ proxmox_wan_bridge }}" udp dport {{ forward.listen_port }} dnat ip to {{ forward.target_host }}:{{ forward.target_port }}
+{% elif forward.target_port_range is defined %}
+    iifname "{{ proxmox_wan_bridge }}" udp dport {{ forward.target_port_range }} dnat ip to {{ forward.target_host }}
+{% endif %}
 {% endfor %}
 {% endif %}
   }
