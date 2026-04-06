@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.26",
+  "repo_version": "0.178.27",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-06T00:37:12Z",
-  "next_refresh_at": "2026-04-06T01:37:12Z",
+  "generated_at": "2026-04-06T00:48:22Z",
+  "next_refresh_at": "2026-04-06T01:48:22Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6166,10 +6166,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.25",
+    "last_version": "0.178.26",
     "deployed_at": "2026-04-06",
     "summary": "wire ADR 0347-0357 agent coordination patterns into all discovery surfaces: AGENTS.md coordination section with code examples, config/integrations/ in .config-locations.yaml, validate_integrations.py + check_provenance_headers.py in scripts discovery, regenerated onboarding packs (service-catalog, automation, fork-bootstrap) now reference all 6 implemented ADRs fix Woodpecker OAuth login: add nginx edge + TLS for git.lv3.org, fix WOODPECKER_GITEA_URL to use private IP (cross-host LAN), remove dead gitea_runtime_default external network from Woodpecker compose",
-    "release_notes_url": "docs/release-notes/0.178.26.md"
+    "release_notes_url": "docs/release-notes/0.178.27.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

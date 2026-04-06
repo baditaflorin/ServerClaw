@@ -69,3 +69,4 @@ across the DNS catalog, publication model, and certificate scope.
 - ADR 0101: Automated certificate lifecycle management
 - ADR 0139: Subdomain exposure audit
 - ADR 0252: Route and DNS publication assertion ledger
+- ADR 0375: Certificate validation and concordance enforcement (implements the certificate concordance admission checks required by this ADR)

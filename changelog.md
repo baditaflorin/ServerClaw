@@ -18,7 +18,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - AW-22 + AW-23 + provision-outline-api-token: generic _resolve_service_auth() helper (ADR 0362 gap); Outline agent tools — list-outline-collections, search-outline-documents, get-outline-document, create-outline-document (ADR 0364); provision-outline-api-token agent tool for headless credential rotation via DB
 
 - ADR triage 0347-0358: implement 6 CPU-only ADRs — Integration Contract Registry (config/integrations/, validate_integrations.py), Nginx Fragment Config role (write-validate-reload), File-Domain Locking + Apply Semaphore (platform/locking/file_domain.py extending ADR 0153), Workstream Apply Receipts state machine (platform/workstream_receipts.py), Change Provenance Tagging (Jinja2 macro + check_provenance_headers.py); mark 3 ADRs Superseded (LLM-heavy: 0348, 0352, 0356) and 3 Deferred (0349, 0354, 0358)
-- ADR 0375: Certificate validation and concordance enforcement — automated SSL checking for all edge-published domains, pre-push gate integration, Uptime Kuma monitors, and fix playbook for NGINX edge certificate hostname mismatches (ci.lv3.org, bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org, ntfy.lv3.org).
+- ADR 0375: Certificate validation and concordance enforcement — automated SSL checking for all edge-published domains, pre-push gate integration, Uptime Kuma monitors, and fix playbook for NGINX edge certificate hostname mismatches (ci.lv3.org, bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org, ntfy.lv3.org); certificate_validator.py now uses certificate-catalog.json (ADR 0101 canonical) as primary source; pre-push gate ADR ref corrected to 0375; validate-certificates Makefile target hooked into configure-edge-publication; back-references added to ADR 0101 and ADR 0273.
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
 - removed dead Plausible OIDC config (OIDC_DISCOVERY_URI, OIDC_CLIENT_SECRET, extra_hosts, /login redirect) — Plausible CE v3.x dropped community OIDC; auth is now exclusively via oauth2-proxy at the NGINX edge
@@ -27,10 +27,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.26 release notes](docs/release-notes/0.178.26.md)
+- [0.178.27 release notes](docs/release-notes/0.178.27.md)
 
 ## Previous Releases
 
+- [0.178.26 release notes](docs/release-notes/0.178.26.md)
 - [0.178.25 release notes](docs/release-notes/0.178.25.md)
 - [0.178.24 release notes](docs/release-notes/0.178.24.md)
 - [0.178.23 release notes](docs/release-notes/0.178.23.md)
@@ -42,9 +43,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.17 release notes](docs/release-notes/0.178.17.md)
 - [0.178.16 release notes](docs/release-notes/0.178.16.md)
 - [0.178.15 release notes](docs/release-notes/0.178.15.md)
-- [0.178.14 release notes](docs/release-notes/0.178.14.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (365 releases)](docs/release-notes/index/2026.md)
+- [2026 (366 releases)](docs/release-notes/index/2026.md)

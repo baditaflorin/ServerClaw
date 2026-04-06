@@ -45,7 +45,7 @@ fi
 echo "validation gate: validating canonical NATS topics"
 uv run --with pyyaml python scripts/validate_nats_topics.py --validate
 
-echo "validation gate: validating SSL certificates (ADR 0361)"
+echo "validation gate: validating SSL certificates (ADR 0375)"
 if [[ -f scripts/certificate_validator.py ]]; then
   if python3 scripts/certificate_validator.py --check-all --json 2>/dev/null | \
      python3 -c "

@@ -174,3 +174,4 @@ systemctl reload openbao
 - ADR 0091: Continuous drift detection (certificate drift is a drift source)
 - ADR 0096: SLO definitions (cert expiry events are SLO-affecting)
 - ADR 0097: Alerting routing (certificate alerts route through this model)
+- ADR 0375: Certificate validation and concordance enforcement (implements the concordance checking and pre-push gate described in this ADR)
