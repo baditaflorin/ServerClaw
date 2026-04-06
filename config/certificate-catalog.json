@@ -101,8 +101,8 @@
     {
       "id": "backup-pbs-ui",
       "service_id": "backup_pbs",
-      "status": "active",
-      "summary": "Proxmox Backup Server HTTPS endpoint on the backup VM.",
+      "status": "lan_only",
+      "summary": "Proxmox Backup Server HTTPS endpoint on the backup VM. LAN-only \u2014 not reachable from the Tailscale controller; excluded from automated validation.",
       "expected_issuer": "any",
       "endpoint": {
         "host": "10.10.10.60",
@@ -931,8 +931,8 @@
     {
       "id": "portainer-proxy",
       "service_id": "portainer",
-      "status": "active",
-      "summary": "Portainer HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
+      "status": "tls_pending",
+      "summary": "Portainer HTTPS endpoint exposed through the Proxmox host Tailscale proxy. TLS handshake fails (Cipher: NONE) \u2014 Portainer serves a self-signed cert incompatible with modern TLS stacks; excluded from validation until cert is replaced with step-ca material.",
       "expected_issuer": "any",
       "endpoint": {
         "host": "100.64.0.1",
@@ -1125,7 +1125,7 @@
       "endpoint": {
         "host": "100.64.0.1",
         "port": 9443,
-        "server_name": "100.64.0.1"
+        "server_name": "localhost"
       },
       "policy": {
         "warn_hours": 6,
