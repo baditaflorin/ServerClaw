@@ -627,10 +627,11 @@ def _write_nginx_upstreams_conf(upstreams: list[dict], out_path: Path) -> None:
 
     for u in upstreams:
         all_fqdns = [u["fqdn"]] + u["extra_fqdns"]
+        is_last = (u is upstreams[-1])
         lines.append(f"# {u['service_name']} — {', '.join(all_fqdns)}\n")
         lines.append(f"upstream {u['name']} {{\n")
         lines.append(f"    server {u['ip']}:{u['port']};  # {u['host']}\n")
-        lines.append("}\n\n")
+        lines.append("}\n" if is_last else "}\n\n")
 
     out_path.write_text("".join(lines))
 
