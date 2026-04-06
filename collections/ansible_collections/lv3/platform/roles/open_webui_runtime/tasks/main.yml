@@ -11,6 +11,7 @@
     tasks_from: derive_service_defaults
   vars:
     common_derive_service_name: open_webui
+  when: open_webui_site_dir is not defined
 
 
 - name: Validate Open WebUI runtime inputs

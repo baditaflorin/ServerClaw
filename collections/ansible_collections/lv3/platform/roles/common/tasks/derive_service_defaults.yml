@@ -16,7 +16,7 @@
 - name: "Validate {{ common_derive_service_name }} exists in platform_service_registry"
   ansible.builtin.assert:
     that:
-      - common_derive_service_name in platform_service_registry
+      - common_derive_service_name in hostvars['proxmox_florin'].platform_service_registry
     fail_msg: >-
       Service '{{ common_derive_service_name }}' not found in platform_service_registry.
       Add it to inventory/group_vars/platform_services.yml.
@@ -25,71 +25,71 @@
 - name: "Derive conventional defaults for {{ common_derive_service_name }}"
   ansible.builtin.set_fact:
     "{{ common_derive_service_name }}_site_dir": >-
-      {{ platform_service_registry[common_derive_service_name].site_dir
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
          | default('/opt/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_data_dir": >-
-      {{ (platform_service_registry[common_derive_service_name].site_dir
+      {{ (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
           | default('/opt/' + common_derive_service_name)) + '/data' }}
     "{{ common_derive_service_name }}_secret_dir": >-
-      {{ platform_service_registry[common_derive_service_name].secret_dir
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].secret_dir
          | default('/etc/lv3/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_compose_file": >-
-      {{ (platform_service_registry[common_derive_service_name].site_dir
+      {{ (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
           | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
     "{{ common_derive_service_name }}_env_file": >-
       {{ compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env' }}
     "{{ common_derive_service_name }}_legacy_env_file": >-
-      {{ (platform_service_registry[common_derive_service_name].site_dir
+      {{ (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
           | default('/opt/' + common_derive_service_name)) + '/' + common_derive_service_name + '.env' }}
     "{{ common_derive_service_name }}_container_name": >-
-      {{ platform_service_registry[common_derive_service_name].container_name
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].container_name
          | default(common_derive_service_name) }}
     "{{ common_derive_service_name }}_image": >-
-      {{ container_image_catalog.images[platform_service_registry[common_derive_service_name].image_catalog_key].ref }}
+      {{ container_image_catalog.images[hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].image_catalog_key].ref }}
     "{{ common_derive_service_name }}_internal_port": >-
-      {{ platform_service_registry[common_derive_service_name].internal_port }}
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].internal_port }}
     "{{ common_derive_service_name }}_internal_base_url": >-
-      {{ 'http://127.0.0.1:' + (platform_service_registry[common_derive_service_name].internal_port | string) }}
+      {{ 'http://127.0.0.1:' + (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].internal_port | string) }}
     "{{ common_derive_service_name }}_local_artifact_dir": >-
-      {{ repo_shared_local_root + '/' + (platform_service_registry[common_derive_service_name].local_artifact_dir
+      {{ repo_shared_local_root + '/' + (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].local_artifact_dir
          | default(common_derive_service_name)) }}
-  when: platform_service_registry[common_derive_service_name].image_catalog_key | default('') | length > 0
+  when: hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].image_catalog_key | default('') | length > 0
 
 - name: "Derive conventional defaults for {{ common_derive_service_name }} (no image catalog entry)"
   ansible.builtin.set_fact:
     "{{ common_derive_service_name }}_site_dir": >-
-      {{ platform_service_registry[common_derive_service_name].site_dir
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
          | default('/opt/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_data_dir": >-
-      {{ (platform_service_registry[common_derive_service_name].site_dir
+      {{ (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
           | default('/opt/' + common_derive_service_name)) + '/data' }}
     "{{ common_derive_service_name }}_secret_dir": >-
-      {{ platform_service_registry[common_derive_service_name].secret_dir
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].secret_dir
          | default('/etc/lv3/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_compose_file": >-
-      {{ (platform_service_registry[common_derive_service_name].site_dir
+      {{ (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
           | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
     "{{ common_derive_service_name }}_env_file": >-
       {{ compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env' }}
     "{{ common_derive_service_name }}_legacy_env_file": >-
-      {{ (platform_service_registry[common_derive_service_name].site_dir
+      {{ (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
           | default('/opt/' + common_derive_service_name)) + '/' + common_derive_service_name + '.env' }}
     "{{ common_derive_service_name }}_container_name": >-
-      {{ platform_service_registry[common_derive_service_name].container_name
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].container_name
          | default(common_derive_service_name) }}
     "{{ common_derive_service_name }}_internal_port": >-
-      {{ platform_service_registry[common_derive_service_name].internal_port }}
+      {{ hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].internal_port }}
     "{{ common_derive_service_name }}_internal_base_url": >-
-      {{ 'http://127.0.0.1:' + (platform_service_registry[common_derive_service_name].internal_port | string) }}
+      {{ 'http://127.0.0.1:' + (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].internal_port | string) }}
     "{{ common_derive_service_name }}_local_artifact_dir": >-
-      {{ repo_shared_local_root + '/' + (platform_service_registry[common_derive_service_name].local_artifact_dir
+      {{ repo_shared_local_root + '/' + (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].local_artifact_dir
          | default(common_derive_service_name)) }}
-  when: platform_service_registry[common_derive_service_name].image_catalog_key | default('') | length == 0
+  when: hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].image_catalog_key | default('') | length == 0
 
 - name: "Derive OpenBao defaults for {{ common_derive_service_name }}"
   ansible.builtin.set_fact:
     "{{ common_derive_service_name }}_openbao_agent_dir": >-
-      {{ (platform_service_registry[common_derive_service_name].site_dir
+      {{ (hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].site_dir
           | default('/opt/' + common_derive_service_name)) + '/openbao' }}
     "{{ common_derive_service_name }}_openbao_agent_image": "{{ openbao_agent_image }}"
     "{{ common_derive_service_name }}_openbao_agent_container_name": >-
@@ -100,7 +100,7 @@
       lv3-service-{{ common_derive_service_name }}-runtime
     "{{ common_derive_service_name }}_openbao_approle_name": >-
       {{ common_derive_service_name }}-runtime
-  when: platform_service_registry[common_derive_service_name].needs_openbao | default(true)
+  when: hostvars['proxmox_florin'].platform_service_registry[common_derive_service_name].needs_openbao | default(true)
 
 - name: "Apply extra defaults for {{ common_derive_service_name }}"
   ansible.builtin.set_fact:

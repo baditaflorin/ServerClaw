@@ -1,74 +1,78 @@
 ---
+# NOTE: Conventional argument specs (site_dir, data_dir, secret_dir, compose_file,
+# env_file, container_name, image, internal_port, openbao_*, local_artifact_dir)
+# are automatically derived from platform_service_registry via the common role's
+# derive_service_defaults task at the start of tasks/main.yml (ADR 0373).
+# Only service-specific (non-conventional) options are declared here.
 argument_specs:
   main:
     short_description: Converge the Woodpecker runtime, bootstrap Gitea OAuth, and refresh controller-local auth artifacts.
     options:
-      woodpecker_site_dir:
-        type: path
-        required: true
-      woodpecker_data_dir:
-        type: path
-        required: true
-      woodpecker_secret_dir:
-        type: path
-        required: true
-      woodpecker_compose_file:
-        type: path
-        required: true
-      woodpecker_env_file:
-        type: path
-        required: true
-      woodpecker_http_port:
-        type: int
-        required: true
       woodpecker_controller_url:
         type: str
         required: true
+        description: Host-controller access URL for Woodpecker API
       woodpecker_public_url:
         type: str
         required: true
+        description: Public authenticated base URL for Woodpecker
       woodpecker_gitea_runtime_url:
         type: str
         required: true
+        description: Gitea internal runtime URL
       woodpecker_gitea_api_url:
         type: str
         required: true
+        description: Gitea controller API URL
       woodpecker_gitea_oauth_url:
         type: str
         required: true
+        description: Gitea OAuth provider URL
       woodpecker_database_name:
         type: str
         required: true
+        description: Woodpecker PostgreSQL database name
       woodpecker_database_user:
         type: str
         required: true
+        description: Woodpecker PostgreSQL database user
       woodpecker_database_host:
         type: str
         required: true
+        description: Woodpecker PostgreSQL host
       woodpecker_database_password_local_file:
         type: path
         required: true
+        description: Controller-local database password artifact
       woodpecker_gitea_admin_token_local_file:
         type: path
         required: true
+        description: Controller-local Gitea admin API token
       woodpecker_gitea_admin_password_local_file:
         type: path
         required: true
+        description: Controller-local Gitea admin password
       woodpecker_gitea_client_id_local_file:
         type: path
         required: true
+        description: Controller-local Gitea OAuth client ID
       woodpecker_gitea_client_secret_local_file:
         type: path
         required: true
+        description: Controller-local Gitea OAuth client secret
       woodpecker_agent_secret_local_file:
         type: path
         required: true
+        description: Controller-local agent secret
       woodpecker_api_token_local_file:
         type: path
         required: true
+        description: Controller-local API token
       woodpecker_admin_auth_local_file:
         type: path
         required: true
+        description: Controller-local admin auth JSON
       woodpecker_bootstrap_spec_local_file:
         type: path
         required: true
+        description: Controller-local bootstrap spec
