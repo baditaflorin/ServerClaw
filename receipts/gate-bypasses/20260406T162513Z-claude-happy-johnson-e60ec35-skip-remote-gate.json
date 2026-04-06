@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-06T16:25:13Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/happy-johnson",
+  "commit": "e60ec357e42ff9ecba7d463b71d9b3b0771641e9",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "cert catalog fixes: PBS lan_only, Portainer tls_pending, step-ca server_name, Vaultwarden network fix",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local-pre-commit-passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-08",
+    "remediation_ref": "ADR-0375-cert-validator"
+  }
+}

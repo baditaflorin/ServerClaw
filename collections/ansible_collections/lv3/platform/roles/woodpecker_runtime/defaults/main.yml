@@ -22,10 +22,20 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-06
 
+# Conventional variables derived from platform_service_registry (ADR 0373)
+# These follow the standard naming pattern for all services
+woodpecker_site_dir: /opt/woodpecker
+woodpecker_compose_file: /opt/woodpecker/docker-compose.yml
+woodpecker_env_file: "{{ compose_runtime_secret_root }}/woodpecker/runtime.env"
+woodpecker_legacy_env_file: /opt/woodpecker/woodpecker.env
+woodpecker_http_port: 8000
+
 # Service-specific Woodpecker runtime defaults
 woodpecker_server_container_name: woodpecker-server
 woodpecker_agent_container_name: woodpecker-agent
 woodpecker_agent_image: "{{ container_image_catalog.images.woodpecker_agent_runtime.ref }}"
+woodpecker_image: "{{ container_image_catalog.images.woodpecker_server_runtime.ref }}"
+woodpecker_server_image: "{{ container_image_catalog.images.woodpecker_server_runtime.ref }}"
 
 # Database configuration (shared PostgreSQL) — service-specific
 woodpecker_database_name: woodpecker

@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-06T13:26:25Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/happy-johnson",
+  "commit": "5fc12accbf5b8fa8aaba83477a40c3b811733c3c",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "cert-validator warn_hours support and OpenBao renewal 72h->24h fix",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local-pre-commit-passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-08",
+    "remediation_ref": "ADR-0375-cert-validator"
+  }
+}
