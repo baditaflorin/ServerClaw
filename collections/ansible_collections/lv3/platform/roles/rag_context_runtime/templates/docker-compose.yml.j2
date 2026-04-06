@@ -25,6 +25,10 @@ services:
     image: {{ platform_context_qdrant_image }}
     container_name: qdrant-platform-context
     restart: unless-stopped
+{% if platform_context_qdrant_host_port | default(0) | int > 0 %}
+    ports:
+      - "127.0.0.1:{{ platform_context_qdrant_host_port }}:6333"
+{% endif %}
     volumes:
       - {{ platform_context_data_dir }}:/qdrant/storage
 
