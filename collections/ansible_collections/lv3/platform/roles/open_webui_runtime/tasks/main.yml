@@ -431,6 +431,9 @@
         body_format: json
         body:
           DEFAULT_MODELS: "{{ open_webui_default_models }}"
+          DEFAULT_PINNED_MODELS: "{{ open_webui_default_models }}"
+          MODEL_ORDER_LIST: []
+          DEFAULT_MODEL_METADATA: {}
           DEFAULT_MODEL_PARAMS:
             system: "{{ open_webui_system_prompt_content.content | b64decode }}"
         status_code:
