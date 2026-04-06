@@ -49,6 +49,38 @@ class CertValidationResult:
     service_id: Optional[str] = None
 
 
+def _parse_der_cert(der_bytes: bytes) -> dict:
+    """Parse a DER-encoded certificate into a dict compatible with getpeercert()."""
+    try:
+        from cryptography import x509
+        from cryptography.hazmat.backends import default_backend
+        cert = x509.load_der_x509_certificate(der_bytes, default_backend())
+        # Build a dict in the same format as ssl.getpeercert()
+        result: dict = {}
+        # subject CN
+        cn_attrs = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
+        result["subject"] = tuple(
+            (("commonName", a.value),) for a in cn_attrs
+        )
+        # SANs
+        try:
+            san_ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+            sans = []
+            for dns in san_ext.value.get_values_for_type(x509.DNSName):
+                sans.append(("DNS", dns))
+            for ip in san_ext.value.get_values_for_type(x509.IPAddress):
+                sans.append(("IP Address", str(ip)))
+            result["subjectAltName"] = tuple(sans)
+        except x509.extensions.ExtensionNotFound:
+            pass
+        # dates
+        result["notBefore"] = cert.not_valid_before_utc.strftime("%b %d %H:%M:%S %Y GMT")
+        result["notAfter"] = cert.not_valid_after_utc.strftime("%b %d %H:%M:%S %Y GMT")
+        return result
+    except Exception:
+        return {}
+
+
 def get_certificate(fqdn: str, target: str, port: int, timeout: int = 10):
     """Connect to target:port, verify against fqdn, return (cert_dict, error)."""
     ctx = ssl.create_default_context()
@@ -57,13 +89,15 @@ def get_certificate(fqdn: str, target: str, port: int, timeout: int = 10):
             with ctx.wrap_socket(sock, server_hostname=fqdn) as ssock:
                 return ssock.getpeercert(), None
     except ssl.SSLCertVerificationError as e:
+        # Cert exists but CA is untrusted (e.g. internal step-ca). Retrieve raw DER.
         ctx2 = ssl.create_default_context()
         ctx2.check_hostname = False
         ctx2.verify_mode = ssl.CERT_NONE
         try:
             with socket.create_connection((target, port), timeout=timeout) as sock:
                 with ctx2.wrap_socket(sock, server_hostname=fqdn) as ssock:
-                    return ssock.getpeercert(), str(e)
+                    der = ssock.getpeercert(binary_form=True)
+                    return _parse_der_cert(der) if der else {}, str(e)
         except Exception as e2:
             return None, str(e2)
     except Exception as e:
@@ -132,8 +166,8 @@ def load_catalog(path: str) -> list:
                 continue
             policy = cert.get("policy", {})
             entries.append({
-                "fqdn": ep["host"],
-                "target": ep.get("server_name", ep["host"]),
+                "fqdn": ep.get("server_name", ep["host"]),
+                "target": ep["host"],
                 "target_port": ep["port"],
                 "service_id": cert.get("service_id", ""),
                 "warn_days": policy.get("warn_days", 21),

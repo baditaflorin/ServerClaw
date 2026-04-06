@@ -848,7 +848,7 @@ configure-ingress:
 	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags ingress
 
 validate-certificates:
-	python3 $(REPO_ROOT)/scripts/certificate_validator.py --check-all
+	uv run python3 $(REPO_ROOT)/scripts/certificate_validator.py --check-all
 
 configure-edge-publication:
 	$(MAKE) preflight WORKFLOW=configure-edge-publication
@@ -1178,6 +1178,7 @@ converge-realtime:
 
 converge-open-webui:
 	$(MAKE) preflight WORKFLOW=converge-open-webui
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/open-webui.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-serverclaw:

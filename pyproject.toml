@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Unified operator CLI for the LV3 platform"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["PyYAML>=6.0"]
+dependencies = ["PyYAML>=6.0", "cryptography>=42.0"]
 
 [project.scripts]
 lv3 = "scripts.lv3_cli:main"
