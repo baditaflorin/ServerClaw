@@ -22,17 +22,19 @@
 #   - ADR 0187: Requires seed snapshot storage verification.
 #   - Role: backup_vm — verifies the converged PBS guest.
 #
-# Related ADRs: 0029, 0165, 0187
+# Related ADRs: 0029, 0165, 0187, 0371
 # Related Runbooks: docs/runbooks/backup-restore-verification.md
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-28
-- name: Verify the PBS proxy listener is reachable
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ backup_vm_api_port }}"
-    delay: 0
-    timeout: 60
+- name: Verify the backup VM runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: proxmox-backup-server
+    common_verify_port: "{{ backup_vm_api_port }}"
+    common_verify_port_timeout: 60
 
 - name: Verify the managed PBS datastore is present
   ansible.builtin.command:
