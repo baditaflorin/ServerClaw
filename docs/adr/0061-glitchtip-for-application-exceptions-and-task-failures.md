@@ -1,6 +1,7 @@
 # ADR 0061: GlitchTip For Application Exceptions And Task Failures
 
-- Status: Proposed
+- Status: Superseded
+- Superseded By: 0281
 - Implementation Status: Not Implemented
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
@@ -47,3 +48,7 @@ Initial integration targets:
 - Exception tracking does not replace logs, traces, or uptime checks.
 - Sensitive payloads must be scrubbed before they are reported.
 - Public user-facing error reporting is out of scope unless a later ADR approves it.
+
+## Supersession Note
+
+ADR 0061 has been superseded by ADR 0281 (GlitchTip exception tracking — accepted and deployed). The newer ADR provides the final accepted design and implementation details based on production experience.
