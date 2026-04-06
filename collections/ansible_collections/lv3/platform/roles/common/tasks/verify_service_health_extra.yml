@@ -1,0 +1,21 @@
+---
+- name: "Verify {{ common_verify_service_name }} endpoint {{ common_verify_extra_endpoint.url }}"
+  ansible.builtin.uri:
+    url: "{{ common_verify_extra_endpoint.url }}"
+    method: GET
+    status_code: "{{ common_verify_extra_endpoint.status_code | default(200) }}"
+    return_content: true
+  register: common_verify_extra_response
+  retries: "{{ common_verify_extra_endpoint.retries | default(18) }}"
+  delay: "{{ common_verify_extra_endpoint.delay | default(5) }}"
+  until: common_verify_extra_response.status == (common_verify_extra_endpoint.status_code | default(200) | int)
+  changed_when: false
+
+- name: "Assert {{ common_verify_service_name }} endpoint {{ common_verify_extra_endpoint.url }}"
+  ansible.builtin.assert:
+    that: "{{ common_verify_extra_endpoint.assertions }}"
+    fail_msg: >-
+      {{ common_verify_extra_endpoint.assertion_msg | default(
+        common_verify_service_name ~ ' extra endpoint ' ~ common_verify_extra_endpoint.url ~ ' assertions failed.'
+      ) }}
+  when: (common_verify_extra_endpoint.assertions | default([])) | length > 0
