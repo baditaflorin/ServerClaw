@@ -21,6 +21,38 @@ archive_summary:
   by_year:
     '2026': 302
 workstreams:
+- id: ws-0377-open-webui-serverclaw-integration
+  adr: '0377'
+  title: Open WebUI platform knowledge and ServerClaw tool integration
+  status: planned
+  owner: claude
+  branch: claude/elastic-curie
+  worktree_path: .claude/worktrees/elastic-curie
+  doc: docs/workstreams/ws-0377-open-webui-serverclaw-integration.md
+  depends_on:
+  - adr-0198-qdrant-vector-search
+  - adr-0254-serverclaw-product
+  - adr-0257-openclaw-skill-packs
+  - adr-0263-serverclaw-memory-substrate
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/open-webui.env.j2
+  ownership_manifest:
+    owned_surfaces:
+    - id: adr_0377_0378_docs
+      paths:
+      - docs/adr/0377-open-webui-platform-knowledge-integration.md
+      - docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+      - docs/workstreams/ws-0377-open-webui-serverclaw-integration.md
+      mode: exclusive
+    - id: workstream_source
+      paths:
+      - workstreams/active/ws-0377-open-webui-serverclaw-integration.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  ready_to_merge: false
+  live_applied: false
 - id: nifty-clarke-identity-watchdog
   adr: '0376'
   title: "Identity-core watchdog \u2014 30s OIDC probe + oauth2-proxy auto-restart"
@@ -1839,85 +1871,32 @@ workstreams:
       mode: shared_contract
       contract: discovery-artifacts-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
-- id: ws-0375-certificate-validation-codification
-  workstream_id: ws-0375
-  status: in_progress
-  priority: high
-  date_opened: '2026-04-06'
-  date_target_completion: '2026-04-13'
+- id: ws-dry-centralization-0368-0374
+  title: "DRY Centralization \u2014 ADRs 0368\u20130374"
+  status: ready
   owner: platform-infrastructure
-  title: Certificate Validation and Concordance Enforcement (ADR 0375)
-  description: 'Implement automated certificate validation and concordance enforcement
-    per ADR 0101
+  branch: claude/objective-bose
+  worktree_path: .claude/worktrees/objective-bose
+  adrs:
+  - 0368
+  - 0369
+  - '0370'
+  - '0371'
+  - '0372'
+  - '0373'
+  - '0374'
+  description: 'Implements 7 ADRs eliminating duplication across Ansible roles, scripts,
+    and
 
-    and ADR 0273. Fixes hostname mismatch errors (ci.lv3.org, etc.) and codifies
+    playbooks. Extracts shared patterns into: Python validation toolkit, Jinja2
 
-    certificate monitoring as part of the standard deployment workflow.
+    compose macros, shared lifecycle/verify task includes, service registry with
 
-    '
-  objectives:
-  - Implement certificate validator script for all edge-published domains
-  - Create Ansible playbooks for validation and automatic remediation
-  - Integrate with Uptime Kuma for continuous monitoring
-  - Fix immediate certificate issues (ci.lv3.org, bi.lv3.org, etc.)
-  - Create ADR 0375 documenting the implementation
-  - Integrate into pre-deployment checks and CI/CD gates
-  success_criteria:
-  - "All 53 edge-published domains show \u2713 Valid in certificate validator"
-  - No "CERT_MISMATCH" issues reported by validator
-  - Playbook fix-edge-certificate.yml successfully regenerates cert with all domains
-  - Uptime Kuma monitors created for all edge-published domains
-  - ADR 0375 committed and accepted
-  - Documentation complete (runbook, setup guide, quick reference)
-  artifacts:
-  - scripts/certificate_validator.py
-  - scripts/add-certificate-monitors-to-uptime-kuma.py
-  - playbooks/certificate-validation.yml
-  - playbooks/fix-edge-certificate.yml
-  - docs/adr/0361-certificate-validation-and-concordance-enforcement.md
-  - docs/runbooks/certificate-monitoring.md
-  - docs/certificate-monitoring-setup.md
-  - CERTIFICATE-MONITORING.md
-  - ACTION_PLAN.md
-  blockers: []
-  notes: 'Implements the missing validation layer from ADR 0101 and ADR 0273.
+    derived defaults, data-driven playbook composition, and cross-cutting service
 
-
-    Recent operational issue: ci.lv3.org, bi.lv3.org, grist.lv3.org,
-
-    paperless.lv3.org, annotate.lv3.org, and ntfy.lv3.org all have
-
-    hostname mismatch errors because they are in subdomain-catalog.json
-
-    but missing from the NGINX edge certificate SANs.
-
-
-    This workstream provides:
-
-    1. Programmatic detection of such mismatches
-
-    2. Automated remediation via certificate regeneration
-
-    3. Continuous monitoring via Uptime Kuma
-
-    4. Documentation and runbooks
+    manifest (hairpin, DNS, TLS, nginx, SSO).
 
     '
-  related_adrs:
-  - ADR 0101: Automated certificate lifecycle management
-  - ADR 0273: Public endpoint admission control
-  - ADR 0021: Public subdomain publication at NGINX edge
-  ownership_manifest:
-    owned_surfaces:
-    - id: certificate_validator_scripts
-      paths:
-      - scripts/certificate_validator.py
-      - playbooks/certificate-validation.yml
-      - playbooks/fix-edge-certificate.yml
-      mode: exclusive
-  doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
-  branch: claude/nervous-feistel
-  worktree: nervous-feistel
 - id: ws-0364-service-api-agent-tools
   title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
     0362 follow-up)'

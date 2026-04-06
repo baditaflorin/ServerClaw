@@ -1,8 +1,9 @@
-# Release 0.178.34
+# Release 0.178.35
 
 - Date: 2026-04-06
 
 ## Summary
+- DRY centralization: ADRs 0368-0374 — shared validation toolkit, Jinja2 compose macros, lifecycle/verify task includes, service registry with derived defaults, data-driven playbook composition, cross-cutting service manifest (hairpin/DNS/TLS/nginx/SSO)
 - feat(ADR-0376): identity-core watchdog — 30s OIDC discovery probe on Keycloak, auto-restart on 2 failures (6/hr limit), oauth2-proxy watchdog on nginx-lv3, KC_CACHE=local to kill JGroups TCP loop
 - fix: Open WebUI system prompt injection 422 — add required model config fields (DEFAULT_PINNED_MODELS, MODEL_ORDER_LIST, DEFAULT_MODEL_METADATA) to POST /api/v1/configs/models; fix endpoint from /configs/default/models; ignore ACME plugin update errors when HETZNER_DNS_API_TOKEN not forwarded
 - fix(cert-validator): TLS 1.3 support via uv run python3, DER cert parsing for internal CA (step-ca), correct fqdn/target field mapping, warn_hours policy support for short-lived certs (OpenBao), OpenBao renewal script fixed (72h→24h, deduplicated SAN)

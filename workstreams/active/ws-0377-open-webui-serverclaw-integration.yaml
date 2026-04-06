@@ -1,7 +1,7 @@
 id: ws-0377-open-webui-serverclaw-integration
 adr: '0377'
 title: Open WebUI platform knowledge and ServerClaw tool integration
-status: proposed
+status: planned
 owner: claude
 branch: claude/elastic-curie
 worktree_path: .claude/worktrees/elastic-curie
