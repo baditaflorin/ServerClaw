@@ -30,7 +30,7 @@ send_ntfy() {
 }
 
 # Probe: GET /oauth2/auth must return 401 (unauthenticated but alive)
-status_code=$(curl -sf -o /dev/null -w "%{http_code}" -m 5 \
+status_code=$(curl -s -o /dev/null -w "%{http_code}" -m 5 \
     -H "Host: ${PROBE_HOST}" \
     -H "X-Forwarded-Proto: https" \
     "${PROBE_URL}" 2>/dev/null) || status_code="000"
