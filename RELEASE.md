@@ -1,9 +1,11 @@
-# Release 0.178.30
+# Release 0.178.31
 
 - Date: 2026-04-06
 
 ## Summary
+- fix(cert-validator): TLS 1.3 support via uv run python3, DER cert parsing for internal CA (step-ca), correct fqdn/target field mapping in certificate-catalog.json loader
 - fix: Gitea OAuth2 login — ROOT_URL changed to Tailscale access URL (http://100.64.0.1:3009) to fix OAuth2 state cookie mismatch; remove invalid `groups` scope from OPENID_CONNECT_SCOPES in ctmpl template
+- Fixed browser-runner service accessibility — added firewall rules to open port 8096 on docker-runtime-lv3 from management network, all guests, and Docker bridge networks; service now accessible from headscale at http://10.10.10.20:8096/
 - ADR 0377/0378: Wire platform knowledge and RAG into Open WebUI — enable Ollama API, Qdrant vector DB backend, nomic-embed-text embeddings, ServerClaw system prompt injection, expose Qdrant port 6333 on host for cross-compose access
 - ADR 0376: Credential isolation and agent safety — .gitignore hardening for .local symlink blind spot, pre-commit guard to block .local from index, recovery runbook (recover_local_secrets.sh), agent credential access contract, bootstrap key rotation procedure, server migration security checklist
 - wire ADR 0347-0357 agent coordination patterns into all discovery surfaces: AGENTS.md coordination section with code examples, config/integrations/ in .config-locations.yaml, validate_integrations.py + check_provenance_headers.py in scripts discovery, regenerated onboarding packs (service-catalog, automation, fork-bootstrap) now reference all 6 implemented ADRs
