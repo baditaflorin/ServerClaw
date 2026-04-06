@@ -25,10 +25,14 @@
 # Conventional variables derived from platform_service_registry (ADR 0373)
 # These follow the standard naming pattern for all services
 woodpecker_site_dir: /opt/woodpecker
+woodpecker_data_dir: /opt/woodpecker/data
+woodpecker_secret_dir: /etc/lv3/woodpecker
 woodpecker_compose_file: /opt/woodpecker/docker-compose.yml
 woodpecker_env_file: "{{ compose_runtime_secret_root }}/woodpecker/runtime.env"
 woodpecker_legacy_env_file: /opt/woodpecker/woodpecker.env
 woodpecker_http_port: 8000
+woodpecker_internal_base_url: "http://127.0.0.1:{{ woodpecker_http_port }}"
+woodpecker_local_artifact_dir: "{{ repo_shared_local_root }}/woodpecker"
 
 # Service-specific Woodpecker runtime defaults
 woodpecker_server_container_name: woodpecker-server
