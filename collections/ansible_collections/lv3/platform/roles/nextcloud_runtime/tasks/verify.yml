@@ -1,29 +1,21 @@
 # Purpose: Verify that the managed Nextcloud runtime is healthy, installed, and operator-accessible after converge.
-# Use case: Include at the end of Nextcloud convergence or replay verification to confirm local health and bootstrap state.
-# Inputs: nextcloud_* runtime URLs, container names, and OCC retry settings.
-# Outputs: Verified service health, admin presence, and expected runtime assertions.
-# Idempotency: Fully idempotent; verification reads state and fails if expectations are not met.
-# Dependencies: ADR 0165 metadata standard, ADR 0260, and a running nextcloud_runtime deployment.
+# Dependencies: ADR 0165, ADR 0260, ADR 0371; requires a running nextcloud_runtime deployment.
 ---
-- name: Verify the Nextcloud local status endpoint
-  ansible.builtin.uri:
-    url: "{{ nextcloud_internal_base_url }}/status.php"
-    method: GET
-    status_code: 200
-    return_content: true
-  register: nextcloud_verify_status
-  retries: 24
-  delay: 5
-  until: nextcloud_verify_status.status == 200
-  changed_when: false
-
-- name: Assert the Nextcloud local status payload reports an installed instance
-  ansible.builtin.assert:
-    that:
-      - (nextcloud_verify_status.content | from_json).installed | default(false)
-      - (nextcloud_verify_status.content | from_json).maintenance | default(false) == false
-      - (nextcloud_verify_status.content | from_json).version | length > 0
-    fail_msg: "Nextcloud answered locally, but the status payload did not report an installed and healthy instance."
+- name: Verify the Nextcloud runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: nextcloud
+    common_verify_port: "{{ nextcloud_internal_port }}"
+    common_verify_health_url: "{{ nextcloud_internal_base_url }}/status.php"
+    common_verify_health_retries: 24
+    common_verify_health_delay: 5
+    common_verify_health_assertions:
+      - "(common_verify_health_response.content | from_json).installed | default(false)"
+      - "(common_verify_health_response.content | from_json).maintenance | default(false) == false"
+      - "(common_verify_health_response.content | from_json).version | length > 0"
+    common_verify_health_assertion_msg: "Nextcloud answered locally, but the status payload did not report an installed and healthy instance."
 
 - name: Verify the bootstrap Nextcloud admin exists
   ansible.builtin.command:
