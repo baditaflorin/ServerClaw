@@ -23,72 +23,17 @@
 # Related ADRs: 0068, 0077, 0087, 0095, 0204, 0276, 0280, 0299
 # Related Runbooks: docs/runbooks/configure-ntfy.md docs/runbooks/subdomain-governance.md
 #
+# Invocation: ansible-playbook playbooks/ntfy.yml -e @playbooks/vars/ntfy.yml -e env=production
+#
 # Author: LV3 Platform
-# Last Updated: 2026-04-02
+# Last Updated: 2026-04-06
 
-- name: Ensure Hetzner DNS publication for ntfy
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-    subdomain_fqdn: ntfy.lv3.org
-  tags:
-    - tier-2
-    - communication
-    - service-ntfy
+# --- Standard plays (driven by vars/ntfy.yml) ---
 
-  tasks:
-    - name: Load controller defaults
-      ansible.builtin.include_vars:
-        file: "{{ inventory_defaults_path }}"
+- import_playbook: _includes/dns_publication.yml
+  when: service_needs_dns | default(false)
 
-    - name: Load the subdomain catalog
-      ansible.builtin.include_vars:
-        file: "{{ subdomain_catalog_path }}"
-        name: subdomain_catalog
-
-    - name: Select the ntfy subdomain entry
-      ansible.builtin.set_fact:
-        selected_subdomain: >-
-          {{
-            (
-              subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', subdomain_fqdn)
-              | list
-              | first
-            ) | default({})
-          }}
-
-    - name: Assert the ntfy subdomain is catalogued
-      ansible.builtin.assert:
-        that:
-          - selected_subdomain != {}
-          - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "ntfy.lv3.org must exist in config/subdomain-catalog.json before live apply."
-
-    - name: Derive the managed Hetzner record name
-      ansible.builtin.set_fact:
-        selected_subdomain_record_name: >-
-          {{
-            '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
-            else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
-            )
-          }}
-
-    - name: Converge the ntfy Hetzner DNS record
-      ansible.builtin.include_role:
-        name: lv3.platform.hetzner_dns_record
-      vars:
-        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
-        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
-        hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
-        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+# --- ntfy-specific docker runtime play (has post_tasks with post-verify and notify) ---
 
 - name: Converge ntfy on the Docker runtime VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
@@ -124,28 +69,10 @@
       vars:
         playbook_execution_notification_service: ntfy
 
-- name: Publish ntfy through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
-  become: true
-  gather_facts: true
-  vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
-  tags:
-    - tier-2
-    - communication
-    - service-ntfy
+- import_playbook: _includes/nginx_edge_publication.yml
+  when: service_needs_nginx_edge | default(false)
 
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.nginx_edge_publication
+# --- ntfy-specific verify play ---
 
 - name: Verify the ntfy public health endpoint from the controller
   hosts: localhost
