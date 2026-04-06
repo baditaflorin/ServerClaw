@@ -202,6 +202,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
 
 - name: Render the Mattermost bootstrap script
   ansible.builtin.template:
