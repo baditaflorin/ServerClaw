@@ -1586,6 +1586,17 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         )
         return JSONResponse(status_code=error.http_status, content=error.to_response())
 
+    @app.get("/")
+    async def root() -> dict[str, str]:
+        return {
+            "service": "lv3-api-gateway",
+            "version": "0.1.0",
+            "status": "ok",
+            "docs": "https://api.lv3.org/docs",
+            "openapi_schema": "https://api.lv3.org/v1/openapi.json",
+            "health_check": "https://api.lv3.org/healthz",
+        }
+
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
         return {"status": "ok"}
