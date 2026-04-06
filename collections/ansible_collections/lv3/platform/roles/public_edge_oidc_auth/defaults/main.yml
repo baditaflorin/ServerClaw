@@ -30,3 +30,13 @@ public_edge_oidc_auth_profile_url: "{{ public_edge_oidc_auth_internal_base_url }
 public_edge_oidc_auth_validate_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/userinfo"
 public_edge_oidc_auth_jwks_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/certs"
 public_edge_oidc_auth_probe_hostname: ops.lv3.org
+
+# Watchdog — checks oauth2-proxy is alive and auto-restarts via systemd every 30s
+public_edge_oidc_auth_watchdog_enabled: true
+public_edge_oidc_auth_watchdog_interval_sec: 30
+public_edge_oidc_auth_watchdog_script_path: /usr/local/libexec/lv3-ops-portal-oauth2-proxy-watchdog.sh
+public_edge_oidc_auth_watchdog_service_name: lv3-ops-portal-oauth2-proxy-watchdog
+public_edge_oidc_auth_watchdog_failure_threshold: 2
+public_edge_oidc_auth_watchdog_ntfy_url: "http://127.0.0.1:2586"
+public_edge_oidc_auth_watchdog_ntfy_topic: platform-identity-critical
+public_edge_oidc_auth_watchdog_ntfy_title: "LV3 OAuth2 Proxy Watchdog"

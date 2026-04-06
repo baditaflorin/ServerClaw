@@ -10,7 +10,7 @@ generated: '2026-04-06'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 338
+total_adrs: 339
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6247,3 +6247,20 @@ adrs:
     summary: 'We will implement certificate validation and concordance enforcement that:'
     filename: 0375-certificate-validation-and-concordance-enforcement.md
     path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+  - adr: '0376'
+    title: Credential Isolation and Agent Safety for .local/ Secrets
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - credential
+      - isolation
+      - agent
+      - safety
+      - local
+      - secrets
+    summary: Add an explicit entry for the .local symlink (without trailing slash) to
+    filename: 0376-credential-isolation-and-agent-safety.md
+    path: docs/adr/0376-credential-isolation-and-agent-safety.md
+    implemented_on: '2026-04-06'

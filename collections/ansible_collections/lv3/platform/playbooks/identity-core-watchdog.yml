@@ -1,0 +1,33 @@
+---
+# Identity-core health watchdog — ADR 0376
+# Deploys a 15-second systemd timer on runtime-control-lv3 that probes
+# Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure.
+
+- name: Converge identity-core watchdog on runtime-control-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - identity-core-watchdog
+    - watchdog
+    - security
+    - service-identity-core-watchdog
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.identity-core-watchdog
+        playbook_execution_audit_target: identity_core_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.identity_core_watchdog
+
+  post_tasks:
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: identity_core_watchdog

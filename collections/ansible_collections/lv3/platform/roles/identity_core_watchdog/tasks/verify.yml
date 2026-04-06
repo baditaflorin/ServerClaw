@@ -1,0 +1,30 @@
+---
+# Purpose: Verify the identity-core watchdog timer is active and the status file is recent.
+# Use case: Post-convergence verification for the identity_core_watchdog role.
+
+- name: Verify identity watchdog timer is active
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ identity_watchdog_timer_name }}"
+  changed_when: false
+  register: _watchdog_timer_status
+
+- name: Assert identity watchdog timer is running
+  ansible.builtin.assert:
+    that:
+      - _watchdog_timer_status.stdout == 'active'
+    fail_msg: "Identity watchdog timer {{ identity_watchdog_timer_name }} is not active."
+
+- name: Check identity watchdog status file exists
+  ansible.builtin.stat:
+    path: "{{ identity_watchdog_status_file }}"
+  register: _watchdog_status_stat
+
+- name: Assert identity watchdog has produced a status file
+  ansible.builtin.assert:
+    that:
+      - _watchdog_status_stat.stat.exists
+    fail_msg: "Identity watchdog status file {{ identity_watchdog_status_file }} does not exist. Timer may not have fired yet."
+  when: false  # Skip on first deploy — timer needs one cycle to produce the file

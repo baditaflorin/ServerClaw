@@ -76,6 +76,15 @@
           401
         ]
       },
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes API Gateway health every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "http://127.0.0.1:8083/healthz",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -83,8 +92,8 @@
           "type": "http",
           "url": "https://api.lv3.org/healthz",
           "description": "Public edge entrypoint for the unified LV3 API gateway.",
-          "interval": 60,
-          "retryInterval": 60,
+          "interval": 15,
+          "retryInterval": 15,
           "maxretries": 0,
           "maxredirects": 5,
           "accepted_statuscodes": [
@@ -1122,6 +1131,15 @@
       "tls_certificate_ids": [
         "keycloak-edge"
       ],
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes Keycloak management liveness every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "http://127.0.0.1:19000/health/live",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -1129,8 +1147,8 @@
           "type": "http",
           "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
           "description": "Shared SSO discovery endpoint published through the NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
+          "interval": 15,
+          "retryInterval": 15,
           "maxretries": 0,
           "maxredirects": 5,
           "accepted_statuscodes": [
@@ -2272,6 +2290,15 @@
       "tls_certificate_ids": [
         "openbao-proxy"
       ],
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes OpenBao health every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "http://127.0.0.1:8201/v1/sys/health",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": false,
         "reason": "The operator-facing TLS surface requires client-certificate authentication, so Uptime Kuma only tracks this contract indirectly through role verification."
@@ -3347,6 +3374,15 @@
       "tls_certificate_ids": [
         "step-ca-proxy"
       ],
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes Step-CA health every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "https://127.0.0.1:9000/health",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -3354,8 +3390,8 @@
           "type": "http",
           "url": "https://10.10.10.92:9000/health",
           "description": "Private step-ca health endpoint on runtime-control-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
+          "interval": 15,
+          "retryInterval": 15,
           "maxretries": 0,
           "maxredirects": 10,
           "accepted_statuscodes": [

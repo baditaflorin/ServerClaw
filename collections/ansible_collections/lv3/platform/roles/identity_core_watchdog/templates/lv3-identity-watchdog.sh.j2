@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+# Identity-core health watchdog — ADR 0376
+# Probes identity services every {{ identity_watchdog_probe_interval_sec }}s,
+# auto-restarts on {{ identity_watchdog_failure_threshold }} consecutive failures,
+# rate-limited to {{ identity_watchdog_max_restarts_per_hour }} restarts/hour/service.
+
+set -euo pipefail
+
+STATE_DIR="{{ identity_watchdog_state_dir }}"
+STATUS_FILE="{{ identity_watchdog_status_file }}"
+PROBE_TIMEOUT="{{ identity_watchdog_probe_timeout_sec }}"
+FAILURE_THRESHOLD="{{ identity_watchdog_failure_threshold }}"
+MAX_RESTARTS_PER_HOUR="{{ identity_watchdog_max_restarts_per_hour }}"
+NTFY_ENABLED="{{ identity_watchdog_ntfy_enabled | lower }}"
+NTFY_URL="{{ identity_watchdog_ntfy_url }}/{{ identity_watchdog_ntfy_topic }}"
+NTFY_PRIORITY="{{ identity_watchdog_ntfy_priority }}"
+NTFY_TITLE="{{ identity_watchdog_ntfy_title }}"
+HOSTNAME="$(hostname -f)"
+TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+mkdir -p "${STATE_DIR}"
+
+# --- helper functions ---
+
+log_info()  { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) INFO  $*"; }
+log_warn()  { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) WARN  $*"; }
+log_error() { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) ERROR $*"; }
+
+send_ntfy() {
+    local title="$1" message="$2" tags="$3" priority="${4:-${NTFY_PRIORITY}}"
+    if [[ "${NTFY_ENABLED}" != "true" ]]; then return 0; fi
+    curl -sf -o /dev/null \
+        -H "Title: ${title}" \
+        -H "Priority: ${priority}" \
+        -H "Tags: ${tags}" \
+        -d "${message}" \
+        "${NTFY_URL}" 2>/dev/null || true
+}
+
+get_failure_count() {
+    local svc="$1"
+    local file="${STATE_DIR}/${svc}.failures"
+    if [[ -f "${file}" ]]; then cat "${file}"; else echo 0; fi
+}
+
+set_failure_count() {
+    local svc="$1" count="$2"
+    echo "${count}" > "${STATE_DIR}/${svc}.failures"
+}
+
+get_restart_count_this_hour() {
+    local svc="$1"
+    local file="${STATE_DIR}/${svc}.restarts"
+    local current_hour
+    current_hour="$(date -u +%Y-%m-%dT%H)"
+    if [[ -f "${file}" ]]; then
+        local stored_hour stored_count
+        stored_hour="$(head -1 "${file}")"
+        stored_count="$(tail -1 "${file}")"
+        if [[ "${stored_hour}" == "${current_hour}" ]]; then
+            echo "${stored_count}"
+            return
+        fi
+    fi
+    echo 0
+}
+
+increment_restart_count() {
+    local svc="$1"
+    local file="${STATE_DIR}/${svc}.restarts"
+    local current_hour count
+    current_hour="$(date -u +%Y-%m-%dT%H)"
+    count="$(get_restart_count_this_hour "${svc}")"
+    count=$(( count + 1 ))
+    printf '%s\n%s\n' "${current_hour}" "${count}" > "${file}"
+}
+
+probe_service() {
+    local url="$1" method="$2" expected="$3"
+    local status_code
+    # shellcheck disable=SC2086
+    status_code="$(curl -sf -o /dev/null -w '%{http_code}' \
+        --max-time "${PROBE_TIMEOUT}" \
+        ${method} \
+        "${url}" 2>/dev/null)" || status_code="000"
+    if [[ "${status_code}" == "${expected}" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+restart_service() {
+    local svc="$1" compose_dir="$2" compose_service="$3"
+    log_warn "${svc}: restarting ${compose_service} in ${compose_dir}"
+    if cd "${compose_dir}" && docker compose restart "${compose_service}" --timeout 30 2>&1; then
+        log_info "${svc}: restart completed"
+        return 0
+    else
+        log_error "${svc}: restart failed"
+        return 1
+    fi
+}
+
+# --- main probe loop ---
+
+declare -A results
+overall_healthy=true
+
+{% for svc in identity_watchdog_services %}
+# --- {{ svc.name }} ---
+{
+    svc_name="{{ svc.name }}"
+    svc_url="{{ svc.health_url }}"
+    svc_method="{{ svc.health_method }}"
+    svc_expected="{{ svc.expected_status }}"
+    svc_compose_dir="{{ svc.compose_dir }}"
+    svc_compose_service="{{ svc.compose_service }}"
+
+    if probe_service "${svc_url}" "${svc_method}" "${svc_expected}"; then
+        log_info "${svc_name}: healthy"
+        prev_failures="$(get_failure_count "${svc_name}")"
+        set_failure_count "${svc_name}" 0
+        results["${svc_name}"]="healthy"
+
+        # Send recovery notification if previously failing
+        if [[ "${prev_failures}" -ge "${FAILURE_THRESHOLD}" ]]; then
+            log_info "${svc_name}: recovered after ${prev_failures} consecutive failures"
+            send_ntfy \
+                "${NTFY_TITLE} — ${svc_name} recovered" \
+                "${svc_name} is healthy again on ${HOSTNAME} after ${prev_failures} consecutive failures." \
+                "white_check_mark,shield" \
+                "3"
+        fi
+    else
+        failures="$(get_failure_count "${svc_name}")"
+        failures=$(( failures + 1 ))
+        set_failure_count "${svc_name}" "${failures}"
+        results["${svc_name}"]="unhealthy (${failures} consecutive)"
+        overall_healthy=false
+        log_warn "${svc_name}: unhealthy — ${failures} consecutive failure(s)"
+
+        if [[ "${failures}" -ge "${FAILURE_THRESHOLD}" ]]; then
+            restarts_this_hour="$(get_restart_count_this_hour "${svc_name}")"
+
+            if [[ "${restarts_this_hour}" -lt "${MAX_RESTARTS_PER_HOUR}" ]]; then
+                log_warn "${svc_name}: threshold reached (${failures}/${FAILURE_THRESHOLD}), attempting restart (${restarts_this_hour}/${MAX_RESTARTS_PER_HOUR} this hour)"
+                send_ntfy \
+                    "${NTFY_TITLE} — ${svc_name} DOWN" \
+                    "${svc_name} failed ${failures} consecutive probes on ${HOSTNAME}. Auto-restarting (${restarts_this_hour}/${MAX_RESTARTS_PER_HOUR} this hour)." \
+                    "rotating_light,skull"
+
+                if restart_service "${svc_name}" "${svc_compose_dir}" "${svc_compose_service}"; then
+                    increment_restart_count "${svc_name}"
+                fi
+            else
+                log_error "${svc_name}: restart rate limit reached (${MAX_RESTARTS_PER_HOUR}/hour). Manual intervention required."
+                # Only notify once when hitting the limit
+                if [[ "${restarts_this_hour}" -eq "${MAX_RESTARTS_PER_HOUR}" ]]; then
+                    send_ntfy \
+                        "${NTFY_TITLE} — ${svc_name} RESTART LIMIT" \
+                        "${svc_name} on ${HOSTNAME} hit restart rate limit (${MAX_RESTARTS_PER_HOUR}/hour). Service is DOWN. Manual intervention required." \
+                        "rotating_light,sos,skull"
+                fi
+            fi
+        fi
+    fi
+}
+
+{% endfor %}
+
+# --- write machine-readable status ---
+
+cat > "${STATUS_FILE}.tmp" <<STATUSEOF
+{
+  "timestamp": "${TIMESTAMP}",
+  "hostname": "${HOSTNAME}",
+  "overall_healthy": ${overall_healthy},
+  "services": {
+{% for svc in identity_watchdog_services %}
+    "{{ svc.name }}": {
+      "status": "${results[{{ svc.name }}]:-unknown}",
+      "failure_count": $(get_failure_count "{{ svc.name }}"),
+      "restarts_this_hour": $(get_restart_count_this_hour "{{ svc.name }}")
+    }{{ "," if not loop.last else "" }}
+{% endfor %}
+  }
+}
+STATUSEOF
+mv "${STATUS_FILE}.tmp" "${STATUS_FILE}"
+
+if [[ "${overall_healthy}" == "true" ]]; then
+    log_info "All identity-core services healthy"
+else
+    log_warn "One or more identity-core services unhealthy — see status file"
+fi

@@ -1,0 +1,11 @@
+[Unit]
+Description={{ identity_watchdog_description }}
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart={{ identity_watchdog_script_path }}
+TimeoutStartSec=30
+Restart=no
+SyslogIdentifier={{ identity_watchdog_syslog_identifier }}

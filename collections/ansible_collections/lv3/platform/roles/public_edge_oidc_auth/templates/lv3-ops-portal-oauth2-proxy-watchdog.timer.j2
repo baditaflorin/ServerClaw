@@ -1,0 +1,11 @@
+[Unit]
+Description=LV3 oauth2-proxy health watchdog — fires every {{ public_edge_oidc_auth_watchdog_interval_sec }}s
+Requires={{ public_edge_oidc_auth_watchdog_service_name }}.service
+
+[Timer]
+OnActiveSec=0
+OnUnitActiveSec={{ public_edge_oidc_auth_watchdog_interval_sec }}s
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

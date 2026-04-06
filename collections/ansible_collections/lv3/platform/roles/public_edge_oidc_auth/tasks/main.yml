@@ -166,6 +166,52 @@
     common_systemd_unit_daemon_reload: false
     common_systemd_unit_expected_active_state: active
 
+- name: Ensure the oauth2-proxy watchdog script directory exists
+  when: public_edge_oidc_auth_watchdog_enabled
+  ansible.builtin.file:
+    path: "{{ public_edge_oidc_auth_watchdog_script_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the oauth2-proxy watchdog script
+  when: public_edge_oidc_auth_watchdog_enabled
+  ansible.builtin.template:
+    src: lv3-ops-portal-oauth2-proxy-watchdog.sh.j2
+    dest: "{{ public_edge_oidc_auth_watchdog_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the oauth2-proxy watchdog systemd service
+  when: public_edge_oidc_auth_watchdog_enabled
+  ansible.builtin.template:
+    src: lv3-ops-portal-oauth2-proxy-watchdog.service.j2
+    dest: "/etc/systemd/system/{{ public_edge_oidc_auth_watchdog_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the oauth2-proxy watchdog systemd timer
+  when: public_edge_oidc_auth_watchdog_enabled
+  ansible.builtin.template:
+    src: lv3-ops-portal-oauth2-proxy-watchdog.timer.j2
+    dest: "/etc/systemd/system/{{ public_edge_oidc_auth_watchdog_service_name }}.timer"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure the oauth2-proxy watchdog timer is enabled and active
+  when: public_edge_oidc_auth_watchdog_enabled
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ public_edge_oidc_auth_watchdog_service_name }}.timer"
+    common_systemd_unit_daemon_reload: true
+    common_systemd_unit_verify_active: true
+
 - name: Verify the public edge OIDC auth proxy answers unauthenticated auth checks
   ansible.builtin.uri:
     url: "http://{{ public_edge_oidc_auth_http_address }}/oauth2/auth"

@@ -1,0 +1,10 @@
+[Unit]
+Description=LV3 oauth2-proxy watchdog (one-shot)
+After=network-online.target {{ public_edge_oidc_auth_service_name }}.service
+
+[Service]
+Type=oneshot
+ExecStart={{ public_edge_oidc_auth_watchdog_script_path }}
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier={{ public_edge_oidc_auth_watchdog_service_name }}

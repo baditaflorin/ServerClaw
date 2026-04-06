@@ -479,6 +479,11 @@ playbooks:
     shared_surfaces:
       - service:step-ca
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/identity-core-watchdog.yml:
+    playbook_id: identity-core-watchdog
+    mutation_scope: host
+    shared_surfaces:
+      - roles/identity_core_watchdog
   playbooks/superset.yml:
     playbook_id: superset
     mutation_scope: platform

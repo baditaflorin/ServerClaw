@@ -1,0 +1,71 @@
+---
+# Playbook: identity-core-watchdog.yml
+# Purpose: Deploy the identity-core health watchdog on runtime-control-lv3 (ADR 0376).
+# Use case: Run to install or update the systemd timer that probes Keycloak, Step-CA,
+#   OpenBao, and API Gateway every 15 seconds and auto-restarts them on failure.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector (production or staging).
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - systemd timer lv3-identity-watchdog.timer active on runtime-control-lv3, probing every 15s.
+#   - Status file /var/lib/lv3-identity-watchdog/status.json updated each cycle.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0376: Identity core VM isolation and aggressive health watchdog.
+#   - Requires: runtime-control-lv3 to be provisioned and reachable.
+#   - Role: lv3.platform.identity_core_watchdog
+#
+# Related ADRs: 0376, 0056, 0101, 0226
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-06
+
+- name: Converge identity-core watchdog on runtime-control-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - identity-core-watchdog
+    - watchdog
+    - security
+    - service-identity-core-watchdog
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.identity-core-watchdog
+        playbook_execution_audit_target: identity_core_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.identity_core_watchdog
+
+  post_tasks:
+    - name: Verify identity watchdog timer is active
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-active
+          - lv3-identity-watchdog.timer
+      changed_when: false
+      register: _watchdog_timer_check
+
+    - name: Assert identity watchdog timer is running
+      ansible.builtin.assert:
+        that:
+          - _watchdog_timer_check.stdout == 'active'
+        fail_msg: "Identity watchdog timer lv3-identity-watchdog.timer is not active."
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: identity_core_watchdog

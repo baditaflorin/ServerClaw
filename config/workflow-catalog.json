@@ -2046,6 +2046,49 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-identity-core-watchdog": {
+      "description": "Deploy the identity-core health watchdog on runtime-control-lv3: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-identity-core-watchdog",
+        "command": "make converge-identity-core-watchdog"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/adr/0376-identity-core-vm-isolation-and-watchdog.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/identity-core-watchdog.yml",
+        "roles/identity_core_watchdog"
+      ],
+      "outputs": [
+        "A systemd timer lv3-identity-watchdog.timer active on runtime-control-lv3, probing identity-core services every 15 seconds and auto-restarting on failure."
+      ],
+      "verification_commands": [
+        "ssh -i .local/ssh/bootstrap.id_ed25519 -J ops@100.64.0.1 ops@10.10.10.92 'systemctl is-active lv3-identity-watchdog.timer'",
+        "ssh -i .local/ssh/bootstrap.id_ed25519 -J ops@100.64.0.1 ops@10.10.10.92 'cat /var/lib/lv3-identity-watchdog/status.json'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 300,
+        "max_steps": 50,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-superset": {
       "description": "Deploy the Superset metadata schema, runtime, Keycloak client, and public edge publication, then verify SQL-first BI access end to end.",
       "lifecycle_status": "active",
