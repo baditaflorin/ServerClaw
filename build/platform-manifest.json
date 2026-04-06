@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.21",
+  "repo_version": "0.178.23",
   "platform_version": "0.131.0",
-  "generated_at": "2026-04-05T23:51:04Z",
-  "next_refresh_at": "2026-04-06T00:51:04Z",
+  "generated_at": "2026-04-06T00:08:44Z",
+  "next_refresh_at": "2026-04-06T01:08:44Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6166,10 +6166,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.20",
-    "deployed_at": "2026-04-05",
-    "summary": "ADR triage 0347-0358: implement 6 CPU-only ADRs \u2014 Integration Contract Registry (config/integrations/, validate_integrations.py), Nginx Fragment Config role (write-validate-reload), File-Domain Locking + Apply Semaphore (platform/locking/file_domain.py extending ADR 0153), Workstream Apply Receipts state machine (platform/workstream_receipts.py), Change Provenance Tagging (Jinja2 macro + check_provenance_headers.py); mark 3 ADRs Superseded (LLM-heavy: 0348, 0352, 0356) and 3 Deferred (0349, 0354, 0358) ADR 0375: Certificate validation and concordance enforcement \u2014 automated SSL checking for all edge-published domains, pre-push gate integration, Uptime Kuma monitors, and fix playbook for NGINX edge certificate hostname mismatches (ci.lv3.org, bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org, ntfy.lv3.org).",
-    "release_notes_url": "docs/release-notes/0.178.21.md"
+    "last_version": "0.178.22",
+    "deployed_at": "2026-04-06",
+    "summary": "fix Woodpecker OAuth login: add nginx edge + TLS for git.lv3.org, fix WOODPECKER_GITEA_URL to use private IP (cross-host LAN), remove dead gitea_runtime_default external network from Woodpecker compose AW-22 + AW-23: generic _resolve_service_auth() helper (ADR 0362 gap); Outline agent tools \u2014 list-outline-collections, search-outline-documents, get-outline-document, create-outline-document (ADR 0364)",
+    "release_notes_url": "docs/release-notes/0.178.23.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
