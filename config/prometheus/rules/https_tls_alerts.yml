@@ -1460,6 +1460,51 @@ groups:
           description: https://nginx.lv3.org:443/ has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_nomad_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="nomad-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nomad-public HTTPS probe is failing.
+          description: https://scheduler.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_nomad_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nomad-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: nomad-public TLS certificate is approaching expiry.
+          description: https://scheduler.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_nomad_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nomad-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nomad-public TLS certificate is within the critical expiry window.
+          description: https://scheduler.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_nomad_internal
         expr: probe_success{job="https-tls-blackbox",assurance_id="nomad-internal"}
           == 0
@@ -2005,6 +2050,51 @@ groups:
         annotations:
           summary: realtime-public TLS certificate is within the critical expiry window.
           description: https://realtime.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_repowise_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="repowise-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: repowise
+          assurance_id: repowise-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: repowise-public HTTPS probe is failing.
+          description: https://repowise.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_repowise_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="repowise-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: repowise
+          assurance_id: repowise-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: repowise-public TLS certificate is approaching expiry.
+          description: https://repowise.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_repowise_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="repowise-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: repowise
+          assurance_id: repowise-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: repowise-public TLS certificate is within the critical expiry window.
+          description: https://repowise.lv3.org:443/ has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_serverclaw_public

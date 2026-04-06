@@ -28,6 +28,8 @@
     gate_tools_mypy_version: "1.13.0"
     gate_tools_pyyaml_version: "6.0.2"
     gate_tools_jsonschema_version: "4.23.0"
+    gate_tools_checkov_version: "3.2.469"
+    gate_tools_pytest_version: "8.4.2"
     gate_tools_version_file: "/opt/builds/gate-tool-versions.json"
 
   tasks:
@@ -41,6 +43,8 @@
           - "PyYAML=={{ gate_tools_pyyaml_version }}"
           - "jsonschema=={{ gate_tools_jsonschema_version }}"
           - "types-PyYAML"
+          - "checkov=={{ gate_tools_checkov_version }}"
+          - "pytest=={{ gate_tools_pytest_version }}"
         state: present
         executable: pip3
         extra_args: "--break-system-packages"
@@ -128,3 +132,5 @@
           mypy: "{{ gate_tools_mypy_version }}"
           pyyaml: "{{ gate_tools_pyyaml_version }}"
           jsonschema: "{{ gate_tools_jsonschema_version }}"
+          checkov: "{{ gate_tools_checkov_version }}"
+          pytest: "{{ gate_tools_pytest_version }}"
