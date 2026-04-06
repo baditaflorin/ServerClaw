@@ -267,8 +267,8 @@ open_webui_enable_ollama_api: false
 open_webui_ollama_base_url: "http://host.docker.internal:11434"
 open_webui_enable_web_search: true
 open_webui_searxng_query_url: "http://host.docker.internal:8881/search?q=<query>&format=json"
-open_webui_default_models: "{{ one_api_default_chat_model_alias }}"
-open_webui_default_pinned_models: "{{ one_api_default_chat_model_alias }}"
+open_webui_default_models: "serverclaw:latest"
+open_webui_default_pinned_models: "serverclaw:latest"
 serverclaw_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 serverclaw_admin_email: ops@lv3.org
 serverclaw_admin_name: Florin Badita
@@ -279,13 +279,13 @@ serverclaw_enable_login_form: true
 serverclaw_enable_password_auth: true
 serverclaw_oidc_client_id: serverclaw
 serverclaw_oidc_provider_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
-serverclaw_enable_openai_api: true
-serverclaw_enable_ollama_api: false
+serverclaw_enable_openai_api: false
+serverclaw_enable_ollama_api: true
 serverclaw_ollama_base_url: http://10.10.10.20:11434
 serverclaw_enable_web_search: true
 serverclaw_searxng_query_url: http://10.10.10.20:8881/search?q=<query>&format=json
-serverclaw_default_models: "{{ one_api_default_chat_model_alias }}"
-serverclaw_default_pinned_models: "{{ one_api_default_chat_model_alias }}"
+serverclaw_default_models: "serverclaw:latest"
+serverclaw_default_pinned_models: "serverclaw:latest"
 serverclaw_default_user_role: user
 serverclaw_workspace_models_access: true
 serverclaw_workspace_knowledge_access: true
