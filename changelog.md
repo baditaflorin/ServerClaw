@@ -12,7 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- fix(cert-validator): TLS 1.3 support via uv run python3, DER cert parsing for internal CA (step-ca), correct fqdn/target field mapping in certificate-catalog.json loader
+- fix(cert-validator): TLS 1.3 support via uv run python3, DER cert parsing for internal CA (step-ca), correct fqdn/target field mapping, warn_hours policy support for short-lived certs (OpenBao), OpenBao renewal script fixed (72h→24h, deduplicated SAN)
 
 - fix: Gitea OAuth2 login — ROOT_URL changed to Tailscale access URL (http://100.64.0.1:3009) to fix OAuth2 state cookie mismatch; remove invalid `groups` scope from OPENID_CONNECT_SCOPES in ctmpl template
 - Fixed browser-runner service accessibility — added firewall rules to open port 8096 on docker-runtime-lv3 from management network, all guests, and Docker bridge networks; service now accessible from headscale at http://10.10.10.20:8096/
@@ -33,10 +33,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.31 release notes](docs/release-notes/0.178.31.md)
+- [0.178.32 release notes](docs/release-notes/0.178.32.md)
 
 ## Previous Releases
 
+- [0.178.31 release notes](docs/release-notes/0.178.31.md)
 - [0.178.30 release notes](docs/release-notes/0.178.30.md)
 - [0.178.29 release notes](docs/release-notes/0.178.29.md)
 - [0.178.28 release notes](docs/release-notes/0.178.28.md)
@@ -48,9 +49,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.22 release notes](docs/release-notes/0.178.22.md)
 - [0.178.21 release notes](docs/release-notes/0.178.21.md)
 - [0.178.20 release notes](docs/release-notes/0.178.20.md)
-- [0.178.19 release notes](docs/release-notes/0.178.19.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (370 releases)](docs/release-notes/index/2026.md)
+- [2026 (371 releases)](docs/release-notes/index/2026.md)
