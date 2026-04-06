@@ -6396,7 +6396,7 @@ matrix_synapse_controller_url: http://100.64.0.1:8015
 matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
-gitea_root_url: https://git.lv3.org
+gitea_root_url: http://100.64.0.1:3009
 gitea_private_base_url: http://10.10.10.92:3003
 gitea_controller_url: http://100.64.0.1:3009
 minio_public_url: https://minio.lv3.org
