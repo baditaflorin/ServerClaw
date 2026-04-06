@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 302
+  total_workstreams: 303
   by_year:
-    '2026': 302
+    '2026': 303
 workstreams:
 - id: ws-0377-open-webui-serverclaw-integration
   adr: '0377'
@@ -1871,32 +1871,6 @@ workstreams:
       mode: shared_contract
       contract: discovery-artifacts-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
-- id: ws-dry-centralization-0368-0374
-  title: "DRY Centralization \u2014 ADRs 0368\u20130374"
-  status: ready
-  owner: platform-infrastructure
-  branch: claude/objective-bose
-  worktree_path: .claude/worktrees/objective-bose
-  adrs:
-  - 0368
-  - 0369
-  - '0370'
-  - '0371'
-  - '0372'
-  - '0373'
-  - '0374'
-  description: 'Implements 7 ADRs eliminating duplication across Ansible roles, scripts,
-    and
-
-    playbooks. Extracts shared patterns into: Python validation toolkit, Jinja2
-
-    compose macros, shared lifecycle/verify task includes, service registry with
-
-    derived defaults, data-driven playbook composition, and cross-cutting service
-
-    manifest (hairpin, DNS, TLS, nginx, SSO).
-
-    '
 - id: ws-0364-service-api-agent-tools
   title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
     0362 follow-up)'

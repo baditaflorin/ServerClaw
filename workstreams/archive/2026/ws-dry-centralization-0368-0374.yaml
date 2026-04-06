@@ -1,9 +1,9 @@
 id: ws-dry-centralization-0368-0374
 title: "DRY Centralization — ADRs 0368–0374"
-status: ready
+status: merged
 owner: platform-infrastructure
 branch: claude/objective-bose
-worktree_path: .claude/worktrees/objective-bose
+doc: docs/adr/0368-docker-compose-jinja2-macro-library.md
 adrs:
   - "0368"
   - "0369"

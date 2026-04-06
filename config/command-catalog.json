@@ -2394,7 +2394,7 @@
       "description": "Deploy the identity-core health watchdog on runtime-control-lv3 — probes Keycloak OIDC discovery, Step-CA, OpenBao, and API Gateway every 30s with auto-restart.",
       "workflow_id": "converge-identity-core-watchdog",
       "scope": "guest_runtime",
-      "approval_policy": "routine_live_change",
+      "approval_policy": "standard_live_change",
       "inputs": [
         {
           "name": "bootstrap_ssh_private_key",

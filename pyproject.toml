@@ -15,3 +15,6 @@ lv3 = "scripts.lv3_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["platform*", "scripts*"]
+
+[tool.mypy]
+mypy_path = "scripts"
