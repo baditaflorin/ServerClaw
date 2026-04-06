@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- deploy serverclaw:latest with baked-in system prompt as the default named model in chat.lv3.org; fix derive_service_defaults guard (use open_webui_site_dir is not defined), fix Ollama api/create URL for remote Ollama instance, add keycloak_local_artifact_dir fallback default, migrate woodpecker_runtime defaults to ADR 0373 pattern
+
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
 - removed dead Plausible OIDC config (OIDC_DISCOVERY_URI, OIDC_CLIENT_SECRET, extra_hosts, /login redirect) — Plausible CE v3.x dropped community OIDC; auth is now exclusively via oauth2-proxy at the NGINX edge
@@ -20,10 +22,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.36 release notes](docs/release-notes/0.178.36.md)
+- [0.178.38 release notes](docs/release-notes/0.178.38.md)
 
 ## Previous Releases
 
+- [0.178.36 release notes](docs/release-notes/0.178.36.md)
 - [0.178.35 release notes](docs/release-notes/0.178.35.md)
 - [0.178.34 release notes](docs/release-notes/0.178.34.md)
 - [0.178.33 release notes](docs/release-notes/0.178.33.md)
@@ -35,9 +38,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.27 release notes](docs/release-notes/0.178.27.md)
 - [0.178.26 release notes](docs/release-notes/0.178.26.md)
 - [0.178.25 release notes](docs/release-notes/0.178.25.md)
-- [0.178.24 release notes](docs/release-notes/0.178.24.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (375 releases)](docs/release-notes/index/2026.md)
+- [2026 (376 releases)](docs/release-notes/index/2026.md)
