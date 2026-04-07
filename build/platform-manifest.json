@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.43",
+  "repo_version": "0.178.44",
   "platform_version": "0.131.1",
-  "generated_at": "2026-04-07T05:15:51Z",
-  "next_refresh_at": "2026-04-07T06:15:51Z",
+  "generated_at": "2026-04-07T05:16:01Z",
+  "next_refresh_at": "2026-04-07T06:16:01Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6249,10 +6249,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.39",
+    "last_version": "0.178.42",
     "deployed_at": "2026-04-07",
     "summary": "made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults",
-    "release_notes_url": "docs/release-notes/0.178.42.md"
+    "release_notes_url": "docs/release-notes/0.178.43.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

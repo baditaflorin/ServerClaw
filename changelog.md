@@ -24,10 +24,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.43 release notes](docs/release-notes/0.178.43.md)
+- [0.178.44 release notes](docs/release-notes/0.178.44.md)
 
 ## Previous Releases
 
+- [0.178.43 release notes](docs/release-notes/0.178.43.md)
 - [0.178.42 release notes](docs/release-notes/0.178.42.md)
 - [0.178.39 release notes](docs/release-notes/0.178.39.md)
 - [0.178.38 release notes](docs/release-notes/0.178.38.md)
@@ -39,9 +40,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.31 release notes](docs/release-notes/0.178.31.md)
 - [0.178.30 release notes](docs/release-notes/0.178.30.md)
 - [0.178.29 release notes](docs/release-notes/0.178.29.md)
-- [0.178.28 release notes](docs/release-notes/0.178.28.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (379 releases)](docs/release-notes/index/2026.md)
+- [2026 (380 releases)](docs/release-notes/index/2026.md)
