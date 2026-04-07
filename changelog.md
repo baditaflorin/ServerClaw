@@ -50,3 +50,5 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - ADR 0058 and 0061 marked as Superseded (deployed via ADRs 0276, 0281)
 
 - ADR implementation scanner tool created for automated discovery (618 lines)
+
+- ADR 0243 branch assessment: Storybook/Playwright UI testing framework ready (with Windmill CE fix pending)
