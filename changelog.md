@@ -52,3 +52,5 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - ADR implementation scanner tool created for automated discovery (618 lines)
 
 - ADR 0243 branch assessment: Storybook/Playwright UI testing framework ready (with Windmill CE fix pending)
+
+- ADR 0025 deep dive: 4-phase roadmap for completing Compose-managed stacks (systemd integration, runbooks, registry)
