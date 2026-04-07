@@ -58,4 +58,6 @@ librechat_admin_email: ops@lv3.org
 librechat_enable_web_search: true
 librechat_searxng_query_url: "http://host.docker.internal:8888/search?q=%s&format=json"
 # Extra hosts for hairpin NAT
-librechat_extra_hosts: []
+librechat_extra_hosts:
+  - "sso.lv3.org:10.10.10.40"
+  - "chat.lv3.org:10.10.10.40"
