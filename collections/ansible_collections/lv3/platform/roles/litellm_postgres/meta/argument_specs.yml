@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Provision the LiteLLM PostgreSQL database.
+    options:
+      litellm_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name for LiteLLM.
+      litellm_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL role name for LiteLLM.
+      litellm_postgres_secret_dir:
+        type: path
+        required: true
+        description:
+          - Guest-local directory that stores the database password.
+      litellm_postgres_password_file:
+        type: path
+        required: true
+        description:
+          - Guest-local path to the database password file.
+      litellm_local_artifact_dir:
+        type: path
+        required: true
+        description:
+          - Controller-local directory that mirrors database credentials.
+      litellm_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local mirror path for the database password.

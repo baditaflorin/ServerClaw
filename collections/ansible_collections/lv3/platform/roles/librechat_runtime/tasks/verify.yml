@@ -1,0 +1,18 @@
+---
+- name: Wait for the LibreChat runtime to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ librechat_internal_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the LibreChat health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ librechat_internal_port }}{{ librechat_healthcheck_path }}"
+    method: GET
+    status_code: 200
+  register: librechat_verify_health
+  retries: 18
+  delay: 5
+  until: librechat_verify_health.status == 200
+  changed_when: false

@@ -1,0 +1,258 @@
+---
+# Purpose: Converge the LibreChat runtime on the target host.
+# Use case: Deploys or updates the LibreChat container stack with MongoDB and Meilisearch sidecars.
+# Inputs: librechat_* variables from defaults/main.yml.
+# Outputs: Running LibreChat container with OIDC auth, Ollama + Anthropic backends, system prompt preset.
+# Idempotency: Yes.
+
+- name: Validate LibreChat runtime inputs
+  ansible.builtin.assert:
+    that:
+      - librechat_site_dir | length > 0
+      - librechat_secret_dir | length > 0
+      - librechat_compose_file | length > 0
+      - librechat_env_file | length > 0
+      - librechat_image | length > 0
+      - librechat_container_name | length > 0
+      - librechat_internal_port | int > 0
+    fail_msg: "librechat_runtime requires runtime paths, port metadata, and image reference."
+
+- name: Ensure LibreChat runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the LibreChat runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ librechat_site_dir }}"
+      mode: "0755"
+    - path: "{{ librechat_data_dir }}"
+      mode: "0755"
+    - path: "{{ librechat_secret_dir }}"
+      mode: "0700"
+    - path: "{{ librechat_mongo_data_dir }}"
+      mode: "0755"
+    - path: "{{ librechat_meilisearch_data_dir }}"
+      mode: "0755"
+
+- name: Generate the LibreChat JWT secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ librechat_jwt_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ librechat_jwt_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_jwt_gen
+  changed_when: "'changed' in librechat_jwt_gen.stdout"
+  no_log: true
+
+- name: Generate the LibreChat credentials encryption key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ librechat_creds_key_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ librechat_creds_key_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_creds_key_gen
+  changed_when: "'changed' in librechat_creds_key_gen.stdout"
+  no_log: true
+
+- name: Generate the LibreChat credentials IV
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ librechat_creds_iv_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 16 > "{{ librechat_creds_iv_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_creds_iv_gen
+  changed_when: "'changed' in librechat_creds_iv_gen.stdout"
+  no_log: true
+
+- name: Read the LibreChat secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ librechat_jwt_secret_remote_file }}"
+    - "{{ librechat_creds_key_remote_file }}"
+    - "{{ librechat_creds_iv_remote_file }}"
+  register: librechat_secrets_raw
+  no_log: true
+
+- name: Record the LibreChat runtime secrets
+  ansible.builtin.set_fact:
+    librechat_jwt_secret: "{{ librechat_secrets_raw.results[0].content | b64decode | trim }}"
+    librechat_creds_key: "{{ librechat_secrets_raw.results[1].content | b64decode | trim }}"
+    librechat_creds_iv: "{{ librechat_secrets_raw.results[2].content | b64decode | trim }}"
+  no_log: true
+
+- name: Read the OIDC client secret
+  ansible.builtin.slurp:
+    src: "{{ librechat_oidc_client_secret_local_file }}"
+  register: librechat_oidc_secret_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: librechat_enable_oidc | bool
+
+- name: Record the OIDC client secret
+  ansible.builtin.set_fact:
+    librechat_oidc_client_secret: "{{ librechat_oidc_secret_raw.content | b64decode | trim }}"
+  no_log: true
+  when: librechat_enable_oidc | bool
+
+- name: Build the LibreChat runtime secret payload
+  ansible.builtin.set_fact:
+    librechat_runtime_secret_payload:
+      JWT_SECRET: "{{ librechat_jwt_secret }}"
+      CREDS_KEY: "{{ librechat_creds_key }}"
+      CREDS_IV: "{{ librechat_creds_iv }}"
+      OPENID_CLIENT_SECRET: "{{ librechat_oidc_client_secret | default('') }}"
+  no_log: true
+
+- name: Ensure the local LibreChat artifact directory exists
+  ansible.builtin.file:
+    path: "{{ librechat_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the LibreChat secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  loop:
+    - dest: "{{ librechat_jwt_secret_local_file }}"
+      content: "{{ librechat_jwt_secret }}"
+    - dest: "{{ librechat_creds_key_local_file }}"
+      content: "{{ librechat_creds_key }}"
+    - dest: "{{ librechat_creds_iv_local_file }}"
+      content: "{{ librechat_creds_iv }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for LibreChat
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: librechat
+    common_openbao_compose_env_agent_dir: "{{ librechat_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ librechat_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ librechat_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ librechat_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ librechat_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ librechat_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ librechat_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ librechat_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ librechat_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ librechat_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ librechat_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: runtime.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ librechat_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ librechat_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ librechat_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ librechat_legacy_env_file }}"
+  no_log: true
+  when: librechat_enable_openbao_agent | bool
+
+- name: Copy the system prompt preset file
+  ansible.builtin.copy:
+    src: "{{ librechat_system_prompt_src }}"
+    dest: "{{ librechat_system_prompt_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the LibreChat config file
+  ansible.builtin.template:
+    src: librechat.yaml.j2
+    dest: "{{ librechat_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the LibreChat environment file
+  ansible.builtin.template:
+    src: runtime.env.j2
+    dest: "{{ librechat_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the LibreChat compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ librechat_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the LibreChat images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ librechat_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ librechat_site_dir }}"
+  register: librechat_pull
+  changed_when: >-
+    'Pulling' in librechat_pull.stdout
+    or 'Downloaded newer image' in librechat_pull.stdout
+    or 'Pull complete' in librechat_pull.stdout
+
+- name: Start the LibreChat stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ librechat_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ librechat_site_dir }}"
+  register: librechat_up
+  changed_when: >-
+    'Creating' in librechat_up.stdout
+    or 'Recreating' in librechat_up.stdout
+    or 'Starting' in librechat_up.stdout
+
+- name: Verify the LibreChat runtime
+  ansible.builtin.import_tasks: verify.yml

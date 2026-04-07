@@ -1,0 +1,18 @@
+---
+- name: Wait for the LiteLLM runtime to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ litellm_internal_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the LiteLLM health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ litellm_internal_port }}{{ litellm_healthcheck_path }}"
+    method: GET
+    status_code: 200
+  register: litellm_verify_health
+  retries: 18
+  delay: 5
+  until: litellm_verify_health.status == 200
+  changed_when: false

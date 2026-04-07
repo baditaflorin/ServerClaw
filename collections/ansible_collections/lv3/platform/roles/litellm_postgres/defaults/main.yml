@@ -1,0 +1,13 @@
+# Purpose: Define default PostgreSQL database names, users, and secret paths required by the LiteLLM stack.
+# Use case: Loaded whenever the LiteLLM PostgreSQL helper role provisions or validates database prerequisites.
+# Inputs: Repo-local secret paths and LiteLLM database naming defaults.
+# Outputs: Supplies stable defaults consumed by the LiteLLM PostgreSQL role tasks.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165 and ADR 0359.
+---
+litellm_database_name: litellm
+litellm_database_user: litellm
+litellm_postgres_secret_dir: /etc/lv3/litellm
+litellm_postgres_password_file: "{{ litellm_postgres_secret_dir }}/database-password"
+litellm_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/litellm
+litellm_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/litellm/database-password.txt

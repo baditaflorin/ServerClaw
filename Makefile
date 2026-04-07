@@ -98,6 +98,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
 .PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
+.PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat
 .PHONY: syntax-check-flagsmith converge-flagsmith
 .PHONY: syntax-check-lago converge-lago
 .PHONY: syntax-check-matrix-synapse converge-matrix-synapse
@@ -1185,6 +1186,15 @@ converge-serverclaw:
 	$(MAKE) preflight WORKFLOW=converge-serverclaw
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/serverclaw.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+converge-litellm:
+	$(MAKE) preflight WORKFLOW=converge-litellm
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/litellm.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+converge-librechat:
+	$(MAKE) preflight WORKFLOW=converge-librechat
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/librechat.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-homepage:
 	$(MAKE) preflight WORKFLOW=converge-homepage
