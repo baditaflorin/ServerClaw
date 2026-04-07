@@ -1,8 +1,9 @@
-# Release 0.178.49
+# Release 0.178.50
 
 - Date: 2026-04-07
 
 ## Summary
+- fix redirect loop: stale session reset now redirects to Keycloak logout (kills Keycloak session + clears sso.lv3.org cookie) instead of /oauth2/sign_in, preventing Keycloak from auto-logging back in with a poisoned session
 - NGINX auto-clears stale session cookie on oauth2-proxy 500 at /oauth2/callback — users no longer see 500 errors or need to manually clear cookies after Keycloak restarts
 - made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout
 - fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults
