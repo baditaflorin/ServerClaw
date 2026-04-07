@@ -217,7 +217,7 @@
     "command": "python scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
-    "native_command": "python3 -m pytest tests/ -x -q"
+    "native_command": "python3 -m pytest tests/ -x -q --import-mode=importlib"
   },
   "yaml-lint": {
     "description": "Run full-repository yamllint across tracked YAML files.",
