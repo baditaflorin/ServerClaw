@@ -1,0 +1,35 @@
+id: ws-0400-adr-status-correction
+adr: '0325'
+title: "ADR Status Correction: Resolve 149 Implementation Status Mismatches"
+description: |
+  Systematic correction of 149 ADRs with mismatched implementation status claims
+  vs. actual evidence found by the implementation scanner (Phase 2 WS-0401).
+  Correct canonical status claims to match actual deployment evidence or confirm
+  intentional status gaps.
+status: planned
+owner: claude
+branch: claude/ws-0400-adr-status-correction
+worktree_path: .claude/worktrees/ws-0400-adr-status-correction
+doc: docs/workstreams/ws-0400-adr-status-correction.md
+depends_on:
+  - adr-0325-adr-discovery-root-manifest
+  - adr-0401-adr-implementation-scanner
+conflicts_with: []
+shared_surfaces:
+  - docs/workstreams/ws-0400-adr-status-correction.md
+ownership_manifest:
+  owned_surfaces:
+    - id: status_correction_docs
+      paths:
+        - docs/workstreams/ws-0400-adr-status-correction.md
+      mode: exclusive
+notes: |
+  - Categorize 149 mismatches: 83 uncertain Implemented, 21 ghost Implemented, 14 hidden Not-Implemented, others
+  - For each mismatch: review scanner evidence, ADR content, git history
+  - Decision: update canonical status OR document intentional gap with evidence reference
+  - Update ADR frontmatter (Status, Implementation Status, Implemented In Repo Version)
+  - Regenerate ADR index after all corrections
+  - Create summary report of status corrections by category
+  - Commit all ADR updates and push to claude/ws-0400-adr-status-correction
+ready_to_merge: false
+live_applied: false
