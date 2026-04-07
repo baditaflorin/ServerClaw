@@ -2514,10 +2514,28 @@
 
 - name: Reconcile the Plane OIDC client
   block:
+    - name: Acquire a fresh Keycloak admin token for Plane OIDC client reconciliation
+      ansible.builtin.uri:
+        url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: client_credentials
+          client_id: "{{ keycloak_admin_client_id }}"
+          client_secret: "{{ keycloak_admin_client_secret }}"
+        return_content: true
+        status_code: 200
+      register: keycloak_plane_admin_token
+      retries: 3
+      delay: 5
+      until: keycloak_plane_admin_token.status == 200
+      changed_when: false
+      no_log: true
+
     - name: Run the Plane OIDC client reconciliation tasks
       ansible.builtin.include_tasks: plane_client.yml
       vars:
-        keycloak_admin_token: "{{ keycloak_admin_client_token.json.access_token }}"
+        keycloak_admin_token: "{{ keycloak_plane_admin_token.json.access_token }}"
   rescue:
     - name: Surface unexpected Plane OIDC client reconciliation failures
       ansible.builtin.fail:
