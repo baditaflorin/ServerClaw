@@ -1,0 +1,18 @@
+scanner_version: '1.0'
+generated: '2026-04-06T22:09:04.665215'
+total_adrs: 10
+scan_summary:
+  fully_matching: 0
+  partial_matching: 2
+  no_evidence: 8
+reports:
+- '0024'
+- '0025'
+- 0058
+- '0061'
+- '0214'
+- '0215'
+- '0216'
+- '0217'
+- 0218
+- 0219
