@@ -27,6 +27,12 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-07
 
+# --- DNS provisioning ---
+
+- import_playbook: _includes/dns_publication.yml
+  vars:
+    service_dns_fqdn: browser.lv3.org
+
 # --- Neko-specific plays ---
 
 - name: Converge Neko Remote Desktop Runtime
