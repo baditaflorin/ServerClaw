@@ -1,0 +1,45 @@
+id: ws-0350-nginx-fragments
+adr: '0350'
+title: "Nginx Fragment-Based Atomic Configuration"
+description: |
+  Implement atomic nginx configuration management via include-directory pattern.
+  Each service writes a single named fragment file with provenance tagging, and
+  a coordinator role applies and validates atomically before reload.
+status: planned
+owner: claude
+branch: claude/ws-0350-nginx-fragments
+worktree_path: .claude/worktrees/ws-0350-nginx-fragments
+doc: docs/workstreams/ws-0350-nginx-fragments.md
+depends_on:
+  - adr-0350-nginx-fragment-based-atomic-config
+  - adr-0347-agent-file-domain-locking
+  - adr-0351-change-provenance-tagging
+conflicts_with: []
+shared_surfaces:
+  - docs/workstreams/ws-0350-nginx-fragments.md
+  - scripts/nginx_fragment_inventory.py
+  - roles/nginx_runtime/tasks/
+  - roles/*/templates/nginx-fragment.conf.j2
+ownership_manifest:
+  owned_surfaces:
+    - id: nginx_fragments_tool
+      paths:
+        - scripts/nginx_fragment_inventory.py
+      mode: exclusive
+    - id: nginx_fragments_docs
+      paths:
+        - docs/workstreams/ws-0350-nginx-fragments.md
+      mode: exclusive
+notes: |
+  - Create /etc/nginx/fragments.d/ directory structure
+  - Create nginx-runtime role tasks for platform-includes.conf setup
+  - Create nginx_fragment_inventory.py tool with list, validate, diff, orphans subcommands
+  - Extract current nginx configs from service roles to nginx-fragment.conf.j2 templates
+  - Implement write-validate-reload protocol with file domain locking (ADR 0347)
+  - Add provenance headers to all fragments (ADR 0351)
+  - Document fragment file naming convention (<adr>-<service>.conf)
+  - Create daily health check task for orphan detection
+  - Test multi-VM nginx targeting via role defaults
+  - Commit implementation and push to claude/ws-0350-nginx-fragments
+ready_to_merge: false
+live_applied: false

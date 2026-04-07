@@ -1,0 +1,47 @@
+id: ws-0216-0219-data-replication
+adr: '0216-0219'
+title: "Data & Replication Strategy — Criticality Rings & Environment Isolation"
+description: |
+  Implement criticality ring taxonomy (foundation, core, supporting, peripheral),
+  one-way environment data flow, single-writer relational HA policy, and per-data-class
+  replication policies for queues, object stores, search indexes, caches, secrets,
+  and time-series systems.
+status: planned
+owner: claude
+branch: claude/ws-0216-0219-data-replication
+worktree_path: .claude/worktrees/ws-0216-0219-data-replication
+doc: docs/workstreams/ws-0216-0219-data-replication.md
+depends_on:
+  - adr-0216-service-criticality-rings
+  - adr-0217-one-way-environment-data-flow
+  - adr-0218-relational-database-replication
+  - adr-0219-data-class-replication-policies
+  - adr-0098-postgresql-ha
+  - adr-0073-code-promotion-and-config-management
+conflicts_with: []
+shared_surfaces:
+  - docs/workstreams/ws-0216-0219-data-replication.md
+  - docs/architecture/criticality-rings.yaml
+  - docs/architecture/environment-data-policy.yaml
+  - docs/architecture/replication-policies.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: replication_docs
+      paths:
+        - docs/workstreams/ws-0216-0219-data-replication.md
+        - docs/architecture/criticality-rings.yaml
+        - docs/architecture/environment-data-policy.yaml
+        - docs/architecture/replication-policies.yaml
+      mode: exclusive
+notes: |
+  - Create criticality-rings.yaml: classify all services by ring (foundation, core, supporting, peripheral)
+  - Validate dependency direction (inward-only)
+  - Create environment-data-policy.yaml: define allowed cross-env replication patterns
+  - Document sanitized snapshot, logical subset, event replay patterns for staging
+  - Create replication-policies.yaml per data class (queues, object stores, search, cache, secrets, time-series)
+  - Map current platform services to rings and identify violations
+  - Document relational DB endpoints (rw, ro, admin) for each cluster
+  - Create validation playbook to check environment isolation
+  - Commit workstream docs and push to claude/ws-0216-0219-data-replication
+ready_to_merge: false
+live_applied: false
