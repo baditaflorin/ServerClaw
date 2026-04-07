@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-07'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 406
+total_adrs: 407
 adr_number_range:
   first: '0001'
-  last: 0380
-  next_available: 0381
+  last: 0381
+  next_available: 0382
 implementation_status_summary:
-  Implemented: 274
+  Implemented: 273
   Partial: 60
   Not Implemented: 32
   Deprecated: 4
   Accepted: 25
-  Proposed: 11
+  Proposed: 13
 decision_status_summary:
   Accepted: 330
-  Proposed: 19
+  Proposed: 20
   Deprecated: 7
   Implemented: 50
 facets:
@@ -44,9 +44,9 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 87
+      count: 88
       first_adr: '0300'
-      last_adr: 0380
+      last_adr: 0381
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -59,7 +59,7 @@ facets:
       count: 10
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 27
+      count: 28
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 5
@@ -126,17 +126,22 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 12
+      count: 13
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0381
+  next_available_adr: 0382
 latest_adrs:
+  - adr: 0381
+    title: Login Service Contracts and Session Recovery Automation
+    implementation_status: Proposed
+    concern: automation
+    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
   - adr: 0380
     title: Neko Remote Desktop for Interactive Operator Browser Access
-    implementation_status: Implemented
+    implementation_status: Proposed
     concern: identity
     path: docs/adr/0380-neko-for-operator-remote-browser-access.md
   - adr: 0378
@@ -180,11 +185,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: automation
     path: docs/adr/0372-data-driven-playbook-composition.md
-  - adr: '0371'
-    title: Parameterized Service Verification Tasks
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0371-parameterized-verify-tasks.md
 discovery_queries:
   how do we bootstrap:
     - '0001'
