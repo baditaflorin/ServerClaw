@@ -27,6 +27,13 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-07
 
+# --- Standard plays (driven by vars/neko.yml) ---
+
+- import_playbook: _includes/dns_publication.yml
+  when: service_needs_dns | default(false)
+
+# --- Neko-specific plays ---
+
 - name: Converge Neko Remote Desktop Runtime
   hosts: "{{ 'runtime-comms-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-comms-lv3' }}"
   become: true

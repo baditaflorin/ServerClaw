@@ -11,7 +11,7 @@
   tags: [neko, convergence]
 
 - name: Pull Neko Docker image
-  docker_image:
+  community.docker.docker_image:
     name: "{{ neko_runtime_image_name }}"
     tag: "{{ neko_runtime_image_tag }}"
     source: pull
