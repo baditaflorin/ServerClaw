@@ -22,7 +22,7 @@
 - name: Capture Docker image digest for change detection
   shell: |
     docker inspect {{ neko_runtime_image_name }}:{{ neko_runtime_image_tag }} \
-      --format='{{ "{{" }}.RepoDigests[0]{{ "}}" }}'
+      --format='{{ "{{" }}index .RepoDigests 0{{ "}}" }}'
   register: neko_image_digest_output
   changed_when: false
   tags: [neko, convergence]
