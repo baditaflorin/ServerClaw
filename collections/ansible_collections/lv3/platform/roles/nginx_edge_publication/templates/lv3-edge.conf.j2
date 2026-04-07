@@ -460,15 +460,21 @@ server {
     }
 
     location @oauth2_stale_session_reset {
-        # Expire the oauth2-proxy session cookie.
+        # Expire the oauth2-proxy session cookie AND the CSRF cookie.
+        # The CSRF cookie holds the PKCE code_verifier (oauth2-proxy uses S256).
+        # If only the session cookie is expired, the stale code_verifier persists,
+        # oauth2-proxy sends the wrong verifier to Keycloak → "Code not valid" on
+        # every subsequent login attempt until the user manually clears cookies.
         add_header Set-Cookie "{{ public_edge_session_authority.cookie_name }}=; Path=/; Domain={{ public_edge_session_authority.cookie_domain }}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; Secure; SameSite=Lax" always;
+        add_header Set-Cookie "{{ public_edge_session_authority.cookie_name }}_csrf=; Path=/; Domain={{ public_edge_session_authority.cookie_domain }}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; Secure; SameSite=Lax" always;
         add_header Cache-Control "no-store" always;
         # Redirect to Keycloak logout — this kills the Keycloak server-side session AND
         # clears the sso.lv3.org browser cookie.  Without this step, Keycloak auto-logs the
         # user back in using its own still-valid session, generates a new code, which is
         # immediately "already used" → 500 → redirect loop.
-        # post_logout_redirect_uri sends the user to /oauth2/sign_in for a fresh login.
-        return 302 {{ public_edge_session_authority.keycloak_logout_url }}?post_logout_redirect_uri={{ ("https://" ~ public_edge_session_authority.authority_hostname ~ "/oauth2/sign_in") | urlencode }}&client_id={{ public_edge_session_authority.ops_portal_client_id | urlencode }};
+        # post_logout_redirect_uri=/ is always registered; ops.lv3.org/ then bounces through
+        # oauth2-proxy which starts a fresh OIDC flow automatically.
+        return 302 {{ public_edge_session_authority.keycloak_logout_url }}?post_logout_redirect_uri={{ ("https://" ~ public_edge_session_authority.authority_hostname ~ "/") | urlencode }}&client_id={{ public_edge_session_authority.ops_portal_client_id | urlencode }};
     }
 
     location @oauth2_signin {
