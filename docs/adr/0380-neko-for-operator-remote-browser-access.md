@@ -1,6 +1,6 @@
 # ADR 0380: Neko Remote Desktop for Interactive Operator Browser Access
 
-**Status:** Accepted
+**Status:** Implemented
 
 **Date:** 2026-04-06
 
@@ -136,3 +136,50 @@ Three regression tests ensure past failures do not recur:
 5. **Release management** (version bump, changelog, topology regeneration)
 
 See implementation plan at `/Users/live/.claude/plans/async-finding-reef.md` for detailed phases, file lists, and verification checklist.
+
+## Amendment: Multi-Instance Evolution (2026-04-07)
+
+### What Changed
+
+The original ADR described a single-container `neko` deployment. This amendment documents the evolution to N isolated containers driven by the `neko_instances` dict in `inventory/group_vars/platform.yml`.
+
+### Per-Instance Isolation
+
+Each instance keyed in `neko_instances` receives fully independent resources:
+
+- **Container name:** `neko-<key>`
+- **TCP signalling port:** unique per instance, auto-assignable via `scripts/neko_tool.py`
+- **UDP media range:** set via `NEKO_EPR` env var; non-overlapping, 3000 ports per instance
+- **Data directory:** `/opt/neko/instances/<key>`
+- **Keycloak user:** auto-provisioned with `neko_managed=true` attribute; deprovisioned when the instance is removed from the dict
+
+### NGINX Routing
+
+After oauth2-proxy authentication, the `X-Auth-Request-Email` header is matched against a `map $auth_email $neko_backend` directive. Each authenticated email is routed to its assigned container backend. Users not present in the map receive HTTP 403.
+
+### Graceful Failure
+
+`ignore_errors: true` is set throughout `deploy_instance.yml`. A failure in one instance's deployment never blocks the remaining instances from converging.
+
+### User Lifecycle Automation
+
+`playbooks/neko.yml` Play 2 manages Keycloak users via the Admin API (`client_credentials` grant against the master realm):
+
+- **Provision:** Creates a Keycloak user for each entry in `neko_instances`, stamping `neko_managed=true` as a user attribute.
+- **Deprovision:** Deletes any Keycloak user bearing `neko_managed=true` that no longer appears in `neko_instances`.
+
+### Operational Tooling
+
+`scripts/neko_tool.py` provides a CLI for day-to-day instance management:
+
+| Subcommand | Purpose |
+|---|---|
+| `list` | Show all configured instances |
+| `add <name> --email <email>` | Add instance; auto-assigns port and UDP range |
+| `remove <name>` | Remove instance (prompts for confirmation) |
+| `check [name]` | HTTP health probe per instance (or all) |
+| `validate` | Verify no port or UDP range conflicts |
+| `next-port` | Emit the next available signalling port |
+| `next-udp-range` | Emit the next available UDP range |
+
+`next-port` and `next-udp-range` are designed for use in automation pipelines (e.g. scripted `add` calls).

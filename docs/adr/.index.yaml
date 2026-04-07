@@ -14,12 +14,12 @@ adr_number_range:
   last: 0380
   next_available: 0381
 implementation_status_summary:
-  Implemented: 273
+  Implemented: 274
   Partial: 60
   Not Implemented: 32
   Deprecated: 4
   Accepted: 25
-  Proposed: 12
+  Proposed: 11
 decision_status_summary:
   Accepted: 330
   Proposed: 19
@@ -136,7 +136,7 @@ reservation_ledger:
 latest_adrs:
   - adr: 0380
     title: Neko Remote Desktop for Interactive Operator Browser Access
-    implementation_status: Proposed
+    implementation_status: Implemented
     concern: identity
     path: docs/adr/0380-neko-for-operator-remote-browser-access.md
   - adr: 0378
