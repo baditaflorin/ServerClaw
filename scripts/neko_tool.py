@@ -65,7 +65,7 @@ except ImportError:
 
 BASE_TCP_PORT: int = 8080
 UDP_BASE: int = 50000
-UDP_BLOCK_SIZE: int = 3000  # ports per instance
+UDP_BLOCK_SIZE: int = 1000  # ports per instance (1000 allows ~15 instances below 65535)
 
 NEKO_MARKER = "\n# ---------------------------------------------------------------------------\n# Neko multi-instance browser sessions"
 
@@ -147,11 +147,11 @@ def _build_neko_block(instances: dict[str, dict[str, Any]]) -> str:
         "#     florin:",
         "#       email: florin@lv3.org",
         "#       port: 8080",
-        '#       udp_range: "50000-52999"',
+        '#       udp_range: "50000-50999"',
         "#     alice:",
         "#       email: alice@lv3.org",
         "#       port: 8081",
-        '#       udp_range: "53000-55999"',
+        '#       udp_range: "51000-51999"',
     ]
 
     if not instances:
@@ -244,6 +244,11 @@ def next_available_udp_range(
     while True:
         start = UDP_BASE + block * UDP_BLOCK_SIZE
         end = start + UDP_BLOCK_SIZE - 1
+        if end > 65535:
+            raise RuntimeError(
+                f"No available UDP range: would exceed max port 65535 "
+                f"(tried start={start}). Reduce UDP_BLOCK_SIZE or free up ranges."
+            )
         # Check for overlap with any used range
         overlap = False
         for u_start, u_end in used:
@@ -638,7 +643,10 @@ def _kc_list_users_in_realm(kc_url: str, realm: str, token: str) -> list[dict[st
 def _kc_list_users_in_group(kc_url: str, realm: str, token: str, group_path: str) -> list[dict[str, Any]]:
     """Return all enabled users in a Keycloak group (looked up by path)."""
     # First resolve path → group ID
-    search_url = f"{kc_url}/admin/realms/{realm}/groups?search={urllib.parse.quote(group_path)}&max=100"
+    # Strip leading slash for the search term — Keycloak search matches by name,
+    # not full path, so "%2F..." returns 0 results; we do exact path match below.
+    search_term = group_path.lstrip("/")
+    search_url = f"{kc_url}/admin/realms/{realm}/groups?search={urllib.parse.quote(search_term)}&max=100"
     groups = _kc_request(search_url, token=token)
 
     # Find exact path match (search is fuzzy)
@@ -730,9 +738,11 @@ def cmd_sync_from_keycloak(
         print(f"ERROR: Could not fetch users from Keycloak: {exc}", file=sys.stderr)
         return 1
 
-    # Build email → Keycloak user mapping (only users with a valid email)
+    # Build email → Keycloak user mapping (only enabled users with a valid email)
     kc_by_email: dict[str, dict[str, Any]] = {}
     for u in kc_users:
+        if not u.get("enabled", True):
+            continue
         email = (u.get("email") or "").strip().lower()
         if email and validate_email(email):
             kc_by_email[email] = u
@@ -912,8 +922,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_sync.add_argument(
         "--client-id",
-        default="neko-admin",
-        help="Admin client ID for client_credentials grant (default: neko-admin)",
+        default="lv3-admin-runtime",
+        help="Admin client ID for client_credentials grant (default: lv3-admin-runtime)",
     )
     p_sync.add_argument(
         "--secret-file",

@@ -6665,7 +6665,35 @@ mail_platform_internal_submission_port: 1587
 #       port: 8081
 #       udp_range: "53000-55999"
 neko_instances:
+  baditaflorin:
+    email: baditaflorin@gmail.com
+    port: 8082
+    udp_range: "52000-52999"
+  baditaflorin_tmp002:
+    email: baditaflorin+tmp002@gmail.com
+    port: 8081
+    udp_range: "51000-51999"
+  browser_smoke:
+    email: browser.smoke@lv3.org
+    port: 8083
+    udp_range: "53000-53999"
+  demo-20260327-0430:
+    email: demo-20260327-0430@lv3.org
+    port: 8084
+    udp_range: "54000-54999"
   florin:
     email: busui.matei1994@gmail.com
     port: 8080
-    udp_range: "50000-52999"
+    udp_range: "50000-50999"
+  florin2:
+    email: florin@badita.org
+    port: 8085
+    udp_range: "55000-55999"
+  outline_automation:
+    email: outline.automation@lv3.org
+    port: 8086
+    udp_range: "56000-56999"
+  test:
+    email: test@lv3.org
+    port: 8087
+    udp_range: "57000-57999"

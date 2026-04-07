@@ -184,9 +184,44 @@ def configured_url(env_var: str, default: str) -> str:
     return default
 
 
+ADMIN_CLIENT_ID = "lv3-admin-runtime"
+ADMIN_CLIENT_SECRET_FILE = repo_path(".local", "keycloak", "admin-client-secret.txt")
+
+
 def get_token(bootstrap_pass: str) -> str:
-    """Acquire an admin token from the Keycloak master realm."""
+    """Acquire an admin token from the Keycloak master realm.
+
+    Tries client-credentials grant with lv3-admin-runtime first (more reliable
+    when the bootstrap admin password has been rotated).  Falls back to the
+    legacy password grant with lv3-bootstrap-admin.
+    """
     keycloak_url = configured_url("LV3_KEYCLOAK_URL", DEFAULT_KEYCLOAK_URL)
+    token_url = f"{keycloak_url}/realms/master/protocol/openid-connect/token"
+
+    # Try client credentials first if the secret file exists
+    if ADMIN_CLIENT_SECRET_FILE.exists():
+        client_secret = ADMIN_CLIENT_SECRET_FILE.read_text(encoding="utf-8").strip()
+        if client_secret:
+            data = urllib.parse.urlencode(
+                {
+                    "client_id": ADMIN_CLIENT_ID,
+                    "client_secret": client_secret,
+                    "grant_type": "client_credentials",
+                }
+            ).encode("utf-8")
+            req = urllib.request.Request(
+                token_url,
+                data=data,
+                method="POST",
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+            try:
+                with urllib.request.urlopen(req, context=_ssl_ctx()) as response:
+                    return json.loads(response.read())["access_token"]
+            except urllib.error.HTTPError:
+                print("[token] client-credentials grant failed, falling back to password grant")
+
+    # Fallback: password grant with bootstrap admin
     data = urllib.parse.urlencode(
         {
             "client_id": "admin-cli",
@@ -196,7 +231,7 @@ def get_token(bootstrap_pass: str) -> str:
         }
     ).encode("utf-8")
     req = urllib.request.Request(
-        f"{keycloak_url}/realms/master/protocol/openid-connect/token",
+        token_url,
         data=data,
         method="POST",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
