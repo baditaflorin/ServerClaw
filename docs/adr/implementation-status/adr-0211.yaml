@@ -1,0 +1,94 @@
+adr_number: '0211'
+title: Shared Policy Packs And Rule Registries
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:75072e177
+  evidence: 75072e177 [policy] Recut ADR 0211 on top of 0.177.38
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567114'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:a2deb3389
+  evidence: a2deb3389 [policy] Recut ADR 0211 on top of 0.177.37
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567163'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:5aca22541
+  evidence: 5aca22541 Merge remote-tracking branch 'origin/main' into codex/ws-0211-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:35.567183'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:4d4936fc7
+  evidence: 4d4936fc7 [policy] Recut ADR 0211 on top of 0.177.35
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567269'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:3bb5f9302
+  evidence: 3bb5f9302 [policy] Recut ADR 0211 on top of 0.177.34
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567300'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:52cfa5709
+  evidence: 52cfa5709 [merge] Absorb latest origin/main before ADR 0211 recut
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567331'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:8c317c328
+  evidence: 8c317c328 [policy] Integrate ADR 0211 on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567351'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:a256076ef
+  evidence: a256076ef [policy] Record ADR 0211 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567354'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:99b8e2a7a
+  evidence: '99b8e2a7a [policy] Centralize shared policy packs\n\nPurpose: Make repeated
+    redundancy, capacity, and placement rules come from one machine-checkable registry\nScope:
+    Add shared policy pack config/schema/loader and refactor the affected validators,
+    schemas, runbooks, tests, and workstream metadata\nStatus: Focused tests and repository
+    data-model validation pass; broader generated-doc/live-apply verification is next\nNext:
+    Rebase onto latest origin/main, run the remaining validation gates, perform the
+    live apply, and record receipts\nSee also: ADR 0211'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567368'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:7faecd593
+  evidence: 7faecd593 [policy] Record ADR 0211 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567422'
+- marker_type: git-commit
+  adr_number: '0211'
+  location: git:b532b1f8b
+  evidence: 'b532b1f8b [policy] Centralize shared policy packs\n\nPurpose: Make repeated
+    redundancy, capacity, and placement rules come from one machine-checkable registry\nScope:
+    Add shared policy pack config/schema/loader and refactor the affected validators,
+    schemas, runbooks, tests, and workstream metadata\nStatus: Focused tests and repository
+    data-model validation pass; broader generated-doc/live-apply verification is next\nNext:
+    Rebase onto latest origin/main, run the remaining validation gates, perform the
+    live apply, and record receipts\nSee also: ADR 0211'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.567447'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=11
+
+  Implemented On: 2026-03-28'

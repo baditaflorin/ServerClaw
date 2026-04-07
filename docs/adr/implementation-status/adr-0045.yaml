@@ -1,0 +1,22 @@
+adr_number: '0045'
+title: Control-Plane Communication Lanes
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0045'
+  location: git:82df937b7
+  evidence: 82df937b7 Record ADR 0045, 0046, and 0048 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:23.373834'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-03-22'

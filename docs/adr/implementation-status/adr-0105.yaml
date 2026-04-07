@@ -1,0 +1,121 @@
+adr_number: '0105'
+title: Platform Capacity Model and Resource Quota Enforcement
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:c265c012b
+  evidence: c265c012b Finalize ADR 0105 latest-main live apply release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025109'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:18ab4c7eb
+  evidence: 18ab4c7eb Release 0.177.4 for ADR 0105 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025147'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:2907637da
+  evidence: 2907637da Implement ADR 0105 monitoring live apply on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025151'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:82274c4e2
+  evidence: 82274c4e2 Refresh canonical truth for 0.177.1 ADR 0105 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025227'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:c6e4cdea3
+  evidence: c6e4cdea3 Prepare 0.177.1 ADR 0105 mainline integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025234'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:12898d4ef
+  evidence: 12898d4ef Merge remote-tracking branch 'origin/main' into codex/ws-0105-main-merge-v5
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:49.025272'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:d6105a8a8
+  evidence: d6105a8a8 Merge branch 'origin/codex/ws-0105-live-apply' into codex/ws-0105-main-merge-v5
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:49.025279'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:cee6a2386
+  evidence: cee6a2386 Release 0.176.3 for ADR 0105 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025365'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:4d3cd1159
+  evidence: 4d3cd1159 Merge remote-tracking branch 'origin/codex/ws-0105-live-apply'
+    into codex/ws-0105-main-merge-v3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:49.025409'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:b9c1fc189
+  evidence: b9c1fc189 Refresh ADR 0105 mainline replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025427'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:e12c5ae47
+  evidence: e12c5ae47 Release 0.176.1 for ADR 0105 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025452'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:1d8776933
+  evidence: 1d8776933 Merge remote-tracking branch 'origin/codex/ws-0105-live-apply'
+    into codex/ws-0105-main-merge-v2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:49.025459'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:f010db80a
+  evidence: f010db80a Release 0.175.3 for ADR 0105 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025480'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:14cd7b574
+  evidence: 14cd7b574 Merge remote-tracking branch 'origin/codex/ws-0105-live-apply'
+    into codex/ws-0105-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:49.025497'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:0777b0d33
+  evidence: 0777b0d33 Record ADR 0105 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.025610'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:1908bbad7
+  evidence: 1908bbad7 Implement ADR 0105 capacity model
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.027567'
+- marker_type: git-commit
+  adr_number: '0105'
+  location: git:939bbcec4
+  evidence: 939bbcec4 Implement ADR 0105 capacity model
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.027719'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 17
+
+  Breakdown: git-commit=17
+
+  Implemented On: 2026-03-27'

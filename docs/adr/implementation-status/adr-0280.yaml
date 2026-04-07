@@ -1,0 +1,64 @@
+adr_number: 0280
+title: Changedetection.io For External Content And API Change Monitoring
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0280
+  location: git:aaab0fef7
+  evidence: aaab0fef7 [changedetection] Mark ADR 0280 merged on main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.230629'
+- marker_type: git-commit
+  adr_number: 0280
+  location: git:b95f8e267
+  evidence: b95f8e267 [changedetection] Finalize ADR 0280 mainline candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.230663'
+- marker_type: git-commit
+  adr_number: 0280
+  location: git:65305c70c
+  evidence: 65305c70c [release] Cut 0.177.100 for ADR 0280
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.230681'
+- marker_type: git-commit
+  adr_number: 0280
+  location: git:c9a358bf6
+  evidence: c9a358bf6 [changedetection] Add ADR 0280 runtime and live-apply lane
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.230733'
+- marker_type: git-commit
+  adr_number: 0280
+  location: git:98cb5c082
+  evidence: 98cb5c082 [release] Cut 0.177.99 for ADR 0280
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.230792'
+- marker_type: git-commit
+  adr_number: 0280
+  location: git:fcc47f193
+  evidence: fcc47f193 [changedetection] Add ADR 0280 runtime and live-apply lane
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.230816'
+- marker_type: git-commit
+  adr_number: 0280
+  location: git:10aebc4b7
+  evidence: 10aebc4b7 [changedetection] Add ADR 0280 runtime and live-apply lane
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.230835'
+- marker_type: playbook
+  adr_number: 0280
+  location: playbooks/changedetection.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:06.265573'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=7, playbook=1
+
+  Implemented On: 2026-03-30'

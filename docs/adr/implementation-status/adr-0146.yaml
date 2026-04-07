@@ -1,0 +1,52 @@
+adr_number: '0146'
+title: Langfuse For Agent Observability
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0146'
+  location: git:145e7404a
+  evidence: 145e7404a Record gate bypass for ADR-0146 main push
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:06.847020'
+- marker_type: git-commit
+  adr_number: '0146'
+  location: git:484950100
+  evidence: 484950100 Record gate bypass for ADR-0146 branch push
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:06.847275'
+- marker_type: git-commit
+  adr_number: '0146'
+  location: git:1c65af02b
+  evidence: 1c65af02b Finalize ADR-0146 Langfuse live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:06.847301'
+- marker_type: git-commit
+  adr_number: '0146'
+  location: git:52e9d0ba8
+  evidence: 52e9d0ba8 Update ADR-0146 live blocker state
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:06.847398'
+- marker_type: git-commit
+  adr_number: '0146'
+  location: git:62a55f52a
+  evidence: 62a55f52a Implement ADR-0146 Langfuse observability stack
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:06.847412'
+- marker_type: playbook
+  adr_number: '0146'
+  location: playbooks/langfuse.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:06.861536'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=5, playbook=1
+
+  Implemented On: 2026-03-26'

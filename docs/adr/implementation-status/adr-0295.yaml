@@ -1,0 +1,76 @@
+adr_number: 0295
+title: Shared Artifact Cache Plane For Container And Package Dependencies
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:489094065
+  evidence: 489094065 [artifact-cache] Record ws-0295 latest-main replay evidence
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.234406'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:d02123e90
+  evidence: d02123e90 [artifact-cache] Prepare ws-0295 replay branch metadata
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.234432'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:dfabe8667
+  evidence: dfabe8667 [merge] Refresh ADR 0295 live-apply branch onto latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.243723'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:af6c81721
+  evidence: af6c81721 [docs] Refresh generated diagrams for ADR 0295 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.243751'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:43e664dda
+  evidence: 43e664dda [live-apply] Record ADR 0295 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.243762'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:b80cc3a88
+  evidence: b80cc3a88 Merge remote-tracking branch 'origin/main' into codex/ws-0295-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.243804'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:710d0a2b5
+  evidence: 710d0a2b5 [docs] Fix ws-0295 workstream status contract
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.243952'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:62306bc13
+  evidence: 62306bc13 [docs] Refresh canonical truth for ws-0295 live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.243958'
+- marker_type: git-commit
+  adr_number: 0295
+  location: git:90ea55366
+  evidence: 90ea55366 [live-apply] Start ADR 0295 mainline replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.243990'
+- marker_type: playbook
+  adr_number: 0295
+  location: playbooks/artifact-cache-vm.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:13.275616'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=9, playbook=1
+
+  Implemented On: 2026-03-29'

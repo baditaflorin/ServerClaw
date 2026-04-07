@@ -1,0 +1,27 @@
+adr_number: 0380
+title: Neko Remote Desktop for Interactive Operator Browser Access
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0380
+  location: git:835da3582
+  evidence: '835da3582 feat(ADR-0380): Neko remote desktop for interactive operator
+    browser access'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:46.286743'
+- marker_type: playbook
+  adr_number: 0380
+  location: playbooks/neko.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:46.342414'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=1, playbook=1'

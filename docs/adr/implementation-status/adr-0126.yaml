@@ -1,0 +1,70 @@
+adr_number: '0126'
+title: Observation-to-Action Closure Loop
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:74f662b78
+  evidence: 74f662b78 Record ADR-0126 gate bypass
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:57.547537'
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:3d8c02434
+  evidence: 3d8c02434 Cut 0.170.0 for ADR-0126 live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:57.547575'
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:cced4d3a3
+  evidence: cced4d3a3 Record ADR-0126 live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:57.547584'
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:8cde04ff1
+  evidence: 8cde04ff1 Record ADR 0126 remote gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.548861'
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:a3504cd58
+  evidence: a3504cd58 Merge origin/main and finalize ADR 0126
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.548864'
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:3d4c87f18
+  evidence: 3d4c87f18 Merge origin/main into ADR 0126 branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.548977'
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:9ac068620
+  evidence: 9ac068620 Advance ADR 0126 release to 0.125.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.548987'
+- marker_type: git-commit
+  adr_number: '0126'
+  location: git:1843016e8
+  evidence: 1843016e8 Implement ADR 0126 closure loop
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.548990'
+- marker_type: config-file
+  adr_number: '0126'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:57.689924'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=8, config-file=1
+
+  Implemented On: 2026-03-26'

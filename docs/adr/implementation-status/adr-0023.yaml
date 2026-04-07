@@ -1,0 +1,22 @@
+adr_number: '0023'
+title: Docker Runtime VM Baseline
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: playbook
+  adr_number: '0023'
+  location: playbooks/docker-publication-assurance.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:14.202196'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: playbook=1
+
+  Implemented On: 2026-03-22'

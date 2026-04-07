@@ -1,0 +1,58 @@
+adr_number: 0187
+title: Anonymized Seed Data Snapshots for Repeatable Tests
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0187
+  location: git:ebfcda222
+  evidence: ebfcda222 [meta] Record ws-0187 main-merge gate bypass
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.240482'
+- marker_type: git-commit
+  adr_number: 0187
+  location: git:eca127ec7
+  evidence: eca127ec7 [seed-data] Record merged-main ADR 0187 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.240546'
+- marker_type: git-commit
+  adr_number: 0187
+  location: git:f9069ff53
+  evidence: f9069ff53 Merge remote-tracking branch 'origin/main' into codex/ws-0187-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.240553'
+- marker_type: git-commit
+  adr_number: 0187
+  location: git:dc25a711a
+  evidence: dc25a711a [seed-data] Merge ADR 0187 onto latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.240606'
+- marker_type: git-commit
+  adr_number: 0187
+  location: git:943eac6b3
+  evidence: 943eac6b3 [docs] Refresh ADR index for ADR 0187
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.240627'
+- marker_type: git-commit
+  adr_number: 0187
+  location: git:4cc7cfcab
+  evidence: 4cc7cfcab Merge origin/main into codex/ws-0187-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.240632'
+- marker_type: git-commit
+  adr_number: 0187
+  location: git:72879957f
+  evidence: 72879957f [seed-data] Implement ADR 0187 snapshots and harden live paths
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.240719'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-28'

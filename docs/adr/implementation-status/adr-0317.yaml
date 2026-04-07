@@ -1,0 +1,48 @@
+adr_number: '0317'
+title: Keycloak Direct-API Operator Provisioning via SSH Proxy
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0317'
+  location: git:16280d12a
+  evidence: 16280d12a [release] Cut 0.177.137 for ADR 0317 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:23.192504'
+- marker_type: git-commit
+  adr_number: '0317'
+  location: git:9e044a11d
+  evidence: 9e044a11d [identity] Ready ADR 0317 live-apply branch for mainline replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:23.192543'
+- marker_type: git-commit
+  adr_number: '0317'
+  location: git:f314a8ec7
+  evidence: f314a8ec7 [identity] Ready ADR 0317 live-apply branch for mainline replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:23.192547'
+- marker_type: git-commit
+  adr_number: '0317'
+  location: git:a63b4b861
+  evidence: a63b4b861 [gate] Refresh generated artifacts and extend ws-0317 owned
+    surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:23.193039'
+- marker_type: git-commit
+  adr_number: '0317'
+  location: git:baa7db4a1
+  evidence: 'baa7db4a1 [adr] Add ADR 0317: Keycloak direct-API provisioning via SSH
+    proxy'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:23.193042'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-04-02'

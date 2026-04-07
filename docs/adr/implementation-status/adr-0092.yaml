@@ -1,0 +1,64 @@
+adr_number: 0092
+title: Unified Platform API Gateway
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0092
+  location: git:4217378c5
+  evidence: 4217378c5 Live apply ADR 0092 platform API gateway
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:43.615916'
+- marker_type: git-commit
+  adr_number: 0092
+  location: git:df538e7de
+  evidence: df538e7de Fix ADR 0092 live-apply blockers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:43.615947'
+- marker_type: git-commit
+  adr_number: 0092
+  location: git:c786b32fc
+  evidence: c786b32fc Fix ADR 0092 live-apply blockers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:43.615981'
+- marker_type: git-commit
+  adr_number: 0092
+  location: git:bb2eb8769
+  evidence: bb2eb8769 Implement ADR 0092 unified platform API gateway
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:43.616193'
+- marker_type: git-commit
+  adr_number: 0092
+  location: git:cad94ddd8
+  evidence: cad94ddd8 Implement ADR 0092 unified platform API gateway
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:43.616224'
+- marker_type: git-commit
+  adr_number: 0092
+  location: git:aa7ec2c02
+  evidence: 'aa7ec2c02 Propose ADRs 0092-0111: platform product completion roadmap'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:43.616307'
+- marker_type: playbook
+  adr_number: 0092
+  location: playbooks/changedetection.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:43.623770'
+- marker_type: config-file
+  adr_number: 0092
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:43.733137'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=6, playbook=1, config-file=1
+
+  Implemented On: 2026-03-24'

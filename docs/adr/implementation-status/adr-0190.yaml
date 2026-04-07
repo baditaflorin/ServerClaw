@@ -1,0 +1,130 @@
+adr_number: 0190
+title: Synthetic Transaction Replay for Capacity and Recovery Validation
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:90e6b6d80
+  evidence: 90e6b6d80 [release] Cut 0.177.21 for ADR 0186 and ADR 0190
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615047'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:e823cfa65
+  evidence: e823cfa65 [workstream] Refresh ADR 0190 mainline note
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615136'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:fab2cd251
+  evidence: fab2cd251 Merge remote-tracking branch 'origin/main' into codex/ws-0190-main-merge-v4
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615182'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:7bbed8dcc
+  evidence: 7bbed8dcc Merge remote-tracking branch 'origin/main' into codex/ws-0190-main-merge-v4
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615197'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:9cc182bdd
+  evidence: 9cc182bdd [docs] Refresh generated diagrams after ADR 0190 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615304'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:d3e2ce73e
+  evidence: d3e2ce73e [build] Refresh platform manifest after ADR 0190 main merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615350'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:c61421d98
+  evidence: c61421d98 Merge remote-tracking branch 'origin/main' into codex/ws-0190-main-merge-v4
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615361'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:3ae16b50a
+  evidence: 3ae16b50a [merge] Integrate ADR 0190 on main after 0.177.15
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615380'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:7bab1c1e9
+  evidence: 7bab1c1e9 Merge branch 'codex/ws-0190-live-apply' into codex/ws-0190-main-merge-v4
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615399'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:abb99b2bc
+  evidence: abb99b2bc [release] Cut 0.177.15 for ADR 0190
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615452'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:8e25ca1a4
+  evidence: 8e25ca1a4 Merge branch 'codex/ws-0190-live-apply' into codex/ws-0190-main-merge-v3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615469'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:ff7f3eead
+  evidence: ff7f3eead [release] Cut 0.177.14 for ADR 0190
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615511'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:15c3b0b17
+  evidence: 15c3b0b17 Merge branch 'codex/ws-0190-live-apply' into codex/ws-0190-main-merge-v2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615548'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:40fe29dfe
+  evidence: 40fe29dfe Merge branch 'codex/ws-0190-live-apply' into codex/ws-0190-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615581'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:173a235b9
+  evidence: 173a235b9 [workstream] Mark ADR 0190 ready for mainline release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615604'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:1dc4c3462
+  evidence: 1dc4c3462 Merge remote-tracking branch 'origin/main' into codex/ws-0190-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:27.615610'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:453b76b55
+  evidence: 453b76b55 [build] Refresh platform manifest for ADR 0190
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615736'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:e4b47caf8
+  evidence: e4b47caf8 [receipts] Record ADR 0190 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615748'
+- marker_type: git-commit
+  adr_number: 0190
+  location: git:d04a8e6ab
+  evidence: d04a8e6ab [recovery] Implement ADR 0190 replay harness
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.615751'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 19
+
+  Breakdown: git-commit=19
+
+  Implemented On: 2026-03-27'

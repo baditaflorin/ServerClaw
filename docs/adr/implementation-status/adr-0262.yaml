@@ -1,0 +1,192 @@
+adr_number: '0262'
+title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:0a971edbd
+  evidence: 0a971edbd [release] Integrate ADR 0261 and ADR 0262 onto main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309298'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:8cd0623c2
+  evidence: 8cd0623c2 [adr-0262] Finalize exact-main live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:58.309349'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:a6d327e73
+  evidence: a6d327e73 [keycloak] Restore ADR 0262 runtime client contracts after latest-main
+    merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309370'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:a28a0457c
+  evidence: a28a0457c [release] Cut 0.177.95 for ADR 0261 and ADR 0262
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309374'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:3ba87344f
+  evidence: 3ba87344f [release] Cut 0.177.95 for ADR 0262 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309378'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:e192b7445
+  evidence: e192b7445 [merge] Refresh ADR 0262 integration onto latest origin/main
+    626c1a76b
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309381'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:557a07283
+  evidence: 557a07283 [merge] Land ADR 0261 and ADR 0262 on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309385'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:ceb486639
+  evidence: ceb486639 [merge] Refresh ADR 0261 and ADR 0262 onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309388'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:e806d9e26
+  evidence: e806d9e26 [release] Cut 0.177.94 for ADR 0262 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309401'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:db7985df7
+  evidence: db7985df7 [merge] Refresh ADR 0262 integration onto origin/main 46df65e7f
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309408'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:e3b751b7c
+  evidence: e3b751b7c [workstream] Record ADR 0261/0262 exact-main live apply state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.309420'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:93995b41c
+  evidence: 93995b41c [release] Cut 0.177.93 for ADR 0262 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309431'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:f4ec1ee7c
+  evidence: f4ec1ee7c Merge remote-tracking branch 'origin/main' into codex/ws-0262-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.309446'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:aa693757c
+  evidence: aa693757c [merge] Refresh ADR 0262 integration onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309489'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:6cb003fb8
+  evidence: 6cb003fb8 Merge remote-tracking branch 'origin/main' into codex/ws-0262-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.309577'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:a2bd68fad
+  evidence: a2bd68fad [workstream] Record ADR 0261/0262 exact-main replay state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.309584'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:9b2e02de3
+  evidence: 9b2e02de3 [merge] Refresh ADR 0262 integration onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.309595'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:6532dcff9
+  evidence: 6532dcff9 Merge remote-tracking branch 'origin/main' into codex/ws-0262-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.309791'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:ecd3a73a8
+  evidence: ecd3a73a8 Merge remote-tracking branch 'origin/main' into codex/ws-0262-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.309911'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:d2b303ee8
+  evidence: d2b303ee8 Merge remote-tracking branch 'origin/main' into codex/ws-0262-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.310148'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:427cbc759
+  evidence: 427cbc759 [openfga] Refresh ADR 0262 onto origin/main 899711d19
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310374'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:7af94cbcd
+  evidence: 7af94cbcd [openfga] Refresh ADR 0262 integration to latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310444'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:f2cefdddc
+  evidence: f2cefdddc [openfga] Merge ADR 0262 onto latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310447'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:5b6ea0432
+  evidence: 5b6ea0432 [openfga] Record ADR 0262 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310611'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:e23b4f044
+  evidence: e23b4f044 [openfga] Finalize ADR 0262 live-apply automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310614'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:cbb75870e
+  evidence: cbb75870e [openfga] Harden ADR 0262 live apply path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310621'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:60ebd0dc0
+  evidence: 60ebd0dc0 [openfga] Repair validation contracts for ADR 0262
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310624'
+- marker_type: git-commit
+  adr_number: '0262'
+  location: git:935c4d2c8
+  evidence: 935c4d2c8 [openfga] Implement ADR 0262 repo automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.310628'
+- marker_type: playbook
+  adr_number: '0262'
+  location: playbooks/openfga.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:58.338437'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 29
+
+  Breakdown: git-commit=28, playbook=1
+
+  Implemented On: 2026-03-30'

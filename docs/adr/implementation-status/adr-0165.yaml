@@ -1,0 +1,94 @@
+adr_number: '0165'
+title: Workflow Idempotency Keys and Double-Execution Prevention
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0165'
+  location: git:d392b9285
+  evidence: 'd392b9285 [monitoring] Add metadata headers for ADR 0250 surfaces\n\nPurpose:
+    satisfy ADR 0165 validation for the monitoring and alertmanager role files touched
+    by ADR 0250 integration\nScope: monitoring_vm task, handler, and argument-spec
+    files plus alertmanager runtime verification metadata\nStatus: validated locally
+    alongside the Loki Canary selector and verification fixes\nNext: refresh main
+    worktree, replay production, and capture live evidence\nSee also: ADR 0165, ADR
+    0250'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.167806'
+- marker_type: git-commit
+  adr_number: '0165'
+  location: git:99f47d648
+  evidence: 99f47d648 Live apply ADR 0165 idempotency
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.171479'
+- marker_type: git-commit
+  adr_number: '0165'
+  location: git:4d3876036
+  evidence: 4d3876036 Implement ADR 0165 workflow idempotency
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.171591'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/api-gateway.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.177303'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/nats-jetstream.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.178554'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/server-resident-reconciliation.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.182309'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/.metadata-template.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.183569'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/ops-portal.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.183743'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/gitea.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.192794'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/restic-config-backup.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.193898'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/openbao.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.203065'
+- marker_type: playbook
+  adr_number: '0165'
+  location: playbooks/typesense.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:16.206873'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=3, playbook=9
+
+  Implemented On: 2026-03-25'

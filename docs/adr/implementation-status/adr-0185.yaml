@@ -1,0 +1,34 @@
+adr_number: 0185
+title: Branch-Scoped Ephemeral Preview Environments
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0185
+  location: git:dc8e5a6a8
+  evidence: dc8e5a6a8 [docs] Refresh generated diagrams for ADR 0185 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.480032'
+- marker_type: git-commit
+  adr_number: 0185
+  location: git:18049d89c
+  evidence: 18049d89c [release] Cut 0.177.17 for ADR 0185
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.480082'
+- marker_type: git-commit
+  adr_number: 0185
+  location: git:6b7f1efe3
+  evidence: 6b7f1efe3 [preview] Record ADR 0185 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.480109'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 3
+
+  Breakdown: git-commit=3
+
+  Implemented On: 2026-03-27'

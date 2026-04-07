@@ -1,0 +1,88 @@
+adr_number: '0070'
+title: Retrieval-Augmented Context For Platform Queries
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:9248db823
+  evidence: 9248db823 Release ADR 0070 on 0.71.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152389'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:03700e2a9
+  evidence: 03700e2a9 Fix ADR 0070 mainline live-apply contracts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152424'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:ee16d1971
+  evidence: ee16d1971 Release ADR 0070 on 0.70.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152428'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:1156f8780
+  evidence: 1156f8780 Harden ADR 0070 live runtime convergence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152431'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:008f184a9
+  evidence: 008f184a9 Fix ADR 0070 live apply path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152434'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:00f87f77e
+  evidence: 00f87f77e Release ADR 0070 on 0.65.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152437'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:54a13366e
+  evidence: 54a13366e Harden ADR 0070 live runtime convergence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152440'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:1cacbe603
+  evidence: 1cacbe603 Fix ADR 0070 live apply path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152455'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:4d091b263
+  evidence: 4d091b263 Merge remote-tracking branch 'origin/main' into codex/integration-0070-rag-context
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:35.152606'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:67bdf9c30
+  evidence: 67bdf9c30 Release ADR 0070 platform context on 0.62.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152616'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:ec3c80ea9
+  evidence: ec3c80ea9 Merge ADR 0070 platform context workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152638'
+- marker_type: git-commit
+  adr_number: '0070'
+  location: git:9513cf963
+  evidence: 9513cf963 Implement ADR 0069 and ADR 0070 repo surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.152649'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-03-23'

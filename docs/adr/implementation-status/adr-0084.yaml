@@ -1,0 +1,28 @@
+adr_number: 0084
+title: Packer VM Template Pipeline
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0084
+  location: git:170c6d059
+  evidence: 170c6d059 Implement ADR 0084 Packer VM template pipeline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.592445'
+- marker_type: playbook
+  adr_number: 0084
+  location: playbooks/artifact-cache-vm.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:40.616407'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=1, playbook=1
+
+  Implemented On: 2026-03-23'

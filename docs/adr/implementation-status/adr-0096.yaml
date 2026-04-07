@@ -1,0 +1,46 @@
+adr_number: 0096
+title: SLO Definitions and Error Budget Tracking
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0096
+  location: git:33dd200ab
+  evidence: 33dd200ab Refresh subdomain exposure registry for ADR 0096
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.232468'
+- marker_type: git-commit
+  adr_number: 0096
+  location: git:fc35e8d39
+  evidence: fc35e8d39 Record ADR 0096 live apply and cut 0.143.1
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.232549'
+- marker_type: git-commit
+  adr_number: 0096
+  location: git:b203c2edd
+  evidence: b203c2edd Fix ADR 0096 monitoring live apply prerequisites
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.232560'
+- marker_type: git-commit
+  adr_number: 0096
+  location: git:56a2baa91
+  evidence: 56a2baa91 Refresh generated ADR 0096 artifacts for 0.106.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.233521'
+- marker_type: git-commit
+  adr_number: 0096
+  location: git:35f3bec19
+  evidence: 35f3bec19 Implement ADR 0096 SLO tracking
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.233535'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-25'

@@ -1,0 +1,115 @@
+adr_number: '0163'
+title: Repository Structure Index for Agent Discovery
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:eda2fc649
+  evidence: "eda2fc649 live-apply: ADR 0163-0168 \u2014 Full agent discovery infrastructure\
+    \ (0.173.0)"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.248189'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:e294cf50d
+  evidence: 'e294cf50d Add ADR series 0163-0167: Agent discovery and onboarding standards'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:15.248301'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:46f96f6f5
+  evidence: 46f96f6f5 Add break-glass SSH port 2222 to prevent Tailscale-down lockouts
+    (ADR 0163)
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.248359'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:f85b42a2c
+  evidence: f85b42a2c Refresh ADR 0163 live apply for 0.164.0 main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.248550'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:4e080ab03
+  evidence: 4e080ab03 Merge remote-tracking branch 'origin/main' into codex/live-apply-0163-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:15.248562'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:f3b8583ac
+  evidence: f3b8583ac Record gate bypass for ADR 0163 main push
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.248574'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:5bdba7f68
+  evidence: 5bdba7f68 Record ADR 0163 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.248586'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:8a54131a1
+  evidence: 8a54131a1 Record ADR 0163 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.249123'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:30cceadc1
+  evidence: 30cceadc1 Release 0.149.0 for ADR 0163 retry taxonomy
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.249126'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:d575d6695
+  evidence: "d575d6695 Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:15.249133'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:9e08148cd
+  evidence: 9e08148cd Implement ADR 0163 retry taxonomy foundation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.249136'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:5dfc8ca64
+  evidence: "5dfc8ca64 Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:15.249264'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:d14097527
+  evidence: d14097527 Implement ADR 0163 retry taxonomy foundation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.249353'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:4d69a3c2b
+  evidence: "4d69a3c2b Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:15.249367'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:f34faf5bc
+  evidence: "f34faf5bc Merge ADRs 0163\u20130172: platform stability and reliability\
+    \ layer"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:15.250714'
+- marker_type: git-commit
+  adr_number: '0163'
+  location: git:fd91bdffd
+  evidence: "fd91bdffd Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:15.250730'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 16
+
+  Breakdown: git-commit=16
+
+  Implemented On: 2026-03-26'

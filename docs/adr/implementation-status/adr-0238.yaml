@@ -1,0 +1,88 @@
+adr_number: 0238
+title: Data-Dense Operator Grids Via AG Grid Community
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:bd696876e
+  evidence: bd696876e [merge] Integrate ADR 0238 AG Grid operator grid into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139188'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:ead0acd7b
+  evidence: ead0acd7b [receipts] Refresh ADR 0238 branch verification metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139571'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:bc8a4c5c7
+  evidence: bc8a4c5c7 [receipts] Refresh ADR 0238 live apply source commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139603'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:5ee26b597
+  evidence: 5ee26b597 [windmill] Live apply ADR 0238 operator grid
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139607'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:98ab55bd5
+  evidence: 98ab55bd5 [receipts] Record ADR 0238 operator grid live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139615'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:1779a1ba0
+  evidence: 1779a1ba0 [windmill] Finish ADR 0238 live apply hardening
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139619'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:a53ef7656
+  evidence: a53ef7656 [windmill] Start ADR 0238 AG Grid rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139626'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:9c699205f
+  evidence: 9c699205f [receipts] Refresh ADR 0238 live apply source commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139732'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:d89bfe52a
+  evidence: d89bfe52a [windmill] Live apply ADR 0238 operator grid
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139736'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:04591d86a
+  evidence: 04591d86a [receipts] Record ADR 0238 operator grid live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139744'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:54a097c13
+  evidence: 54a097c13 [windmill] Finish ADR 0238 live apply hardening
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139747'
+- marker_type: git-commit
+  adr_number: 0238
+  location: git:2263a269b
+  evidence: 2263a269b [windmill] Start ADR 0238 AG Grid rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.139760'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-03-29'

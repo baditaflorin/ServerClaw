@@ -1,0 +1,77 @@
+adr_number: '0310'
+title: First-Run Activation Checklists And Progressive Capability Reveal
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:ddfa27098
+  evidence: ddfa27098 [ops-portal] Merge ADR 0310 activation into ws-0309 branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.183072'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:dcfbc1e9f
+  evidence: dcfbc1e9f [ws-0310] Integrate ADR 0310 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.183152'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:69bea8276
+  evidence: 69bea8276 [ops-portal] Merge ADR 0310 activation gating into ADR 0308
+    branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.183161'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:4125edb25
+  evidence: 4125edb25 Merge remote-tracking branch 'origin/main' into codex/ws-0310-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:20.183197'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:0f48c80fb
+  evidence: 0f48c80fb Merge remote-tracking branch 'origin/main' into codex/ws-0310-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:20.183245'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:ee7606442
+  evidence: ee7606442 [ops-portal] Implement ADR 0310 activation checklist
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.183368'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:0a3e8af3b
+  evidence: 0a3e8af3b [ops-portal] Record ADR 0310 branch-local live-apply state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.183482'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:40da10fda
+  evidence: 40da10fda [ops-portal] Refresh generated truth for ADR 0310 validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.183490'
+- marker_type: git-commit
+  adr_number: '0310'
+  location: git:8c32daa71
+  evidence: 8c32daa71 [ops-portal] Implement ADR 0310 activation checklist
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.183493'
+- marker_type: playbook
+  adr_number: '0310'
+  location: playbooks/ops-portal.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:20.239959'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=9, playbook=1
+
+  Implemented On: 2026-04-02'

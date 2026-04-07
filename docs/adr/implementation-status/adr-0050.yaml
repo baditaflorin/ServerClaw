@@ -1,0 +1,46 @@
+adr_number: '0050'
+title: Transactional Email And Notification Profiles
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0050'
+  location: git:a15c22790
+  evidence: a15c22790 Merge remote-tracking branch 'origin/main' into codex/adr-0050-main-integration
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:26.562613'
+- marker_type: git-commit
+  adr_number: '0050'
+  location: git:8a82b22f7
+  evidence: 8a82b22f7 Merge origin/main and release ADR 0050 notification profiles
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:26.562654'
+- marker_type: git-commit
+  adr_number: '0050'
+  location: git:6877fa73f
+  evidence: 6877fa73f Record ADR 0050 live apply and release 0.51.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:26.562676'
+- marker_type: git-commit
+  adr_number: '0050'
+  location: git:2ef08073f
+  evidence: 2ef08073f Merge ADR 0050 notification profiles
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:26.562743'
+- marker_type: git-commit
+  adr_number: '0050'
+  location: git:72fba399b
+  evidence: 72fba399b Implement ADR 0050 notification profiles
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:26.562746'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-22'

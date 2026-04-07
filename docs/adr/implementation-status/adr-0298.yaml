@@ -1,0 +1,106 @@
+adr_number: 0298
+title: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:2411a7cd4
+  evidence: 2411a7cd4 [sbom] Finalize ADR 0298 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.668035'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:51fc3a473
+  evidence: 51fc3a473 [adr-0298] Mark main integration workstream merged
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670331'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:ff80bd781
+  evidence: ff80bd781 [adr-0298] Refresh platform manifest for 0.177.114
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670343'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:40696b89b
+  evidence: 40696b89b [adr-0298] Fix validation after exact-main rebase
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670348'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:e21a61215
+  evidence: e21a61215 [adr-0298] Prepare 0.177.114 exact-main merge tree
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670357'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:afc1a3b59
+  evidence: afc1a3b59 [adr-0298] Route runtime cache ingress to artifact-cache-lv3
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670361'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:afdec66f9
+  evidence: afdec66f9 [adr-0298] Repair exact-main ownership manifest
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670365'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:71855d032
+  evidence: 71855d032 [adr-0298] Align exact-main cache plane carryover
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670377'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:7d3acf571
+  evidence: 7d3acf571 [adr-0298] Record blocked branch live-apply receipt
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670382'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:7b64bb3a5
+  evidence: 7b64bb3a5 [adr-0298] Land SBOM and CVE scanning surfaces
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.670386'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:3382354c7
+  evidence: 3382354c7 [security] Implement ADR 0298 SBOM and CVE automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.670550'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:30b118c82
+  evidence: 30b118c82 [adr-0298] Align workstream ownership manifest
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.676055'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:b046b0ca7
+  evidence: b046b0ca7 [adr-0298] Record blocked branch live-apply receipt
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.676072'
+- marker_type: git-commit
+  adr_number: 0298
+  location: git:4348455fa
+  evidence: 4348455fa [adr-0298] Land SBOM and CVE scanning surfaces
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.676081'
+- marker_type: config-file
+  adr_number: 0298
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.864225'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=14, config-file=1
+
+  Implemented On: 2026-03-31'

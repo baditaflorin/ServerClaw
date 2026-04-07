@@ -1,0 +1,52 @@
+adr_number: '0312'
+title: Shared Notification Center And Activity Timeline Across Human Surfaces
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0312'
+  location: git:9c58e76c6
+  evidence: 9c58e76c6 [release] Cut 0.177.147 for ADR 0312 mainline integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:21.014162'
+- marker_type: git-commit
+  adr_number: '0312'
+  location: git:3713ae0ef
+  evidence: 3713ae0ef [ops-portal] Finalize ADR 0312 exact-main apply and gate hardening
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:21.014192'
+- marker_type: git-commit
+  adr_number: '0312'
+  location: git:a44928e0f
+  evidence: a44928e0f [ops-portal] Integrate ADR 0308 and ADR 0312 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:21.014242'
+- marker_type: git-commit
+  adr_number: '0312'
+  location: git:4a450d363
+  evidence: 4a450d363 [ops-portal] Merge ADR 0312 attention center into portal branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:21.014250'
+- marker_type: git-commit
+  adr_number: '0312'
+  location: git:584d4b2b0
+  evidence: 584d4b2b0 [workstreams] Repair ws-0312 registry entry after rebase
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:21.014309'
+- marker_type: git-commit
+  adr_number: '0312'
+  location: git:9085cbdc7
+  evidence: 9085cbdc7 [workstreams] Repair ws-0312 registry entry after rebase
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:21.014645'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=6
+
+  Implemented On: 2026-04-02'

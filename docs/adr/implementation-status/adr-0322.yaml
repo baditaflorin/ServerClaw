@@ -1,0 +1,14 @@
+adr_number: '0322'
+title: Memory-Pressure Autoscaling For Elastic Runtime Pools
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers: []
+inferred_implementation_status: No Evidence
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: No Evidence
+
+  Markers Found: 0
+
+  Implemented On: 2026-04-02'

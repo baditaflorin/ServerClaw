@@ -1,0 +1,178 @@
+adr_number: '0275'
+title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:cbf9b1ec3
+  evidence: cbf9b1ec3 [live-apply] Finalize ADR 0275 exact-main Tika replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.008979'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:f5dc516b7
+  evidence: f5dc516b7 [tika] Restore ws-0275 closeout registry
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:04.019330'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:60f25e147
+  evidence: 60f25e147 [tika] Restore ws-0275 closeout registry
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:04.019377'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:1bcc69f94
+  evidence: '1bcc69f94 [document-extraction] Stabilize Tika and Tesseract verification\n\nPurpose:
+    Align the OCR live-apply workflow with the working private Tika and Tesseract
+    contracts\nScope: Tika metadata verification, Tesseract workflow/runbook commands,
+    shared catalogs, tests, and workstream ownership metadata\nStatus: Verified with
+    targeted tests plus governed Tika and Tesseract live applies\nNext: Record the
+    committed-source receipt, cut the mainline release surfaces, and push origin/main\nSee
+    also: ADR 0275, ADR 0286'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.022627'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:1daefb549
+  evidence: '1daefb549 [document-extraction] Stabilize Tika and Tesseract verification\n\nPurpose:
+    Align the OCR live-apply workflow with the working private Tika and Tesseract
+    contracts\nScope: Tika metadata verification, Tesseract workflow/runbook commands,
+    shared catalogs, tests, and workstream ownership metadata\nStatus: Verified with
+    targeted tests plus governed Tika and Tesseract live applies\nNext: Record the
+    committed-source receipt, cut the mainline release surfaces, and push origin/main\nSee
+    also: ADR 0275, ADR 0286'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.022751'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:bca0d352f
+  evidence: bca0d352f [tika] Cut 0.177.102 for ADR 0275
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023048'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:230d26855
+  evidence: '230d26855 [tika] Restore host reachability through guest policy\n\nPurpose:
+    Keep the Proxmox host verification path to the private Tika listener reachable
+    after the repo-managed guest firewall reloads\nScope: Allow host-sourced Tika
+    traffic in the docker-runtime guest policy, refresh generated platform vars, and
+    add regression coverage\nStatus: Live replay now verifies /version, /tika, and
+    /meta from the Proxmox host again\nNext: Refresh ADR 0275 receipts and metadata,
+    run repo-wide gates, and integrate onto origin/main\nSee also: ADR 0275'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023068'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:d50938dcc
+  evidence: 'd50938dcc [tika] Harden docker runtime reruns\n\nPurpose: Make ADR 0275
+    live-apply reruns survive Docker nat-chain recovery and align guest firewall forward
+    rules with docker runtime expectations\nScope: Update docker_runtime and tika_runtime
+    recovery tasks, linux_guest_firewall forward CIDRs, and focused role tests\nStatus:
+    Ready for repo-wide validation and exact-main receipt refresh\nNext: Re-run validation
+    gates, refresh live-apply evidence, and integrate onto origin/main\nSee also:
+    ADR 0275'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023073'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:318b17000
+  evidence: 318b17000 [tika] Implement ADR 0275 runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023084'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:31889a504
+  evidence: 31889a504 [tika] Record ADR 0275 branch-local live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023171'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:166c9c917
+  evidence: '166c9c917 [tika] Restore host reachability through guest policy\n\nPurpose:
+    Keep the Proxmox host verification path to the private Tika listener reachable
+    after the repo-managed guest firewall reloads\nScope: Allow host-sourced Tika
+    traffic in the docker-runtime guest policy, refresh generated platform vars, and
+    add regression coverage\nStatus: Live replay now verifies /version, /tika, and
+    /meta from the Proxmox host again\nNext: Refresh ADR 0275 receipts and metadata,
+    run repo-wide gates, and integrate onto origin/main\nSee also: ADR 0275'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023186'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:a3ed98ac4
+  evidence: 'a3ed98ac4 [tika] Harden docker runtime reruns\n\nPurpose: Make ADR 0275
+    live-apply reruns survive Docker nat-chain recovery and align guest firewall forward
+    rules with docker runtime expectations\nScope: Update docker_runtime and tika_runtime
+    recovery tasks, linux_guest_firewall forward CIDRs, and focused role tests\nStatus:
+    Ready for repo-wide validation and exact-main receipt refresh\nNext: Re-run validation
+    gates, refresh live-apply evidence, and integrate onto origin/main\nSee also:
+    ADR 0275'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023191'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:7cf7deed8
+  evidence: 7cf7deed8 [tika] Stage ADR 0275 runtime automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.023198'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:0ac85f342
+  evidence: '0ac85f342 [tika] Restore host reachability through guest policy\n\nPurpose:
+    Keep the Proxmox host verification path to the private Tika listener reachable
+    after the repo-managed guest firewall reloads\nScope: Allow host-sourced Tika
+    traffic in the docker-runtime guest policy, refresh generated platform vars, and
+    add regression coverage\nStatus: Live replay now verifies /version, /tika, and
+    /meta from the Proxmox host again\nNext: Refresh ADR 0275 receipts and metadata,
+    run repo-wide gates, and integrate onto origin/main\nSee also: ADR 0275'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.024141'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:cb6f82e73
+  evidence: 'cb6f82e73 [tika] Harden docker runtime reruns\n\nPurpose: Make ADR 0275
+    live-apply reruns survive Docker nat-chain recovery and align guest firewall forward
+    rules with docker runtime expectations\nScope: Update docker_runtime and tika_runtime
+    recovery tasks, linux_guest_firewall forward CIDRs, and focused role tests\nStatus:
+    Ready for repo-wide validation and exact-main receipt refresh\nNext: Re-run validation
+    gates, refresh live-apply evidence, and integrate onto origin/main\nSee also:
+    ADR 0275'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.024169'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:e46566084
+  evidence: e46566084 [release] Cut 0.177.91 for ADR 0275
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.024249'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:7d6ea2ef6
+  evidence: 7d6ea2ef6 [tika] Record ADR 0275 branch-local live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.024268'
+- marker_type: git-commit
+  adr_number: '0275'
+  location: git:abc467b82
+  evidence: abc467b82 [tika] Stage ADR 0275 runtime automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.024274'
+- marker_type: playbook
+  adr_number: '0275'
+  location: playbooks/tika.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:04.082440'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 19
+
+  Breakdown: git-commit=18, playbook=1
+
+  Implemented On: 2026-04-03'

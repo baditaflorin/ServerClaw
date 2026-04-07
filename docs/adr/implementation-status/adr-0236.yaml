@@ -1,0 +1,40 @@
+adr_number: '0236'
+title: Server-State And Mutation Feedback Via TanStack Query
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0236'
+  location: git:a4f8e6cc8
+  evidence: a4f8e6cc8 [release] Finalize ADR 0236 exact-main integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:46.134091'
+- marker_type: git-commit
+  adr_number: '0236'
+  location: git:d7e035423
+  evidence: d7e035423 [release] Prepare ADR 0236 mainline surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:46.134128'
+- marker_type: git-commit
+  adr_number: '0236'
+  location: git:a48c024fb
+  evidence: a48c024fb [docs] Record ADR 0236 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:46.134155'
+- marker_type: git-commit
+  adr_number: '0236'
+  location: git:e55f7b1d9
+  evidence: e55f7b1d9 [docs] Record ADR 0236 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:46.140197'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-28'

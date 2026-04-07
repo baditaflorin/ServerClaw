@@ -1,0 +1,52 @@
+adr_number: '0256'
+title: Mautrix Bridges For External Chat Channel Adapters
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0256'
+  location: git:f5ca9ae41
+  evidence: f5ca9ae41 [matrix] Finalize ADR 0256 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.268829'
+- marker_type: git-commit
+  adr_number: '0256'
+  location: git:85d330315
+  evidence: 85d330315 [release] Cut 0.177.98 for ADR 0256
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.268882'
+- marker_type: git-commit
+  adr_number: '0256'
+  location: git:f38804496
+  evidence: f38804496 [matrix] Record ADR 0256 branch live-apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.268886'
+- marker_type: git-commit
+  adr_number: '0256'
+  location: git:9ce8b5861
+  evidence: 9ce8b5861 [matrix] Stabilize ADR 0256 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.268890'
+- marker_type: git-commit
+  adr_number: '0256'
+  location: git:d40f399f5
+  evidence: d40f399f5 [matrix] Add ADR 0256 bridge runtime automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.268893'
+- marker_type: playbook
+  adr_number: '0256'
+  location: playbooks/matrix-synapse.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:55.313378'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=5, playbook=1
+
+  Implemented On: 2026-03-30'

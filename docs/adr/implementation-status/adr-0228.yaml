@@ -1,0 +1,142 @@
+adr_number: 0228
+title: Windmill As The Default Browser-And-API Operations Surface
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:909c0dbab
+  evidence: 909c0dbab [windmill] Finalize ADR 0228 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741299'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:02f94f140
+  evidence: 02f94f140 [generated] Refresh mainline truth surfaces for ADR 0228 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741346'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:9ba8c0d62
+  evidence: 9ba8c0d62 Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.741354'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:9b3d617fc
+  evidence: 9b3d617fc [release] Cut ADR 0228 mainline candidate 0.177.70
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741365'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:e7b3f0cff
+  evidence: e7b3f0cff [merge] Refresh ADR 0228 on latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741372'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:2da49574f
+  evidence: 2da49574f [merge] Refresh ADR 0228 on latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741405'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:f2a683207
+  evidence: f2a683207 [merge] Refresh ADR 0228 on latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741413'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:177191b64
+  evidence: 177191b64 [merge] Integrate ADR 0228 on latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741441'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:c2338cef3
+  evidence: c2338cef3 [release] Finalize ADR 0228 mainline truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741525'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:1130f6b01
+  evidence: 1130f6b01 Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.741611'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:d3d120053
+  evidence: d3d120053 [merge] Refresh ADR 0228 branch on latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741647'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:cff4b70cb
+  evidence: cff4b70cb [release] Prepare ADR 0228 mainline candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.741700'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:96edf7429
+  evidence: 96edf7429 Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.741929'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:56c9e5248
+  evidence: 56c9e5248 Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.742100'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:5ab08d9ea
+  evidence: 5ab08d9ea Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.742171'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:a98b7f25b
+  evidence: a98b7f25b Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.742314'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:2ba9ab85b
+  evidence: 2ba9ab85b Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.742412'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:5eda54b47
+  evidence: 5eda54b47 Merge remote-tracking branch 'origin/main' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.742501'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:fe29f3fda
+  evidence: fe29f3fda [release] Start ADR 0228 main integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.742543'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:837c32542
+  evidence: 837c32542 Merge branch 'origin/codex/ws-0228-live-apply' into codex/ws-0228-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:42.742550'
+- marker_type: git-commit
+  adr_number: 0228
+  location: git:72a049465
+  evidence: 72a049465 [windmill] Record ADR 0228 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:42.742578'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 21
+
+  Breakdown: git-commit=21
+
+  Implemented On: 2026-03-29'

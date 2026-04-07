@@ -1,0 +1,138 @@
+adr_number: '0270'
+title: Docker Publication Self-Healing And Port-Programming Assertions
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:626c1a76b
+  evidence: 626c1a76b [release] Cut 0.177.94 for ADR 0270
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.916644'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:35bc2ed95
+  evidence: 35bc2ed95 [merge] Refresh ADR 0270 integration onto latest origin/main
+    46df65e7f
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.916680'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:1c828acd9
+  evidence: 1c828acd9 [merge] Finalize ADR 0270 mainline validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.916708'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:66f21a93c
+  evidence: 66f21a93c [adr-0270] Record exact-main live apply closeout
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.916722'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:6bbe13b66
+  evidence: 6bbe13b66 [merge] Carry ADR 0278 merged-main receipt onto ADR 0270 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.916741'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:fe65798ad
+  evidence: fe65798ad [release] Cut 0.177.93 for ADR 0270
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.916749'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:d57c6a233
+  evidence: d57c6a233 [merge] Refresh ADR 0270 integration onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.916756'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:5c4152925
+  evidence: 5c4152925 [adr-0270] Capture exact-main replay checkpoint
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.916760'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:72921f9a0
+  evidence: 72921f9a0 Merge branch 'codex/ws-0270-live-apply' into codex/ws-0270-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:01.916952'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:c8f576a30
+  evidence: c8f576a30 [adr-0270] Harden live apply recovery follow-through
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.916982'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:0a353a1a3
+  evidence: 0a353a1a3 [adr-0270] Reset keycloak compose networks on forced recovery
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917410'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:2ca0cd23c
+  evidence: 2ca0cd23c [adr-0270] Stabilize harbor and docker runtime recovery
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917419'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:6f913cc1a
+  evidence: 6f913cc1a [adr-0270] Recover post-compose Docker chain loss
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917619'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:c675f48d3
+  evidence: c675f48d3 [adr-0270] Claim recursive live-apply evidence surfaces
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917626'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:b7e9e3f73
+  evidence: b7e9e3f73 [adr-0270] Harden harbor publication recovery after live replay
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917631'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:4ae0170ba
+  evidence: 4ae0170ba [adr-0270] Align shared surface contracts after latest-main
+    rebase
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917636'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:7b8359470
+  evidence: 7b8359470 [adr-0270] Repair automation target registration and ownership
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917640'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:03fd3ff1b
+  evidence: 03fd3ff1b [adr-0270] Complete publication assurance contracts and validation
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917645'
+- marker_type: git-commit
+  adr_number: '0270'
+  location: git:5d23bd4e9
+  evidence: 5d23bd4e9 [adr-0270] Start docker publication assurance wiring
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:01.917649'
+- marker_type: playbook
+  adr_number: '0270'
+  location: playbooks/docker-publication-assurance.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:01.931575'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 20
+
+  Breakdown: git-commit=19, playbook=1
+
+  Implemented On: 2026-03-30'

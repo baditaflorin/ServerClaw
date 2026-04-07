@@ -1,0 +1,211 @@
+adr_number: 0288
+title: Flagsmith As The Feature Flag And Remote Configuration Service
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:3d773e95a
+  evidence: 3d773e95a [adr-0288] Record build-server snapshot cleanup
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.939362'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:f69fbf0b2
+  evidence: f69fbf0b2 [adr-0288] Refresh platform manifest for main push
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.939408'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:2a181bd42
+  evidence: 2a181bd42 [adr-0288] Clean rebased main integration state
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.939440'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:f53988698
+  evidence: 'f53988698 [adr-0288] Mark Crawl4AI exact-main replay merged\n\nPurpose:
+    Close the ws-0288 Crawl4AI main-merge workstream on main after the verified 0.177.115
+    / 0.130.75 promotion.\nScope: Flip the workstream registry and workstream note
+    from ready_for_merge to merged.\nStatus: Merged on main and ready to push to origin/main.\nNext:
+    Push HEAD to origin/main.\nSee also: ADR 0288'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.939463'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:f6f07f7cc
+  evidence: 'f6f07f7cc [adr-0288] Finalize exact-main Crawl4AI promotion\n\nPurpose:
+    Record the verified 0.177.115 exact-main replay for ADR 0288 and promote platform
+    truth to 0.130.75.\nScope: Update ADR/workstream metadata, stack and manifest
+    truth, and add the final live-apply evidence bundle.\nStatus: Branch-complete,
+    fully validated, and ready to merge onto main.\nNext: Refresh origin/main, merge
+    from a dedicated main worktree, and push origin/main.\nSee also: ADR 0288'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.939471'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:a01cd6e9c
+  evidence: a01cd6e9c [adr-0288] Prepare 0.177.115 exact-main replay tree
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.939475'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:1ec1b5207
+  evidence: 1ec1b5207 [adr-0288] Finalize Crawl4AI exact-main evidence bundle
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.939479'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:026ce366b
+  evidence: '026ce366b [adr-0288] Finalize exact-main Crawl4AI promotion\n\nPurpose:
+    Record the verified 0.177.115 exact-main replay for ADR 0288 and promote platform
+    truth to 0.130.75.\nScope: Update ADR/workstream metadata, stack and manifest
+    truth, and add the final live-apply evidence bundle.\nStatus: Branch-complete,
+    fully validated, and ready to merge onto main.\nNext: Refresh origin/main, merge
+    from a dedicated main worktree, and push origin/main.\nSee also: ADR 0288'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.939497'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:2b04836bc
+  evidence: 2b04836bc [adr-0288] Prepare 0.177.115 exact-main replay tree
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.939521'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:c6b851e03
+  evidence: c6b851e03 [adr-0288] Finalize Crawl4AI exact-main evidence bundle
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.939534'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:7c6e14e7b
+  evidence: 7c6e14e7b [crawl4ai] Mark ws-0288 merged on main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.939697'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:cd8dc662b
+  evidence: cd8dc662b [crawl4ai] Promote ADR 0288 into canonical mainline truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.939700'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:8183cddd6
+  evidence: 8183cddd6 [adr-0288] Isolate Crawl4AI from the legacy Docker bridge
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.940985'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:d54da2c46
+  evidence: d54da2c46 [adr-0288] Extend Docker bridge helper settle-time recovery
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941006'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:91885c873
+  evidence: 91885c873 [adr-0288] Harden Crawl4AI bridge-network recovery
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941014'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:ca6d4aa1c
+  evidence: ca6d4aa1c [adr-0288] Recover Crawl4AI startup from stale Docker bridge
+    drift
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941019'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:330e33ec0
+  evidence: 330e33ec0 [adr-0288] Cut latest-main Crawl4AI release tree
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941047'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:48354b2dd
+  evidence: 48354b2dd [adr-0288] Refresh exact-main validation surfaces
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941055'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:640d83d21
+  evidence: 640d83d21 [adr-0288] Record Crawl4AI live-apply proof
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941064'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:4129e9567
+  evidence: 4129e9567 [adr-0288] Fix Crawl4AI runtime config contract
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941068'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:a74553b0c
+  evidence: a74553b0c [adr-0288] Repair repo contracts after rebase
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941072'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:1adab35ff
+  evidence: 1adab35ff [adr-0288] Add Crawl4AI runtime automation and metadata
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941076'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:237c2c0d5
+  evidence: 237c2c0d5 [adr-0288] Cut exact-main Crawl4AI release tree
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941198'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:25dc05e7a
+  evidence: 25dc05e7a [adr-0288] Refresh exact-main validation surfaces
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941214'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:b286e3e8b
+  evidence: b286e3e8b [adr-0288] Record Crawl4AI live-apply proof
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941218'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:be93332c7
+  evidence: be93332c7 [adr-0288] Fix Crawl4AI runtime config contract
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941223'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:0dd62225c
+  evidence: 0dd62225c [adr-0288] Repair repo contracts after rebase
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941234'
+- marker_type: git-commit
+  adr_number: 0288
+  location: git:e05a40399
+  evidence: e05a40399 [adr-0288] Add Crawl4AI runtime automation and metadata
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:09.941238'
+- marker_type: playbook
+  adr_number: 0288
+  location: playbooks/flagsmith.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:09.983644'
+- marker_type: playbook
+  adr_number: 0288
+  location: playbooks/crawl4ai.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:09.994469'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 30
+
+  Breakdown: git-commit=28, playbook=2
+
+  Implemented On: 2026-03-30'

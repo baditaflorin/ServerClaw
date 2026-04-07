@@ -1,0 +1,22 @@
+adr_number: '0127'
+title: Intent Deduplication and Conflict Resolution
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0127'
+  location: git:2ea421cb0
+  evidence: 2ea421cb0 Implement ADR 0127 intent conflict resolution
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.964450'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-03-24'

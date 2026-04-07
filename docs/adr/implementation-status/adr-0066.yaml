@@ -1,0 +1,100 @@
+adr_number: '0066'
+title: Structured Mutation Audit Log
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:237dd7de1
+  evidence: 237dd7de1 Release ADR 0066 on 0.78.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.714967'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:6925cb1cd
+  evidence: 6925cb1cd Repair current-main execution gates for ADR 0066 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715016'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:983058ddd
+  evidence: 983058ddd Integrate ADR 0066 mutation audit on current main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715039'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:ab0b605fe
+  evidence: ab0b605fe Integrate ADR 0052 log shipping with ADR 0066 mutation sinks
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715043'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:a9fa2fdf2
+  evidence: a9fa2fdf2 Implement ADR 0066 mutation audit foundations
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715046'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:f4df92d35
+  evidence: f4df92d35 Release ADR 0066 on 0.77.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715053'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:10f769137
+  evidence: 10f769137 Integrate ADR 0066 mutation audit on current main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715074'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:e09b8dd1b
+  evidence: e09b8dd1b Integrate ADR 0052 log shipping with ADR 0066 mutation sinks
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715078'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:4b9cd1648
+  evidence: 4b9cd1648 Implement ADR 0066 mutation audit foundations
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715081'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:cf40afee6
+  evidence: cf40afee6 Finalize ADR 0066 live rollout and release 0.50.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715143'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:60a9f16e2
+  evidence: 60a9f16e2 Integrate ADR 0052 log shipping with ADR 0066 mutation sinks
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715258'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:b9dd513e0
+  evidence: b9dd513e0 Merge branch 'codex/adr-0052-loki-logs' into codex/adr-0066-mutation-audit-log
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:33.715264'
+- marker_type: git-commit
+  adr_number: '0066'
+  location: git:1055d4ab6
+  evidence: 1055d4ab6 Implement ADR 0066 mutation audit foundations
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.715267'
+- marker_type: playbook
+  adr_number: '0066'
+  location: playbooks/falco.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:33.736614'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=13, playbook=1
+
+  Implemented On: 2026-03-23'

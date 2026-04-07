@@ -1,0 +1,89 @@
+adr_number: '0162'
+title: Distributed Deadlock Detection and Resolution
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:e2ee3cda6
+  evidence: e2ee3cda6 Fix ADR 0162 receipt source commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.397218'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:febf90126
+  evidence: febf90126 Record ADR 0162 live apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.397247'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:5f9ddf354
+  evidence: 5f9ddf354 Finalize ADR 0162 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.397251'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:e5d3a9d56
+  evidence: e5d3a9d56 Merge current main and bump ADR 0162 to 0.150.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.397515'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:6e16906b5
+  evidence: 6e16906b5 Cut ADR 0162 repo integration metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.397549'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:6b207e559
+  evidence: 6b207e559 Merge origin/main into ADR 0162 workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.397560'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:79d02cea6
+  evidence: 79d02cea6 Implement ADR 0162 deadlock detector runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.397727'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:9243e9f0b
+  evidence: "9243e9f0b Add ADRs 0153\u20130162: parallel agent execution without conflict"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:14.397785'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:455d10089
+  evidence: "455d10089 Add ADRs 0153\u20130162: parallel agent execution without conflict"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:14.398217'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:d86ac372c
+  evidence: "d86ac372c Merge ADRs 0153\u20130162: parallel agent execution concurrency\
+    \ layer"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:14.398237'
+- marker_type: git-commit
+  adr_number: '0162'
+  location: git:364581400
+  evidence: "364581400 Add ADRs 0153\u20130162: parallel agent execution without conflict"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:14.398243'
+- marker_type: config-file
+  adr_number: '0162'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:14.751076'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=11, config-file=1
+
+  Implemented On: 2026-03-25'

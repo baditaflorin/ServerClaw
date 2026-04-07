@@ -1,0 +1,138 @@
+adr_number: 0368
+title: Docker Compose Jinja2 Macro Library
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:53009c1d0
+  evidence: "53009c1d0 [release] Bump to 0.178.35 \u2014 DRY centralization ADRs 0368-0374"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:42.044058'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:681666d8e
+  evidence: "681666d8e [merge] claude/objective-bose \u2014 implement DRY centralization\
+    \ ADRs 0368-0374"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:42.044086'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:95c844d52
+  evidence: 95c844d52 [workstreams] Register DRY centralization ADRs 0368-0374 and
+    update ADR index
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:42.044094'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:1076f1619
+  evidence: "1076f1619 feat(grist,jupyterhub): migrate compose templates to shared\
+    \ macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044205'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:2a9d8afa9
+  evidence: "2a9d8afa9 feat(outline,paperless,plane,plausible,rag_context,semaphore):\
+    \ migrate compose templates to shared macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044230'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:974f130c2
+  evidence: "974f130c2 feat(mattermost,n8n,netbox,nextcloud,one_api,openfga): migrate\
+    \ compose templates to shared macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044239'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:21df0e93d
+  evidence: "21df0e93d feat(dify,glitchtip,keycloak,livekit,matrix_synapse): migrate\
+    \ compose templates to shared macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044244'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:d0b7bf58d
+  evidence: "d0b7bf58d feat(directus_runtime): migrate compose template to shared\
+    \ macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044263'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:bbfc87a77
+  evidence: "bbfc87a77 feat(common): add compose_macros.j2 macro library and platform_hairpin_nat_hosts\
+    \ \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044267'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:a326f0d02
+  evidence: a326f0d02 [workstreams] Register DRY centralization ADRs 0368-0374 and
+    update ADR index
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:42.044356'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:8d06d9bb3
+  evidence: "8d06d9bb3 feat(grist,jupyterhub): migrate compose templates to shared\
+    \ macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044659'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:6c73e2352
+  evidence: "6c73e2352 feat(outline,paperless,plane,plausible,rag_context,semaphore):\
+    \ migrate compose templates to shared macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044693'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:04b4ef0ef
+  evidence: "04b4ef0ef feat(mattermost,n8n,netbox,nextcloud,one_api,openfga): migrate\
+    \ compose templates to shared macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044723'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:e41ccde6b
+  evidence: "e41ccde6b feat(dify,glitchtip,keycloak,livekit,matrix_synapse): migrate\
+    \ compose templates to shared macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044727'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:8a76a0fd4
+  evidence: "8a76a0fd4 feat(directus_runtime): migrate compose template to shared\
+    \ macros \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044751'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:5bd521901
+  evidence: "5bd521901 feat(common): add compose_macros.j2 macro library and platform_hairpin_nat_hosts\
+    \ \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.044760'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:eb7e1410d
+  evidence: 'eb7e1410d chore: update ADR references to 0368-0374'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:42.044978'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:2295a23f9
+  evidence: '2295a23f9 chore: renumber DRY centralization ADRs 0368-0374 (0361-0367
+    already exist)'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:42.044985'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 18
+
+  Breakdown: git-commit=18'

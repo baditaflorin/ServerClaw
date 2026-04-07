@@ -1,0 +1,71 @@
+adr_number: '0202'
+title: Excalidraw Auto Generated Architecture Diagrams
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:64049aa74
+  evidence: 64049aa74 [docs] Refresh generated Excalidraw diagram after ADR 0202 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990151'
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:53bd5fb8b
+  evidence: 53bd5fb8b [docs] Refresh generated Excalidraw diagram after ADR 0202 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990185'
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:854493b9d
+  evidence: 854493b9d Merge ADR 0202 mainline release into codex/ws-0184-live-apply
+    before final ADR 0184 release retry
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990214'
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:392032c79
+  evidence: 392032c79 [release] Integrate ADR 0202 after 0.177.15
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990285'
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:3b9dd3cdf
+  evidence: 3b9dd3cdf [docs] Live-apply ADR 0202 Excalidraw
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990303'
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:c775b7cfe
+  evidence: c775b7cfe [release] Integrate ADR 0202 on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990447'
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:8dc2a35e4
+  evidence: 8dc2a35e4 [docs] Live-apply ADR 0202 Excalidraw
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990471'
+- marker_type: git-commit
+  adr_number: '0202'
+  location: git:2d73a70c6
+  evidence: 2d73a70c6 [docs] Live-apply ADR 0202 Excalidraw
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.990603'
+- marker_type: playbook
+  adr_number: '0202'
+  location: playbooks/excalidraw.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:32.011899'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=8, playbook=1
+
+  Implemented On: 2026-03-27'

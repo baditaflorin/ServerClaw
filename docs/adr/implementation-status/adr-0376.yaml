@@ -1,0 +1,41 @@
+adr_number: '0376'
+title: Identity Core VM Isolation and Aggressive Health Watchdog
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0376'
+  location: git:b38200b3b
+  evidence: "b38200b3b [release] Bump to 0.178.34 \u2014 ADR-0376 identity-core watchdog\
+    \ + OIDC simulation"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:45.083102'
+- marker_type: git-commit
+  adr_number: '0376'
+  location: git:058778d1b
+  evidence: "058778d1b feat(ADR-0376): identity-core watchdog \u2014 15s probes, auto-restart,\
+    \ KC_CACHE=local"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:45.083233'
+- marker_type: git-commit
+  adr_number: '0376'
+  location: git:6921c74bc
+  evidence: "6921c74bc [release] Bump to 0.178.28 \u2014 ADR 0376: credential isolation\
+    \ and agent safety"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:45.083328'
+- marker_type: playbook
+  adr_number: '0376'
+  location: playbooks/identity-core-watchdog.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:45.114085'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=3, playbook=1'

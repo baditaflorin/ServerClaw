@@ -1,0 +1,22 @@
+adr_number: '0034'
+title: Controller-Local Secret Manifest And Preflight
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0034'
+  location: git:a00e8896e
+  evidence: a00e8896e Implement ADR 0034 controller-local preflight
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:18.682417'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-03-22'

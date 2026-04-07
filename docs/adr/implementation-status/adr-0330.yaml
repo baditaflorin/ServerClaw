@@ -1,0 +1,89 @@
+adr_number: '0330'
+title: Public GitHub Readiness As A First-Class Repository Lifecycle
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:d44bdbfc6
+  evidence: d44bdbfc6 [publication] Finalize ADR 0330 exact-main 0.178.4 closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471456'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:aa771b5cb
+  evidence: aa771b5cb [merge] Advance ADR 0330 closeout to origin/main 0.178.4
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471476'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:3024ac15b
+  evidence: 3024ac15b [publication] Record ADR 0330 final latest-main evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471480'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:3dbb575f3
+  evidence: 3dbb575f3 [publication] Merge ADR 0333 latest-main replay into ADR 0330
+    closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471493'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:2453540ea
+  evidence: 2453540ea [publication] Merge newer origin/main into ADR 0330 closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471522'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:afc3a4b87
+  evidence: afc3a4b87 [publication] Merge latest origin/main into ADR 0330 closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471555'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:6e61c8f36
+  evidence: '6e61c8f36 receipt: record ADR 0330 exact-main proof'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471558'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:2cee4e65e
+  evidence: 2cee4e65e [publication] Refresh ADR 0330 exact-main truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471631'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:347472955
+  evidence: 347472955 [publication] Record ADR 0330 branch-local evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471642'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:edf5cbd04
+  evidence: edf5cbd04 [publication] Close out ADR 0330 fork-first surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.471645'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:602f300c3
+  evidence: 602f300c3 Merge origin/main into codex/ws-0330-runtime-pools-transition
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.472474'
+- marker_type: git-commit
+  adr_number: '0330'
+  location: git:39a2791e4
+  evidence: 39a2791e4 Merge remote-tracking branch 'origin/main' into codex/ws-0330-runtime-pools-transition
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.472521'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-04-04'

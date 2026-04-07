@@ -1,0 +1,46 @@
+adr_number: 0097
+title: Alerting Routing and On-Call Runbook Model
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0097
+  location: git:9691bfa49
+  evidence: 9691bfa49 Fix ADR 0097 pre-push gate regressions
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.597358'
+- marker_type: git-commit
+  adr_number: 0097
+  location: git:4030b61f9
+  evidence: 4030b61f9 Cut 0.109.0 for ADR 0097 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.597386'
+- marker_type: git-commit
+  adr_number: 0097
+  location: git:e5467cbae
+  evidence: e5467cbae Fix mainline integration after ADR 0097 rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.597391'
+- marker_type: git-commit
+  adr_number: 0097
+  location: git:3ca791f4d
+  evidence: 3ca791f4d Implement ADR 0097 alert routing
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:45.597394'
+- marker_type: playbook
+  adr_number: 0097
+  location: playbooks/keycloak.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:45.608840'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=4, playbook=1
+
+  Implemented On: 2026-03-24'

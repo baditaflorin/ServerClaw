@@ -1,0 +1,136 @@
+adr_number: 0108
+title: Operator Onboarding and Off-boarding Workflow
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:64c1f8068
+  evidence: 64c1f8068 Release 0.177.8 for ADR 0108 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259278'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:6677ef328
+  evidence: 6677ef328 Stabilize ADR 0108 latest-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259306'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:363618a18
+  evidence: 363618a18 Implement ADR 0108 Windmill live-apply durability
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259310'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:ee41d6bb9
+  evidence: ee41d6bb9 Harden ADR 0108 mainline replay fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259313'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:b16fa4cdb
+  evidence: b16fa4cdb Stabilize ADR 0108 latest-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259317'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:b105c94fe
+  evidence: b105c94fe Harden ADR 0108 mainline replay fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259324'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:b1819d304
+  evidence: b1819d304 Implement ADR 0108 Windmill live-apply durability
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259327'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:1901d5d33
+  evidence: 1901d5d33 Record ADR 0108 mainline live-apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259330'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:335a57da8
+  evidence: 335a57da8 Release 0.177.4 for ADR 0108 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259337'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:cf0041844
+  evidence: cf0041844 Harden ADR 0108 mainline replay fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259389'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:c1e85c7da
+  evidence: c1e85c7da Record ADR 0108 live-apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259392'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:bb5eaf7ae
+  evidence: bb5eaf7ae Implement ADR 0108 Windmill live-apply durability
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259395'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:7a22c533d
+  evidence: 7a22c533d Harden ADR 0108 mainline replay fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259556'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:bfec98fb7
+  evidence: bfec98fb7 Merge ADR 0108 live-apply branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259739'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:b7ada3596
+  evidence: b7ada3596 Record ADR 0108 live-apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259776'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:e600830da
+  evidence: e600830da Implement ADR 0108 Windmill live-apply durability
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.259780'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:7bc1e1a58
+  evidence: 7bc1e1a58 Merge origin/main and cut 0.105.0 for ADR 0108
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.262075'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:e01bfe1a1
+  evidence: e01bfe1a1 Merge ADR 0108 operator lifecycle automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.262080'
+- marker_type: git-commit
+  adr_number: 0108
+  location: git:53f251e6d
+  evidence: 53f251e6d Implement ADR 0108 operator lifecycle automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.262304'
+- marker_type: config-file
+  adr_number: 0108
+  location: config/operators.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:50.446556'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 20
+
+  Breakdown: git-commit=19, config-file=1
+
+  Implemented On: 2026-03-27'

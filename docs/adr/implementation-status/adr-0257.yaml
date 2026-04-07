@@ -1,0 +1,71 @@
+adr_number: '0257'
+title: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0257'
+  location: git:7b6881d65
+  evidence: '7b6881d65 [merge] Bring ws-0294 onto latest origin/main after ADR 0257\n\nPurpose:
+    Reconcile the validated ADR 0294 branch with the current origin/main head so the
+    final release bump and live replay start from the real latest mainline state.\nScope:
+    Merge ADR 0257 runtime, OpenBao, docker recovery, Windmill, release metadata,
+    and workstream registry updates into the ADR 0294 worktree.\nStatus: Latest mainline
+    merged; next re-run the ADR 0294 exact-main integration on top of repo version
+    0.177.117 and recut the final release.\nNext: Recompute the next release version,
+    refresh protected surfaces, replay the One-API live apply and downstream converges,
+    then push origin/main.\nSee also: ADR 0294, ADR 0257'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.608433'
+- marker_type: git-commit
+  adr_number: '0257'
+  location: git:5c7e07235
+  evidence: 5c7e07235 [adr-0257] Record final mainline gate receipt
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:55.608521'
+- marker_type: git-commit
+  adr_number: '0257'
+  location: git:ed905a0d0
+  evidence: ed905a0d0 [adr-0257] Finalize mainline integration release
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:55.608526'
+- marker_type: git-commit
+  adr_number: '0257'
+  location: git:1ac02b4a6
+  evidence: 1ac02b4a6 Merge branch 'codex/ws-0257-main-merge' into codex/ws-0257-main-publish
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:55.608533'
+- marker_type: git-commit
+  adr_number: '0257'
+  location: git:af37dfbb8
+  evidence: af37dfbb8 [adr-0257] Record exact-main live-apply evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:55.608537'
+- marker_type: git-commit
+  adr_number: '0257'
+  location: git:465fa4487
+  evidence: '465fa4487 [docker-runtime] Canonicalize inspect payload for recovery\n\nPurpose:
+    Keep restart-managed container recovery working after daemon bounces\nScope: Canonicalize
+    the inspect payload passed into the recovery script and lock it with tests\nStatus:
+    Local tests passing; live converge pending on latest origin/main\nNext: Rebase
+    onto origin/main, replay windmill convergence, then verify public and worker surfaces\nSee
+    also: ADR 0257'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.608687'
+- marker_type: git-commit
+  adr_number: '0257'
+  location: git:be0cdb866
+  evidence: be0cdb866 [runtime] Harden ADR 0257 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:55.608706'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-31'

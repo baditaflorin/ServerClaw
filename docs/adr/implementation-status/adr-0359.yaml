@@ -1,0 +1,58 @@
+adr_number: 0359
+title: Declarative PostgreSQL Client Registry
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:5ac89567d
+  evidence: '5ac89567d chore: add gate bypass receipts for ADR 0359 push'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:39.828234'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:7248a600b
+  evidence: "7248a600b [release] Bump to 0.178.12 \u2014 ADR 0359 declarative PostgreSQL\
+    \ client registry"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:39.828366'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:e86feffef
+  evidence: 'e86feffef feat(adr-0359): implement declarative PostgreSQL client registry'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:39.828372'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:bf57cd0b8
+  evidence: 'bf57cd0b8 release(0.178.8): ADR 0359 declarative postgres registry +
+    keycloak fixes'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:39.828375'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:c33b6f02c
+  evidence: 'c33b6f02c feat(adr-0359): implement declarative PostgreSQL client registry'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:39.828397'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:9d1aa8d91
+  evidence: '9d1aa8d91 docs(adr-0359): declarative postgres client registry'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:39.828465'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:227123ea4
+  evidence: '227123ea4 docs(adr-0359): declarative postgres client registry'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:39.828475'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7'

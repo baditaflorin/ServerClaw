@@ -1,0 +1,68 @@
+adr_number: '0247'
+title: Authenticated Browser Journey Verification Via Playwright
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:1eaa2af91
+  evidence: 1eaa2af91 [workstream] Record ws-0247 r53 browser replay
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.976379'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:cc1e30e63
+  evidence: cc1e30e63 [workstream] Record ws-0247 live auth timeout state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.976426'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:439e70395
+  evidence: 439e70395 [docs] Refresh ws-0247 blocker state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.977990'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:315caa48d
+  evidence: 315caa48d [docs] Record ws-0247 live blocker receipts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.978003'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:49fdd4cf3
+  evidence: 49fdd4cf3 [browser] Harden ADR 0247 verifier and Dify recovery
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.978007'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:82cb6bafe
+  evidence: 82cb6bafe [browser] Harden ws-0247 live evidence capture
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.979060'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:3c2dd54f1
+  evidence: 3c2dd54f1 [browser] Refresh ws-0247 blocker notes
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.980412'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:3c8049177
+  evidence: 3c8049177 [browser] Tighten ws-0247 validation surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.980423'
+- marker_type: git-commit
+  adr_number: '0247'
+  location: git:09d2140cd
+  evidence: 09d2140cd [browser] Refresh ADR 0247 live-apply state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.980439'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=9'

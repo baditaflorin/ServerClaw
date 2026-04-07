@@ -1,6 +1,12 @@
 schema_version: 1.0.0
 
 playbooks:
+  - path: playbooks/_includes/dns_publication.yml
+    workflow_id: _include_dns_publication
+    make_target: null
+    mutation_scope: utility
+    shared_surfaces: []
+    lock_resources: []
   - path: playbooks/guest-network-policy.yml
     workflow_id: converge-guest-network-policy
     make_target: converge-guest-network-policy

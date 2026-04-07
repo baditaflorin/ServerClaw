@@ -1,0 +1,45 @@
+adr_number: '0243'
+title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright,
+  And Axe-Core
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0243'
+  location: git:b1c29b0ad
+  evidence: "b1c29b0ad [release] Bump to 0.178.40 \u2014 ADR 0243 branch assessment"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.284317'
+- marker_type: git-commit
+  adr_number: '0243'
+  location: git:20ac50bba
+  evidence: "20ac50bba [merge] WS-0402 \u2014 ADR 0243 branch assessment"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.284345'
+- marker_type: git-commit
+  adr_number: '0243'
+  location: git:085ea6b0d
+  evidence: 085ea6b0d [ws-0402] Assessment of ADR 0243 Storybook/Playwright branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.284454'
+- marker_type: git-commit
+  adr_number: '0243'
+  location: git:f4faffa40
+  evidence: f4faffa40 [windmill-ui] Refresh ws-0243 generated metadata
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:49.316153'
+- marker_type: git-commit
+  adr_number: '0243'
+  location: git:7065e6711
+  evidence: 7065e6711 [windmill-ui] Record ADR 0243 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.316190'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5'

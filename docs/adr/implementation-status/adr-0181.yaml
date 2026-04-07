@@ -1,0 +1,34 @@
+adr_number: 0181
+title: Off-Host Witness and Control Metadata Replication
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0181
+  location: git:80b434e60
+  evidence: 80b434e60 Record ADR 0181 merged-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:23.783807'
+- marker_type: git-commit
+  adr_number: 0181
+  location: git:17e744901
+  evidence: 17e744901 Record ADR 0181 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:23.784212'
+- marker_type: git-commit
+  adr_number: 0181
+  location: git:5125ec6df
+  evidence: 5125ec6df Implement ADR 0181 witness replication
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:23.784217'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 3
+
+  Breakdown: git-commit=3
+
+  Implemented On: 2026-03-27'

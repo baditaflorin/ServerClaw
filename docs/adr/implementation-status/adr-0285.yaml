@@ -1,0 +1,62 @@
+adr_number: 0285
+title: Whisper ASR As The CPU Speech-To-Text Service
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0285
+  location: git:c6407a7c4
+  evidence: c6407a7c4 Merge remote-tracking branch 'origin/main' into codex/ws-0285-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:08.543185'
+- marker_type: git-commit
+  adr_number: 0285
+  location: git:e79a9b1db
+  evidence: e79a9b1db Merge remote-tracking branch 'origin/main' into codex/ws-0285-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:08.543303'
+- marker_type: git-commit
+  adr_number: 0285
+  location: git:74a5ce7a1
+  evidence: 74a5ce7a1 Merge origin/main into codex/ws-0285-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:08.543363'
+- marker_type: git-commit
+  adr_number: 0285
+  location: git:e0845fbd8
+  evidence: e0845fbd8 [paperless] Snapshot ws-0285 integration state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:08.543377'
+- marker_type: git-commit
+  adr_number: 0285
+  location: git:acac0a8a6
+  evidence: acac0a8a6 [release] Cut 0.177.116 for ADR 0285 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:08.543950'
+- marker_type: git-commit
+  adr_number: 0285
+  location: git:435ace38f
+  evidence: 435ace38f [paperless] Merge ADR 0285 onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:08.543953'
+- marker_type: git-commit
+  adr_number: 0285
+  location: git:c0acb8a8b
+  evidence: c0acb8a8b [adr] Replace duplicate 0285/0286 with Paperless-ngx and Vikunja
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:08.550212'
+- marker_type: playbook
+  adr_number: 0285
+  location: playbooks/paperless.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:08.591265'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=7, playbook=1'

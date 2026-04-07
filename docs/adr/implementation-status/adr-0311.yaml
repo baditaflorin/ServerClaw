@@ -1,0 +1,59 @@
+adr_number: '0311'
+title: Global Command Palette And Universal Open Dialog Via cmdk
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0311'
+  location: git:4d6b58426
+  evidence: 4d6b58426 [receipts] Stamp ADR 0311 promoted source commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.600116'
+- marker_type: git-commit
+  adr_number: '0311'
+  location: git:279ae8a4d
+  evidence: 279ae8a4d [windmill] Promote ADR 0311 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.600150'
+- marker_type: git-commit
+  adr_number: '0311'
+  location: git:5172e8234
+  evidence: '5172e8234 [windmill] Record ADR 0311 pre-refresh mainline replay\n\nPurpose:
+    Preserve the release-cut and exact-main replay evidence completed before origin/main
+    advanced to the ADR 0316 integration baseline.\nScope: Record intermediate release
+    surfaces, mainline replay evidence, and repo-truth updates captured during the
+    first ADR 0311 exact-main pass.\nStatus: Successful exact-main replay preserved
+    locally; awaiting rebase onto newer origin/main for final latest-main verification.\nNext:
+    Rebase onto origin/main c7051f80, integrate ADR 0316 shared surfaces, and rerun
+    the final mainline validation bundle.\nSee also: ADR 0311'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.600213'
+- marker_type: git-commit
+  adr_number: '0311'
+  location: git:076b86957
+  evidence: 076b86957 [handoff] Record ADR 0311 push-gate blocker
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.600216'
+- marker_type: git-commit
+  adr_number: '0311'
+  location: git:f22cbfe59
+  evidence: f22cbfe59 [receipts] Record ADR 0311 live-apply proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.600219'
+- marker_type: git-commit
+  adr_number: '0311'
+  location: git:e582b918f
+  evidence: e582b918f [windmill] Live-apply ADR 0311 command palette
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:20.600222'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=6
+
+  Implemented On: 2026-04-02'

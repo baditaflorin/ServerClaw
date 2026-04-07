@@ -1,0 +1,47 @@
+adr_number: 0168
+title: Automated Enforcement of Agent Discovery and Handoff Standards
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0168
+  location: git:eda2fc649
+  evidence: "eda2fc649 live-apply: ADR 0163-0168 \u2014 Full agent discovery infrastructure\
+    \ (0.173.0)"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:17.477220'
+- marker_type: git-commit
+  adr_number: 0168
+  location: git:a8b93a6fe
+  evidence: 'a8b93a6fe Add ADR 0168: Automated enforcement of agent standards'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.477310'
+- marker_type: git-commit
+  adr_number: 0168
+  location: git:c2ba1be65
+  evidence: c2ba1be65 Release 0.146.0 for ADR 0168
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.478271'
+- marker_type: git-commit
+  adr_number: 0168
+  location: git:569349362
+  evidence: 569349362 Merge ADR 0168 idempotency CI enforcement
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.478287'
+- marker_type: git-commit
+  adr_number: 0168
+  location: git:c897578e0
+  evidence: c897578e0 Implement ADR 0168 idempotency CI enforcement
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.478303'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-26'

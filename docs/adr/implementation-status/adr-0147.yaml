@@ -1,0 +1,40 @@
+adr_number: '0147'
+title: Vaultwarden for Operator Credential Management
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0147'
+  location: git:8c594f66f
+  evidence: 8c594f66f Reconcile ADR 0147 live apply status
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.330314'
+- marker_type: git-commit
+  adr_number: '0147'
+  location: git:407f3116e
+  evidence: 407f3116e Record ADR 0147 repo version and live-apply blocker
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.331285'
+- marker_type: git-commit
+  adr_number: '0147'
+  location: git:859969e10
+  evidence: 859969e10 Merge ADR 0147 and cut release 0.147.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.331289'
+- marker_type: git-commit
+  adr_number: '0147'
+  location: git:680ebdb2b
+  evidence: 680ebdb2b Implement ADR 0147 Vaultwarden service
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.331321'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-26'

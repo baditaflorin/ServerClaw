@@ -1,0 +1,40 @@
+adr_number: '0145'
+title: Ollama for Local LLM Inference API
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0145'
+  location: git:c0f87b008
+  evidence: c0f87b008 Refresh generated artifacts for ADR 0145 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:06.379438'
+- marker_type: git-commit
+  adr_number: '0145'
+  location: git:4ddd21c09
+  evidence: 4ddd21c09 Finalize ADR 0145 live apply on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:06.379468'
+- marker_type: git-commit
+  adr_number: '0145'
+  location: git:ad42e7e88
+  evidence: ad42e7e88 Release 0.142.0 for ADR 0145
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:06.379475'
+- marker_type: git-commit
+  adr_number: '0145'
+  location: git:e6f6812dd
+  evidence: e6f6812dd Implement ADR 0145 Ollama local inference
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:06.379479'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-25'

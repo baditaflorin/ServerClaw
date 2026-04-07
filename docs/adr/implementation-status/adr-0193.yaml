@@ -1,0 +1,117 @@
+adr_number: 0193
+title: Plane Kanban Task Board
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:ed3f48e2b
+  evidence: ed3f48e2b [release] Reissue ADR 0193 on updated mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.782924'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:f0503fd01
+  evidence: f0503fd01 Merge remote-tracking branch 'origin/main' into codex/ws-0193-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:28.782961'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:b457e1a4c
+  evidence: b457e1a4c [plane] Record ADR 0193 merged-main live apply truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.782965'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:d28b283e7
+  evidence: d28b283e7 Merge remote-tracking branch 'origin/main' into codex/ws-0193-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:28.782984'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:1b452a28d
+  evidence: 1b452a28d [merge] Align repo versioning metadata for ADR 0193 push gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783086'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:067aae302
+  evidence: 067aae302 [merge] Fix pre-push blockers for ADR 0193 main integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783101'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:bbdc9d3dd
+  evidence: bbdc9d3dd [merge] Refresh ADR 0193 integration from latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783105'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:6a5a6e8e4
+  evidence: 6a5a6e8e4 [plane] Integrate ADR 0193 into mainline truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783108'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:df87acf9a
+  evidence: 'df87acf9a [plane] Refresh generated platform manifest\n\nPurpose: Satisfy
+    schema-validation by recording the current generated platform manifest\nScope:
+    build/platform-manifest.json\nStatus: Workstream branch is ready to repush\nNext:
+    Push the branch and integrate to main\nSee also: ADR 0193'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783278'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:25cc8822d
+  evidence: '25cc8822d [plane] Record ADR 0193 live-apply evidence\n\nPurpose: Capture
+    verified Plane live-apply evidence and branch validation results\nScope: Live-apply
+    receipt and workstream evidence notes\nStatus: Workstream branch is ready for
+    integration\nNext: Rebase onto latest origin/main and merge to main\nSee also:
+    ADR 0193'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783312'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:6a8aa92b4
+  evidence: '6a8aa92b4 [plane] Finalize ADR 0193 live apply\n\nPurpose: Complete the
+    repo-managed Plane live apply and harden its governed ADR sync path\nScope: Plane
+    runtime retries, shared edge defaults, ADR/workstream docs, tests, and workstream
+    ownership metadata\nStatus: Live apply and branch-side verification are complete\nNext:
+    Record the receipt with this commit and merge to main\nSee also: ADR 0193'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783341'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:7d4e01983
+  evidence: 7d4e01983 [plane] Normalize ADR 0193 receipt verification states
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783825'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:2dc1a7928
+  evidence: 2dc1a7928 [plane] Fix push-gate metadata for ADR 0193
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783828'
+- marker_type: git-commit
+  adr_number: 0193
+  location: git:6541d28d2
+  evidence: 6541d28d2 [plane] Apply ADR 0193 runtime and sync path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.783831'
+- marker_type: playbook
+  adr_number: 0193
+  location: playbooks/plane.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:28.805100'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=14, playbook=1
+
+  Implemented On: 2026-03-27'

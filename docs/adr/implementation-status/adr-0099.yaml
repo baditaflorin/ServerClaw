@@ -1,0 +1,40 @@
+adr_number: 0099
+title: Automated Backup Restore Verification
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0099
+  location: git:30c20d09d
+  evidence: 30c20d09d Release 0.99.0 for ADR 0099
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.470749'
+- marker_type: git-commit
+  adr_number: 0099
+  location: git:7ffde0e00
+  evidence: 7ffde0e00 Implement ADR 0099 restore verification workflow
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.470788'
+- marker_type: git-commit
+  adr_number: 0099
+  location: git:acb0b12ae
+  evidence: acb0b12ae Implement ADR 0099 restore verification workflow
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.470854'
+- marker_type: config-file
+  adr_number: 0099
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:46.647339'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=3, config-file=1
+
+  Implemented On: 2026-03-23'

@@ -1,0 +1,100 @@
+adr_number: 0188
+title: Failover Rehearsal Gate for Redundancy Tiers
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:70009d11c
+  evidence: 70009d11c [release] Cut 0.177.20 for ADR 0188
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.722254'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:954affdc8
+  evidence: 954affdc8 Merge remote-tracking branch 'origin/main' into codex/ws-0188-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.722297'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:5e28226d4
+  evidence: 5e28226d4 [release] Cut 0.177.17 for ADR 0188
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.722424'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:153d78902
+  evidence: 153d78902 Merge remote-tracking branch 'origin/main' into codex/ws-0188-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.722440'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:c730400ad
+  evidence: c730400ad [release] Cut 0.177.16 for ADR 0188
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.722494'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:acdb5e588
+  evidence: acdb5e588 Merge remote-tracking branch 'origin/main' into codex/ws-0188-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.722515'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:1c174dcdf
+  evidence: 1c174dcdf [release] Cut 0.177.15 for ADR 0188
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.722529'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:8c0e42a70
+  evidence: 8c0e42a70 Merge remote-tracking branch 'origin/main' into codex/ws-0188-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.722544'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:e9ae31cb4
+  evidence: e9ae31cb4 [release] Cut 0.177.14 for ADR 0188
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.722599'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:cf1dc6bbe
+  evidence: cf1dc6bbe Merge remote-tracking branch 'origin/main' into codex/ws-0188-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.722622'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:40c5600a8
+  evidence: 40c5600a8 Merge remote-tracking branch 'origin/main' into codex/ws-0188-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:26.722662'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:a0aa1a5e4
+  evidence: a0aa1a5e4 [build] Refresh platform manifest for ADR 0188 gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.722900'
+- marker_type: git-commit
+  adr_number: 0188
+  location: git:03f34f477
+  evidence: 03f34f477 [redundancy] Apply ADR 0188 rehearsal gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:26.722920'
+- marker_type: config-file
+  adr_number: 0188
+  location: config/service-redundancy-catalog.json
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:26.844463'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=13, config-file=1
+
+  Implemented On: 2026-03-27'

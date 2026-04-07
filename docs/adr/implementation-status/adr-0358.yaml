@@ -1,0 +1,48 @@
+adr_number: 0358
+title: Platform Health Contract and Inter-Service Dependency SLO
+canonical_status: Proposed
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0358
+  location: git:eea65509a
+  evidence: 'eea65509a chore: regenerate ADR index after status triage (0347-0358
+    superseded/deferred)'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:39.512154'
+- marker_type: git-commit
+  adr_number: 0358
+  location: git:f056ddce0
+  evidence: "f056ddce0 [release] Bump to 0.178.21 \u2014 ADR triage 0347-0358: 6 implementations\
+    \ + 3 superseded + 3 deferred"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:39.512203'
+- marker_type: git-commit
+  adr_number: 0358
+  location: git:1027d5d8a
+  evidence: 1027d5d8a [workstream] Register adr-0347-0358 multi-agent ops workstream
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:39.512443'
+- marker_type: git-commit
+  adr_number: 0358
+  location: git:51c033e0b
+  evidence: "51c033e0b Merge PR: epic-liskov \u2014 ADR 0347-0358 atomic multi-agent\
+    \ ops and LLM integration"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:39.513052'
+- marker_type: git-commit
+  adr_number: 0358
+  location: git:ec2f8c830
+  evidence: ec2f8c830 [adr-0347-0358] Add 12 ADRs for atomic multi-agent ops and LLM
+    integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:39.513123'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5'

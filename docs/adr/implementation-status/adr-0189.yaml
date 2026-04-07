@@ -1,0 +1,46 @@
+adr_number: 0189
+title: Network Impairment Test Matrix for Staging and Previews
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0189
+  location: git:6d41f749a
+  evidence: 6d41f749a [main] Sync current origin/main and publish ADR 0189 in 0.177.22
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:27.144856'
+- marker_type: git-commit
+  adr_number: 0189
+  location: git:46b554152
+  evidence: 46b554152 [adr-0189] Merge network impairment matrix into main
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:27.144935'
+- marker_type: git-commit
+  adr_number: 0189
+  location: git:0127610e6
+  evidence: 0127610e6 [adr-0189] Refresh platform manifest
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:27.145133'
+- marker_type: git-commit
+  adr_number: 0189
+  location: git:b6b631499
+  evidence: b6b631499 [adr-0189] Record live apply evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:27.145202'
+- marker_type: git-commit
+  adr_number: 0189
+  location: git:5ebdd2afc
+  evidence: 5ebdd2afc [adr-0189] Implement network impairment matrix workflow
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:27.145219'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-27'

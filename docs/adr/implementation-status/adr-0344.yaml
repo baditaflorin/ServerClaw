@@ -1,0 +1,30 @@
+adr_number: '0344'
+title: Single-Source Environment Topology
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0344'
+  location: git:0391c9b75
+  evidence: 0391c9b75 [adr-0344] Implement topology snapshot generator from Ansible
+    inventory
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:34.623979'
+- marker_type: git-commit
+  adr_number: '0344'
+  location: git:912e6bc26
+  evidence: 912e6bc26 [adr-0344] Implement topology snapshot generator from Ansible
+    inventory
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:34.624032'
+inferred_implementation_status: Partial Evidence
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Partial Evidence
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-04-04'

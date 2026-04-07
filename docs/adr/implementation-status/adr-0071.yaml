@@ -1,0 +1,40 @@
+adr_number: '0071'
+title: Agent Observation Loop And Autonomous Drift Detection
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0071'
+  location: git:6727f61d7
+  evidence: 6727f61d7 Merge origin/main into ADR 0071 workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.441520'
+- marker_type: git-commit
+  adr_number: '0071'
+  location: git:f7892d5e8
+  evidence: f7892d5e8 Implement ADR 0071 observation loop
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:35.441551'
+- marker_type: git-commit
+  adr_number: '0071'
+  location: git:6e84ff9d9
+  evidence: 6e84ff9d9 Add ADRs 0062-0071 with workstreams and hardening roadmap
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:35.441998'
+- marker_type: config-file
+  adr_number: '0071'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:35.594134'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=3, config-file=1
+
+  Implemented On: 2026-03-23'

@@ -1,0 +1,40 @@
+adr_number: '0060'
+title: Open WebUI For Operator And Agent Workbench
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0060'
+  location: git:c9b2e53a6
+  evidence: c9b2e53a6 Merge latest main and release ADR 0060 Open WebUI
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.860649'
+- marker_type: git-commit
+  adr_number: '0060'
+  location: git:fba440a0f
+  evidence: fba440a0f Merge origin/main and release ADR 0060 Open WebUI
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.860681'
+- marker_type: git-commit
+  adr_number: '0060'
+  location: git:dad4c2b3d
+  evidence: dad4c2b3d Release ADR 0060 Open WebUI rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.860718'
+- marker_type: git-commit
+  adr_number: '0060'
+  location: git:a084edf88
+  evidence: a084edf88 Implement ADR 0060 Open WebUI workbench
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.860751'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-22'

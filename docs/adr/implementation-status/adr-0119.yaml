@@ -1,0 +1,100 @@
+adr_number: 0119
+title: Budgeted Workflow Scheduler
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:1f9281174
+  evidence: 1f9281174 Release 0.177.10 for ADR 0119 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732015'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:443d3ca58
+  evidence: 443d3ca58 Fix ADR 0119 Windmill seed sync replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732046'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:de3d7ceff
+  evidence: de3d7ceff Handle Windmill bootstrap session auth for ADR 0119
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732050'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:82bd1afaa
+  evidence: 82bd1afaa Fix ADR 0119 Windmill live apply follow-ups
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732053'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:bf0c50ccb
+  evidence: bf0c50ccb Apply ADR 0119 scheduler live runtime fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732056'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:7ce7badeb
+  evidence: 7ce7badeb Record ADR 0119 mainline verification state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732100'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:bf7d311d0
+  evidence: bf7d311d0 Handle Windmill bootstrap session auth for ADR 0119
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732347'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:850930799
+  evidence: 850930799 Fix ADR 0119 Windmill live apply follow-ups
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732350'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:5aa54cee1
+  evidence: 5aa54cee1 Apply ADR 0119 scheduler live runtime fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732353'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:1bc5c3c25
+  evidence: 1bc5c3c25 Fix ADR 0119 Windmill live apply follow-ups
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732505'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:847336a5a
+  evidence: 847336a5a Apply ADR 0119 scheduler live runtime fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732612'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:2d9ef2197
+  evidence: 2d9ef2197 Apply ADR 0119 scheduler live runtime fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.732658'
+- marker_type: git-commit
+  adr_number: 0119
+  location: git:eee1c08cb
+  evidence: eee1c08cb Implement ADR 0119 budgeted workflow scheduler
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.734552'
+- marker_type: config-file
+  adr_number: 0119
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:54.877138'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=13, config-file=1
+
+  Implemented On: 2026-03-26'
