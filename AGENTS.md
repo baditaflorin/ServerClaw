@@ -311,7 +311,7 @@ To add/update a service's nginx config atomically (write-validate-rename-reload)
     nginx_fragment_content: |
       server {
         listen 443 ssl;
-        server_name sso.lv3.org;
+        server_name sso.your-domain.example;
         ...
       }
 ```
