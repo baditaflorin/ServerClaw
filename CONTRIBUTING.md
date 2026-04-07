@@ -107,16 +107,54 @@ SKIP_ADR_VALIDATION=1 GATE_BYPASS_REASON_CODE=build_server_unreachable \
 
 This logs a bypass receipt in `receipts/gate-bypasses/` for audit trail.
 
+### Provisioning ADR Governance Infrastructure (IaC)
+
+The Plane project and API credentials are created programmatically through Infrastructure as Code:
+
+#### Automated Provisioning (Recommended)
+
+```bash
+# Prerequisites: Get Plane admin token from workspace settings
+# (Plane UI → Settings → API Tokens → Create Token)
+
+# Test provisioning (dry-run)
+make provision-adr-governance-dry-run PLANE_ADMIN_TOKEN=your_admin_token
+
+# Execute provisioning
+make provision-adr-governance PLANE_ADMIN_TOKEN=your_admin_token
+```
+
+**What happens:**
+1. Ansible playbook runs on runtime_control_lv3
+2. Creates Plane project "Architecture Decisions" (adr-index)
+3. Generates API token for ADR sync
+4. Saves credentials to `/root/.local/plane.env`
+5. Displays next steps
+
+#### Manual Provisioning (Development)
+
+```bash
+# Run provisioning script directly
+python3 scripts/provision_plane_adr_project.py \
+  --plane-url http://10.10.10.20:8093/api/v1 \
+  --workspace-slug default \
+  --admin-token YOUR_TOKEN \
+  --output-file .local/plane.env
+```
+
 ### Viewing ADR Status in Plane
 
 All 406 ADRs are synced to Plane project `adr-index`:
 
 ```bash
+# After provisioning, source the credentials
+source /root/.local/plane.env  # On deployment host
+source .local/plane.env         # On dev machine
+
 # Test sync (dry-run)
 make sync-adrs-to-plane-dry-run
 
-# Execute sync (requires PLANE_API_KEY in .local/plane.env)
-source .local/plane.env
+# Execute sync
 make sync-adrs-to-plane
 ```
 
@@ -124,6 +162,11 @@ make sync-adrs-to-plane
 - Accepted → Backlog
 - Partial → In Progress
 - Implemented → Done
+
+**IaC Files:**
+- Playbook: `playbooks/provision_adr_governance.yml`
+- Role: `collections/ansible_collections/lv3/platform/roles/plane_adr_provisioner/`
+- Script: `scripts/provision_plane_adr_project.py`
 
 ### Quarterly Audit
 
