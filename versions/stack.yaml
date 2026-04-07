@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.178.37
-platform_version: 0.131.2
+platform_version: 0.131.3
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -14,6 +14,7 @@ live_apply_evidence:
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-04-07-adr-0376-oauth2-stale-session-cookie-auto-clear-live-apply
+    semaphore: 2026-04-08-ws-0362-semaphore-keycloak-oidc-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     identity_core_watchdog: 2026-04-06-adr-0376-identity-core-watchdog-live-apply
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
