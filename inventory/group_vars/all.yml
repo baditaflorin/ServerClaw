@@ -493,6 +493,9 @@ playbook_execution_required_hosts:
   runtime_general:
     production: runtime-general-lv3
     staging: docker-runtime-staging-lv3
+  runtime_comms:
+    production: runtime-comms-lv3
+    staging: docker-runtime-staging-lv3
   monitoring:
     production: monitoring-lv3
     staging: monitoring-staging-lv3
