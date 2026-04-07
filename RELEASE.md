@@ -1,8 +1,9 @@
-# Release 0.178.55
+# Release 0.178.56
 
-- Date: 2026-04-07
+- Date: 2026-04-08
 
 ## Summary
+- LiteLLM Proxy + LibreChat deployed to production, replacing One API + Open WebUI; deployment fixes for OpenBao, Prisma, Docker port conflicts, and LibreChat config schema
 - ADR 0380 updated to Implemented status with multi-instance amendment; neko_tool.py CLI for programmatic instance management (add/remove/check/validate, auto-assigns ports and UDP ranges, JSON output for automation)
 - Neko multi-instance browser sessions: each user gets an isolated Neko container keyed by Keycloak email; adding/removing entries in neko_instances auto-provisions/deprovisions the container and Keycloak user; NGINX routes authenticated users to their container via email map; single-instance containers removed in favour of the loop-based neko_runtime role
 - fix ops.lv3.org auth loop — expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused "Code not valid" on every login attempt

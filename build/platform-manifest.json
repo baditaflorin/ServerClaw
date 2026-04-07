@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.55",
+  "repo_version": "0.178.56",
   "platform_version": "0.131.2",
-  "generated_at": "2026-04-07T19:41:26Z",
-  "next_refresh_at": "2026-04-07T20:41:26Z",
+  "generated_at": "2026-04-07T21:26:12Z",
+  "next_refresh_at": "2026-04-07T22:26:12Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6321,10 +6321,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.54",
+    "last_version": "0.178.55",
     "deployed_at": "2026-04-07",
-    "summary": "fix ops.lv3.org auth loop \u2014 expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused \"Code not valid\" on every login attempt add LiteLLM Proxy + LibreChat to replace One API + Open WebUI \u2014 portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar",
-    "release_notes_url": "docs/release-notes/0.178.55.md"
+    "summary": "LiteLLM Proxy + LibreChat deployed to production, replacing One API + Open WebUI; deployment fixes for OpenBao, Prisma, Docker port conflicts, and LibreChat config schema ADR 0380 updated to Implemented status with multi-instance amendment; neko_tool.py CLI for programmatic instance management (add/remove/check/validate, auto-assigns ports and UDP ranges, JSON output for automation)",
+    "release_notes_url": "docs/release-notes/0.178.56.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
