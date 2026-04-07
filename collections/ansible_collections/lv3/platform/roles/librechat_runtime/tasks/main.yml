@@ -58,6 +58,20 @@
   changed_when: "'changed' in librechat_jwt_gen.stdout"
   no_log: true
 
+- name: Generate the LibreChat JWT refresh secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ librechat_jwt_refresh_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ librechat_jwt_refresh_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_jwt_refresh_gen
+  changed_when: "'changed' in librechat_jwt_refresh_gen.stdout"
+  no_log: true
+
 - name: Generate the LibreChat credentials encryption key
   ansible.builtin.shell: |
     set -euo pipefail
@@ -106,6 +120,7 @@
     src: "{{ item }}"
   loop:
     - "{{ librechat_jwt_secret_remote_file }}"
+    - "{{ librechat_jwt_refresh_secret_remote_file }}"
     - "{{ librechat_creds_key_remote_file }}"
     - "{{ librechat_creds_iv_remote_file }}"
   register: librechat_secrets_raw
@@ -121,8 +136,9 @@
 - name: Record the LibreChat runtime secrets
   ansible.builtin.set_fact:
     librechat_jwt_secret: "{{ librechat_secrets_raw.results[0].content | b64decode | trim }}"
-    librechat_creds_key: "{{ librechat_secrets_raw.results[1].content | b64decode | trim }}"
-    librechat_creds_iv: "{{ librechat_secrets_raw.results[2].content | b64decode | trim }}"
+    librechat_jwt_refresh_secret: "{{ librechat_secrets_raw.results[1].content | b64decode | trim }}"
+    librechat_creds_key: "{{ librechat_secrets_raw.results[2].content | b64decode | trim }}"
+    librechat_creds_iv: "{{ librechat_secrets_raw.results[3].content | b64decode | trim }}"
     librechat_oidc_session_secret: "{{ librechat_oidc_session_raw.content | b64decode | trim if librechat_enable_oidc | bool else '' }}"
   no_log: true
 

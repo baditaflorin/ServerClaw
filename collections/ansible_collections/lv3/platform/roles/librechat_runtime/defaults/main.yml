@@ -33,6 +33,7 @@ librechat_meilisearch_data_dir: "{{ librechat_data_dir }}/meilisearch"
 librechat_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/librechat
 librechat_jwt_secret_local_file: "{{ librechat_local_artifact_dir }}/jwt-secret.txt"
 librechat_jwt_secret_remote_file: "{{ librechat_secret_dir }}/jwt-secret"
+librechat_jwt_refresh_secret_remote_file: "{{ librechat_secret_dir }}/jwt-refresh-secret"
 librechat_creds_key_local_file: "{{ librechat_local_artifact_dir }}/creds-key.txt"
 librechat_creds_key_remote_file: "{{ librechat_secret_dir }}/creds-key"
 librechat_creds_iv_local_file: "{{ librechat_local_artifact_dir }}/creds-iv.txt"
