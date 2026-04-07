@@ -27,6 +27,11 @@ litellm_image: "{{ container_image_catalog.images.litellm_runtime.ref }}"
 litellm_master_key_remote_file: "{{ litellm_secret_dir }}/master-key"
 litellm_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/litellm
 litellm_master_key_local_file: "{{ litellm_local_artifact_dir }}/master-key.txt"
-litellm_database_url: "postgresql://{{ litellm_database_user }}:{{ litellm_database_password }}@{{ platform_service_topology.postgres.hosts.internal }}:5432/{{ litellm_database_name }}"
+litellm_database_name: litellm
+litellm_database_user: litellm
+litellm_postgres_secret_dir: /etc/lv3/litellm
+litellm_postgres_password_file: "{{ litellm_postgres_secret_dir }}/database-password"
+litellm_database_password_local_file: "{{ litellm_local_artifact_dir }}/database-password.txt"
+litellm_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 litellm_ollama_base_url: http://10.10.10.20:11434
 litellm_log_level: INFO
