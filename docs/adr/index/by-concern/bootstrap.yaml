@@ -14,7 +14,7 @@ adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-21'
     concern: bootstrap
     keywords:

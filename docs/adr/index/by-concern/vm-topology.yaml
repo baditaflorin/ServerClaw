@@ -101,7 +101,7 @@ adrs:
   - adr: '0023'
     title: Docker Runtime VM Baseline
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -188,7 +188,7 @@ adrs:
   - adr: 0029
     title: Dedicated Backup VM With Local PBS
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -221,7 +221,7 @@ adrs:
   - adr: '0033'
     title: Declarative Service Topology Catalog
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: vm-topology
     keywords:

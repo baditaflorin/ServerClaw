@@ -1,7 +1,7 @@
 # ADR 0031: Repository Validation Pipeline For Automation Changes
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.32.0
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-22
