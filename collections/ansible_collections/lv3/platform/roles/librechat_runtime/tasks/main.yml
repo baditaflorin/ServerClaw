@@ -41,6 +41,8 @@
       mode: "0755"
     - path: "{{ librechat_meilisearch_data_dir }}"
       mode: "0755"
+    - path: "{{ librechat_env_file | dirname }}"
+      mode: "0700"
 
 - name: Generate the LibreChat JWT secret
   ansible.builtin.shell: |
