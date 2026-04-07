@@ -11,6 +11,8 @@ map $http_upgrade $connection_upgrade {
 
 # Route authenticated user email to their dedicated Neko container.
 # Empty string = authenticated Keycloak user but no browser session assigned.
+# An empty $neko_backend causes proxy_pass to fail with nginx 500 (content phase,
+# after auth), which is caught by error_page 500 = @neko_no_session below.
 map $auth_email $neko_backend {
 {% for name, inst in neko_instances.items() %}
     "{{ inst.email }}"  "http://{{ hostvars['runtime-comms-lv3'].ansible_host }}:{{ inst.port }}";
@@ -40,18 +42,15 @@ server {
     add_header X-Content-Type-Options nosniff always;
     add_header Referrer-Policy no-referrer-when-downgrade always;
 
-    # Server-level error page handlers — ensure proper Content-Type for all error responses
-    error_page 403 @neko_no_session;
-
     # Shared oauth2-proxy passthrough (cookie_domains covers .lv3.org)
     location /oauth2/ {
         proxy_pass http://127.0.0.1:4180;
         proxy_http_version 1.1;
-        proxy_set_header Host                   $host;
-        proxy_set_header X-Real-IP              $remote_addr;
-        proxy_set_header X-Forwarded-For        $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto      $scheme;
-        proxy_set_header X-Forwarded-Host       $host;
+        proxy_set_header Host                    $host;
+        proxy_set_header X-Real-IP               $remote_addr;
+        proxy_set_header X-Forwarded-For         $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto       $scheme;
+        proxy_set_header X-Forwarded-Host        $host;
         proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
     }
 
@@ -75,16 +74,15 @@ server {
         # Step 2: Extract authenticated user email from oauth2-proxy
         auth_request_set $auth_email $upstream_http_x_auth_request_email;
 
-        # Step 3: Route to user's container (map evaluated lazily after auth_request_set)
-        # Return 403 if this Keycloak user has no browser session assigned.
-        # Use plain 403 + server-level error_page so Chrome receives text/html (not
-        # application/octet-stream, which triggers ERR_INVALID_RESPONSE).
-        if ($neko_backend = "") {
-            return 403;
-        }
-
-        # Graceful handling when the user's container is temporarily down
-        error_page 502 503 504 = @neko_unavailable;
+        # Step 3: Route to user's container.
+        # $neko_backend is evaluated in the content phase (after auth_request_set
+        # has populated $auth_email), so the map resolves correctly.
+        # When $neko_backend is "" (email not in neko_instances), proxy_pass fails
+        # with nginx error 500 — caught below and shown as a 403 HTML page.
+        # NOTE: do NOT use an `if` block here — `if` is rewrite-phase and runs
+        # before auth_request, so $auth_email would always be "" at that point.
+        error_page 500 @neko_no_session;
+        error_page 502 503 504 @neko_unavailable;
 
         proxy_pass              $neko_backend;
         proxy_http_version      1.1;
@@ -106,7 +104,7 @@ server {
     }
 
     # Shown when authenticated but no Neko instance is assigned to this email.
-    # Separate named location ensures Content-Type: text/html (not application/octet-stream).
+    # Triggered via error_page 500 from proxy_pass with empty $neko_backend.
     location @neko_no_session {
         default_type text/html;
         return 403 '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>No browser session — browser.lv3.org</title><style>body{font-family:system-ui,sans-serif;max-width:520px;margin:100px auto;padding:0 24px;color:#1a1a2e}h2{color:#e63946}code{background:#f1f1f1;padding:2px 6px;border-radius:3px;font-size:.9em}</style></head><body><h2>No browser session assigned</h2><p>You are signed in, but your account does not have a dedicated browser session on this platform.</p><p>Ask an administrator to add your email to <code>neko_instances</code> in <code>inventory/group_vars/platform.yml</code> and re-run the Neko playbook.</p><p><a href="/oauth2/sign_out">Sign out</a></p></body></html>';
