@@ -37,24 +37,23 @@
     gate_tools_version_file: "/opt/builds/gate-tool-versions.json"
 
   tasks:
-    - name: Install Python gate tool dependencies via pip
-      ansible.builtin.pip:
-        name:
-          - "ansible-lint=={{ gate_tools_ansible_lint_version }}"
-          - "yamllint=={{ gate_tools_yamllint_version }}"
-          - "semgrep=={{ gate_tools_semgrep_version }}"
-          - "mypy=={{ gate_tools_mypy_version }}"
-          - "PyYAML=={{ gate_tools_pyyaml_version }}"
-          - "jsonschema=={{ gate_tools_jsonschema_version }}"
-          - "types-PyYAML"
-          - "checkov=={{ gate_tools_checkov_version }}"
-          - "pytest=={{ gate_tools_pytest_version }}"
-          - "python-hcl2=={{ gate_tools_hcl2_version }}"
-          - "qdrant-client=={{ gate_tools_qdrant_client_version }}"
-          - "httpx"
-        state: present
-        executable: pip3
-        extra_args: "--break-system-packages"
+    - name: Install Python gate tool dependencies via uv
+      ansible.builtin.command:
+        cmd: >-
+          uv pip install --system --break-system-packages
+          ansible-lint=={{ gate_tools_ansible_lint_version }}
+          yamllint=={{ gate_tools_yamllint_version }}
+          semgrep=={{ gate_tools_semgrep_version }}
+          mypy=={{ gate_tools_mypy_version }}
+          PyYAML=={{ gate_tools_pyyaml_version }}
+          jsonschema=={{ gate_tools_jsonschema_version }}
+          types-PyYAML
+          checkov=={{ gate_tools_checkov_version }}
+          pytest=={{ gate_tools_pytest_version }}
+          python-hcl2=={{ gate_tools_hcl2_version }}
+          qdrant-client=={{ gate_tools_qdrant_client_version }}
+          httpx
+      become: true
 
     - name: Check installed trivy version
       ansible.builtin.command: trivy --version
