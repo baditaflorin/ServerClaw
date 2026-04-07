@@ -24,10 +24,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.39 release notes](docs/release-notes/0.178.39.md)
+- [0.178.42 release notes](docs/release-notes/0.178.42.md)
 
 ## Previous Releases
 
+- [0.178.39 release notes](docs/release-notes/0.178.39.md)
 - [0.178.38 release notes](docs/release-notes/0.178.38.md)
 - [0.178.36 release notes](docs/release-notes/0.178.36.md)
 - [0.178.35 release notes](docs/release-notes/0.178.35.md)
@@ -39,19 +40,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.29 release notes](docs/release-notes/0.178.29.md)
 - [0.178.28 release notes](docs/release-notes/0.178.28.md)
 - [0.178.27 release notes](docs/release-notes/0.178.27.md)
-- [0.178.26 release notes](docs/release-notes/0.178.26.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (377 releases)](docs/release-notes/index/2026.md)
-
-## Unreleased
-
-- ADR 0058 and 0061 marked as Superseded (deployed via ADRs 0276, 0281)
-
-- ADR implementation scanner tool created for automated discovery (618 lines)
-
-- ADR 0243 branch assessment: Storybook/Playwright UI testing framework ready (with Windmill CE fix pending)
-
-- ADR 0025 deep dive: 4-phase roadmap for completing Compose-managed stacks (systemd integration, runbooks, registry)
+- [2026 (378 releases)](docs/release-notes/index/2026.md)
