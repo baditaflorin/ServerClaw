@@ -42,6 +42,8 @@ identity_watchdog_ntfy_title: "LV3 Identity Watchdog"
 #   name: human-readable identifier
 #   compose_dir: path to the docker-compose project directory
 #   compose_service: service name within the compose file to restart
+#   restart_args: docker compose subcommand + args (default: "restart <service> --timeout 30")
+#                 use "up -d" for services that may be fully stopped (e.g. OOM-killed)
 #   health_url: HTTP(S) URL to probe
 #   health_method: curl flags (e.g. -k for TLS ignore)
 #   expected_status: HTTP status code(s) that mean healthy
@@ -49,24 +51,35 @@ identity_watchdog_services:
   - name: keycloak
     compose_dir: /opt/keycloak
     compose_service: keycloak
+    restart_args: ""
     health_url: "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration"
     health_method: ""
     expected_status: "200"
   - name: step-ca
     compose_dir: /opt/step-ca
     compose_service: step-ca
+    restart_args: ""
     health_url: "https://127.0.0.1:9000/health"
     health_method: "-k"
     expected_status: "200"
   - name: openbao
     compose_dir: /opt/openbao
     compose_service: openbao
+    restart_args: ""
     health_url: "http://127.0.0.1:8201/v1/sys/health"
     health_method: ""
     expected_status: "200"
   - name: api-gateway
     compose_dir: /opt/api-gateway
     compose_service: api-gateway
+    restart_args: ""
     health_url: "http://127.0.0.1:8083/healthz"
+    health_method: ""
+    expected_status: "200"
+  - name: harbor
+    compose_dir: /opt/harbor/installer/harbor
+    compose_service: ""
+    restart_args: "up -d"
+    health_url: "http://127.0.0.1:8095/api/v2.0/ping"
     health_method: ""
     expected_status: "200"

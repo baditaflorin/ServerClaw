@@ -92,9 +92,19 @@ probe_service() {
 }
 
 restart_service() {
-    local svc="$1" compose_dir="$2" compose_service="$3"
-    log_warn "${svc}: restarting ${compose_service} in ${compose_dir}"
-    if cd "${compose_dir}" && docker compose restart "${compose_service}" --timeout 30 2>&1; then
+    local svc="$1" compose_dir="$2" compose_service="$3" restart_args="$4"
+    # Build the docker compose command:
+    #   restart_args="" → "restart <service> --timeout 30" (running container)
+    #   restart_args="up -d" → "up -d" (handles stopped/OOM-killed containers)
+    local compose_cmd
+    if [[ -z "${restart_args}" ]]; then
+        compose_cmd="restart ${compose_service} --timeout 30"
+    else
+        compose_cmd="${restart_args}"
+    fi
+    log_warn "${svc}: running 'docker compose ${compose_cmd}' in ${compose_dir}"
+    # shellcheck disable=SC2086
+    if cd "${compose_dir}" && docker compose ${compose_cmd} 2>&1; then
         log_info "${svc}: restart completed"
         return 0
     else
@@ -117,6 +127,7 @@ overall_healthy=true
     svc_expected="{{ svc.expected_status }}"
     svc_compose_dir="{{ svc.compose_dir }}"
     svc_compose_service="{{ svc.compose_service }}"
+    svc_restart_args="{{ svc.restart_args | default('') }}"
 
     if probe_service "${svc_url}" "${svc_method}" "${svc_expected}"; then
         log_info "${svc_name}: healthy"
@@ -151,7 +162,7 @@ overall_healthy=true
                     "${svc_name} failed ${failures} consecutive probes on ${HOSTNAME}. Auto-restarting (${restarts_this_hour}/${MAX_RESTARTS_PER_HOUR} this hour)." \
                     "rotating_light,skull"
 
-                if restart_service "${svc_name}" "${svc_compose_dir}" "${svc_compose_service}"; then
+                if restart_service "${svc_name}" "${svc_compose_dir}" "${svc_compose_service}" "${svc_restart_args}"; then
                     increment_restart_count "${svc_name}"
                 fi
             else
