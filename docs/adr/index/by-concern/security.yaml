@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-07'
+generated: '2026-04-08'
 facet: concern
 concern: security
-total_adrs: 32
+total_adrs: 34
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -552,6 +552,21 @@ adrs:
     summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
+  - adr: '0361'
+    title: Semaphore Keycloak OIDC Integration
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - semaphore
+      - keycloak
+      - oidc
+      - integration
+    summary: 'Extend Semaphore runtime configuration to support Keycloak OpenID Connect (OIDC) authentication while maintaining
+      fallback username/password login for recovery '
+    filename: 0361-semaphore-keycloak-oidc-integration.md
+    path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted
@@ -605,3 +620,21 @@ adrs:
     filename: 0376-credential-isolation-and-agent-safety.md
     path: docs/adr/0376-credential-isolation-and-agent-safety.md
     implemented_on: '2026-04-06'
+  - adr: 0382
+    title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - adr-0382
+      - keycloak
+      - sign-in
+      - button
+      - stuck
+      - active
+      - incident
+      - postmortem
+    summary: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    filename: 0382-keycloak-sign-in-button-stuck-postmortem.md
+    path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md

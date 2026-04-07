@@ -1,0 +1,113 @@
+id: ws-adr-0364-native-gate
+adr: '0364'
+title: Native Build Server Gate Execution — eliminate per-check Docker overhead and amd64 emulation
+status: ready
+owner: claude
+branch: claude/adr-0364-native-gate
+worktree_path: .claude/worktrees/native-gate
+doc: docs/adr/0364-native-build-server-gate-execution.md
+depends_on:
+- adr-0082-remote-build-execution-gateway
+- adr-0083-docker-based-check-runner
+- adr-0087-repository-validation-gate
+conflicts_with: []
+shared_surfaces:
+- scripts/parallel_check.py
+- config/validation-gate.json
+- config/build-server.json
+- collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
+- docs/adr/0364-native-build-server-gate-execution.md
+ownership_manifest:
+  owned_surfaces:
+  - id: adr_0364_doc
+    paths:
+    - docs/adr/0364-native-build-server-gate-execution.md
+    - AGENTS.md
+    - docs/runbooks/certificate-monitoring.md
+    mode: exclusive
+  - id: adr_0364_gate_tools_playbook
+    paths:
+    - collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
+    - collections/requirements.yml
+    - collections/ansible_collections/lv3/platform/roles/repowise_runtime/meta/main.yml
+    mode: exclusive
+  - id: adr_0364_parallel_check
+    paths:
+    - scripts/parallel_check.py
+    mode: exclusive
+  - id: adr_0364_validation_gate
+    paths:
+    - config/validation-gate.json
+    mode: exclusive
+  - id: adr_0364_build_server_config
+    paths:
+    - config/build-server.json
+    mode: exclusive
+  - id: adr_0364_service_completeness_fix
+    paths:
+    - config/service-completeness.json
+    - config/service-redundancy-catalog.json
+    - config/health-probe-catalog.json
+    - collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml
+    - scripts/subdomain_catalog.py
+    mode: exclusive
+  - id: adr_0364_service_capability_catalog
+    paths:
+    - config/service-capability-catalog.json
+    mode: shared_contract
+    contract: service-catalog-v1
+  - id: adr_0364_uptime_kuma
+    paths:
+    - config/uptime-kuma/monitors.json
+    mode: shared_contract
+    contract: service-catalog-and-automation-contract-v1
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    - workstreams/active/ws-adr-0364-native-gate.yaml
+    - workstreams/active/ws-0375-certificate-validation.yaml
+    - workstreams/active/ws-0364-outline-agent-tools.yaml
+    - workstreams/archive/2026/ws-0364-outline-agent-tools.yaml
+    - workstreams/active/ws-0375-certificate-validation-codification.yaml
+    - workstreams/active/ws-0364-service-api-agent-tools.yaml
+    - workstreams/active/adr-0346-centralized-port-registry.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-range/*.yaml
+    - docs/adr/index/by-concern/*.yaml
+    - docs/adr/index/by-status/*.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: generated_truth
+    paths:
+    - build/platform-manifest.json
+    - build/onboarding/agent-core.yaml
+    - build/onboarding/automation.yaml
+    - build/onboarding/service-catalog.yaml
+    - build/onboarding/fork-bootstrap.yaml
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/diagrams/service-dependency-graph.excalidraw
+    - config/prometheus/file_sd/https_tls_targets.yml
+    - config/prometheus/rules/https_tls_alerts.yml
+    - docs/site-generated/architecture/dependency-graph.md
+    mode: shared_contract
+    contract: latest-main-generated-truth-v1
+  - id: release_bookkeeping
+    paths:
+    - README.md
+    - changelog.md
+    - versions/stack.yaml
+    - VERSION
+    mode: shared_contract
+    contract: canonical-truth-v1
+ready_to_merge: true
+live_applied: false
+canonical_truth:
+  changelog_entry: adds ADR 0364 native build server gate execution — LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions
+  release_bump: minor
+  included_in_repo_version: null

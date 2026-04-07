@@ -48,6 +48,7 @@ class CheckDefinition:
     working_dir: str
     timeout_seconds: int
     local_fallback_command: str | None = None
+    native_command: str | None = None
     cache_mounts: tuple[str, ...] = ()
 
 
@@ -121,6 +122,11 @@ def load_manifest(manifest_path: Path) -> dict[str, CheckDefinition]:
             local_fallback_command=(
                 str(config["local_fallback_command"])
                 if config.get("local_fallback_command")
+                else None
+            ),
+            native_command=(
+                str(config["native_command"])
+                if config.get("native_command")
                 else None
             ),
             cache_mounts=tuple(str(item) for item in config.get("cache_mounts", [])),
@@ -281,13 +287,28 @@ def should_use_local_fallback_command(check: CheckDefinition) -> bool:
     return bool(check.local_fallback_command and source.startswith("local-"))
 
 
+def should_use_native_command(check: CheckDefinition) -> bool:
+    """Return True when LV3_NATIVE_EXECUTION=1 and the check has a native_command.
+
+    Native execution runs the check directly on the host (no Docker container)
+    and is intended for the build server where all gate tools are pre-installed
+    and pinned via Ansible (ADR 0362).
+    """
+    return bool(
+        os.environ.get("LV3_NATIVE_EXECUTION") == "1"
+        and check.native_command
+    )
+
+
 def execute_check(
     check: CheckDefinition,
     workspace: Path,
     docker_binary: str,
 ) -> CheckResult:
     cidfile_path: Path | None = None
-    if should_use_local_fallback_command(check):
+    if should_use_native_command(check):
+        docker_command = ["sh", "-c", check.native_command or check.command]
+    elif should_use_local_fallback_command(check):
         docker_command = ["sh", "-c", check.local_fallback_command or check.command]
     else:
         cidfile_dir = workspace / ".local" / "validation-gate" / "docker-cids"

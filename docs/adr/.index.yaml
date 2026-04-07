@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-07'
+generated: '2026-04-08'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 407
+total_adrs: 411
 adr_number_range:
   first: '0001'
-  last: 0381
-  next_available: 0382
+  last: 0382
+  next_available: 0383
 implementation_status_summary:
   Implemented: 273
-  Partial: 60
+  Partial: 61
   Not Implemented: 32
   Deprecated: 4
-  Accepted: 25
-  Proposed: 13
+  Accepted: 24
+  Proposed: 17
 decision_status_summary:
   Accepted: 330
-  Proposed: 20
+  Proposed: 24
   Deprecated: 7
   Implemented: 50
 facets:
@@ -44,9 +44,9 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 88
+      count: 92
       first_adr: '0300'
-      last_adr: 0381
+      last_adr: 0382
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -80,10 +80,10 @@ facets:
       count: 10
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
-      count: 25
+      count: 26
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 135
+      count: 136
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -92,7 +92,7 @@ facets:
       count: 6
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 32
+      count: 34
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 6
@@ -110,7 +110,7 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 60
+      count: 61
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -122,18 +122,28 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 25
+      count: 24
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 13
+      count: 17
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0382
+  next_available_adr: 0383
 latest_adrs:
+  - adr: 0382
+    title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    implementation_status: Proposed
+    concern: security
+    path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md
+  - adr: 0382
+    title: Convergence Speed and Incremental Apply
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0382-convergence-speed-and-incremental-apply.md
   - adr: 0381
     title: Login Service Contracts and Session Recovery Automation
     implementation_status: Proposed
@@ -175,16 +185,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0374-cross-cutting-service-manifest.md
-  - adr: '0373'
-    title: Service Registry and Derived Defaults
-    implementation_status: Proposed
-    concern: resilience
-    path: docs/adr/0373-service-registry-and-derived-defaults.md
-  - adr: '0372'
-    title: Data-Driven Playbook Composition
-    implementation_status: Proposed
-    concern: automation
-    path: docs/adr/0372-data-driven-playbook-composition.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

@@ -1,0 +1,145 @@
+---
+# Purpose: Install and pin gate validation tools on the build server for native execution (ADR 0362).
+# Use case: Run after tool version bumps or initial build server provision to ensure the
+#   pre-push gate can run all checks natively without Docker container overhead.
+# Inputs:
+#   gate_tools_ansible_lint_version: ansible-lint pip package version (default: 24.12.2)
+#   gate_tools_yamllint_version: yamllint pip package version (default: 1.37.1)
+#   gate_tools_semgrep_version: semgrep pip package version (default: 1.88.0)
+#   gate_tools_trivy_version: trivy binary version (default: 0.59.2)
+#   gate_tools_tofu_version: opentofu version (default: 1.9.1)
+#   gate_tools_mypy_version: mypy pip package version (default: 1.13.0)
+#   gate_tools_hcl2_version: python-hcl2 pip package version (default: 8.1.1)
+#   gate_tools_qdrant_client_version: qdrant-client pip package version (default: 1.17.1)
+# Outputs: All gate tools installed under /usr/local/bin or system python3, with versions
+#   recorded in /opt/builds/gate-tool-versions.json for capability attestation.
+# Idempotency: Y — pip install --upgrade uses exact versions; binary downloads are
+#   skipped when the version file matches.
+# Dependencies: ADR 0362, ADR 0082 (build server SSH gateway), ADR 0083 (check runner manifest)
+- name: Install native gate validation tools on the build server
+  hosts: "docker-build-lv3"
+  become: true
+  gather_facts: true
+
+  vars:
+    gate_tools_ansible_lint_version: "24.12.2"
+    gate_tools_yamllint_version: "1.37.1"
+    gate_tools_semgrep_version: "1.88.0"
+    gate_tools_trivy_version: "0.59.2"
+    gate_tools_tofu_version: "1.9.1"
+    gate_tools_mypy_version: "1.13.0"
+    gate_tools_pyyaml_version: "6.0.2"
+    gate_tools_jsonschema_version: "4.23.0"
+    gate_tools_checkov_version: "3.2.469"
+    gate_tools_pytest_version: "8.4.2"
+    gate_tools_hcl2_version: "8.1.1"
+    gate_tools_qdrant_client_version: "1.17.1"
+    gate_tools_version_file: "/opt/builds/gate-tool-versions.json"
+
+  tasks:
+    - name: Install Python gate tool dependencies via pip
+      ansible.builtin.pip:
+        name:
+          - "ansible-lint=={{ gate_tools_ansible_lint_version }}"
+          - "yamllint=={{ gate_tools_yamllint_version }}"
+          - "semgrep=={{ gate_tools_semgrep_version }}"
+          - "mypy=={{ gate_tools_mypy_version }}"
+          - "PyYAML=={{ gate_tools_pyyaml_version }}"
+          - "jsonschema=={{ gate_tools_jsonschema_version }}"
+          - "types-PyYAML"
+          - "checkov=={{ gate_tools_checkov_version }}"
+          - "pytest=={{ gate_tools_pytest_version }}"
+          - "python-hcl2=={{ gate_tools_hcl2_version }}"
+          - "qdrant-client=={{ gate_tools_qdrant_client_version }}"
+          - "httpx"
+        state: present
+        executable: pip3
+        extra_args: "--break-system-packages"
+
+    - name: Check installed trivy version
+      ansible.builtin.command: trivy --version
+      register: trivy_version_check
+      changed_when: false
+      failed_when: false
+
+    - name: Download and install trivy binary
+      when: >-
+        trivy_version_check.rc != 0 or
+        gate_tools_trivy_version not in trivy_version_check.stdout
+      block:
+        - name: Download trivy archive
+          ansible.builtin.get_url:
+            url: "https://github.com/aquasecurity/trivy/releases/download/v{{ gate_tools_trivy_version }}/trivy_{{ gate_tools_trivy_version }}_Linux-64bit.tar.gz"
+            dest: "/tmp/trivy_{{ gate_tools_trivy_version }}.tar.gz"
+            mode: "0644"
+
+        - name: Extract and install trivy
+          ansible.builtin.unarchive:
+            src: "/tmp/trivy_{{ gate_tools_trivy_version }}.tar.gz"
+            dest: /usr/local/bin
+            remote_src: true
+            include: ["trivy"]
+            mode: "0755"
+
+    - name: Check installed tofu version
+      ansible.builtin.command: tofu version
+      register: tofu_version_check
+      changed_when: false
+      failed_when: false
+
+    - name: Download and install opentofu binary
+      when: >-
+        tofu_version_check.rc != 0 or
+        gate_tools_tofu_version not in tofu_version_check.stdout
+      block:
+        - name: Download opentofu archive
+          ansible.builtin.get_url:
+            url: "https://github.com/opentofu/opentofu/releases/download/v{{ gate_tools_tofu_version }}/tofu_{{ gate_tools_tofu_version }}_linux_amd64.zip"
+            dest: "/tmp/tofu_{{ gate_tools_tofu_version }}.zip"
+            mode: "0644"
+
+        - name: Extract and install tofu
+          ansible.builtin.unarchive:
+            src: "/tmp/tofu_{{ gate_tools_tofu_version }}.zip"
+            dest: /usr/local/bin
+            remote_src: true
+            include: ["tofu"]
+            mode: "0755"
+
+    - name: Ensure ansible collections cache directory exists
+      ansible.builtin.file:
+        path: /opt/builds/.ansible/collections
+        state: directory
+        owner: ops
+        group: ops
+        mode: "0755"
+
+    - name: Ensure policy toolchain cache directory exists
+      ansible.builtin.file:
+        path: /opt/builds/.policy-toolchain
+        state: directory
+        owner: ops
+        group: ops
+        mode: "0755"
+
+    - name: Write gate tool version attestation
+      ansible.builtin.copy:
+        dest: "{{ gate_tools_version_file }}"
+        content: "{{ _versions | to_nice_json }}"
+        mode: "0644"
+      vars:
+        _versions:
+          schema_version: "1"
+          attested_at: "{{ ansible_date_time.iso8601 }}"
+          ansible_lint: "{{ gate_tools_ansible_lint_version }}"
+          yamllint: "{{ gate_tools_yamllint_version }}"
+          semgrep: "{{ gate_tools_semgrep_version }}"
+          trivy: "{{ gate_tools_trivy_version }}"
+          tofu: "{{ gate_tools_tofu_version }}"
+          mypy: "{{ gate_tools_mypy_version }}"
+          pyyaml: "{{ gate_tools_pyyaml_version }}"
+          jsonschema: "{{ gate_tools_jsonschema_version }}"
+          checkov: "{{ gate_tools_checkov_version }}"
+          pytest: "{{ gate_tools_pytest_version }}"
+          python_hcl2: "{{ gate_tools_hcl2_version }}"
+          qdrant_client: "{{ gate_tools_qdrant_client_version }}"

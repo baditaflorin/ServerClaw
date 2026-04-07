@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-07T05:01:56Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "8f50db0580e07e0e384b7a55d4d679b589a47193",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "KC_CACHE=local missing from ctmpl causing JGroups storm + Keycloak crashes",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "single-line fix in ctmpl template"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-09",
+    "remediation_ref": "restore-harbor-registry"
+  }
+}

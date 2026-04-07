@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-07T05:52:29Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "7b28986c4e7d2df98b42e30dcf53ee5cadaa2235",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "registry.lv3.org/check-runner/python:3.12.10 not cached locally",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "live-apply receipt only",
+      "no code changes"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-09",
+    "remediation_ref": "restore-harbor-registry"
+  }
+}

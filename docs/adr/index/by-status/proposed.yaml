@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-07'
+generated: '2026-04-08'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 13
+total_adrs: 17
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -73,6 +73,36 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
+  - adr: '0361'
+    title: Semaphore Keycloak OIDC Integration
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - semaphore
+      - keycloak
+      - oidc
+      - integration
+    summary: 'Extend Semaphore runtime configuration to support Keycloak OpenID Connect (OIDC) authentication while maintaining
+      fallback username/password login for recovery '
+    filename: 0361-semaphore-keycloak-oidc-integration.md
+    path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
+  - adr: '0364'
+    title: Native Build Server Gate Execution
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - native
+      - build
+      - server
+      - gate
+      - execution
+    summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
+    filename: 0364-native-build-server-gate-execution.md
+    path: docs/adr/0364-native-build-server-gate-execution.md
   - adr: 0368
     title: Docker Compose Jinja2 Macro Library
     status: Proposed
@@ -210,3 +240,35 @@ adrs:
       .lv3.org.
     filename: 0381-login-service-contracts-and-session-recovery-automation.md
     path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+  - adr: 0382
+    title: Convergence Speed and Incremental Apply
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - convergence
+      - speed
+      - incremental
+      - apply
+    summary: 'Plays that only delegate to localhost (DNS, preflight) do not need remote facts. Change from:'
+    filename: 0382-convergence-speed-and-incremental-apply.md
+    path: docs/adr/0382-convergence-speed-and-incremental-apply.md
+  - adr: 0382
+    title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - adr-0382
+      - keycloak
+      - sign-in
+      - button
+      - stuck
+      - active
+      - incident
+      - postmortem
+    summary: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    filename: 0382-keycloak-sign-in-button-stuck-postmortem.md
+    path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md

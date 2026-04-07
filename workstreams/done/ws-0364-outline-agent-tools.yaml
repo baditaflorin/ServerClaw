@@ -4,6 +4,7 @@ status: completed
 owner: claude
 branch: claude/implement-aw22-23
 adr: '0364'
+doc: docs/adr/0362-agent-service-api-gateway-pattern.md
 description: 'Implements AW-22 and AW-23 from the Plane task board.
 
 
@@ -37,3 +38,10 @@ adr_refs:
 - '0363'
 - '0364'
 plane_issue_id: e1823bea-0c9d-4cac-94b8-eb729eba065d
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0364_outline_tools_workstream
+    paths:
+    - workstreams/active/ws-0364-outline-agent-tools.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1

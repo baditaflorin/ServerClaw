@@ -4,6 +4,7 @@
 # Fix certificate hostname mismatch issues (ci.lv3.org, bi.lv3.org, etc.)
 
 id: ws-0375-certificate-validation-codification
+adr: '0375'
 workstream_id: ws-0375
 status: in_progress
 priority: high
@@ -77,3 +78,12 @@ ownership_manifest:
 doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
 branch: claude/nervous-feistel
 worktree: nervous-feistel
+worktree_path: .claude/worktrees/nervous-feistel
+doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0375_cert_validation_codification_workstream
+    paths:
+    - workstreams/active/ws-0375-certificate-validation-codification.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1

@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-07'
+generated: '2026-04-08'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 60
+total_adrs: 61
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -28,6 +28,22 @@ adrs:
     path: docs/adr/0001-bootstrap-dedicated-host-with-ansible.md
     implemented_in_repo_version: 0.2.0
     implemented_in_platform_version: 0.1.0
+    implemented_on: '2026-03-21'
+  - adr: '0005'
+    title: Single-Node First Topology
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - single-node
+      - first
+      - topology
+    summary: We will design the first delivery as a single Proxmox node with local storage and external backups, not as a
+      cluster and not as a hyper-converged Ceph deploymen
+    filename: 0005-single-node-first-topology.md
+    path: docs/adr/0005-single-node-first-topology.md
+    implemented_in_platform_version: 0.2.0
     implemented_on: '2026-03-21'
   - adr: '0014'
     title: Operator Access To Private Guest Network

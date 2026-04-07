@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-07T19:09:03Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "b16fd83b6e966a7ffd2ea79a166e90061a0d4d60",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "LiteLLM+LibreChat deployment - new roles, DTOs, platform integration",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local-validation-passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-09",
+    "remediation_ref": "N/A"
+  }
+}

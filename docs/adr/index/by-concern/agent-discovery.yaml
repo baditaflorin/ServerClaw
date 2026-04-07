@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-07'
+generated: '2026-04-08'
 facet: concern
 concern: agent-discovery
 total_adrs: 22

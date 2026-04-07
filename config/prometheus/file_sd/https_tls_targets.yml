@@ -575,6 +575,24 @@
     policy_critical: '14'
     display_url: https://nginx.lv3.org:443/
 - targets:
+    - https://10.10.10.10:443/
+  labels:
+    assurance_id: nomad-public
+    service_id: nomad
+    service_name: Nomad
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: scheduler.lv3.org
+    certificate_id: scheduler-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://scheduler.lv3.org:443/
+- targets:
     - https://100.64.0.1:8013/
   labels:
     assurance_id: nomad-internal
@@ -582,7 +600,7 @@
     service_name: Nomad
     environment: production
     scope: internal
-    exposure: private-only
+    exposure: edge-published
     auth_requirement: private_network
     probe_module: http_2xx_follow_redirects_insecure_tls
     probe_hostname: ''
@@ -790,6 +808,24 @@
     policy_warn: '21'
     policy_critical: '14'
     display_url: https://realtime.lv3.org:443/
+- targets:
+    - https://10.10.10.10:443/
+  labels:
+    assurance_id: repowise-public
+    service_id: repowise
+    service_name: Repowise Semantic Code Search
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: repowise.lv3.org
+    certificate_id: repowise-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://repowise.lv3.org:443/
 - targets:
     - https://10.10.10.10:443/
   labels:

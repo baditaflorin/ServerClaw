@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- adds ADR 0364 native build server gate execution — LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions
 - ADR 0376 identity-core watchdog: 15s OIDC discovery probes + auto-restart on 2 failures (6/hr rate limit); KC_CACHE=local prevents stale JGroups TCP loops; oauth2-proxy watchdog on nginx-lv3 restarts proxy on unresponsive state
 - ADR 0346 repowise semantic search: local code search using Ollama nomic-embed-text + Qdrant; repowise_corpus.py chunks code by language, repowise_index.py embeds and stores, repowise_service.py serves FastAPI /search with filters
 - ADR 0317/0318 operator provisioning: Keycloak direct-API provisioning via SSH proxy (ADR 0317); provision_operator.py v2 with Headscale + step-ca fingerprint in single onboarding email (ADR 0318)
@@ -44,10 +45,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.57 release notes](docs/release-notes/0.178.57.md)
+- [0.178.58 release notes](docs/release-notes/0.178.58.md)
 
 ## Previous Releases
 
+- [0.178.57 release notes](docs/release-notes/0.178.57.md)
 - [0.178.56 release notes](docs/release-notes/0.178.56.md)
 - [0.178.55 release notes](docs/release-notes/0.178.55.md)
 - [0.178.54 release notes](docs/release-notes/0.178.54.md)
