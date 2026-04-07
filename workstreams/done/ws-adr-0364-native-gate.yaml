@@ -106,8 +106,8 @@ ownership_manifest:
     mode: shared_contract
     contract: canonical-truth-v1
 ready_to_merge: true
-live_applied: false
+live_applied: true
 canonical_truth:
   changelog_entry: adds ADR 0364 native build server gate execution — LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions
   release_bump: minor
-  included_in_repo_version: null
+  included_in_repo_version: "0.178.58"
