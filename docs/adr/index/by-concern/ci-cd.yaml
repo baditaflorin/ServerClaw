@@ -29,7 +29,7 @@ adrs:
   - adr: '0031'
     title: Repository Validation Pipeline For Automation Changes
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:

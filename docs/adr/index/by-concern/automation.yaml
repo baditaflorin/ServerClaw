@@ -14,7 +14,7 @@ adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -63,7 +63,7 @@ adrs:
   - adr: '0044'
     title: Windmill For Agent And Operator Workflows
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: automation
     keywords:

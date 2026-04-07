@@ -10,8 +10,25 @@ generated: '2026-04-07'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 16
+total_adrs: 27
 adrs:
+  - adr: '0001'
+    title: Bootstrap Dedicated Host With Ansible
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - dedicated
+      - host
+      - ansible
+    summary: 'We will treat the build as two stages:'
+    filename: 0001-bootstrap-dedicated-host-with-ansible.md
+    path: docs/adr/0001-bootstrap-dedicated-host-with-ansible.md
+    implemented_in_repo_version: 0.2.0
+    implemented_in_platform_version: 0.1.0
+    implemented_on: '2026-03-21'
   - adr: '0014'
     title: Operator Access To Private Guest Network
     status: Accepted
@@ -30,6 +47,23 @@ adrs:
     implemented_in_repo_version: 0.8.0
     implemented_in_platform_version: 0.6.0
     implemented_on: '2026-03-21'
+  - adr: '0023'
+    title: Docker Runtime VM Baseline
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - runtime
+      - vm
+      - baseline
+    summary: We will manage the Docker runtime VM with a dedicated runtime baseline role and playbook.
+    filename: 0023-docker-runtime-vm-baseline.md
+    path: docs/adr/0023-docker-runtime-vm-baseline.md
+    implemented_in_repo_version: 0.25.0
+    implemented_in_platform_version: 0.17.0
+    implemented_on: '2026-03-22'
   - adr: '0025'
     title: Compose-Managed Runtime Stacks
     status: Accepted
@@ -43,6 +77,158 @@ adrs:
     summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
+  - adr: 0029
+    title: Dedicated Backup VM With Local PBS
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - backup
+      - vm
+      - local
+      - pbs
+    summary: We will create a dedicated internal backup VM and run Proxmox Backup Server inside it.
+    filename: 0029-dedicated-backup-vm-with-local-pbs.md
+    path: docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+    implemented_in_repo_version: 0.30.0
+    implemented_in_platform_version: 0.19.0
+    implemented_on: '2026-03-22'
+  - adr: '0030'
+    title: Role Interface Contracts And Defaults Boundaries
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - role
+      - interface
+      - contracts
+      - defaults
+      - boundaries
+    summary: We will make each role own an explicit interface contract.
+    filename: 0030-role-interface-contracts-and-defaults-boundaries.md
+    path: docs/adr/0030-role-interface-contracts-and-defaults-boundaries.md
+    implemented_in_repo_version: 0.31.0
+    implemented_on: '2026-03-22'
+  - adr: '0031'
+    title: Repository Validation Pipeline For Automation Changes
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - pipeline
+      - automation
+      - changes
+    summary: We will define one repository validation pipeline and make it the standard integration gate.
+    filename: 0031-repository-validation-pipeline-for-automation-changes.md
+    path: docs/adr/0031-repository-validation-pipeline-for-automation-changes.md
+    implemented_in_repo_version: 0.32.0
+    implemented_on: '2026-03-22'
+  - adr: '0033'
+    title: Declarative Service Topology Catalog
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - declarative
+      - service
+      - topology
+      - catalog
+    summary: We will introduce one declarative service-topology catalog as the canonical source for workload metadata.
+    filename: 0033-declarative-service-topology-catalog.md
+    path: docs/adr/0033-declarative-service-topology-catalog.md
+    implemented_in_repo_version: 0.34.0
+    implemented_on: '2026-03-22'
+  - adr: '0034'
+    title: Controller-Local Secret Manifest And Preflight
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - controller-local
+      - secret
+      - manifest
+      - preflight
+    summary: We will define a controller-local secret manifest and a standard preflight check.
+    filename: 0034-controller-local-secret-manifest-and-preflight.md
+    path: docs/adr/0034-controller-local-secret-manifest-and-preflight.md
+    implemented_in_repo_version: 0.35.0
+    implemented_on: '2026-03-22'
+  - adr: '0036'
+    title: Live Apply Receipts And Verification Evidence
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - live
+      - apply
+      - receipts
+      - verification
+      - evidence
+    summary: We will record structured live-apply receipts and verification evidence in the repository.
+    filename: 0036-live-apply-receipts-and-verification-evidence.md
+    path: docs/adr/0036-live-apply-receipts-and-verification-evidence.md
+    implemented_in_repo_version: 0.37.0
+    implemented_on: '2026-03-22'
+  - adr: 0038
+    title: Generated Status Documents From Canonical State
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - generated
+      - status
+      - documents
+      - from
+      - canonical
+      - state
+    summary: We will generate selected status-facing documentation fragments from canonical repository state.
+    filename: 0038-generated-status-documents-from-canonical-state.md
+    path: docs/adr/0038-generated-status-documents-from-canonical-state.md
+    implemented_in_repo_version: 0.41.0
+    implemented_on: '2026-03-22'
+  - adr: '0044'
+    title: Windmill For Agent And Operator Workflows
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - windmill
+      - agent
+      - operator
+      - workflows
+    summary: We will use Windmill as the first on-platform workflow runtime for agents and operators.
+    filename: 0044-windmill-for-agent-and-operator-workflows.md
+    path: docs/adr/0044-windmill-for-agent-and-operator-workflows.md
+    implemented_in_repo_version: 0.47.0
+    implemented_in_platform_version: 0.23.0
+    implemented_on: '2026-03-22'
+  - adr: '0045'
+    title: Control-Plane Communication Lanes
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - control-plane
+      - communication
+      - lanes
+    summary: We will standardize on four control-plane communication lanes.
+    filename: 0045-control-plane-communication-lanes.md
+    path: docs/adr/0045-control-plane-communication-lanes.md
+    implemented_in_repo_version: 0.45.0
+    implemented_in_platform_version: 0.26.0
+    implemented_on: '2026-03-22'
   - adr: 0058
     title: NATS JetStream For Internal Event Bus And Agent Coordination
     status: Deprecated
