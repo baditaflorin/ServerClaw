@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.56",
+  "repo_version": "0.178.57",
   "platform_version": "0.131.2",
-  "generated_at": "2026-04-07T21:26:12Z",
-  "next_refresh_at": "2026-04-07T22:26:12Z",
+  "generated_at": "2026-04-07T22:38:00Z",
+  "next_refresh_at": "2026-04-07T23:38:00Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6321,10 +6321,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.55",
+    "last_version": "0.178.56",
     "deployed_at": "2026-04-07",
-    "summary": "LiteLLM Proxy + LibreChat deployed to production, replacing One API + Open WebUI; deployment fixes for OpenBao, Prisma, Docker port conflicts, and LibreChat config schema ADR 0380 updated to Implemented status with multi-instance amendment; neko_tool.py CLI for programmatic instance management (add/remove/check/validate, auto-assigns ports and UDP ranges, JSON output for automation)",
-    "release_notes_url": "docs/release-notes/0.178.56.md"
+    "summary": "ADR 0376 identity-core watchdog: 15s OIDC discovery probes + auto-restart on 2 failures (6/hr rate limit); KC_CACHE=local prevents stale JGroups TCP loops; oauth2-proxy watchdog on nginx-lv3 restarts proxy on unresponsive state ADR 0346 repowise semantic search: local code search using Ollama nomic-embed-text + Qdrant; repowise_corpus.py chunks code by language, repowise_index.py embeds and stores, repowise_service.py serves FastAPI /search with filters",
+    "release_notes_url": "docs/release-notes/0.178.57.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

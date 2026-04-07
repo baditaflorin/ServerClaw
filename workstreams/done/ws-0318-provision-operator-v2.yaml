@@ -2,7 +2,7 @@ id: ws-0318-provision-operator-v2
 adr: 0318
 title: 'provision_operator.py v2: Headscale + step-ca fingerprint in single onboarding
   email'
-status: ready_for_merge
+status: merged
 owner: claude
 branch: claude/provision-operator-v2
 worktree_path: .worktrees/provision-v2-worktree

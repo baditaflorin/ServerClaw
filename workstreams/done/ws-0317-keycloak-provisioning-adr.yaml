@@ -1,7 +1,7 @@
 id: ws-0317-keycloak-provisioning-adr
 adr: '0317'
 title: Keycloak direct-API operator provisioning via SSH proxy
-status: ready_for_merge
+status: merged
 owner: claude
 branch: claude/adr-0317-keycloak-provisioning
 worktree_path: .worktrees/adr-0317-worktree

@@ -1,7 +1,7 @@
 id: repowise-semantic-search
 adr: '0346'
 title: Repowise — local semantic code search over the git repo (Ollama + Qdrant, no third-party APIs)
-status: ready_for_merge
+status: merged
 owner: claude
 branch: claude/affectionate-galileo
 doc: docs/adr/0346-repowise-semantic-search.md

@@ -1,7 +1,7 @@
 id: ws-0318-operator-onboarding-iac
 adr: 0318
 title: Repeatable operator onboarding with provision_operator.py and CC audit trail
-status: ready_for_merge
+status: merged
 owner: claude
 branch: claude/adr-0318-operator-onboarding
 worktree_path: .worktrees/onboard-worktree
