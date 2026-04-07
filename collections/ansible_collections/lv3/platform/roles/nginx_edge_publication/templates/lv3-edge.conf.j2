@@ -439,6 +439,34 @@ server {
         proxy_pass_request_body off;
     }
 
+    # Intercept oauth2-proxy 500s at the callback endpoint (ADR 0376).
+    # A 500 here means Keycloak invalidated the auth code (e.g. after a restart).
+    # The browser holds a stale session cookie with already-used codes and will
+    # keep replaying them — it cannot recover on its own.  We expire the cookie
+    # server-side (Max-Age=0) so the next request starts a clean OIDC flow.
+    location = /oauth2/callback {
+        proxy_pass {{ protected_site.auth_proxy_upstream }};
+        proxy_http_version 1.1;
+{{ hide_upstream_security_headers(site) }}
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Uri $request_uri;
+        proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
+        proxy_intercept_errors on;
+        error_page 500 = @oauth2_stale_session_reset;
+    }
+
+    location @oauth2_stale_session_reset {
+        # Expire the stale session cookie so the next request starts a fresh OIDC flow.
+        # Do NOT redirect to /oauth2/sign_out — that loops back through auth and 500s again.
+        add_header Set-Cookie "{{ public_edge_session_authority.cookie_name }}=; Path=/; Domain={{ public_edge_session_authority.cookie_domain }}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; Secure; SameSite=Lax" always;
+        add_header Cache-Control "no-store" always;
+        return 302 /oauth2/sign_in;
+    }
+
     location @oauth2_signin {
         return 302 /oauth2/sign_in?rd=$scheme://$host$request_uri;
     }
