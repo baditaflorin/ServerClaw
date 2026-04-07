@@ -86,7 +86,7 @@
       block:
         - name: Render browser.lv3.org NGINX site configuration
           template:
-            src: "collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2"
+            src: "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2"
             dest: "/etc/nginx/sites-available/browser.lv3.org.conf"
             owner: root
             group: root
