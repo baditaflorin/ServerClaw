@@ -16,6 +16,7 @@
 - name: "Validate {{ common_derive_service_name }} exists in platform_service_registry"
   ansible.builtin.assert:
     that:
+      - hostvars['proxmox_florin'].platform_service_registry is mapping
       - common_derive_service_name in hostvars['proxmox_florin'].platform_service_registry
     fail_msg: >-
       Service '{{ common_derive_service_name }}' not found in platform_service_registry.
