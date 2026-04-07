@@ -22,7 +22,7 @@ librechat_openbao_approle_name: librechat-runtime
 librechat_container_name: librechat
 librechat_internal_port: 8096
 librechat_container_port: 3080
-librechat_healthcheck_path: /api/health
+librechat_healthcheck_path: /
 librechat_image: "{{ container_image_catalog.images.librechat_runtime.ref }}"
 librechat_mongo_container_name: librechat-mongodb
 librechat_mongo_image: mongo:7
