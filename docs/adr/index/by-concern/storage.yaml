@@ -45,7 +45,7 @@ adrs:
   - adr: 0099
     title: Automated Backup Restore Verification
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: storage
     keywords:

@@ -154,7 +154,7 @@ adrs:
   - adr: '0102'
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: security
     keywords:

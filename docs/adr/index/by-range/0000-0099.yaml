@@ -1514,7 +1514,7 @@ adrs:
   - adr: 0087
     title: Repository Validation Gate (Pre-Push and CI)
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -1532,7 +1532,7 @@ adrs:
   - adr: 0088
     title: Ephemeral Infrastructure Fixtures
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -1548,7 +1548,7 @@ adrs:
   - adr: 0089
     title: Build Artifact Cache and Layer Registry
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -1581,7 +1581,7 @@ adrs:
   - adr: 0091
     title: Continuous Drift Detection and Reconciliation
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -1615,7 +1615,7 @@ adrs:
   - adr: 0093
     title: Interactive Ops Portal with Live Actions
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -1634,7 +1634,7 @@ adrs:
   - adr: 0094
     title: Developer Portal and Service Documentation Site
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: documentation
     keywords:
@@ -1690,7 +1690,7 @@ adrs:
   - adr: 0097
     title: Alerting Routing and On-Call Runbook Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: documentation
     keywords:
@@ -1708,7 +1708,7 @@ adrs:
   - adr: 0098
     title: Postgres High Availability and Automated Failover
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -1726,7 +1726,7 @@ adrs:
   - adr: 0099
     title: Automated Backup Restore Verification
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: storage
     keywords:

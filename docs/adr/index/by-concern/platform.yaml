@@ -328,7 +328,7 @@ adrs:
   - adr: 0088
     title: Ephemeral Infrastructure Fixtures
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -344,7 +344,7 @@ adrs:
   - adr: 0089
     title: Build Artifact Cache and Layer Registry
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -396,7 +396,7 @@ adrs:
   - adr: 0098
     title: Postgres High Availability and Automated Failover
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -414,7 +414,7 @@ adrs:
   - adr: '0103'
     title: Data Classification and Retention Policy
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -431,7 +431,7 @@ adrs:
   - adr: '0104'
     title: Service Dependency Graph and Failure Propagation Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -450,7 +450,7 @@ adrs:
   - adr: '0106'
     title: Ephemeral Environment Lifecycle and Teardown Policy
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -469,7 +469,7 @@ adrs:
   - adr: '0107'
     title: Platform Extension Model for Adding New Services
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -488,7 +488,7 @@ adrs:
   - adr: 0109
     title: Public Status Page
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -504,7 +504,7 @@ adrs:
   - adr: '0112'
     title: Deterministic Goal Compiler
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -520,7 +520,7 @@ adrs:
   - adr: '0113'
     title: World-State Materializer
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -536,7 +536,7 @@ adrs:
   - adr: '0115'
     title: Event-Sourced Mutation Ledger
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -553,7 +553,7 @@ adrs:
   - adr: '0116'
     title: Change Risk Scoring Without LLMs
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -571,7 +571,7 @@ adrs:
   - adr: '0117'
     title: Service Dependency Graph As First-Class Runtime
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:

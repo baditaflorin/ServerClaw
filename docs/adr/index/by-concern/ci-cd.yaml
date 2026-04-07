@@ -97,7 +97,7 @@ adrs:
   - adr: 0087
     title: Repository Validation Gate (Pre-Push and CI)
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -115,7 +115,7 @@ adrs:
   - adr: 0091
     title: Continuous Drift Detection and Reconciliation
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -149,7 +149,7 @@ adrs:
   - adr: 0093
     title: Interactive Ops Portal with Live Actions
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -188,7 +188,7 @@ adrs:
   - adr: '0114'
     title: Rule-Based Incident Triage Engine
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: ci-cd
     keywords:
