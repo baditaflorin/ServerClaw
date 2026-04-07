@@ -1,0 +1,74 @@
+---
+workstream_id: ws-0406
+workstream_name: "ADR Tier 3 Phase 2 — Remaining 63 ADRs Secondary Pass"
+branch_name: claude/ws-0406-adr-tier3-phase2
+status: in_progress
+created_at: '2026-04-07T13:05:00Z'
+owner: claude-haiku-4-5
+description: >-
+  Secondary pass on remaining 63 Tier 3 ADRs (0046–0122 subset, excluding
+  those corrected in Phase 1). Re-examine deferred ADRs using same evidence-depth
+  methodology: upgrade to "Partial Implemented" if single-marker evidence
+  exists, downgrade to "Accepted" if no current evidence found, or retain
+  "Implemented" if strong multi-marker evidence confirmed.
+
+scope:
+  mutation_surfaces:
+    - docs/adr/*.md (63 ADR files for potential status updates)
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-status/*.yaml (status index shards)
+    - docs/workstreams/ws-0406-adr-tier3-phase2-summary.md (new assessment doc)
+  protected_surfaces:
+    - VERSION (no changes on branch)
+    - changelog.md (no changes on branch)
+    - RELEASE.md (no changes on branch)
+
+tasks:
+  - name: "Analyze first 30 Tier 3 Phase 2 ADRs (0046–0075 range)"
+    description: >-
+      Apply same evidence-depth methodology as Phase 1 (WS-0405):
+      - Check scanner evidence (git commits, Ansible roles, Docker patterns)
+      - Examine git history for implementation markers
+      - Assess recency (active vs. stale evidence)
+      - Determine upgrade, downgrade, or retain decision
+    status: pending
+
+  - name: "Apply status corrections to high-confidence ADRs from Phase 2 batch"
+    description: >-
+      Update frontmatter for ADRs where evidence assessment yields clear decisions.
+      Regenerate docs/adr/.index.yaml and all status index shards.
+    status: pending
+
+  - name: "Categorize remaining 33 ADRs for Phase 3 (if needed)"
+    description: >-
+      Group remaining deferred ADRs by evidence availability and complexity.
+      Create recommendations for future pass prioritization.
+    status: pending
+
+  - name: "Create Phase 2 assessment document"
+    description: >-
+      Document findings from 30 ADR analysis, categorization of 33 remainder,
+      and recommendations for Phase 3 continuation.
+    status: pending
+
+estimates:
+  effort_hours: 5
+  complexity: medium
+  risk: low
+  merge_readiness: 85% (depends on Phase 2 batch analysis completeness)
+
+prior_work_reference:
+  - ws-0405-adr-tier3-refinement.yaml (Phase 1: 11 ADRs re-scored, methodology established)
+  - docs/workstreams/ws-0405-adr-tier3-refinement-summary.md (evidence framework and scoring)
+  - docs/adr/implementation-status/INDEX.md (scanner documentation)
+
+success_criteria:
+  - At least 20–30 Phase 2 Tier 3 ADRs analyzed with evidence assessment
+  - Minimum 5–10 ADRs with clear upgrade/downgrade decisions
+  - docs/adr/.index.yaml regenerated with updated status counts
+  - ws-0406 summary document created with findings and deferred work tracking
+  - Zero new git conflicts (exclusive file ownership maintained)
+
+deferred_work:
+  remaining_adrs: 33
+  recommendation: "Phase 3 continuation if evidence-depth analysis continues to yield clear decisions; otherwise defer to future comprehensive ADR audit"

@@ -158,6 +158,12 @@
     common_manage_service_secrets_fact_name: "plane_decoded_secrets"
   no_log: true
 
+- name: Load Plane OIDC client secret if available
+  ansible.builtin.set_fact:
+    plane_oidc_client_secret: "{{ lookup('ansible.builtin.file', plane_oidc_client_secret_local_file, errors='ignore') | trim }}"
+  no_log: true
+  when: plane_oidc_enabled | bool
+
 - name: Record the Plane runtime secrets
   ansible.builtin.set_fact:
     plane_secret_key: "{{ plane_decoded_secrets[0] }}"

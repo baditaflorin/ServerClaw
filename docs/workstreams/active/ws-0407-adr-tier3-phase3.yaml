@@ -1,0 +1,80 @@
+---
+workstream_id: ws-0407
+workstream_name: "ADR Tier 3 Phase 3 — Final 33 ADRs (0087–0122)"
+branch_name: claude/ws-0407-adr-tier3-phase3
+status: in_progress
+created_at: '2026-04-07T13:15:00Z'
+owner: claude-haiku-4-5
+description: >-
+  Final phase of Tier 3 ADR re-scoring. Analyze remaining 33 deferred ADRs
+  (0087–0122 range) using established evidence-depth methodology. Complete
+  comprehensive re-scoring of all 149 original Tier 3 mismatches identified by
+  ADR scanner.
+
+scope:
+  mutation_surfaces:
+    - docs/adr/*.md (33 ADR files for potential status updates)
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-status/*.yaml (status index shards)
+    - docs/workstreams/ws-0407-adr-tier3-phase3-summary.md (new assessment doc)
+  protected_surfaces:
+    - VERSION (no changes on branch)
+    - changelog.md (no changes on branch)
+    - RELEASE.md (no changes on branch)
+
+tasks:
+  - name: "Analyze final 33 Tier 3 ADRs (0087–0122 range)"
+    description: >-
+      Apply evidence-depth methodology to complete remaining ADRs:
+      - Check scanner evidence (git commits, Ansible roles, Docker patterns)
+      - Examine git history for implementation markers
+      - Assess recency (active vs. stale evidence)
+      - Determine upgrade, downgrade, or retain decision
+      - Focus on identifying downgrade candidates (claimed Implemented, no evidence)
+    status: pending
+
+  - name: "Apply status corrections to Phase 3 batch"
+    description: >-
+      Update frontmatter for ADRs with clear decisions.
+      Regenerate docs/adr/.index.yaml and all status index shards.
+    status: pending
+
+  - name: "Create comprehensive Phase 3 assessment"
+    description: >-
+      Document Phase 3 findings and completion summary for all Tier 3 work.
+      Include recommendations for any remaining uncertain ADRs.
+    status: pending
+
+  - name: "Complete Tier 3 re-scoring cycle"
+    description: >-
+      Final summary report on 149-ADR Tier 3 initiative: total corrections,
+      categorization by evidence tier, and recommendations for ADR index
+      maintenance going forward.
+    status: pending
+
+estimates:
+  effort_hours: 4
+  complexity: medium
+  risk: low
+  merge_readiness: 90% (final phase, straightforward analysis)
+
+prior_work_reference:
+  - ws-0405-adr-tier3-refinement.yaml (Phase 1: 11 ADRs)
+  - ws-0406-adr-tier3-phase2.yaml (Phase 2: 7 ADRs, 23 confirmed)
+  - docs/workstreams/ws-0405-adr-tier3-refinement-summary.md
+  - docs/workstreams/ws-0406-adr-tier3-phase2-summary.md
+
+success_criteria:
+  - All 33 Phase 3 ADRs analyzed and categorized
+  - 5–15 ADRs with clear upgrade/downgrade decisions applied
+  - docs/adr/.index.yaml regenerated with final Tier 3 impact counts
+  - ws-0407 summary created with comprehensive Tier 3 cycle closure
+  - Zero new git conflicts
+  - Final statistics: total ADRs corrected, category breakdown, impact on index
+
+completion_metrics:
+  phase1_results: "11 upgraded, 9 confirmed"
+  phase2_results: "7 upgraded, 23 confirmed"
+  phase3_target: "5-15 upgraded/downgraded, remaining confirmed"
+  tier3_total_target: "23-33 status corrections out of 33 remaining ADRs"
+  overall_149_mismatches: "53+ corrections across Phases 1-3"

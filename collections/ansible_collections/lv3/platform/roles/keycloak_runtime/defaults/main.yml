@@ -234,3 +234,10 @@ keycloak_nomad_root_url: https://scheduler.lv3.org
 keycloak_nomad_post_logout_redirect_uris:
   - "{{ keycloak_nomad_root_url }}/ui"
   - "{{ keycloak_nomad_root_url }}"
+keycloak_plane_client_id: lv3-plane-oidc
+keycloak_plane_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/plane-client-secret.txt"
+keycloak_plane_root_url: https://tasks.lv3.org
+keycloak_plane_post_logout_redirect_uris:
+  - "{{ keycloak_plane_root_url }}"
+  - "{{ keycloak_plane_root_url }}/"
+plane_oidc_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/plane-oidc-client-secret.txt"

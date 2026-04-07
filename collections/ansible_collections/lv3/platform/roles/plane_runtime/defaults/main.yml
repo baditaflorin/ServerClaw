@@ -103,3 +103,15 @@ plane_healthcheck_path: /api/instances/
 # The bootstrap admin (plane_bootstrap_admin_email) is always owner — no need to list here.
 # Add any operator or sysadmin accounts that should see the full workspace.
 plane_workspace_members: []
+
+# Keycloak OIDC Integration (ADR 0353)
+plane_oidc_enabled: true
+plane_oidc_server_url: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') | default({}) | map_attribute('public_base_url') | first | default('https://keycloak.lv3.org') }}"
+plane_oidc_realm: "lv3"
+plane_oidc_client_id: "lv3-plane-oidc"
+plane_oidc_client_secret_local_file: "{{ plane_local_artifact_dir }}/oidc-client-secret.txt"
+plane_oidc_client_secret_remote_file: "{{ plane_secret_dir }}/oidc-client-secret.txt"
+plane_oidc_discovery_url: "{{ plane_oidc_server_url }}/realms/{{ plane_oidc_realm }}/.well-known/openid-configuration"
+plane_oidc_callback_url: "{{ plane_public_base_url }}/auth/callback/keycloak"
+plane_oidc_scopes: "openid profile email"
+plane_oidc_auto_signup: true

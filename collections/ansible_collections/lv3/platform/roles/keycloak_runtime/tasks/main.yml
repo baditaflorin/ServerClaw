@@ -2512,6 +2512,19 @@
     keycloak_nomad_client_secret: "{{ keycloak_nomad_client_secret_info.clientsecret_info.value }}"
   no_log: true
 
+- name: Reconcile the Plane OIDC client
+  block:
+    - name: Run the Plane OIDC client reconciliation tasks
+      ansible.builtin.include_tasks: plane_client.yml
+      vars:
+        keycloak_admin_token: "{{ keycloak_admin_client_token.json.access_token }}"
+  rescue:
+    - name: Surface unexpected Plane OIDC client reconciliation failures
+      ansible.builtin.fail:
+        msg: >-
+          Plane OIDC client reconciliation failed with error:
+          {{ ansible_failed_result.msg | default(ansible_failed_result) }}
+
 - name: Mirror the Grafana client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_grafana_client_secret_local_file }}"
@@ -2680,6 +2693,16 @@
   delegate_to: localhost
   become: false
   no_log: true
+
+- name: Mirror the Plane OIDC client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ plane_oidc_client_secret_local_file }}"
+    content: "{{ plane_oidc_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: plane_oidc_client_secret | default('') | length > 0
 
 - name: Reconcile repo-managed Keycloak users
   block:
