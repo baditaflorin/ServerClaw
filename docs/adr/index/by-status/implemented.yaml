@@ -10,7 +10,7 @@ generated: '2026-04-07'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 306
+total_adrs: 299
 adrs:
   - adr: '0011'
     title: Monitoring VM With Grafana And Proxmox Metrics
@@ -198,41 +198,6 @@ adrs:
     implemented_in_repo_version: 0.48.0
     implemented_in_platform_version: 0.24.0
     implemented_on: '2026-03-22'
-  - adr: '0046'
-    title: Identity Classes For Humans, Services, And Agents
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-03-22'
-    concern: identity
-    keywords:
-      - identity
-      - classes
-      - humans
-      - services
-      - agents
-    summary: All platform identities must belong to one of four classes.
-    filename: 0046-identity-classes-for-humans-services-and-agents.md
-    path: docs/adr/0046-identity-classes-for-humans-services-and-agents.md
-    implemented_in_repo_version: 0.45.0
-    implemented_in_platform_version: 0.26.0
-    implemented_on: '2026-03-22'
-  - adr: '0047'
-    title: Short-Lived Credentials And Internal mTLS
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-03-22'
-    concern: security
-    keywords:
-      - short-lived
-      - credentials
-      - internal
-      - mtls
-    summary: We will prefer short-lived credentials and mutual TLS for new internal access paths.
-    filename: 0047-short-lived-credentials-and-internal-mtls.md
-    path: docs/adr/0047-short-lived-credentials-and-internal-mtls.md
-    implemented_in_repo_version: 0.49.0
-    implemented_in_platform_version: 0.25.0
-    implemented_on: '2026-03-22'
   - adr: 0048
     title: Command Catalog And Approval Gates
     status: Accepted
@@ -249,22 +214,6 @@ adrs:
     path: docs/adr/0048-command-catalog-and-approval-gates.md
     implemented_in_repo_version: 0.45.0
     implemented_in_platform_version: 0.26.0
-    implemented_on: '2026-03-22'
-  - adr: 0049
-    title: Private-First API Publication Model
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-03-22'
-    concern: api
-    keywords:
-      - private-first
-      - api
-      - publication
-      - model
-    summary: Every API must be classified into one of three publication tiers.
-    filename: 0049-private-first-api-publication-model.md
-    path: docs/adr/0049-private-first-api-publication-model.md
-    implemented_in_repo_version: 0.50.0
     implemented_on: '2026-03-22'
   - adr: '0050'
     title: Transactional Email And Notification Profiles
@@ -477,24 +426,6 @@ adrs:
     path: docs/adr/0063-centralised-vars-and-computed-facts-library.md
     implemented_in_repo_version: 0.68.0
     implemented_on: '2026-03-23'
-  - adr: '0064'
-    title: Health Probe Contracts For All Services
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - health
-      - probe
-      - contracts
-      - all
-      - services
-    summary: We will define a health probe contract for every managed service and enforce it in the Ansible role for that
-      service.
-    filename: 0064-health-probe-contracts-for-all-services.md
-    path: docs/adr/0064-health-probe-contracts-for-all-services.md
-    implemented_in_repo_version: 0.61.0
-    implemented_on: '2026-03-22'
   - adr: '0065'
     title: Secret Rotation Automation With OpenBao
     status: Accepted
@@ -750,23 +681,6 @@ adrs:
     path: docs/adr/0079-playbook-decomposition-and-shared-execution-model.md
     implemented_in_repo_version: 0.77.0
     implemented_on: '2026-03-23'
-  - adr: 0080
-    title: Maintenance Window And Change Suppression Protocol
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - maintenance
-      - window
-      - change
-      - suppression
-      - protocol
-    summary: We will implement a maintenance window protocol based on a NATS KV flag and a governed open/close workflow.
-    filename: 0080-maintenance-window-and-change-suppression-protocol.md
-    path: docs/adr/0080-maintenance-window-and-change-suppression-protocol.md
-    implemented_in_repo_version: 0.86.0
-    implemented_on: '2026-03-23'
   - adr: 0081
     title: Platform Changelog And Deployment History Portal
     status: Accepted
@@ -820,40 +734,6 @@ adrs:
     filename: 0083-docker-based-check-runner.md
     path: docs/adr/0083-docker-based-check-runner.md
     implemented_in_repo_version: 0.87.0
-    implemented_on: '2026-03-23'
-  - adr: 0084
-    title: Packer VM Template Pipeline
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-03-22'
-    concern: vm-topology
-    keywords:
-      - packer
-      - vm
-      - template
-      - pipeline
-    summary: We will maintain a Packer VM Template Pipeline defined under packer/ and executed on the build server.
-    filename: 0084-packer-vm-template-pipeline.md
-    path: docs/adr/0084-packer-vm-template-pipeline.md
-    implemented_in_repo_version: 0.91.0
-    implemented_on: '2026-03-23'
-  - adr: 0085
-    title: OpenTofu IaC for VM Lifecycle Management
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-03-22'
-    concern: vm-topology
-    keywords:
-      - opentofu
-      - iac
-      - vm
-      - lifecycle
-      - management
-    summary: We will introduce OpenTofu (tofu) for all Proxmox resource management and move VM lifecycle out of Ansible.
-    filename: 0085-opentofu-vm-lifecycle.md
-    path: docs/adr/0085-opentofu-vm-lifecycle.md
-    implemented_in_repo_version: 0.92.0
-    implemented_in_platform_version: 0.39.0
     implemented_on: '2026-03-23'
   - adr: 0086
     title: Ansible Collection Packaging and Versioned Role Distribution

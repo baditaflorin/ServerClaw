@@ -287,7 +287,7 @@ adrs:
   - adr: 0084
     title: Packer VM Template Pipeline
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -303,7 +303,7 @@ adrs:
   - adr: 0085
     title: OpenTofu IaC for VM Lifecycle Management
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: vm-topology
     keywords:

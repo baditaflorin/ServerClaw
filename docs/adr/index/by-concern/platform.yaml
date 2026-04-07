@@ -225,7 +225,7 @@ adrs:
   - adr: '0064'
     title: Health Probe Contracts For All Services
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -293,7 +293,7 @@ adrs:
   - adr: 0080
     title: Maintenance Window And Change Suppression Protocol
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
