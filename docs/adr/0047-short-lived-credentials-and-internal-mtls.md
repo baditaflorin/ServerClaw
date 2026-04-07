@@ -1,7 +1,7 @@
 # ADR 0047: Short-Lived Credentials And Internal mTLS
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.49.0
 - Implemented In Platform Version: 0.25.0
 - Implemented On: 2026-03-22
