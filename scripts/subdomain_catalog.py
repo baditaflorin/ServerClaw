@@ -12,7 +12,10 @@ from environment_catalog import configured_environment_ids
 SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
-PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaults", "main.yml")
+PUBLIC_EDGE_DEFAULTS_PATH = repo_path(
+    "collections", "ansible_collections", "lv3", "platform",
+    "roles", "nginx_edge_publication", "defaults", "main.yml",
+)
 
 ALLOWED_STATUSES = {"active", "planned", "reserved", "retiring"}
 ALLOWED_EXPOSURES = {"edge-published", "informational-only", "private-only"}
