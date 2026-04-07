@@ -2,8 +2,9 @@
 # Neko Remote Desktop Role Defaults
 
 # Docker image configuration
+# m1k1o/neko tags are browser-flavoured: chromium, firefox, ungoogled-chromium, etc.
 neko_runtime_image_name: "m1k1o/neko"
-neko_runtime_image_tag: "3.x"
+neko_runtime_image_tag: "chromium"
 
 # Container configuration
 neko_runtime_container_name: "neko"
