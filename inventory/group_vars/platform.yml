@@ -2094,43 +2094,6 @@ platform_service_topology:
     urls:
       public: https://livekit.lv3.org
       internal: http://10.10.10.20:7880
-  neko:
-    service_name: neko
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
-    public_hostname: browser.lv3.org
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: browser
-      type: A
-      target: 65.108.75.123
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      proxy_read_timeout_seconds: 3600
-      proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.21:8080
-    service_id: neko
-    runtime_pool: runtime-comms
-    deployment_surface: playbooks/services/neko.yml
-    restart_domain: runtime-comms-browser
-    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-comms
-    mobility_tier: movable_singleton
-    ports:
-      internal: 8080
-      media_udp_start: 50000
-      media_udp_end: 60000
-    urls:
-      public: https://browser.lv3.org
-      internal: http://10.10.10.21:8080
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime-lv3
@@ -4647,43 +4610,6 @@ public_edge_service_topology:
     urls:
       public: https://livekit.lv3.org
       internal: http://10.10.10.20:7880
-  neko:
-    service_name: neko
-    owning_vm: runtime-comms-lv3
-    private_ip: 10.10.10.21
-    public_hostname: browser.lv3.org
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: browser
-      type: A
-      target: 65.108.75.123
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      proxy_read_timeout_seconds: 3600
-      proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.21:8080
-    service_id: neko
-    runtime_pool: runtime-comms
-    deployment_surface: playbooks/services/neko.yml
-    restart_domain: runtime-comms-browser
-    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-comms
-    mobility_tier: movable_singleton
-    ports:
-      internal: 8080
-      media_udp_start: 50000
-      media_udp_end: 60000
-    urls:
-      public: https://browser.lv3.org
-      internal: http://10.10.10.21:8080
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime-lv3
@@ -6715,3 +6641,27 @@ tika_port: 9998
 tesseract_ocr_port: 3008
 keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587
+
+# ---------------------------------------------------------------------------
+# Neko multi-instance browser sessions
+# ---------------------------------------------------------------------------
+# Each entry provisions an isolated browser container on runtime-comms-lv3
+# and a Keycloak user in the lv3 realm. Removing an entry destroys the
+# container and the Keycloak user on the next converge.
+#
+# Key         = instance name (container name: neko-<key>, data dir: /opt/neko/instances/<key>)
+# email       = Keycloak user email and routing key for NGINX → container mapping
+# port        = TCP port the Neko signalling server binds on (must be unique per instance)
+# udp_range   = Ephemeral UDP port range for WebRTC media (must be unique per instance)
+#
+# Example:
+#   neko_instances:
+#     florin:
+#       email: florin@lv3.org
+#       port: 8080
+#       udp_range: "50000-52999"
+#     alice:
+#       email: alice@lv3.org
+#       port: 8081
+#       udp_range: "53000-55999"
+neko_instances: {}

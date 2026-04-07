@@ -1,0 +1,42 @@
+---
+# Remove containers for Neko instances that were deleted from neko_instances.
+# Safe: only touches containers whose names match the neko-* prefix.
+# ignore_errors: true throughout — cleanup never blocks convergence.
+
+- name: Find all running neko-* containers
+  ansible.builtin.shell: |
+    docker ps -a --filter "name=^neko-" --format "{{ '{{' }}.Names{{ '}}' }}" 2>/dev/null || true
+  register: _neko_running_containers
+  changed_when: false
+  ignore_errors: true
+
+- name: Build expected container name set
+  ansible.builtin.set_fact:
+    _neko_expected_containers: >-
+      {{
+        neko_instances.keys()
+        | map('regex_replace', '^(.*)$', 'neko-\1')
+        | list
+      }}
+
+- name: Remove containers for deleted instances
+  ansible.builtin.shell: |
+    docker stop {{ item }} 2>/dev/null || true
+    docker rm   {{ item }} 2>/dev/null || true
+    # Clean up instance data dir
+    rm -rf {{ neko_data_dir }}/{{ item | regex_replace('^neko-', '') }}
+    echo "Removed {{ item }}"
+  loop: "{{ _neko_running_containers.stdout_lines | default([]) }}"
+  when: item not in _neko_expected_containers
+  register: _neko_cleanup_result
+  changed_when: "'Removed' in _neko_cleanup_result.stdout"
+  ignore_errors: true
+
+- name: Log removed instances
+  ansible.builtin.debug:
+    msg: "Removed stale Neko instance: {{ item.item }}"
+  loop: "{{ _neko_cleanup_result.results | default([]) }}"
+  when:
+    - item.changed | default(false)
+    - item.stdout is defined
+    - "'Removed' in item.stdout"

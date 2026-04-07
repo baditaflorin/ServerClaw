@@ -1,46 +1,59 @@
 ---
 # Neko Remote Desktop Role Defaults
 
-# Docker image configuration
-# m1k1o/neko tags are browser-flavoured: chromium, firefox, ungoogled-chromium, etc.
+# --- Multi-instance configuration (primary interface) ---
+# Each entry provisions an isolated browser container + Keycloak user.
+# Key = instance name (used for container name, data dir, logs).
+# Removing an entry from this dict causes the container to be destroyed
+# and the Keycloak user to be deleted on the next converge.
+#
+# Example:
+#   neko_instances:
+#     florin:
+#       email: florin@example.com
+#       port: 8080
+#       udp_range: "50000-52999"
+#     alice:
+#       email: alice@example.com
+#       port: 8081
+#       udp_range: "53000-55999"
+neko_instances: {}
+
+# --- Image configuration (shared across all instances) ---
 neko_runtime_image_name: "m1k1o/neko"
 neko_runtime_image_tag: "chromium"
 
-# Container configuration
-neko_runtime_container_name: "neko"
-neko_runtime_restart_policy: "unless-stopped"
+# --- Per-instance defaults (overridable per entry in neko_instances) ---
+neko_default_browser: "chromium"
+neko_default_res: "1440x900"
+neko_default_max_connections: 10
+neko_default_cpu_limit: "2"
+neko_default_memory_limit: "4g"
+neko_default_restart_policy: "unless-stopped"
 
-# Network configuration
-neko_runtime_port: 8080  # TCP signalling port (proxied via NGINX)
-neko_runtime_data_dir: "/opt/neko"
+# --- Storage ---
+neko_data_dir: "/opt/neko/instances"
 
-# Browser configuration
-neko_runtime_browser: "chromium"  # "chromium" or "firefox"
-neko_runtime_res: "1440x900"  # Display resolution
+# --- Health check ---
+neko_healthcheck_interval: "30s"
+neko_healthcheck_timeout: "5s"
+neko_healthcheck_retries: 3
 
-# Session configuration
-neko_runtime_max_connections: 1  # Max concurrent operator sessions
-neko_runtime_password: ""  # Optional session password (empty = no auth)
+# --- Logging ---
+neko_log_driver: "json-file"
+neko_log_max_size: "10m"
+neko_log_max_file: "3"
 
-# Resource limits (applied as Docker constraints)
-neko_runtime_cpu_limit: "8"
-neko_runtime_cpu_request: "4"
-neko_runtime_memory_limit: "16g"
-neko_runtime_memory_request: "8g"
+# --- Keycloak user lifecycle ---
+# Admin API credentials (same vars used by keycloak_runtime role)
+# These are read from the controller environment or local secrets.
+neko_keycloak_realm: "lv3"
+neko_keycloak_admin_url: "https://sso.lv3.org"
 
-# Health check configuration
-neko_runtime_healthcheck_interval: "30s"
-neko_runtime_healthcheck_timeout: "5s"
-neko_runtime_healthcheck_retries: 3
+# Attribute set on Keycloak users managed by this role.
+# Used to identify users to clean up when removed from neko_instances.
+neko_keycloak_managed_attribute: "neko_managed"
+neko_keycloak_managed_attribute_value: "true"
 
-# Logging
-neko_runtime_log_driver: "json-file"
-neko_runtime_log_max_size: "10m"
-neko_runtime_log_max_file: "3"
-
-# Advanced: WebRTC configuration (optional)
-neko_runtime_stun_server: ""  # Optional STUN server (leave empty for default)
-neko_runtime_turn_servers: []  # Optional TURN servers list
-
-# Change detection (do not edit manually)
+# --- Change detection (do not edit manually) ---
 neko_runtime_image_pull_digest: ""
