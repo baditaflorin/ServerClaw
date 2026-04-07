@@ -18,6 +18,15 @@ keycloak_compose_file: "{{ keycloak_site_dir }}/docker-compose.yml"
 keycloak_env_file: "{{ keycloak_site_dir }}/runtime.env"
 keycloak_image: "quay.io/keycloak/keycloak:26.5.4"
 keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
+keycloak_legacy_env_file: "{{ keycloak_site_dir }}/keycloak.env"
+
+# OpenBao agent configuration (from ADR 0373)
+keycloak_openbao_agent_dir: "{{ keycloak_site_dir }}/openbao"
+keycloak_openbao_agent_image: "{{ openbao_agent_image }}"
+keycloak_openbao_agent_container_name: keycloak-openbao-agent
+keycloak_openbao_secret_path: services/keycloak/runtime-env
+keycloak_openbao_policy_name: lv3-service-keycloak-runtime
+keycloak_openbao_approle_name: keycloak-runtime
 
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 keycloak_session_authority: "{{ platform_session_authority }}"
