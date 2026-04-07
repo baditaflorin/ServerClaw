@@ -1,27 +1,15 @@
 ---
-semaphore_site_dir: /opt/semaphore
-semaphore_data_dir: "{{ semaphore_site_dir }}/data"
-semaphore_secret_dir: /etc/lv3/semaphore
-semaphore_compose_file: "{{ semaphore_site_dir }}/docker-compose.yml"
-semaphore_env_file: "{{ compose_runtime_secret_root }}/semaphore/runtime.env"
-semaphore_legacy_env_file: "{{ semaphore_site_dir }}/semaphore.env"
-semaphore_openbao_agent_dir: "{{ semaphore_site_dir }}/openbao"
-semaphore_openbao_agent_image: "{{ openbao_agent_image }}"
-semaphore_openbao_agent_container_name: semaphore-openbao-agent
-semaphore_openbao_secret_path: services/semaphore/runtime-env
-semaphore_openbao_policy_name: lv3-service-semaphore-runtime
-semaphore_openbao_approle_name: semaphore-runtime
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file, openbao_*,
+# container_name, internal_port, local_artifact_dir) are derived from
+# platform_service_registry — ADR 0373.
 semaphore_server_port: "{{ platform_service_topology | platform_service_port('semaphore', 'internal') }}"
 semaphore_host_proxy_port: "{{ platform_service_topology | platform_service_port('semaphore', 'controller') }}"
-semaphore_image: "{{ container_image_catalog.images.semaphore_runtime.ref }}"
-semaphore_container_name: semaphore
 semaphore_database_name: semaphore
 semaphore_database_user: semaphore_admin
 semaphore_database_inventory_host: postgres-lv3
 semaphore_database_host: "{{ hostvars[semaphore_database_inventory_host].ansible_host }}"
 semaphore_database_port: 5432
 semaphore_database_password_local_file: "{{ playbook_dir }}/../.local/semaphore/database-password.txt"
-semaphore_local_artifact_dir: "{{ playbook_dir }}/../.local/semaphore"
 semaphore_admin_password_local_file: "{{ semaphore_local_artifact_dir }}/admin-password.txt"
 semaphore_admin_password_guest_file: "{{ semaphore_secret_dir }}/admin-password"
 semaphore_api_token_local_file: "{{ semaphore_local_artifact_dir }}/api-token.txt"
