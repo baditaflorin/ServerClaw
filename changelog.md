@@ -45,3 +45,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 - [Release note archives](docs/release-notes/index/README.md)
 - [2026 (380 releases)](docs/release-notes/index/2026.md)
+
+## Unreleased
+
+- ADR status correction: 35 mismatches resolved based on implementation scanner evidence (14 upgraded, 21 downgraded)
