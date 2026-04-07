@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.44",
-  "platform_version": "0.131.1",
-  "generated_at": "2026-04-07T05:16:01Z",
-  "next_refresh_at": "2026-04-07T06:16:01Z",
+  "repo_version": "0.178.50",
+  "platform_version": "0.131.2",
+  "generated_at": "2026-04-07T09:37:56Z",
+  "next_refresh_at": "2026-04-07T10:37:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6249,10 +6249,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.42",
+    "last_version": "0.178.49",
     "deployed_at": "2026-04-07",
-    "summary": "made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults",
-    "release_notes_url": "docs/release-notes/0.178.43.md"
+    "summary": "fix redirect loop: stale session reset now redirects to Keycloak logout (kills Keycloak session + clears sso.lv3.org cookie) instead of /oauth2/sign_in, preventing Keycloak from auto-logging back in with a poisoned session NGINX auto-clears stale session cookie on oauth2-proxy 500 at /oauth2/callback \u2014 users no longer see 500 errors or need to manually clear cookies after Keycloak restarts",
+    "release_notes_url": "docs/release-notes/0.178.50.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6304,13 +6304,6 @@
   },
   "known_gaps": [
     {
-      "adr": "0118",
-      "title": "Replayable Failure Case Library",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0118-replayable-failure-case-library.md"
-    },
-    {
       "adr": "0183",
       "title": "Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity",
       "status": "Proposed",
@@ -6323,13 +6316,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0377-open-webui-platform-knowledge-integration.md"
-    },
-    {
-      "adr": "0378",
-      "title": "ServerClaw Tool Surface In Open WebUI",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0378-serverclaw-tool-surface-in-open-webui.md"
     }
   ]
 }

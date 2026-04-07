@@ -1,7 +1,7 @@
 # ADR 0111: End-to-End Integration Test Suite
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.100.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-23
