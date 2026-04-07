@@ -59,22 +59,16 @@
   tags: [neko, convergence]
 
 - name: Deploy Neko via docker-compose
-  community.docker.docker_compose_v2:
-    project_src: "{{ neko_runtime_data_dir }}"
-    files:
-      - docker-compose.yml
-    state: present
-    pull: "{{ 'always' if neko_image_pulled.changed else 'never' }}"
-  environment:
-    # Pass environment variables to docker-compose
-    NEKO_DATA_DIR: "{{ neko_runtime_data_dir }}"
+  shell: |
+    docker compose -f {{ neko_runtime_data_dir }}/docker-compose.yml up -d \
+      {{ '--force-recreate' if (neko_compose_rendered.changed or neko_env_rendered.changed or neko_image_pulled.changed) else '' }}
   register: neko_compose_result
+  changed_when: neko_compose_rendered.changed or neko_env_rendered.changed or neko_image_pulled.changed
   tags: [neko, convergence]
 
 - name: Wait for Neko container to be healthy
-  docker_container:
+  community.docker.docker_container_info:
     name: "{{ neko_runtime_container_name }}"
-    state: started
   register: neko_container
   until: neko_container.container.State.Health.Status | default('') == 'healthy'
   retries: 10
