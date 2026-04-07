@@ -129,6 +129,14 @@ platform_postgres_clients:
     password_remote_dir: /etc/lv3/one-api
     password_remote_file: /etc/lv3/one-api/database-password
 
+  - service: litellm
+    database: litellm
+    user: litellm
+    source_vm: docker-runtime-lv3
+    password_local_file: "{{ repo_shared_root }}/.local/litellm/database-password.txt"
+    password_remote_dir: /etc/lv3/litellm
+    password_remote_file: /etc/lv3/litellm/database-password
+
   - service: openfga
     database: openfga
     user: openfga
