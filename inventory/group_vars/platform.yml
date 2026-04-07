@@ -3402,8 +3402,8 @@ platform_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
-    private_ip: 10.10.10.92
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -3423,7 +3423,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.92:8091
+      internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -5918,8 +5918,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
-    private_ip: 10.10.10.92
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -5939,7 +5939,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.92:8091
+      internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
