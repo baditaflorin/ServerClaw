@@ -2219,11 +2219,11 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The LiteLLM Proxy models endpoint is ready.",
+        "description": "The LiteLLM Proxy health endpoint confirms readiness.",
         "timeout_seconds": 120,
         "retries": 12,
         "delay_seconds": 2,
-        "url": "http://127.0.0.1:4000/v1/models",
+        "url": "http://127.0.0.1:4000/health/readiness",
         "method": "GET",
         "expected_status": [
           200
