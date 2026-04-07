@@ -71,4 +71,4 @@ open_webui_rag_hybrid_search: true
 open_webui_enable_system_prompt_injection: true
 open_webui_system_prompt_template: system-prompt.md.j2
 # Base model for the serverclaw Ollama model (must be pre-pulled)
-open_webui_serverclaw_base_model: "qwen2.5:7b"
+open_webui_serverclaw_base_model: "gemma4:e4b"
