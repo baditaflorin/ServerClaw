@@ -40,6 +40,9 @@ server {
     add_header X-Content-Type-Options nosniff always;
     add_header Referrer-Policy no-referrer-when-downgrade always;
 
+    # Server-level error page handlers — ensure proper Content-Type for all error responses
+    error_page 403 @neko_no_session;
+
     # Shared oauth2-proxy passthrough (cookie_domains covers .lv3.org)
     location /oauth2/ {
         proxy_pass http://127.0.0.1:4180;
@@ -73,9 +76,11 @@ server {
         auth_request_set $auth_email $upstream_http_x_auth_request_email;
 
         # Step 3: Route to user's container (map evaluated lazily after auth_request_set)
-        # 403 if this Keycloak user has no browser session assigned
+        # Return 403 if this Keycloak user has no browser session assigned.
+        # Use plain 403 + server-level error_page so Chrome receives text/html (not
+        # application/octet-stream, which triggers ERR_INVALID_RESPONSE).
         if ($neko_backend = "") {
-            return 403 "No browser session is assigned to your account. Contact an administrator.";
+            return 403;
         }
 
         # Graceful handling when the user's container is temporarily down
@@ -100,8 +105,15 @@ server {
         return 302 /oauth2/sign_in?rd=$scheme://$host$request_uri;
     }
 
+    # Shown when authenticated but no Neko instance is assigned to this email.
+    # Separate named location ensures Content-Type: text/html (not application/octet-stream).
+    location @neko_no_session {
+        default_type text/html;
+        return 403 '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>No browser session — browser.lv3.org</title><style>body{font-family:system-ui,sans-serif;max-width:520px;margin:100px auto;padding:0 24px;color:#1a1a2e}h2{color:#e63946}code{background:#f1f1f1;padding:2px 6px;border-radius:3px;font-size:.9em}</style></head><body><h2>No browser session assigned</h2><p>You are signed in, but your account does not have a dedicated browser session on this platform.</p><p>Ask an administrator to add your email to <code>neko_instances</code> in <code>inventory/group_vars/platform.yml</code> and re-run the Neko playbook.</p><p><a href="/oauth2/sign_out">Sign out</a></p></body></html>';
+    }
+
     location @neko_unavailable {
-        add_header Content-Type text/plain always;
-        return 503 "Your browser session is temporarily unavailable. Please try again in a moment.";
+        default_type text/html;
+        return 503 '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Session unavailable — browser.lv3.org</title><style>body{font-family:system-ui,sans-serif;max-width:520px;margin:100px auto;padding:0 24px;color:#1a1a2e}h2{color:#e87040}</style></head><body><h2>Browser session temporarily unavailable</h2><p>Your session container is starting up or restarting. Please try again in a moment.</p><p><a href="/">Retry</a></p></body></html>';
     }
 }
