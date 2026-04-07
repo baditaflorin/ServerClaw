@@ -30,6 +30,7 @@ gitea_env_file: "{{ compose_runtime_secret_root }}/gitea/runtime.env"
 gitea_image: docker.io/gitea/gitea:latest
 gitea_local_artifact_dir: "{{ repo_shared_local_root }}/gitea"
 gitea_legacy_env_file: "{{ gitea_site_dir }}/gitea.env"
+gitea_container_name: gitea
 
 # OpenBao agent configuration (from ADR 0373)
 gitea_openbao_agent_dir: "{{ gitea_site_dir }}/openbao"
