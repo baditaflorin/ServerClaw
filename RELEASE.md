@@ -1,8 +1,9 @@
-# Release 0.178.54
+# Release 0.178.55
 
 - Date: 2026-04-07
 
 ## Summary
+- fix ops.lv3.org auth loop — expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused "Code not valid" on every login attempt
 - add LiteLLM Proxy + LibreChat to replace One API + Open WebUI — portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar
 - deploy Neko remote desktop at browser.lv3.org (ADR 0380) — dedicated runtime-comms-lv3 VM (VMID 121, 10.10.10.21), Chromium over WebRTC with host-mode networking for UDP media (50000-60000), TLS cert via certbot, published through nginx_edge_publication role with 3600s proxy timeout for long-lived streaming sessions
 - ADR governance system: pre-commit hook validates ADR status transitions (requires evidence for upgrades, reason for downgrades), Plane integration syncs 406 ADRs for team visibility, quarterly audit detects implementation drift automatically

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.54",
+  "repo_version": "0.178.55",
   "platform_version": "0.131.2",
-  "generated_at": "2026-04-07T19:08:39Z",
-  "next_refresh_at": "2026-04-07T20:08:39Z",
+  "generated_at": "2026-04-07T19:41:26Z",
+  "next_refresh_at": "2026-04-07T20:41:26Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -2035,6 +2035,58 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-langfuse.md"
+      },
+      {
+        "id": "converge-librechat",
+        "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge, replacing Open WebUI.",
+        "tags": [
+          "converge-librechat",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-librechat.md"
+      },
+      {
+        "id": "converge-litellm",
+        "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend, replacing One API as the programmatic LLM gateway.",
+        "tags": [
+          "converge-litellm",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-litellm.md"
       },
       {
         "id": "converge-livekit",
@@ -5252,6 +5304,26 @@
         ]
       },
       {
+        "id": "configure-librechat",
+        "title": "Configure LibreChat",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-librechat.md",
+        "workflow_ids": [
+          "converge-librechat"
+        ]
+      },
+      {
+        "id": "configure-litellm",
+        "title": "Configure LiteLLM Proxy",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-litellm.md",
+        "workflow_ids": [
+          "converge-litellm"
+        ]
+      },
+      {
         "id": "configure-livekit",
         "title": "Configure LiveKit",
         "agent_trust_required": "T3",
@@ -6249,10 +6321,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.53",
+    "last_version": "0.178.54",
     "deployed_at": "2026-04-07",
-    "summary": "add LiteLLM Proxy + LibreChat to replace One API + Open WebUI \u2014 portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar deploy Neko remote desktop at browser.lv3.org (ADR 0380) \u2014 dedicated runtime-comms-lv3 VM (VMID 121, 10.10.10.21), Chromium over WebRTC with host-mode networking for UDP media (50000-60000), TLS cert via certbot, published through nginx_edge_publication role with 3600s proxy timeout for long-lived streaming sessions",
-    "release_notes_url": "docs/release-notes/0.178.54.md"
+    "summary": "fix ops.lv3.org auth loop \u2014 expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused \"Code not valid\" on every login attempt add LiteLLM Proxy + LibreChat to replace One API + Open WebUI \u2014 portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar",
+    "release_notes_url": "docs/release-notes/0.178.55.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
