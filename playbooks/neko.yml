@@ -92,5 +92,13 @@
         required_hosts:
           - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
 
+    - name: Remove legacy browser.lv3.org standalone site conf (superseded by lv3-edge.conf)
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/nginx/sites-enabled/browser.lv3.org.conf
+        - /etc/nginx/sites-available/browser.lv3.org.conf
+
   roles:
     - role: lv3.platform.nginx_edge_publication
