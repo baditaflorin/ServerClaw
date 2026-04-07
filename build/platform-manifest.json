@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.46",
+  "repo_version": "0.178.47",
   "platform_version": "0.131.1",
-  "generated_at": "2026-04-07T05:44:31Z",
-  "next_refresh_at": "2026-04-07T06:44:31Z",
+  "generated_at": "2026-04-07T05:51:05Z",
+  "next_refresh_at": "2026-04-07T06:51:05Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6249,10 +6249,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.44",
+    "last_version": "0.178.46",
     "deployed_at": "2026-04-07",
     "summary": "NGINX auto-clears stale session cookie on oauth2-proxy 500 at /oauth2/callback \u2014 users no longer see 500 errors or need to manually clear cookies after Keycloak restarts made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout",
-    "release_notes_url": "docs/release-notes/0.178.46.md"
+    "release_notes_url": "docs/release-notes/0.178.47.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
