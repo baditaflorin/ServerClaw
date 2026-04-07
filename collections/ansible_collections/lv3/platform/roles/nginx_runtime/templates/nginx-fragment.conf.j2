@@ -1,0 +1,37 @@
+# Nginx Service Fragment Template
+# This is an example template for service roles to use when rendering
+# nginx fragment files.
+#
+# Usage in a service role (e.g., roles/keycloak_runtime/templates/nginx-fragment.conf.j2):
+#
+#   upstream {{ service_name }} {
+#       server {{ service_host }}:{{ service_port }};
+#       keepalive 32;
+#   }
+#
+#   server {
+#       listen 443 ssl http2;
+#       server_name {{ service_domain }};
+#       ssl_certificate {{ ssl_cert_path }};
+#       ssl_certificate_key {{ ssl_key_path }};
+#       location / {
+#           proxy_pass http://{{ service_name }};
+#       }
+#   }
+#
+# The nginx_fragment_config role will automatically prepend the provenance header
+# and perform write-validate-reload. No need to add the header here.
+
+# Managed by:  roles/{{ role_name | default('service_runtime') }}
+# ADR:         {{ adr_number | default('0000') }} — {{ adr_title | default('Nginx Service Publication') }}
+# Workstream:  {{ workstream_id | default('unset') }}
+# Playbook:    {{ playbook_path | default('unset') }}
+# Agent:       {{ agent_session_id | default('human-operator') }}
+# Applied:     {{ ansible_date_time.iso8601 }}
+# Do not edit by hand — regenerated on each apply.
+
+{% if service_content is defined %}
+{{ service_content }}
+{% else %}
+# Template placeholder — set service_content in the calling role
+{% endif %}

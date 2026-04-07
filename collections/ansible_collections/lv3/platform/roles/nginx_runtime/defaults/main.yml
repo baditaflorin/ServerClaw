@@ -1,0 +1,21 @@
+---
+# Purpose: Define defaults for nginx runtime initialization and fragment management.
+# Use case: Used by platforms that need to set up nginx with fragment-based
+#           atomic configuration (ADR 0350).
+#
+# Inputs (optional):
+#   - nginx_fragment_dir (str, default="/etc/nginx/fragments.d"): Directory for fragments
+#   - nginx_fragments_enabled (bool, default=true): Enable fragment-based config
+#   - nginx_fragment_platform_include (str, default="conf.d/platform-includes.conf"):
+#       Include file for fragments
+#
+# Dependencies:
+#   - ADR 0350: Nginx Fragment-Based Atomic Configuration
+#
+# Related ADRs: 0350
+# Author: LV3 Platform
+
+nginx_fragment_dir: /etc/nginx/fragments.d
+nginx_fragments_enabled: true
+nginx_fragment_platform_include: conf.d/platform-includes.conf
+nginx_config_root: /etc/nginx

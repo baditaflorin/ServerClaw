@@ -1,0 +1,8 @@
+---
+# ADR 0350: Nginx Fragment-Based Atomic Configuration
+
+- name: reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+    enabled: true
