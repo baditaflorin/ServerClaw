@@ -1,0 +1,39 @@
+id: ws-0215-node-role-taxonomy
+adr: '0215'
+title: "Node Role Taxonomy Implementation"
+description: |
+  Establish standard node role vocabulary and assignment rules across the platform.
+  Classify all VMs and future node pools by primary role (bootstrap, control, state,
+  edge, workload, observability, recovery, build) and document assignment rules.
+status: planned
+owner: claude
+branch: claude/ws-0215-node-role-taxonomy
+worktree_path: .claude/worktrees/ws-0215-node-role-taxonomy
+doc: docs/workstreams/ws-0215-node-role-taxonomy.md
+depends_on:
+  - adr-0215-node-role-taxonomy
+  - adr-0176-inventory-sharding
+  - adr-0180-standby-capacity-reservation
+conflicts_with: []
+shared_surfaces:
+  - docs/workstreams/ws-0215-node-role-taxonomy.md
+  - docs/inventory/node-roles.yaml
+  - docs/inventory/role-assignment-matrix.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: node_role_docs
+      paths:
+        - docs/workstreams/ws-0215-node-role-taxonomy.md
+        - docs/inventory/node-roles.yaml
+        - docs/inventory/role-assignment-matrix.yaml
+      mode: exclusive
+notes: |
+  - Map all current VMs to primary roles (bootstrap, control, state, edge, workload, observability, recovery, build)
+  - Document assignment rules and exceptions (multi-role waivers)
+  - Create node-roles.yaml registry with role definitions
+  - Create role-assignment-matrix.yaml with production/staging topology
+  - Identify role collapse in staging and document technical debt
+  - Add node role validation to platform manifest generation
+  - Commit workstream docs and push to claude/ws-0215-node-role-taxonomy
+ready_to_merge: false
+live_applied: false
