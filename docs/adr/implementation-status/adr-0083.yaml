@@ -1,0 +1,53 @@
+adr_number: 0083
+title: Docker-Based Check Runner on Build Server
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0083
+  location: git:04234f15d
+  evidence: 04234f15d Release 0.90.0 for ADR 0083 archive-mode validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.201600'
+- marker_type: git-commit
+  adr_number: 0083
+  location: git:f3f4794ce
+  evidence: f3f4794ce Release 0.87.0 for ADR 0083 and ADR 0089
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.201657'
+- marker_type: git-commit
+  adr_number: 0083
+  location: git:7cdb6c6b0
+  evidence: 7cdb6c6b0 Merge ADR 0083 into ADR 0089 workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.201672'
+- marker_type: git-commit
+  adr_number: 0083
+  location: git:57ca9853d
+  evidence: 57ca9853d Stabilize ADR 0083 check runner validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.201680'
+- marker_type: git-commit
+  adr_number: 0083
+  location: git:db35399a9
+  evidence: db35399a9 Merge main into ADR 0083 workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.201704'
+- marker_type: git-commit
+  adr_number: 0083
+  location: git:0a769f409
+  evidence: '0a769f409 Implement ADR 0083: Docker-based check runner images and parallel
+    executor'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.201711'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=6
+
+  Implemented On: 2026-03-23'

@@ -1,0 +1,88 @@
+adr_number: '0132'
+title: Self-Describing Platform Manifest
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:1e18c3fc2
+  evidence: 1e18c3fc2 Merge origin/main gate fix into ADR 0132 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347702'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:a4f652edc
+  evidence: a4f652edc Merge origin/main into ADR 0132 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347736'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:ea14d448b
+  evidence: ea14d448b Release 0.140.0 for ADR 0132
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347750'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:b6f1a029b
+  evidence: b6f1a029b Implement ADR 0132 platform manifest generator
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347765'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:0f39b9c96
+  evidence: 0f39b9c96 Release 0.132.0 for ADR 0132
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347817'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:f633d4734
+  evidence: f633d4734 Implement ADR 0132 platform manifest generator
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347824'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:de89b2059
+  evidence: de89b2059 Restore agent-state CLI after ADR 0132 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347839'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:531644d0d
+  evidence: 531644d0d Merge ADR 0132 platform manifest into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.347983'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:616e4f2fb
+  evidence: 616e4f2fb Implement ADR 0132 platform manifest generator
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.348025'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:8e9997e0d
+  evidence: "8e9997e0d Add ADRs 0123\u20130132: agentic cohesion layer"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:00.348082'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:aa8619d38
+  evidence: "aa8619d38 Merge ADRs 0123\u20130132: agentic cohesion layer"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:00.348115'
+- marker_type: git-commit
+  adr_number: '0132'
+  location: git:794adc72f
+  evidence: "794adc72f Add ADRs 0123\u20130132: agentic cohesion layer"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:00.348120'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-03-25'

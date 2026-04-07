@@ -1,0 +1,46 @@
+adr_number: 0182
+title: Live Apply Merge Train and Rollback Bundle
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0182
+  location: git:613f095bb
+  evidence: 613f095bb Release 0.176.6 for ADR 0182
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.230255'
+- marker_type: git-commit
+  adr_number: 0182
+  location: git:8d9841245
+  evidence: 8d9841245 Implement ADR 0182 merge train and rollback bundle
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.230290'
+- marker_type: git-commit
+  adr_number: 0182
+  location: git:18cacda9f
+  evidence: 18cacda9f Refresh ADR 0182 repo version metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.230345'
+- marker_type: git-commit
+  adr_number: 0182
+  location: git:bcdf94c74
+  evidence: bcdf94c74 Release 0.176.1 for ADR 0182
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.230348'
+- marker_type: git-commit
+  adr_number: 0182
+  location: git:aa9d99399
+  evidence: aa9d99399 Implement ADR 0182 merge train and rollback bundle
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.230352'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-27'

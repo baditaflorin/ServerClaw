@@ -5,6 +5,15 @@
 # Idempotency: Partially idempotent because bootstrap state and runtime restarts may intentionally refresh live state.
 # Dependencies: ADR 0165, ADR 0060, ADR 0145, and ADR 0148.
 ---
+- name: Derive Open Webui conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: open_webui
+  when: open_webui_site_dir is not defined
+
+
 - name: Validate Open WebUI runtime inputs
   ansible.builtin.assert:
     that:
@@ -37,22 +46,16 @@
   become: false
   register: open_webui_provider_env_local
 
-- name: Check whether a controller-local OIDC client secret file exists
-  ansible.builtin.stat:
-    path: "{{ open_webui_oidc_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: open_webui_oidc_client_secret_local
+- name: Check Open WebUI OIDC prerequisites when SSO is enabled
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ open_webui_oidc_client_secret_local_file }}"
+        description: "Open WebUI OIDC client secret"
+        prerequisite: "Provide the OIDC client secret before enabling SSO for Open WebUI"
   when: open_webui_enable_oidc | bool
-
-- name: Fail if OIDC is enabled but the client secret file is missing
-  ansible.builtin.fail:
-    msg: >-
-      {{ open_webui_oidc_client_secret_local_file }} is missing on the control machine.
-      Provide the OIDC client secret before enabling SSO for Open WebUI.
-  when:
-    - open_webui_enable_oidc | bool
-    - not open_webui_oidc_client_secret_local.stat.exists
 
 - name: Ensure the Open WebUI runtime packages are present
   ansible.builtin.apt:
@@ -388,6 +391,71 @@
         label: "{{ item.id }}"
       changed_when: false
       no_log: true
+
+- name: Inject ServerClaw system prompt into Open WebUI
+  when:
+    - open_webui_enable_system_prompt_injection | default(false) | bool
+    - open_webui_enable_password_auth | bool
+  block:
+    - name: Render the ServerClaw system prompt
+      ansible.builtin.template:
+        src: "{{ open_webui_system_prompt_template }}"
+        dest: "{{ open_webui_site_dir }}/system-prompt.md"
+        owner: root
+        group: root
+        mode: "0644"
+      register: open_webui_system_prompt_rendered
+
+    - name: Read the rendered system prompt
+      ansible.builtin.slurp:
+        src: "{{ open_webui_site_dir }}/system-prompt.md"
+      register: open_webui_system_prompt_content
+
+    - name: Create or update serverclaw Ollama model (from + system fields, Ollama ≥0.5 API)
+      ansible.builtin.uri:
+        url: "{{ open_webui_ollama_api_url }}/api/create"
+        method: POST
+        body_format: json
+        body:
+          name: "serverclaw:latest"
+          from: "{{ open_webui_serverclaw_base_model }}"
+          system: "{{ open_webui_system_prompt_content.content | b64decode }}"
+        status_code:
+          - 200
+      changed_when: true
+
+    - name: Sign in as Open WebUI admin for system prompt injection
+      ansible.builtin.uri:
+        url: "{{ open_webui_internal_base_url }}/api/v1/auths/signin"
+        method: POST
+        body_format: json
+        body:
+          email: "{{ open_webui_admin_email }}"
+          password: "{{ open_webui_admin_password }}"
+        return_content: true
+        status_code: 200
+      register: open_webui_prompt_admin_signin
+      changed_when: false
+      no_log: true
+
+    - name: Set the default model and system prompt via Open WebUI admin config
+      ansible.builtin.uri:
+        url: "{{ open_webui_internal_base_url }}/api/v1/configs/models"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ open_webui_prompt_admin_signin.json.token }}"
+        body_format: json
+        body:
+          DEFAULT_MODELS: "{{ open_webui_default_models }}"
+          DEFAULT_PINNED_MODELS: "{{ open_webui_default_models }}"
+          MODEL_ORDER_LIST: []
+          DEFAULT_MODEL_METADATA: {}
+          DEFAULT_MODEL_PARAMS:
+            system: "{{ open_webui_system_prompt_content.content | b64decode }}"
+        status_code:
+          - 200
+          - 201
+      changed_when: true
 
 - name: Verify Open WebUI health probes
   ansible.builtin.import_tasks: verify.yml

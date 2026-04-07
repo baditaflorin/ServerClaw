@@ -1,0 +1,81 @@
+adr_number: '0201'
+title: Harbor - Vulnerability-Scanning Container Registry
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:e98a9b398
+  evidence: e98a9b398 [merge] Sync ADR 0201 mainline with latest origin/main follow-ups
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.599055'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:402268541
+  evidence: 402268541 [merge] Integrate ADR 0201 Harbor on top of current mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.599538'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:5743cef8f
+  evidence: 5743cef8f [harbor] Merge ADR 0201 to main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.601505'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:78f66ebfc
+  evidence: 78f66ebfc Merge remote-tracking branch 'origin/main' into codex/ws-0201-main-final
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:31.601648'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:bd67572f2
+  evidence: 'bd67572f2 [merge] Integrate ADR 0201 Harbor live apply\n\nPurpose: Land
+    verified Harbor live apply work onto mainline integration branch\nScope: Merge
+    codex/ws-0201-main-merge-r2 into an origin/main-based integration branch\nStatus:
+    Harbor implementation merged; main-only integration updates pending\nNext: Update
+    protected files, replay live apply from merged mainline, validate, and push\nSee
+    also: ADR 0201'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.602549'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:58572ecc2
+  evidence: 58572ecc2 [docs] Refresh ADR 0201 live-apply metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.602727'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:b0a860ef2
+  evidence: b0a860ef2 [harbor] Implement ADR 0201 live apply surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.602780'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:cf1c419a0
+  evidence: cf1c419a0 [harbor] Merge ADR 0201 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.606683'
+- marker_type: git-commit
+  adr_number: '0201'
+  location: git:37b836fea
+  evidence: 37b836fea [harbor] Record ADR 0201 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:31.606903'
+- marker_type: playbook
+  adr_number: '0201'
+  location: playbooks/harbor.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:31.618053'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=9, playbook=1
+
+  Implemented On: 2026-03-29'

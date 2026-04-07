@@ -1,0 +1,427 @@
+adr_number: 0297
+title: Renovate Bot As The Automated Stack Version Upgrade Proposer
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:5e96cf05d
+  evidence: 5e96cf05d [receipts] Capture ADR 0297 Gitea follow-up evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.187822'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:3122eeb5f
+  evidence: 3122eeb5f Merge branch 'codex/ws-0297-main-merge' into codex/ws-0297-main-push
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.187878'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:d01ffab8a
+  evidence: d01ffab8a [adr-0297] Integrate Renovate live apply into main
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.187885'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:cb01fb7ad
+  evidence: cb01fb7ad [workstreams] restore ws-0297 registry after rebase
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.187899'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:717dc82e7
+  evidence: 717dc82e7 [adr-0297] Capture follow-up live apply receipt
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.187930'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:304ed211a
+  evidence: 304ed211a Merge origin/main into codex/ws-0297-live-apply-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.187951'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:bfae2dd1e
+  evidence: bfae2dd1e [adr-0297] Capture follow-up live apply receipt
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:14.188049'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:58dad5d37
+  evidence: 58dad5d37 [renovate] Promote ADR 0297 into canonical mainline truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.189478'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:ba43d0da5
+  evidence: ba43d0da5 [validation] Repair ws-0297 rebase fallout
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189539'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:316607d70
+  evidence: 316607d70 [renovate] Declare ws-0297 hosted gate support surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189585'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:2312ef75e
+  evidence: 2312ef75e [renovate] Refresh generated gate surfaces for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189636'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:1ae887ec0
+  evidence: 1ae887ec0 [renovate] Fix runner host path export for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189642'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:585f293f8
+  evidence: 585f293f8 [renovate] Drop duplicate docker.sock mount for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189652'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:9f84b0927
+  evidence: 9f84b0927 [renovate] Refresh Gitea runner image digest for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189658'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:6d2055f03
+  evidence: 6d2055f03 [renovate] Recover Gitea and OpenBao live replay for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189665'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:8ad44ee66
+  evidence: 8ad44ee66 [renovate] Guard Harbor publication recovery for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189671'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:0d7f535c9
+  evidence: 0d7f535c9 [renovate] Align ws-0297 workflow ownership
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189676'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:285a60f4b
+  evidence: 285a60f4b [renovate] Align ws-0297 gate surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189691'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:866ab40ad
+  evidence: 866ab40ad [renovate] Implement ADR 0297 proposal runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.189702'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:dade3d867
+  evidence: dade3d867 [renovate] Declare ws-0297 hosted gate support surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189840'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:7de4ab9aa
+  evidence: 7de4ab9aa [renovate] Refresh generated gate surfaces for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189892'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:53bc82ab5
+  evidence: 53bc82ab5 [renovate] Fix runner host path export for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189898'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:4c4c067f4
+  evidence: 4c4c067f4 [renovate] Drop duplicate docker.sock mount for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189910'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:ebafe7788
+  evidence: ebafe7788 [renovate] Refresh Gitea runner image digest for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189916'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:9477aed52
+  evidence: 9477aed52 [renovate] Recover Gitea and OpenBao live replay for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189922'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:79bb47e3e
+  evidence: 79bb47e3e [renovate] Guard Harbor publication recovery for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189928'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:67057a638
+  evidence: 67057a638 [renovate] Align ws-0297 workflow ownership
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189934'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:ba189cc49
+  evidence: ba189cc49 [renovate] Align ws-0297 gate surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189947'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:f41e27600
+  evidence: f41e27600 [renovate] Implement ADR 0297 proposal runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.189958'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:2c7e77d72
+  evidence: 2c7e77d72 [renovate] Declare ws-0297 hosted gate support surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.189980'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:8dc1cee24
+  evidence: 8dc1cee24 [renovate] Refresh generated gate surfaces for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190032'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:dadf49970
+  evidence: dadf49970 [renovate] Fix runner host path export for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190037'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:8cc0cde41
+  evidence: 8cc0cde41 [renovate] Drop duplicate docker.sock mount for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190047'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:cd8010eef
+  evidence: cd8010eef [renovate] Refresh Gitea runner image digest for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190054'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:a1e6245aa
+  evidence: a1e6245aa [renovate] Recover Gitea and OpenBao live replay for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190060'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:ee4ebcbed
+  evidence: ee4ebcbed [renovate] Guard Harbor publication recovery for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190066'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:56812dbbd
+  evidence: 56812dbbd [renovate] Align ws-0297 workflow ownership
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190071'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:c2a302a99
+  evidence: c2a302a99 [renovate] Align ws-0297 gate surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190085'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:1dc5d2921
+  evidence: 1dc5d2921 [renovate] Implement ADR 0297 proposal runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.190095'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:b7f4ab919
+  evidence: b7f4ab919 [renovate] Declare ws-0297 hosted gate support surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190109'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:19240d1b3
+  evidence: 19240d1b3 [renovate] Refresh generated gate surfaces for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190193'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:6f2c59c88
+  evidence: 6f2c59c88 [renovate] Fix runner host path export for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190199'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:9cd75fd7c
+  evidence: 9cd75fd7c [renovate] Drop duplicate docker.sock mount for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190209'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:29b779471
+  evidence: 29b779471 [renovate] Refresh Gitea runner image digest for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190214'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:d645bcd31
+  evidence: d645bcd31 [renovate] Recover Gitea and OpenBao live replay for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190221'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:6cb118648
+  evidence: 6cb118648 [renovate] Guard Harbor publication recovery for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190226'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:2c065b079
+  evidence: 2c065b079 [renovate] Align ws-0297 workflow ownership
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190232'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:fac9f58ff
+  evidence: fac9f58ff [renovate] Align ws-0297 gate surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190245'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:074ff838b
+  evidence: 074ff838b [renovate] Implement ADR 0297 proposal runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.190256'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:8b8f852a5
+  evidence: 8b8f852a5 [renovate] Refresh generated gate surfaces for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190316'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:d703eefce
+  evidence: d703eefce [renovate] Fix runner host path export for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190351'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:73d6775a3
+  evidence: 73d6775a3 [renovate] Drop duplicate docker.sock mount for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190362'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:e99122336
+  evidence: e99122336 [renovate] Refresh Gitea runner image digest for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190368'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:4930009ad
+  evidence: 4930009ad [renovate] Recover Gitea and OpenBao live replay for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190375'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:c750b8010
+  evidence: c750b8010 [renovate] Guard Harbor publication recovery for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190381'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:5a47ffb5a
+  evidence: 5a47ffb5a [renovate] Align ws-0297 workflow ownership
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190388'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:32d692753
+  evidence: 32d692753 [renovate] Align ws-0297 gate surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190402'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:b408e33ca
+  evidence: b408e33ca [renovate] Implement ADR 0297 proposal runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.190413'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:8ef0fea67
+  evidence: 8ef0fea67 [renovate] Drop duplicate docker.sock mount for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190535'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:764434844
+  evidence: 764434844 [renovate] Refresh Gitea runner image digest for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190545'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:64b8326b6
+  evidence: 64b8326b6 [renovate] Recover Gitea and OpenBao live replay for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190590'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:37bacab1c
+  evidence: 37bacab1c [renovate] Guard Harbor publication recovery for ws-0297
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190743'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:eee05670b
+  evidence: eee05670b [renovate] Align ws-0297 workflow ownership
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190826'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:38ba7a46c
+  evidence: 38ba7a46c [renovate] Align ws-0297 gate surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.190902'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:93c8e569a
+  evidence: 93c8e569a [renovate] Implement ADR 0297 proposal runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:14.190935'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:81553c9e8
+  evidence: 81553c9e8 Regenerate ADR index, canonical truth, and stale diagrams after
+    ADRs 0297-0306
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.193216'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:fbae3ab05
+  evidence: 'fbae3ab05 Add ADRs 0297-0306: automation, security scanning, and error-reduction
+    toolchain'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.193250'
+- marker_type: git-commit
+  adr_number: 0297
+  location: git:ff5582780
+  evidence: 'ff5582780 Add ADRs 0297-0306: automation, security scanning, and error-reduction
+    toolchain'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:14.193261'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 68
+
+  Breakdown: git-commit=68
+
+  Implemented On: 2026-03-31'

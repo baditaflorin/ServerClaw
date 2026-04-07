@@ -6,12 +6,58 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 1
+total_adrs: 13
 adrs:
+  - adr: '0025'
+    title: Gap Analysis Matrix
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - gap
+      - analysis
+      - matrix
+    summary: Gap Analysis Matrix
+    filename: 0025-gap-analysis-matrix.md
+    path: docs/adr/0025-gap-analysis-matrix.md
+  - adr: '0025'
+    title: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - implementation
+      - roadmap
+      - compose-managed
+      - runtime
+      - stacks
+    summary: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    filename: 0025-implementation-roadmap.md
+    path: docs/adr/0025-implementation-roadmap.md
+  - adr: '0346'
+    title: '— Repowise: local semantic code search over the git repo'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: documentation
+    keywords:
+      - repowise
+      - local
+      - semantic
+      - code
+      - search
+      - over
+      - git
+      - repo
+    summary: 'Deploy repowise — a local semantic code search service — using:'
+    filename: 0346-repowise-semantic-search.md
+    path: docs/adr/0346-repowise-semantic-search.md
   - adr: 0359
     title: Declarative PostgreSQL Client Registry
     status: Proposed
@@ -27,3 +73,140 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
+  - adr: 0368
+    title: Docker Compose Jinja2 Macro Library
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - docker
+      - compose
+      - jinja2
+      - macro
+      - library
+    summary: 'Create a shared Jinja2 macro library at collections/ansiblecollections/lv3/platform/roles/common/templates/composemacros.j2.
+      Each compose template imports from '
+    filename: 0368-docker-compose-jinja2-macro-library.md
+    path: docs/adr/0368-docker-compose-jinja2-macro-library.md
+  - adr: 0369
+    title: Python Validation Toolkit
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - python
+      - validation
+      - toolkit
+    summary: Create a shared validation toolkit module at scripts/validationtoolkit.py containing all canonical validation
+      functions. All 43+ catalog/registry scripts must i
+    filename: 0369-python-validation-toolkit.md
+    path: docs/adr/0369-python-validation-toolkit.md
+  - adr: '0370'
+    title: Service Lifecycle Task Includes
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - service
+      - lifecycle
+      - task
+      - includes
+    summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
+      Runtime roles include them with includerole / in
+    filename: 0370-service-lifecycle-task-includes.md
+    path: docs/adr/0370-service-lifecycle-task-includes.md
+  - adr: '0371'
+    title: Parameterized Service Verification Tasks
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - parameterized
+      - service
+      - verification
+      - tasks
+    summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
+      parameters.
+    filename: 0371-parameterized-verify-tasks.md
+    path: docs/adr/0371-parameterized-verify-tasks.md
+  - adr: '0372'
+    title: Data-Driven Playbook Composition
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: automation
+    keywords:
+      - data-driven
+      - playbook
+      - composition
+    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
+      that drives playbook composition.
+    filename: 0372-data-driven-playbook-composition.md
+    path: docs/adr/0372-data-driven-playbook-composition.md
+  - adr: '0373'
+    title: Service Registry and Derived Defaults
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - service
+      - registry
+      - derived
+      - defaults
+    summary: 'Create a platform service registry in inventory/groupvars/platformservices.yml that declares each service''s
+      identity and metadata. A shared Ansible vars plugin '
+    filename: 0373-service-registry-and-derived-defaults.md
+    path: docs/adr/0373-service-registry-and-derived-defaults.md
+  - adr: '0374'
+    title: Cross-Cutting Service Manifest
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - cross-cutting
+      - service
+      - manifest
+    summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
+      what it needs from DNS, nginx, TLS, and SSO — in '
+    filename: 0374-cross-cutting-service-manifest.md
+    path: docs/adr/0374-cross-cutting-service-manifest.md
+  - adr: 0380
+    title: Neko Remote Desktop for Interactive Operator Browser Access
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: identity
+    keywords:
+      - neko
+      - remote
+      - desktop
+      - interactive
+      - operator
+      - browser
+      - access
+    summary: Neko Remote Desktop for Interactive Operator Browser Access
+    filename: 0380-neko-for-operator-remote-browser-access.md
+    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+  - adr: 0381
+    title: Login Service Contracts and Session Recovery Automation
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: automation
+    keywords:
+      - login
+      - service
+      - contracts
+      - session
+      - recovery
+      - automation
+    summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
+      .lv3.org.
+    filename: 0381-login-service-contracts-and-session-recovery-automation.md
+    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md

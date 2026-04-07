@@ -1,0 +1,28 @@
+adr_number: '0323'
+title: Service Mobility Tiers And Migration Waves For Runtime Pools
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: playbook
+  adr_number: '0323'
+  location: playbooks/runtime-general-pool.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:25.871540'
+- marker_type: playbook
+  adr_number: '0323'
+  location: playbooks/runtime-control-pool.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:25.872441'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: playbook=2
+
+  Implemented On: 2026-04-05'

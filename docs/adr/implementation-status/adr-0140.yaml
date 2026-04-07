@@ -1,0 +1,40 @@
+adr_number: '0140'
+title: Grafana Public Access Hardening
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0140'
+  location: git:802f6eddb
+  evidence: 802f6eddb Record ADR 0140 live rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.150288'
+- marker_type: git-commit
+  adr_number: '0140'
+  location: git:8e36e3ff5
+  evidence: 8e36e3ff5 Release 0.125.1 for ADR 0140 rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.150321'
+- marker_type: git-commit
+  adr_number: '0140'
+  location: git:27084ea25
+  evidence: 27084ea25 Fix ADR 0140 rollout blockers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.150442'
+- marker_type: git-commit
+  adr_number: '0140'
+  location: git:6f5b80d29
+  evidence: 6f5b80d29 Implement ADR 0140 Grafana public access hardening
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.150480'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-24'

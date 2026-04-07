@@ -1,0 +1,49 @@
+adr_number: 0091
+title: Continuous Drift Detection and Reconciliation
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0091
+  location: git:f4e3ac29f
+  evidence: 'f4e3ac29f Implement ADR 0091: continuous drift detection across 5 sources
+    with NATS events'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:43.243796'
+- marker_type: git-commit
+  adr_number: 0091
+  location: git:11696c7c8
+  evidence: "11696c7c8 Merge origin/main + ADRs 0073-0091 IaC potency batch \u2014\
+    \ bump to 0.76.0"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:43.244086'
+- marker_type: git-commit
+  adr_number: 0091
+  location: git:3f23f647b
+  evidence: 3f23f647b Add LLM implementation prompts for ADRs 0082-0091
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:43.244272'
+- marker_type: git-commit
+  adr_number: 0091
+  location: git:5cca3bdf8
+  evidence: 5cca3bdf8 Add ADRs 0082-0091 with workstreams, roadmap runbook, and bump
+    to 0.51.0
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:43.244279'
+- marker_type: config-file
+  adr_number: 0091
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:43.376650'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=4, config-file=1
+
+  Implemented On: 2026-03-23'

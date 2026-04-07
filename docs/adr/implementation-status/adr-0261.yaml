@@ -1,0 +1,106 @@
+adr_number: '0261'
+title: Playwright Browser Runners For ServerClaw Web Action And Extraction
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:7734de0db
+  evidence: 7734de0db [docs] Sync canonical truth for ws-0261 closeout
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.751060'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:0d15ebce1
+  evidence: 0d15ebce1 [workstream] Close ws-0261 main integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.751096'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:0a971edbd
+  evidence: 0a971edbd [release] Integrate ADR 0261 and ADR 0262 onto main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.751101'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:b7f9fbe6a
+  evidence: b7f9fbe6a [api-gateway] Harden ADR 0261 packaged runtime replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.751114'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:a28a0457c
+  evidence: a28a0457c [release] Cut 0.177.95 for ADR 0261 and ADR 0262
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.751143'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:557a07283
+  evidence: 557a07283 [merge] Land ADR 0261 and ADR 0262 on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.751156'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:ceb486639
+  evidence: ceb486639 [merge] Refresh ADR 0261 and ADR 0262 onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.751159'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:e3b751b7c
+  evidence: e3b751b7c [workstream] Record ADR 0261/0262 exact-main live apply state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.751190'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:a2bd68fad
+  evidence: a2bd68fad [workstream] Record ADR 0261/0262 exact-main replay state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.751348'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:00b0a2f4e
+  evidence: 00b0a2f4e Merge remote-tracking branch 'origin/main' into codex/ws-0261-main-finish
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.751579'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:b248025e1
+  evidence: b248025e1 Merge remote-tracking branch 'origin/main' into codex/ws-0261-main-finish
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.751644'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:fd1629e97
+  evidence: fd1629e97 Merge remote-tracking branch 'origin/main' into codex/ws-0261-main-finish
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.751917'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:a099f405c
+  evidence: a099f405c [browser-runner] Implement ADR 0261 browser runner surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.752017'
+- marker_type: git-commit
+  adr_number: '0261'
+  location: git:f90bfb12e
+  evidence: f90bfb12e [browser-runner] Implement ADR 0261 browser runner surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.752322'
+- marker_type: playbook
+  adr_number: '0261'
+  location: playbooks/browser-runner.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:57.766331'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=14, playbook=1
+
+  Implemented On: 2026-03-30'

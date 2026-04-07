@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: agent-discovery
 total_adrs: 22
@@ -14,7 +14,7 @@ adrs:
   - adr: '0017'
     title: ADR Lifecycle And Implementation Metadata
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -25,7 +25,6 @@ adrs:
     summary: 'Every ADR in this repository must carry these metadata fields near the top of the document:'
     filename: 0017-adr-lifecycle-and-implementation-metadata.md
     path: docs/adr/0017-adr-lifecycle-and-implementation-metadata.md
-    implemented_in_repo_version: 0.7.0
     implemented_on: '2026-03-21'
   - adr: '0057'
     title: Mattermost For ChatOps And Operator-Agent Collaboration

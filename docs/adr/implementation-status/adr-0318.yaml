@@ -1,0 +1,65 @@
+adr_number: 0318
+title: Repeatable Operator Onboarding with CC Audit Trail
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0318
+  location: git:6b9117310
+  evidence: 6b9117310 [operator-access] Refresh ws-0318 rebased manifest artifacts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:23.730449'
+- marker_type: git-commit
+  adr_number: 0318
+  location: git:3bf42e195
+  evidence: 3bf42e195 [operator-access] Refresh ws-0318 generated diagrams
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:23.730486'
+- marker_type: git-commit
+  adr_number: 0318
+  location: git:ae8c25ad6
+  evidence: ae8c25ad6 [operator-access] Integrate ws-0318 exact-main verification
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:23.730493'
+- marker_type: git-commit
+  adr_number: 0318
+  location: git:bb4365163
+  evidence: bb4365163 [operator-access] Live apply ADR 0318 fallback onboarding
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:23.730497'
+- marker_type: git-commit
+  adr_number: 0318
+  location: git:a9272562d
+  evidence: 'a9272562d [merge] Bring ws-0319 integration branch to latest origin/main\n\nPurpose:
+    Integrate the latest mainline ADR 0318 onboarding history before final ADR 0319
+    publish\nScope: Merge origin/main, preserve ws-0319 canonical truth, and carry
+    forward current mainline operator onboarding changes\nStatus: Branch history aligned
+    with the latest origin/main before final validation\nNext: Regenerate affected
+    artifacts, rerun validation, and push to main\nSee also: ADR 0318, ADR 0319, ADR
+    0320'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:23.732189'
+- marker_type: git-commit
+  adr_number: 0318
+  location: git:6c6975970
+  evidence: '6c6975970 fix(ws): declare agent-coordination-map in ws-0318-provision-operator-v2
+    surfaces'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:23.732227'
+- marker_type: git-commit
+  adr_number: 0318
+  location: git:1485471dc
+  evidence: '1485471dc feat(ops): ADR 0318 + provision_operator.py + Matei Busui onboarding'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:23.732936'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-04-03'

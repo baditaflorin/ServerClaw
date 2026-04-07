@@ -1,0 +1,25 @@
+---
+# ADR 0350: Verify nginx fragment is active and nginx is running
+
+- name: nginx_fragment_config | verify fragment file exists
+  ansible.builtin.stat:
+    path: "{{ nginx_fragment_dir }}/{{ nginx_fragment_service_name }}.conf"
+  register: _fragment_stat
+  when: nginx_fragment_state == "present"
+
+- name: nginx_fragment_config | assert fragment is present
+  ansible.builtin.assert:
+    that: _fragment_stat.stat.exists
+    fail_msg: "Fragment {{ nginx_fragment_service_name }}.conf not found in {{ nginx_fragment_dir }}"
+  when: nginx_fragment_state == "present"
+
+- name: nginx_fragment_config | verify nginx is running
+  ansible.builtin.service_facts:
+
+- name: nginx_fragment_config | assert nginx is active
+  ansible.builtin.assert:
+    that: ansible_facts.services['nginx.service'].state == 'running'
+    fail_msg: "nginx is not running after fragment activation"
+  when:
+    - nginx_fragment_state == "present"
+    - ansible_facts.services['nginx.service'] is defined

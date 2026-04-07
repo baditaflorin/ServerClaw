@@ -1,0 +1,54 @@
+adr_number: 0284
+title: Piper TTS As The CPU Neural Text-To-Speech Service
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0284
+  location: git:bb94f851a
+  evidence: bb94f851a [piper] Integrate ADR 0284 onto main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:08.105364'
+- marker_type: git-commit
+  adr_number: 0284
+  location: git:f268ea8fe
+  evidence: 'f268ea8fe [piper] Implement ADR 0284 private runtime\n\nPurpose: Add
+    the private Piper text-to-speech service, topology wiring, and repo validation
+    contracts for ADR 0284\nScope: Introduce the Piper runtime role, playbooks, runbook,
+    tests, Makefile targets, topology generation, and shared service catalogs\nStatus:
+    Implementation complete on the branch and ready for governed live apply from the
+    latest origin/main baseline\nNext: Run the production live apply, capture receipts,
+    update ADR/workstream state, and carry the verified change onto main\nSee also:
+    ADR 0284'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:08.105525'
+- marker_type: git-commit
+  adr_number: 0284
+  location: git:49952dc73
+  evidence: "49952dc73 [adr] Add 10 API-first infrastructure service ADRs (0284\u2013\
+    0293)"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:08.110094'
+- marker_type: git-commit
+  adr_number: 0284
+  location: git:728ad1fc5
+  evidence: "728ad1fc5 [adr] Add 10 CPU-only autonomous stack ADRs (0284\u20130293)"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:08.110663'
+- marker_type: playbook
+  adr_number: 0284
+  location: playbooks/piper.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:08.132635'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=4, playbook=1
+
+  Implemented On: 2026-03-31'

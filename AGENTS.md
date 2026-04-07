@@ -102,7 +102,7 @@ New agent? Read these files in order - all six take under 2 minutes:
 
 ## Plane Task Board Protocol (ADR 0360)
 
-The platform task board (see `config/plane/` for connection details) is the **Agent Work HQ**. Every non-trivial agent session gets a
+The **Plane task board** (configured in `.local/plane/`) is the **Agent Work HQ**. Every non-trivial agent session gets a
 Plane issue in the **AW** project. This applies to all agents: Claude, Codex,
 GPT, Gemini, or any automated script that writes workstream YAML files.
 
@@ -141,7 +141,7 @@ python scripts/sync_plane_agent_issues.py --workstream <id> \
 
 ### Rules
 
-- **Git is authoritative.** Plane is a projection. If the task board is down,
+- **Git is authoritative.** Plane is a projection. If the Plane task board is down,
   continue without it — the workstream YAML is the fallback.
 - `plane_issue_id` is written into the workstream YAML after issue creation.
   Subsequent calls use it directly (no re-scan of the issue list).
@@ -157,6 +157,21 @@ python scripts/sync_plane_agent_issues.py --workstream <id> \
 python scripts/sync_plane_agent_issues.py --bootstrap-only
 # Creates AW project + labels if missing; writes .local/plane/aw-auth.json
 ```
+
+### Plane Agent Tools (ADR 0363)
+
+Five governed tools for programmatic Plane access via the agent tool registry:
+
+| Tool | Category | Use case |
+|------|----------|----------|
+| `list-plane-tasks` | observe | List tasks in AW or ADR project, optionally filtered by state |
+| `get-plane-task` | observe | Get full details of a single task by UUID |
+| `create-plane-task` | execute (approval required) | Create blockers, follow-up tasks, operational findings |
+| `update-plane-task` | execute | Update task status, title, priority |
+| `add-plane-comment` | execute | Add milestone comments, status notes |
+
+These tools use `.local/plane/admin-auth.json` for credentials and default to the AW project.
+Pass `"project": "ADR"` to operate on the architecture decisions project.
 
 ---
 
@@ -222,6 +237,97 @@ The pre-push gate (`scripts/validate_repo.sh agent-standards`) enforces:
 - `docs/adr/.index.yaml` must be current when ADR files change
   - Regenerate: `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
 
+## Agent Coordination Patterns (ADR 0347, 0350, 0353, 0355, 0357)
+
+These patterns are **Accepted** and implemented. Use them for all new work.
+
+### File-Domain Locking (ADR 0347) + Apply Serialization (ADR 0355)
+
+Before writing any docker-compose.yml, nginx config, or systemd unit — acquire a lock:
+
+```python
+from platform.locking import file_domain_lock, apply_lock, ResourceLockRegistry
+
+registry = ResourceLockRegistry()
+
+# Lock a specific config file (ADR 0347)
+with file_domain_lock(registry, vmid="101", role="keycloak_runtime",
+                      filename="docker-compose.yml", holder="ws-0347"):
+    # safe to write — no other agent can write this file concurrently
+    ...
+
+# Lock a full VM apply (ADR 0355) — serializes playbook runs
+with apply_lock(registry, vmid="101", holder="ws-0355"):
+    # safe to run full playbook against vm:101
+    ...
+```
+
+Lock key convention: `vm:{vmid}:config:{role}:{filename}` and `vm:{vmid}:apply`
+
+### Service Integration Contracts (ADR 0353)
+
+All cross-service dependencies are declared in `config/integrations/<consumer>--<provider>.yaml`.
+Check here **before** changing any service port, database name, or secret path — changing one endpoint can break multiple consumers.
+
+```bash
+# Validate all contracts
+python3 scripts/validate_integrations.py --check-dead
+
+# Find all consumers of postgres_vm
+grep -l "provider: postgres_vm" config/integrations/
+```
+
+### Workstream Apply Receipts (ADR 0357)
+
+Guard against duplicate applies and track in-progress state:
+
+```python
+from platform.workstream_receipts import WorkstreamApplyReceipts
+
+receipts = WorkstreamApplyReceipts()
+receipts.guard_not_completed("ws-0353")   # raises if already applied
+receipts.guard_not_in_progress("ws-0353") # raises if another agent is mid-apply
+
+receipt = receipts.start("ws-0353", applied_by="claude/eager-buck", adr="0353")
+try:
+    # ... do the apply ...
+    receipts.complete("ws-0353")
+except Exception as e:
+    receipts.fail("ws-0353", errors=[str(e)])
+```
+
+Receipt files live in `receipts/live-applies/<workstream-id>-apply-receipt.yaml`.
+
+### Nginx Fragment Config (ADR 0350)
+
+To add/update a service's nginx config atomically (write-validate-rename-reload):
+
+```yaml
+- name: publish keycloak nginx fragment
+  ansible.builtin.include_role:
+    name: lv3.platform.nginx_fragment_config
+  vars:
+    nginx_fragment_service_name: keycloak
+    nginx_fragment_content: |
+      server {
+        listen 443 ssl;
+        server_name sso.example.org;
+        ...
+      }
+```
+
+### Change Provenance Tagging (ADR 0351)
+
+All Jinja2 templates must carry a `# managed-by:` header. Add to new templates:
+
+```
+# managed-by: role=my_runtime adr=XXXX agent={{ lookup('env','LV3_AGENT_SESSION') | default('operator') }}
+```
+
+Audit missing headers: `python3 scripts/check_provenance_headers.py`
+
+---
+
 ## Nomad Scheduler (ADR 0232, ADR 0361)
 
 The platform runs a private Nomad cluster for durable batch and long-running
@@ -229,9 +335,9 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 
 | Resource | Location |
 |---|---|
-| **UI** | Nomad UI — see `.config-locations.yaml` for the deployment URL |
-| **API proxy** | Tailscale proxy — see `.config-locations.yaml` (requires management token) |
-| **Server** | `monitoring-lv3` (Nomad agent on the monitoring VM) |
+| **UI** | Nomad scheduler web UI (OIDC login via Keycloak) |
+| **API proxy** | Tailscale mesh management proxy (requires management token) |
+| **Server** | monitoring-lv3 (see inventory for host details) |
 | **Clients** | docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, runtime-control-lv3, docker-build-lv3 |
 | **CLI wrapper** | `/usr/local/bin/lv3-nomad` on all cluster nodes (auto-loads token) |
 | **Playbook** | `playbooks/nomad.yml` |
@@ -264,3 +370,6 @@ For targeted VM-only runs (`make provision-guests`), apply each service in the t
 - For managed guests, pin the MAC address in repo config and keep it stable across reruns. Treat the MAC as part of the guest identity, not as disposable runtime state.
 - After changing guest cloud-init inputs such as `net0`, `ipconfig0`, or `cicustom`, refresh the seed data with `qm cloudinit update <vmid>` before restarting the guest. Do not assume `qm set` alone is enough.
 - On first boot or early bootstrap, prefer a Proxmox stop/start cycle over `qm reboot` when the guest agent may not be running yet. `qm reboot` can fail with a qga timeout even when the VM itself is otherwise healthy.
+- NEVER create symlinks to `.local/` or any credential directory. A symlink named `.local` bypasses `.gitignore` (which only ignores the directory), and committing it destroys the real credential store when checked out. (See ADR 0376.)
+- NEVER run `git add .local`, `git add -A`, or `git add .` in any directory containing `.local`. Always name specific files or directories when staging.
+- Agents in worktrees do NOT have `.local/` — this is intentional. If credentials are needed, read from the main worktree path directly. Do not create symlinks, copies, or placeholder credentials.

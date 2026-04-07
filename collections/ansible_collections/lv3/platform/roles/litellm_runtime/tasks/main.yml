@@ -1,0 +1,196 @@
+---
+# Purpose: Converge the LiteLLM Proxy runtime on the target host.
+# Use case: Deploys or updates the LiteLLM container stack.
+# Inputs: litellm_* variables from defaults/main.yml.
+# Outputs: Running LiteLLM container with OpenBao sidecar for secrets.
+# Idempotency: Yes.
+# Dependencies: litellm_postgres must have run first.
+
+- name: Validate LiteLLM runtime inputs
+  ansible.builtin.assert:
+    that:
+      - litellm_site_dir | length > 0
+      - litellm_secret_dir | length > 0
+      - litellm_compose_file | length > 0
+      - litellm_env_file | length > 0
+      - litellm_image | length > 0
+      - litellm_container_name | length > 0
+      - litellm_internal_port | int > 0
+    fail_msg: "litellm_runtime requires runtime paths, port metadata, and image reference."
+
+- name: Ensure LiteLLM runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+
+- name: Ensure the LiteLLM runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ litellm_site_dir }}"
+      mode: "0755"
+    - path: "{{ litellm_data_dir }}"
+      mode: "0755"
+    - path: "{{ litellm_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the LiteLLM master key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ litellm_master_key_remote_file }}" ]; then
+      umask 077
+      echo "sk-$(openssl rand -hex 32)" > "{{ litellm_master_key_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: litellm_key_generation
+  changed_when: "'changed' in litellm_key_generation.stdout"
+  no_log: true
+
+- name: Read the LiteLLM master key
+  ansible.builtin.slurp:
+    src: "{{ litellm_master_key_remote_file }}"
+  register: litellm_key_raw
+  no_log: true
+
+- name: Read the LiteLLM database password from the controller
+  ansible.builtin.slurp:
+    src: "{{ litellm_database_password_local_file }}"
+  register: litellm_db_password_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Record the LiteLLM runtime secrets
+  ansible.builtin.set_fact:
+    litellm_master_key: "{{ litellm_key_raw.content | b64decode | trim }}"
+    litellm_database_password: "{{ litellm_db_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Build the LiteLLM runtime secret payload
+  ansible.builtin.set_fact:
+    litellm_runtime_secret_payload:
+      LITELLM_MASTER_KEY: "{{ litellm_master_key }}"
+      DATABASE_URL: "postgresql://{{ litellm_database_user }}:{{ litellm_database_password }}@{{ litellm_database_host }}:5432/{{ litellm_database_name }}"
+  no_log: true
+
+- name: Ensure the local LiteLLM artifact directory exists
+  ansible.builtin.file:
+    path: "{{ litellm_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the LiteLLM master key to the control machine
+  ansible.builtin.copy:
+    dest: "{{ litellm_master_key_local_file }}"
+    content: "{{ litellm_master_key }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for LiteLLM
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: litellm
+    common_openbao_compose_env_agent_dir: "{{ litellm_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ litellm_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ litellm_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ litellm_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ litellm_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ litellm_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ litellm_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ litellm_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ litellm_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ litellm_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ litellm_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: runtime.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ litellm_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ litellm_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ litellm_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ litellm_legacy_env_file }}"
+  no_log: true
+  when: litellm_enable_openbao_agent | bool
+
+- name: Render the LiteLLM config file
+  ansible.builtin.template:
+    src: litellm-config.yaml.j2
+    dest: "{{ litellm_config_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Render the LiteLLM environment file
+  ansible.builtin.template:
+    src: runtime.env.j2
+    dest: "{{ litellm_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the LiteLLM compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ litellm_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the LiteLLM image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ litellm_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ litellm_site_dir }}"
+  register: litellm_pull
+  changed_when: >-
+    'Pulling' in litellm_pull.stdout
+    or 'Downloaded newer image' in litellm_pull.stdout
+    or 'Pull complete' in litellm_pull.stdout
+
+- name: Start the LiteLLM stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ litellm_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ litellm_site_dir }}"
+  register: litellm_up
+  changed_when: >-
+    'Creating' in litellm_up.stdout
+    or 'Recreating' in litellm_up.stdout
+    or 'Starting' in litellm_up.stdout
+
+- name: Verify the LiteLLM runtime
+  ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,46 @@
+adr_number: '0142'
+title: Public Surface Automated Security Scan
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0142'
+  location: git:adf8b915a
+  evidence: adf8b915a Record ADR 0142 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.010498'
+- marker_type: git-commit
+  adr_number: '0142'
+  location: git:6a2f7fd78
+  evidence: 6a2f7fd78 Fix ADR 0142 scanner entrypoint imports
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.010535'
+- marker_type: git-commit
+  adr_number: '0142'
+  location: git:ca3450f3d
+  evidence: ca3450f3d Fix ADR 0142 rebase validation regressions
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.010543'
+- marker_type: git-commit
+  adr_number: '0142'
+  location: git:03753942c
+  evidence: 03753942c Implement ADR 0142 public surface security scan
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.010546'
+- marker_type: config-file
+  adr_number: '0142'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:05.140880'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=4, config-file=1
+
+  Implemented On: 2026-03-24'

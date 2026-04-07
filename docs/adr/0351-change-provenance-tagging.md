@@ -3,6 +3,7 @@
 - Status: Accepted
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Scoping Note (2026-04-06): Keep simple — Jinja2 comment headers only (# managed-by: role=X adr=Y agent=Z). No provenance database. Grep the headers when lineage is needed. Gradual rollout across templates. Priority 6 in implementation order.
 - Tags: audit, provenance, documentation, infrastructure, agent-coordination, dry
 
 ## Context

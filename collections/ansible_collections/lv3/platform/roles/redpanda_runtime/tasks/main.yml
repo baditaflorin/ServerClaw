@@ -5,6 +5,14 @@
 # Outputs: /opt/redpanda compose/config assets, a running lv3-redpanda container, seeded smoke topics, and a verified schema-registry + HTTP proxy path.
 # Idempotency: Yes; the role replays docker compose safely, preserves generated passwords, and reapplies topic/auth contracts deterministically.
 # Dependencies: ADR 0077, ADR 0165, ADR 0290, local OpenBao, and docker-runtime-lv3.
+- name: Derive Redpanda conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: redpanda
+
+
 - name: Validate Redpanda runtime inputs
   ansible.builtin.assert:
     that:

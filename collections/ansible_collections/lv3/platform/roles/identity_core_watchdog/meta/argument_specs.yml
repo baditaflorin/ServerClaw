@@ -1,0 +1,34 @@
+---
+argument_specs:
+  main:
+    short_description: Install the identity-core health watchdog (ADR 0376).
+    description:
+      - Deploys a systemd timer that probes Keycloak, Step-CA, OpenBao, and
+        API Gateway every 15 seconds on runtime-control-lv3.
+      - Auto-restarts services on consecutive health failures.
+      - Sends ntfy notifications on failure and recovery.
+    options:
+      identity_watchdog_probe_interval_sec:
+        type: int
+        required: false
+        default: 15
+        description: Seconds between health probe cycles.
+      identity_watchdog_failure_threshold:
+        type: int
+        required: false
+        default: 2
+        description: Consecutive failures before triggering an auto-restart.
+      identity_watchdog_max_restarts_per_hour:
+        type: int
+        required: false
+        default: 6
+        description: Maximum restarts per service per hour to prevent storms.
+      identity_watchdog_ntfy_enabled:
+        type: bool
+        required: false
+        default: true
+        description: Whether to send ntfy notifications on failure/recovery.
+      identity_watchdog_services:
+        type: list
+        required: false
+        description: List of services to monitor with health endpoints.

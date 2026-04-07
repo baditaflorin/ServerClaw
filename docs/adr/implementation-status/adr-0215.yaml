@@ -1,0 +1,13 @@
+adr_number: '0215'
+title: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability,
+  Recovery, And Build
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers: []
+inferred_implementation_status: No Evidence
+status_match: true
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: No Evidence
+
+  Markers Found: 0'

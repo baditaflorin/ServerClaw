@@ -1,6 +1,12 @@
 schema_version: 1.0.0
 
 playbooks:
+  - path: playbooks/_includes/dns_publication.yml
+    workflow_id: _include_dns_publication
+    make_target: null
+    mutation_scope: utility
+    shared_surfaces: []
+    lock_resources: []
   - path: playbooks/guest-network-policy.yml
     workflow_id: converge-guest-network-policy
     make_target: converge-guest-network-policy
@@ -99,6 +105,50 @@ playbooks:
       - vm:110/service:nginx_edge_publication
       - vm:120
       - vm:120/service:livekit
+
+  - path: playbooks/neko.yml
+    workflow_id: converge-neko
+    make_target: converge-neko
+    mutation_scope: platform
+    shared_surfaces:
+      - service:neko
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:121
+      - vm:121/service:neko
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - config/subdomain-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
+    lock_resources:
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:121
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+
+  - path: playbooks/services/neko.yml
+    workflow_id: converge-neko
+    make_target: live-apply-service
+    make_vars:
+      service: neko
+    mutation_scope: platform
+    shared_surfaces:
+      - service:neko
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:121
+      - vm:121/service:neko
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - config/subdomain-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
+    lock_resources:
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:121
+      - vm:110
+      - vm:110/service:nginx_edge_publication
 
   - path: playbooks/ntfy.yml
     workflow_id: converge-ntfy

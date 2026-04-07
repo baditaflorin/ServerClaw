@@ -1,0 +1,64 @@
+adr_number: '0233'
+title: Signed Release Bundles Via Gitea Releases And Cosign
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:2fb27abe6
+  evidence: 2fb27abe6 [release] Recut ADR 0233 on latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.041591'
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:6904e72fb
+  evidence: 6904e72fb [release] Recut ADR 0233 on latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.041629'
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:50e143bb6
+  evidence: 50e143bb6 [release] Integrate ADR 0233 signed release bundles
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.041637'
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:d41fa7f9c
+  evidence: d41fa7f9c Merge remote-tracking branch 'origin/main' into codex/ws-0233-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.041677'
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:9a84986dd
+  evidence: 9a84986dd Merge remote-tracking branch 'origin/main' into codex/ws-0233-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.041698'
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:cc8288025
+  evidence: cc8288025 Merge remote-tracking branch 'origin/main' into codex/ws-0233-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.041723'
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:a48edd56e
+  evidence: a48edd56e [gitea] Merge ws-0233 onto main candidate
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.041741'
+- marker_type: git-commit
+  adr_number: '0233'
+  location: git:8ebde2bef
+  evidence: 8ebde2bef [gitea] Implement ADR 0233 signed release bundles
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.041971'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8
+
+  Implemented On: 2026-03-28'

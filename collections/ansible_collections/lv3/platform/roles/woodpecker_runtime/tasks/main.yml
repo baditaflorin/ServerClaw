@@ -54,47 +54,21 @@
       woodpecker_runtime requires runtime paths, pinned image refs, database auth,
       controller-local Gitea credentials, and bootstrap artifact paths.
 
-- name: Ensure the Woodpecker database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ woodpecker_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: woodpecker_database_password_local
-
-- name: Fail if the Woodpecker database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ woodpecker_database_password_local_file }} is missing on the control machine.
-      Converge woodpecker_postgres before deploying Woodpecker.
-  when: not woodpecker_database_password_local.stat.exists
-
-- name: Ensure the Gitea admin token exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ woodpecker_gitea_admin_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: woodpecker_gitea_admin_token_local
-
-- name: Fail if the Gitea admin token is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ woodpecker_gitea_admin_token_local_file }} is missing on the control machine.
-      Converge Gitea first so Woodpecker can bootstrap its OAuth application.
-  when: not woodpecker_gitea_admin_token_local.stat.exists
-
-- name: Ensure the Gitea admin password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ woodpecker_gitea_admin_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: woodpecker_gitea_admin_password_local
-
-- name: Fail if the Gitea admin password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ woodpecker_gitea_admin_password_local_file }} is missing on the control machine.
-      Converge Gitea first so Woodpecker can complete the governed login flow.
-  when: not woodpecker_gitea_admin_password_local.stat.exists
+- name: Check Woodpecker prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ woodpecker_database_password_local_file }}"
+        description: "Woodpecker database password"
+        prerequisite: "Converge woodpecker_postgres before deploying Woodpecker"
+      - path: "{{ woodpecker_gitea_admin_token_local_file }}"
+        description: "Gitea admin token"
+        prerequisite: "Converge Gitea before deploying Woodpecker"
+      - path: "{{ woodpecker_gitea_admin_password_local_file }}"
+        description: "Gitea admin password"
+        prerequisite: "Converge Gitea before deploying Woodpecker"
 
 - name: Ensure the Woodpecker runtime packages are present
   ansible.builtin.apt:
@@ -316,6 +290,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
 
 - name: Pull the Woodpecker images
   ansible.builtin.command:

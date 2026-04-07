@@ -3,7 +3,13 @@
 import argparse
 import json
 import sys
+from pathlib import Path
 from typing import Any
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_list, require_mapping, require_str, require_string_list
 
 from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog, require_identifier
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
@@ -12,32 +18,6 @@ from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 API_PUBLICATION_PATH = repo_path("config", "api-publication.json")
 ALLOWED_PUBLICATION_TIERS = ("internal-only", "operator-only", "public-edge")
 ALLOWED_HTTP_LANES = {"api", "event"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    items = require_list(value, path)
-    result: list[str] = []
-    for index, item in enumerate(items):
-        result.append(require_str(item, f"{path}[{index}]"))
-    return result
 
 
 def build_lane_surface_index(catalog: dict[str, Any]) -> dict[str, dict[str, Any]]:

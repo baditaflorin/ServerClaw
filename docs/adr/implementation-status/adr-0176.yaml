@@ -1,0 +1,40 @@
+adr_number: '0176'
+title: Inventory Sharding and Host-Scoped Ansible Execution
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0176'
+  location: git:54815c997
+  evidence: 54815c997 Record ADR 0176 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:21.058060'
+- marker_type: git-commit
+  adr_number: '0176'
+  location: git:89f4bc0f1
+  evidence: 89f4bc0f1 Implement ADR 0176 inventory sharding
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:21.058212'
+- marker_type: git-commit
+  adr_number: '0176'
+  location: git:20695536e
+  evidence: 20695536e Mark ADR 0176 implemented
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:21.058351'
+- marker_type: git-commit
+  adr_number: '0176'
+  location: git:d8a5884e0
+  evidence: d8a5884e0 Implement ADR 0176 inventory sharding
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:21.058384'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-27'

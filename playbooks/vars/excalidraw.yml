@@ -1,0 +1,6 @@
+---
+service_audit_name: excalidraw
+service_dns_fqdn: draw.lv3.org
+service_needs_dns: true
+service_needs_postgres: false
+service_needs_nginx_edge: false

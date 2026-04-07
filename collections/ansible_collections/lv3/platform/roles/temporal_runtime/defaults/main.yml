@@ -5,27 +5,19 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0165 and ADR 0293.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 temporal_server_image: "{{ container_image_catalog.images.temporal_server_runtime.ref }}"
 temporal_admin_tools_image: "{{ container_image_catalog.images.temporal_admin_tools_runtime.ref }}"
 temporal_ui_image: "{{ container_image_catalog.images.temporal_ui_runtime.ref }}"
-temporal_site_dir: /opt/temporal
 temporal_config_dir: "{{ temporal_site_dir }}/config"
-temporal_compose_file: "{{ temporal_site_dir }}/docker-compose.yml"
 temporal_dynamic_config_file: "{{ temporal_config_dir }}/dynamicconfig.yml"
-temporal_env_file: "{{ compose_runtime_secret_root }}/temporal/runtime.env"
-temporal_legacy_env_file: "{{ temporal_site_dir }}/temporal.env"
-temporal_openbao_agent_dir: "{{ temporal_site_dir }}/openbao"
-temporal_openbao_agent_image: "{{ openbao_agent_image }}"
-temporal_openbao_agent_container_name: temporal-openbao-agent
-temporal_openbao_secret_path: services/temporal/runtime-env
-temporal_openbao_policy_name: lv3-service-temporal-runtime
-temporal_openbao_approle_name: temporal-runtime
-temporal_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal
 temporal_database_name: temporal
 temporal_visibility_database_name: temporal_visibility
 temporal_database_user: temporal
 temporal_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-temporal_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal/database-password.txt
+temporal_database_password_local_file: "{{ temporal_local_artifact_dir }}/database-password.txt"
 temporal_schema_bootstrap_report_local_file: "{{ temporal_local_artifact_dir }}/schema-bootstrap-report.json"
 temporal_namespace_report_local_file: "{{ temporal_local_artifact_dir }}/namespace-report.json"
 temporal_default_store_max_conns: 5

@@ -46,8 +46,8 @@ rewriting one operator's workstation paths.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.18` |
-| Platform version | `0.131.0` |
+| Repository version | `0.178.37` |
+| Platform version | `0.131.1` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -56,23 +56,24 @@ rewriting one operator's workstation paths.
 ### Topology Summary
 | Field | Value |
 | --- | --- |
-| Managed guest count | 13 |
+| Managed guest count | 17 |
 | Running guest count | 10 |
 | Template VM present | `true` |
-| Declared services | 72 |
-| Publicly published services | 45 |
+| Declared services | 73 |
+| Publicly published services | 47 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 36 |
+| `edge-published` | 38 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
-| `private-only` | 31 |
+| `private-only` | 30 |
 
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `identity_core_watchdog` | `2026-04-06-adr-0376-identity-core-watchdog-live-apply` |
 | `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
@@ -92,9 +93,8 @@ rewriting one operator's workstation paths.
 | `api_gateway` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
-| `runbook_task_reentry` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
 
-Showing 20 of 171 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 172 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -173,12 +173,12 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.18` |
-| Platform version | `0.131.0` |
+| Repository version | `0.178.37` |
+| Platform version | `0.131.1` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
-| Declared services | 72 |
+| Declared services | 73 |
 <!-- END GENERATED: version-summary -->
 
 ## Delivery Model
@@ -194,12 +194,14 @@ Current values on `main`:
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 299 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 301 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
+| `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
-| `0328` | Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse | `merged` | [0328-ops-portal.md](docs/adr/0328-ops-portal.md) |
+| `0328` | Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse | `merged` | [0093-interactive-ops-portal.md](docs/adr/0093-interactive-ops-portal.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -221,8 +223,6 @@ Showing 25 of 299 merged or live-applied workstreams. Full history: [merged work
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
-| `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
-| `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](docs/workstreams/adr-0166-canonical-error-response-format.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Next For Forks

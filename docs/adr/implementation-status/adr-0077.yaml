@@ -1,0 +1,64 @@
+adr_number: '0077'
+title: Compose Runtime Secrets Injection Via OpenBao Agent
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0077'
+  location: git:0e8b32af3
+  evidence: 0e8b32af3 Record ADR 0077 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:37.811178'
+- marker_type: git-commit
+  adr_number: '0077'
+  location: git:5c66e4f68
+  evidence: 5c66e4f68 Fix ADR 0077 live rollout regressions
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:37.811210'
+- marker_type: git-commit
+  adr_number: '0077'
+  location: git:7c38f62d0
+  evidence: 7c38f62d0 Implement ADR 0077 compose runtime secret injection
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:37.811283'
+- marker_type: git-commit
+  adr_number: '0077'
+  location: git:472ba8b5a
+  evidence: 472ba8b5a Implement ADR 0077 compose runtime secret injection
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:37.811286'
+- marker_type: playbook
+  adr_number: '0077'
+  location: playbooks/typesense.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:37.841014'
+- marker_type: config-file
+  adr_number: '0077'
+  location: config/workflow-catalog.json
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:37.933085'
+- marker_type: config-file
+  adr_number: '0077'
+  location: config/correction-loops.json
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:37.958940'
+- marker_type: config-file
+  adr_number: '0077'
+  location: config/command-catalog.json
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:37.959857'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=4, playbook=1, config-file=3
+
+  Implemented On: 2026-03-23'

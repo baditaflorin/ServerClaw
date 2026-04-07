@@ -1,0 +1,70 @@
+adr_number: '0141'
+title: API Token Lifecycle and Exposure Response
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:a63ae293d
+  evidence: a63ae293d Merge latest origin/main into codex/integration-0141-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:04.626917'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:29ce8951d
+  evidence: 29ce8951d Drop stale ADR 0141 0.134.0 release note path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.626954'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:0c42cce69
+  evidence: 0c42cce69 Bump ADR 0141 integration to 0.135.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.626961'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:3a9ccd9c7
+  evidence: 3a9ccd9c7 Merge latest origin/main into codex/integration-0141-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:04.626971'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:69852e3ec
+  evidence: 69852e3ec Drop stale ADR 0141 0.133.0 release note path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.626974'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:f45998103
+  evidence: f45998103 Bump ADR 0141 integration to 0.134.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.626977'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:f0391e395
+  evidence: f0391e395 Merge latest origin/main into codex/integration-0141-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:04.626994'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:c31a03315
+  evidence: c31a03315 Merge branch 'codex/adr-0141-token-lifecycle'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:04.627009'
+- marker_type: git-commit
+  adr_number: '0141'
+  location: git:55f29d548
+  evidence: 55f29d548 Implement ADR 0141 token lifecycle management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:04.627206'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=9
+
+  Implemented On: 2026-03-25'

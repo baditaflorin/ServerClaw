@@ -12,6 +12,10 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
 CATALOG_PATH = REPO_ROOT / "config" / "repo-deploy-base-image-profiles.json"
 SCHEMA_PATH = REPO_ROOT / "docs" / "schema" / "repo-deploy-base-image-profiles.schema.json"
 SUPPORTED_SCHEMA_VERSION = "1.0.0"
@@ -44,32 +48,6 @@ def load_json(path: Path) -> Any:
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value.strip()
-
-
-def require_int(value: Any, path: str, minimum: int | None = None) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if minimum is not None and value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_identifier(value: Any, path: str) -> str:
@@ -133,7 +111,7 @@ def validate_profile_catalog(payload: dict[str, Any], *, path: Path = CATALOG_PA
                     f"{profile_path}.allowed_build_packs[{build_pack_index}] must be one of {sorted(SUPPORTED_BUILD_PACKS)}"
                 )
 
-        require_int(profile.get("freshness_hours"), f"{profile_path}.freshness_hours", 1)
+        require_int(profile.get("freshness_hours"), f"{profile_path}.freshness_hours", minimum=1)
 
         repository_ids: set[str] = set()
         for repository_index, raw_repository in enumerate(profile.get("repositories", [])):
@@ -349,9 +327,9 @@ def verify_receipt(
     if receipt.get("result") != "pass":
         raise ValueError("warm receipt result must be 'pass'")
 
-    image_count = require_int(receipt.get("image_count"), "receipt.image_count", 0)
-    successful_pulls = require_int(receipt.get("successful_pulls"), "receipt.successful_pulls", 0)
-    failed_pulls = require_int(receipt.get("failed_pulls"), "receipt.failed_pulls", 0)
+    image_count = require_int(receipt.get("image_count"), "receipt.image_count", minimum=0)
+    successful_pulls = require_int(receipt.get("successful_pulls"), "receipt.successful_pulls", minimum=0)
+    failed_pulls = require_int(receipt.get("failed_pulls"), "receipt.failed_pulls", minimum=0)
     if image_count != len(seed_images):
         raise ValueError("warm receipt image_count does not match the current seed plan")
     if successful_pulls != len(seed_images) or failed_pulls != 0:

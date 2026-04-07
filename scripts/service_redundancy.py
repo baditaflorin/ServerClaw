@@ -5,7 +5,13 @@ from __future__ import annotations
 import argparse
 import sys
 from datetime import date, datetime, timedelta
+from pathlib import Path
 from typing import Any, Final
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from service_id_resolver import resolve_service_id
@@ -33,32 +39,6 @@ LIVE_APPLY_MODE_BY_TIER = SHARED_POLICIES.live_apply_mode_by_tier
 KNOWN_EMPTY_LOCATIONS = SHARED_POLICIES.known_empty_locations
 REHEARSAL_TIER_SEQUENCE = SHARED_POLICIES.rehearsal_tier_sequence
 ALLOWED_REHEARSAL_RESULTS = SHARED_POLICIES.allowed_rehearsal_results
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_enum(value: Any, path: str, allowed: set[str]) -> str:
@@ -159,7 +139,7 @@ def load_rehearsal_gate_policies(catalog: dict[str, Any]) -> dict[str, dict[str,
             "freshness_window_days": require_int(
                 policy.get("freshness_window_days"),
                 f"platform.rehearsal_gate.tiers.{tier}.freshness_window_days",
-                1,
+                minimum=1,
             ),
         }
     return normalized
@@ -199,7 +179,7 @@ def normalized_rehearsal_metadata(
             "freshness_window_days": require_int(
                 override.get("freshness_window_days"),
                 f"services.{service_id}.rehearsal.policies.{tier}.freshness_window_days",
-                1,
+                minimum=1,
             ),
         }
 
@@ -239,12 +219,12 @@ def normalized_rehearsal_metadata(
         require_int(
             proof.get("duration_minutes"),
             f"services.{service_id}.rehearsal.proofs[{index}].duration_minutes",
-            0,
+            minimum=0,
         )
         require_int(
             proof.get("observed_rto_seconds"),
             f"services.{service_id}.rehearsal.proofs[{index}].observed_rto_seconds",
-            0,
+            minimum=0,
         )
         require_str(
             proof.get("observed_data_loss"),
@@ -399,7 +379,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
     )
 
     platform = require_mapping(catalog.get("platform"), "platform")
-    failure_domain_count = require_int(platform.get("failure_domain_count"), "platform.failure_domain_count", 1)
+    failure_domain_count = require_int(platform.get("failure_domain_count"), "platform.failure_domain_count", minimum=1)
     max_supported_tier = require_enum(
         platform.get("max_supported_tier"),
         "platform.max_supported_tier",
@@ -437,12 +417,12 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
         require_int(
             recovery_objective.get("rto_minutes"),
             f"services.{service_id}.recovery_objective.rto_minutes",
-            1,
+            minimum=1,
         )
         require_int(
             recovery_objective.get("rpo_minutes"),
             f"services.{service_id}.recovery_objective.rpo_minutes",
-            0,
+            minimum=0,
         )
 
         require_string_list(entry.get("backup_sources"), f"services.{service_id}.backup_sources")

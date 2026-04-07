@@ -1,8 +1,8 @@
 # ADR 0032: Shared Guest Observability Framework
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.33.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-22
 - Date: 2026-03-22

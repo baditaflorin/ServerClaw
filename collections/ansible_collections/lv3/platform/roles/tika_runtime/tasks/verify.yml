@@ -3,25 +3,21 @@
 # Inputs: Running Tika container plus the configured runtime URL and HTML verification fixture.
 # Outputs: Read-only verification results for the version banner, plaintext extraction, and metadata payload.
 # Idempotency: Fully idempotent; these are read-only HTTP checks against the live service.
-# Dependencies: ADR 0275 and ADR 0165; requires the tika_runtime compose stack to be running.
+# Dependencies: ADR 0275, ADR 0165, ADR 0371; requires the tika_runtime compose stack to be running.
 ---
-- name: Verify the Apache Tika version endpoint responds
-  ansible.builtin.uri:
-    url: "{{ tika_runtime_base_url }}/version"
-    method: GET
-    status_code: 200
-    return_content: true
-  register: tika_runtime_verify_version
-  retries: 18
-  delay: 5
-  until: tika_runtime_verify_version.status == 200
-  changed_when: false
-
-- name: Assert the Apache Tika version banner is present
-  ansible.builtin.assert:
-    that:
-      - "'Apache Tika' in tika_runtime_verify_version.content"
-    fail_msg: "Apache Tika version verification did not return the expected banner."
+- name: Verify the Apache Tika runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: tika
+    common_verify_port: "{{ tika_runtime_port }}"
+    common_verify_health_url: "{{ tika_runtime_base_url }}/version"
+    common_verify_health_retries: 18
+    common_verify_health_delay: 5
+    common_verify_health_assertions:
+      - "'Apache Tika' in common_verify_health_response.content"
+    common_verify_health_assertion_msg: "Apache Tika version verification did not return the expected banner."
 
 - name: Verify Apache Tika extracts plaintext from the HTML fixture
   ansible.builtin.uri:

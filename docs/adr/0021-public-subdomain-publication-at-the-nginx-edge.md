@@ -1,8 +1,8 @@
 # ADR 0021: Public Subdomain Publication At The NGINX Edge
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.22.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: 0.14.0
 - Implemented On: 2026-03-22
 - Date: 2026-03-22

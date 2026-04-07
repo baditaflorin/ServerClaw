@@ -1,0 +1,65 @@
+adr_number: '0302'
+title: Restic For Encrypted File-Level Backup Of Platform Configuration And State
+  Artifacts
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0302'
+  location: git:ad0050483
+  evidence: ad0050483 [backup] Finish ADR 0302 mainline validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:16.560934'
+- marker_type: git-commit
+  adr_number: '0302'
+  location: git:f85f007ae
+  evidence: f85f007ae [backup] Integrate ADR 0302 onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:16.560969'
+- marker_type: git-commit
+  adr_number: '0302'
+  location: git:2f1954ae8
+  evidence: 2f1954ae8 [backup] Integrate ADR 0302 exact-main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:16.561062'
+- marker_type: git-commit
+  adr_number: '0302'
+  location: git:da96216a1
+  evidence: 'da96216a1 [backup] Complete ADR 0302 live apply\n\nPurpose: Finish the
+    ADR 0302 Restic backup rollout, live verification, and merge-ready evidence set.\nScope:
+    Finalize runner fixes, shared-role hardening, backup ledger compatibility, receipts,
+    and workstream metadata.\nStatus: Live applied on docker-runtime-lv3 and ready
+    to merge onto main.\nNext: Merge to main, bump VERSION and versions/stack.yaml,
+    update ADR metadata, and publish the mainline live-apply receipt.\nSee also: ADR
+    0302'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:16.561162'
+- marker_type: git-commit
+  adr_number: '0302'
+  location: git:bfb7c9579
+  evidence: bfb7c9579 [backup] Implement ADR 0302 restic config backup automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:16.561248'
+- marker_type: playbook
+  adr_number: '0302'
+  location: playbooks/restic-config-backup.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:16.653094'
+- marker_type: config-file
+  adr_number: '0302'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:16.811041'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=5, playbook=1, config-file=1
+
+  Implemented On: 2026-03-31'

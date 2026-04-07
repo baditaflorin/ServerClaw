@@ -176,6 +176,8 @@ platform_ports:
   openfga_host_proxy_port: 8014
   one_api_port: 8101
   one_api_host_proxy_port: 8018
+  litellm_port: 4000
+  litellm_host_proxy_port: 4000
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
@@ -282,6 +284,8 @@ platform_port_assignments:
   openfga_host_proxy_port: 8014
   one_api_port: 8101
   one_api_host_proxy_port: 8018
+  litellm_port: 4000
+  litellm_host_proxy_port: 4000
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
@@ -2262,7 +2266,7 @@ platform_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: private-only
+    exposure_model: edge-published
     observability:
       guest_dashboard: false
       service_telemetry: true
@@ -2273,6 +2277,16 @@ platform_service_topology:
       type: A
       target: 100.64.0.1
       ttl: 60
+    edge:
+      enabled: true
+      kind: proxy
+      tls: true
+      noindex: true
+      upstream: http://10.10.10.92:3003
+      client_max_body_size: 0
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 600
+      proxy_send_timeout_seconds: 600
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
@@ -2979,6 +2993,64 @@ platform_service_topology:
       controller: http://100.64.0.1:8018
       openai: http://10.10.10.20:8101/v1
       controller_openai: http://100.64.0.1:8018/v1
+  litellm:
+    service_name: litellm
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:4000
+    service_id: litellm
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/litellm.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: elastic_stateless
+    ports:
+      internal: 4000
+      controller: 4000
+    urls:
+      internal: http://10.10.10.20:4000
+      controller: http://100.64.0.1:4000
+      openai: http://10.10.10.20:4000/v1
+      controller_openai: http://100.64.0.1:4000/v1
+  librechat:
+    service_name: librechat
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8096
+    service_id: librechat
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/librechat.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: movable_singleton
+    ports:
+      internal: 8096
+    urls:
+      public: https://chat.lv3.org
+      internal: http://10.10.10.70:8096
   gotenberg:
     service_name: gotenberg
     owning_vm: runtime-ai-lv3
@@ -3330,8 +3402,8 @@ platform_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
-    private_ip: 10.10.10.92
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -3351,7 +3423,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.92:8091
+      internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -3856,6 +3928,8 @@ platform_session_authority:
   shared_proxy_cleanup_url: https://ops.lv3.org/.well-known/lv3/session/proxy-logout
   shared_logged_out_path: /.well-known/lv3/session/logged-out
   shared_logged_out_url: https://ops.lv3.org/.well-known/lv3/session/logged-out
+  cookie_name: "_lv3_ops_portal_proxy"
+  cookie_domain: ".lv3.org"
 platform_dns_records:
   public: &id001
     - name: '@'
@@ -4708,7 +4782,7 @@ public_edge_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: private-only
+    exposure_model: edge-published
     observability:
       guest_dashboard: false
       service_telemetry: true
@@ -4719,6 +4793,16 @@ public_edge_service_topology:
       type: A
       target: 100.64.0.1
       ttl: 60
+    edge:
+      enabled: true
+      kind: proxy
+      tls: true
+      noindex: true
+      upstream: http://10.10.10.92:3003
+      client_max_body_size: 0
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 600
+      proxy_send_timeout_seconds: 600
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
@@ -5425,6 +5509,64 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8018
       openai: http://10.10.10.20:8101/v1
       controller_openai: http://100.64.0.1:8018/v1
+  litellm:
+    service_name: litellm
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:4000
+    service_id: litellm
+    runtime_pool: runtime-ai
+    deployment_surface: playbooks/litellm.yml
+    restart_domain: runtime-ai-inference
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+    mobility_tier: elastic_stateless
+    ports:
+      internal: 4000
+      controller: 4000
+    urls:
+      internal: http://10.10.10.20:4000
+      controller: http://100.64.0.1:4000
+      openai: http://10.10.10.20:4000/v1
+      controller_openai: http://100.64.0.1:4000/v1
+  librechat:
+    service_name: librechat
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8096
+    service_id: librechat
+    runtime_pool: dedicated-coolify
+    deployment_surface: playbooks/librechat.yml
+    restart_domain: dedicated-coolify-core
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify
+    mobility_tier: movable_singleton
+    ports:
+      internal: 8096
+    urls:
+      public: https://chat.lv3.org
+      internal: http://10.10.10.70:8096
   gotenberg:
     service_name: gotenberg
     owning_vm: runtime-ai-lv3
@@ -5776,8 +5918,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
-    private_ip: 10.10.10.92
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -5797,7 +5939,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.92:8091
+      internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -6338,6 +6480,12 @@ one_api_internal_url: http://10.10.10.20:8101
 one_api_controller_url: http://100.64.0.1:8018
 one_api_openai_base_url: http://10.10.10.20:8101/v1
 one_api_controller_openai_base_url: http://100.64.0.1:8018/v1
+litellm_port: 4000
+litellm_host_proxy_port: 4000
+litellm_internal_url: http://10.10.10.20:4000
+litellm_controller_url: http://100.64.0.1:4000
+litellm_openai_base_url: http://10.10.10.20:4000/v1
+litellm_controller_openai_base_url: http://100.64.0.1:4000/v1
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
 semaphore_private_base_url: http://10.10.10.92:3004
@@ -6493,3 +6641,27 @@ tika_port: 9998
 tesseract_ocr_port: 3008
 keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587
+
+# ---------------------------------------------------------------------------
+# Neko multi-instance browser sessions
+# ---------------------------------------------------------------------------
+# Each entry provisions an isolated browser container on runtime-comms-lv3
+# and a Keycloak user in the lv3 realm. Removing an entry destroys the
+# container and the Keycloak user on the next converge.
+#
+# Key         = instance name (container name: neko-<key>, data dir: /opt/neko/instances/<key>)
+# email       = Keycloak user email and routing key for NGINX → container mapping
+# port        = TCP port the Neko signalling server binds on (must be unique per instance)
+# udp_range   = Ephemeral UDP port range for WebRTC media (must be unique per instance)
+#
+# Example:
+#   neko_instances:
+#     florin:
+#       email: florin@lv3.org
+#       port: 8080
+#       udp_range: "50000-52999"
+#     alice:
+#       email: alice@lv3.org
+#       port: 8081
+#       udp_range: "53000-55999"
+neko_instances: {}

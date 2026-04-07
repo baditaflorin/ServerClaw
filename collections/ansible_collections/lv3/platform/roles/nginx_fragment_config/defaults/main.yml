@@ -1,0 +1,33 @@
+---
+# Purpose: Declare defaults for per-service nginx fragment management.
+# Use case: Used by any role that needs to add/update/remove a named nginx
+#           server-block fragment without touching other services' configs.
+#
+# Inputs (required):
+#   - nginx_fragment_service_name (str): Unique slug for this service (e.g. "keycloak").
+#   - nginx_fragment_content (str): Full nginx server-block config for this service.
+#
+# Inputs (optional):
+#   - nginx_fragment_state (str, default="present"): "present" or "absent".
+#   - nginx_fragment_dir (str): Directory for fragment files (default: /etc/nginx/fragments.d).
+#   - nginx_fragment_validate (bool, default=true): Run nginx -t before activating fragment.
+#   - nginx_fragment_reload (bool, default=true): Reload nginx after activating fragment.
+#
+# Outputs:
+#   - Fragment file at {{ nginx_fragment_dir }}/{{ nginx_fragment_service_name }}.conf
+#
+# Idempotency: Fully idempotent — write-validate-rename-reload only fires on change.
+#
+# Dependencies:
+#   - ADR 0350: Nginx Fragment-Based Atomic Configuration
+#   - Nginx must be installed and running on the target host.
+#
+# Related ADRs: 0350
+# Author: LV3 Platform
+
+nginx_fragment_state: present
+nginx_fragment_dir: /etc/nginx/fragments.d
+nginx_fragment_validate: true
+nginx_fragment_reload: true
+nginx_fragment_nginx_binary: nginx
+nginx_fragment_nginx_config: /etc/nginx/nginx.conf

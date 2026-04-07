@@ -60,8 +60,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, SearXNG, Uptime Kuma, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
 | `3` | Homepage, Open WebUI, Platform API Gateway, ServerClaw, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -96,6 +96,7 @@ graph TD
     backup_pbs["Proxmox Backup Server\nTier 1"]
     proxmox_ui["Proxmox UI\nTier 1"]
     redpanda["Redpanda\nTier 1"]
+    repowise["Repowise Semantic Code Search\nTier 1"]
     searxng["SearXNG\nTier 1"]
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
@@ -122,6 +123,7 @@ graph TD
     matrix_synapse["Matrix Synapse\nTier 2"]
     mattermost["Mattermost\nTier 2"]
     n8n["n8n\nTier 2"]
+    neko["Neko Remote Desktop\nTier 2"]
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
     ntfy["ntfy\nTier 2"]
@@ -253,6 +255,8 @@ graph TD
     n8n -->|soft| nginx_edge
     n8n -->|startup_only| openbao
     n8n -->|hard| postgres
+    neko -->|soft| keycloak
+    neko -->|hard| nginx_edge
     netbox -->|startup_only| openbao
     netbox -->|hard| postgres
     nextcloud -->|soft| nginx_edge

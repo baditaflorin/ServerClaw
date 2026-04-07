@@ -1,0 +1,373 @@
+---
+# WS-0215: Node Role Taxonomy
+# Canonical role definitions, constraints, and assignment rules
+# Source: docs/inventory/node-roles.yaml
+# Version: 1.0
+# Updated: 2026-04-07
+
+## ==============================================================================
+## ROLE TAXONOMY
+## ==============================================================================
+## Eight foundational roles define the operational structure of the platform.
+## Every node is assigned exactly one primary role (with documented exceptions).
+
+roles:
+
+  # ==========================================================================
+  # BOOTSTRAP — Hypervisor initialization and foundational platform services
+  # ==========================================================================
+  bootstrap:
+    title: "Hypervisor Bootstrap"
+    description: |
+      The Proxmox VE host itself. Manages VM lifecycle, storage, networking,
+      and access control for all guest VMs. Entry point for platform operations.
+
+    primary_function: "Hypervisor management and VM provisioning"
+    examples:
+      - proxmox_florin (10.10.10.1 or via Tailscale)
+
+    mandatory_capabilities:
+      - proxmox_ve: "VE 9.x, kernel 6.17+, Debian 13 base"
+      - api_access: "Proxmox API on :8006 (HTTPS)"
+      - vm_provisioning: "Ability to spawn, snapshot, and manage guest VMs"
+      - network_control: "Bridge creation, vlan tagging, virtual routing"
+      - storage_backend: "Local LVM or shared storage for VM disks"
+
+    optional_capabilities:
+      - metrics_export: "Prometheus exporter (for host-level observability)"
+
+    constraints:
+      - single_per_deployment: "Exactly one bootstrap node per deployment"
+      - hardware_required: "Dedicated server or cloud instance capable of nested virt"
+      - no_workload_services: "No application services deployed directly on this node"
+      - operator_ssh_required: "SSH access for ops identity, sudo escalation"
+
+    assignment_rules:
+      - "Assigned to the Proxmox VE hypervisor at infrastructure bootstrap"
+      - "Cannot be reassigned; removal requires full platform evacuation"
+
+  # ==========================================================================
+  # CONTROL — Orchestration, coordination, and control-plane services
+  # ==========================================================================
+  control:
+    title: "Control Plane"
+    description: |
+      Hosts orchestration, state management, and operational tooling.
+      Makes decisions about platform behavior, coordinates multi-service
+      workflows, and maintains operational state.
+
+    primary_function: "Platform orchestration and operational control"
+    examples:
+      - runtime-control-lv3 (10.10.10.92, production)
+
+    mandatory_capabilities:
+      - orchestration_runtime: "Docker or Kubernetes for container scheduling"
+      - api_exposure: "REST or RPC API for external callers"
+      - identity_integration: "OIDC/SAML capability for federated auth"
+      - state_management: "Ability to store and retrieve operational state"
+
+    optional_capabilities:
+      - workflow_automation: "DAG or event-driven workflow execution (Nomad, Temporal)"
+      - secret_management: "Integration with secret store (OpenBao, Vault)"
+
+    constraints:
+      - single_or_ha: "Typically one primary, replicas optional"
+      - dedicated_network: "Access from runtime layer only, not public"
+      - state_persistence: "Must have durable storage or HA backing"
+      - controlled_scaling: "Does not auto-scale on demand"
+
+    assignment_rules:
+      - "One per logical deployment environment (prod, staging)"
+      - "May be co-hosted with state or observability in small deployments (technical debt)"
+
+  # ==========================================================================
+  # STATE — Persistent data, databases, and stateful services
+  # ==========================================================================
+  state:
+    title: "State Management"
+    description: |
+      Runs databases, key-value stores, and other stateful services.
+      Provides durable storage, transactions, and data consistency for
+      the platform and hosted services.
+
+    primary_function: "Durable state storage and retrieval"
+    examples:
+      - postgres-lv3 (10.10.10.50, primary, production)
+      - postgres-replica-lv3 (10.10.10.51, read replica, production)
+      - postgres-apps-lv3 (10.10.10.52, application database, production)
+      - postgres-data-lv3 (10.10.10.54, data warehouse node, production)
+
+    mandatory_capabilities:
+      - database_engine: "PostgreSQL 15+, MySQL 8+, or similar"
+      - persistence: "Durable storage (block or object backend)"
+      - replication: "Read replicas or HA failover capability"
+      - backup_integration: "Automated WAL archiving or snapshots"
+
+    optional_capabilities:
+      - sharding: "Horizontal partitioning for large datasets"
+      - analytics: "OLAP query optimization or data warehouse features"
+
+    constraints:
+      - replication_required: "Must have at least one backup/replica"
+      - network_isolation: "Access restricted to application tier only"
+      - no_public_exposure: "Never directly exposed to internet"
+      - fixed_capacity: "Scaling requires migration, not horizontal addition"
+
+    assignment_rules:
+      - "One or more per environment (primary + replicas)"
+      - "May be split by concern (transaction vs. analytics) in large deployments"
+
+  # ==========================================================================
+  # EDGE — Ingress, egress, and boundary services
+  # ==========================================================================
+  edge:
+    title: "Edge Services"
+    description: |
+      First-line services handling public ingress, egress, and platform
+      boundaries. Includes reverse proxies, API gateways, CDN origins,
+      and public DNS.
+
+    primary_function: "Ingress/egress and boundary security"
+    examples:
+      - nginx-lv3 (10.10.10.10, production)
+      - nginx-staging-lv3 (10.20.10.10, staging)
+
+    mandatory_capabilities:
+      - http_proxy: "Reverse proxy (Nginx, Envoy, Caddy)"
+      - tls_termination: "HTTPS, certificate rotation, perfect forward secrecy"
+      - routing: "Path/hostname-based routing to backend services"
+      - rate_limiting: "Per-IP or per-client traffic shaping"
+
+    optional_capabilities:
+      - waf: "Web application firewall (ModSecurity, Cloudflare, etc.)"
+      - cdn_origin: "Cache headers, compression, media optimization"
+      - dms_integration: "Document management, file serving"
+
+    constraints:
+      - public_network: "Directly accessible from internet (or via LB)"
+      - stateless: "Should handle graceful reload without disruption"
+      - high_availability: "Typically 2+ nodes for fault tolerance"
+      - no_state_storage: "No persistent data; cached or external only"
+
+    assignment_rules:
+      - "One or more per environment (HA recommended)"
+      - "Must be behind DDoS protection or rate-limit firewall"
+
+  # ==========================================================================
+  # WORKLOAD — User-facing applications and hosted services
+  # ==========================================================================
+  workload:
+    title: "Application Workload"
+    description: |
+      General-purpose application runtime. Hosts business logic, microservices,
+      and user-facing applications. Scales horizontally to meet demand.
+
+    primary_function: "Application execution and service hosting"
+    examples:
+      - runtime-general-lv3 (10.10.10.91, production)
+      - runtime-apps-lv3 (10.10.10.22, production)
+      - docker-runtime-lv3 (10.10.10.20, production, general)
+      - coolify-lv3 (10.10.10.70, production, PaaS)
+      - coolify-apps-lv3 (10.10.10.71, production, PaaS apps)
+
+    mandatory_capabilities:
+      - container_runtime: "Docker, Podman, or Kubernetes"
+      - orchestration: "Swarm, Kubernetes, or simple Compose"
+      - service_discovery: "DNS or service registry (Consul, Eureka)"
+      - logging_integration: "Structured logs to central sink"
+
+    optional_capabilities:
+      - horizontal_scaling: "Auto-scaling or manual replica management"
+      - graceful_shutdown: "Drain connections, coordinated exit"
+      - observability: "Health endpoints, span tracing"
+
+    constraints:
+      - stateless_preferred: "Services should not store state locally"
+      - elastic_scaling: "Nodes can be added/removed to match demand"
+      - fault_tolerant: "Service should survive single node loss"
+      - no_public_exposure: "Access via edge layer only"
+
+    assignment_rules:
+      - "Multiple per environment (load distribution)"
+      - "May be specialized by workload type (GPU, memory-intensive, etc.)"
+      - "High-scaling workloads may have dedicated nodes"
+
+  # ==========================================================================
+  # OBSERVABILITY — Metrics, logs, traces, and alerting
+  # ==========================================================================
+  observability:
+    title: "Observability"
+    description: |
+      Collects, aggregates, and exposes operational signals: metrics, logs,
+      traces, and alerts. Enables incident response and performance tuning.
+
+    primary_function: "Platform observability and incident response"
+    examples:
+      - monitoring-lv3 (10.10.10.40, production)
+      - monitoring-staging-lv3 (10.20.10.40, staging)
+
+    mandatory_capabilities:
+      - metrics_ingestion: "Prometheus, Influx, or Graphite"
+      - visualization: "Grafana or similar dashboard UI"
+      - alerting: "Alert rule engine, notification channels"
+      - log_aggregation: "ELK, Loki, or Splunk"
+
+    optional_capabilities:
+      - tracing: "OpenTelemetry, Jaeger, or Zipkin"
+      - slo_automation: "SLO definition and error-budget tracking"
+      - anomaly_detection: "ML-based alert optimization"
+
+    constraints:
+      - data_retention: "Configurable TTL; older data may be archived"
+      - high_ingest_volume: "Must handle peak cardinality without degradation"
+      - no_customer_data: "Observability stores operational metrics only"
+      - independent_scaling: "Should scale separately from workload tier"
+
+    assignment_rules:
+      - "One per environment (plus optional replicas for HA)"
+      - "May be split by signal type (metrics vs. logs) in large deployments"
+
+  # ==========================================================================
+  # RECOVERY — Backup, disaster recovery, and data protection
+  # ==========================================================================
+  recovery:
+    title: "Recovery and Backup"
+    description: |
+      Manages backup, restore, and disaster recovery operations.
+      Stores off-site replicas, cold snapshots, and recovery automation.
+
+    primary_function: "Data protection and disaster recovery"
+    examples:
+      - backup-lv3 (10.10.10.60, production)
+      - backup-staging-lv3 (10.20.10.60, staging)
+
+    mandatory_capabilities:
+      - backup_engine: "Bacula, Velero, or similar"
+      - snapshot_management: "VM snapshots, WAL archiving, point-in-time recovery"
+      - retention_policy: "Automated cleanup of old backups"
+      - restore_validation: "Regular restore tests to ensure RTO/RPO"
+
+    optional_capabilities:
+      - geographic_replication: "Off-site backups in different regions"
+      - immutable_copies: "WORM storage for compliance"
+      - backup_deduplication: "Content-addressed storage to reduce capacity"
+
+    constraints:
+      - isolated_network: "Separate from production paths when possible"
+      - capacity_planning: "Must provision for peak restore throughput"
+      - rto_sla: "Restore time SLA must be documented and tested"
+      - no_direct_serving: "Not exposed as user-facing service"
+
+    assignment_rules:
+      - "One per environment (may be external cloud provider)"
+      - "May include off-site replication endpoint"
+
+  # ==========================================================================
+  # BUILD — CI/CD, artifact creation, and deployment automation
+  # ==========================================================================
+  build:
+    title: "Build and Deployment"
+    description: |
+      Executes build pipelines, creates artifacts, and runs deployment
+      automation. Interfaces with git, container registries, and deployment
+      orchestrators.
+
+    primary_function: "Continuous integration and artifact production"
+    examples:
+      - docker-build-lv3 (10.10.10.30, production)
+      - docker-build-staging-lv3 (10.20.10.30, staging)
+
+    mandatory_capabilities:
+      - ci_runner: "Jenkins, GitLab CI, Woodpecker, or Gitea Actions"
+      - container_builder: "Docker, Podman, or Kaniko"
+      - artifact_registry: "Container registry (Harbor, Nexus, ECR)"
+      - version_control_integration: "Git webhook integration"
+
+    optional_capabilities:
+      - hermetic_builds: "Nix, Bazel, or similar for reproducibility"
+      - cross_platform: "Multi-arch builds (ARM, x86, etc.)"
+      - dependency_scanning: "Security and license scanning"
+
+    constraints:
+      - isolated_workloads: "Should not run untrusted code from internet"
+      - large_disk_io: "Needs fast I/O for build cache"
+      - high_cpu_usage: "Parallelized builds consume significant CPU"
+      - privileged_access: "Container runtime requires elevated privilege"
+
+    assignment_rules:
+      - "One per environment (shared or dedicated)"
+      - "May scale with build queue depth in large deployments"
+
+---
+
+## ==============================================================================
+## ASSIGNMENT RULES (Global)
+## ==============================================================================
+
+assignment_rules:
+  primary_role_cardinality:
+    rule: "Every node is assigned exactly one primary role."
+    exceptions: |
+      In small deployments (staging, test), nodes may temporarily combine
+      multiple roles due to resource constraints. These are documented as
+      technical debt in role-assignment-matrix.yaml.
+
+  role_dependencies:
+    rule: "Roles define operational boundaries, not deployment boundaries."
+    note: |
+      A single VM may contain multiple container services; the VM's role
+      reflects its primary operational function, not the count of services.
+
+  environment_isolation:
+    rule: "Production and staging use separate role assignments."
+    note: |
+      Staging may collapse roles (e.g., single docker-runtime-staging
+      for workload + cache), while production maintains separation.
+
+  technical_debt_tracking:
+    rule: "Multi-role waivers are documented with justification and date."
+    note: |
+      Each exception includes: (1) role combination, (2) reason,
+      (3) target date for separation, (4) ticket/ADR reference.
+
+---
+
+## ==============================================================================
+## ROLE LIFECYCLE
+## ==============================================================================
+
+provisioning:
+  bootstrap: "Manual, tied to hypervisor deployment"
+  control: "Automated via IaC playbook"
+  state: "Automated via IaC playbook, includes initial seed data"
+  edge: "Automated via IaC playbook"
+  workload: "Automated via IaC playbook"
+  observability: "Automated via IaC playbook"
+  recovery: "Automated via IaC playbook"
+  build: "Automated via IaC playbook"
+
+deprovisioning:
+  bootstrap: "Requires full platform evacuation and hypervisor reset"
+  control: "Drain services, migrate state, then deprovision"
+  state: "Backup first, then deprovision"
+  edge: "Drain connections, promote secondary if HA, then deprovision"
+  workload: "Drain workload, scale down, then deprovision"
+  observability: "Export/archive data, then deprovision"
+  recovery: "Finalize backups, then deprovision"
+  build: "Quiesce pipeline, export artifacts, then deprovision"
+
+---
+
+## ==============================================================================
+## VERSION HISTORY
+## ==============================================================================
+
+versions:
+  - version: "1.0"
+    date: "2026-04-07"
+    author: "WS-0215 Implementation"
+    summary: "Initial taxonomy definition with eight foundational roles"
+    changes:
+      - "Defined bootstrap, control, state, edge, workload, observability, recovery, build roles"
+      - "Established assignment rules and constraints"
+      - "Created role lifecycle guidance"

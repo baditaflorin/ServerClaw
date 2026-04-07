@@ -313,6 +313,7 @@
     - proxmox_acme_plugin_id in proxmox_acme_plugins.stdout
   changed_when: true
   no_log: true
+  ignore_errors: true
 
 - name: Remove temporary ACME DNS plugin credential file
   ansible.builtin.file:

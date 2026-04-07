@@ -556,7 +556,7 @@
       {
         "id": "runtime-ai",
         "baseline_ram_gb": 16,
-        "max_ram_gb": 28,
+        "max_ram_gb": 24,
         "admission_priority": 3,
         "notes": "Bursty document, notebook, and inference-adjacent workloads may expand last and only inside the approved runtime-ai envelope."
       }

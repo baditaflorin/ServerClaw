@@ -1,0 +1,46 @@
+adr_number: '0255'
+title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0255'
+  location: git:1025c4c41
+  evidence: 1025c4c41 [merge] Sync ADR 0255 mainline finalization into ADR 0266 candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.720376'
+- marker_type: git-commit
+  adr_number: '0255'
+  location: git:cdf1b9a4a
+  evidence: cdf1b9a4a [release] Cut 0.177.85 for ADR 0255
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.720607'
+- marker_type: git-commit
+  adr_number: '0255'
+  location: git:64db4bcfa
+  evidence: 64db4bcfa [matrix-synapse] Implement ADR 0255 repo automation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.720649'
+- marker_type: git-commit
+  adr_number: '0255'
+  location: git:a3a108cbb
+  evidence: a3a108cbb [matrix-synapse] Implement ADR 0255 repo automation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.721053'
+- marker_type: playbook
+  adr_number: '0255'
+  location: playbooks/matrix-synapse.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:54.759429'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=4, playbook=1
+
+  Implemented On: 2026-03-29'

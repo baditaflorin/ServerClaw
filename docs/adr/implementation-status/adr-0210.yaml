@@ -1,0 +1,41 @@
+adr_number: '0210'
+title: Canonical Domain Models Over Vendor Schemas
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0210'
+  location: git:e2ba8e95e
+  evidence: e2ba8e95e [merge] Absorb latest origin/main after ADR 0210 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.194387'
+- marker_type: git-commit
+  adr_number: '0210'
+  location: git:7939d04f7
+  evidence: 7939d04f7 [release] Integrate ADR 0210 on mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.194436'
+- marker_type: git-commit
+  adr_number: '0210'
+  location: git:960548177
+  evidence: 960548177 [docs] Record ADR 0210 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.194440'
+- marker_type: git-commit
+  adr_number: '0210'
+  location: git:0cd3e15e9
+  evidence: 0cd3e15e9 [adr-0210] Separate canonical publication models from delivery
+    adapters
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:35.194449'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-28'

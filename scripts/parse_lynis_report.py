@@ -9,17 +9,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_mapping
+
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
 
 DEFAULT_SUPPRESSIONS_PATH = repo_path("config", "lynis-suppressions.json")
 FINDING_ID_PATTERN = re.compile(r"\b([A-Z]{2,10}-\d{2,5})\b")
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
 
 
 def load_suppressions(path: Path = DEFAULT_SUPPRESSIONS_PATH) -> dict[str, dict[str, Any]]:

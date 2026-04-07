@@ -1,10 +1,13 @@
 ---
-- name: Verify PostgreSQL is listening on the managed TCP port
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ postgres_vm_port }}"
-    delay: 0
-    timeout: 60
+# Dependencies: ADR 0371.
+- name: Verify the PostgreSQL runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: postgresql
+    common_verify_port: "{{ postgres_vm_port }}"
+    common_verify_port_timeout: 60
 
 - name: Verify PostgreSQL accepts a local SQL readiness probe
   become: true

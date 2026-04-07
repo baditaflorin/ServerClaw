@@ -17,10 +17,203 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 301
+  total_workstreams: 303
   by_year:
-    '2026': 301
+    '2026': 303
 workstreams:
+- id: ws-0377-open-webui-serverclaw-integration
+  adr: '0377'
+  title: Open WebUI platform knowledge and ServerClaw tool integration
+  status: planned
+  owner: claude
+  branch: claude/elastic-curie
+  worktree_path: .claude/worktrees/elastic-curie
+  doc: docs/workstreams/ws-0377-open-webui-serverclaw-integration.md
+  depends_on:
+  - adr-0198-qdrant-vector-search
+  - adr-0254-serverclaw-product
+  - adr-0257-openclaw-skill-packs
+  - adr-0263-serverclaw-memory-substrate
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/open-webui.env.j2
+  ownership_manifest:
+    owned_surfaces:
+    - id: adr_0377_0378_docs
+      paths:
+      - docs/adr/0377-open-webui-platform-knowledge-integration.md
+      - docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+      - docs/workstreams/ws-0377-open-webui-serverclaw-integration.md
+      mode: exclusive
+    - id: workstream_source
+      paths:
+      - workstreams/active/ws-0377-open-webui-serverclaw-integration.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  ready_to_merge: false
+  live_applied: false
+- id: nifty-clarke-identity-watchdog
+  adr: '0376'
+  title: "Identity-core watchdog \u2014 30s OIDC probe + oauth2-proxy auto-restart"
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: false
+  owner: claude
+  branch: claude/nifty-clarke
+  worktree_path: .claude/worktrees/nifty-clarke
+  doc: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
+  depends_on:
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0226-systemd-host-supervisor
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/identity_core_watchdog/
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/keycloak.env.j2
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/
+  - playbooks/identity-core-watchdog.yml
+  - config/ansible-execution-scopes.yaml
+  - config/workflow-catalog.json
+  - config/health-probe-catalog.json
+  - config/ntfy/topics.yaml
+  - config/uptime-kuma/monitors.json
+  - Makefile
+  ownership_manifest:
+    owned_surfaces:
+    - id: identity_core_watchdog_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/identity_core_watchdog/
+      - playbooks/identity-core-watchdog.yml
+      mode: exclusive
+    - id: oauth2_proxy_watchdog_templates
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.sh.j2
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.service.j2
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.timer.j2
+      mode: exclusive
+  notes: 'ADR 0376: Keycloak kept dying. Deployed identity-core watchdog with 30s
+    OIDC
+
+    discovery probe (not just /health/live), auto-restart on 2 failures, 6/hr limit.
+
+    Added KC_CACHE=local to eliminate JGroups TCP loop from stale jgroups_ping rows.
+
+    Added oauth2-proxy watchdog timer on nginx-lv3 to restart on unresponsive proxy.
+
+    Root cause of 500s: Keycloak restart invalidated in-flight auth codes.
+
+    '
+- id: ws-0375-certificate-validation
+  adr: '0375'
+  title: Certificate Validation and Concordance Enforcement
+  status: ready
+  ready_to_merge: false
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/nervous-feistel
+  worktree_path: .claude/worktrees/nervous-feistel
+  doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+  depends_on:
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0273-public-endpoint-admission-control
+  conflicts_with: []
+  shared_surfaces:
+  - .githooks/pre-push
+  - scripts/certificate_validator.py
+  - playbooks/certificate-validation.yml
+  - playbooks/fix-edge-certificate.yml
+  ownership_manifest:
+    owned_surfaces:
+    - id: certificate_validator
+      paths:
+      - scripts/certificate_validator.py
+      - playbooks/certificate-validation.yml
+      - playbooks/fix-edge-certificate.yml
+      - .githooks/pre-push
+      mode: exclusive
+  notes: 'Implements ADR 0375: automated SSL certificate validation for all 53
+
+    edge-published domains. Fixes hostname mismatches on ci.lv3.org,
+
+    bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org,
+
+    ntfy.lv3.org. Adds pre-push gate, Uptime Kuma integration, and
+
+    automated remediation playbooks.
+
+    '
+- id: ws-0364-service-api-agent-tools
+  adr: '0364'
+  title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
+    0362 follow-up)'
+  status: planned
+  branch: main
+  worktree_path: .claude/worktrees/service-api-agent-tools
+  owner: unassigned
+  priority: medium
+  description: "ADR 0362 (Agent Service API Gateway) is implemented for Plane (ADR\
+    \ 0363) but three\ngaps remain before the pattern is fully reusable:\n\n1. Generic\
+    \ _resolve_service_auth(service_name) helper is missing \u2014 only Plane-specific\n\
+    \   _resolve_plane_auth() exists. Must be built before other services can be added\
+    \ without\n   copy-pasting credential discovery logic.\n\n2. Outline tools (wiki.lv3.org)\
+    \ \u2014 existing REST client at scripts/outline_client.py,\n   no governed tool\
+    \ surface yet.\n\n3. Netbox tools \u2014 network source of truth, agents can't\
+    \ query IP allocations.\n\n4. Dify tools \u2014 agents can't trigger workflows\
+    \ programmatically.\n\nPlane task creation was attempted but Plane API returned\
+    \ 502 at time of writing.\nRun sync_plane_agent_issues.py once Plane recovers\
+    \ to register this workstream.\n"
+  tasks:
+  - id: task-1
+    title: Implement generic _resolve_service_auth(service_name) helper
+    priority: medium
+    description: "Add _resolve_service_auth(service_name: str) -> dict to scripts/agent_tool_registry.py.\n\
+      Precedence: env LV3_{SERVICE}_AUTH_FILE \u2192 .local/{service}/admin-auth.json\
+      \ \u2192 .local/{service}/api-token.txt\nRefactor _resolve_plane_auth() to delegate\
+      \ to this helper.\nFile: scripts/agent_tool_registry.py ~line 720\nADR: docs/adr/0362-agent-service-api-gateway-pattern.md\n"
+  - id: task-2
+    title: Build Outline agent tools (list/search/get/create)
+    priority: medium
+    description: "Tools: list-outline-collections, search-outline-documents, get-outline-document,\n\
+      \       create-outline-document (approval_required: true)\nExisting client:\
+      \ scripts/outline_client.py\nAuth: .local/outline/admin-auth.json (base_url,\
+      \ api_token)\nRegistry: config/agent-tool-registry.json\nWrite ADR 0364 for\
+      \ Outline agent tools.\nPrior art: Plane handlers in scripts/agent_tool_registry.py\
+      \ lines ~720-895\n"
+  - id: task-3
+    title: Build Netbox agent tools (list-devices, get-device, list-prefixes)
+    priority: low
+    description: "Tools: list-netbox-devices, get-netbox-device, list-netbox-prefixes,\n\
+      \       create-netbox-ip-address (approval_required: true)\nAuth: .local/netbox/admin-auth.json\
+      \ (base_url, api_token)\nNetbox REST API v3: /api/dcim/devices/, /api/ipam/prefixes/\n"
+  - id: task-4
+    title: Build Dify agent tools (list-apps, get-app, trigger-workflow)
+    priority: low
+    description: "Tools: list-dify-apps, get-dify-app, trigger-dify-workflow (approval_required:\
+      \ true)\nIMPORTANT: use internal URL http://10.10.10.20:8094 \u2014 agents.lv3.org\
+      \ is behind oauth2-proxy\nAuth: .local/dify/admin-auth.json (base_url, api_token\
+      \ = Dify API key)\n"
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - scripts/agent_tool_registry.py
+  - config/agent-tool-registry.json
+  ready_to_merge: false
+  live_applied: false
+  ownership_manifest:
+    owned_surfaces:
+    - id: service_api_agent_tools
+      paths:
+      - scripts/agent_tool_registry.py
+      - config/agent-tool-registry.json
+      mode: shared_contract
+      contract: workstream-registry-v1
+  doc: docs/adr/0362-agent-service-api-gateway-pattern.md
+  adr_refs:
+  - '0362'
+  - '0363'
+  notes: "Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py\n\
+    step was skipped. Run it to register in Plane once the service recovers:\n  python\
+    \ scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools\n"
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
@@ -54,7 +247,8 @@ workstreams:
     - id: workstream_source
       paths:
       - workstreams/active/adr-0360-openbao-cert-hardening.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: workstream-registry-v1
     - id: release_integration
       paths:
       - workstreams.yaml
@@ -185,7 +379,8 @@ workstreams:
     - id: workstream_source
       paths:
       - workstreams/active/adr-0346-centralized-port-registry.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: workstream-registry-v1
     - id: release_management
       paths:
       - README.md
@@ -233,7 +428,7 @@ workstreams:
   owner: claude
   branch: claude/affectionate-galileo
   worktree_path: .claude/worktrees/affectionate-galileo
-  doc: docs/adr/0328-ops-portal.md
+  doc: docs/adr/0093-interactive-ops-portal.md
   depends_on:
   - adr-0328-ops-portal
   conflicts_with: []
@@ -1692,6 +1887,7 @@ workstreams:
       - docs/adr/index/by-status/implemented.yaml
       - docs/adr/index/by-status/not-implemented.yaml
       - docs/adr/index/by-status/partial.yaml
+      - docs/adr/index/by-status/proposed.yaml
       mode: shared_contract
       contract: adr-index-v1
     - id: parallel_adr_sync_surfaces
@@ -1717,6 +1913,39 @@ workstreams:
       - playbooks/services/runtime-comms-pool.yml
       mode: shared_contract
       contract: topology-v1
+    - id: gate_fix_ansible_lint
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/postgres_client/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+      mode: exclusive
+    - id: gate_fix_public_entrypoints
+      paths:
+      - AGENTS.md
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: gate_fix_release_notes
+      paths:
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/index/2026.md
+      - docs/release-notes/index/README.md
+      - README.md
+      - versions/stack.yaml
+      mode: shared_contract
+      contract: release-management-v1
+    - id: gate_fix_skills
+      paths:
+      - config/serverclaw/skills/shared/human-review-queue/SKILL.md
+      mode: exclusive
+    - id: gate_fix_generated_config
+      paths:
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/subdomain-exposure-registry.json
+      - config/subdomain-catalog.json
+      - docs/status/history/merged-workstreams.md
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: discovery-artifacts-v1
   plane_issue_id: d9ca7b64-bcb0-4344-88d0-43fabec7de1b
 surface_ownership:
   global_mutable_paths:

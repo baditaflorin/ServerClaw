@@ -1,0 +1,82 @@
+adr_number: 0239
+title: Browser-Local Search Experience Via Pagefind
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:7c71a5c8b
+  evidence: 7c71a5c8b [receipts] Refresh ADR 0239 post-merge replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.611877'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:bfbdbfca8
+  evidence: bfbdbfca8 [receipts] Record ADR 0239 post-merge replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.611956'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:48b8a79b0
+  evidence: 48b8a79b0 [docs] Refresh ADR 0239 generated diagrams
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.611976'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:f87664261
+  evidence: f87664261 [docs] Refresh ADR 0239 canonical truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.611984'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:a1f8ca956
+  evidence: a1f8ca956 [receipts] Record ADR 0239 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.611988'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:33c6c8ee9
+  evidence: 33c6c8ee9 [release] Prepare ADR 0239 mainline candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.611991'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:f2936b48f
+  evidence: f2936b48f [docs] Record ADR 0239 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.612011'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:6074b6a1c
+  evidence: 6074b6a1c [docs] Refresh generated artifacts for ADR 0239 push gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.612294'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:cdde7120e
+  evidence: cdde7120e [receipts] Record ADR 0239 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.612321'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:e3ecb6161
+  evidence: e3ecb6161 [release] Integrate ADR 0239 Pagefind search into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.612350'
+- marker_type: git-commit
+  adr_number: 0239
+  location: git:5e4fec7c4
+  evidence: 5e4fec7c4 [docs] Record ADR 0239 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:47.612390'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=11
+
+  Implemented On: 2026-03-28'

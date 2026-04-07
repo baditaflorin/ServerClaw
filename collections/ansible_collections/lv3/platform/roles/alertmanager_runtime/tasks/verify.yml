@@ -1,52 +1,21 @@
 # Role Task File: alertmanager_runtime/tasks/verify.yml
 # Purpose: Verify Alertmanager health and Prometheus rule visibility after alert routing changes are converged.
-# Use case: Imported after the alertmanager runtime role flushes handlers so monitoring alerts are confirmed live.
-#
-# Inputs (required):
-#   - alertmanager_runtime_url (str, required): Local Alertmanager base URL used for health and readiness checks.
-#
-# Inputs (optional):
-#   - None.
-#
-# Outputs:
-#   - Confirms Alertmanager is healthy, the pgaudit relay is reachable, and key alert rules are visible to Prometheus.
-#
-# Idempotency: Fully idempotent
-#              Read-only verification tasks against the live monitoring stack.
-#
-# Dependencies:
-#   - ADR 0097: Defines the alert routing baseline for the platform.
-#   - ADR 0250: Adds the Loki Canary alert rule group that must be loaded after copy and reload.
-#   - ADR 0303: Adds the PostgreSQL audit alert relay and audit-specific alert rules.
-#   - Requires: alertmanager_runtime has already rendered configuration and Prometheus rules.
-#
-# Related ADRs: 0097, 0250, 0303
-# Related Runbooks: docs/runbooks/log-queryability-canary.md, docs/runbooks/postgres-audit.md
-#
-# Author: LV3 Platform
-# Last Updated: 2026-03-31
+# Dependencies: ADR 0097, ADR 0250, ADR 0303, ADR 0371.
 ---
-- name: Verify Alertmanager health endpoint responds
-  ansible.builtin.uri:
-    url: "{{ alertmanager_runtime_url }}/-/healthy"
-    method: GET
-    status_code: 200
-  register: alertmanager_runtime_health
-  retries: 20
-  delay: 3
-  until: alertmanager_runtime_health.status == 200
-  changed_when: false
-
-- name: Verify Alertmanager readiness endpoint responds
-  ansible.builtin.uri:
-    url: "{{ alertmanager_runtime_url }}/-/ready"
-    method: GET
-    status_code: 200
-  register: alertmanager_runtime_ready
-  retries: 20
-  delay: 3
-  until: alertmanager_runtime_ready.status == 200
-  changed_when: false
+- name: Verify the Alertmanager runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: alertmanager
+    common_verify_port: "{{ alertmanager_runtime_port }}"
+    common_verify_health_url: "{{ alertmanager_runtime_url }}/-/healthy"
+    common_verify_health_retries: 20
+    common_verify_health_delay: 3
+    common_verify_extra_endpoints:
+      - url: "{{ alertmanager_runtime_url }}/-/ready"
+        retries: 20
+        delay: 3
 
 - name: Verify pgaudit alert relay health endpoint responds
   ansible.builtin.uri:

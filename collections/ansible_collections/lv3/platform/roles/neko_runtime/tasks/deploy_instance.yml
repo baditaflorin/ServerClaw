@@ -1,0 +1,86 @@
+---
+# Deploy a single Neko instance. Called in a loop from main.yml.
+# All failures use ignore_errors so other instances continue.
+# _neko_inst_item: dict2items entry with .key (name) and .value (config)
+
+- name: "{{ _neko_inst_item.key }} | Set instance facts"
+  ansible.builtin.set_fact:
+    _inst_name: "{{ _neko_inst_item.key }}"
+    _inst_port: "{{ _neko_inst_item.value.port }}"
+    _inst_email: "{{ _neko_inst_item.value.email }}"
+    _inst_udp_range: "{{ _neko_inst_item.value.udp_range | default('50000-59999') }}"
+    _inst_browser: "{{ _neko_inst_item.value.browser | default(neko_default_browser) }}"
+    _inst_res: "{{ _neko_inst_item.value.res | default(neko_default_res) }}"
+    _inst_max_connections: "{{ _neko_inst_item.value.max_connections | default(neko_default_max_connections) }}"
+    _inst_cpu_limit: "{{ _neko_inst_item.value.cpu_limit | default(neko_default_cpu_limit) }}"
+    _inst_memory_limit: "{{ _neko_inst_item.value.memory_limit | default(neko_default_memory_limit) }}"
+    _inst_restart: "{{ _neko_inst_item.value.restart_policy | default(neko_default_restart_policy) }}"
+    _inst_data_dir: "{{ neko_data_dir }}/{{ _neko_inst_item.key }}"
+    _inst_container: "neko-{{ _neko_inst_item.key }}"
+
+- name: "{{ _inst_name }} | Ensure instance data directories exist"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ _inst_data_dir }}"
+    - "{{ _inst_data_dir }}/cache"
+    - "{{ _inst_data_dir }}/config"
+    - "{{ _inst_data_dir }}/logs"
+  ignore_errors: true
+
+- name: "{{ _inst_name }} | Render docker-compose for instance"
+  ansible.builtin.template:
+    src: docker-compose-instance.yml.j2
+    dest: "{{ _inst_data_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  register: _inst_compose_rendered
+  ignore_errors: true
+
+- name: "{{ _inst_name }} | Deploy container"
+  ansible.builtin.shell: |
+    docker compose -f {{ _inst_data_dir }}/docker-compose.yml up -d \
+      {{ '--force-recreate' if (_inst_compose_rendered.changed or neko_image_pulled.changed) else '' }}
+  become: true
+  register: _inst_deploy_result
+  changed_when: _inst_compose_rendered.changed or neko_image_pulled.changed
+  ignore_errors: true
+
+- name: "{{ _inst_name }} | Log deploy failure (non-blocking)"
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: neko instance '{{ _inst_name }}' failed to start.
+      Error: {{ _inst_deploy_result.stderr | default('unknown') }}
+      Other instances are unaffected.
+  when: _inst_deploy_result.failed | default(false)
+
+- name: "{{ _inst_name }} | Wait for container to be healthy (non-blocking on failure)"
+  ansible.builtin.shell: |
+    for i in $(seq 1 12); do
+      status=$(docker inspect --format="{{ '{{' }}.State.Health.Status{{ '}}' }}" neko-{{ _inst_name }} 2>/dev/null || echo "missing")
+      if [ "$status" = "healthy" ]; then
+        echo "healthy"
+        exit 0
+      fi
+      sleep 5
+    done
+    echo "not_healthy"
+  register: _inst_health
+  changed_when: false
+  ignore_errors: true
+  when: not (_inst_deploy_result.failed | default(false))
+
+- name: "{{ _inst_name }} | Warn on unhealthy (non-blocking)"
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: neko instance '{{ _inst_name }}' did not reach healthy state.
+      Check: docker logs neko-{{ _inst_name }}
+      Other instances are unaffected.
+  when:
+    - not (_inst_deploy_result.failed | default(false))
+    - _inst_health.stdout | default('') != 'healthy'

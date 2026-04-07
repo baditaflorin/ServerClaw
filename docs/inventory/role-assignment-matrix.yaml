@@ -1,0 +1,561 @@
+---
+# WS-0215: Role Assignment Matrix
+# Current VM role assignments for production and staging environments
+# Source: docs/inventory/role-assignment-matrix.yaml
+# Version: 1.0
+# Updated: 2026-04-07
+# Note: This document describes the current state. Role assignments are
+#       authoritative in the role-assignment-matrix.yaml; inventory/hosts.yml
+#       lists IP addresses and connectivity.
+
+## ==============================================================================
+## PRODUCTION TOPOLOGY
+## ==============================================================================
+
+production:
+  metadata:
+    environment: production
+    total_nodes: 17
+    total_roles: 8
+    multi_role_nodes: 0
+    last_updated: "2026-04-07"
+    status: "Fully segregated; every role has dedicated node(s)"
+
+  role_assignments:
+
+    # ========================================================================
+    # BOOTSTRAP
+    # ========================================================================
+    bootstrap:
+      count: 1
+      capacity_model: "Not scaling; single hypervisor per deployment"
+      nodes:
+        - name: proxmox_florin
+          ip_address: "10.10.10.1 (or via Tailscale)"
+          primary_role: bootstrap
+          secondary_roles: []
+          description: "Debian 13 + Proxmox VE 9.x hypervisor"
+          container_runtime: "N/A (host hypervisor)"
+          observability_integration: "Prometheus node exporter optional"
+          backup_status: "Storage backend only; VM snapshots via backup-lv3"
+          technical_debt: []
+
+    # ========================================================================
+    # CONTROL
+    # ========================================================================
+    control:
+      count: 1
+      capacity_model: "Single primary; HA replicas possible but not currently deployed"
+      nodes:
+        - name: runtime-control-lv3
+          ip_address: 10.10.10.92
+          primary_role: control
+          secondary_roles: []
+          description: "Orchestration, API gateway, control-plane services"
+          container_runtime: Docker
+          services_deployed:
+            - api_gateway: "Public edge API"
+            - agent_tools: "Automated task execution"
+            - service_mesh_control: "Optional, for advanced routing"
+          observability_integration: "Prometheus, Loki, OpenTelemetry"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+    # ========================================================================
+    # STATE (Multi-node topology)
+    # ========================================================================
+    state:
+      count: 4
+      capacity_model: "Primary + replicas for HA; split by concern (transaction vs. analytics)"
+      nodes:
+        - name: postgres-lv3
+          ip_address: 10.10.10.50
+          primary_role: state
+          secondary_roles: []
+          description: "Primary PostgreSQL database (transactions, OLTP)"
+          database_engine: PostgreSQL 15
+          storage_type: LVM (10.10.10.50)
+          replication_mode: "Async replication to postgres-replica-lv3"
+          observability_integration: "PostgreSQL exporter, WAL archiving"
+          backup_status: "WAL archived to backup-lv3; daily snapshots"
+          technical_debt: []
+
+        - name: postgres-replica-lv3
+          ip_address: 10.10.10.51
+          primary_role: state
+          secondary_roles: []
+          description: "Async read replica for transaction database"
+          database_engine: PostgreSQL 15
+          storage_type: LVM (10.10.10.51)
+          replication_mode: "Streaming replication from postgres-lv3"
+          observability_integration: "PostgreSQL exporter, lag monitoring"
+          backup_status: "Replicated only; no additional snapshots needed"
+          technical_debt: []
+
+        - name: postgres-apps-lv3
+          ip_address: 10.10.10.52
+          primary_role: state
+          secondary_roles: []
+          description: "Application database (hosted SaaS services, OpenFGA, etc.)"
+          database_engine: PostgreSQL 15
+          storage_type: LVM (10.10.10.52)
+          replication_mode: "None (single node for app data)"
+          observability_integration: "PostgreSQL exporter"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt:
+            - issue: "No replica; RTO=restore-from-backup"
+              target_date: "2026-06-30"
+              priority: "Medium"
+
+        - name: postgres-data-lv3
+          ip_address: 10.10.10.54
+          primary_role: state
+          secondary_roles: []
+          description: "Data warehouse / analytics database (OLAP)"
+          database_engine: PostgreSQL 15
+          storage_type: LVM (10.10.10.54)
+          replication_mode: "None (analytics workload)"
+          observability_integration: "PostgreSQL exporter"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+    # ========================================================================
+    # EDGE
+    # ========================================================================
+    edge:
+      count: 1
+      capacity_model: "Single node (HA with secondary node recommended but not currently deployed)"
+      nodes:
+        - name: nginx-lv3
+          ip_address: 10.10.10.10
+          primary_role: edge
+          secondary_roles: []
+          description: "Nginx reverse proxy, ingress, TLS termination"
+          services: "HTTP/HTTPS reverse proxy, OAuth2 proxy integration"
+          observability_integration: "Nginx exporter, access logs to Loki"
+          backup_status: "Stateless; configuration managed by IaC"
+          technical_debt:
+            - issue: "Single point of ingress; secondary node recommended"
+              target_date: "2026-06-30"
+              priority: "High"
+
+    # ========================================================================
+    # WORKLOAD (Multi-node specialization)
+    # ========================================================================
+    workload:
+      count: 6
+      capacity_model: "Horizontal scaling; specialization by workload type (AI, comms, general, apps, cache)"
+      nodes:
+        - name: runtime-general-lv3
+          ip_address: 10.10.10.91
+          primary_role: workload
+          secondary_roles: []
+          description: "General-purpose workload runtime"
+          container_runtime: Docker
+          workload_specialization: "General applications (web apps, tools)"
+          observability_integration: "Prometheus, cAdvisor, OpenTelemetry"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+        - name: runtime-ai-lv3
+          ip_address: 10.10.10.90
+          primary_role: workload
+          secondary_roles: []
+          description: "AI/ML workload runtime (Ollama, LLM inference)"
+          container_runtime: Docker
+          workload_specialization: "GPU-accelerated, memory-intensive"
+          hardware_requirements: "GPU or high-memory allocation"
+          observability_integration: "Prometheus, GPU metrics, model performance"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+        - name: runtime-comms-lv3
+          ip_address: 10.10.10.21
+          primary_role: workload
+          secondary_roles: []
+          description: "Communications and messaging workload"
+          container_runtime: Docker
+          workload_specialization: "Mail platform, messaging, real-time comms"
+          observability_integration: "Prometheus, mail pipeline metrics"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+        - name: runtime-apps-lv3
+          ip_address: 10.10.10.22
+          primary_role: workload
+          secondary_roles: []
+          description: "SaaS and application workload runtime"
+          container_runtime: Docker
+          workload_specialization: "Hosted SaaS platforms (Plane, OpenFGA, etc.)"
+          observability_integration: "Prometheus, application instrumentation"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+        - name: coolify-lv3
+          ip_address: 10.10.10.70
+          primary_role: workload
+          secondary_roles: []
+          description: "Coolify control plane (PaaS platform management)"
+          container_runtime: Docker
+          workload_specialization: "Platform-as-a-Service orchestration"
+          observability_integration: "Prometheus, Coolify internal metrics"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+        - name: coolify-apps-lv3
+          ip_address: 10.10.10.71
+          primary_role: workload
+          secondary_roles: []
+          description: "Coolify application runtime (PaaS hosted apps)"
+          container_runtime: Docker
+          workload_specialization: "User-deployed Coolify applications"
+          observability_integration: "Prometheus, per-app metrics"
+          backup_status: "Backed up via backup-lv3"
+          technical_debt: []
+
+    # ========================================================================
+    # OBSERVABILITY
+    # ========================================================================
+    observability:
+      count: 1
+      capacity_model: "Single node (HA not currently deployed; data retention configurable)"
+      nodes:
+        - name: monitoring-lv3
+          ip_address: 10.10.10.40
+          primary_role: observability
+          secondary_roles: []
+          description: "Prometheus, Grafana, Loki, alerting"
+          metrics_engine: Prometheus
+          visualization: Grafana
+          log_aggregation: Loki
+          alerting_rules: "Alertmanager with Slack/email integration"
+          observability_integration: "N/A (self-observing)"
+          backup_status: "Backed up via backup-lv3; metrics not critical"
+          technical_debt:
+            - issue: "Single point of observability; HA recommended"
+              target_date: "2026-06-30"
+              priority: "Medium"
+
+    # ========================================================================
+    # RECOVERY
+    # ========================================================================
+    recovery:
+      count: 1
+      capacity_model: "Single node; may be backed by external object storage or cloud provider"
+      nodes:
+        - name: backup-lv3
+          ip_address: 10.10.10.60
+          primary_role: recovery
+          secondary_roles: []
+          description: "Bacula backup agent, WAL archiving, snapshot coordination"
+          backup_engine: Bacula
+          backup_types:
+            - "VM snapshots (LVM snapshots + qcow2)"
+            - "PostgreSQL WAL archiving"
+            - "File-level backups (application data)"
+          retention_policy: "90-day rolling window; annual archives"
+          rto_sla: "4 hours for VM restore; point-in-time to last WAL"
+          rpo_sla: "15 minutes (WAL archiving frequency)"
+          observability_integration: "Backup job status, archival metrics"
+          backup_status: "Local backups; off-site replication recommended"
+          technical_debt:
+            - issue: "No geographic redundancy; local storage only"
+              target_date: "2026-09-30"
+              priority: "High"
+
+    # ========================================================================
+    # BUILD
+    # ========================================================================
+    build:
+      count: 1
+      capacity_model: "Single shared node; may scale to parallel runners if queue depth increases"
+      nodes:
+        - name: docker-build-lv3
+          ip_address: 10.10.10.30
+          primary_role: build
+          secondary_roles: []
+          description: "Docker build agent, artifact creation, CI/CD execution"
+          ci_runner: "Woodpecker, Gitea Actions"
+          container_builder: Docker
+          artifact_registry: Harbor
+          vcs_integration: Gitea
+          observability_integration: "Build pipeline metrics, artifact size tracking"
+          backup_status: "Backed up via backup-lv3; build cache rebuild on restore"
+          technical_debt:
+            - issue: "Single build node; parallel builds queue; may need horizontal scaling"
+              target_date: "2026-08-31"
+              priority: "Medium"
+
+    # ========================================================================
+    # OPTIONAL (Non-role)
+    # ========================================================================
+    non_role_nodes:
+      count: 1
+      nodes:
+        - name: artifact-cache-lv3
+          ip_address: 10.10.10.80
+          role_category: "Cache / Accelerator (does not fit standard taxonomy)"
+          description: "Shared artifact cache, package proxy (npm, apt, etc.)"
+          reason_for_non_taxonomy: |
+            Artifact caching is a support function that operates across
+            multiple roles. Not assigned to any single role per se.
+          observability_integration: "Cache hit/miss metrics"
+          backup_status: "Backed up via backup-lv3; cache rebuild on restore"
+
+---
+
+## ==============================================================================
+## STAGING TOPOLOGY
+## ==============================================================================
+
+staging:
+  metadata:
+    environment: staging
+    total_nodes: 7
+    total_roles: 8
+    multi_role_nodes: 1
+    last_updated: "2026-04-07"
+    status: "Role collapse for cost efficiency; multiple roles per node"
+
+  role_assignments:
+
+    bootstrap:
+      count: 1
+      nodes:
+        - name: proxmox_florin
+          ip_address: "10.10.10.1 (shared with production)"
+          primary_role: bootstrap
+          note: "Single hypervisor shared between prod and staging"
+
+    control:
+      count: 0
+      note: "Staging control plane uses docker-runtime-staging-lv3 (MULTI-ROLE WAIVER)"
+
+    state:
+      count: 1
+      nodes:
+        - name: postgres-staging-lv3
+          ip_address: 10.20.10.50
+          primary_role: state
+          description: "Unified staging database (all concerns)"
+          technical_debt:
+            - issue: "No separate data warehouse; queries compete with OLTP"
+              target_date: "2026-09-30"
+              priority: "Low"
+
+    edge:
+      count: 1
+      nodes:
+        - name: nginx-staging-lv3
+          ip_address: 10.20.10.10
+          primary_role: edge
+
+    workload:
+      count: 1
+      nodes:
+        - name: docker-runtime-staging-lv3
+          ip_address: 10.20.10.20
+          primary_role: workload
+          secondary_roles:
+            - control: "Runtime-control functions (MULTI-ROLE WAIVER)"
+            - observability: "Monitoring stack (MULTI-ROLE WAIVER)"
+          description: "Unified staging workload + control + observability"
+          multi_role_waivers:
+            - id: WAIVER-STG-001
+              issued: "2026-01-15"
+              roles_combined: ["control", "observability", "workload"]
+              justification: "Staging cost reduction; non-critical environment"
+              target_separation_date: "2026-12-31"
+              ticket: "None; technical debt only"
+
+    observability:
+      count: 0
+      note: "Observability integrated into docker-runtime-staging-lv3 (MULTI-ROLE WAIVER)"
+
+    recovery:
+      count: 1
+      nodes:
+        - name: backup-staging-lv3
+          ip_address: 10.20.10.60
+          primary_role: recovery
+          description: "Staging backup agent (reduced retention, local only)"
+
+    build:
+      count: 1
+      nodes:
+        - name: docker-build-staging-lv3
+          ip_address: 10.20.10.30
+          primary_role: build
+
+---
+
+## ==============================================================================
+## TOPOLOGY SUMMARY
+## ==============================================================================
+
+summary:
+  production:
+    total_nodes: 17
+    role_distribution:
+      - role: bootstrap
+        count: 1
+        node_names: [proxmox_florin]
+      - role: control
+        count: 1
+        node_names: [runtime-control-lv3]
+      - role: state
+        count: 4
+        node_names:
+          - postgres-lv3
+          - postgres-replica-lv3
+          - postgres-apps-lv3
+          - postgres-data-lv3
+      - role: edge
+        count: 1
+        node_names: [nginx-lv3]
+      - role: workload
+        count: 6
+        node_names:
+          - runtime-general-lv3
+          - runtime-ai-lv3
+          - runtime-comms-lv3
+          - runtime-apps-lv3
+          - coolify-lv3
+          - coolify-apps-lv3
+      - role: observability
+        count: 1
+        node_names: [monitoring-lv3]
+      - role: recovery
+        count: 1
+        node_names: [backup-lv3]
+      - role: build
+        count: 1
+        node_names: [docker-build-lv3]
+    non_role_nodes: 1 (artifact-cache-lv3)
+
+  staging:
+    total_nodes: 7
+    role_distribution:
+      - role: bootstrap
+        count: 1
+        node_names: [proxmox_florin]
+      - role: control
+        count: 0
+        note: "Combined with workload in docker-runtime-staging-lv3"
+      - role: state
+        count: 1
+        node_names: [postgres-staging-lv3]
+      - role: edge
+        count: 1
+        node_names: [nginx-staging-lv3]
+      - role: workload
+        count: 1
+        node_names: [docker-runtime-staging-lv3]
+        note: "also hosts control + observability"
+      - role: observability
+        count: 0
+        note: "Combined with workload in docker-runtime-staging-lv3"
+      - role: recovery
+        count: 1
+        node_names: [backup-staging-lv3]
+      - role: build
+        count: 1
+        node_names: [docker-build-staging-lv3]
+
+---
+
+## ==============================================================================
+## IDENTIFIED TECHNICAL DEBT
+## ==============================================================================
+
+technical_debt:
+  production:
+    high_priority:
+      - id: DEBT-PROD-001
+        title: "Single point of ingress (edge role)"
+        affected_nodes: [nginx-lv3]
+        impact: "Platform unavailable if single Nginx node fails"
+        mitigation: "Deploy secondary nginx-lv3-secondary with keepalived VRRP"
+        target_date: "2026-06-30"
+        adr_reference: "ADR 0350 (Nginx fragments)"
+
+      - id: DEBT-PROD-002
+        title: "Backup storage not geographically redundant"
+        affected_nodes: [backup-lv3]
+        impact: "Total data loss if Proxmox hypervisor storage fails"
+        mitigation: "Add off-site replication to S3 or secondary site"
+        target_date: "2026-09-30"
+        adr_reference: "ADR 0216-0219 (Data replication)"
+
+    medium_priority:
+      - id: DEBT-PROD-003
+        title: "postgres-apps-lv3 has no read replica"
+        affected_nodes: [postgres-apps-lv3]
+        impact: "RTO=restore-from-backup if node fails; no read scaling"
+        mitigation: "Deploy postgres-apps-replica-lv3 with streaming replication"
+        target_date: "2026-06-30"
+
+      - id: DEBT-PROD-004
+        title: "Single build node bottleneck"
+        affected_nodes: [docker-build-lv3]
+        impact: "Parallel builds queue; CI/CD latency increases with load"
+        mitigation: "Add docker-build-lv3-secondary for workload sharing"
+        target_date: "2026-08-31"
+
+      - id: DEBT-PROD-005
+        title: "Single observability node; HA not deployed"
+        affected_nodes: [monitoring-lv3]
+        impact: "Loss of observability if node fails; alert suppression"
+        mitigation: "Deploy monitoring-lv3-secondary with Prometheus federation"
+        target_date: "2026-06-30"
+
+  staging:
+    high_priority:
+      - id: DEBT-STG-001
+        title: "Role collapse: workload + control + observability"
+        affected_nodes: [docker-runtime-staging-lv3]
+        impact: "Difficult to isolate failure domains; capacity planning unclear"
+        mitigation: "Separate roles per node once staging scaling increases"
+        target_date: "2026-12-31"
+        justification: "Acceptable for non-production cost optimization"
+
+---
+
+## ==============================================================================
+## CROSSCUTTING ASSIGNMENTS
+## ==============================================================================
+
+## The following nodes/services span multiple role boundaries and are tracked
+## separately from primary role assignment.
+
+cross_cutting:
+  shared_services:
+    - service: artifact-cache-lv3
+      reason: "Serves multiple roles (build, workload, edge)"
+      allocation_model: "Shared cache pool; not assigned to any single role"
+
+  multi_role_waivers:
+    - id: WAIVER-STG-001
+      environment: staging
+      roles: [control, observability, workload]
+      node: docker-runtime-staging-lv3
+      issued_date: "2026-01-15"
+      target_date: "2026-12-31"
+      justification: "Non-critical staging environment; cost optimization"
+
+---
+
+## ==============================================================================
+## VERSION HISTORY
+## ==============================================================================
+
+versions:
+  - version: "1.0"
+    date: "2026-04-07"
+    author: "WS-0215 Implementation"
+    summary: "Initial role assignment matrix for production and staging"
+    changes:
+      - "Mapped all 17 production VMs to roles"
+      - "Documented 7 staging VMs with role collapse waivers"
+      - "Identified 10 items of technical debt"
+      - "Established baseline for future separation and HA planning"

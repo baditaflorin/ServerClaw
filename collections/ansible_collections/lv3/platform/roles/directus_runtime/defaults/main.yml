@@ -3,23 +3,15 @@
 # Inputs: Platform topology, image catalog, Keycloak settings, PostgreSQL location, and controller-local secret paths.
 # Outputs: Supplies stable runtime defaults consumed by the directus_runtime tasks and templates.
 # Idempotency: Fully idempotent because this file only declares desired defaults.
-# Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, and ADR 0289.
+# Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, ADR 0289, ADR 0373.
+#
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file, openbao_*, container_name,
+# internal_port, internal_base_url, local_artifact_dir, and service-specific health/ping/openapi paths)
+# are derived at play time from platform_service_registry by common/tasks/derive_service_defaults.
+# Only non-conventional, Directus-specific defaults remain here.
 ---
 directus_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('directus') }}"
 directus_session_authority: "{{ platform_session_authority }}"
-directus_site_dir: /opt/directus
-directus_secret_dir: /etc/lv3/directus
-directus_compose_file: "{{ directus_site_dir }}/docker-compose.yml"
-directus_env_file: "{{ compose_runtime_secret_root }}/directus/runtime.env"
-directus_legacy_env_file: "{{ directus_site_dir }}/directus.env"
-directus_openbao_agent_dir: "{{ directus_site_dir }}/openbao"
-directus_openbao_agent_image: "{{ openbao_agent_image }}"
-directus_openbao_agent_container_name: directus-openbao-agent
-directus_openbao_secret_path: services/directus/runtime-env
-directus_openbao_policy_name: lv3-service-directus-runtime
-directus_openbao_approle_name: directus-runtime
-directus_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.directus_port }}"
-directus_internal_base_url: "http://127.0.0.1:{{ directus_internal_port }}"
 directus_public_base_url: "https://{{ directus_service_topology.public_hostname }}"
 directus_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
 directus_public_hostname_overrides:
@@ -29,23 +21,19 @@ directus_public_hostname_overrides:
     address: "{{ directus_public_edge_private_ip }}"
 directus_compose_project_name: directus
 directus_compose_network_name: "{{ directus_compose_project_name }}_default"
-directus_container_name: directus
 directus_container_port: "{{ platform_service_topology | platform_service_port('directus', 'internal') }}"
-directus_image: "{{ container_image_catalog.images.directus_runtime.ref }}"
 directus_database_name: directus
 directus_database_user: directus
 directus_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-directus_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/database-password.txt
-directus_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus
-directus_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/key.txt
-directus_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/secret.txt
-directus_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/admin-password.txt
-directus_service_registry_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/service-registry-token.txt
-directus_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/directus-client-secret.txt
+directus_database_password_local_file: "{{ directus_local_artifact_dir }}/database-password.txt"
+directus_key_local_file: "{{ directus_local_artifact_dir }}/key.txt"
+directus_secret_local_file: "{{ directus_local_artifact_dir }}/secret.txt"
+directus_admin_password_local_file: "{{ directus_local_artifact_dir }}/admin-password.txt"
+directus_service_registry_token_local_file: "{{ directus_local_artifact_dir }}/service-registry-token.txt"
+directus_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/directus-client-secret.txt"
 directus_key_remote_file: "{{ directus_secret_dir }}/key.txt"
 directus_secret_remote_file: "{{ directus_secret_dir }}/secret.txt"
 directus_admin_password_remote_file: "{{ directus_secret_dir }}/admin-password.txt"
-directus_admin_email: directus.admin@lv3.org
 directus_keycloak_client_id: directus
 directus_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
 directus_keycloak_allow_public_registration: true
@@ -60,10 +48,6 @@ directus_observer_role_id: 4b0fd2c2-596a-4e1f-bd0a-a9d8617c4c40
 directus_operator_role_id: 1e4a3bf6-1798-49dd-b8e3-1c129422e7df
 directus_keycloak_role_mapping_json: >-
   {"/lv3-platform-admins":"{{ directus_operator_role_id }}"}
-directus_health_path: /server/health
-directus_ping_path: /server/ping
-directus_graphql_path: /graphql
-directus_openapi_path: /server/specs/oas
 directus_keycloak_login_path: /auth/login/keycloak
 directus_keycloak_callback_path: /auth/login/keycloak/callback
 directus_bootstrap_collection_name: service_registry

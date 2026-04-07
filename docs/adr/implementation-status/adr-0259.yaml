@@ -1,0 +1,64 @@
+adr_number: 0259
+title: n8n As The External App Connector Fabric For ServerClaw
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:f3da817dd
+  evidence: f3da817dd [docs] Record ADR 0259 validation-path results
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:56.803493'
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:28cb4eede
+  evidence: 28cb4eede [live-apply] Record ADR 0259 mainline verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:56.803551'
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:c54fe1c57
+  evidence: c54fe1c57 [release] Cut 0.177.79 for ADR 0259
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:56.803597'
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:efc99eb9e
+  evidence: efc99eb9e [merge] Integrate ADR 0259 into current mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:56.803607'
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:e60802d6e
+  evidence: e60802d6e [adr-0259] Refresh live apply evidence and repo guards
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:56.803621'
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:948ef7ba2
+  evidence: 948ef7ba2 [adr-0259] Record n8n live apply evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:56.803633'
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:968c3823b
+  evidence: 968c3823b [adr-0259] Harden n8n live apply recovery
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:56.803645'
+- marker_type: git-commit
+  adr_number: 0259
+  location: git:732bf5c99
+  evidence: 732bf5c99 [adr-0259] Define n8n as the ServerClaw connector fabric
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:56.803659'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8
+
+  Implemented On: 2026-03-29'

@@ -1,30 +1,15 @@
+{% from 'compose_macros.j2' import openbao_sidecar %}
 services:
-  openbao-agent:
-    image: {{ platform_context_openbao_agent_image }}
-    container_name: {{ platform_context_openbao_agent_container_name }}
-    user: "0:0"
-    environment:
-      BAO_SKIP_DROP_ROOT: "true"
-    command:
-      - agent
-      - -config=/openbao-agent/agent.hcl
-    network_mode: host
-    restart: unless-stopped
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - test -s {{ platform_context_env_file }}
-      interval: 10s
-      timeout: 3s
-      retries: 12
-    volumes:
-      - {{ platform_context_openbao_agent_dir }}:/openbao-agent:ro
-      - {{ platform_context_env_file | dirname }}:{{ platform_context_env_file | dirname }}
+{{ openbao_sidecar("platform_context") }}
 
   qdrant:
     image: {{ platform_context_qdrant_image }}
     container_name: qdrant-platform-context
     restart: unless-stopped
+{% if platform_context_qdrant_host_port | default(0) | int > 0 %}
+    ports:
+      - "127.0.0.1:{{ platform_context_qdrant_host_port }}:6333"
+{% endif %}
     volumes:
       - {{ platform_context_data_dir }}:/qdrant/storage
 

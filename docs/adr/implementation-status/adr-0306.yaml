@@ -1,0 +1,127 @@
+adr_number: '0306'
+title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:97f058022
+  evidence: 97f058022 [adr-0306] Record exact-head verification and receipt truth
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:18.496358'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:56fd6422c
+  evidence: 56fd6422c [adr-0306] Cut 0.177.119 mainline integration candidate
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:18.496416'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:3f97ba8ad
+  evidence: 3f97ba8ad [adr-0306] Finalize live apply evidence and truth
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:18.496446'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:87118c5fa
+  evidence: 87118c5fa [checkov] Recut ADR 0306 on 0.177.115
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.496450'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:cc7d9f0d6
+  evidence: cc7d9f0d6 [checkov] Add ADR 0306 IaC policy gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.496460'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:d34415ee4
+  evidence: d34415ee4 [adr-0306] Reconcile mainline truth on latest origin/main
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:18.497015'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:7fb2a0973
+  evidence: 7fb2a0973 [adr-0306] Finalize live apply evidence and truth
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:18.497041'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:d67b06f5f
+  evidence: d67b06f5f [checkov] Recut ADR 0306 on 0.177.115
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497044'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:1543c9dc2
+  evidence: 1543c9dc2 [checkov] Add ADR 0306 IaC policy gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497059'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:8d17ace04
+  evidence: 8d17ace04 ADR 0306 exact-main snapshot
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497157'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:ef2803b38
+  evidence: ef2803b38 [checkov] Recut ADR 0306 on 0.177.115
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497210'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:4f459c86c
+  evidence: 4f459c86c [checkov] Add ADR 0306 IaC policy gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497261'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:af164e8fd
+  evidence: af164e8fd [checkov] Prepare ADR 0306 mainline candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497362'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:229cf0f32
+  evidence: 229cf0f32 [checkov] Add ADR 0306 IaC policy gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497425'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:e55b14e9d
+  evidence: e55b14e9d [checkov] Add ADR 0306 IaC policy gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:18.497459'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:81553c9e8
+  evidence: 81553c9e8 Regenerate ADR index, canonical truth, and stale diagrams after
+    ADRs 0297-0306
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:18.512804'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:fbae3ab05
+  evidence: 'fbae3ab05 Add ADRs 0297-0306: automation, security scanning, and error-reduction
+    toolchain'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:18.512848'
+- marker_type: git-commit
+  adr_number: '0306'
+  location: git:ff5582780
+  evidence: 'ff5582780 Add ADRs 0297-0306: automation, security scanning, and error-reduction
+    toolchain'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:18.512861'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 18
+
+  Breakdown: git-commit=18
+
+  Implemented On: 2026-03-31'

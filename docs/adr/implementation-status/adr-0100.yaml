@@ -1,0 +1,22 @@
+adr_number: '0100'
+title: Formal RTO/RPO Targets and Disaster Recovery Playbook
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0100'
+  location: git:ebb0e7d2b
+  evidence: ebb0e7d2b Implement ADR 0100 disaster recovery playbook
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.854329'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-03-23'

@@ -1,0 +1,160 @@
+adr_number: '0224'
+title: Server-Resident Operations As The Default Control Model
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:ddd21d61b
+  evidence: ddd21d61b [release] Cut 0.177.67 for ADR 0224
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.885472'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:0d2a52c35
+  evidence: 0d2a52c35 [merge] Integrate ws-0224 on latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.885512'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:fcef1112a
+  evidence: fcef1112a [build] Refresh mainline platform manifest for ADR 0224
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.885526'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:e9cf670e4
+  evidence: e9cf670e4 [build] Refresh ws-0224 platform manifest
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.885531'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:9fa41bada
+  evidence: 9fa41bada [docs] Repair ws-0224 mainline gate contracts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.885541'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:ec31b1fde
+  evidence: ec31b1fde [docs] Repair ws-0224 ownership contract
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.885547'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:6bf4805ba
+  evidence: 6bf4805ba [release] Cut 0.177.66 for ADR 0224
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.885578'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:19b891760
+  evidence: 19b891760 [merge] Sync ws-0224 with latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.885598'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:7d11585b8
+  evidence: 7d11585b8 [ops] Record ws-0224 remote gate bypass
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.886414'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:d789af2d1
+  evidence: d789af2d1 [ops] Record ws-0224 gate bypass
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.886452'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:86b95240c
+  evidence: 86b95240c [docs] Finalize ADR 0224 exact-main evidence for 0.177.52
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886459'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:14143f58d
+  evidence: 14143f58d [release] Recut ADR 0224 and ADR 0226 on top of 0.177.51
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886471'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:12d3f738e
+  evidence: 12d3f738e Merge remote-tracking branch 'origin/main' into codex/ws-0224-live-apply-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.886486'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:c2c8ab594
+  evidence: c2c8ab594 [meta] Refresh ADR index for 0224 and 0226
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.886492'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:faa5ad953
+  evidence: faa5ad953 [docs] Finalize ADR 0224 exact-main evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886504'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:c11de34d3
+  evidence: c11de34d3 [release] Recut ADR 0224 and ADR 0226 on top of 0.177.49
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886534'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:ca968fbba
+  evidence: ca968fbba Merge remote-tracking branch 'origin/main' into codex/ws-0224-live-apply-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:40.886572'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:5e19c53a3
+  evidence: 5e19c53a3 [docs] Record ADR 0224 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886575'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:7b4462fe1
+  evidence: 7b4462fe1 [meta] Keep ADR 0224 branch active through validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886621'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:385566381
+  evidence: 385566381 [release] Cut ADR 0224 and ADR 0226 integration candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886632'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:f21545f3f
+  evidence: f21545f3f [merge] Refresh ADR 0224 branch on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886677'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:4058d34f0
+  evidence: 4058d34f0 [meta] Refresh ADR 0224 generated surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886680'
+- marker_type: git-commit
+  adr_number: '0224'
+  location: git:35e9b5cff
+  evidence: 35e9b5cff [workstream] Register ADR 0224 live-apply integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:40.886703'
+- marker_type: playbook
+  adr_number: '0224'
+  location: playbooks/proxmox-install.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:40.931801'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 24
+
+  Breakdown: git-commit=23, playbook=1
+
+  Implemented On: 2026-03-28'

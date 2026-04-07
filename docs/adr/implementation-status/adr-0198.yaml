@@ -1,0 +1,113 @@
+adr_number: 0198
+title: Qdrant Vector Search for Semantic Platform RAG
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:5f587cec8
+  evidence: 5f587cec8 [meta] Refresh subdomain exposure registry for ADR 0198 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682294'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:8699b5dd4
+  evidence: 8699b5dd4 [meta] Refresh platform manifest for ADR 0198 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682321'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:e8c3c0f1f
+  evidence: e8c3c0f1f [release] Refresh ADR 0198 mainline live apply truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682325'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:4e492732a
+  evidence: 4e492732a [release] Record ADR 0198 mainline live apply truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682328'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:583383e0c
+  evidence: 583383e0c [meta] Sync 0.177.24 canonical truth before ADR 0198 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682332'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:4500cedaa
+  evidence: 4500cedaa [release] Cut 0.177.24 for ADR 0198
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682336'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:35f1b9919
+  evidence: 35f1b9919 [release] Record ADR 0198 mainline live apply truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682343'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:327cbb311
+  evidence: 327cbb311 [meta] Sync 0.177.24 canonical truth before ADR 0198 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682371'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:9d543dfa6
+  evidence: 9d543dfa6 [release] Cut 0.177.24 for ADR 0198
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682374'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:201323698
+  evidence: 201323698 [meta] Sync 0.177.22 canonical truth before ADR 0198 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682403'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:c38e81f6f
+  evidence: c38e81f6f [release] Cut 0.177.22 for ADR 0198
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682410'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:d8d2d4131
+  evidence: d8d2d4131 [release] Integrate ADR 0198 on mainline release train
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682566'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:72dd65b2e
+  evidence: 72dd65b2e Merge ADR 0198 mainline release into codex/ws-0184-live-apply
+    before retrying ADR 0184 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682836'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:dc216bcad
+  evidence: dc216bcad [release] Merge ADR 0198 into mainline release 0.177.14
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682897'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:140920956
+  evidence: 140920956 [rag-context] Record ADR 0198 live-apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.682915'
+- marker_type: git-commit
+  adr_number: 0198
+  location: git:3546a7224
+  evidence: 3546a7224 [rag-context] Record ADR 0198 live-apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.683152'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 16
+
+  Breakdown: git-commit=16
+
+  Implemented On: 2026-03-28'

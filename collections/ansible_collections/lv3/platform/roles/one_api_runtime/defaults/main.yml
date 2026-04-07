@@ -5,27 +5,16 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0165 and ADR 0294.
 ---
-one_api_image: "{{ container_image_catalog.images.one_api_runtime.ref }}"
-one_api_container_name: one-api
-one_api_site_dir: /opt/one-api
-one_api_secret_dir: /etc/lv3/one-api
-one_api_compose_file: "{{ one_api_site_dir }}/docker-compose.yml"
-one_api_env_file: "{{ compose_runtime_secret_root }}/one-api/runtime.env"
-one_api_legacy_env_file: "{{ one_api_site_dir }}/one-api.env"
-one_api_openbao_agent_dir: "{{ one_api_site_dir }}/openbao"
-one_api_openbao_agent_image: "{{ openbao_agent_image }}"
-one_api_openbao_agent_container_name: one-api-openbao-agent
-one_api_openbao_secret_path: services/one-api/runtime-env
-one_api_openbao_policy_name: lv3-service-one-api-runtime
-one_api_openbao_approle_name: one-api-runtime
-one_api_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 one_api_database_name: oneapi
 one_api_database_user: oneapi
 one_api_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-one_api_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/database-password.txt
-one_api_session_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/session-secret.txt
-one_api_root_access_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-access-token.txt
-one_api_root_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-password.txt
+one_api_database_password_local_file: "{{ repo_shared_local_root }}/one-api/database-password.txt"
+one_api_session_secret_local_file: "{{ repo_shared_local_root }}/one-api/session-secret.txt"
+one_api_root_access_token_local_file: "{{ repo_shared_local_root }}/one-api/root-access-token.txt"
+one_api_root_password_local_file: "{{ repo_shared_local_root }}/one-api/root-password.txt"
 one_api_internal_http_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.one_api_port }}"
 one_api_controller_url: >-
   http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{

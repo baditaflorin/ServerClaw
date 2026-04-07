@@ -21,15 +21,29 @@ entries:
       - 'inventory/group_vars/all.yml: Common variables'
     schema_hint: "services:\n  - service: service_name\n    vm: vm_name\n    image:
       image:version\n    port: port_number\n"
+  config/integrations/:
+    purpose: ADR 0353 service integration contracts — canonical declarations of every cross-service dependency (postgres, s3, secrets, oidc, smtp, nats)
+    owner: human
+    format: "YAML — one file per consumer/provider pair: <consumer>--<provider>.yaml"
+    use_for: Pre-flight validation, impact analysis, dead-integration detection; run scripts/validate_integrations.py before changing any service port or credential
+    update_when: Adding a new service integration or changing connection details / secrets paths
+    update_by: Agent or human implementing the consuming role
+    validation: python3 scripts/validate_integrations.py --check-dead
+    schema_hint: "contract_id: consumer--provider\nconsumer: role_name\nprovider: role_name\nintegration_type: postgres|s3|secrets|oidc|smtp|nats|redis|http\n"
+    related_files:
+      - 'scripts/validate_integrations.py: Validates all contracts and detects dead integrations'
+      - 'docs/adr/0353-service-integration-contract-registry.md: ADR governing this pattern'
   receipts/live-applies/:
-    purpose: Operational audit trail of successful live deployments
+    purpose: Operational audit trail of successful live deployments; see also WorkstreamApplyReceipts (platform/workstream_receipts.py) for in-progress state tracking (ADR 0357)
     owner: automation
-    format: "JSON — timestamp, agent, ADR reference, changes, verification"
-    use_for: Understanding what changed when and confirming deploys succeeded
+    format: "JSON/YAML — timestamp, agent, ADR reference, changes, verification; workstream receipts use state machine: pending→in_progress→completed/failed/partial"
+    use_for: Understanding what changed when and confirming deploys succeeded; use platform.workstream_receipts.WorkstreamApplyReceipts to guard against duplicate applies
     update_when: After every live-apply run
     update_by: Deployment automation (Ansible/Windmill) or agent
     validation: Manual review
     naming_convention: YYYY-MM-DD-adr-XXXX-description-live-apply.json
+    related_files:
+      - 'platform/workstream_receipts.py: ADR 0357 state machine for in-progress tracking'
   receipts/sast/:
     purpose: Semgrep SARIF receipts emitted by repo validation runs
     owner: automation

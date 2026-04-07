@@ -1,7 +1,7 @@
 # ADR 0119: Budgeted Workflow Scheduler
 
 - Status: Accepted
-- Implementation Status: Live applied
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.118.0
 - Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-26

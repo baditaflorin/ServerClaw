@@ -12,6 +12,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_list, require_mapping, require_str
+
 from controller_automation_toolkit import emit_cli_error, load_json
 from environment_catalog import environment_choices, primary_environment
 
@@ -24,30 +29,6 @@ SCHEMA_PATH = REPO_ROOT / "docs" / "schema" / "stage-smoke-suites.schema.json"
 SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
 DEFAULT_REPORT_DIR = ".local/stage-smoke-suites"
 ALLOWED_RUNNERS = {"integration_suite"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
 
 
 def require_string_list(value: Any, path: str) -> list[str]:

@@ -1,11 +1,13 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # repowise_runtime — semantic code search for the platform git repo
 
 # Deployment paths
 repowise_base_dir: /opt/repowise
 repowise_service_dir: "{{ repowise_base_dir }}/service"
 repowise_repo_dir: "{{ repowise_base_dir }}/repo"
-repowise_data_dir: "{{ repowise_base_dir }}/data"
 
 # Git repo to index
 repowise_git_repo: "http://{{ gitea_ops_user | default('ops') }}:{{ gitea_ops_token }}@10.10.10.20:3003/ops/proxmox_florin_server.git"
@@ -13,7 +15,6 @@ repowise_git_branch: main
 
 # Service networking
 repowise_port: 7070
-repowise_container_name: repowise
 
 # Embedding (reuse existing Ollama)
 repowise_ollama_url: "http://{{ ansible_default_ipv4.address }}:11434"

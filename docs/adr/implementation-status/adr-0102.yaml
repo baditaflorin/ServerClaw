@@ -1,0 +1,76 @@
+adr_number: '0102'
+title: Security Posture Reporting and Benchmark Drift
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:4fac4ed1c
+  evidence: 4fac4ed1c Record ADR 0102 main push gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.747077'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:15fd2d68a
+  evidence: 15fd2d68a Release 0.175.1 for ADR 0102 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.747106'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:6b7a3091f
+  evidence: 6b7a3091f Integrate ADR 0102 live verification on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.747110'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:2cfd6de7f
+  evidence: 2cfd6de7f Record ADR 0102 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.747113'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:967cec282
+  evidence: 967cec282 Record ws-0102 gate bypass receipt
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:47.747241'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:ad2421ff5
+  evidence: ad2421ff5 Record ADR 0102 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.747255'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:a069c1f09
+  evidence: a069c1f09 Merge latest main into ADR 0102 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.749250'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:b48739183
+  evidence: b48739183 Integrate ADR 0102 security posture reporting
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.749257'
+- marker_type: git-commit
+  adr_number: '0102'
+  location: git:16e1d7b68
+  evidence: 16e1d7b68 Implement ADR 0102 security posture reporting
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.749288'
+- marker_type: config-file
+  adr_number: '0102'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:47.954498'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=9, config-file=1
+
+  Implemented On: 2026-03-26'

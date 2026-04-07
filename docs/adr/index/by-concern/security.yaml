@@ -6,15 +6,15 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: security
-total_adrs: 29
+total_adrs: 32
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: security
     keywords:
@@ -65,7 +65,7 @@ adrs:
   - adr: '0047'
     title: Short-Lived Credentials And Internal mTLS
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: security
     keywords:
@@ -154,7 +154,7 @@ adrs:
   - adr: '0102'
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: security
     keywords:
@@ -481,8 +481,8 @@ adrs:
     implemented_on: '2026-04-03'
   - adr: 0348
     title: Per-Service LLM Context File (service.llm.yaml)
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -501,8 +501,8 @@ adrs:
     path: docs/adr/0348-per-service-llm-context-file.md
   - adr: '0352'
     title: Token-Budgeted Agent Onboarding Packs
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -552,3 +552,56 @@ adrs:
     summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
+  - adr: '0362'
+    title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - agents
+      - tools
+      - api
+      - governance
+      - credentials
+      - pattern
+      - agent
+      - service
+      - gateway
+      - governed
+    summary: All agent-callable service tools discover credentials from the .local/
+    filename: 0362-agent-service-api-gateway-pattern.md
+    path: docs/adr/0362-agent-service-api-gateway-pattern.md
+    implemented_in_repo_version: 0.178.19
+    implemented_on: '2026-04-06'
+  - adr: '0375'
+    title: Certificate Validation And Concordance Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - certificate
+      - validation
+      - concordance
+      - enforcement
+    summary: 'We will implement certificate validation and concordance enforcement that:'
+    filename: 0375-certificate-validation-and-concordance-enforcement.md
+    path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+  - adr: '0376'
+    title: Credential Isolation and Agent Safety for .local/ Secrets
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - credential
+      - isolation
+      - agent
+      - safety
+      - local
+      - secrets
+    summary: Add an explicit entry for the .local symlink (without trailing slash) to
+    filename: 0376-credential-isolation-and-agent-safety.md
+    path: docs/adr/0376-credential-isolation-and-agent-safety.md
+    implemented_on: '2026-04-06'

@@ -1,0 +1,46 @@
+adr_number: 0093
+title: Interactive Ops Portal with Live Actions
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0093
+  location: git:a42e9ec6a
+  evidence: a42e9ec6a Fix ADR 0093 live receipt provenance
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:44.005228'
+- marker_type: git-commit
+  adr_number: 0093
+  location: git:8d9869b88
+  evidence: 8d9869b88 Finalize ADR 0093 live apply and cut 0.114.1
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:44.005269'
+- marker_type: git-commit
+  adr_number: 0093
+  location: git:d0f741c0d
+  evidence: d0f741c0d Fix ADR 0093 live receipt provenance
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:44.005273'
+- marker_type: git-commit
+  adr_number: 0093
+  location: git:b54b89452
+  evidence: b54b89452 Apply ADR 0093 interactive ops portal live
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:44.005276'
+- marker_type: git-commit
+  adr_number: 0093
+  location: git:9c8d1f8e0
+  evidence: 9c8d1f8e0 Implement ADR 0093 interactive ops portal
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:44.005597'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-24'

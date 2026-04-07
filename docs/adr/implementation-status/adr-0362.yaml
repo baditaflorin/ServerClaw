@@ -1,0 +1,49 @@
+adr_number: '0362'
+title: "Agent Service API Gateway \u2014 Governed Pattern for Internal Service Tools"
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0362'
+  location: git:e65d3e4f3
+  evidence: e65d3e4f3 [receipt] Record bypass for ADR-0362 push
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:40.843605'
+- marker_type: git-commit
+  adr_number: '0362'
+  location: git:f017a6565
+  evidence: f017a6565 [generated] Regen ADR index and platform manifest for ADR 0362
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:40.843639'
+- marker_type: git-commit
+  adr_number: '0362'
+  location: git:21a74e8f6
+  evidence: "21a74e8f6 [adr-0362] Native build server gate execution \u2014 no per-check\
+    \ Docker overhead"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:40.843645'
+- marker_type: git-commit
+  adr_number: '0362'
+  location: git:3379f01c9
+  evidence: 3379f01c9 [agents] Mark ADRs 0362 + 0363 as Implemented; commit subdomain
+    catalog updates
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:40.843733'
+- marker_type: git-commit
+  adr_number: '0362'
+  location: git:7344c109b
+  evidence: '7344c109b [agents] ADRs 0362 + 0363: Agent Service API Gateway + Plane
+    agent tools'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:40.843765'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-04-06'

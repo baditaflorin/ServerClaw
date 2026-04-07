@@ -1,0 +1,58 @@
+adr_number: '0106'
+title: Ephemeral Environment Lifecycle and Teardown Policy
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0106'
+  location: git:f426d0f59
+  evidence: f426d0f59 Release 0.175.2 for ADR 0106 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.391052'
+- marker_type: git-commit
+  adr_number: '0106'
+  location: git:05f49bc4e
+  evidence: 05f49bc4e Finalize ADR 0106 mainline integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.391088'
+- marker_type: git-commit
+  adr_number: '0106'
+  location: git:6cbda5a00
+  evidence: 6cbda5a00 Record ADR 0106 live apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.391095'
+- marker_type: git-commit
+  adr_number: '0106'
+  location: git:7d0fd032f
+  evidence: 7d0fd032f Apply ADR 0106 live Windmill reaper rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.391099'
+- marker_type: git-commit
+  adr_number: '0106'
+  location: git:d1ac6731e
+  evidence: d1ac6731e Record ADR 0106 live apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.391218'
+- marker_type: git-commit
+  adr_number: '0106'
+  location: git:b7224a113
+  evidence: b7224a113 Apply ADR 0106 live Windmill reaper rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.391221'
+- marker_type: git-commit
+  adr_number: '0106'
+  location: git:d017f476c
+  evidence: d017f476c Implement ADR 0106 ephemeral VM lifecycle policy
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:49.393501'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-26'

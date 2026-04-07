@@ -238,6 +238,12 @@ public_edge_security_headers_overrides:
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:; connect-src 'self'
       https://status.lv3.org ws://status.lv3.org wss://status.lv3.org; manifest-src 'self'
+  git.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://git.lv3.org wss://git.lv3.org; manifest-src 'self'
   uptime.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';

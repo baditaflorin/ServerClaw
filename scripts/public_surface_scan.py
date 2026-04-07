@@ -22,6 +22,10 @@ from controller_automation_toolkit import emit_cli_error, load_json, repo_path, 
 REPO_ROOT = repo_path()
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_list, require_mapping, require_str, require_string_list
 
 # controller_automation_toolkit may have imported the stdlib platform module first.
 # Drop that non-package entry so the repo's platform/ package can be imported.
@@ -62,42 +66,11 @@ class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
 def require_enum(value: Any, path: str, allowed: set[str]) -> str:
     value = require_str(value, path)
     if value not in allowed:
         raise ValueError(f"{path} must be one of {sorted(allowed)}")
     return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    result: list[str] = []
-    for index, item in enumerate(require_list(value, path)):
-        result.append(require_str(item, f"{path}[{index}]"))
-    return result
 
 
 def load_public_surface_scan_policy(path: Path = DEFAULT_POLICY_PATH) -> dict[str, Any]:

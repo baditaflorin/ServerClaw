@@ -5,7 +5,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 from typing import Any, Final
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 
@@ -34,32 +40,6 @@ HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml"
 EDGE_EXPOSURES = {"edge-published", "edge-static"}
 CLASSIFICATIONS = {"edge", "stateful", "edge_and_stateful"}
 VALIDATION_MODES = {"inactive_edge_peer", "preview_guest", "restore_preview", "warm_standby"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_enum(value: Any, path: str, allowed: set[str]) -> str:
@@ -178,7 +158,7 @@ def validate_guest_replacement_catalog(catalog: dict[str, Any]) -> None:
             VALIDATION_MODES,
         )
         require_str(policy.get("cutover_method"), f"guests.{guest_name}.cutover_method")
-        require_int(policy.get("rollback_window_minutes"), f"guests.{guest_name}.rollback_window_minutes", 15)
+        require_int(policy.get("rollback_window_minutes"), f"guests.{guest_name}.rollback_window_minutes", minimum=15)
         require_str(policy.get("rollback_method"), f"guests.{guest_name}.rollback_method")
         if policy.get("exception_rule") is not None:
             require_str(policy.get("exception_rule"), f"guests.{guest_name}.exception_rule")

@@ -33,17 +33,13 @@ if str(REPO_ROOT / "scripts") not in sys.path:
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, resolve_repo_local_path  # noqa: E402
 
+from validation_toolkit import require_mapping
+
 
 NTFY_SEQUENCE_ID_REGEX = re.compile(r"^[-_A-Za-z0-9]{1,64}$")
 NTFY_SEQUENCE_ID_INVALID_CHARS = re.compile(r"[^-_A-Za-z0-9]+")
 NTFY_SEQUENCE_ID_HASH_LEN = 12
 NTFY_SEQUENCE_ID_FALLBACK_PREFIX = "seq"
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
 
 
 def require_string(value: Any, path: str, *, allow_empty: bool = False) -> str:

@@ -3,6 +3,7 @@
 - Status: Accepted
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Scoping Note (2026-04-06): Implement as thin wrapper on existing ADR 0153 lock registry — map file domains to lock keys (e.g. file:vm:101:compose:keycloak). ~50 lines of Python extending platform/locking/registry.py, not a new system.
 - Tags: agent-coordination, locking, atomicity, nginx, docker-compose, infrastructure
 
 ## Context

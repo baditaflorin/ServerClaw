@@ -1,0 +1,40 @@
+adr_number: 0339
+title: Reference Deployment Samples And Replaceable Provider Profiles
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0339
+  location: git:8cdffd437
+  evidence: 8cdffd437 [adr-0339] Record exact-main validation evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:32.468461'
+- marker_type: git-commit
+  adr_number: 0339
+  location: git:e5dfc5f2a
+  evidence: e5dfc5f2a [adr-0339] Integrate exact-main 0.178.4 release closeout
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:32.468492'
+- marker_type: git-commit
+  adr_number: 0339
+  location: git:22b6c9a2f
+  evidence: 22b6c9a2f [adr-0339] Record branch-local live apply receipt
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:32.468502'
+- marker_type: git-commit
+  adr_number: 0339
+  location: git:44616dedf
+  evidence: 44616dedf [adr-0339] Add reference deployment samples
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:32.468507'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-04-04'

@@ -1,0 +1,169 @@
+# Purpose: Pull images, recover Docker networking if broken, start the compose stack with drift detection, and optionally force-recreate.
+# Use case: Called by runtime roles to handle phases 9-11 of the service lifecycle (pull, NAT recovery, compose up).
+# Inputs:
+#   common_docker_compose_converge_compose_file (str, required): Path to the docker-compose.yml file.
+#   common_docker_compose_converge_site_dir (str, required): Working directory for compose commands.
+#   common_docker_compose_converge_service_name (str, required): Human-readable service name for task labels.
+#   common_docker_compose_converge_template_results (list, optional): Registered template task results to check for changes.
+#   common_docker_compose_converge_health_port (int, optional): Port to probe before deciding on force-recreate. 0 = skip.
+#   common_docker_compose_converge_health_url (str, optional): URL to probe before deciding on force-recreate.
+#   common_docker_compose_converge_force_recreate_service (str, optional): Service name to force-recreate (defaults to service_name).
+#   common_docker_compose_converge_pull_retries (int, optional): Number of pull retries. Default: 5.
+#   common_docker_compose_converge_pull_delay (int, optional): Seconds between pull retries. Default: 5.
+# Outputs: Running compose stack. Sets common_dcc_force_recreate fact with the computed force-recreate decision.
+# Idempotency: Partially idempotent; compose up is idempotent, force-recreate is triggered by drift.
+# Dependencies: ADR 0370, ADR 0021.
+---
+- name: Validate docker_compose_converge inputs
+  ansible.builtin.assert:
+    that:
+      - common_docker_compose_converge_compose_file | length > 0
+      - common_docker_compose_converge_site_dir | length > 0
+      - common_docker_compose_converge_service_name | length > 0
+    fail_msg: "common.docker_compose_converge requires compose_file, site_dir, and service_name."
+    quiet: true
+
+- name: "Pull images for {{ common_docker_compose_converge_service_name }}"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ common_docker_compose_converge_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ common_docker_compose_converge_site_dir }}"
+  register: common_dcc_pull
+  retries: "{{ common_docker_compose_converge_pull_retries }}"
+  delay: "{{ common_docker_compose_converge_pull_delay }}"
+  until: common_dcc_pull.rc == 0
+  changed_when: >-
+    'Pulling' in common_dcc_pull.stdout
+    or 'Downloaded newer image' in common_dcc_pull.stdout
+    or 'Pull complete' in common_dcc_pull.stdout
+
+- name: "Check Docker NAT chain before {{ common_docker_compose_converge_service_name }} startup"
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: common_dcc_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the NAT chain is missing
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: common_dcc_nat_chain.rc != 0
+
+- name: Recheck Docker NAT chain after recovery
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: common_dcc_nat_chain_recheck
+  changed_when: false
+  failed_when: common_dcc_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: common_dcc_nat_chain_recheck.rc == 0
+  when: common_dcc_nat_chain.rc != 0
+
+- name: Wait for Docker daemon after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - "{{ '{{.ServerVersion}}' }}"
+  register: common_dcc_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: common_dcc_docker_info.rc == 0
+  when: common_dcc_nat_chain.rc != 0
+
+- name: Assert Docker NAT chain is present
+  ansible.builtin.assert:
+    that:
+      - common_dcc_nat_chain.rc == 0 or (common_dcc_nat_chain_recheck.rc | default(1)) == 0
+    fail_msg: "Docker is running but the NAT DOCKER chain is missing; published ports will fail."
+
+- name: "Check {{ common_docker_compose_converge_service_name }} local port before startup"
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ common_docker_compose_converge_health_port }}"
+    delay: 0
+    timeout: 1
+  register: common_dcc_port_probe
+  changed_when: false
+  failed_when: false
+  when: common_docker_compose_converge_health_port | int > 0
+
+- name: "Check {{ common_docker_compose_converge_service_name }} health before startup"
+  ansible.builtin.uri:
+    url: "{{ common_docker_compose_converge_health_url }}"
+    method: GET
+    status_code: 200
+  register: common_dcc_health_probe
+  changed_when: false
+  failed_when: false
+  when: common_docker_compose_converge_health_url | length > 0
+
+- name: Determine whether force-recreate is needed
+  ansible.builtin.set_fact:
+    common_dcc_force_recreate: >-
+      {{
+        common_dcc_nat_chain.rc != 0
+        or (common_docker_compose_converge_template_results | selectattr('changed', 'defined') | selectattr('changed') | list | length > 0)
+        or (common_dcc_pull.changed | default(false))
+        or (common_dcc_port_probe.failed | default(false))
+        or (common_dcc_health_probe.status | default(0)) != 200
+      }}
+
+- name: "Start {{ common_docker_compose_converge_service_name }} stack"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ common_docker_compose_converge_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ common_docker_compose_converge_site_dir }}"
+  register: common_dcc_up
+  changed_when: >-
+    'Creating' in common_dcc_up.stdout
+    or 'Recreating' in common_dcc_up.stdout
+    or 'Starting' in common_dcc_up.stdout
+  when: not common_dcc_force_recreate
+
+- name: "Force-recreate {{ common_docker_compose_converge_service_name }} after drift or Docker recovery"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ common_docker_compose_converge_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --no-deps
+      - "{{ common_docker_compose_converge_force_recreate_service | default(common_docker_compose_converge_service_name) }}"
+  args:
+    chdir: "{{ common_docker_compose_converge_site_dir }}"
+  register: common_dcc_force_up
+  changed_when: >-
+    'Creating' in common_dcc_force_up.stdout
+    or 'Recreating' in common_dcc_force_up.stdout
+    or 'Starting' in common_dcc_force_up.stdout
+  when: common_dcc_force_recreate

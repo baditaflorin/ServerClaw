@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the shared defaults for converging the private Gitea runtime, bootstrap artifacts, and MinIO-backed LFS contract.
 # Use case: Load whenever the gitea_runtime role renders the runtime env, compose stack, and bootstrap assets.
 #
@@ -19,25 +22,29 @@
 #   - ADR 0165: Requires metadata headers on managed playbook and role surfaces.
 #   - ADR 0233: Adds the release-bundle bootstrap contract.
 #   - ADR 0274: Moves Gitea LFS storage to the shared MinIO object layer.
-gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
-gitea_keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 gitea_site_dir: /opt/gitea
 gitea_data_dir: "{{ gitea_site_dir }}/data"
 gitea_secret_dir: /etc/lv3/gitea
 gitea_compose_file: "{{ gitea_site_dir }}/docker-compose.yml"
 gitea_env_file: "{{ compose_runtime_secret_root }}/gitea/runtime.env"
+gitea_image: docker.io/gitea/gitea:latest
+gitea_local_artifact_dir: "{{ repo_shared_local_root }}/gitea"
 gitea_legacy_env_file: "{{ gitea_site_dir }}/gitea.env"
-gitea_bootstrap_script: "{{ gitea_site_dir }}/bootstrap-gitea.sh"
+gitea_container_name: gitea
+
+# OpenBao agent configuration (from ADR 0373)
 gitea_openbao_agent_dir: "{{ gitea_site_dir }}/openbao"
 gitea_openbao_agent_image: "{{ openbao_agent_image }}"
 gitea_openbao_agent_container_name: gitea-openbao-agent
-gitea_network_name: gitea_runtime_default
-gitea_network_subnet: 172.16.240.0/24
 gitea_openbao_secret_path: services/gitea/runtime-env
 gitea_openbao_policy_name: lv3-service-gitea-runtime
 gitea_openbao_approle_name: gitea-runtime
-gitea_image: docker.io/gitea/gitea:1.25.5-rootless@sha256:fb134070432dec3fd2bde580436d1a54469e34d7e156b7fae68b6f422bbf8d59
-gitea_container_name: gitea
+
+gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
+gitea_keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
+gitea_bootstrap_script: "{{ gitea_site_dir }}/bootstrap-gitea.sh"
+gitea_network_name: gitea_runtime_default
+gitea_network_subnet: 172.16.240.0/24
 gitea_http_port: "{{ platform_service_topology | platform_service_port('gitea', 'internal') }}"
 gitea_host_proxy_port: "{{ platform_service_topology | platform_service_port('gitea', 'controller') }}"
 gitea_public_hostname: "{{ gitea_service_topology.public_hostname }}"
@@ -48,43 +55,42 @@ gitea_database_name: gitea
 gitea_database_user: gitea
 gitea_database_host: "{{ hostvars[playbook_execution_host_patterns.postgres[playbook_execution_env]].ansible_host }}"
 gitea_database_port: 5432
-gitea_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/database-password.txt
+gitea_database_password_local_file: "{{ gitea_local_artifact_dir }}/database-password.txt"
 gitea_oidc_client_id: gitea-oauth
-gitea_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/gitea-client-secret.txt
+gitea_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/gitea-client-secret.txt"
 gitea_oidc_discovery_url: "{{ gitea_keycloak_service_topology.urls.public }}/realms/lv3/.well-known/openid-configuration"
 gitea_oidc_internal_discovery_url: "{{ gitea_keycloak_service_topology.urls.internal }}/realms/lv3/.well-known/openid-configuration"
 gitea_oidc_required_claim_name: groups
 gitea_oidc_required_claim_value: lv3-platform-admins
 gitea_minio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('minio') }}"
 gitea_minio_access_key_id: gitealfs
-gitea_minio_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/minio-secret-key.txt
+gitea_minio_secret_key_local_file: "{{ gitea_local_artifact_dir }}/minio-secret-key.txt"
 gitea_minio_bucket_name: gitea-lfs
 gitea_minio_region: us-east-1
 gitea_minio_endpoint: "{{ gitea_minio_service_topology.private_ip }}:{{ hostvars['proxmox_florin'].platform_port_assignments.minio_api_port }}"
 gitea_admin_username: ops-gitea
 gitea_admin_email: "{{ proxmox_notification_email }}"
 gitea_admin_password_remote_file: "{{ gitea_secret_dir }}/admin-password"
-gitea_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-password.txt
+gitea_admin_password_local_file: "{{ gitea_local_artifact_dir }}/admin-password.txt"
 gitea_admin_token_remote_file: "{{ gitea_secret_dir }}/admin-token"
-gitea_admin_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt
+gitea_admin_token_local_file: "{{ gitea_local_artifact_dir }}/admin-token.txt"
 gitea_renovate_username: renovate-bot
 gitea_renovate_email: renovate-bot@lv3.internal
 gitea_renovate_password_remote_file: "{{ gitea_secret_dir }}/renovate-password"
-gitea_renovate_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/renovate-password.txt
+gitea_renovate_password_local_file: "{{ gitea_local_artifact_dir }}/renovate-password.txt"
 gitea_renovate_repo_permission: write
 gitea_runner_registration_token_remote_file: "{{ gitea_secret_dir }}/runner-registration-token"
-gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
+gitea_runner_registration_token_local_file: "{{ gitea_local_artifact_dir }}/runner-registration-token.txt"
 gitea_webhook_secret_remote_file: "{{ gitea_secret_dir }}/webhook-secret"
-gitea_webhook_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/webhook-secret.txt
-gitea_release_bundle_cosign_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.key
-gitea_release_bundle_cosign_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.password.txt
+gitea_webhook_secret_local_file: "{{ gitea_local_artifact_dir }}/webhook-secret.txt"
+gitea_release_bundle_cosign_private_key_local_file: "{{ gitea_local_artifact_dir }}/release-bundle-cosign.key"
+gitea_release_bundle_cosign_password_local_file: "{{ gitea_local_artifact_dir }}/release-bundle-cosign.password.txt"
 gitea_release_bundle_cosign_public_key_repo_file: "{{ playbook_dir | dirname }}/keys/gitea-release-bundle-cosign.pub"
 gitea_release_bundle_cosign_private_key_secret_name: RELEASE_BUNDLE_COSIGN_PRIVATE_KEY
 gitea_release_bundle_cosign_password_secret_name: RELEASE_BUNDLE_COSIGN_PASSWORD
 gitea_release_bundle_repo_token_secret_name: RELEASE_BUNDLE_REPO_TOKEN
-gitea_ntfy_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/gitea-actions-token.txt
+gitea_ntfy_token_local_file: "{{ repo_shared_local_root }}/ntfy/gitea-actions-token.txt"
 gitea_ntfy_token_secret_name: NTFY_TOKEN
-gitea_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea
 gitea_repo_org: ops
 gitea_repo_name: proxmox_florin_server
 gitea_prereceive_hook_template: "{{ gitea_site_dir }}/pre-receive.validation-hook"

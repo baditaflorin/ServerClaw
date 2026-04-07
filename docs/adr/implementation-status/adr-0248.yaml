@@ -1,0 +1,76 @@
+adr_number: 0248
+title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:8fd7c9fa8
+  evidence: 8fd7c9fa8 [auth] Refresh ws-0248 live-apply manifest
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.440971'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:414c0b27f
+  evidence: 414c0b27f [auth] Record ws-0248 mainline live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.441004'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:a9b0d76e9
+  evidence: a9b0d76e9 [auth] Cut ws-0248 exact-main release candidate
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.441015'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:bcfd079f6
+  evidence: bcfd079f6 Merge remote-tracking branch 'origin/main' into codex/ws-0248-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.441035'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:f145bdf08
+  evidence: f145bdf08 Merge remote-tracking branch 'origin/main' into codex/ws-0248-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.441046'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:b065f3d16
+  evidence: b065f3d16 [merge] Refresh ws-0248 branch onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.441084'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:51379d722
+  evidence: 51379d722 [auth] Fix ws-0248 branch gate blockers
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.441169'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:d8055fe52
+  evidence: d8055fe52 [auth] Record ADR 0248 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.441173'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:df1431905
+  evidence: df1431905 [auth] Fix ws-0248 branch gate blockers
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:51.441195'
+- marker_type: git-commit
+  adr_number: 0248
+  location: git:95a1e5004
+  evidence: 95a1e5004 [auth] Record ADR 0248 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.441251'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=10
+
+  Implemented On: 2026-03-29'

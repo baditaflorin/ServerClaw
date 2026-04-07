@@ -4,11 +4,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_list, require_mapping
 
 
 DEFAULT_COLLECTION = "platform-services"
@@ -37,18 +43,6 @@ PLATFORM_SERVICE_SCHEMA = {
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def require_mapping(value: Any, label: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{label} must be an object")
-    return value
-
-
-def require_list(value: Any, label: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{label} must be a list")
-    return value
 
 
 def require_string(value: Any, label: str) -> str:

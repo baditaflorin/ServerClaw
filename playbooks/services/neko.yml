@@ -1,0 +1,6 @@
+---
+# Service Playbook Wrapper: neko.yml
+# Purpose: Delegates to the main Neko convergence playbook.
+# This wrapper allows service-level orchestration and cross-service dependencies.
+
+- import_playbook: ../neko.yml

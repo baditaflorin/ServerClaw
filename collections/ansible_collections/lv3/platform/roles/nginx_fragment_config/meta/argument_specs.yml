@@ -1,0 +1,51 @@
+---
+argument_specs:
+  main:
+    short_description: Atomically manage a per-service nginx config fragment.
+    description: >-
+      Implements ADR 0350: write a named fragment to a staging path, validate
+      with nginx -t, rename atomically, then reload nginx.
+      Each service owns exactly one fragment file; concurrent writes to
+      different services are safe.
+    options:
+      nginx_fragment_service_name:
+        type: str
+        required: true
+        description: >-
+          Unique slug for this service (e.g. "keycloak", "directus").
+          Becomes the fragment filename: {{ nginx_fragment_dir }}/{{ slug }}.conf
+      nginx_fragment_content:
+        type: str
+        required: true
+        description: Full nginx server-block config to write for this service.
+      nginx_fragment_state:
+        type: str
+        required: false
+        default: present
+        choices: [present, absent]
+        description: Whether the fragment should exist or be removed.
+      nginx_fragment_dir:
+        type: str
+        required: false
+        default: /etc/nginx/fragments.d
+        description: Directory holding per-service fragment files.
+      nginx_fragment_validate:
+        type: bool
+        required: false
+        default: true
+        description: Run nginx -t to validate before activating the fragment.
+      nginx_fragment_reload:
+        type: bool
+        required: false
+        default: true
+        description: Reload nginx after activating a changed fragment.
+      nginx_fragment_nginx_binary:
+        type: str
+        required: false
+        default: nginx
+        description: Path to the nginx binary.
+      nginx_fragment_nginx_config:
+        type: str
+        required: false
+        default: /etc/nginx/nginx.conf
+        description: Path to the main nginx.conf used during validation.

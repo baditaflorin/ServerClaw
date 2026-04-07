@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: range
 label: 0100-0199
 range:
@@ -55,7 +55,7 @@ adrs:
   - adr: '0102'
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: security
     keywords:
@@ -74,7 +74,7 @@ adrs:
   - adr: '0103'
     title: Data Classification and Retention Policy
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -91,7 +91,7 @@ adrs:
   - adr: '0104'
     title: Service Dependency Graph and Failure Propagation Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -130,7 +130,7 @@ adrs:
   - adr: '0106'
     title: Ephemeral Environment Lifecycle and Teardown Policy
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -149,7 +149,7 @@ adrs:
   - adr: '0107'
     title: Platform Extension Model for Adding New Services
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -186,7 +186,7 @@ adrs:
   - adr: 0109
     title: Public Status Page
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -202,7 +202,7 @@ adrs:
   - adr: '0110'
     title: Platform Versioning, Release Notes, and Upgrade Path
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: release
     keywords:
@@ -221,7 +221,7 @@ adrs:
   - adr: '0111'
     title: End-to-End Integration Test Suite
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: testing
     keywords:
@@ -238,7 +238,7 @@ adrs:
   - adr: '0112'
     title: Deterministic Goal Compiler
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -254,7 +254,7 @@ adrs:
   - adr: '0113'
     title: World-State Materializer
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -270,7 +270,7 @@ adrs:
   - adr: '0114'
     title: Rule-Based Incident Triage Engine
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -287,7 +287,7 @@ adrs:
   - adr: '0115'
     title: Event-Sourced Mutation Ledger
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -304,7 +304,7 @@ adrs:
   - adr: '0116'
     title: Change Risk Scoring Without LLMs
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -322,7 +322,7 @@ adrs:
   - adr: '0117'
     title: Service Dependency Graph As First-Class Runtime
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -342,7 +342,7 @@ adrs:
   - adr: 0118
     title: Replayable Failure Case Library
     status: Proposed
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -357,7 +357,7 @@ adrs:
   - adr: 0119
     title: Budgeted Workflow Scheduler
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -391,7 +391,7 @@ adrs:
   - adr: '0121'
     title: Local Search and Indexing Fabric
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: documentation
     keywords:
@@ -409,7 +409,7 @@ adrs:
   - adr: '0122'
     title: Windmill Operator Access Admin Surface
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -1258,7 +1258,7 @@ adrs:
   - adr: '0166'
     title: Canonical Configuration Locations Registry
     status: Implemented
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1269,7 +1269,6 @@ adrs:
     summary: 'We will maintain a canonical configuration locations registry at .config-locations.yaml documenting:'
     filename: 0166-canonical-configuration-locations.md
     path: docs/adr/0166-canonical-configuration-locations.md
-    implemented_in_repo_version: 0.173.0
     implemented_on: '2026-03-26'
   - adr: '0166'
     title: Canonical Error Response Format and Error Code Registry

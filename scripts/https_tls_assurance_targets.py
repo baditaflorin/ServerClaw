@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 import ipaddress
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import ParseResult, urlparse, urlunparse
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_list, require_mapping, require_str
 
 from controller_automation_toolkit import load_json, repo_path
 
@@ -29,24 +35,6 @@ SPECIAL_PROBE_PATHS = {
     "backup_pbs": "/api2/json/version",
     "step_ca": "/health",
 }
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def is_https_url(url: str | None) -> bool:

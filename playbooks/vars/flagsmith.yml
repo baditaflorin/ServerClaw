@@ -1,0 +1,10 @@
+---
+service_audit_name: flagsmith
+service_dns_fqdn: flags.lv3.org
+service_postgres_role: lv3.platform.flagsmith_postgres
+service_runtime_roles:
+  - lv3.platform.docker_runtime
+  - lv3.platform.flagsmith_runtime
+service_needs_dns: true
+service_needs_postgres: true
+service_needs_nginx_edge: true

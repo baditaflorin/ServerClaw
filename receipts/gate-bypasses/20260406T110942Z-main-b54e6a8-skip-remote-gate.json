@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-06T11:09:42Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "b54e6a8f1cd44abbd315822302c75882a6c65e3b",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Remote gate timed out after 90s during ADR 0377 push",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Config and ADR-only change \u2014 no runtime code modified"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-08",
+    "remediation_ref": "retry-next-push"
+  }
+}

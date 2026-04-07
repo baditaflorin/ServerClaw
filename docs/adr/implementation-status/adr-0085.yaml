@@ -1,0 +1,28 @@
+adr_number: 0085
+title: OpenTofu IaC for VM Lifecycle Management
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0085
+  location: git:3ad32bd3a
+  evidence: 3ad32bd3a Merge ADR 0085 OpenTofu VM lifecycle
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.963890'
+- marker_type: git-commit
+  adr_number: 0085
+  location: git:87d9af6e5
+  evidence: 87d9af6e5 Implement ADR 0085 OpenTofu VM lifecycle
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:40.963920'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-03-23'

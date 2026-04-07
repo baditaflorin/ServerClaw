@@ -1,25 +1,6 @@
+{% from 'compose_macros.j2' import openbao_sidecar %}
 services:
-  openbao-agent:
-    image: {{ langfuse_openbao_agent_image }}
-    container_name: {{ langfuse_openbao_agent_container_name }}
-    user: "0:0"
-    environment:
-      BAO_SKIP_DROP_ROOT: "true"
-    command:
-      - agent
-      - -config=/openbao-agent/agent.hcl
-    network_mode: host
-    restart: unless-stopped
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - test -s {{ langfuse_env_file }}
-      interval: 10s
-      timeout: 3s
-      retries: 12
-    volumes:
-      - {{ langfuse_openbao_agent_dir }}:/openbao-agent:ro
-      - {{ langfuse_env_file | dirname }}:{{ langfuse_env_file | dirname }}
+{{ openbao_sidecar("langfuse") }}
 
   clickhouse:
     image: {{ langfuse_clickhouse_image }}

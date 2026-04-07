@@ -1,0 +1,30 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0353 role=dify_postgres
+schema_version: "1.0.0"
+contract_id: dify--postgres
+consumer: dify_runtime
+provider: postgres_vm
+integration_type: postgres
+adr: "0179"
+
+connection:
+  host_var: platform_port_assignments.postgres_host
+  port_var: platform_port_assignments.postgres_port
+  database: dify
+  user: dify
+  ssl_mode: require
+
+secrets:
+  - path: openbao/postgres/dify/password
+    env_var: DB_PASSWORD
+
+health_check:
+  query: "SELECT 1"
+  timeout_seconds: 5
+
+pre_flight:
+  - check: postgres_schema_exists
+    schema: dify
+  - check: role_exists
+    role: dify

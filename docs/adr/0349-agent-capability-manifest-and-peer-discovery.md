@@ -1,8 +1,9 @@
 # ADR 0349: Agent Capability Manifest and Peer Discovery
 
-- Status: Accepted
+- Status: Deferred
 - Implementation Status: Not Implemented
 - Date: 2026-04-05
+- Deferred: 2026-04-06 — Over-engineering for current scale (2-3 concurrent agents). File-domain locking (ADR 0347/0153) prevents write conflicts at runtime. Revisit when 5+ concurrent agents cause conflicts that locking alone cannot prevent.
 - Tags: agent-coordination, agent-discovery, capability-manifest, peer-awareness, nats
 
 ## Context

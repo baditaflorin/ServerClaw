@@ -11,6 +11,11 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Final
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
+
 from api_publication import load_api_publication_catalog
 from command_catalog import (
     ALLOWED_IDENTITY_CLASSES,
@@ -52,38 +57,6 @@ DEFAULT_PORTAINER_AUTH_FILE_PATH: Final[Path] = REPO_ROOT / ".local" / "portaine
 SUPPORTED_SCHEMA_VERSION: Final[str] = "1.0.0"
 ALLOWED_TOOL_CATEGORIES: Final[set[str]] = {"observe", "report", "execute", "approve"}
 ALLOWED_TRANSPORTS: Final[set[str]] = {"controller_local", "http", "nats", "ansible"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int | None = None) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if minimum is not None and value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def validate_json_schema_shape(
@@ -159,7 +132,7 @@ def validate_instance(instance: Any, schema: dict[str, Any], path: str) -> None:
         return
 
     if schema_type == "integer":
-        value = require_int(instance, path, schema.get("minimum"))
+        value = require_int(instance, path, minimum=schema.get("minimum"))
         if "enum" in schema and value not in schema["enum"]:
             raise ValueError(f"{path} must be one of {schema['enum']}")
         return
@@ -422,7 +395,7 @@ def tool_get_platform_status(_tool: dict[str, Any], _args: dict[str, Any]) -> di
 def tool_list_recent_receipts(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     validate_receipts()
     limit = args.get("limit", 5)
-    require_int(limit, "arguments.limit", 1)
+    require_int(limit, "arguments.limit", minimum=1)
     receipts: list[dict[str, Any]] = []
     for path in sorted(iter_receipt_paths(), reverse=True)[:limit]:
         receipt = load_receipt(path)
@@ -446,7 +419,7 @@ def tool_get_deployment_history(_tool: dict[str, Any], args: dict[str, Any]) -> 
     environment = args.get("environment")
     if environment is not None:
         environment = require_str(environment, "arguments.environment")
-    days = require_int(args.get("days", 30), "arguments.days", 1)
+    days = require_int(args.get("days", 30), "arguments.days", minimum=1)
     return query_deployment_history(service_id=service_id, environment=environment, days=days)
 
 
@@ -492,7 +465,7 @@ def tool_export_mcp_tools(registry: dict[str, Any], args: dict[str, Any]) -> dic
 
 def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     question = require_str(args.get("question"), "arguments.question")
-    top_k = require_int(args.get("top_k", 5), "arguments.top_k", 1)
+    top_k = require_int(args.get("top_k", 5), "arguments.top_k", minimum=1)
     token = read_secret_file(resolve_platform_context_token_path(), "platform-context API token")
     request = urllib.request.Request(
         require_str(tool.get("endpoint"), f"{tool['name']}.endpoint"),
@@ -525,7 +498,7 @@ def tool_browser_run_session(_tool: dict[str, Any], args: dict[str, Any]) -> dic
     timeout_seconds = require_int(
         args.get("timeout_seconds", DEFAULT_TIMEOUT_SECONDS),
         "arguments.timeout_seconds",
-        1,
+        minimum=1,
     )
     payload = dict(args)
     return run_session(base_url, payload, timeout_seconds=timeout_seconds)
@@ -637,7 +610,7 @@ def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[st
 def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     from portainer_tool import PortainerClient  # lazy import — requests not required at registry load time
     container = require_str(args.get("container"), "arguments.container")
-    tail = require_int(args.get("tail", 100), "arguments.tail", 1)
+    tail = require_int(args.get("tail", 100), "arguments.tail", minimum=1)
     client = PortainerClient(resolve_portainer_auth())
     client.login()
     logs = client.container_logs(container, tail)
@@ -714,6 +687,436 @@ def tool_dispatch_nomad_job(_tool: dict[str, Any], args: dict[str, Any]) -> dict
     }
 
 
+# ---------------------------------------------------------------------------
+# Generic service auth helper (ADR 0362)
+# ---------------------------------------------------------------------------
+
+
+def _resolve_service_auth(service_name: str) -> dict[str, Any]:
+    """Discover credentials for a named service following the ADR 0362 convention.
+
+    Precedence:
+      1. LV3_{SERVICE}_AUTH_FILE env var (absolute path to auth JSON)
+      2. .local/{service}/admin-auth.json  (structured: base_url + api_token + extras)
+      3. .local/{service}/api-token.txt    (single token; base_url from JSON if present)
+    """
+    env_var = f"LV3_{service_name.upper()}_AUTH_FILE"
+    env_override = os.environ.get(env_var)
+    if env_override:
+        auth_path = Path(env_override)
+        if not auth_path.is_file():
+            raise RuntimeError(f"{env_var} points to missing file: {auth_path}")
+        return json.loads(auth_path.read_text())
+
+    admin_auth = REPO_ROOT / ".local" / service_name / "admin-auth.json"
+    if admin_auth.is_file():
+        return json.loads(admin_auth.read_text())
+
+    token_file = REPO_ROOT / ".local" / service_name / "api-token.txt"
+    if token_file.is_file():
+        return {"api_token": token_file.read_text().strip()}
+
+    raise RuntimeError(
+        f"No credentials found for service '{service_name}'. "
+        f"Expected {admin_auth} or {token_file}, or set {env_var}."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Plane tools (ADR 0362 gateway pattern, ADR 0363)
+# ---------------------------------------------------------------------------
+
+
+def _resolve_plane_auth() -> dict[str, Any]:
+    return _resolve_service_auth("plane")
+
+
+def _plane_client():  # type: ignore[return]
+    from platform.ansible.plane import PlaneClient  # lazy import
+
+    auth = _resolve_plane_auth()
+    return PlaneClient(
+        base_url=auth["base_url"],
+        api_token=auth["api_token"],
+        verify_ssl=auth.get("verify_ssl", True),
+    ), auth
+
+
+def _resolve_plane_project(client, workspace_slug: str, identifier: str) -> str:
+    projects = client.list_projects(workspace_slug)
+    for p in projects:
+        if p.get("identifier") == identifier:
+            return p["id"]
+    raise RuntimeError(f"Plane project with identifier '{identifier}' not found")
+
+
+def _resolve_state_id(client, workspace_slug: str, project_id: str, state_name: str) -> str:
+    states = client.list_states(workspace_slug, project_id)
+    for s in states:
+        if s.get("name", "").lower() == state_name.lower():
+            return s["id"]
+    available = ", ".join(s.get("name", "") for s in states)
+    raise RuntimeError(f"Plane state '{state_name}' not found; available: {available}")
+
+
+def tool_list_plane_tasks(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    issues = client.list_issues(ws, project_id)
+    state_filter = args.get("state_name")
+    if state_filter:
+        states = client.list_states(ws, project_id)
+        state_map = {s["id"]: s.get("name", "") for s in states}
+        issues = [i for i in issues if state_map.get(i.get("state"), "").lower() == state_filter.lower()]
+    else:
+        states = client.list_states(ws, project_id)
+        state_map = {s["id"]: s.get("name", "") for s in states}
+    tasks = [
+        {
+            "id": i.get("id", ""),
+            "name": i.get("name", ""),
+            "state_name": state_map.get(i.get("state"), ""),
+            "priority": i.get("priority"),
+            "created_at": i.get("created_at", ""),
+        }
+        for i in issues
+    ]
+    return {"count": len(tasks), "project": identifier, "tasks": tasks}
+
+
+def tool_get_plane_task(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    issue_id = require_str(args.get("issue_id"), "arguments.issue_id")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    _status, issue = client._request(
+        f"/api/v1/workspaces/{ws}/projects/{project_id}/issues/{issue_id}/",
+    )
+    states = client.list_states(ws, project_id)
+    state_map = {s["id"]: s.get("name", "") for s in states}
+    issue["state_name"] = state_map.get(issue.get("state"), "")
+    return issue
+
+
+def tool_create_plane_task(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    title = require_str(args.get("title"), "arguments.title")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    payload: dict[str, Any] = {"name": title}
+    if "description_html" in args:
+        payload["description_html"] = args["description_html"]
+    if "priority" in args:
+        payload["priority"] = args["priority"]
+    state_name = args.get("state_name", "Todo")
+    payload["state"] = _resolve_state_id(client, ws, project_id, state_name)
+    if "label_names" in args:
+        existing_labels = client.list_labels(ws, project_id)
+        label_map = {lb.get("name", "").lower(): lb["id"] for lb in existing_labels}
+        label_ids = []
+        for name in args["label_names"]:
+            lid = label_map.get(name.lower())
+            if not lid:
+                new_label = client.create_label(ws, project_id, name)
+                lid = new_label["id"]
+            label_ids.append(lid)
+        payload["labels"] = label_ids
+    issue = client.create_issue(ws, project_id, payload)
+    return {
+        "id": issue.get("id", ""),
+        "name": issue.get("name", ""),
+        "state_name": state_name,
+        "project_identifier": identifier,
+    }
+
+
+def tool_update_plane_task(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    issue_id = require_str(args.get("issue_id"), "arguments.issue_id")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    payload: dict[str, Any] = {}
+    if "name" in args:
+        payload["name"] = args["name"]
+    if "description_html" in args:
+        payload["description_html"] = args["description_html"]
+    if "priority" in args:
+        payload["priority"] = args["priority"]
+    if "state_name" in args:
+        payload["state"] = _resolve_state_id(client, ws, project_id, args["state_name"])
+    if not payload:
+        raise ValueError("At least one field to update must be provided")
+    issue = client.update_issue(ws, project_id, issue_id, payload)
+    return {
+        "id": issue.get("id", ""),
+        "name": issue.get("name", ""),
+    }
+
+
+def tool_add_plane_comment(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client, auth = _plane_client()
+    ws = auth["workspace_slug"]
+    issue_id = require_str(args.get("issue_id"), "arguments.issue_id")
+    comment_html = require_str(args.get("comment_html"), "arguments.comment_html")
+    identifier = args.get("project", "AW")
+    project_id = _resolve_plane_project(client, ws, identifier)
+    comment = client.add_comment(ws, project_id, issue_id, comment_html)
+    return {"id": comment.get("id", "")}
+
+
+# ---------------------------------------------------------------------------
+# Outline tools (ADR 0362 gateway pattern, ADR 0364)
+# ---------------------------------------------------------------------------
+
+
+def _outline_client():  # type: ignore[return]
+    from outline_client import OutlineClient  # lazy import
+
+    auth = _resolve_service_auth("outline")
+    base_url = auth.get("base_url", "https://wiki.lv3.org")
+    api_token = auth.get("api_token") or auth.get("token")
+    if not api_token:
+        raise RuntimeError("Outline auth missing 'api_token' field")
+    return OutlineClient(base_url=base_url, api_token=api_token)
+
+
+def tool_list_outline_collections(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    client = _outline_client()
+    response = client.call("collections.list", {})
+    collections = [
+        {
+            "id": c.get("id", ""),
+            "name": c.get("name", ""),
+            "description": c.get("description", ""),
+            "documents_count": c.get("documentsCount", 0),
+        }
+        for c in response.get("data", [])
+    ]
+    return {"count": len(collections), "collections": collections}
+
+
+def tool_search_outline_documents(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    query = require_str(args.get("query"), "arguments.query")
+    client = _outline_client()
+    payload: dict[str, Any] = {"query": query, "limit": args.get("limit", 25)}
+    if "collection_id" in args:
+        payload["collectionId"] = args["collection_id"]
+    response = client.call("documents.search", payload)
+    results = [
+        {
+            "id": r.get("document", {}).get("id", ""),
+            "title": r.get("document", {}).get("title", ""),
+            "collection_id": r.get("document", {}).get("collectionId", ""),
+            "url": r.get("document", {}).get("url", ""),
+            "ranking": r.get("ranking"),
+        }
+        for r in response.get("data", [])
+    ]
+    return {"count": len(results), "query": query, "results": results}
+
+
+def tool_get_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    doc_id = require_str(args.get("document_id"), "arguments.document_id")
+    client = _outline_client()
+    response = client.call("documents.info", {"id": doc_id})
+    doc = response.get("data", {})
+    return {
+        "id": doc.get("id", ""),
+        "title": doc.get("title", ""),
+        "text": doc.get("text", ""),
+        "collection_id": doc.get("collectionId", ""),
+        "url": doc.get("url", ""),
+        "created_at": doc.get("createdAt", ""),
+        "updated_at": doc.get("updatedAt", ""),
+    }
+
+
+def tool_create_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    title = require_str(args.get("title"), "arguments.title")
+    collection_id = require_str(args.get("collection_id"), "arguments.collection_id")
+    client = _outline_client()
+    payload: dict[str, Any] = {
+        "title": title,
+        "collectionId": collection_id,
+        "text": args.get("text", ""),
+        "publish": args.get("publish", True),
+    }
+    if "parent_document_id" in args:
+        payload["parentDocumentId"] = args["parent_document_id"]
+    response = client.call("documents.create", payload)
+    doc = response.get("data", {})
+    return {
+        "id": doc.get("id", ""),
+        "title": doc.get("title", ""),
+        "url": doc.get("url", ""),
+        "collection_id": doc.get("collectionId", ""),
+    }
+
+
+def tool_list_outline_documents(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    collection_id = require_str(args.get("collection_id"), "arguments.collection_id")
+    client = _outline_client()
+    # Paginate through all documents in the collection
+    offset = 0
+    limit = 100
+    all_docs: list[dict[str, Any]] = []
+    while True:
+        response = client.call("documents.list", {
+            "collectionId": collection_id,
+            "limit": limit,
+            "offset": offset,
+        })
+        batch = response.get("data", [])
+        all_docs.extend(batch)
+        if len(batch) < limit:
+            break
+        offset += limit
+    return {
+        "collection_id": collection_id,
+        "count": len(all_docs),
+        "documents": [
+            {
+                k: v for k, v in {
+                    "id": d.get("id", ""),
+                    "title": d.get("title", ""),
+                    "url": d.get("url", ""),
+                    "parent_document_id": d.get("parentDocumentId"),
+                    "updated_at": d.get("updatedAt", ""),
+                }.items() if v is not None
+            }
+            for d in all_docs
+        ],
+    }
+
+
+def tool_update_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    document_id = require_str(args.get("document_id"), "arguments.document_id")
+    client = _outline_client()
+    payload: dict[str, Any] = {"id": document_id, "publish": True, "done": True}
+    if "title" in args:
+        payload["title"] = args["title"]
+    if "text" in args:
+        payload["text"] = args["text"]
+    if not any(k in payload for k in ("title", "text")):
+        raise ValueError("update-outline-document: at least one of 'title' or 'text' is required")
+    response = client.call("documents.update", payload)
+    doc = response.get("data", {})
+    return {
+        "id": doc.get("id", document_id),
+        "title": doc.get("title", ""),
+        "url": doc.get("url", ""),
+        "collection_id": doc.get("collectionId", ""),
+        "updated_at": doc.get("updatedAt", ""),
+    }
+
+
+def tool_upsert_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Create-or-update by title within a collection (idempotent).
+
+    Mirrors outline_tool.py document.publish: if a document with this title
+    already exists in the collection, update it; otherwise create it.
+    """
+    title = require_str(args.get("title"), "arguments.title")
+    collection_id = require_str(args.get("collection_id"), "arguments.collection_id")
+    text = args.get("text", "")
+    client = _outline_client()
+
+    # Find existing document by title
+    offset = 0
+    limit = 100
+    existing_id: str | None = None
+    while True:
+        response = client.call("documents.list", {
+            "collectionId": collection_id,
+            "limit": limit,
+            "offset": offset,
+        })
+        batch = response.get("data", [])
+        for d in batch:
+            if d.get("title") == title:
+                existing_id = d["id"]
+                break
+        if existing_id or len(batch) < limit:
+            break
+        offset += limit
+
+    if existing_id:
+        response = client.call("documents.update", {
+            "id": existing_id,
+            "title": title,
+            "text": text,
+            "publish": True,
+            "done": True,
+        })
+        doc = response.get("data", {})
+        return {
+            "id": doc.get("id", existing_id),
+            "title": title,
+            "url": doc.get("url", ""),
+            "collection_id": collection_id,
+            "outcome": "updated",
+        }
+    else:
+        payload: dict[str, Any] = {
+            "collectionId": collection_id,
+            "title": title,
+            "text": text,
+            "publish": True,
+        }
+        if "parent_document_id" in args:
+            payload["parentDocumentId"] = args["parent_document_id"]
+        response = client.call("documents.create", payload)
+        doc = response.get("data", {})
+        return {
+            "id": doc.get("id", ""),
+            "title": title,
+            "url": doc.get("url", ""),
+            "collection_id": collection_id,
+            "outcome": "created",
+        }
+
+
+def tool_delete_outline_document(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    document_id = require_str(args.get("document_id"), "arguments.document_id")
+    client = _outline_client()
+    client.call("documents.delete", {"id": document_id})
+    return {"deleted": True, "document_id": document_id}
+
+
+def tool_provision_outline_api_token(
+    _tool: dict[str, Any], args: dict[str, Any]
+) -> dict[str, Any]:
+    """Provision a new Outline API token via direct DB insertion.
+
+    This is the self-service credential rotation path for agents. When Outline
+    tools return 401, call this first, then retry the failed operation.
+    """
+    # Lazy import to avoid module-load side effects (subprocess calls, etc.)
+    import importlib.util
+    import sys as _sys
+
+    script_path = REPO_ROOT / "scripts" / "provision_outline_api_token.py"
+    spec = importlib.util.spec_from_file_location("provision_outline_api_token", script_path)
+    mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
+
+    name = args.get("name", "agent-automation")
+    dry_run = bool(args.get("dry_run", False))
+
+    token = mod.provision(name=name, dry_run=dry_run)
+
+    auth_file = str(REPO_ROOT / ".local" / "outline" / "admin-auth.json")
+    return {
+        "token_preview": f"{token[:20]}...{token[-4:]}",
+        "auth_file": auth_file,
+    }
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -733,6 +1136,20 @@ HANDLERS: Final[dict[str, Any]] = {
     "list_nomad_jobs": tool_list_nomad_jobs,
     "get_nomad_job_status": tool_get_nomad_job_status,
     "dispatch_nomad_job": tool_dispatch_nomad_job,
+    "list_plane_tasks": tool_list_plane_tasks,
+    "get_plane_task": tool_get_plane_task,
+    "create_plane_task": tool_create_plane_task,
+    "update_plane_task": tool_update_plane_task,
+    "add_plane_comment": tool_add_plane_comment,
+    "list_outline_collections": tool_list_outline_collections,
+    "search_outline_documents": tool_search_outline_documents,
+    "get_outline_document": tool_get_outline_document,
+    "create_outline_document": tool_create_outline_document,
+    "list_outline_documents": tool_list_outline_documents,
+    "update_outline_document": tool_update_outline_document,
+    "upsert_outline_document": tool_upsert_outline_document,
+    "delete_outline_document": tool_delete_outline_document,
+    "provision_outline_api_token": tool_provision_outline_api_token,
 }
 
 

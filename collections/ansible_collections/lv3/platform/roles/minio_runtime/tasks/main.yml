@@ -4,6 +4,14 @@
 # Outputs: Rendered compose file plus a running MinIO runtime with repo-managed users, buckets, policies, default-CORS verification inputs, and lifecycle rules.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack, local secret mirrors, and bucket contracts.
 # Dependencies: ADR 0077, ADR 0165, ADR 0274, and the docker_runtime role outputs.
+- name: Derive Minio conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: minio
+
+
 - name: Validate MinIO runtime inputs
   ansible.builtin.assert:
     that:

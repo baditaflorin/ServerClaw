@@ -1,0 +1,42 @@
+id: ws-0403-adr0025-deep-dive
+adr: '0025'
+title: "ADR 0025 Deep Dive: Compose Stacks Implementation Roadmap"
+description: |
+  Trace ADR 0025 (Compose-managed runtime stacks) implementation across the codebase.
+  Identify gaps (notably missing systemd integration), document Compose usage patterns,
+  and create a 4-phase roadmap for completing implementation.
+status: planned
+owner: claude
+branch: claude/ws-0403-adr0025-dive
+worktree_path: .claude/worktrees/ws-0403-adr0025-dive
+doc: docs/workstreams/ws-0403-adr0025-deep-dive.md
+depends_on:
+  - adr-0025-compose-managed-runtime-stacks
+  - adr-0368-docker-compose-jinja2-macro-library
+conflicts_with: []
+shared_surfaces:
+  - docs/adr/0025-implementation-roadmap.md
+  - docs/adr/0025-gap-analysis-matrix.md
+ownership_manifest:
+  owned_surfaces:
+    - id: compose_roadmap_docs
+      paths:
+        - docs/adr/0025-implementation-roadmap.md
+      mode: exclusive
+    - id: gap_analysis
+      paths:
+        - docs/adr/0025-gap-analysis-matrix.md
+      mode: exclusive
+notes: |
+  - Analyze 62 runtime roles using compose; identify usage patterns
+  - Document missing systemd service units for compose stack lifecycle
+  - Create gap matrix: what's done vs. what's needed
+  - Draft 4-phase roadmap:
+    Phase 1: Systemd template design
+    Phase 2: Service registry integration
+    Phase 3: Runbook generation automation
+    Phase 4: Ansible playbook updates
+  - Reference existing implementations (directus_runtime, etc.) as examples
+  - Commit roadmap docs and push to claude/ws-0403-adr0025-dive
+ready_to_merge: false
+live_applied: false

@@ -5,7 +5,7 @@ status: merged
 owner: claude
 branch: claude/affectionate-galileo
 worktree_path: .claude/worktrees/affectionate-galileo
-doc: docs/adr/0328-ops-portal.md
+doc: docs/adr/0093-interactive-ops-portal.md
 depends_on:
 - adr-0328-ops-portal
 conflicts_with: []

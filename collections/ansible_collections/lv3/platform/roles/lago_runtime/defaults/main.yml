@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Default inputs for converging the Lago billing runtime on docker-runtime-lv3.
 # Use case: Loaded whenever the platform needs the repo-managed Lago API, web UI, worker, clock, Redis, and PDF companion stack.
 #
@@ -24,16 +27,11 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 lago_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago') }}"
-lago_site_dir: /opt/lago
-lago_data_dir: "{{ lago_site_dir }}/data"
 lago_storage_dir: "{{ lago_data_dir }}/storage"
 lago_redis_data_dir: "{{ lago_data_dir }}/redis"
 lago_redis_data_owner: "999"
 lago_redis_data_group: "1000"
 lago_redis_data_mode: "0770"
-lago_secret_dir: /etc/lv3/lago
-lago_compose_file: "{{ lago_site_dir }}/docker-compose.yml"
-lago_env_file: "{{ compose_runtime_secret_root }}/lago/runtime.env"
 lago_api_container_name: lago-api
 lago_front_container_name: lago-front
 lago_worker_container_name: lago-worker
@@ -58,18 +56,17 @@ lago_database_name: lago
 lago_database_user: lago
 lago_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 lago_database_port: 5432
-lago_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago
-lago_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/database-password.txt
-lago_redis_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/redis-password.txt
-lago_secret_key_base_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/secret-key-base.txt
-lago_rsa_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/rsa-private-key.pem
-lago_encryption_primary_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/encryption-primary-key.txt
-lago_encryption_deterministic_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/encryption-deterministic-key.txt
-lago_encryption_key_derivation_salt_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/encryption-key-derivation-salt.txt
-lago_bootstrap_user_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/bootstrap-user-password.txt
-lago_org_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/org-api-key.txt
-lago_smoke_producer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/smoke-producer-token.txt
-lago_producer_catalog_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/producer-catalog.json
+lago_database_password_local_file: "{{ lago_local_artifact_dir }}/database-password.txt"
+lago_redis_password_local_file: "{{ lago_local_artifact_dir }}/redis-password.txt"
+lago_secret_key_base_local_file: "{{ lago_local_artifact_dir }}/secret-key-base.txt"
+lago_rsa_private_key_local_file: "{{ lago_local_artifact_dir }}/rsa-private-key.pem"
+lago_encryption_primary_key_local_file: "{{ lago_local_artifact_dir }}/encryption-primary-key.txt"
+lago_encryption_deterministic_key_local_file: "{{ lago_local_artifact_dir }}/encryption-deterministic-key.txt"
+lago_encryption_key_derivation_salt_local_file: "{{ lago_local_artifact_dir }}/encryption-key-derivation-salt.txt"
+lago_bootstrap_user_password_local_file: "{{ lago_local_artifact_dir }}/bootstrap-user-password.txt"
+lago_org_api_key_local_file: "{{ lago_local_artifact_dir }}/org-api-key.txt"
+lago_smoke_producer_token_local_file: "{{ lago_local_artifact_dir }}/smoke-producer-token.txt"
+lago_producer_catalog_local_file: "{{ lago_local_artifact_dir }}/producer-catalog.json"
 lago_redis_password_remote_file: "{{ lago_secret_dir }}/redis-password.txt"
 lago_secret_key_base_remote_file: "{{ lago_secret_dir }}/secret-key-base.txt"
 lago_rsa_private_key_remote_file: "{{ lago_secret_dir }}/rsa-private-key.pem"

@@ -6,15 +6,15 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: ci-cd
-total_adrs: 41
+total_adrs: 42
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: ci-cd
     keywords:
@@ -25,12 +25,11 @@ adrs:
     summary: 'We will treat the following as core repository rules:'
     filename: 0009-dry-and-solid-engineering-principles.md
     path: docs/adr/0009-dry-and-solid-engineering-principles.md
-    implemented_in_repo_version: 0.1.0
     implemented_on: '2026-03-21'
   - adr: '0031'
     title: Repository Validation Pipeline For Automation Changes
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -98,7 +97,7 @@ adrs:
   - adr: 0087
     title: Repository Validation Gate (Pre-Push and CI)
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -116,7 +115,7 @@ adrs:
   - adr: 0091
     title: Continuous Drift Detection and Reconciliation
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -150,7 +149,7 @@ adrs:
   - adr: 0093
     title: Interactive Ops Portal with Live Actions
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -189,7 +188,7 @@ adrs:
   - adr: '0114'
     title: Rule-Based Incident Triage Engine
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -774,3 +773,17 @@ adrs:
     summary: A new file type integration.yaml is placed in
     filename: 0353-service-integration-contract-registry.md
     path: docs/adr/0353-service-integration-contract-registry.md
+  - adr: 0369
+    title: Python Validation Toolkit
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - python
+      - validation
+      - toolkit
+    summary: Create a shared validation toolkit module at scripts/validationtoolkit.py containing all canonical validation
+      functions. All 43+ catalog/registry scripts must i
+    filename: 0369-python-validation-toolkit.md
+    path: docs/adr/0369-python-validation-toolkit.md

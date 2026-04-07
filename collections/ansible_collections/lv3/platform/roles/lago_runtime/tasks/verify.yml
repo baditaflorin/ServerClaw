@@ -4,17 +4,17 @@
 # Inputs: lago_* verification URLs, seeded smoke data, and direct API credentials.
 # Outputs: Failing or passing verification results for the Lago health and usage contracts.
 # Idempotency: Fully idempotent; verification only reads runtime state.
-# Dependencies: ADR 0165, ADR 0292, and a converged Lago runtime.
-- name: Verify the Lago local health endpoint
-  ansible.builtin.uri:
-    url: "{{ lago_direct_api_local_base_url }}/health"
-    method: GET
-    status_code: 200
-  register: lago_verify_health
-  retries: 30
-  delay: 5
-  until: lago_verify_health.status == 200
-  changed_when: false
+# Dependencies: ADR 0165, ADR 0292, ADR 0371, and a converged Lago runtime.
+- name: Verify the Lago runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: lago
+    common_verify_port: "{{ platform_service_topology.lago.ports.api }}"
+    common_verify_health_url: "{{ lago_direct_api_local_base_url }}/health"
+    common_verify_health_retries: 30
+    common_verify_health_delay: 5
 
 - name: Verify the Lago direct current usage endpoint returns the smoke metric
   ansible.builtin.shell: |

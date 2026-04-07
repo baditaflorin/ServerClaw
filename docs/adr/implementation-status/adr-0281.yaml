@@ -1,0 +1,64 @@
+adr_number: 0281
+title: GlitchTip As The Sentry-Compatible Application Error Tracker
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0281
+  location: git:7296d4c49
+  evidence: 7296d4c49 [glitchtip] Finalize ADR 0281 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.724273'
+- marker_type: git-commit
+  adr_number: 0281
+  location: git:f5c06adf0
+  evidence: f5c06adf0 [glitchtip] Restore ws-0281 pending release metadata
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:06.724339'
+- marker_type: git-commit
+  adr_number: 0281
+  location: git:0701366a6
+  evidence: 0701366a6 [glitchtip] Replay ADR 0281 onto latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.724378'
+- marker_type: git-commit
+  adr_number: 0281
+  location: git:4d40ef17f
+  evidence: 4d40ef17f [glitchtip] Replay ADR 0281 onto latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.727076'
+- marker_type: git-commit
+  adr_number: 0281
+  location: git:45faac9fe
+  evidence: 45faac9fe Merge remote-tracking branch 'origin/main' into codex/ws-0281-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:06.728561'
+- marker_type: git-commit
+  adr_number: 0281
+  location: git:55ab0b444
+  evidence: 55ab0b444 [merge] Integrate ADR 0281 latest-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.728565'
+- marker_type: git-commit
+  adr_number: 0281
+  location: git:040ad9655
+  evidence: 040ad9655 [glitchtip] Implement repo-managed ADR 0281 rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:06.728579'
+- marker_type: playbook
+  adr_number: 0281
+  location: playbooks/glitchtip.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:06.772288'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=7, playbook=1
+
+  Implemented On: 2026-04-03'

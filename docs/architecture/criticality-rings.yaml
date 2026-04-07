@@ -1,0 +1,714 @@
+---
+# Service Criticality Rings Classification
+# Implements ADR 0216: Service Criticality Rings for Foundation, Core, Supporting, and Peripheral Functions
+# Date: 2026-04-07
+# Version: 1.0.0
+
+schema_version: "1.0.0"
+description: |
+  This document classifies all platform services into criticality rings that express
+  recovery and dependency priority. Rings define which services must come back first,
+  which dependencies are allowed to pull others down, and which services are truly
+  central versus helpful but deferrable.
+
+  The dependency rule is inward-only: peripheral may depend on supporting, core, or
+  foundation; supporting may depend on core or foundation; core may depend on foundation;
+  and foundation services must not require core, supporting, or peripheral to recover.
+
+rings:
+  foundation:
+    title: "Foundation Ring"
+    description: |
+      Services required to establish trust, operator control, and authoritative data recovery.
+      These are the first services to bring up during disaster recovery and platform bootstrap.
+      Foundation services must be operationally independent and cannot depend on core,
+      supporting, or peripheral services to recover.
+    services:
+      - id: keycloak
+        name: Keycloak
+        reason: |
+          Identity and OIDC authority. All platform authentication flows depend on this.
+          Required for operator access and service-to-service trust establishment.
+        dependencies: []
+        data_criticality: critical
+
+      - id: step_ca
+        name: Step CA
+        reason: |
+          Short-lived certificate authority for operator SSH, internal TLS, and service
+          identity. Required to bootstrap trust relationships and operator access.
+        dependencies: []
+        data_criticality: critical
+
+      - id: openbao
+        name: OpenBao
+        reason: |
+          Secret authority and key sealing boundary. Required for decryption of sealed
+          secrets and bootstrap credentials. Separate authority per environment.
+        dependencies: []
+        data_criticality: critical
+
+      - id: postgres
+        name: PostgreSQL (Primary Cluster)
+        reason: |
+          Authoritative relational database for application state. Required for operator
+          dashboards, service configuration, and data recovery workflows.
+        dependencies:
+          - keycloak  # auth for admin access
+        data_criticality: critical
+
+      - id: api_gateway
+        name: Platform API Gateway
+        reason: |
+          Unified authenticated gateway for operator and automation access to platform APIs.
+          Provides command and control surface required for emergency operations.
+        dependencies:
+          - keycloak  # OIDC and token validation
+        data_criticality: important
+
+  core:
+    title: "Core Ring"
+    description: |
+      Services required for normal platform control and production-facing operation once
+      the foundation exists. These enable application delivery, control-plane messaging,
+      and workload scheduling.
+    services:
+      - id: nats_jetstream
+        name: NATS JetStream
+        reason: |
+          Control-plane event bus and command delivery system. Required for platform
+          orchestration, alert distribution, and operator workflows.
+        dependencies:
+          - postgres  # for persistent state and recovery metadata
+        data_criticality: critical
+
+      - id: gitea
+        name: Gitea
+        reason: |
+          Application and infrastructure source control. Required for GitOps-driven
+          deployment, configuration promotion, and audit trails.
+        dependencies:
+          - postgres  # application database
+          - keycloak  # authentication
+        data_criticality: critical
+
+      - id: docker_runtime
+        name: Docker Runtime (runtime-control-lv3)
+        reason: |
+          Service execution runtime for platform containers. Required for running all
+          containerized services and operator tools.
+        dependencies:
+          - nats_jetstream  # event coordination
+        data_criticality: important
+
+      - id: docker_build
+        name: Docker Build Service
+        reason: |
+          Container image building for service and tool delivery. Required for platform
+          service updates and deployment pipeline.
+        dependencies:
+          - gitea  # source code access
+          - harbor  # image storage
+        data_criticality: important
+
+      - id: harbor
+        name: Harbor
+        reason: |
+          Container image registry and artifact storage. Required for service deployment
+          and pull-based delivery from docker runtimes.
+        dependencies:
+          - postgres  # registry metadata
+        data_criticality: critical
+
+      - id: nomad
+        name: Nomad Scheduler
+        reason: |
+          Service and workload orchestration scheduler. Required for job scheduling,
+          placement decisions, and lifecycle management.
+        dependencies:
+          - nats_jetstream  # coordination
+        data_criticality: important
+
+      - id: temporal
+        name: Temporal
+        reason: |
+          Durable workflow orchestration engine. Required for long-running background
+          jobs, automation chains, and failure recovery workflows.
+        dependencies:
+          - postgres  # workflow state
+        data_criticality: important
+
+  supporting:
+    title: "Supporting Ring"
+    description: |
+      Services that materially improve operations but are not required to restore
+      foundation and core. These enable observability, backup, and operational convenience.
+    services:
+      - id: grafana
+        name: Grafana
+        reason: |
+          Observability dashboarding and alerting UI. Required for operator situational
+          awareness and health monitoring during recovery operations.
+        dependencies:
+          - postgres  # dashboard state
+          - nats_jetstream  # event metrics
+        data_criticality: supporting
+
+      - id: alertmanager
+        name: Alertmanager
+        reason: |
+          Alert routing and silencing. Required for operational notifications and
+          escalation during incidents.
+        dependencies:
+          - nats_jetstream  # alert events
+        data_criticality: supporting
+
+      - id: uptime_kuma
+        name: Uptime Kuma
+        reason: |
+          Status monitoring and public status page. Required for operator and external
+          visibility into service health.
+        dependencies:
+          - postgres  # monitor state
+        data_criticality: supporting
+
+      - id: backup_pbs
+        name: Proxmox Backup Server
+        reason: |
+          VM and guest backup storage. Required for disaster recovery and snapshot
+          retention outside the primary environment.
+        dependencies: []
+        data_criticality: critical
+
+      - id: minio
+        name: MinIO Object Storage
+        reason: |
+          Durable object storage for backups, exports, and artifact archival. Required
+          for data protection and recovery capability.
+        dependencies: []
+        data_criticality: supporting
+
+      - id: redpanda
+        name: Redpanda Message Streaming
+        reason: |
+          High-throughput event streaming for log aggregation and observability pipelines.
+          Required for production observability and incident diagnostics.
+        dependencies:
+          - postgres  # cluster state
+        data_criticality: supporting
+
+      - id: ngtr
+        name: N-Topology Realtime Metrics
+        reason: |
+          Real-time network and host metrics collection. Improves operational visibility
+          but not required for core control-plane function.
+        dependencies: []
+        data_criticality: supporting
+      - id: ntfy
+        name: Ntfy
+        reason: |
+          Pub/sub notification system for operator alerts. Improves incident notification
+          but falls back to dashboard polling if unavailable.
+        dependencies: []
+        data_criticality: supporting
+
+  peripheral:
+    title: "Peripheral Ring"
+    description: |
+      Convenience, experimental, or low-blast-radius services that can be deferred
+      during restore and failover. These improve developer experience and platform
+      capabilities but are not required for core operations.
+    services:
+      - id: open_webui
+        name: Open WebUI
+        reason: |
+          AI chat and knowledge platform. Experimental service with limited operational
+          dependency; can rebuild from seed data if lost.
+        dependencies:
+          - harbor  # image access
+          - ollama  # model serving
+        data_criticality: low
+
+      - id: dify
+        name: Dify
+        reason: |
+          AI workflow orchestration platform. Experimental service used for agent
+          development; can rebuild workflows from Git sources.
+        dependencies:
+          - postgres  # workflow state
+          - redis  # caching (if used)
+        data_criticality: low
+
+      - id: woodpecker
+        name: Woodpecker
+        reason: |
+          Lightweight CI/CD orchestration. Used for agent test and deployment workflows
+          but not required for production service delivery.
+        dependencies:
+          - postgres  # pipeline state
+          - gitea  # source access
+        data_criticality: low
+
+      - id: grist
+        name: Grist
+        reason: |
+          Spreadsheet and data grid tool. Used for team collaboration and data management
+          but not required for platform operations.
+        dependencies:
+          - postgres  # document storage
+        data_criticality: low
+
+      - id: label_studio
+        name: Label Studio
+        reason: |
+          Data labeling and annotation tool. Used for ML training dataset preparation;
+          can rebuild from external sources.
+        dependencies:
+          - postgres  # annotation storage
+          - minio  # asset storage
+        data_criticality: low
+
+      - id: langfuse
+        name: Langfuse
+        reason: |
+          LLM observability and tracing. Used for monitoring agent and model behavior;
+          data can be resampled or replayed.
+        dependencies:
+          - postgres  # traces
+          - clickhouse  # analytics (if used)
+        data_criticality: low
+
+      - id: jupyterhub
+        name: JupyterHub
+        reason: |
+          Interactive notebook environment. Used for exploratory analysis and learning;
+          can rebuild from seed notebooks.
+        dependencies:
+          - postgres  # session state
+        data_criticality: low
+
+      - id: searxng
+        name: SearXNG
+        reason: |
+          Private metasearch engine. Improves developer productivity but is not required
+          for platform control.
+        dependencies:
+          - redis  # cache (if used)
+        data_criticality: low
+
+      - id: nextcloud
+        name: Nextcloud
+        reason: |
+          Collaborative file sharing and sync. Used for team document management but
+          not required for platform operations.
+        dependencies:
+          - postgres  # metadata
+          - minio  # file storage
+        data_criticality: low
+
+      - id: outline
+        name: Outline
+        reason: |
+          Team wiki and documentation platform. Used for operational knowledge capture;
+          can be rebuilt from exported backups.
+        dependencies:
+          - postgres  # document storage
+          - redis  # caching
+        data_criticality: low
+
+      - id: mattermost
+        name: Mattermost
+        reason: |
+          Team chat and messaging platform. Convenient for operator coordination but
+          not required for platform control.
+        dependencies:
+          - postgres  # message storage
+        data_criticality: low
+
+      - id: plane
+        name: Plane
+        reason: |
+          Project management and issue tracking. Used for workstream planning but
+          not required for platform delivery.
+        dependencies:
+          - postgres  # project data
+        data_criticality: low
+
+      - id: ollama
+        name: Ollama
+        reason: |
+          Local LLM model serving. Used for experimental AI workloads; models can
+          be redownloaded or rebuilt.
+        dependencies: []
+        data_criticality: low
+
+      - id: superset
+        name: Superset
+        reason: |
+          Business intelligence and analytics. Used for data exploration but not
+          required for platform operations.
+        dependencies:
+          - postgres  # data source
+        data_criticality: low
+
+      - id: crawl4ai
+        name: Crawl4AI
+        reason: |
+          Web crawling and content extraction. Used for external data collection;
+          can be re-executed as needed.
+        dependencies:
+          - nats_jetstream  # task distribution (if used)
+        data_criticality: low
+
+      - id: gotenberg
+        name: Gotenberg
+        reason: |
+          HTML to PDF conversion service. Used for document generation; can rebuild
+          outputs from source.
+        dependencies: []
+        data_criticality: low
+
+      - id: headscale
+        name: Headscale
+        reason: |
+          Tailscale coordination server for operator VPN. Used for private access
+          but can fall back to direct SSH with proper bastion setup.
+        dependencies:
+          - postgres  # node state
+        data_criticality: supporting
+
+      - id: vaultwarden
+        name: Vaultwarden
+        reason: |
+          Self-hosted password manager. Improves credential security but uses external
+          clients that can fall back to other managers.
+        dependencies:
+          - postgres  # vault storage
+        data_criticality: low
+
+      - id: piper
+        name: Piper TTS
+        reason: |
+          Text-to-speech synthesis service. Used for accessibility and agent audio
+          output; can be rebuilt or replaced.
+        dependencies: []
+        data_criticality: low
+
+      - id: tika
+        name: Apache Tika
+        reason: |
+          Document content extraction. Used for indexing and analysis; processing
+          can be re-executed as needed.
+        dependencies: []
+        data_criticality: low
+
+      - id: paperless
+        name: Paperless-ngx
+        reason: |
+          Document management and archival. Used for team document storage but
+          not required for platform operations.
+        dependencies:
+          - postgres  # document metadata
+          - minio  # document storage
+        data_criticality: low
+
+      - id: portainer
+        name: Portainer
+        reason: |
+          Container and Docker management UI. Convenient for exploration but not
+          required when command-line and API access work.
+        dependencies:
+          - docker_runtime  # monitoring
+        data_criticality: low
+
+      - id: repowise
+        name: Repowise
+        reason: |
+          Semantic code search. Improves developer productivity but can rebuild
+          index from Git sources.
+        dependencies:
+          - gitea  # source access
+          - qdrant  # search index
+        data_criticality: low
+
+      - id: typesense
+        name: Typesense
+        reason: |
+          Fast search and faceted navigation. Improves UX but is rebuilable from
+          canonical data.
+        dependencies: []
+        data_criticality: low
+
+      - id: n8n
+        name: N8N
+        reason: |
+          Low-code automation and integration platform. Used for experimental workflows;
+          workflows can be rebuilt from Git.
+        dependencies:
+          - postgres  # workflow state
+        data_criticality: low
+
+      - id: changelog_portal
+        name: Changelog Portal
+        reason: |
+          Change log and release notes UI. Read-only documentation surface; can
+          rebuild from Git history.
+        dependencies:
+          - gitea  # source
+        data_criticality: low
+
+      - id: docs_portal
+        name: Docs Portal
+        reason: |
+          Documentation and guide website. Read-only reference; can rebuild from Git.
+        dependencies:
+          - gitea  # source
+        data_criticality: low
+
+      - id: homepage
+        name: Homepage
+        reason: |
+          Platform landing page and service directory. Read-only convenience service;
+          can rebuild from config.
+        dependencies: []
+        data_criticality: low
+
+      - id: status_page
+        name: Status Page
+        reason: |
+          Public service status dashboard. Informational; actual health checks continue
+          even if UI is down.
+        dependencies:
+          - uptime_kuma  # status data (if integrated)
+        data_criticality: low
+
+      - id: platform_context_api
+        name: Platform Context API
+        reason: |
+          Runtime configuration and dynamic discovery API. Useful for agent introspection;
+          can fallback to static configuration.
+        dependencies:
+          - postgres  # service registry
+        data_criticality: low
+
+      - id: directus
+        name: Directus
+        reason: |
+          Headless CMS and data API. Used for content management; data can be
+          re-exported and re-seeded.
+        dependencies:
+          - postgres  # content storage
+        data_criticality: low
+
+      - id: netbox
+        name: Netbox
+        reason: |
+          Network inventory and IPAM. Used for network documentation; can rebuild
+          from deployed state.
+        dependencies:
+          - postgres  # inventory
+        data_criticality: low
+
+      - id: ntopng
+        name: ntopng
+        reason: |
+          Network traffic monitoring and analytics. Improves visibility but not
+          required for platform control.
+        dependencies: []
+        data_criticality: low
+
+      - id: livekit
+        name: LiveKit
+        reason: |
+          WebRTC media server for real-time communication. Used for video/audio;
+          can be rebuilt or replaced.
+        dependencies:
+          - postgres  # room state (if used)
+        data_criticality: low
+
+      - id: matrix_synapse
+        name: Matrix Synapse
+        reason: |
+          Federated chat and messaging. Alternative to Mattermost; can be rebuilt
+          from exported events.
+        dependencies:
+          - postgres  # message storage
+        data_criticality: low
+
+      - id: flagsmith
+        name: Flagsmith
+        reason: |
+          Feature flag and A/B testing platform. Used for gradual rollouts;
+          can fall back to static configuration.
+        dependencies:
+          - postgres  # flag state
+        data_criticality: low
+
+      - id: glitchtip
+        name: Glitchtip
+        reason: |
+          Error tracking and uptime monitoring. Used for application error visibility;
+          can aggregate errors locally.
+        dependencies:
+          - postgres  # error storage
+        data_criticality: low
+
+      - id: lago
+        name: Lago
+        reason: |
+          Billing and metering platform. Used for usage tracking; can batch-process
+          offline if needed.
+        dependencies:
+          - postgres  # billing data
+        data_criticality: low
+
+      - id: one_api
+        name: One-API
+        reason: |
+          API marketplace and credential management. Used for third-party integrations;
+          not required for core platform.
+        dependencies:
+          - postgres  # credential storage
+        data_criticality: low
+
+      - id: plausible
+        name: Plausible
+        reason: |
+          Privacy-first analytics. Used for understanding user behavior; can aggregate
+          analytics offline.
+        dependencies: []
+        data_criticality: low
+
+      - id: proxmox_ui
+        name: Proxmox UI Proxy
+        reason: |
+          Web proxy to Proxmox management interface. Convenience for operator UI access;
+          not required when direct SSH and API work.
+        dependencies:
+          - nginx_edge  # routing (if used)
+        data_criticality: low
+
+      - id: realtime
+        name: Realtime Service
+        reason: |
+          WebSocket coordination for real-time updates. Improves UX but can fallback
+          to polling.
+        dependencies: []
+        data_criticality: low
+
+      - id: browser_runner
+        name: Browser Runner
+        reason: |
+          Playwright session runtime for web automation. Used for testing and automation;
+          sessions are ephemeral.
+        dependencies:
+          - docker_runtime  # execution environment
+        data_criticality: low
+
+      - id: changedetection
+        name: Changedetection.io
+        reason: |
+          Content and dependency change monitoring. Used for observability of external
+          feeds; can re-run scans as needed.
+        dependencies: []
+        data_criticality: low
+
+      - id: semaphore
+        name: Semaphore
+        reason: |
+          Ansible automation UI. Convenient for playbook execution but not required
+          when direct Ansible access works.
+        dependencies:
+          - postgres  # state
+        data_criticality: low
+
+      - id: neko
+        name: Neko
+        reason: |
+          Browser sharing and collaboration. Used for team WebRTC streaming;
+          can be rebuilt or replaced.
+        dependencies: []
+        data_criticality: low
+
+      - id: mail_platform
+        name: Mail Platform (Haraka/Postfix)
+        reason: |
+          Internal mail delivery system. Used for operational notifications;
+          can queue locally or use external SMTP.
+        dependencies: []
+        data_criticality: supporting
+
+      - id: mailpit
+        name: Mailpit
+        reason: |
+          Mail capture and debugging service. Used for testing mail workflows;
+          ephemeral service.
+        dependencies: []
+        data_criticality: low
+
+      - id: tesseract_ocr
+        name: Tesseract OCR
+        reason: |
+          Optical character recognition. Used for document processing; can
+          re-process documents as needed.
+        dependencies: []
+        data_criticality: low
+
+      - id: ops_portal
+        name: Ops Portal
+        reason: |
+          Operator dashboard and portal UI. Provides convenience access to
+          platform services through unified interface.
+        dependencies:
+          - api_gateway  # backend API
+          - keycloak  # authentication
+        data_criticality: low
+
+      - id: serverclaw
+        name: ServerClaw
+        reason: |
+          Server management and tool automation. Experimental tools for cluster
+          operations; can rebuild or replace.
+        dependencies:
+          - api_gateway  # backend
+        data_criticality: low
+
+      - id: coolify
+        name: Coolify
+        reason: |
+          Application deployment and PaaS platform. Used for app delivery but
+          not required for core platform operations.
+        dependencies:
+          - postgres  # deployment metadata
+          - docker_runtime  # execution
+        data_criticality: low
+
+      - id: coolify_apps
+        name: Coolify Apps Runtime
+        reason: |
+          Application runtime for deployed services. Used for user applications;
+          workloads can be redeployed.
+        dependencies:
+          - docker_runtime  # container execution
+          - coolify  # orchestration
+        data_criticality: low
+
+  unclassified:
+    title: "Pending Classification"
+    description: |
+      Services that require further review or context before assignment.
+    services: []
+
+dependency_violations:
+  description: |
+    If any dependency violations are discovered during this classification exercise,
+    they are documented here with remediation paths.
+  violations: []
+
+notes: |
+  Classification completed 2026-04-07. All services from service-capability-catalog.json
+  are assigned. The dependency rule (inward-only) is validated at classification time.
+
+  Critical observation: This is a one-time classification snapshot. Services may move
+  between rings as the platform matures and operational reality changes. Changes to
+  ring assignment must be tracked in workstream and ADR comments.

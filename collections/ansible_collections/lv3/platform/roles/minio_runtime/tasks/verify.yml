@@ -3,32 +3,21 @@
 # Inputs: Running MinIO container plus the configured local runtime URL, bucket contracts, allowed Langfuse origins, and mc client path.
 # Outputs: Health, bucket policy, lifecycle, and temporary presigned-download smoke probe results for the shared MinIO runtime.
 # Idempotency: Functionally idempotent; verification creates and removes a temporary Langfuse smoke object in the same run.
-# Dependencies: ADR 0165 and ADR 0274; requires the minio_runtime compose stack to be running.
-- name: Verify the MinIO live health endpoint responds locally
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
-    method: GET
-    status_code: 200
-    return_content: false
-    timeout: 30
-  register: minio_verify_live
-  retries: 12
-  delay: 2
-  until: minio_verify_live.status == 200
-  changed_when: false
-
-- name: Verify the MinIO ready health endpoint responds locally
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/ready"
-    method: GET
-    status_code: 200
-    return_content: false
-    timeout: 30
-  register: minio_verify_ready
-  retries: 12
-  delay: 2
-  until: minio_verify_ready.status == 200
-  changed_when: false
+# Dependencies: ADR 0165, ADR 0274, ADR 0371; requires the minio_runtime compose stack to be running.
+- name: Verify the MinIO runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: minio
+    common_verify_port: "{{ minio_api_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
+    common_verify_health_retries: 12
+    common_verify_health_delay: 2
+    common_verify_extra_endpoints:
+      - url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/ready"
+        retries: 12
+        delay: 2
 
 - name: Verify the managed MinIO buckets are reachable
   ansible.builtin.command:

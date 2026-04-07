@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: range
 label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 70
+total_adrs: 88
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1050,7 +1050,7 @@ adrs:
   - adr: '0346'
     title: Outline Programmatic Wiki API and Automation Hooks
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-04-05'
     concern: automation
     keywords:
@@ -1064,7 +1064,6 @@ adrs:
       ensuredocument, loadapitoken) into a shared module '
     filename: 0346-outline-programmatic-wiki-api-and-automation-hooks.md
     path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
-    implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.178.4
     implemented_on: '2026-04-05'
   - adr: '0346'
@@ -1086,6 +1085,24 @@ adrs:
     filename: 0346-postgresql-domain-clustering.md
     path: docs/adr/0346-postgresql-domain-clustering.md
     implemented_in_repo_version: 0.179.0
+  - adr: '0346'
+    title: '— Repowise: local semantic code search over the git repo'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: documentation
+    keywords:
+      - repowise
+      - local
+      - semantic
+      - code
+      - search
+      - over
+      - git
+      - repo
+    summary: 'Deploy repowise — a local semantic code search service — using:'
+    filename: 0346-repowise-semantic-search.md
+    path: docs/adr/0346-repowise-semantic-search.md
   - adr: '0347'
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted
@@ -1127,8 +1144,8 @@ adrs:
     implemented_in_repo_version: 0.179.0
   - adr: 0348
     title: Per-Service LLM Context File (service.llm.yaml)
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1147,7 +1164,7 @@ adrs:
     path: docs/adr/0348-per-service-llm-context-file.md
   - adr: 0349
     title: Agent Capability Manifest and Peer Discovery
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1205,8 +1222,8 @@ adrs:
     path: docs/adr/0351-change-provenance-tagging.md
   - adr: '0352'
     title: Token-Budgeted Agent Onboarding Packs
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1242,7 +1259,7 @@ adrs:
     path: docs/adr/0353-service-integration-contract-registry.md
   - adr: '0354'
     title: Structured Agent Mutation Audit Log
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1279,8 +1296,8 @@ adrs:
     path: docs/adr/0355-apply-phase-serialization-via-semaphore.md
   - adr: '0356'
     title: LLM Inference Routing and Model Registry
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Deprecated
+    implementation_status: Deprecated
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1318,7 +1335,7 @@ adrs:
     path: docs/adr/0357-idempotent-workstream-apply-receipts.md
   - adr: 0358
     title: Platform Health Contract and Inter-Service Dependency SLO
-    status: Accepted
+    status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-05'
     concern: networking
@@ -1406,3 +1423,286 @@ adrs:
     summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
+  - adr: '0362'
+    title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - agents
+      - tools
+      - api
+      - governance
+      - credentials
+      - pattern
+      - agent
+      - service
+      - gateway
+      - governed
+    summary: All agent-callable service tools discover credentials from the .local/
+    filename: 0362-agent-service-api-gateway-pattern.md
+    path: docs/adr/0362-agent-service-api-gateway-pattern.md
+    implemented_in_repo_version: 0.178.19
+    implemented_on: '2026-04-06'
+  - adr: '0363'
+    title: Plane Agent Tools — Programmatic Task Management for Agents
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: automation
+    keywords:
+      - agents
+      - tools
+      - plane
+      - tasks
+      - api
+      - automation
+      - agent
+      - programmatic
+      - task
+      - management
+    summary: 'Five Plane tools, following the ADR 0369 gateway pattern:'
+    filename: 0363-plane-agent-tools.md
+    path: docs/adr/0363-plane-agent-tools.md
+    implemented_in_repo_version: 0.178.19
+    implemented_on: '2026-04-06'
+  - adr: '0364'
+    title: Outline Agent Tools — Programmatic Wiki Access for Agents
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: automation
+    keywords:
+      - agents
+      - tools
+      - outline
+      - wiki
+      - api
+      - automation
+      - agent
+      - programmatic
+      - access
+    summary: 'Four Outline tools following the ADR 0362 gateway pattern:'
+    filename: 0364-outline-agent-tools.md
+    path: docs/adr/0364-outline-agent-tools.md
+    implemented_in_repo_version: 0.178.22
+    implemented_on: '2026-04-06'
+  - adr: 0368
+    title: Docker Compose Jinja2 Macro Library
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - docker
+      - compose
+      - jinja2
+      - macro
+      - library
+    summary: 'Create a shared Jinja2 macro library at collections/ansiblecollections/lv3/platform/roles/common/templates/composemacros.j2.
+      Each compose template imports from '
+    filename: 0368-docker-compose-jinja2-macro-library.md
+    path: docs/adr/0368-docker-compose-jinja2-macro-library.md
+  - adr: 0369
+    title: Python Validation Toolkit
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - python
+      - validation
+      - toolkit
+    summary: Create a shared validation toolkit module at scripts/validationtoolkit.py containing all canonical validation
+      functions. All 43+ catalog/registry scripts must i
+    filename: 0369-python-validation-toolkit.md
+    path: docs/adr/0369-python-validation-toolkit.md
+  - adr: '0370'
+    title: Service Lifecycle Task Includes
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - service
+      - lifecycle
+      - task
+      - includes
+    summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
+      Runtime roles include them with includerole / in
+    filename: 0370-service-lifecycle-task-includes.md
+    path: docs/adr/0370-service-lifecycle-task-includes.md
+  - adr: '0371'
+    title: Parameterized Service Verification Tasks
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - parameterized
+      - service
+      - verification
+      - tasks
+    summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
+      parameters.
+    filename: 0371-parameterized-verify-tasks.md
+    path: docs/adr/0371-parameterized-verify-tasks.md
+  - adr: '0372'
+    title: Data-Driven Playbook Composition
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: automation
+    keywords:
+      - data-driven
+      - playbook
+      - composition
+    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
+      that drives playbook composition.
+    filename: 0372-data-driven-playbook-composition.md
+    path: docs/adr/0372-data-driven-playbook-composition.md
+  - adr: '0373'
+    title: Service Registry and Derived Defaults
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - service
+      - registry
+      - derived
+      - defaults
+    summary: 'Create a platform service registry in inventory/groupvars/platformservices.yml that declares each service''s
+      identity and metadata. A shared Ansible vars plugin '
+    filename: 0373-service-registry-and-derived-defaults.md
+    path: docs/adr/0373-service-registry-and-derived-defaults.md
+  - adr: '0374'
+    title: Cross-Cutting Service Manifest
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - cross-cutting
+      - service
+      - manifest
+    summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
+      what it needs from DNS, nginx, TLS, and SSO — in '
+    filename: 0374-cross-cutting-service-manifest.md
+    path: docs/adr/0374-cross-cutting-service-manifest.md
+  - adr: '0375'
+    title: Certificate Validation And Concordance Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - certificate
+      - validation
+      - concordance
+      - enforcement
+    summary: 'We will implement certificate validation and concordance enforcement that:'
+    filename: 0375-certificate-validation-and-concordance-enforcement.md
+    path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+  - adr: '0376'
+    title: Credential Isolation and Agent Safety for .local/ Secrets
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: security
+    keywords:
+      - credential
+      - isolation
+      - agent
+      - safety
+      - local
+      - secrets
+    summary: Add an explicit entry for the .local symlink (without trailing slash) to
+    filename: 0376-credential-isolation-and-agent-safety.md
+    path: docs/adr/0376-credential-isolation-and-agent-safety.md
+    implemented_on: '2026-04-06'
+  - adr: '0376'
+    title: Identity Core VM Isolation and Aggressive Health Watchdog
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-06'
+    concern: vm-topology
+    keywords:
+      - vm-topology
+      - identity
+      - keycloak
+      - step-ca
+      - openbao
+      - api-gateway
+      - watchdog
+      - health
+      - reliability
+      - core
+    summary: 'runtime-control-lv3 retains only the four identity-core services:'
+    filename: 0376-identity-core-vm-isolation-and-watchdog.md
+    path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
+  - adr: '0377'
+    title: Open WebUI Platform Knowledge Integration
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-06'
+    concern: platform
+    keywords:
+      - open
+      - webui
+      - platform
+      - knowledge
+      - integration
+    summary: 'We will wire platform knowledge into Open WebUI through three layers:'
+    filename: 0377-open-webui-platform-knowledge-integration.md
+    path: docs/adr/0377-open-webui-platform-knowledge-integration.md
+  - adr: 0378
+    title: ServerClaw Tool Surface In Open WebUI
+    status: Proposed
+    implementation_status: Partial
+    date: '2026-04-06'
+    concern: platform
+    keywords:
+      - serverclaw
+      - tool
+      - surface
+      - open
+      - webui
+    summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
+    filename: 0378-serverclaw-tool-surface-in-open-webui.md
+    path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+  - adr: 0380
+    title: Neko Remote Desktop for Interactive Operator Browser Access
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: identity
+    keywords:
+      - neko
+      - remote
+      - desktop
+      - interactive
+      - operator
+      - browser
+      - access
+    summary: Neko Remote Desktop for Interactive Operator Browser Access
+    filename: 0380-neko-for-operator-remote-browser-access.md
+    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+  - adr: 0381
+    title: Login Service Contracts and Session Recovery Automation
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: automation
+    keywords:
+      - login
+      - service
+      - contracts
+      - session
+      - recovery
+      - automation
+    summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
+      .lv3.org.
+    filename: 0381-login-service-contracts-and-session-recovery-automation.md
+    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md

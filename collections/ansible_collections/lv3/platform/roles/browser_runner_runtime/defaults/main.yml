@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Define the repo-synced sources, local image build inputs, and runtime paths for the private Playwright browser runner.
 browser_runner_runtime_site_dir: /opt/browser-runner
 browser_runner_runtime_service_dir: "{{ browser_runner_runtime_site_dir }}/app"

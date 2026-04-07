@@ -17,6 +17,12 @@ repos:
           - --config=.gitleaks.toml
   - repo: local
     hooks:
+      - id: block-local-credential-dir
+        name: Block .local from being committed
+        entry: "bash -c 'if git diff --cached --name-only | grep -q ^.local; then echo BLOCKED .local must never be committed; exit 1; fi'"
+        language: system
+        pass_filenames: false
+        always_run: true
       - id: published-artifact-secret-scan
         name: Scan published artifacts for secrets
         entry: python3 scripts/published_artifact_secret_scan.py --repo-root .

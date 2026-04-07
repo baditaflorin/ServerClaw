@@ -1,0 +1,76 @@
+adr_number: '0244'
+title: Runtime Assurance Matrix Per Service And Environment
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0244'
+  location: git:9416fec68
+  evidence: 9416fec68 [release] Recut ADR 0244 on current main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.670924'
+- marker_type: git-commit
+  adr_number: '0244'
+  location: git:3c152a90e
+  evidence: 3c152a90e [release] Integrate ADR 0244 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.670965'
+- marker_type: git-commit
+  adr_number: '0244'
+  location: git:2e7497b74
+  evidence: '2e7497b74 [api-gateway] Fall back when Keycloak verify token fails\n\nPurpose:
+    Keep live API gateway verification working when the preferred Keycloak client-credentials
+    exchange fails but the legacy platform-context token is still available for authenticated
+    route checks.\nScope: Make the verify role tolerate Keycloak token request failures
+    and enforce the fallback in focused role tests.\nStatus: Focused tests and syntax-check
+    pass; live replay is next.\nNext: Re-run converge-api-gateway, verify the live
+    route and portal partial, then record ADR 0244 mainline evidence.\nSee also: ADR
+    0244'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.670983'
+- marker_type: git-commit
+  adr_number: '0244'
+  location: git:ed94ac02a
+  evidence: 'ed94ac02a [api-gateway] Remove duplicate receipts sync\n\nPurpose: Prevent
+    the API gateway live apply from hanging while recursively copying the receipts
+    tree after it was already staged via the archive-based tree sync.\nScope: Remove
+    the duplicate receipts build-context copy task and update the role test to enforce
+    the staged-sync path.\nStatus: Focused tests and syntax-check pass; live replay
+    is next.\nNext: Re-run converge-api-gateway, verify the runtime-assurance route
+    live, then replay ops-portal once the guest is stable.\nSee also: ADR 0244'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.670996'
+- marker_type: git-commit
+  adr_number: '0244'
+  location: git:2143e180b
+  evidence: '2143e180b [merge] Track ws-0244 exact-main integration\n\nPurpose: Record
+    the exact-main integration branch in the repo before rebasing again onto the newest
+    origin/main.\nScope: Add the ws-0244 main-merge workstream metadata and refresh
+    the ADR index.\nStatus: Integration branch bookkeeping committed; latest-main
+    rebase is next.\nNext: Rebase onto origin/main, rerun validation, then refresh
+    protected release truth.\nSee also: ADR 0244'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.671019'
+- marker_type: git-commit
+  adr_number: '0244'
+  location: git:f8dcc5a8d
+  evidence: f8dcc5a8d [runtime-assurance] Record ADR 0244 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.671023'
+- marker_type: git-commit
+  adr_number: '0244'
+  location: git:adc8507e0
+  evidence: adc8507e0 [runtime-assurance] Record ADR 0244 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:49.671266'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-29'

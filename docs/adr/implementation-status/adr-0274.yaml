@@ -1,0 +1,191 @@
+adr_number: '0274'
+title: MinIO As The S3-Compatible Object Storage Layer
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:4d3bf1325
+  evidence: 4d3bf1325 [receipts] Point ADR 0274 receipt at applied commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.610061'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:bc41cbab7
+  evidence: bc41cbab7 [minio] Finalize ADR 0274 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.610100'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:9abc788b8
+  evidence: 9abc788b8 [merge] Refresh ws-0274 onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:03.610595'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:010659ef3
+  evidence: 010659ef3 [merge] Refresh ws-0274 onto origin/main 0.177.123
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:03.610753'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:1c5d526e7
+  evidence: 1c5d526e7 [minio] Replay ADR 0274 onto refreshed mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.610757'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:fceac1821
+  evidence: fceac1821 [merge] Bring ADR 0274 onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.622309'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:5ba77f67d
+  evidence: 5ba77f67d [replay] Capture ADR 0274 branch-local replays and fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.628191'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:f25371319
+  evidence: f25371319 [merge] Replay ws-0274 MinIO workstream on latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:03.628219'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:5627fbe9a
+  evidence: 5627fbe9a [replay] Capture ADR 0274 branch-local replays and fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.628227'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:7f2a4de57
+  evidence: 7f2a4de57 [release] Integrate ADR 0274 on main as 0.177.106
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.629310'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:08b02b4ac
+  evidence: 08b02b4ac Merge branch 'codex/ws-0274-minio-live-apply' into codex/ws-0274-mainline-final
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:03.629328'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:d17509656
+  evidence: d17509656 [release] Recut ADR 0274 on latest main as 0.177.104
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.638115'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:1b8811256
+  evidence: 1b8811256 [release] Integrate ADR 0274 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.638166'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:3e66c03e2
+  evidence: 3e66c03e2 Merge origin/main into codex/ws-0274-main-merge-r4
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:03.638248'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:d412935f1
+  evidence: d412935f1 [release] Cut 0.177.102 for ADR 0274
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.638329'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:2c5ee54e4
+  evidence: 2c5ee54e4 Merge remote-tracking branch 'origin/main' into codex/ws-0274-main-merge-r4
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:03.652743'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:c72439892
+  evidence: c72439892 [coolify] Implement ADR 0274 repo-deploy image warming
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.652852'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:5087f7172
+  evidence: 5087f7172 [release] Cut 0.177.97 for ADR 0274 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.657361'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:eb810415e
+  evidence: eb810415e [coolify] Implement ADR 0274 repo-deploy image warming
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.657375'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:411732d4b
+  evidence: 411732d4b [adr-0274] Record exact-main live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:03.657380'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:bbce15d25
+  evidence: bbce15d25 [release] Cut 0.177.96 for ADR 0274 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.657423'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:78ab8f7a9
+  evidence: 78ab8f7a9 [coolify] Implement ADR 0274 repo-deploy image warming
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.657473'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:ae23d006d
+  evidence: ae23d006d [release] Cut 0.177.91 for ADR 0274
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.657903'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:f1a1e5b2a
+  evidence: f1a1e5b2a [coolify] Implement ADR 0274 repo-deploy image warming
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.657906'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:02c319b5d
+  evidence: 02c319b5d [release] Cut 0.177.90 for ADR 0274
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.658055'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:075d7df1e
+  evidence: 075d7df1e [coolify] Implement ADR 0274 repo-deploy image warming
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.658087'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:b35a90575
+  evidence: b35a90575 [coolify] Implement ADR 0274 repo-deploy image warming
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:03.658103'
+- marker_type: git-commit
+  adr_number: '0274'
+  location: git:e18e40adc
+  evidence: "e18e40adc [adr] Add 10 CPU-only open source service ADRs (0274\u2013\
+    0283)"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:03.660062'
+- marker_type: playbook
+  adr_number: '0274'
+  location: playbooks/minio.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:03.681288'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 29
+
+  Breakdown: git-commit=28, playbook=1
+
+  Implemented On: 2026-03-31'

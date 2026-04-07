@@ -318,6 +318,15 @@
       "adr": "0054"
     },
     {
+      "id": "neko",
+      "service": "neko",
+      "name": "Neko Remote Desktop",
+      "vm": "runtime-comms-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0380"
+    },
+    {
       "id": "nextcloud",
       "service": "nextcloud",
       "name": "Nextcloud",
@@ -397,6 +406,22 @@
       "tier": 2,
       "category": "automation",
       "adr": "0294"
+    },
+    {
+      "id": "litellm",
+      "service": "litellm",
+      "name": "LiteLLM Proxy",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation"
+    },
+    {
+      "id": "librechat",
+      "service": "librechat",
+      "name": "LibreChat",
+      "vm": "coolify-lv3",
+      "tier": 3,
+      "category": "automation"
     },
     {
       "id": "openbao",
@@ -550,6 +575,15 @@
       "tier": 1,
       "category": "observability",
       "adr": "0196"
+    },
+    {
+      "id": "repowise",
+      "service": "repowise",
+      "name": "Repowise Semantic Code Search",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0346"
     },
     {
       "id": "searxng",
@@ -1178,6 +1212,18 @@
       "description": "NetBox stores all inventory, topology, and IPAM data in Postgres."
     },
     {
+      "from": "neko",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "Neko WebRTC signalling is proxied through the shared NGINX edge at browser.lv3.org with TLS termination and WebSocket upgrade support."
+    },
+    {
+      "from": "neko",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Neko operator access is controlled through Keycloak OIDC client configuration for Tailscale headscale management network."
+    },
+    {
       "from": "nextcloud",
       "to": "nginx_edge",
       "type": "soft",
@@ -1242,6 +1288,48 @@
       "to": "ollama",
       "type": "hard",
       "description": "One-API forwards local chat and embedding aliases to the private Ollama runtime."
+    },
+    {
+      "from": "litellm",
+      "to": "ollama",
+      "type": "hard",
+      "description": "LiteLLM Proxy forwards local chat and embedding aliases to the private Ollama runtime."
+    },
+    {
+      "from": "litellm",
+      "to": "postgres",
+      "type": "hard",
+      "description": "LiteLLM Proxy stores virtual keys and usage data in PostgreSQL."
+    },
+    {
+      "from": "litellm",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "LiteLLM Proxy consumes runtime secrets from the OpenBao sidecar."
+    },
+    {
+      "from": "librechat",
+      "to": "ollama",
+      "type": "hard",
+      "description": "LibreChat connects directly to Ollama for local model inference."
+    },
+    {
+      "from": "librechat",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "LibreChat uses Keycloak OIDC for authentication but can fall back to local login."
+    },
+    {
+      "from": "librechat",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "LibreChat consumes runtime secrets from the OpenBao sidecar."
+    },
+    {
+      "from": "librechat",
+      "to": "searxng",
+      "type": "soft",
+      "description": "LibreChat delegates optional web-search requests to the private SearXNG runtime."
     },
     {
       "from": "openfga",

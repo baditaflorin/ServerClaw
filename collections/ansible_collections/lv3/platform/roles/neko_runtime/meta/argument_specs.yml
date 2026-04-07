@@ -1,0 +1,123 @@
+---
+argument_specs:
+  main:
+    short_description: "Deploy Neko multi-instance remote desktop for isolated per-user browser access"
+    description:
+      - "Configures and deploys N isolated Neko (m1k1o/neko) WebRTC browser containers."
+      - "Each entry in neko_instances provisions a dedicated container with its own TCP"
+      - "signalling port and UDP media range. Removing an entry destroys the container."
+      - "Access is routed by Keycloak email via NGINX map at browser.lv3.org."
+    version_added: "0.178.54"
+    options:
+      neko_instances:
+        type: dict
+        default: {}
+        description:
+          - "Primary interface. Dict of instance definitions keyed by instance name."
+          - "Each key becomes the container name (neko-<key>) and data directory."
+          - "Removing a key causes the container to be destroyed on next converge."
+          - "Each value dict accepts: email, port, udp_range, and optional per-instance"
+          - "overrides (browser, res, max_connections, cpu_limit, memory_limit)."
+
+      neko_runtime_image_name:
+        type: str
+        default: "m1k1o/neko"
+        description: "Docker image name for Neko remote desktop (shared across all instances)"
+
+      neko_runtime_image_tag:
+        type: str
+        default: "chromium"
+        description: "Docker image tag (browser flavour: chromium, firefox, ungoogled-chromium)"
+
+      neko_data_dir:
+        type: str
+        default: "/opt/neko/instances"
+        description: "Root directory for per-instance data subdirectories"
+
+      neko_default_browser:
+        type: str
+        default: "chromium"
+        choices: ["chromium", "firefox", "ungoogled-chromium"]
+        description: "Default browser engine (overridable per instance)"
+
+      neko_default_res:
+        type: str
+        default: "1440x900"
+        description: "Default display resolution WIDTHxHEIGHT (overridable per instance)"
+
+      neko_default_max_connections:
+        type: int
+        default: 10
+        description: "Default maximum concurrent sessions per instance"
+
+      neko_default_cpu_limit:
+        type: str
+        default: "2"
+        description: "Default Docker CPU limit per instance (overridable per instance)"
+
+      neko_default_memory_limit:
+        type: str
+        default: "4g"
+        description: "Default Docker memory limit per instance (overridable per instance)"
+
+      neko_default_restart_policy:
+        type: str
+        default: "unless-stopped"
+        choices: ["no", "always", "on-failure", "unless-stopped"]
+        description: "Default Docker restart policy for all instances"
+
+      neko_healthcheck_interval:
+        type: str
+        default: "30s"
+        description: "Docker healthcheck interval"
+
+      neko_healthcheck_timeout:
+        type: str
+        default: "5s"
+        description: "Docker healthcheck timeout"
+
+      neko_healthcheck_retries:
+        type: int
+        default: 3
+        description: "Docker healthcheck failure retries before marking unhealthy"
+
+      neko_log_driver:
+        type: str
+        default: "json-file"
+        choices: ["json-file", "syslog", "journald"]
+        description: "Docker logging driver"
+
+      neko_log_max_size:
+        type: str
+        default: "10m"
+        description: "Maximum log file size before rotation"
+
+      neko_log_max_file:
+        type: int
+        default: 3
+        description: "Maximum number of rotated log files"
+
+      neko_keycloak_realm:
+        type: str
+        default: "lv3"
+        description: "Keycloak realm for Neko-managed users"
+
+      neko_keycloak_admin_url:
+        type: str
+        default: "https://sso.lv3.org"
+        description: "Keycloak base URL for admin API calls"
+
+      neko_keycloak_managed_attribute:
+        type: str
+        default: "neko_managed"
+        description: "Keycloak user attribute name used to identify Neko-managed users"
+
+      neko_keycloak_managed_attribute_value:
+        type: str
+        default: "true"
+        description: "Value of the neko_managed attribute on Neko-provisioned Keycloak users"
+
+      neko_runtime_image_pull_digest:
+        type: str
+        default: ""
+        description: "Last pulled image digest — set automatically for change detection. Do not edit manually."

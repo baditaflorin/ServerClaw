@@ -1,0 +1,125 @@
+adr_number: 0293
+title: Temporal As The Durable Workflow And Task Queue Engine
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:8e47a73c8
+  evidence: '8e47a73c8 [livekit] Refresh latest-main blocker evidence\n\nPurpose:
+    Keep the ws-0293 branch evidence aligned with the newest origin/main baseline
+    and the latest ADR 0153 lock state on vm:120.\nScope: Update the workstream notes
+    plus the branch validation, canonical-truth gate, and lock-blocker evidence artifacts
+    after rebasing to 0.177.104.\nStatus: The branch is rebased and validated on the
+    newest mainline base, but live mutation remains blocked because ws-0286-live-apply
+    holds vm:120 until 2026-03-30T16:22:24Z.\nNext: When the lock clears, acquire
+    the required resources, run the LiveKit converge and end-to-end verification,
+    then integrate and replay from main.'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.210794'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:5e959ce31
+  evidence: '5e959ce31 [livekit] Add repo-managed LiveKit rollout\n\nPurpose: Introduce
+    the repo-managed LiveKit runtime, topology, and validation surfaces for ADR 0293
+    from a clean latest-origin/main worktree.\nScope: Add the LiveKit role, helper
+    script, playbooks, catalogs, topology updates, tests, image scan receipts, and
+    workstream/runbook documentation.\nStatus: Repo implementation and validation
+    are complete on the branch; live mutation is blocked pending the active ADR 0153
+    lock on vm:120.\nNext: Acquire the required locks, run the branch-local converge
+    and verification, then carry the exact-main replay and protected integration surfaces
+    onto main.'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.210852'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:32696e7e5
+  evidence: 32696e7e5 [evidence] Record ADR 0293 detached promotion gate pass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.214319'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:5241ff2af
+  evidence: 5241ff2af [receipts] Finalize ADR 0293 mainline live-apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.214385'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:22e744ecc
+  evidence: 22e744ecc [merge] Integrate ADR 0293 Temporal on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.214393'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:bc43866bf
+  evidence: 'bc43866bf [temporal] Fix rebase follow-up validation\n\nPurpose: Keep
+    ADR 0293 merge-ready after rebasing onto the newer origin/main and clear the concrete
+    lint regressions surfaced by the repo gate.\nScope: Resolve workstream conflict
+    fallout, add idempotent owner checks for Temporal PostgreSQL, and mark the schema
+    probe commands with explicit privilege escalation.\nStatus: Temporal branch-local
+    tests, syntax, and ansible lint now pass on the rebased workstream tip.\nNext:
+    Replay the workstream onto the latest origin/main integration worktree, update
+    protected release truth, and rerun the exact-main live apply.\nSee also: ADR 0293'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.214467'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:597b070b4
+  evidence: 597b070b4 [temporal] Implement ADR 0293 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.214470'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:0d6eab2f6
+  evidence: '0d6eab2f6 [temporal] Fix rebase follow-up validation\n\nPurpose: Keep
+    ADR 0293 merge-ready after rebasing onto the newer origin/main and clear the concrete
+    lint regressions surfaced by the repo gate.\nScope: Resolve workstream conflict
+    fallout, add idempotent owner checks for Temporal PostgreSQL, and mark the schema
+    probe commands with explicit privilege escalation.\nStatus: Temporal branch-local
+    tests, syntax, and ansible lint now pass on the rebased workstream tip.\nNext:
+    Replay the workstream onto the latest origin/main integration worktree, update
+    protected release truth, and rerun the exact-main live apply.\nSee also: ADR 0293'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.214477'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:9a7753068
+  evidence: 9a7753068 [temporal] Implement ADR 0293 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.214480'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:49952dc73
+  evidence: "49952dc73 [adr] Add 10 API-first infrastructure service ADRs (0284\u2013\
+    0293)"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.221883'
+- marker_type: git-commit
+  adr_number: 0293
+  location: git:728ad1fc5
+  evidence: "728ad1fc5 [adr] Add 10 CPU-only autonomous stack ADRs (0284\u20130293)"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.222461'
+- marker_type: playbook
+  adr_number: 0293
+  location: playbooks/temporal.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:12.245886'
+- marker_type: playbook
+  adr_number: 0293
+  location: playbooks/livekit.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:12.255764'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 13
+
+  Breakdown: git-commit=11, playbook=2
+
+  Implemented On: 2026-03-30'

@@ -5,8 +5,6 @@ metadata:
   openclaw:
     compatibility: skill-md
   lv3:
-    tool_refs:
-      - submit-human-review-task
     memory_refs:
       - memory:platform-context
 ---

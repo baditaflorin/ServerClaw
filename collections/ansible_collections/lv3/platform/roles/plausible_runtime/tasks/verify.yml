@@ -4,34 +4,21 @@
 # Inputs: Running Plausible container plus the configured local runtime URL, bootstrap credentials, and one declared tracked site.
 # Outputs: Read-only health checks, bootstrap assertions, and a synthetic pageview probe recorded in the ClickHouse event store.
 # Idempotency: Partially idempotent because the synthetic verification step intentionally appends one pageview event to the analytics store.
-# Dependencies: ADR 0165 and ADR 0283.
-- name: Verify the Plausible basic health endpoint responds locally
-  ansible.builtin.uri:
-    url: "{{ plausible_internal_base_url }}/api/health"
-    method: GET
-    status_code:
-      - 200
-    return_content: true
-    timeout: 30
-  register: plausible_verify_health
-  retries: 24
-  delay: 5
-  until: plausible_verify_health.status == 200
-  changed_when: false
-
-- name: Verify the Plausible readiness endpoint responds locally
-  ansible.builtin.uri:
-    url: "{{ plausible_internal_base_url }}/api/system/health/ready"
-    method: GET
-    status_code:
-      - 200
-    return_content: false
-    timeout: 30
-  register: plausible_verify_readiness
-  retries: 24
-  delay: 5
-  until: plausible_verify_readiness.status == 200
-  changed_when: false
+# Dependencies: ADR 0165, ADR 0283, ADR 0371.
+- name: Verify the Plausible runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: plausible
+    common_verify_port: "{{ plausible_internal_port }}"
+    common_verify_health_url: "{{ plausible_internal_base_url }}/api/health"
+    common_verify_health_retries: 24
+    common_verify_health_delay: 5
+    common_verify_extra_endpoints:
+      - url: "{{ plausible_internal_base_url }}/api/system/health/ready"
+        retries: 24
+        delay: 5
 
 - name: Verify the Plausible tracker script responds locally
   ansible.builtin.uri:

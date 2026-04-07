@@ -1,0 +1,59 @@
+adr_number: '0300'
+title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly
+  Detection
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0300'
+  location: git:539204fd5
+  evidence: 539204fd5 [falco] Finalize ADR 0300 exact-main integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:15.514355'
+- marker_type: git-commit
+  adr_number: '0300'
+  location: git:5975dd5d3
+  evidence: 5975dd5d3 [falco] Finalize ADR 0300 live-apply closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:15.514407'
+- marker_type: git-commit
+  adr_number: '0300'
+  location: git:e33ab1ab2
+  evidence: 'e33ab1ab2 [falco] Harden live bridge delivery\n\nPurpose: Keep ADR 0300
+    event delivery and live verification resilient under ntfy throttling while shipping
+    Falco alerts into journald and Loki\nScope: Falco runtime role, Loki relabeling,
+    bridge runtime behavior, runbook guidance, and targeted tests\nStatus: Branch-local
+    implementation checkpoint ready to rebase onto the latest origin/main before final
+    live apply\nNext: Rebase to origin/main, rerun production converge, capture green
+    smoke evidence, and integrate to main\nSee also: ADR 0300'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:15.514499'
+- marker_type: git-commit
+  adr_number: '0300'
+  location: git:1ff7662b7
+  evidence: 1ff7662b7 [falco] Implement ADR 0300 repo surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:15.514523'
+- marker_type: playbook
+  adr_number: '0300'
+  location: playbooks/falco.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:15.562054'
+- marker_type: config-file
+  adr_number: '0300'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:15.821411'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=4, playbook=1, config-file=1
+
+  Implemented On: 2026-04-03'

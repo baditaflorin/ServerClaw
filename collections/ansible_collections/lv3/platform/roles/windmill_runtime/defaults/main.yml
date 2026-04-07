@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Define Windmill runtime defaults, worker checkout sync, and runtime secret wiring.
 # Inputs: Inventory facts, platform topology helpers, and controller-local secret artifacts.
 # Outputs: Role defaults consumed by the Windmill runtime converge tasks and seeded workers.
@@ -9,17 +12,6 @@
 windmill_workspace_id: lv3
 windmill_workspace_name: LV3
 windmill_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
-windmill_site_dir: /opt/windmill
-windmill_secret_dir: /etc/lv3/windmill
-windmill_compose_file: "{{ windmill_site_dir }}/docker-compose.yml"
-windmill_env_file: "{{ compose_runtime_secret_root }}/windmill/runtime.env"
-windmill_legacy_env_file: "{{ windmill_site_dir }}/windmill.env"
-windmill_openbao_agent_dir: "{{ windmill_site_dir }}/openbao"
-windmill_openbao_agent_image: "{{ openbao_agent_image }}"
-windmill_openbao_agent_container_name: windmill-openbao-agent
-windmill_openbao_secret_path: services/windmill/runtime-env
-windmill_openbao_policy_name: lv3-service-windmill-runtime
-windmill_openbao_approle_name: windmill-runtime
 windmill_runtime_packages:
   - make
   - openssl
@@ -29,7 +21,6 @@ windmill_server_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.w
 windmill_host_proxy_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
 windmill_server_network_mode: host
 windmill_server_requires_docker_nat: "{{ windmill_server_network_mode != 'host' }}"
-windmill_image: "{{ container_image_catalog.images.windmill_runtime.ref }}"
 windmill_extra_image: "{{ container_image_catalog.images.windmill_extra_runtime.ref }}"
 windmill_uv_version: "0.9.21"
 windmill_uv_download_url: >-
@@ -108,7 +99,6 @@ windmill_ledger_nats_password: >-
 windmill_ledger_nats_url: >-
   {%- set password = windmill_ledger_nats_password | trim -%}{%- if password | length > 0 -%}nats://{{ windmill_ledger_nats_username }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_nats_host }}:{{ windmill_ledger_nats_port }}{%- endif -%}
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
-windmill_local_artifact_dir: "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
 windmill_controller_local_root: "{{ windmill_local_artifact_dir | dirname }}"
 windmill_atlas_approle_local_file: "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"

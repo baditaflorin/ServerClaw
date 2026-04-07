@@ -1,0 +1,60 @@
+adr_number: '0333'
+title: Private Overlay Files For Deployment-Specific Secrets And Identities
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0333'
+  location: git:3dbb575f3
+  evidence: 3dbb575f3 [publication] Merge ADR 0333 latest-main replay into ADR 0330
+    closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:29.603796'
+- marker_type: git-commit
+  adr_number: '0333'
+  location: git:c48bdae01
+  evidence: c48bdae01 [validation] Record ADR 0333 final latest-main checks
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:29.603843'
+- marker_type: git-commit
+  adr_number: '0333'
+  location: git:fd987c4ed
+  evidence: fd987c4ed [merge] Advance ADR 0333 replay to latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:29.603847'
+- marker_type: git-commit
+  adr_number: '0333'
+  location: git:32b853f30
+  evidence: 32b853f30 [merge] Replay ADR 0333 on exact main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:29.603855'
+- marker_type: git-commit
+  adr_number: '0333'
+  location: git:b5eeda594
+  evidence: b5eeda594 [adr-0333] Close out shared overlay live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:29.603915'
+- marker_type: git-commit
+  adr_number: '0333'
+  location: git:aa8682266
+  evidence: aa8682266 [adr-0333] Implement shared private-overlay bootstrap alias
+    contract
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:29.603945'
+- marker_type: git-commit
+  adr_number: '0333'
+  location: git:d36f1b1d9
+  evidence: d36f1b1d9 [uptime] Finalize ws-0333 mainline integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:29.604319'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-04-04'

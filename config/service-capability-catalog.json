@@ -1529,6 +1529,40 @@
       }
     },
     {
+      "id": "neko",
+      "name": "Neko Remote Desktop",
+      "description": "WebRTC-based interactive remote desktop for operator browser debugging and exploration of platform integrations.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "runtime-comms-lv3",
+      "vmid": 121,
+      "internal_url": "http://10.10.10.41:8080",
+      "public_url": "https://browser.lv3.org",
+      "subdomain": "browser.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "neko",
+      "adr": "0380",
+      "adr_file": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/neko.yml",
+      "restart_domain": "runtime-comms-webrtc",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-comms",
+      "mobility_tier": "anchor",
+      "tags": [
+        "interactive",
+        "debugging",
+        "webrtc",
+        "remote-access"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://browser.lv3.org",
+          "subdomain": "browser.lv3.org"
+        }
+      }
+    },
+    {
       "id": "nextcloud",
       "name": "Nextcloud",
       "description": "Repo-managed personal data plane for durable files, attachments, and DAV-backed calendars, contacts, and tasks.",
@@ -1651,13 +1685,15 @@
     {
       "id": "nomad",
       "name": "Nomad",
-      "description": "Private distributed scheduler for durable batch jobs and long-running internal workloads.",
+      "description": "Distributed scheduler for durable batch jobs and long-running internal workloads with operator dashboard at scheduler.lv3.org.",
       "category": "automation",
       "lifecycle_status": "active",
       "vm": "monitoring-lv3",
       "vmid": 140,
       "internal_url": "https://100.64.0.1:8013",
-      "exposure": "private-only",
+      "public_url": "https://scheduler.lv3.org",
+      "subdomain": "scheduler.lv3.org",
+      "exposure": "edge-published",
       "health_probe_id": "nomad",
       "secret_catalog_ids": [
         "nomad_acl_management_token",
@@ -1698,7 +1734,9 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://100.64.0.1:8013"
+          "url": "https://scheduler.lv3.org",
+          "subdomain": "scheduler.lv3.org",
+          "notes": "Operator dashboard published through shared NGINX edge with native OIDC auth."
         }
       }
     },
@@ -2650,6 +2688,43 @@
           "status": "active",
           "url": "https://realtime.lv3.org",
           "subdomain": "realtime.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "repowise",
+      "name": "Repowise Semantic Code Search",
+      "description": "Local semantic code search service over the git repository using Ollama embeddings and Qdrant vector storage.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:7070",
+      "public_url": "https://repowise.lv3.org",
+      "subdomain": "repowise.lv3.org",
+      "exposure": "edge-published",
+      "adr": "0346",
+      "adr_file": "docs/adr/0346-repowise-semantic-search.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/repowise.yml",
+      "restart_domain": "runtime-general-automation",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "health_probe_id": "repowise",
+      "tags": [
+        "search",
+        "semantic",
+        "code",
+        "local",
+        "ollama",
+        "qdrant"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://repowise.lv3.org",
+          "subdomain": "repowise.lv3.org",
+          "notes": "Nightly index rebuild at 03:00 UTC keeps semantic search current with main branch commits."
         }
       }
     },

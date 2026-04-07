@@ -1,0 +1,83 @@
+adr_number: '0304'
+title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration
+  Linting
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:8e4b9a216
+  evidence: 8e4b9a216 [atlas] Finalize ADR 0304 mainline closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.610878'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:170eede65
+  evidence: 170eede65 [atlas] Finalize ws-0304 validation replay and fallback gates
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:17.610908'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:6cdfd9f8e
+  evidence: 6cdfd9f8e [atlas] Finalize ADR 0304 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.610911'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:a0bc259b4
+  evidence: a0bc259b4 [atlas] Finalize ADR 0304 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.610915'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:da4fb8b65
+  evidence: da4fb8b65 [atlas] Refresh ADR 0304 exact-main closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.610922'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:e154e07f2
+  evidence: e154e07f2 [adr0304] Finalize Atlas mainline live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:17.610930'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:2e01e122f
+  evidence: 2e01e122f [atlas] Harden ADR 0304 live apply runtime contracts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.610949'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:9bcac8363
+  evidence: 9bcac8363 [adr-0304] Harden live Atlas apply execution
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:17.610953'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:49d8d4bbb
+  evidence: 49d8d4bbb [atlas] Start ADR 0304 automation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.610974'
+- marker_type: git-commit
+  adr_number: '0304'
+  location: git:4e92ca14a
+  evidence: 4e92ca14a [atlas] Start ADR 0304 automation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.615531'
+- marker_type: config-file
+  adr_number: '0304'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:17.808192'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=10, config-file=1
+
+  Implemented On: 2026-04-02'

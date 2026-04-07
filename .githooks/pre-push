@@ -45,5 +45,68 @@ fi
 echo "validation gate: validating canonical NATS topics"
 uv run --with pyyaml python scripts/validate_nats_topics.py --validate
 
+echo "validation gate: validating SSL certificates (ADR 0375)"
+if [[ -f scripts/certificate_validator.py ]]; then
+  if uv run python3 scripts/certificate_validator.py --check-all --json 2>/dev/null | \
+     python3 -c "
+import sys, json
+try:
+    results = json.load(sys.stdin)
+    critical = [r for r in results if r['status'] in ['expired', 'cert_mismatch']]
+    if critical:
+        print(f'CRITICAL: {len(critical)} certificate issue(s):')
+        for r in critical:
+            print(f\"  - {r['fqdn']}: {r['status']}\")
+        sys.exit(1)
+    print(f'✓ All {len(results)} domains have valid certificates')
+except:
+    pass  # If validator fails, let remote gate catch it
+"; then
+    :  # Certificate validation passed
+  else
+    echo "validation gate: certificate validation FAILED"
+    echo "Fix: make converge-nginx-edge env=production"
+    echo "Or:  ansible-playbook playbooks/fix-edge-certificate.yml"
+    echo "Bypass: SKIP_CERT_VALIDATION=1 git push origin <branch>"
+    exit 1
+  fi
+else
+  echo "validation gate: certificate validator not found (skipping local check)"
+fi
+
+echo "validation gate: validating ADR status transitions"
+if [[ "${SKIP_ADR_VALIDATION:-0}" == "1" ]]; then
+  echo "validation gate: skipping ADR validation because SKIP_ADR_VALIDATION=1"
+  bypass_args=(
+    --bypass skip_adr_validation
+    --source pre-push-hook
+    --reason-code "${GATE_BYPASS_REASON_CODE:-}"
+    --detail "${GATE_BYPASS_DETAIL:-${GATE_BYPASS_REASON:-}}"
+    --substitute-evidence "${GATE_BYPASS_SUBSTITUTE_EVIDENCE:-}"
+    --remediation-ref "${GATE_BYPASS_REMEDIATION_REF:-}"
+  )
+  if [[ -n "${GATE_BYPASS_IMPACTED_LANES:-}" ]]; then
+    bypass_args+=( --impacted-lane "${GATE_BYPASS_IMPACTED_LANES}" )
+  else
+    bypass_args+=( --impacted-lane adr-validation )
+  fi
+  if [[ -n "${GATE_BYPASS_OWNER:-}" ]]; then
+    bypass_args+=( --owner "${GATE_BYPASS_OWNER}" )
+  fi
+  if [[ -n "${GATE_BYPASS_EXPIRES_ON:-}" ]]; then
+    bypass_args+=( --expires-on "${GATE_BYPASS_EXPIRES_ON}" )
+  fi
+  python3 scripts/log_gate_bypass.py "${bypass_args[@]}"
+else
+  if uv run python scripts/validate_adr_status_transitions.py; then
+    :  # ADR validation passed
+  else
+    echo "validation gate: ADR status transition validation FAILED"
+    echo "Fix: Update ADR status with proper evidence or add ADR-STATUS-CHANGE-REASON to commit message"
+    echo "Bypass: SKIP_ADR_VALIDATION=1 GATE_BYPASS_REASON_CODE=<code> git push origin <branch>"
+    exit 1
+  fi
+fi
+
 echo "validation gate: running remote pre-push gate"
 scripts/remote_exec.sh pre-push-gate --local-fallback

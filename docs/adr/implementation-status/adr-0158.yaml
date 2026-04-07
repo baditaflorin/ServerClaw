@@ -1,0 +1,52 @@
+adr_number: 0158
+title: Conflict-Free Configuration Merge Protocol
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0158
+  location: git:20c1ebe58
+  evidence: 20c1ebe58 Record ADR 0158 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:12.579022'
+- marker_type: git-commit
+  adr_number: 0158
+  location: git:8e18be871
+  evidence: 8e18be871 Fix ADR 0158 Windmill live merge runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:12.579057'
+- marker_type: git-commit
+  adr_number: 0158
+  location: git:72b06e4a2
+  evidence: 72b06e4a2 Fix ADR 0158 Windmill live merge runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:12.579064'
+- marker_type: git-commit
+  adr_number: 0158
+  location: git:dab4d3ad6
+  evidence: dab4d3ad6 Release 0.154.0 for ADR 0158 config merge protocol
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:12.580111'
+- marker_type: git-commit
+  adr_number: 0158
+  location: git:24e1f32b0
+  evidence: 24e1f32b0 Implement ADR 0158 config merge protocol
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:12.580122'
+- marker_type: config-file
+  adr_number: 0158
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:12.744949'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=5, config-file=1
+
+  Implemented On: 2026-03-26'

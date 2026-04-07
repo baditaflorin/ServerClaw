@@ -3,16 +3,23 @@
 # Inputs: Local OpenFGA URLs, preshared API keys, and expected controller endpoints exposed by the runtime role.
 # Outputs: Confirms the local health endpoint and authenticated API contract without mutating service state.
 # Idempotency: Fully idempotent because these tasks only read state and assert expected behavior.
-# Dependencies: ADR 0165 and ADR 0262.
+# Dependencies: ADR 0165, ADR 0262, and ADR 0371.
 ---
-- name: Verify OpenFGA responds on the local health endpoint
-  ansible.builtin.uri:
-    url: "{{ openfga_local_url }}/healthz"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: openfga_verify_health
-  changed_when: false
+- name: Verify the OpenFGA runtime health endpoint
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: openfga
+    common_verify_port: "{{ openfga_internal_http_port }}"
+    common_verify_health_url: "{{ openfga_local_url }}/healthz"
+    common_verify_health_assertions:
+      - >-
+        (
+          common_verify_health_response.json is defined
+          and (common_verify_health_response.json.status | default('')) == 'SERVING'
+        ) or (common_verify_health_response.content | default('') | trim == 'ok')
+    common_verify_health_assertion_msg: "OpenFGA answered locally, but health status was not SERVING."
 
 - name: Verify the OpenFGA API enforces the repo-managed preshared key
   ansible.builtin.uri:
@@ -26,15 +33,9 @@
   changed_when: false
   no_log: true
 
-- name: Assert OpenFGA health and authenticated access are working
+- name: Assert OpenFGA authenticated access is working
   ansible.builtin.assert:
     that:
-      - openfga_verify_health.status == 200
-      - >-
-        (
-          openfga_verify_health.json is defined
-          and (openfga_verify_health.json.status | default('')) == 'SERVING'
-        ) or (openfga_verify_health.content | default('') | trim == 'ok')
       - openfga_verify_authenticated_api.status == 200
     fail_msg: "OpenFGA answered locally, but the authenticated API path did not validate."
   no_log: true

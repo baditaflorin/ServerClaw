@@ -1139,19 +1139,34 @@
       "output_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["count", "jobs"],
+        "required": [
+          "count",
+          "jobs"
+        ],
         "properties": {
-          "count": { "type": "integer" },
+          "count": {
+            "type": "integer"
+          },
           "jobs": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" },
-                "type": { "type": "string" },
-                "status": { "type": "string" },
-                "namespace": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "namespace": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -1182,7 +1197,9 @@
       "input_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["job_id"],
+        "required": [
+          "job_id"
+        ],
         "properties": {
           "job_id": {
             "type": "string",
@@ -1198,13 +1215,26 @@
       "output_schema": {
         "type": "object",
         "additionalProperties": true,
-        "required": ["id", "status"],
+        "required": [
+          "id",
+          "status"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "type": { "type": "string" },
-          "status": { "type": "string" },
-          "namespace": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          }
         }
       },
       "implementation": {
@@ -1232,7 +1262,9 @@
       "input_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["job_id"],
+        "required": [
+          "job_id"
+        ],
         "properties": {
           "job_id": {
             "type": "string",
@@ -1252,10 +1284,17 @@
       "output_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["dispatch_id", "eval_id"],
+        "required": [
+          "dispatch_id",
+          "eval_id"
+        ],
         "properties": {
-          "dispatch_id": { "type": "string" },
-          "eval_id": { "type": "string" }
+          "dispatch_id": {
+            "type": "string"
+          },
+          "eval_id": {
+            "type": "string"
+          }
         }
       },
       "implementation": {
@@ -1269,6 +1308,780 @@
         "openWorldHint": true
       },
       "runbook": "docs/runbooks/configure-nomad.md"
+    },
+    {
+      "name": "list-plane-tasks",
+      "title": "List Plane Tasks",
+      "description": "List issues in a Plane project with optional state filter. Defaults to the Agent Work (AW) project.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW). Use ADR for architecture decisions."
+          },
+          "state_name": {
+            "type": "string",
+            "description": "Filter tasks by state name (e.g. Todo, In Progress, Done)."
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "project": {
+            "type": "string"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "state_name": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_plane_tasks"
+      }
+    },
+    {
+      "name": "get-plane-task",
+      "title": "Get Plane Task Details",
+      "description": "Get full details of a single Plane issue by its UUID.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "description": "UUID of the Plane issue to retrieve."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          }
+        },
+        "required": [
+          "issue_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state_name": {
+            "type": "string"
+          },
+          "description_html": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_plane_task"
+      }
+    },
+    {
+      "name": "create-plane-task",
+      "title": "Create Plane Task",
+      "description": "Create a new issue in a Plane project. Use this to track blockers, follow-up tasks, and operational findings.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Issue title."
+          },
+          "description_html": {
+            "type": "string",
+            "description": "HTML description body."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          },
+          "state_name": {
+            "type": "string",
+            "description": "Initial state name (default: Todo)."
+          },
+          "label_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Label names to apply. Missing labels are auto-created."
+          },
+          "priority": {
+            "type": "string",
+            "description": "Priority: none, low, medium, high, urgent."
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state_name": {
+            "type": "string"
+          },
+          "project_identifier": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "create_plane_task"
+      }
+    },
+    {
+      "name": "update-plane-task",
+      "title": "Update Plane Task",
+      "description": "Update the status, title, description, or priority of an existing Plane issue.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "description": "UUID of the Plane issue to update."
+          },
+          "state_name": {
+            "type": "string",
+            "description": "New state name (e.g. In Progress, Done, Blocked)."
+          },
+          "name": {
+            "type": "string",
+            "description": "New issue title."
+          },
+          "description_html": {
+            "type": "string",
+            "description": "New HTML description body."
+          },
+          "priority": {
+            "type": "string",
+            "description": "New priority: none, low, medium, high, urgent."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          }
+        },
+        "required": [
+          "issue_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "update_plane_task"
+      }
+    },
+    {
+      "name": "add-plane-comment",
+      "title": "Add Plane Comment",
+      "description": "Add a comment to an existing Plane issue. Use for milestone updates, status notes, or blockers.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "description": "UUID of the Plane issue to comment on."
+          },
+          "comment_html": {
+            "type": "string",
+            "description": "HTML comment body."
+          },
+          "project": {
+            "type": "string",
+            "description": "Plane project identifier (default: AW)."
+          }
+        },
+        "required": [
+          "issue_id",
+          "comment_html"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0363-plane-agent-tools.md",
+      "endpoint": "service://plane/api/v1/workspaces/{workspace}/projects/{project}/issues/",
+      "auth": "plane-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "add_plane_comment"
+      }
+    },
+    {
+      "name": "list-outline-collections",
+      "title": "List Outline Collections",
+      "description": "List all document collections in the Outline wiki (wiki.lv3.org).",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "description": { "type": "string" },
+                "documents_count": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/collections.list",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_outline_collections"
+      }
+    },
+    {
+      "name": "search-outline-documents",
+      "title": "Search Outline Documents",
+      "description": "Full-text search across Outline wiki documents. Optionally scope to a collection.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query string."
+          },
+          "collection_id": {
+            "type": "string",
+            "description": "Optional collection UUID to scope the search."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum results to return (default: 25).",
+            "default": 25
+          }
+        },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "query": { "type": "string" },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "collection_id": { "type": "string" },
+                "url": { "type": "string" },
+                "ranking": {}
+              }
+            }
+          }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.search",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "search_outline_documents"
+      }
+    },
+    {
+      "name": "get-outline-document",
+      "title": "Get Outline Document",
+      "description": "Retrieve the full content (title, markdown text, metadata) of an Outline wiki document by its UUID.",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "description": "UUID of the document to retrieve."
+          }
+        },
+        "required": ["document_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "text": { "type": "string" },
+          "collection_id": { "type": "string" },
+          "url": { "type": "string" },
+          "created_at": { "type": "string" },
+          "updated_at": { "type": "string" }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.info",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_outline_document"
+      }
+    },
+    {
+      "name": "create-outline-document",
+      "title": "Create Outline Document",
+      "description": "Create a new document in an Outline wiki collection. Published immediately unless publish=false.",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Document title."
+          },
+          "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection to create the document in."
+          },
+          "text": {
+            "type": "string",
+            "description": "Document body in Markdown format."
+          },
+          "parent_document_id": {
+            "type": "string",
+            "description": "Optional UUID of a parent document (creates a nested document)."
+          },
+          "publish": {
+            "type": "boolean",
+            "description": "Publish immediately (default: true).",
+            "default": true
+          }
+        },
+        "required": ["title", "collection_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "collection_id": { "type": "string" }
+        }
+      },
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.create",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "implementation": {
+        "kind": "handler",
+        "handler": "create_outline_document"
+      }
+    },
+    {
+      "name": "provision-outline-api-token",
+      "title": "Provision Outline API Token",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "description": "Provision a new Outline API token by inserting it into the Outline PostgreSQL database via the bootstrap SSH key. Writes the token to .local/outline/admin-auth.json so all Outline agent tools pick it up automatically. Call this when Outline tools return 401 errors or when .local/outline/admin-auth.json is missing. Uses the outline.automation@lv3.org service account.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/admin/apiKeys",
+      "auth": "bootstrap-ssh",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the API key in Outline (default: agent-automation)",
+            "default": "agent-automation"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "If true, print what would happen without making changes",
+            "default": false
+          }
+        },
+        "required": []
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "token_preview": {
+            "type": "string",
+            "description": "First 20 chars + last 4 chars of the provisioned token (never the full token)"
+          },
+          "auth_file": {
+            "type": "string",
+            "description": "Path to the written admin-auth.json file"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "provision_outline_api_token"
+      }
+    },
+    {
+      "name": "list-outline-documents",
+      "title": "List Outline Documents",
+      "category": "observe",
+      "transport": "controller_local",
+      "approval_required": false,
+      "description": "List all documents in an Outline collection by collection ID. Returns id, title, url, parent_document_id, and updated_at for each document. Paginates automatically.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.list",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection to list documents from"
+          }
+        },
+        "required": ["collection_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "collection_id": {"type": "string"},
+          "count": {"type": "integer"},
+          "documents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "title": {"type": "string"},
+                "url": {"type": "string"},
+                "updated_at": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_outline_documents"
+      }
+    },
+    {
+      "name": "update-outline-document",
+      "title": "Update Outline Document",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "description": "Update an existing Outline document by document ID. Accepts title and/or text. At least one must be provided. Marks the document as done and published.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.update",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "description": "UUID of the document to update"
+          },
+          "title": {
+            "type": "string",
+            "description": "New title for the document (optional)"
+          },
+          "text": {
+            "type": "string",
+            "description": "New Markdown content for the document (optional)"
+          }
+        },
+        "required": ["document_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "url": {"type": "string"},
+          "collection_id": {"type": "string"},
+          "updated_at": {"type": "string"}
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "update_outline_document"
+      }
+    },
+    {
+      "name": "upsert-outline-document",
+      "title": "Upsert Outline Document",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": false,
+      "description": "Create or update an Outline document by title within a collection (idempotent). If a document with the given title already exists in the collection it is updated; otherwise a new document is created. Returns outcome: 'created' or 'updated'.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.create|documents.update",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Document title (used as the unique key within the collection)"
+          },
+          "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection"
+          },
+          "text": {
+            "type": "string",
+            "description": "Markdown content for the document"
+          },
+          "parent_document_id": {
+            "type": "string",
+            "description": "UUID of parent document for nesting (optional, create-only)"
+          }
+        },
+        "required": ["title", "collection_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "url": {"type": "string"},
+          "collection_id": {"type": "string"},
+          "outcome": {"type": "string", "enum": ["created", "updated"]}
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "upsert_outline_document"
+      }
+    },
+    {
+      "name": "delete-outline-document",
+      "title": "Delete Outline Document",
+      "category": "execute",
+      "transport": "controller_local",
+      "approval_required": true,
+      "description": "Permanently delete an Outline document by document ID. This action is irreversible. Requires human approval.",
+      "runbook": "docs/adr/0364-outline-agent-tools.md",
+      "endpoint": "service://outline/api/documents.delete",
+      "auth": "outline-api-token",
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "description": "UUID of the document to delete"
+          }
+        },
+        "required": ["document_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "deleted": {"type": "boolean"},
+          "document_id": {"type": "string"}
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "delete_outline_document"
+      }
     }
   ]
 }

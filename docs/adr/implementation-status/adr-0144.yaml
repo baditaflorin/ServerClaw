@@ -1,0 +1,40 @@
+adr_number: '0144'
+title: Headscale For Zero-Trust Mesh VPN
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0144'
+  location: git:b8d16655f
+  evidence: b8d16655f Merge origin/main into ADR 0144 integration (n8n blockers)
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.906962'
+- marker_type: git-commit
+  adr_number: '0144'
+  location: git:5ab508417
+  evidence: 5ab508417 Merge origin/main into ADR 0144 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.906989'
+- marker_type: git-commit
+  adr_number: '0144'
+  location: git:9347e19fb
+  evidence: 9347e19fb Merge ADR 0144 headscale mesh control plane
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.907004'
+- marker_type: git-commit
+  adr_number: '0144'
+  location: git:132119e27
+  evidence: 132119e27 Implement ADR 0144 headscale mesh control plane
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.907031'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-25'

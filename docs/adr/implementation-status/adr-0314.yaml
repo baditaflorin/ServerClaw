@@ -1,0 +1,101 @@
+adr_number: '0314'
+title: Resumable Multi-Step Flows And Return-To-Task Reentry
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:630f663bd
+  evidence: 630f663bd [ws-0314] Refresh ADR discovery index after archival
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.010422'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:e376fbc4f
+  evidence: e376fbc4f [ws-0314] Finalize mainline validation and archive closeout
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.010445'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:f3698b327
+  evidence: f3698b327 [ws-0314] Archive merged workstream after mainline validation
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.010451'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:329b66014
+  evidence: 329b66014 [ws-0314] Integrate live apply onto latest main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.010457'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:4e7aeaf44
+  evidence: 4e7aeaf44 [ws-0314] Capture live-apply implementation snapshot
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.010462'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:ae90e357f
+  evidence: ae90e357f [keycloak] Preserve ws-0314 live-apply evidence and fixes
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.010860'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:ac7e0bb84
+  evidence: ac7e0bb84 [runtime-control] Harden ws-0314 migration replay
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.011071'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:b629acaf2
+  evidence: b629acaf2 [ws-0314] Retry ops portal running verification
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.011077'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:a7f52517b
+  evidence: a7f52517b [ws-0314] Sync registry metadata and generated platform vars
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.011082'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:3584ba762
+  evidence: 3584ba762 [ops-portal] Recover live apply dependencies and capture ADR
+    0314 API proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.011086'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:51a57af01
+  evidence: 51a57af01 [adr-0314] Record gateway verification and paused-task evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:22.011090'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:a08ab5c59
+  evidence: a08ab5c59 [adr-0314] Record live apply checkpoint and portal hardening
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:22.011095'
+- marker_type: git-commit
+  adr_number: '0314'
+  location: git:5d1efcc67
+  evidence: 5d1efcc67 [adr-0314] Add resumable runbook task reentry
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:22.011106'
+- marker_type: playbook
+  adr_number: '0314'
+  location: playbooks/api-gateway.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:22.044427'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=13, playbook=1
+
+  Implemented On: 2026-04-04'

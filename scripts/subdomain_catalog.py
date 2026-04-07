@@ -3,7 +3,14 @@
 import argparse
 import re
 import socket
+import sys
+from pathlib import Path
 from typing import Any
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_list, require_mapping, require_str, require_string_list
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_catalog import configured_environment_ids
@@ -27,36 +34,6 @@ PREFIX_PATTERN = re.compile(r"^[a-z0-9-]+$")
 ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
 
 
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    items = require_list(value, path)
-    result = []
-    for index, item in enumerate(items):
-        result.append(require_str(item, f"{path}[{index}]"))
-    return result
 
 
 def require_hostname(value: Any, path: str) -> str:

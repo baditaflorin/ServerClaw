@@ -1,0 +1,118 @@
+adr_number: '0113'
+title: World-State Materializer
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:ee0faef99
+  evidence: ee0faef99 Release 0.177.7 for ADR 0113 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367080'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:1867450ba
+  evidence: 1867450ba Fix ADR 0113 world-state runtime replay gaps
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367120'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:d26d5fc12
+  evidence: d26d5fc12 Record ADR 0113 mainline gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367352'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:999738c36
+  evidence: 999738c36 Replay ADR 0113 mainline integration onto latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367360'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:7de75cd1d
+  evidence: 7de75cd1d Finalize ADR 0113 mainline integration and validation repairs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367363'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:ab30480e2
+  evidence: ab30480e2 Record ADR 0113 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367550'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:ed11f05b8
+  evidence: ed11f05b8 Fix ADR 0113 live-apply receipt hash
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367554'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:d16e94ab5
+  evidence: d16e94ab5 Finalize ADR 0113 merge blockers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367556'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:000590fa1
+  evidence: 000590fa1 Record ADR 0113 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367654'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:8c014cc48
+  evidence: 8c014cc48 Normalize ADR 0113 receipt results
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367658'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:01a14e55a
+  evidence: 01a14e55a Fix ADR 0113 receipt metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367661'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:e1fab11c9
+  evidence: e1fab11c9 Stabilize ADR 0113 live apply path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.367666'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:cc20b16d6
+  evidence: cc20b16d6 Rebase ADR 0113 integration onto main 0.112.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.369627'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:027aff4af
+  evidence: 027aff4af Rebase ADR 0113 integration onto main 0.111.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.369633'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:90111865d
+  evidence: 90111865d Merge ADR 0113 world-state materializer into mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.369644'
+- marker_type: git-commit
+  adr_number: '0113'
+  location: git:d8e861ecf
+  evidence: d8e861ecf Implement ADR 0113 world-state materializer
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.369670'
+- marker_type: config-file
+  adr_number: '0113'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:52.522272'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 17
+
+  Breakdown: git-commit=16, config-file=1
+
+  Implemented On: 2026-03-27'

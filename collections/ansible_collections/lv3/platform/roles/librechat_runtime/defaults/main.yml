@@ -1,0 +1,61 @@
+# Purpose: Define LibreChat runtime defaults, secret paths, auth settings, and upstream integration knobs.
+# Use case: Loaded whenever the LibreChat runtime converges or verifies.
+# Inputs: Platform topology, image catalog entries, OpenBao settings, OIDC connectors.
+# Outputs: Supplies stable defaults for the LibreChat runtime role.
+# Idempotency: Fully idempotent because this file only declares defaults.
+# Dependencies: ADR 0165, ADR 0060.
+---
+librechat_site_dir: /opt/librechat
+librechat_data_dir: "{{ librechat_site_dir }}/data"
+librechat_secret_dir: /etc/lv3/librechat
+librechat_compose_file: "{{ librechat_site_dir }}/docker-compose.yml"
+librechat_config_file: "{{ librechat_site_dir }}/librechat.yaml"
+librechat_env_file: "{{ compose_runtime_secret_root }}/librechat/runtime.env"
+librechat_legacy_env_file: "{{ librechat_site_dir }}/librechat.env"
+librechat_openbao_agent_dir: "{{ librechat_site_dir }}/openbao"
+librechat_openbao_agent_image: "{{ openbao_agent_image }}"
+librechat_openbao_agent_container_name: librechat-openbao-agent
+librechat_enable_openbao_agent: false
+librechat_openbao_secret_path: services/librechat/runtime-env
+librechat_openbao_policy_name: lv3-service-librechat-runtime
+librechat_openbao_approle_name: librechat-runtime
+librechat_container_name: librechat
+librechat_internal_port: 8096
+librechat_container_port: 3080
+librechat_healthcheck_path: /api/health
+librechat_image: "{{ container_image_catalog.images.librechat_runtime.ref }}"
+librechat_mongo_container_name: librechat-mongodb
+librechat_mongo_image: mongo:7
+librechat_mongo_data_dir: "{{ librechat_data_dir }}/mongodb"
+librechat_meilisearch_container_name: librechat-meilisearch
+librechat_meilisearch_image: getmeili/meilisearch:v1.7
+librechat_meilisearch_data_dir: "{{ librechat_data_dir }}/meilisearch"
+librechat_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/librechat
+librechat_jwt_secret_local_file: "{{ librechat_local_artifact_dir }}/jwt-secret.txt"
+librechat_jwt_secret_remote_file: "{{ librechat_secret_dir }}/jwt-secret"
+librechat_creds_key_local_file: "{{ librechat_local_artifact_dir }}/creds-key.txt"
+librechat_creds_key_remote_file: "{{ librechat_secret_dir }}/creds-key"
+librechat_creds_iv_local_file: "{{ librechat_local_artifact_dir }}/creds-iv.txt"
+librechat_creds_iv_remote_file: "{{ librechat_secret_dir }}/creds-iv"
+# OIDC / Keycloak
+librechat_enable_oidc: true
+librechat_oidc_client_id: serverclaw
+librechat_oidc_issuer: https://sso.lv3.org/realms/lv3
+librechat_oidc_discovery_url: "{{ librechat_oidc_issuer }}/.well-known/openid-configuration"
+librechat_oidc_callback_url: https://chat.lv3.org/oauth/openid/callback
+librechat_oidc_button_label: Login with Keycloak
+librechat_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-client-secret.txt
+# Ollama
+librechat_ollama_base_url: http://10.10.10.20:11434
+# Anthropic
+librechat_anthropic_api_key_remote_file: "{{ librechat_secret_dir }}/anthropic-api-key"
+# System prompt preset
+librechat_system_prompt_file: "{{ librechat_site_dir }}/system-prompt.md"
+librechat_system_prompt_src: ../../../../config/serverclaw/system-prompt.md
+# Admin
+librechat_admin_email: ops@lv3.org
+# Web search
+librechat_enable_web_search: true
+librechat_searxng_query_url: "http://host.docker.internal:8888/search?q=%s&format=json"
+# Extra hosts for hairpin NAT
+librechat_extra_hosts: []

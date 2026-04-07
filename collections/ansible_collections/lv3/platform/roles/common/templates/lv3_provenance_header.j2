@@ -1,0 +1,18 @@
+{#
+  ADR 0351: Change Provenance Tagging
+  Include this macro at the top of any managed Jinja2 template.
+
+  Usage (in any template, pass the comment character for your file type):
+    {%- from 'lv3_provenance_header.j2' import provenance_header -%}
+    {{ provenance_header(comment='#', role=role_name, adr=adr_ref) }}
+
+  Or inline for files that don't support block comments:
+    # managed-by: role={{ role_name }} adr={{ adr_ref }} agent={{ lookup('env','LV3_AGENT_SESSION') | default('operator') }}
+#}
+{%- macro provenance_header(comment='#', role='', adr='', agent='') -%}
+{{ comment }} ============================================================
+{{ comment }} MANAGED FILE — do not edit by hand
+{{ comment }} managed-by: role={{ role }}{% if adr %} adr={{ adr }}{% endif %} agent={{ agent if agent else (lookup('env','LV3_AGENT_SESSION') | default('operator')) }}
+{{ comment }} Regenerate: make converge-{{ role | replace('_runtime','') | replace('_','-') }}
+{{ comment }} ============================================================
+{%- endmacro -%}

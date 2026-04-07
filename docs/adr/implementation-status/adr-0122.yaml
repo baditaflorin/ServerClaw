@@ -1,0 +1,40 @@
+adr_number: '0122'
+title: Windmill Operator Access Admin Surface
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0122'
+  location: git:5dced4c22
+  evidence: 5dced4c22 Record ADR 0122 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.872571'
+- marker_type: git-commit
+  adr_number: '0122'
+  location: git:b4dd45e12
+  evidence: b4dd45e12 Merge ADR 0122 into mainline release 0.120.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.872624'
+- marker_type: git-commit
+  adr_number: '0122'
+  location: git:fae66f667
+  evidence: fae66f667 Record ADR 0122 push gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.872628'
+- marker_type: git-commit
+  adr_number: '0122'
+  location: git:dd9b845dd
+  evidence: dd9b845dd Record ADR 0122 push gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.872635'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-24'

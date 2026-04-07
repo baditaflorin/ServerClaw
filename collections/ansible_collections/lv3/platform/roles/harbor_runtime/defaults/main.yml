@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the shared defaults for converging the Harbor runtime, secrets, Keycloak integration, and verification artifacts.
 # Use case: Used whenever the harbor_runtime role renders Harbor, manages robot credentials, and verifies the registry path.
 #
@@ -25,7 +28,6 @@
 harbor_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology.harbor }}"
 harbor_public_hostname: "{{ harbor_service_topology.public_hostname }}"
 harbor_public_base_url: "https://{{ harbor_public_hostname }}"
-harbor_site_dir: /opt/harbor
 harbor_installer_root: "{{ harbor_site_dir }}/installer"
 harbor_installer_dir: "{{ harbor_installer_root }}/harbor"
 harbor_installer_version: 2.15.0
@@ -35,12 +37,9 @@ harbor_config_file: "{{ harbor_installer_dir }}/harbor.yml"
 harbor_generated_compose_file: "{{ harbor_installer_dir }}/docker-compose.yml"
 harbor_compose_project_name: harbor
 harbor_compose_network_name: "{{ harbor_compose_project_name }}_harbor"
-harbor_data_dir: "{{ harbor_site_dir }}/data"
 harbor_log_dir: /var/log/harbor
-harbor_secret_dir: /etc/lv3/harbor
 harbor_admin_password_remote_file: "{{ harbor_secret_dir }}/admin-password"
 harbor_database_password_remote_file: "{{ harbor_secret_dir }}/database-password"
-harbor_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/harbor
 harbor_admin_password_local_file: "{{ harbor_local_artifact_dir }}/admin-password.txt"
 harbor_database_password_local_file: "{{ harbor_local_artifact_dir }}/database-password.txt"
 harbor_check_runner_robot_local_file: "{{ harbor_local_artifact_dir }}/check-runner-robot.json"
@@ -56,7 +55,7 @@ harbor_keycloak_bootstrap_admin_username: lv3-bootstrap-admin
 harbor_keycloak_bootstrap_admin_password_remote_file: /etc/lv3/keycloak/bootstrap-admin-password
 harbor_keycloak_admin_group: harbor-admins
 harbor_keycloak_client_id: harbor
-harbor_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/harbor-client-secret.txt
+harbor_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/harbor-client-secret.txt"
 harbor_oidc_provider_name: Keycloak
 harbor_oidc_scope: openid,profile,email,groups
 harbor_oidc_user_claim: preferred_username

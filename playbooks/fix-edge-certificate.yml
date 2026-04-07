@@ -1,0 +1,187 @@
+---
+- name: Fix NGINX Edge Certificate Issues (ci.lv3.org, bi.lv3.org, etc)
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - infrastructure
+    - certificate-fix
+
+  tasks:
+    - name: Validate controller connectivity
+      ansible.builtin.debug:
+        msg: "Fixing NGINX edge certificate for missing domains (ci.lv3.org, bi.lv3.org, etc)"
+
+    - name: Load subdomain catalog
+      ansible.builtin.set_fact:
+        subdomain_catalog: "{{ lookup('file', playbook_dir + '/../config/subdomain-catalog.json') | from_json }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+    - name: Collect all edge-published domains
+      ansible.builtin.set_fact:
+        edge_published_domains: >-
+          {{
+            subdomain_catalog.subdomains
+            | selectattr('exposure', 'in', ['edge-published', 'edge-static'])
+            | map(attribute='fqdn')
+            | unique
+            | sort
+          }}
+      run_once: true
+
+    - name: Check current certificate
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - /etc/letsencrypt/live/lv3-edge/cert.pem
+          - -text
+          - -noout
+      register: current_cert_info
+      ignore_errors: true
+
+    - name: Extract SANs from current certificate
+      ansible.builtin.set_fact:
+        current_cert_domains: |
+          {{
+            (
+              current_cert_info.stdout
+              | regex_search('Subject Alternative Name: (.*)', '\1')
+              | default('')
+              | split(', ')
+              | map('trim')
+              | map('regex_replace', '^DNS:', '')
+              | list
+            ) if current_cert_info.rc == 0 else []
+          }}
+
+    - name: Compare current and desired domains
+      ansible.builtin.set_fact:
+        missing_domains: "{{ edge_published_domains | difference(current_cert_domains) }}"
+      run_once: true
+
+    - name: Report certificate status
+      ansible.builtin.debug:
+        msg: |
+          Certificate Status:
+          - Current domains in cert: {{ current_cert_domains | length }}
+          - Desired domains: {{ edge_published_domains | length }}
+          - Missing domains: {{ missing_domains | length }}
+
+          {% if missing_domains | length > 0 %}
+          Missing from certificate:
+          {% for domain in missing_domains | sort %}
+          - {{ domain }}
+          {% endfor %}
+          {% endif %}
+      run_once: true
+
+    - name: Check certbot configuration
+      ansible.builtin.command:
+        argv:
+          - certbot
+          - certificates
+          - --cert-name
+          - lv3-edge
+      register: certbot_status
+      ignore_errors: true
+
+    - name: Force certificate renewal with all domains
+      block:
+        - name: Backup current renewal config
+          ansible.builtin.copy:
+            src: /etc/letsencrypt/renewal/lv3-edge.conf
+            dest: /etc/letsencrypt/renewal/lv3-edge.conf.backup
+            remote_src: true
+            backup: true
+          when: missing_domains | length > 0
+
+        - name: Stop nginx during renewal
+          ansible.builtin.systemd:
+            name: nginx
+            state: stopped
+          when: missing_domains | length > 0
+
+        - name: Remove staging certificate to force renewal
+          ansible.builtin.file:
+            path: /etc/letsencrypt/live/lv3-edge
+            state: absent
+          when: missing_domains | length > 0
+
+        - name: Run certbot to request certificate with all domains
+          ansible.builtin.command:
+            argv:
+              - certbot
+              - certonly
+              - --dns-hetzner
+              - --dns-hetzner-credentials
+              - /etc/letsencrypt/hetzner.ini
+              - --cert-name
+              - lv3-edge
+              - --force-renewal
+              - --non-interactive
+              - --agree-tos
+              - --email
+              - "{{ public_edge_certbot_email | default('admin@lv3.org') }}"
+              - "{% for domain in edge_published_domains | sort %}-d {{ domain }}{{ ' ' if not loop.last else '' }}{% endfor %}"
+          when: missing_domains | length > 0
+          async: 300
+          poll: 5
+
+        - name: Start nginx after renewal
+          ansible.builtin.systemd:
+            name: nginx
+            state: started
+            enabled: true
+          when: missing_domains | length > 0
+
+        - name: Verify certificate after renewal
+          ansible.builtin.command:
+            argv:
+              - openssl
+              - x509
+              - -in
+              - /etc/letsencrypt/live/lv3-edge/cert.pem
+              - -text
+              - -noout
+          register: new_cert_info
+          when: missing_domains | length > 0
+
+        - name: Report renewal results
+          ansible.builtin.debug:
+            msg: |
+              Certificate renewal completed!
+              Check: openssl x509 -in /etc/letsencrypt/live/lv3-edge/cert.pem -text -noout | grep -A5 "Subject Alternative Name"
+          when: missing_domains | length > 0
+
+      when: missing_domains | length > 0
+
+    - name: If no missing domains, run standard nginx converge
+      block:
+        - name: Display nginx is up to date
+          ansible.builtin.debug:
+            msg: "Certificate is up to date with all required domains"
+
+      when: missing_domains | length == 0
+
+    - name: Validate certificate domains
+      ansible.builtin.command:
+        argv:
+          - python3
+          - /tmp/certificate_validator.py
+          - --check-all
+      delegate_to: localhost
+      become: false
+      register: validation_result
+      ignore_errors: true
+
+    - name: Show validation results
+      ansible.builtin.debug:
+        msg: "{{ validation_result.stdout }}"
+      when: validation_result.stdout is defined

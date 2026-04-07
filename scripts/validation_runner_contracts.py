@@ -22,6 +22,11 @@ CONTRACT_SCHEMA_PATH = REPO_ROOT / "docs" / "schema" / "validation-runner-contra
 VALIDATION_GATE_PATH = REPO_ROOT / "config" / "validation-gate.json"
 BUILD_SERVER_CONFIG_PATH = REPO_ROOT / "config" / "build-server.json"
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_list, require_mapping, require_str
+
 
 @dataclass(frozen=True)
 class LaneEligibility:
@@ -38,30 +43,6 @@ class LaneEligibility:
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
 
 
 def require_string_list(value: Any, path: str) -> list[str]:

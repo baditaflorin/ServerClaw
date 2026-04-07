@@ -1,0 +1,44 @@
+id: nifty-clarke-identity-watchdog
+adr: "0376"
+title: "Identity-core watchdog — 30s OIDC probe + oauth2-proxy auto-restart"
+status: ready_for_merge
+ready_to_merge: true
+live_applied: false
+owner: claude
+branch: claude/nifty-clarke
+worktree_path: .claude/worktrees/nifty-clarke
+doc: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
+depends_on:
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0226-systemd-host-supervisor
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/identity_core_watchdog/
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/keycloak.env.j2
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/
+  - playbooks/identity-core-watchdog.yml
+  - config/ansible-execution-scopes.yaml
+  - config/workflow-catalog.json
+  - config/health-probe-catalog.json
+  - config/ntfy/topics.yaml
+  - config/uptime-kuma/monitors.json
+  - Makefile
+ownership_manifest:
+  owned_surfaces:
+  - id: identity_core_watchdog_role
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/identity_core_watchdog/
+    - playbooks/identity-core-watchdog.yml
+    mode: exclusive
+  - id: oauth2_proxy_watchdog_templates
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.sh.j2
+    - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.service.j2
+    - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.timer.j2
+    mode: exclusive
+notes: |
+  ADR 0376: Keycloak kept dying. Deployed identity-core watchdog with 30s OIDC
+  discovery probe (not just /health/live), auto-restart on 2 failures, 6/hr limit.
+  Added KC_CACHE=local to eliminate JGroups TCP loop from stale jgroups_ping rows.
+  Added oauth2-proxy watchdog timer on nginx-lv3 to restart on unresponsive proxy.
+  Root cause of 500s: Keycloak restart invalidated in-flight auth codes.

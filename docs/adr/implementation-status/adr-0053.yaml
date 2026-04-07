@@ -1,0 +1,64 @@
+adr_number: '0053'
+title: OpenTelemetry Traces And Service Maps With Grafana Tempo
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:5ff6a3a5b
+  evidence: 5ff6a3a5b Record ADR 0053 receipt and test fix
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077604'
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:5f81360a3
+  evidence: 5f81360a3 Record ADR 0053 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077633'
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:36516fac4
+  evidence: 36516fac4 Release ADR 0053 pipeline fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077681'
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:5c1c9e135
+  evidence: 5c1c9e135 Finish ADR 0053 Tempo metrics pipeline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077684'
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:c0ed47335
+  evidence: c0ed47335 Finish ADR 0053 Tempo metrics pipeline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077698'
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:1ad4e23be
+  evidence: 1ad4e23be Release ADR 0053 repo implementation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077820'
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:e1553fe73
+  evidence: e1553fe73 Merge ADR 0053 tracing stack
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077823'
+- marker_type: git-commit
+  adr_number: '0053'
+  location: git:950ac5adb
+  evidence: 950ac5adb Implement ADR 0053 tracing stack
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.077826'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8
+
+  Implemented On: 2026-03-22'

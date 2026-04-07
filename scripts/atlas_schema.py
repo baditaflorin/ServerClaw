@@ -24,6 +24,12 @@ from typing import Any
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+_SCRIPTS_DIR = str(Path(__file__).resolve().parent)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
+
 try:
     from scripts.drift_lib import (
         build_guest_ssh_tunnel_command,
@@ -64,32 +70,6 @@ def env_flag(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value.strip()
-
-
-def require_int(value: Any, path: str, minimum: int = 1) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
-
-
 def ensure_repo_root_on_host(repo_root: Path) -> Path:
     override = os.environ.get("LV3_HOST_WORKSPACE", "").strip()
     return Path(override).resolve() if override else repo_root.resolve()
@@ -118,7 +98,7 @@ def validate_catalog(
     require_str(runtime.get("openbao_guest"), "config/atlas/catalog.json.runtime.openbao_guest")
     require_str(runtime.get("openbao_url"), "config/atlas/catalog.json.runtime.openbao_url")
     require_str(runtime.get("postgres_guest"), "config/atlas/catalog.json.runtime.postgres_guest")
-    require_int(runtime.get("postgres_port"), "config/atlas/catalog.json.runtime.postgres_port")
+    require_int(runtime.get("postgres_port"), "config/atlas/catalog.json.runtime.postgres_port", minimum=1)
 
     openbao = require_mapping(catalog.get("openbao"), "config/atlas/catalog.json.openbao")
     require_str(
@@ -307,7 +287,7 @@ def lint_scope_args(
     if latest is None and git_base is None:
         latest = 1
     if latest is not None:
-        return ["--latest", str(require_int(latest, f"{path}.latest"))]
+        return ["--latest", str(require_int(latest, f"{path}.latest", minimum=1))]
     return ["--git-base", require_str(git_base, f"{path}.git_base")]
 
 
@@ -493,6 +473,7 @@ def resolve_postgres_endpoint(catalog: dict[str, Any], context: dict[str, Any]):
     postgres_port = require_int(
         runtime.get("postgres_port"),
         "config/atlas/catalog.json.runtime.postgres_port",
+        minimum=1,
     )
     guest_host = context["guests"][guest_name]
     if env_flag("LV3_ATLAS_FORCE_DIRECT_ENDPOINTS"):

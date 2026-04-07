@@ -76,6 +76,15 @@
           401
         ]
       },
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes API Gateway health every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "http://127.0.0.1:8083/healthz",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -83,8 +92,8 @@
           "type": "http",
           "url": "https://api.lv3.org/healthz",
           "description": "Public edge entrypoint for the unified LV3 API gateway.",
-          "interval": 60,
-          "retryInterval": 60,
+          "interval": 15,
+          "retryInterval": 15,
           "maxretries": 0,
           "maxredirects": 5,
           "accepted_statuscodes": [
@@ -1122,6 +1131,15 @@
       "tls_certificate_ids": [
         "keycloak-edge"
       ],
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes Keycloak management liveness every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "http://127.0.0.1:19000/health/live",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -1129,8 +1147,8 @@
           "type": "http",
           "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
           "description": "Shared SSO discovery endpoint published through the NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
+          "interval": 15,
+          "retryInterval": 15,
           "maxretries": 0,
           "maxredirects": 5,
           "accepted_statuscodes": [
@@ -2056,7 +2074,7 @@
           "ollama",
           "ollama",
           "show",
-          "llama3.2:3b"
+          "gemma4:e4b"
         ],
         "success_rc": 0
       },
@@ -2170,6 +2188,110 @@
         }
       }
     },
+    "litellm": {
+      "service_name": "litellm",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "litellm_runtime",
+      "verify_file": "roles/litellm_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "LiteLLM Proxy startup completes once the liveliness endpoint answers.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:4000/health/liveliness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The LiteLLM Proxy liveliness endpoint continues to answer.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:4000/health/liveliness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The LiteLLM Proxy health endpoint confirms readiness.",
+        "timeout_seconds": 120,
+        "retries": 12,
+        "delay_seconds": 2,
+        "url": "http://127.0.0.1:4000/health/readiness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The private LiteLLM Proxy surface is verified through repo-managed local health probes."
+      }
+    },
+    "librechat": {
+      "service_name": "librechat",
+      "owning_vm": "coolify-lv3",
+      "role": "librechat_runtime",
+      "verify_file": "roles/librechat_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "LibreChat startup completes once the health API endpoint answers.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The LibreChat health API endpoint continues to answer.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "LibreChat is ready to serve requests.",
+        "timeout_seconds": 120,
+        "retries": 12,
+        "delay_seconds": 2,
+        "url": "http://127.0.0.1:8096/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor_type": "http",
+        "url": "https://chat.lv3.org",
+        "expected_status": [
+          200,
+          302
+        ],
+        "interval": 60,
+        "retryInterval": 60,
+        "maxretries": 0,
+        "maxredirects": 10,
+        "accepted_statuscodes": [
+          "200-302"
+        ]
+      }
+    },
     "one_api": {
       "service_name": "one-api",
       "owning_vm": "docker-runtime-lv3",
@@ -2272,6 +2394,15 @@
       "tls_certificate_ids": [
         "openbao-proxy"
       ],
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes OpenBao health every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "http://127.0.0.1:8201/v1/sys/health",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": false,
         "reason": "The operator-facing TLS surface requires client-certificate authentication, so Uptime Kuma only tracks this contract indirectly through role verification."
@@ -3347,6 +3478,15 @@
       "tls_certificate_ids": [
         "step-ca-proxy"
       ],
+      "watchdog": {
+        "kind": "identity_core_watchdog",
+        "description": "On-VM identity-core watchdog probes Step-CA health every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).",
+        "interval_seconds": 15,
+        "failure_threshold": 2,
+        "max_restarts_per_hour": 6,
+        "url": "https://127.0.0.1:9000/health",
+        "ntfy_topic": "platform-identity-critical"
+      },
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -3354,8 +3494,8 @@
           "type": "http",
           "url": "https://10.10.10.92:9000/health",
           "description": "Private step-ca health endpoint on runtime-control-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
+          "interval": 15,
+          "retryInterval": 15,
           "maxretries": 0,
           "maxredirects": 10,
           "accepted_statuscodes": [
@@ -3809,6 +3949,85 @@
             "200-299"
           ]
         }
+      }
+    },
+    "repowise": {
+      "service_name": "repowise",
+      "owning_vm": "docker-runtime-lv3",
+      "role": null,
+      "liveness": {
+        "kind": "http",
+        "description": "Repowise semantic search service responds on its local health endpoint.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:7070/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Repowise search endpoint accepts queries after the vector index is loaded.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:7070/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Repowise Private",
+          "type": "http",
+          "url": "http://10.10.10.20:7070/health",
+          "description": "Private Repowise health endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "neko": {
+      "service_name": "neko",
+      "owning_vm": "runtime-comms-lv3",
+      "role": "neko_runtime",
+      "verify_file": "collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Neko responds on its local WebRTC signalling health endpoint.",
+        "timeout_seconds": 30,
+        "retries": 10,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Neko WebRTC signalling is ready to accept WebSocket connections after Docker container health checks pass.",
+        "timeout_seconds": 30,
+        "retries": 10,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "reason": "Neko is operator-facing and published through the edge at browser.lv3.org; public health monitoring is essential for remote access availability."
       }
     }
   }

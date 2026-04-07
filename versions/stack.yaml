@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.18
-platform_version: 0.131.0
+repo_version: 0.178.37
+platform_version: 0.131.2
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -13,8 +13,9 @@ live_apply_evidence:
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+    public_edge_publication: 2026-04-07-adr-0376-oauth2-stale-session-cookie-auto-clear-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
+    identity_core_watchdog: 2026-04-06-adr-0376-identity-core-watchdog-live-apply
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
@@ -75,7 +76,7 @@ live_apply_evidence:
     semaphore: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     ops_portal: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
-    ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
+    ollama: 2026-04-07-ollama-0.20.2-gemma4-e4b-upgrade-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
@@ -123,7 +124,7 @@ live_apply_evidence:
     harbor: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
     nomad_scheduler: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    serverclaw: 2026-04-01-adr-0294-one-api-mainline-live-apply
+    serverclaw: 2026-04-07-serverclaw-gemma4-e4b-base-model-live-apply
     serverclaw_memory: 2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply
     route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
     session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply
@@ -197,10 +198,14 @@ desired_state:
   guest_network_plan:
     nginx_vm: 10.10.10.10
     docker_runtime_vm: 10.10.10.20
+    runtime_comms_vm: 10.10.10.21
+    runtime_apps_vm: 10.10.10.22
     docker_build_vm: 10.10.10.30
     monitoring_vm: 10.10.10.40
     postgres_vm: 10.10.10.50
     postgres_replica_vm: 10.10.10.51
+    postgres_apps_vm: 10.10.10.52
+    postgres_data_vm: 10.10.10.54
     backup_vm: 10.10.10.60
     coolify_vm: 10.10.10.70
     coolify_apps_vm: 10.10.10.71
@@ -214,10 +219,14 @@ desired_state:
     guest_vmids:
       nginx_vm: 110
       docker_runtime_vm: 120
+      runtime_comms_vm: 121
+      runtime_apps_vm: 122
       docker_build_vm: 130
       monitoring_vm: 140
       postgres_vm: 150
       postgres_replica_vm: 151
+      postgres_apps_vm: 152
+      postgres_data_vm: 154
       backup_vm: 160
       coolify_vm: 170
       coolify_apps_vm: 171
@@ -650,6 +659,14 @@ observed_state:
         name: docker-runtime-lv3
         ipv4: 10.10.10.20
         running: true
+      - vmid: 121
+        name: runtime-comms-lv3
+        ipv4: 10.10.10.21
+        running: false
+      - vmid: 122
+        name: runtime-apps-lv3
+        ipv4: 10.10.10.22
+        running: false
       - vmid: 130
         name: docker-build-lv3
         ipv4: 10.10.10.30
@@ -665,6 +682,14 @@ observed_state:
       - vmid: 151
         name: postgres-replica-lv3
         ipv4: 10.10.10.51
+        running: false
+      - vmid: 152
+        name: postgres-apps-lv3
+        ipv4: 10.10.10.52
+        running: false
+      - vmid: 154
+        name: postgres-data-lv3
+        ipv4: 10.10.10.54
         running: false
       - vmid: 160
         name: backup-lv3
@@ -1189,8 +1214,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.18
+    current: 0.178.37
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.98
+    current: 0.131.1
     meaning: intended platform release for the actual server configuration

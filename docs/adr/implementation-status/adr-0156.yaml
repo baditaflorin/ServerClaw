@@ -1,0 +1,70 @@
+adr_number: '0156'
+title: Agent Session Workspace Isolation
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:7ada79ea6
+  evidence: 7ada79ea6 Record ADR 0156 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.832943'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:9f56b7d89
+  evidence: 9f56b7d89 Cut 0.159.1 for ADR 0156 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.832980'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:ef160d4b4
+  evidence: ef160d4b4 Repair ADR 0156 live-apply gate path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.832984'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:a25e0799b
+  evidence: a25e0799b Record ADR 0156 live-apply retry gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.833297'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:d56fcd161
+  evidence: d56fcd161 Record ADR 0156 live-apply retry blocker
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.833300'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:3ba705afd
+  evidence: 3ba705afd Record ADR 0156 gate bypass receipts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.833484'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:bfe390ee7
+  evidence: bfe390ee7 Release 0.143.2 with ADR 0156 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.833492'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:ba32dabc3
+  evidence: ba32dabc3 Implement ADR 0156 session workspace isolation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.833499'
+- marker_type: git-commit
+  adr_number: '0156'
+  location: git:f9910b26f
+  evidence: f9910b26f Implement ADR 0156 session workspace isolation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:11.833502'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=9
+
+  Implemented On: 2026-03-26'

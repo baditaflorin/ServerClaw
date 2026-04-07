@@ -3,8 +3,15 @@
 # Inputs: Runtime paths, image refs, PostgreSQL credentials, Keycloak client secret, and bootstrap script defaults.
 # Outputs: The live Directus container, OpenBao-backed runtime env, seeded collection schema, and local health endpoints match repo truth.
 # Idempotency: Partially idempotent because compose restarts and schema refreshes are performed when the declared runtime or bootstrap inputs change.
-# Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, and ADR 0289.
+# Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, ADR 0289, ADR 0370, ADR 0373.
 ---
+- name: Derive Directus conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: directus
+
 - name: Validate Directus runtime inputs
   ansible.builtin.assert:
     that:
@@ -27,47 +34,21 @@
       directus_runtime requires runtime paths, PostgreSQL auth, a Keycloak
       client secret, and the controller-local service token path.
 
-- name: Check whether the Directus database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ directus_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: directus_database_password_local
-
-- name: Check whether the Directus Keycloak client secret exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ directus_keycloak_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: directus_keycloak_client_secret_local
-
-- name: Check whether the Directus service token exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ directus_service_registry_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: directus_service_registry_token_local
-
-- name: Fail if the Directus database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ directus_database_password_local_file }} is missing on the control machine.
-      Converge directus_postgres before deploying Directus.
-  when: not directus_database_password_local.stat.exists
-
-- name: Fail if the Directus Keycloak client secret is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ directus_keycloak_client_secret_local_file }} is missing on the control machine.
-      Converge the Keycloak runtime before deploying Directus.
-  when: not directus_keycloak_client_secret_local.stat.exists
-
-- name: Fail if the Directus service token is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ directus_service_registry_token_local_file }} is missing on the control machine.
-      Converge directus_postgres before publishing Directus.
-  when: not directus_service_registry_token_local.stat.exists
+- name: Check Directus prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ directus_database_password_local_file }}"
+        description: "Directus database password"
+        prerequisite: "Converge directus_postgres before deploying Directus"
+      - path: "{{ directus_keycloak_client_secret_local_file }}"
+        description: "Directus Keycloak client secret"
+        prerequisite: "Converge the Keycloak runtime before deploying Directus"
+      - path: "{{ directus_service_registry_token_local_file }}"
+        description: "Directus service registry token"
+        prerequisite: "Converge directus_postgres before publishing Directus"
 
 - name: Ensure the Directus runtime packages are present
   ansible.builtin.apt:
@@ -91,74 +72,49 @@
     - path: "{{ directus_secret_dir }}"
       mode: "0700"
 
-- name: Generate the Directus runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ directus_key_remote_file }}"
-      command: "openssl rand -hex 32"
-    - path: "{{ directus_secret_remote_file }}"
-      command: "openssl rand -hex 32"
-    - path: "{{ directus_admin_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
-  register: directus_secret_generation
-  changed_when: "'changed' in directus_secret_generation.stdout"
-  no_log: true
-
-- name: Read the Directus runtime secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  register: directus_secret_reads
-  loop:
-    - "{{ directus_key_remote_file }}"
-    - "{{ directus_secret_remote_file }}"
-    - "{{ directus_admin_password_remote_file }}"
+- name: Manage Directus runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ directus_key_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "directus-key"
+      - path: "{{ directus_secret_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "directus-secret"
+      - path: "{{ directus_admin_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "directus-admin-password"
+    common_manage_service_secrets_read:
+      - "{{ directus_key_remote_file }}"
+      - "{{ directus_secret_remote_file }}"
+      - "{{ directus_admin_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ directus_key_local_file }}"
+        content_index: 0
+      - dest: "{{ directus_secret_local_file }}"
+        content_index: 1
+      - dest: "{{ directus_admin_password_local_file }}"
+        content_index: 2
+    common_manage_service_secrets_local_artifact_dir: "{{ directus_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "directus_decoded_secrets"
   no_log: true
 
 - name: Record the Directus runtime secrets
   ansible.builtin.set_fact:
-    directus_key: "{{ directus_secret_reads.results[0].content | b64decode | trim }}"
-    directus_secret: "{{ directus_secret_reads.results[1].content | b64decode | trim }}"
-    directus_admin_password: "{{ directus_secret_reads.results[2].content | b64decode | trim }}"
+    directus_key: "{{ directus_decoded_secrets[0] }}"
+    directus_secret: "{{ directus_decoded_secrets[1] }}"
+    directus_admin_password: "{{ directus_decoded_secrets[2] }}"
     directus_database_password: "{{ lookup('ansible.builtin.file', directus_database_password_local_file) | trim }}"
     directus_keycloak_client_secret: "{{ lookup('ansible.builtin.file', directus_keycloak_client_secret_local_file) | trim }}"
     directus_runtime_secret_payload:
       DB_PASSWORD: "{{ lookup('ansible.builtin.file', directus_database_password_local_file) | trim }}"
-      KEY: "{{ directus_secret_reads.results[0].content | b64decode | trim }}"
-      SECRET: "{{ directus_secret_reads.results[1].content | b64decode | trim }}"
-      ADMIN_PASSWORD: "{{ directus_secret_reads.results[2].content | b64decode | trim }}"
+      KEY: "{{ directus_decoded_secrets[0] }}"
+      SECRET: "{{ directus_decoded_secrets[1] }}"
+      ADMIN_PASSWORD: "{{ directus_decoded_secrets[2] }}"
       AUTH_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', directus_keycloak_client_secret_local_file) | trim }}"
-  no_log: true
-
-- name: Ensure the local Directus artifact directory exists
-  ansible.builtin.file:
-    path: "{{ directus_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the Directus runtime secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ directus_key_local_file }}"
-      content: "{{ directus_key }}"
-    - dest: "{{ directus_secret_local_file }}"
-      content: "{{ directus_secret }}"
-    - dest: "{{ directus_admin_password_local_file }}"
-      content: "{{ directus_admin_password }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Directus
@@ -213,164 +169,23 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: directus_compose_template
 
-- name: Pull the Directus image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ directus_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ directus_site_dir }}"
-  register: directus_pull
-  retries: 5
-  delay: 5
-  until: directus_pull.rc == 0
-  changed_when: >-
-    'Pulling' in directus_pull.stdout
-    or 'Downloaded newer image' in directus_pull.stdout
-    or 'Pull complete' in directus_pull.stdout
-
-- name: Check whether the Docker nat chain exists before Directus startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: directus_docker_nat_chain
-  changed_when: false
-  failed_when: false
-
-- name: Restore Docker networking when the nat chain is missing before Directus startup
-  ansible.builtin.service:
-    name: docker
-    state: restarted
-  when: directus_docker_nat_chain.rc != 0
-
-- name: Recheck the Docker nat chain before Directus startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: directus_docker_nat_chain_recheck
-  changed_when: false
-  failed_when: directus_docker_nat_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
-  until: directus_docker_nat_chain_recheck.rc == 0
-  when: directus_docker_nat_chain.rc != 0
-
-- name: Wait for the Docker daemon to answer after networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - info
-      - --format
-      - '{{ "{{.ServerVersion}}" }}'
-  register: directus_docker_info
-  changed_when: false
-  retries: 10
-  delay: 2
-  until: directus_docker_info.rc == 0
-  when: directus_docker_nat_chain.rc != 0
-
-- name: Verify the Docker nat chain after networking recovery before Directus startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: directus_docker_nat_chain_verify
-  changed_when: false
-  failed_when: directus_docker_nat_chain_verify.rc not in [0, 1]
-  when: directus_docker_nat_chain.rc != 0
-
-- name: Assert Docker nat chain is present before Directus startup
-  ansible.builtin.assert:
-    that:
-      - directus_docker_nat_chain.rc == 0 or (directus_docker_nat_chain_verify.rc | default(1)) == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; Directus published ports will fail."
-
-- name: Check whether the Directus local port is already published
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ directus_internal_port }}"
-    delay: 0
-    timeout: 1
-  register: directus_local_port_probe
-  changed_when: false
-  failed_when: false
-
-- name: Check whether the current Directus health endpoint is healthy before startup
-  ansible.builtin.uri:
-    url: "{{ directus_internal_base_url }}{{ directus_health_path }}"
-    method: GET
-    status_code: 200
-  register: directus_health_probe
-  changed_when: false
-  failed_when: false
-
-- name: Record whether the Directus startup needs a force recreate
-  ansible.builtin.set_fact:
-    directus_force_recreate: >-
-      {{
-        directus_docker_nat_chain.rc != 0
-        or (directus_env_template.changed | default(false))
-        or (directus_compose_template.changed | default(false))
-        or (directus_pull.changed | default(false))
-        or (directus_local_port_probe.failed | default(false))
-        or (directus_health_probe.status | default(0)) != 200
-      }}
-
-- name: Start the Directus stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ directus_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ directus_site_dir }}"
-  register: directus_up
-  changed_when: >-
-    'Creating' in directus_up.stdout
-    or 'Recreating' in directus_up.stdout
-    or 'Starting' in directus_up.stdout
-  when: not directus_force_recreate
-
-- name: Force-recreate the Directus service after runtime drift or Docker recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ directus_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --no-deps
-      - directus
-  args:
-    chdir: "{{ directus_site_dir }}"
-  register: directus_force_recreate_up
-  changed_when: >-
-    'Creating' in directus_force_recreate_up.stdout
-    or 'Recreating' in directus_force_recreate_up.stdout
-    or 'Starting' in directus_force_recreate_up.stdout
-  when: directus_force_recreate
+- name: Converge the Directus Docker stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ directus_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ directus_site_dir }}"
+    common_docker_compose_converge_service_name: directus
+    common_docker_compose_converge_template_results:
+      - "{{ directus_env_template }}"
+      - "{{ directus_compose_template }}"
+    common_docker_compose_converge_health_port: "{{ directus_internal_port }}"
+    common_docker_compose_converge_health_url: "{{ directus_internal_base_url }}{{ directus_health_path }}"
 
 - name: Verify the Directus runtime before schema bootstrap
   ansible.builtin.import_tasks: verify.yml

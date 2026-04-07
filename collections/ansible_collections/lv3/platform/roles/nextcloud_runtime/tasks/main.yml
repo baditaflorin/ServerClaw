@@ -1,5 +1,6 @@
 ---
 # Purpose: Converge the Nextcloud runtime, bootstrap local secrets, and enforce the repo-managed DAV publication contract.
+# ADR 0373: derive_service_defaults called at top.
 # Use case: Run during Nextcloud deployment, upgrade, or replay on docker-runtime-lv3 once PostgreSQL, OpenBao, and the shared edge exist.
 #
 # Inputs (required):
@@ -26,6 +27,14 @@
 #   - Task file: verify.yml — performs the post-start local verification flow.
 #
 # Related ADRs: 0077, 0165, 0260
+
+- name: Derive Nextcloud conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: nextcloud
+
 
 - name: Validate Nextcloud runtime inputs
   ansible.builtin.assert:
@@ -58,19 +67,15 @@
       nextcloud_runtime requires compose paths, images, service URLs, PostgreSQL credentials,
       and admin or Redis bootstrap settings.
 
-- name: Ensure the Nextcloud database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ nextcloud_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: nextcloud_database_password_local
-
-- name: Fail if the Nextcloud database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ nextcloud_database_password_local_file }} is missing on the control machine.
-      Run the Nextcloud PostgreSQL converge first so the runtime can connect to postgres-lv3.
-  when: not nextcloud_database_password_local.stat.exists
+- name: Check Nextcloud prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ nextcloud_database_password_local_file }}"
+        description: "Nextcloud database password"
+        prerequisite: "Run the Nextcloud PostgreSQL converge first so the runtime can connect to postgres-lv3"
 
 - name: Ensure the Nextcloud runtime packages are present
   ansible.builtin.apt:
@@ -107,76 +112,38 @@
       group: root
       mode: "0700"
 
-- name: Generate the Nextcloud admin password
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ nextcloud_admin_password_remote_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ nextcloud_admin_password_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: nextcloud_admin_password_generation
-  changed_when: "'changed' in nextcloud_admin_password_generation.stdout"
-  no_log: true
-
-- name: Generate the Nextcloud Redis password
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ nextcloud_redis_password_remote_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ nextcloud_redis_password_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: nextcloud_redis_password_generation
-  changed_when: "'changed' in nextcloud_redis_password_generation.stdout"
-  no_log: true
-
-- name: Read the Nextcloud admin password
-  ansible.builtin.slurp:
-    src: "{{ nextcloud_admin_password_remote_file }}"
-  register: nextcloud_admin_password_raw
-  no_log: true
-
-- name: Read the Nextcloud Redis password
-  ansible.builtin.slurp:
-    src: "{{ nextcloud_redis_password_remote_file }}"
-  register: nextcloud_redis_password_raw
+- name: Manage Nextcloud runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ nextcloud_admin_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "nextcloud-admin-password"
+      - path: "{{ nextcloud_redis_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "nextcloud-redis-password"
+    common_manage_service_secrets_read:
+      - "{{ nextcloud_admin_password_remote_file }}"
+      - "{{ nextcloud_redis_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ nextcloud_admin_password_local_file }}"
+        content_index: 0
+      - dest: "{{ nextcloud_redis_password_local_file }}"
+        content_index: 1
+    common_manage_service_secrets_local_artifact_dir: "{{ nextcloud_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "nextcloud_decoded_secrets"
   no_log: true
 
 - name: Record the Nextcloud runtime secrets
   ansible.builtin.set_fact:
-    nextcloud_admin_password: "{{ nextcloud_admin_password_raw.content | b64decode | trim }}"
-    nextcloud_redis_password: "{{ nextcloud_redis_password_raw.content | b64decode | trim }}"
+    nextcloud_admin_password: "{{ nextcloud_decoded_secrets[0] }}"
+    nextcloud_redis_password: "{{ nextcloud_decoded_secrets[1] }}"
     nextcloud_runtime_secret_payload:
       POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.file', nextcloud_database_password_local_file) | trim }}"
-      NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud_admin_password_raw.content | b64decode | trim }}"
-      REDIS_HOST_PASSWORD: "{{ nextcloud_redis_password_raw.content | b64decode | trim }}"
-  no_log: true
-
-- name: Ensure the local Nextcloud artifact directory exists
-  ansible.builtin.file:
-    path: "{{ nextcloud_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the Nextcloud bootstrap secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ nextcloud_admin_password_local_file }}"
-      content: "{{ nextcloud_admin_password }}"
-    - dest: "{{ nextcloud_redis_password_local_file }}"
-      content: "{{ nextcloud_redis_password }}"
+      NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud_decoded_secrets[0] }}"
+      REDIS_HOST_PASSWORD: "{{ nextcloud_decoded_secrets[1] }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Nextcloud
@@ -230,6 +197,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
 
 - name: Pull the Nextcloud images
   ansible.builtin.command:

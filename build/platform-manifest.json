@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.19",
-  "platform_version": "0.131.0",
-  "generated_at": "2026-04-05T22:05:54Z",
-  "next_refresh_at": "2026-04-05T23:05:54Z",
+  "repo_version": "0.178.55",
+  "platform_version": "0.131.2",
+  "generated_at": "2026-04-07T19:41:26Z",
+  "next_refresh_at": "2026-04-07T20:41:26Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -83,7 +83,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://changelog.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "coolify": {
         "service_name": "Coolify",
@@ -139,7 +139,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://data.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "docker_build": {
@@ -162,7 +162,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -173,7 +173,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "dozzle": {
         "service_name": "Dozzle",
@@ -219,7 +219,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "glitchtip": {
@@ -231,7 +231,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://errors.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "gotenberg": {
@@ -267,7 +267,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grist.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "harbor": {
@@ -279,7 +279,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://registry.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "headscale": {
@@ -314,7 +314,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://notebooks.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "keycloak": {
@@ -326,7 +326,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://sso.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "label_studio": {
@@ -384,7 +384,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "mailpit": {
         "service_name": "Mailpit",
@@ -453,7 +453,18 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "nats://10.10.10.92:4222",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
+      },
+      "neko": {
+        "service_name": "Neko Remote Desktop",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://browser.lv3.org",
+        "last_live_apply": "2026-04-04T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -488,7 +499,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://nginx.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "nomad": {
@@ -499,7 +510,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://100.64.0.1:8013",
+        "primary_url": "https://scheduler.lv3.org",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
       "ntfy": {
@@ -544,7 +555,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8018/v1",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "open_webui": {
@@ -568,7 +579,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8200",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "openfga": {
         "service_name": "OpenFGA",
@@ -579,7 +590,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.92:8098",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "ops_portal": {
@@ -591,7 +602,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ops.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "outline": {
         "service_name": "Outline",
@@ -602,7 +613,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://wiki.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "paperless": {
@@ -614,7 +625,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://paperless.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "piper": {
@@ -638,7 +649,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://tasks.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "platform_context_api": {
@@ -674,7 +685,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -721,6 +732,17 @@
         "primary_url": "kafka://10.10.10.20:9092",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
+      "repowise": {
+        "service_name": "Repowise Semantic Code Search",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://repowise.lv3.org",
+        "last_live_apply": "2026-04-06T00:00:00Z"
+      },
       "searxng": {
         "service_name": "SearXNG",
         "status": "healthy",
@@ -741,7 +763,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "serverclaw": {
@@ -777,7 +799,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "superset": {
         "service_name": "Apache Superset",
@@ -788,7 +810,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://bi.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "temporal": {
@@ -800,7 +822,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "grpc://127.0.0.1:7233",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "tesseract_ocr": {
         "service_name": "Tesseract OCR",
@@ -859,7 +881,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://vault.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -871,7 +893,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8005",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-06T00:00:00Z",
         "slo_status": "unknown"
       },
       "woodpecker": {
@@ -1859,6 +1881,32 @@
         "runbook": "docs/runbooks/configure-homepage.md"
       },
       {
+        "id": "converge-identity-core-watchdog",
+        "description": "Deploy the identity-core health watchdog on runtime-control-lv3: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
+        "tags": [
+          "converge-identity-core-watchdog",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 300,
+          "max_steps": 50,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/adr/0376-identity-core-vm-isolation-and-watchdog.md"
+      },
+      {
         "id": "converge-jupyterhub",
         "description": "Deploy JupyterHub on docker-runtime-lv3, publish it at notebooks.lv3.org, and verify the interactive notebook spawn contract against current platform services.",
         "tags": [
@@ -1987,6 +2035,58 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-langfuse.md"
+      },
+      {
+        "id": "converge-librechat",
+        "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge, replacing Open WebUI.",
+        "tags": [
+          "converge-librechat",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-librechat.md"
+      },
+      {
+        "id": "converge-litellm",
+        "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend, replacing One API as the programmatic LLM gateway.",
+        "tags": [
+          "converge-litellm",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-litellm.md"
       },
       {
         "id": "converge-livekit",
@@ -2195,6 +2295,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-n8n.md"
+      },
+      {
+        "id": "converge-neko",
+        "description": "Converge Neko remote desktop on dedicated runtime-comms-lv3 VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
+        "tags": [
+          "converge-neko",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/adr/0380-neko-for-operator-remote-browser-access.md"
       },
       {
         "id": "converge-netbox",
@@ -4765,6 +4891,26 @@
     ],
     "automation_eligible_runbooks": [
       {
+        "id": "0376-identity-core-vm-isolation-and-watchdog",
+        "title": "ADR 0376: Identity Core VM Isolation and Aggressive Health Watchdog",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/adr/0376-identity-core-vm-isolation-and-watchdog.md",
+        "workflow_ids": [
+          "converge-identity-core-watchdog"
+        ]
+      },
+      {
+        "id": "0380-neko-for-operator-remote-browser-access",
+        "title": "ADR 0380: Neko Remote Desktop for Interactive Operator Browser Access",
+        "agent_trust_required": "T3",
+        "steps": 16,
+        "path": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
+        "workflow_ids": [
+          "converge-neko"
+        ]
+      },
+      {
         "id": "agent-observation-loop",
         "title": "Agent Observation Loop",
         "agent_trust_required": "T1",
@@ -5155,6 +5301,26 @@
         "path": "docs/runbooks/configure-langfuse.md",
         "workflow_ids": [
           "converge-langfuse"
+        ]
+      },
+      {
+        "id": "configure-librechat",
+        "title": "Configure LibreChat",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-librechat.md",
+        "workflow_ids": [
+          "converge-librechat"
+        ]
+      },
+      {
+        "id": "configure-litellm",
+        "title": "Configure LiteLLM Proxy",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-litellm.md",
+        "workflow_ids": [
+          "converge-litellm"
         ]
       },
       {
@@ -6155,10 +6321,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.18",
-    "deployed_at": "2026-04-05",
-    "summary": "Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image). fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network",
-    "release_notes_url": "docs/release-notes/0.178.19.md"
+    "last_version": "0.178.54",
+    "deployed_at": "2026-04-07",
+    "summary": "fix ops.lv3.org auth loop \u2014 expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused \"Code not valid\" on every login attempt add LiteLLM Proxy + LibreChat to replace One API + Open WebUI \u2014 portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar",
+    "release_notes_url": "docs/release-notes/0.178.55.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6210,32 +6376,18 @@
   },
   "known_gaps": [
     {
-      "adr": "0058",
-      "title": "NATS JetStream For Internal Event Bus And Agent Coordination",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md"
-    },
-    {
-      "adr": "0061",
-      "title": "GlitchTip For Application Exceptions And Task Failures",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md"
-    },
-    {
-      "adr": "0118",
-      "title": "Replayable Failure Case Library",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0118-replayable-failure-case-library.md"
-    },
-    {
       "adr": "0183",
       "title": "Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity",
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
+    },
+    {
+      "adr": "0377",
+      "title": "Open WebUI Platform Knowledge Integration",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0377-open-webui-platform-knowledge-integration.md"
     }
   ]
 }

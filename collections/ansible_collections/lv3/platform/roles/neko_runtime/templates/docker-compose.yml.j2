@@ -1,0 +1,102 @@
+---
+# Neko Remote Desktop Docker Compose Configuration
+# Manages WebRTC signalling and media streaming for interactive browser access
+
+version: '3.8'
+
+services:
+  neko:
+    image: "{{ neko_runtime_image_name }}:{{ neko_runtime_image_tag }}"
+    container_name: "{{ neko_runtime_container_name }}"
+    restart: "{{ neko_runtime_restart_policy }}"
+
+    # Use host network for direct UDP media streaming (WebRTC)
+    # Signalling: TCP port {{ neko_runtime_port }} (proxied via NGINX at browser.lv3.org)
+    # Media: UDP ports 50000-60000 (direct from Proxmox host)
+    network_mode: host
+
+    # Browser rendering environment variables
+    environment:
+      # Neko server configuration
+      NEKO_SERVER_BIND: "0.0.0.0:{{ neko_runtime_port }}"
+      NEKO_BROADCAST: "broadcast"
+
+      # Browser engine selection
+      NEKO_BROWSER: "{{ neko_runtime_browser }}"
+
+      # Display resolution (split WIDTHxHEIGHT)
+      NEKO_SCREEN_WIDTH: "{{ (neko_runtime_res.split('x'))[0] }}"
+      NEKO_SCREEN_HEIGHT: "{{ (neko_runtime_res.split('x'))[1] }}"
+
+      # Session configuration
+      NEKO_MAX_CONNECTIONS: "{{ neko_runtime_max_connections }}"
+      {% if neko_runtime_password %}
+      NEKO_PASSWORD: "{{ neko_runtime_password }}"
+      {% endif %}
+
+      # WebRTC configuration (optional STUN/TURN)
+      {% if neko_runtime_stun_server %}
+      NEKO_STUN: "{{ neko_runtime_stun_server }}"
+      {% endif %}
+      {% if neko_runtime_turn_servers | length > 0 %}
+      NEKO_TURN: "{{ neko_runtime_turn_servers | join(',') }}"
+      {% endif %}
+
+      # Logging
+      NEKO_LOG_LEVEL: "info"
+
+    # Persistent storage for browser cache and configuration
+    volumes:
+      # Browser cache (speeds up page loads on repeat visits)
+      - "{{ neko_runtime_data_dir }}/cache:/root/.cache"
+      # Browser profile and settings
+      - "{{ neko_runtime_data_dir }}/config:/root/.config"
+      # Neko logs (accessible to Ansible for debugging)
+      - "{{ neko_runtime_data_dir }}/logs:/tmp/logs"
+
+    # Docker healthcheck: HTTP GET to / (Neko UI root always returns 200 when up)
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -fs
+        - --max-time
+        - "5"
+        - "http://127.0.0.1:{{ neko_runtime_port }}/"
+      interval: "{{ neko_runtime_healthcheck_interval }}"
+      timeout: "{{ neko_runtime_healthcheck_timeout }}"
+      retries: {{ neko_runtime_healthcheck_retries }}
+      start_period: 30s
+
+    # Resource limits (prevent container from starving host)
+    # ADR 0347: Separate VM ensures media streaming doesn't starve other workloads
+    cpus: "{{ neko_runtime_cpu_limit }}"
+    cpu_shares: 1024  # Relative weight if cgroup shares needed
+    mem_limit: "{{ neko_runtime_memory_limit }}"
+    memswap_limit: "{{ neko_runtime_memory_limit }}"  # No swap beyond limit
+
+    # Logging configuration
+    logging:
+      driver: "{{ neko_runtime_log_driver }}"
+      options:
+        max-size: "{{ neko_runtime_log_max_size }}"
+        max-file: "{{ neko_runtime_log_max_file }}"
+        labels: "service=neko,version={{ neko_runtime_image_tag }}"
+
+    # Labels for tracking and orchestration
+    labels:
+      service: "neko"
+      role: "neko_runtime"
+      purpose: "interactive-browser-access"
+      adr: "0380"
+
+    # Security: Drop capabilities, read-only root except for specific mounts
+    security_opt:
+      - "no-new-privileges:true"
+
+    # Ensure container stops cleanly
+    stop_grace_period: 10s
+    stop_signal: SIGTERM
+
+# No dedicated network (host network mode)
+# No external volume definitions (all volumes inline)
