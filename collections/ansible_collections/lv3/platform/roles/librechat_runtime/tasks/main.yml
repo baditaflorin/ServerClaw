@@ -22,8 +22,6 @@
     name:
       - openssl
     state: present
-    update_cache: true
-    force_apt_get: true
 
 - name: Ensure the LibreChat runtime directories exist
   ansible.builtin.file:

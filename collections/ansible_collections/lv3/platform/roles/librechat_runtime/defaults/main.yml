@@ -15,7 +15,7 @@ librechat_legacy_env_file: "{{ librechat_site_dir }}/librechat.env"
 librechat_openbao_agent_dir: "{{ librechat_site_dir }}/openbao"
 librechat_openbao_agent_image: "{{ openbao_agent_image }}"
 librechat_openbao_agent_container_name: librechat-openbao-agent
-librechat_enable_openbao_agent: true
+librechat_enable_openbao_agent: false
 librechat_openbao_secret_path: services/librechat/runtime-env
 librechat_openbao_policy_name: lv3-service-librechat-runtime
 librechat_openbao_approle_name: librechat-runtime
@@ -46,7 +46,7 @@ librechat_oidc_callback_url: https://chat.lv3.org/oauth/openid/callback
 librechat_oidc_button_label: Login with Keycloak
 librechat_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-client-secret.txt
 # Ollama
-librechat_ollama_base_url: http://host.docker.internal:11434
+librechat_ollama_base_url: http://10.10.10.20:11434
 # Anthropic
 librechat_anthropic_api_key_remote_file: "{{ librechat_secret_dir }}/anthropic-api-key"
 # System prompt preset
