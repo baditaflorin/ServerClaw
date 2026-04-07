@@ -1508,3 +1508,19 @@ tofu-import:
 	@test "$(ENV)" = "production" || (echo "tofu-import currently supports ENV=production"; exit 1)
 	@COMMAND="$$(python3 $(REPO_ROOT)/scripts/tofu_remote_command.py import $(ENV) --vm $(VM))" \
 		$(RUN_ID_ENV) $(REPO_ROOT)/scripts/remote_exec.sh remote-exec
+
+# ADR Governance Commands
+validate-adr-transitions:
+	python3 $(REPO_ROOT)/scripts/validate_adr_status_transitions.py
+
+sync-adrs-to-plane:
+	python3 $(REPO_ROOT)/scripts/sync_adrs_to_plane.py
+
+sync-adrs-to-plane-dry-run:
+	python3 $(REPO_ROOT)/scripts/sync_adrs_to_plane.py --dry-run
+
+run-adr-quarterly-audit:
+	python3 $(REPO_ROOT)/config/windmill/scripts/adr-quarterly-audit.py
+
+run-adr-quarterly-audit-dry-run:
+	python3 $(REPO_ROOT)/config/windmill/scripts/adr-quarterly-audit.py --dry-run
