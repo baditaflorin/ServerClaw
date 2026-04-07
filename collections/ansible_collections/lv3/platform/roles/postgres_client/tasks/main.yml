@@ -106,13 +106,16 @@
 - name: Ensure support role exists for {{ postgres_client_service }}
   become: true
   become_user: postgres
-  ansible.builtin.command:
-    argv:
-      - psql
-      - -v
-      - ON_ERROR_STOP=1
-      - -c
-      - "CREATE ROLE IF NOT EXISTS {{ postgres_client_support_role }} NOLOGIN"
+  ansible.builtin.shell:
+    cmd: |
+      psql -v ON_ERROR_STOP=1 <<'EOSQL'
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{ postgres_client_support_role }}') THEN
+          CREATE ROLE {{ postgres_client_support_role }} NOLOGIN;
+        END IF;
+      END $$;
+      EOSQL
   changed_when: false
   when:
     - postgres_client_support_role | length > 0
