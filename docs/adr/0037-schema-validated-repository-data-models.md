@@ -1,8 +1,8 @@
 # ADR 0037: Schema-Validated Repository Data Models
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.40.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-22
 - Date: 2026-03-22

@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: range
 label: 0000-0099
 range:
   start: '0000'
   end: 0099
-total_adrs: 99
+total_adrs: 101
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -34,7 +34,7 @@ adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -45,13 +45,12 @@ adrs:
     summary: 'We will target:'
     filename: 0002-target-proxmox-ve-9-on-debian-13.md
     path: docs/adr/0002-target-proxmox-ve-9-on-debian-13.md
-    implemented_in_repo_version: 0.2.0
     implemented_in_platform_version: 0.2.0
     implemented_on: '2026-03-21'
   - adr: '0003'
     title: Prefer Hetzner Rescue Plus Installimage For Bootstrap
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: bootstrap
     keywords:
@@ -65,13 +64,12 @@ adrs:
       installer or the VNC installer.
     filename: 0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md
     path: docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md
-    implemented_in_repo_version: 0.1.0
     implemented_in_platform_version: 0.1.0
     implemented_on: '2026-03-21'
   - adr: '0004'
     title: Install Proxmox VE From Debian Packages
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -85,13 +83,12 @@ adrs:
       and Ansible-managed configuration.
     filename: 0004-install-proxmox-ve-from-debian-packages.md
     path: docs/adr/0004-install-proxmox-ve-from-debian-packages.md
-    implemented_in_repo_version: 0.2.0
     implemented_in_platform_version: 0.2.0
     implemented_on: '2026-03-21'
   - adr: '0005'
     title: Single-Node First Topology
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -102,13 +99,12 @@ adrs:
       cluster and not as a hyper-converged Ceph deploymen
     filename: 0005-single-node-first-topology.md
     path: docs/adr/0005-single-node-first-topology.md
-    implemented_in_repo_version: 0.2.0
     implemented_in_platform_version: 0.2.0
     implemented_on: '2026-03-21'
   - adr: '0006'
     title: Security Baseline For Proxmox Host
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -119,13 +115,12 @@ adrs:
     summary: 'We will apply the following baseline before declaring the node ready for workloads:'
     filename: 0006-security-baseline-for-proxmox-host.md
     path: docs/adr/0006-security-baseline-for-proxmox-host.md
-    implemented_in_repo_version: 0.13.0
     implemented_in_platform_version: 0.10.0
     implemented_on: '2026-03-21'
   - adr: '0007'
     title: Agent-Oriented Access Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: identity
     keywords:
@@ -135,13 +130,12 @@ adrs:
     summary: 'We will use a layered access model:'
     filename: 0007-agent-oriented-access-model.md
     path: docs/adr/0007-agent-oriented-access-model.md
-    implemented_in_repo_version: 0.14.0
     implemented_in_platform_version: 0.11.0
     implemented_on: '2026-03-21'
   - adr: 0008
     title: Versioning Model For Repo And Host
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: release
     keywords:
@@ -152,12 +146,11 @@ adrs:
     summary: We will use two semantic version streams plus one observed-state registry.
     filename: 0008-versioning-model-for-repo-and-host.md
     path: docs/adr/0008-versioning-model-for-repo-and-host.md
-    implemented_in_repo_version: 0.1.0
     implemented_on: '2026-03-21'
   - adr: 0009
     title: DRY And Solid Engineering Principles
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: ci-cd
     keywords:
@@ -168,12 +161,11 @@ adrs:
     summary: 'We will treat the following as core repository rules:'
     filename: 0009-dry-and-solid-engineering-principles.md
     path: docs/adr/0009-dry-and-solid-engineering-principles.md
-    implemented_in_repo_version: 0.1.0
     implemented_on: '2026-03-21'
   - adr: '0010'
     title: Initial Proxmox VM Topology
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -184,7 +176,6 @@ adrs:
     summary: We will start with a simple four-VM topology on a private Proxmox-managed network in the 10.10.10.0/24 range.
     filename: 0010-initial-proxmox-vm-topology.md
     path: docs/adr/0010-initial-proxmox-vm-topology.md
-    implemented_in_repo_version: 0.6.0
     implemented_in_platform_version: 0.6.0
     implemented_on: '2026-03-21'
   - adr: '0011'
@@ -208,7 +199,7 @@ adrs:
   - adr: '0012'
     title: Proxmox Host Bridge And NAT Network
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -220,13 +211,12 @@ adrs:
     summary: 'We will configure the Proxmox host with two bridges:'
     filename: 0012-proxmox-host-bridge-and-nat-network.md
     path: docs/adr/0012-proxmox-host-bridge-and-nat-network.md
-    implemented_in_repo_version: 0.3.0
     implemented_in_platform_version: 0.3.0
     implemented_on: '2026-03-21'
   - adr: '0013'
     title: Public Ingress And Guest Egress Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -238,7 +228,6 @@ adrs:
     summary: We will use a single-edge ingress model in phase one.
     filename: 0013-public-ingress-and-guest-egress-model.md
     path: docs/adr/0013-public-ingress-and-guest-egress-model.md
-    implemented_in_repo_version: 0.12.0
     implemented_in_platform_version: 0.9.0
     implemented_on: '2026-03-21'
   - adr: '0014'
@@ -262,7 +251,7 @@ adrs:
   - adr: '0015'
     title: lv3.org DNS And Subdomain Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -274,13 +263,12 @@ adrs:
     summary: We will use named subdomains under lv3.org for platform entry points.
     filename: 0015-lv3-org-dns-and-subdomain-model.md
     path: docs/adr/0015-lv3-org-dns-and-subdomain-model.md
-    implemented_in_repo_version: 0.5.0
     implemented_in_platform_version: 0.5.0
     implemented_on: '2026-03-21'
   - adr: '0016'
     title: Provision Guests From Debian 13 Cloud Template
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -293,13 +281,12 @@ adrs:
     summary: We will provision the first guests from a reusable Debian 13 cloud-image template using Proxmox qm plus cloud-init.
     filename: 0016-provision-guests-from-debian-13-cloud-template.md
     path: docs/adr/0016-provision-guests-from-debian-13-cloud-template.md
-    implemented_in_repo_version: 0.6.0
     implemented_in_platform_version: 0.6.0
     implemented_on: '2026-03-21'
   - adr: '0017'
     title: ADR Lifecycle And Implementation Metadata
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -310,7 +297,6 @@ adrs:
     summary: 'Every ADR in this repository must carry these metadata fields near the top of the document:'
     filename: 0017-adr-lifecycle-and-implementation-metadata.md
     path: docs/adr/0017-adr-lifecycle-and-implementation-metadata.md
-    implemented_in_repo_version: 0.7.0
     implemented_on: '2026-03-21'
   - adr: 0018
     title: Non-Root Operations For Host And Guests
@@ -332,7 +318,7 @@ adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -343,12 +329,11 @@ adrs:
     summary: 'We will separate architecture, implementation streams, and release:'
     filename: 0019-parallel-adr-delivery-with-workstreams.md
     path: docs/adr/0019-parallel-adr-delivery-with-workstreams.md
-    implemented_in_repo_version: 0.15.0
     implemented_on: '2026-03-22'
   - adr: '0020'
     title: Initial Storage And Backup Model
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: storage
     keywords:
@@ -362,7 +347,7 @@ adrs:
   - adr: '0021'
     title: Public Subdomain Publication At The NGINX Edge
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -375,7 +360,6 @@ adrs:
     summary: We will publish subdomains deliberately at the NGINX edge.
     filename: 0021-public-subdomain-publication-at-the-nginx-edge.md
     path: docs/adr/0021-public-subdomain-publication-at-the-nginx-edge.md
-    implemented_in_repo_version: 0.22.0
     implemented_in_platform_version: 0.14.0
     implemented_on: '2026-03-22'
   - adr: '0022'
@@ -432,7 +416,7 @@ adrs:
   - adr: '0025'
     title: Compose-Managed Runtime Stacks
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -442,6 +426,34 @@ adrs:
     summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
+  - adr: '0025'
+    title: Gap Analysis Matrix
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - gap
+      - analysis
+      - matrix
+    summary: Gap Analysis Matrix
+    filename: 0025-gap-analysis-matrix.md
+    path: docs/adr/0025-gap-analysis-matrix.md
+  - adr: '0025'
+    title: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - implementation
+      - roadmap
+      - compose-managed
+      - runtime
+      - stacks
+    summary: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    filename: 0025-implementation-roadmap.md
+    path: docs/adr/0025-implementation-roadmap.md
   - adr: '0026'
     title: Dedicated PostgreSQL VM Baseline
     status: Accepted
@@ -462,7 +474,7 @@ adrs:
   - adr: '0027'
     title: Uptime Kuma On The Docker Runtime VM
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -474,7 +486,6 @@ adrs:
     summary: We run Uptime Kuma on the Docker runtime VM under /opt/uptime-kuma.
     filename: 0027-uptime-kuma-on-the-docker-runtime-vm.md
     path: docs/adr/0027-uptime-kuma-on-the-docker-runtime-vm.md
-    implemented_in_repo_version: 0.28.0
     implemented_in_platform_version: 0.19.0
     implemented_on: '2026-03-22'
   - adr: 0028
@@ -553,7 +564,7 @@ adrs:
   - adr: '0032'
     title: Shared Guest Observability Framework
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -564,7 +575,6 @@ adrs:
     summary: We will introduce a shared guest-observability framework and keep service-specific details as thin extensions.
     filename: 0032-shared-guest-observability-framework.md
     path: docs/adr/0032-shared-guest-observability-framework.md
-    implemented_in_repo_version: 0.33.0
     implemented_on: '2026-03-22'
   - adr: '0033'
     title: Declarative Service Topology Catalog
@@ -601,7 +611,7 @@ adrs:
   - adr: '0035'
     title: Workflow Catalog And Machine-Readable Execution Contracts
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -613,7 +623,6 @@ adrs:
     summary: We will define one workflow catalog as the canonical machine-readable contract for repository execution paths.
     filename: 0035-workflow-catalog-and-machine-readable-execution-contracts.md
     path: docs/adr/0035-workflow-catalog-and-machine-readable-execution-contracts.md
-    implemented_in_repo_version: 0.36.0
     implemented_on: '2026-03-22'
   - adr: '0036'
     title: Live Apply Receipts And Verification Evidence
@@ -635,7 +644,7 @@ adrs:
   - adr: '0037'
     title: Schema-Validated Repository Data Models
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -647,7 +656,6 @@ adrs:
       in the standard repo gate.
     filename: 0037-schema-validated-repository-data-models.md
     path: docs/adr/0037-schema-validated-repository-data-models.md
-    implemented_in_repo_version: 0.40.0
     implemented_on: '2026-03-22'
   - adr: 0038
     title: Generated Status Documents From Canonical State
@@ -1006,7 +1014,7 @@ adrs:
   - adr: 0058
     title: NATS JetStream For Internal Event Bus And Agent Coordination
     status: Deprecated
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -1059,7 +1067,7 @@ adrs:
   - adr: '0061'
     title: GlitchTip For Application Exceptions And Task Failures
     status: Deprecated
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:

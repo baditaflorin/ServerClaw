@@ -1,8 +1,8 @@
 # ADR 0025: Compose-Managed Runtime Stacks
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Implementation Status: Partial
+- Implemented In Repo Version: detected
 - Implemented In Platform Version: not yet
 - Implemented On: not yet
 - Date: 2026-03-22

@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: release
 total_adrs: 7
@@ -14,7 +14,7 @@ adrs:
   - adr: 0008
     title: Versioning Model For Repo And Host
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: release
     keywords:
@@ -25,7 +25,6 @@ adrs:
     summary: We will use two semantic version streams plus one observed-state registry.
     filename: 0008-versioning-model-for-repo-and-host.md
     path: docs/adr/0008-versioning-model-for-repo-and-host.md
-    implemented_in_repo_version: 0.1.0
     implemented_on: '2026-03-21'
   - adr: '0110'
     title: Platform Versioning, Release Notes, and Upgrade Path

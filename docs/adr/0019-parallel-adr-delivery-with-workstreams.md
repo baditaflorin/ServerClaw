@@ -1,8 +1,8 @@
 # ADR 0019: Parallel ADR Delivery With Workstreams
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.15.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: n/a
 - Implemented On: 2026-03-22
 - Date: 2026-03-22

@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: range
 label: 0200-0299
 range:
@@ -771,7 +771,7 @@ adrs:
   - adr: '0243'
     title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-28'
     concern: identity
     keywords:
@@ -1631,7 +1631,7 @@ adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-29'
     concern: platform
     keywords:

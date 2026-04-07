@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 39
+total_adrs: 32
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -27,67 +27,6 @@ adrs:
       from workload deployment.
     filename: 0024-docker-guest-security-baseline.md
     path: docs/adr/0024-docker-guest-security-baseline.md
-  - adr: '0025'
-    title: Compose-Managed Runtime Stacks
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - compose-managed
-      - runtime
-      - stacks
-    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
-    filename: 0025-compose-managed-runtime-stacks.md
-    path: docs/adr/0025-compose-managed-runtime-stacks.md
-  - adr: 0058
-    title: NATS JetStream For Internal Event Bus And Agent Coordination
-    status: Deprecated
-    implementation_status: Not Implemented
-    date: '2026-03-22'
-    concern: networking
-    keywords:
-      - nats
-      - jetstream
-      - internal
-      - event
-      - bus
-      - agent
-      - coordination
-    summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
-    filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
-    path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
-  - adr: '0061'
-    title: GlitchTip For Application Exceptions And Task Failures
-    status: Deprecated
-    implementation_status: Not Implemented
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - glitchtip
-      - application
-      - exceptions
-      - task
-      - failures
-    summary: We will use GlitchTip or an equivalent self-hosted Sentry-compatible platform for application exception and task-failure
-      visibility.
-    filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
-    path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
-  - adr: 0118
-    title: Replayable Failure Case Library
-    status: Proposed
-    implementation_status: Not Implemented
-    date: '2026-03-24'
-    concern: platform
-    keywords:
-      - replayable
-      - failure
-      - case
-      - library
-    summary: We will build a replayable failure case library stored in Postgres with a full-text search index, queryable via
-      the platform API gateway and surfaced in Matterm
-    filename: 0118-replayable-failure-case-library.md
-    path: docs/adr/0118-replayable-failure-case-library.md
   - adr: 0183
     title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
     status: Proposed
@@ -275,24 +214,6 @@ adrs:
     summary: We will centralize HA and replication intent in one canonical topology
     filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
     path: docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
-  - adr: '0243'
-    title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-03-28'
-    concern: identity
-    keywords:
-      - component
-      - stories
-      - accessibility
-      - ui
-      - contracts
-      - storybook
-      - playwright
-      - axe-core
-    summary: We will use Storybook for component stories and docs, Playwright for
-    filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
-    path: docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
   - adr: '0247'
     title: Authenticated Browser Journey Verification Via Playwright
     status: Accepted
@@ -341,22 +262,6 @@ adrs:
     summary: We will deploy Netbox as the single authoritative source of truth for
     filename: 0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
     path: docs/adr/0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
-  - adr: 0285
-    title: Whisper ASR As The CPU Speech-To-Text Service
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-03-29'
-    concern: platform
-    keywords:
-      - whisper
-      - asr
-      - as
-      - cpu
-      - speech-to-text
-      - service
-    summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
-    filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
-    path: docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md
   - adr: 0286
     title: Vikunja As The Task And Project Management REST API
     status: Accepted
@@ -672,18 +577,3 @@ adrs:
     summary: 'We will wire platform knowledge into Open WebUI through three layers:'
     filename: 0377-open-webui-platform-knowledge-integration.md
     path: docs/adr/0377-open-webui-platform-knowledge-integration.md
-  - adr: 0378
-    title: ServerClaw Tool Surface In Open WebUI
-    status: Proposed
-    implementation_status: Not Implemented
-    date: '2026-04-06'
-    concern: platform
-    keywords:
-      - serverclaw
-      - tool
-      - surface
-      - open
-      - webui
-    summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
-    filename: 0378-serverclaw-tool-surface-in-open-webui.md
-    path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md

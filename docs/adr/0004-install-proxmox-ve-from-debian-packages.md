@@ -1,8 +1,8 @@
 # ADR 0004: Install Proxmox VE From Debian Packages
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.2.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: 0.2.0
 - Implemented On: 2026-03-21
 - Date: 2026-03-21

@@ -1,8 +1,8 @@
 # ADR 0009: DRY And Solid Engineering Principles
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.1.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: n/a
 - Implemented On: 2026-03-21
 - Date: 2026-03-21

@@ -1,8 +1,8 @@
 # ADR 0166: Canonical Configuration Locations Registry
 
 - Status: Implemented
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.173.0
+- Implementation Status: Partial
+- Implemented In Repo Version: detected
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-26
 - Date: 2026-03-26

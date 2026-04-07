@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: vm-topology
 total_adrs: 38
@@ -14,7 +14,7 @@ adrs:
   - adr: '0005'
     title: Single-Node First Topology
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -25,13 +25,12 @@ adrs:
       cluster and not as a hyper-converged Ceph deploymen
     filename: 0005-single-node-first-topology.md
     path: docs/adr/0005-single-node-first-topology.md
-    implemented_in_repo_version: 0.2.0
     implemented_in_platform_version: 0.2.0
     implemented_on: '2026-03-21'
   - adr: '0013'
     title: Public Ingress And Guest Egress Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -43,7 +42,6 @@ adrs:
     summary: We will use a single-edge ingress model in phase one.
     filename: 0013-public-ingress-and-guest-egress-model.md
     path: docs/adr/0013-public-ingress-and-guest-egress-model.md
-    implemented_in_repo_version: 0.12.0
     implemented_in_platform_version: 0.9.0
     implemented_on: '2026-03-21'
   - adr: '0014'
@@ -152,7 +150,7 @@ adrs:
   - adr: '0027'
     title: Uptime Kuma On The Docker Runtime VM
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -164,7 +162,6 @@ adrs:
     summary: We run Uptime Kuma on the Docker runtime VM under /opt/uptime-kuma.
     filename: 0027-uptime-kuma-on-the-docker-runtime-vm.md
     path: docs/adr/0027-uptime-kuma-on-the-docker-runtime-vm.md
-    implemented_in_repo_version: 0.28.0
     implemented_in_platform_version: 0.19.0
     implemented_on: '2026-03-22'
   - adr: 0028
@@ -209,7 +206,7 @@ adrs:
   - adr: '0032'
     title: Shared Guest Observability Framework
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -220,7 +217,6 @@ adrs:
     summary: We will introduce a shared guest-observability framework and keep service-specific details as thin extensions.
     filename: 0032-shared-guest-observability-framework.md
     path: docs/adr/0032-shared-guest-observability-framework.md
-    implemented_in_repo_version: 0.33.0
     implemented_on: '2026-03-22'
   - adr: '0033'
     title: Declarative Service Topology Catalog

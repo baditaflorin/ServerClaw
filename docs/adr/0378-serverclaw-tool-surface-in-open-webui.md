@@ -1,7 +1,7 @@
 # ADR 0378: ServerClaw Tool Surface In Open WebUI
 
 - Status: Proposed
-- Implementation Status: Not Implemented
+- Implementation Status: Partial
 - Date: 2026-04-06
 
 ## Context

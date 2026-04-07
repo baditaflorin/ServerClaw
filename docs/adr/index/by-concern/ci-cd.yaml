@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: ci-cd
 total_adrs: 42
@@ -14,7 +14,7 @@ adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: ci-cd
     keywords:
@@ -25,7 +25,6 @@ adrs:
     summary: 'We will treat the following as core repository rules:'
     filename: 0009-dry-and-solid-engineering-principles.md
     path: docs/adr/0009-dry-and-solid-engineering-principles.md
-    implemented_in_repo_version: 0.1.0
     implemented_on: '2026-03-21'
   - adr: '0031'
     title: Repository Validation Pipeline For Automation Changes
