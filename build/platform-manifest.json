@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.50",
+  "repo_version": "0.178.52",
   "platform_version": "0.131.2",
-  "generated_at": "2026-04-07T09:37:56Z",
-  "next_refresh_at": "2026-04-07T10:37:56Z",
+  "generated_at": "2026-04-07T11:18:19Z",
+  "next_refresh_at": "2026-04-07T12:18:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6249,10 +6249,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.49",
+    "last_version": "0.178.50",
     "deployed_at": "2026-04-07",
-    "summary": "fix redirect loop: stale session reset now redirects to Keycloak logout (kills Keycloak session + clears sso.lv3.org cookie) instead of /oauth2/sign_in, preventing Keycloak from auto-logging back in with a poisoned session NGINX auto-clears stale session cookie on oauth2-proxy 500 at /oauth2/callback \u2014 users no longer see 500 errors or need to manually clear cookies after Keycloak restarts",
-    "release_notes_url": "docs/release-notes/0.178.50.md"
+    "summary": "ADR governance system: pre-commit hook validates ADR status transitions (requires evidence for upgrades, reason for downgrades), Plane integration syncs 406 ADRs for team visibility, quarterly audit detects implementation drift automatically fix redirect loop: stale session reset now redirects to Keycloak logout (kills Keycloak session + clears sso.lv3.org cookie) instead of /oauth2/sign_in, preventing Keycloak from auto-logging back in with a poisoned session",
+    "release_notes_url": "docs/release-notes/0.178.52.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
