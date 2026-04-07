@@ -4,6 +4,8 @@
 # platform_service_registry — ADR 0373.
 semaphore_server_port: "{{ platform_service_topology | platform_service_port('semaphore', 'internal') }}"
 semaphore_host_proxy_port: "{{ platform_service_topology | platform_service_port('semaphore', 'controller') }}"
+semaphore_local_artifact_dir: "{{ playbook_dir }}/../.local/semaphore"
+semaphore_secret_dir: /etc/lv3/semaphore
 semaphore_database_name: semaphore
 semaphore_database_user: semaphore_admin
 semaphore_database_inventory_host: postgres-lv3
