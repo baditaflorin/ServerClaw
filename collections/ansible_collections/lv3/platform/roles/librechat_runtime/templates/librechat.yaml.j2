@@ -4,18 +4,18 @@ version: 1.2.1
 cache: true
 
 endpoints:
-  ollama:
-    # Direct connection to Ollama — no intermediary proxy
-    baseURL: "{{ librechat_ollama_base_url }}"
-    models:
-      default:
-        - gemma4:e4b
-      fetch: true
-    titleConvo: true
-    titleModel: gemma4:e4b
+  custom:
+    - name: Ollama
+      apiKey: "unused"
+      baseURL: "{{ librechat_ollama_base_url }}/v1"
+      models:
+        default:
+          - gemma4:e4b
+        fetch: true
+      titleConvo: true
+      titleModel: gemma4:e4b
 
   anthropic:
-    # Direct Anthropic API — key injected via env
     models:
       default:
         - claude-sonnet-4-20250514
@@ -28,12 +28,3 @@ endpoints:
 registration:
   socialLogins:
     - openid
-
-# System prompt as a preset — replaces the fragile Ollama model creation hack
-presets:
-  - title: ServerClaw
-    description: LV3 platform assistant with full system context
-    default: true
-    endpoint: ollama
-    model: gemma4:e4b
-    promptPrefix: "You are ServerClaw, the LV3 platform assistant."
