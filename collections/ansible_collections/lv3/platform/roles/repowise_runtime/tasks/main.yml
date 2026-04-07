@@ -66,7 +66,7 @@
     mode: "0755"
 
 - name: Start repowise service
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ repowise_base_dir }}"
     state: present
     pull: missing
