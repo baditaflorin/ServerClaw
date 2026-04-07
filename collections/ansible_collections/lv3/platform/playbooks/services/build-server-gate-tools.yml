@@ -25,7 +25,7 @@
     gate_tools_ansible_lint_version: "24.12.2"
     gate_tools_yamllint_version: "1.37.1"
     gate_tools_semgrep_version: "1.88.0"
-    gate_tools_trivy_version: "0.59.2"
+    gate_tools_trivy_version: "0.69.3"
     gate_tools_tofu_version: "1.9.1"
     gate_tools_mypy_version: "1.13.0"
     gate_tools_pyyaml_version: "6.0.2"
@@ -37,13 +37,12 @@
     gate_tools_version_file: "/opt/builds/gate-tool-versions.json"
 
   tasks:
-    - name: Install Python gate tool dependencies via uv
+    - name: Install Python gate tool dependencies via uv (non-semgrep)
       ansible.builtin.command:
         cmd: >-
           uv pip install --system --break-system-packages
           ansible-lint=={{ gate_tools_ansible_lint_version }}
           yamllint=={{ gate_tools_yamllint_version }}
-          semgrep=={{ gate_tools_semgrep_version }}
           mypy=={{ gate_tools_mypy_version }}
           PyYAML=={{ gate_tools_pyyaml_version }}
           jsonschema=={{ gate_tools_jsonschema_version }}
@@ -53,6 +52,13 @@
           python-hcl2=={{ gate_tools_hcl2_version }}
           qdrant-client=={{ gate_tools_qdrant_client_version }}
           httpx
+      become: true
+
+    - name: Install semgrep via uv with --no-deps to bypass ruamel-yaml version conflict
+      ansible.builtin.command:
+        cmd: >-
+          uv pip install --system --break-system-packages --no-deps
+          semgrep=={{ gate_tools_semgrep_version }}
       become: true
 
     - name: Check installed trivy version
