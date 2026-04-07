@@ -8143,7 +8143,8 @@
         "max_restarts": 1,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
-      }
+      },
+      "owner_runbook": "docs/runbooks/configure-litellm.md"
     },
     "converge-librechat": {
       "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge, replacing Open WebUI.",
@@ -8191,7 +8192,8 @@
         "max_restarts": 1,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
-      }
+      },
+      "owner_runbook": "docs/runbooks/configure-librechat.md"
     }
   }
 }
