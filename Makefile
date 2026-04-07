@@ -1524,3 +1524,17 @@ run-adr-quarterly-audit:
 
 run-adr-quarterly-audit-dry-run:
 	python3 $(REPO_ROOT)/config/windmill/scripts/adr-quarterly-audit.py --dry-run
+
+# ADR Governance Provisioning (IaC)
+provision-adr-governance:
+	@test -n "$(PLANE_ADMIN_TOKEN)" || (echo "PLANE_ADMIN_TOKEN required: make provision-adr-governance PLANE_ADMIN_TOKEN=your_token"; exit 1)
+	ansible-playbook $(REPO_ROOT)/playbooks/provision_adr_governance.yml \
+		-i $(ANSIBLE_INVENTORY) \
+		-e "plane_admin_bootstrap_token=$(PLANE_ADMIN_TOKEN)"
+
+provision-adr-governance-dry-run:
+	@test -n "$(PLANE_ADMIN_TOKEN)" || (echo "PLANE_ADMIN_TOKEN required: make provision-adr-governance-dry-run PLANE_ADMIN_TOKEN=your_token"; exit 1)
+	ansible-playbook $(REPO_ROOT)/playbooks/provision_adr_governance.yml \
+		-i $(ANSIBLE_INVENTORY) \
+		-e "plane_admin_bootstrap_token=$(PLANE_ADMIN_TOKEN)" \
+		--check
