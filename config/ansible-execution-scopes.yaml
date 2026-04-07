@@ -406,6 +406,20 @@ playbooks:
     shared_surfaces:
       - service:one-api
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/litellm.yml:
+    playbook_id: litellm
+    canonical_service_id: litellm
+    mutation_scope: platform
+    shared_surfaces:
+      - service:litellm
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/librechat.yml:
+    playbook_id: librechat
+    canonical_service_id: librechat
+    mutation_scope: platform
+    shared_surfaces:
+      - service:librechat
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/glitchtip.yml:
     playbook_id: glitchtip
     mutation_scope: platform
