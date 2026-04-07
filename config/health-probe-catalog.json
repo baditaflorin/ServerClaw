@@ -2074,7 +2074,7 @@
           "ollama",
           "ollama",
           "show",
-          "llama3.2:3b"
+          "gemma4:e4b"
         ],
         "success_rc": 0
       },
