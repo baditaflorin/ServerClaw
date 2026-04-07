@@ -1,8 +1,8 @@
 # ADR 0002: Target Proxmox VE 9 on Debian 13
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.2.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: 0.2.0
 - Implemented On: 2026-03-21
 - Date: 2026-03-21

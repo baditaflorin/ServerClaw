@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: automation
 total_adrs: 27
@@ -31,7 +31,7 @@ adrs:
   - adr: '0035'
     title: Workflow Catalog And Machine-Readable Execution Contracts
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -43,7 +43,6 @@ adrs:
     summary: We will define one workflow catalog as the canonical machine-readable contract for repository execution paths.
     filename: 0035-workflow-catalog-and-machine-readable-execution-contracts.md
     path: docs/adr/0035-workflow-catalog-and-machine-readable-execution-contracts.md
-    implemented_in_repo_version: 0.36.0
     implemented_on: '2026-03-22'
   - adr: 0039
     title: Shared Controller Automation Toolkit
@@ -429,7 +428,7 @@ adrs:
   - adr: '0346'
     title: Outline Programmatic Wiki API and Automation Hooks
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-04-05'
     concern: automation
     keywords:
@@ -443,7 +442,6 @@ adrs:
       ensuredocument, loadapitoken) into a shared module '
     filename: 0346-outline-programmatic-wiki-api-and-automation-hooks.md
     path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
-    implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.178.4
     implemented_on: '2026-04-05'
   - adr: '0363'

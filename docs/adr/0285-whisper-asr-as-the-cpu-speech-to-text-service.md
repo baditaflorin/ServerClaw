@@ -1,8 +1,8 @@
 # ADR 0285: Whisper ASR As The CPU Speech-To-Text Service
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Partial
+- Implemented In Repo Version: detected
 - Implemented In Platform Version: N/A
 - Date: 2026-03-29
 

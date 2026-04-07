@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: networking
 total_adrs: 25
@@ -14,7 +14,7 @@ adrs:
   - adr: '0015'
     title: lv3.org DNS And Subdomain Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -26,13 +26,12 @@ adrs:
     summary: We will use named subdomains under lv3.org for platform entry points.
     filename: 0015-lv3-org-dns-and-subdomain-model.md
     path: docs/adr/0015-lv3-org-dns-and-subdomain-model.md
-    implemented_in_repo_version: 0.5.0
     implemented_in_platform_version: 0.5.0
     implemented_on: '2026-03-21'
   - adr: '0021'
     title: Public Subdomain Publication At The NGINX Edge
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -45,13 +44,12 @@ adrs:
     summary: We will publish subdomains deliberately at the NGINX edge.
     filename: 0021-public-subdomain-publication-at-the-nginx-edge.md
     path: docs/adr/0021-public-subdomain-publication-at-the-nginx-edge.md
-    implemented_in_repo_version: 0.22.0
     implemented_in_platform_version: 0.14.0
     implemented_on: '2026-03-22'
   - adr: 0058
     title: NATS JetStream For Internal Event Bus And Agent Coordination
     status: Deprecated
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: networking
     keywords:

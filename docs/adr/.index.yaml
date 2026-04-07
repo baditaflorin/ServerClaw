@@ -6,30 +6,30 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 404
+total_adrs: 406
 adr_number_range:
   first: '0001'
   last: 0380
   next_available: 0381
 implementation_status_summary:
-  Implemented: 339
-  Partial: 8
-  Not Implemented: 39
+  Implemented: 317
+  Partial: 16
+  Not Implemented: 32
   Deprecated: 4
-  Accepted: 4
-  Proposed: 10
+  Accepted: 25
+  Proposed: 12
 decision_status_summary:
   Accepted: 330
-  Proposed: 17
+  Proposed: 19
   Deprecated: 7
   Implemented: 50
 facets:
   by_range:
     - label: 0000-0099
       path: docs/adr/index/by-range/0000-0099.yaml
-      count: 99
+      count: 101
       first_adr: '0001'
       last_adr: 0099
     - label: 0100-0199
@@ -83,7 +83,7 @@ facets:
       count: 25
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 133
+      count: 135
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -106,15 +106,15 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 339
+      count: 317
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 8
+      count: 16
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 39
+      count: 32
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -122,11 +122,11 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 4
+      count: 25
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 10
+      count: 12
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
@@ -141,7 +141,7 @@ latest_adrs:
     path: docs/adr/0380-neko-for-operator-remote-browser-access.md
   - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
-    implementation_status: Not Implemented
+    implementation_status: Partial
     concern: platform
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
   - adr: '0377'

@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: bootstrap
 total_adrs: 5
@@ -31,7 +31,7 @@ adrs:
   - adr: '0003'
     title: Prefer Hetzner Rescue Plus Installimage For Bootstrap
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-21'
     concern: bootstrap
     keywords:
@@ -45,7 +45,6 @@ adrs:
       installer or the VNC installer.
     filename: 0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md
     path: docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md
-    implemented_in_repo_version: 0.1.0
     implemented_in_platform_version: 0.1.0
     implemented_on: '2026-03-21'
   - adr: '0215'

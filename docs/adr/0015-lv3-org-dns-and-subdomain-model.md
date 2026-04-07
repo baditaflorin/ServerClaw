@@ -1,8 +1,8 @@
 # ADR 0015: lv3.org DNS And Subdomain Model
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.5.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: 0.5.0
 - Implemented On: 2026-03-21
 - Date: 2026-03-21

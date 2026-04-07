@@ -6,15 +6,15 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-07'
 facet: concern
 concern: platform
-total_adrs: 133
+total_adrs: 135
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -25,12 +25,11 @@ adrs:
     summary: 'We will separate architecture, implementation streams, and release:'
     filename: 0019-parallel-adr-delivery-with-workstreams.md
     path: docs/adr/0019-parallel-adr-delivery-with-workstreams.md
-    implemented_in_repo_version: 0.15.0
     implemented_on: '2026-03-22'
   - adr: '0025'
     title: Compose-Managed Runtime Stacks
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -40,6 +39,34 @@ adrs:
     summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
+  - adr: '0025'
+    title: Gap Analysis Matrix
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - gap
+      - analysis
+      - matrix
+    summary: Gap Analysis Matrix
+    filename: 0025-gap-analysis-matrix.md
+    path: docs/adr/0025-gap-analysis-matrix.md
+  - adr: '0025'
+    title: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - implementation
+      - roadmap
+      - compose-managed
+      - runtime
+      - stacks
+    summary: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    filename: 0025-implementation-roadmap.md
+    path: docs/adr/0025-implementation-roadmap.md
   - adr: '0036'
     title: Live Apply Receipts And Verification Evidence
     status: Accepted
@@ -60,7 +87,7 @@ adrs:
   - adr: '0037'
     title: Schema-Validated Repository Data Models
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Accepted
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -72,7 +99,6 @@ adrs:
       in the standard repo gate.
     filename: 0037-schema-validated-repository-data-models.md
     path: docs/adr/0037-schema-validated-repository-data-models.md
-    implemented_in_repo_version: 0.40.0
     implemented_on: '2026-03-22'
   - adr: 0038
     title: Generated Status Documents From Canonical State
@@ -166,7 +192,7 @@ adrs:
   - adr: '0061'
     title: GlitchTip For Application Exceptions And Task Failures
     status: Deprecated
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -565,7 +591,7 @@ adrs:
   - adr: 0118
     title: Replayable Failure Case Library
     status: Proposed
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -717,7 +743,7 @@ adrs:
   - adr: '0166'
     title: Canonical Configuration Locations Registry
     status: Implemented
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -728,7 +754,6 @@ adrs:
     summary: 'We will maintain a canonical configuration locations registry at .config-locations.yaml documenting:'
     filename: 0166-canonical-configuration-locations.md
     path: docs/adr/0166-canonical-configuration-locations.md
-    implemented_in_repo_version: 0.173.0
     implemented_on: '2026-03-26'
   - adr: '0166'
     title: Canonical Error Response Format and Error Code Registry
@@ -1768,7 +1793,7 @@ adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -2377,7 +2402,7 @@ adrs:
   - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
     status: Proposed
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-04-06'
     concern: platform
     keywords:
