@@ -260,6 +260,70 @@
   changed_when: "'changed' in semaphore_cookie_encryption_generation.stdout"
   no_log: true
 
+- name: Check whether the local OIDC client secret already exists
+  ansible.builtin.stat:
+    path: "{{ semaphore_oidc_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: semaphore_oidc_client_secret_local
+  when: semaphore_enable_oidc | default(false)
+
+- name: Check whether the persisted OIDC client secret exists on the guest
+  ansible.builtin.stat:
+    path: "{{ semaphore_oidc_client_secret_guest_file }}"
+  register: semaphore_oidc_client_secret_guest
+  when: semaphore_enable_oidc | default(false)
+
+- name: Read the persisted OIDC client secret from the guest when the local copy is missing
+  ansible.builtin.slurp:
+    src: "{{ semaphore_oidc_client_secret_guest_file }}"
+  register: semaphore_oidc_client_secret_guest_raw
+  when:
+    - semaphore_enable_oidc | default(false)
+    - not semaphore_oidc_client_secret_local.stat.exists
+    - semaphore_oidc_client_secret_guest.stat.exists
+  no_log: true
+
+- name: Restore the OIDC client secret to the control machine from the guest copy
+  ansible.builtin.copy:
+    dest: "{{ semaphore_oidc_client_secret_local_file }}"
+    content: "{{ semaphore_oidc_client_secret_guest_raw.content | b64decode | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when:
+    - semaphore_enable_oidc | default(false)
+    - not semaphore_oidc_client_secret_local.stat.exists
+    - semaphore_oidc_client_secret_guest.stat.exists
+  no_log: true
+
+- name: Generate the OIDC client secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ semaphore_oidc_client_secret_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 32 | tr -d '\n' > "{{ semaphore_oidc_client_secret_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: semaphore_oidc_client_secret_generation
+  changed_when: "'changed' in semaphore_oidc_client_secret_generation.stdout"
+  when: semaphore_enable_oidc | default(false)
+  no_log: true
+
+- name: Persist the OIDC client secret on the guest
+  ansible.builtin.copy:
+    src: "{{ semaphore_oidc_client_secret_local_file }}"
+    dest: "{{ semaphore_oidc_client_secret_guest_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: semaphore_enable_oidc | default(false)
+  no_log: true
+
 - name: Read the Semaphore encryption secrets
   ansible.builtin.slurp:
     src: "{{ item.path }}"
@@ -273,6 +337,15 @@
   register: semaphore_secret_slurps
   no_log: true
 
+- name: Read the OIDC client secret
+  ansible.builtin.slurp:
+    src: "{{ semaphore_oidc_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: semaphore_oidc_client_secret_raw
+  when: semaphore_enable_oidc | default(false)
+  no_log: true
+
 - name: Record the Semaphore runtime secrets
   ansible.builtin.set_fact:
     semaphore_admin_password: "{{ semaphore_admin_password_raw.content | b64decode | trim }}"
@@ -280,16 +353,27 @@
     semaphore_access_key_encryption: "{{ (semaphore_secret_slurps.results | selectattr('item.fact_name', 'equalto', 'semaphore_access_key_encryption_raw') | first).content | b64decode | trim }}"
     semaphore_cookie_hash: "{{ (semaphore_secret_slurps.results | selectattr('item.fact_name', 'equalto', 'semaphore_cookie_hash_raw') | first).content | b64decode | trim }}"
     semaphore_cookie_encryption: "{{ (semaphore_secret_slurps.results | selectattr('item.fact_name', 'equalto', 'semaphore_cookie_encryption_raw') | first).content | b64decode | trim }}"
+    semaphore_oidc_client_secret: "{{ (semaphore_oidc_client_secret_raw.content | b64decode | trim) if semaphore_enable_oidc | default(false) else '' }}"
   no_log: true
 
 - name: Build the Semaphore runtime secret payload
   ansible.builtin.set_fact:
-    semaphore_runtime_secret_payload:
-      SEMAPHORE_DB_PASS: "{{ semaphore_database_password }}"
-      SEMAPHORE_ADMIN_PASSWORD: "{{ semaphore_admin_password }}"
-      SEMAPHORE_ACCESS_KEY_ENCRYPTION: "{{ semaphore_access_key_encryption }}"
-      SEMAPHORE_COOKIE_HASH: "{{ semaphore_cookie_hash }}"
-      SEMAPHORE_COOKIE_ENCRYPTION: "{{ semaphore_cookie_encryption }}"
+    semaphore_runtime_secret_payload: |
+      {
+        "SEMAPHORE_DB_PASS": "{{ semaphore_database_password }}",
+        "SEMAPHORE_ADMIN_PASSWORD": "{{ semaphore_admin_password }}",
+        "SEMAPHORE_ACCESS_KEY_ENCRYPTION": "{{ semaphore_access_key_encryption }}",
+        "SEMAPHORE_COOKIE_HASH": "{{ semaphore_cookie_hash }}",
+        "SEMAPHORE_COOKIE_ENCRYPTION": "{{ semaphore_cookie_encryption }}"
+        {% if semaphore_enable_oidc | default(false) %},
+        "SEMAPHORE_OIDC_CLIENT_SECRET": "{{ semaphore_oidc_client_secret }}"
+        {% endif %}
+      }
+  no_log: true
+
+- name: Parse Semaphore runtime secret payload as JSON
+  ansible.builtin.set_fact:
+    semaphore_runtime_secret_payload: "{{ semaphore_runtime_secret_payload | from_json }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Semaphore
