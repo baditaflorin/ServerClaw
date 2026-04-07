@@ -72,54 +72,25 @@
       vars:
         playbook_execution_notification_service: neko
 
-- name: Publish Neko on NGINX Edge Gateway
-  hosts: "nginx-lv3"
+- name: Publish Neko through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
   become: true
-  gather_facts: false
+  gather_facts: true
   tags:
     - tier-2
     - networking
     - service-neko
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
 
-  tasks:
-    - name: Create NGINX site configuration for browser.lv3.org
-      block:
-        - name: Render browser.lv3.org NGINX site configuration
-          template:
-            src: "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2"
-            dest: "/etc/nginx/sites-available/browser.lv3.org.conf"
-            owner: root
-            group: root
-            mode: '0644'
-          register: nginx_neko_site
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
 
-        - name: Enable browser.lv3.org site
-          file:
-            src: "/etc/nginx/sites-available/browser.lv3.org.conf"
-            dest: "/etc/nginx/sites-enabled/browser.lv3.org.conf"
-            state: link
-            force: yes
-
-        - name: Test NGINX configuration syntax
-          command:
-            argv:
-              - nginx
-              - -t
-          changed_when: false
-
-        - name: Reload NGINX to apply new site
-          service:
-            name: nginx
-            state: reloaded
-
-      tags: [nginx, neko, edge-publication]
-
-    - name: Wait for browser.lv3.org to respond
-      uri:
-        url: "https://browser.lv3.org/api/health"
-        validate_certs: false
-        status_code: 200
-        retries: 5
-        delay: 3
-      register: neko_health_check
-      tags: [nginx, neko, edge-publication]
+  roles:
+    - role: lv3.platform.nginx_edge_publication
