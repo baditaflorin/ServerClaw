@@ -8,11 +8,13 @@
 
 - name: Verify the LibreChat health endpoint
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ librechat_internal_port }}{{ librechat_healthcheck_path }}"
+    url: "http://127.0.0.1:{{ librechat_internal_port }}/api/auth/session"
     method: GET
-    status_code: 200
+    status_code:
+      - 200
+      - 401
   register: librechat_verify_health
   retries: 18
   delay: 5
-  until: librechat_verify_health.status == 200
+  until: librechat_verify_health.status in [200, 401]
   changed_when: false

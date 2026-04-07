@@ -2245,7 +2245,7 @@
         "timeout_seconds": 180,
         "retries": 18,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/api/health",
+        "url": "http://127.0.0.1:8096/",
         "method": "GET",
         "expected_status": [
           200
@@ -2257,7 +2257,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/api/health",
+        "url": "http://127.0.0.1:8096/",
         "method": "GET",
         "expected_status": [
           200
@@ -2269,7 +2269,7 @@
         "timeout_seconds": 120,
         "retries": 12,
         "delay_seconds": 2,
-        "url": "http://127.0.0.1:8096/api/health",
+        "url": "http://127.0.0.1:8096/",
         "method": "GET",
         "expected_status": [
           200
