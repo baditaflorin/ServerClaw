@@ -1,0 +1,123 @@
+---
+# Playbook: neko.yml
+# Purpose: Converge the Neko remote desktop runtime for interactive operator browser access on runtime-comms-lv3.
+# Use case: Run during ADR 0380 rollout, remote desktop recovery, or later drift reconciliation from version-controlled automation.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector (production/staging).
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Neko is running on runtime-comms-lv3 with WebRTC signalling at browser.lv3.org, UDP media forwarding from Proxmox host, and firewall rules preventing concurrent-apply races.
+#
+# Idempotency: Fully idempotent
+#              The playbook re-renders the container stack deterministically and reapplies the firewall contract safely.
+#
+# Dependencies:
+#   - ADR 0380: Defines Neko as the interactive remote desktop platform for operator debugging.
+#   - Requires: runtime-comms-lv3 host access through the Proxmox jump path plus local OpenBao for runtime secret injection.
+#   - Role: lv3.platform.neko_runtime — renders, deploys, and verifies the Neko WebRTC runtime stack.
+#   - Role: lv3.platform.nginx_edge_publication — publishes browser.lv3.org with HTTPS and WebSocket upgrade.
+#
+# Related ADRs: 0077, 0153, 0170, 0293, 0347, 0380
+# Related Runbooks: docs/adr/0380-neko-for-operator-remote-browser-access.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-07
+
+- name: Converge Neko Remote Desktop Runtime
+  hosts: "{{ 'runtime-comms-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-comms-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-neko
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.neko
+        playbook_execution_audit_target: neko
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_comms[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.common
+      vars:
+        ensure_directories:
+          - path: /opt/neko
+            owner: root
+            group: root
+            mode: '0755'
+            description: "Neko persistent storage (cache, config, logs)"
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.neko_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: neko
+        playbook_execution_post_verify_audit_action: playbook.verify.neko
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: neko
+
+- name: Publish Neko on NGINX Edge Gateway
+  hosts: "nginx-lv3"
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - networking
+    - service-neko
+
+  tasks:
+    - name: Create NGINX site configuration for browser.lv3.org
+      block:
+        - name: Render browser.lv3.org NGINX site configuration
+          template:
+            src: "collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2"
+            dest: "/etc/nginx/sites-available/browser.lv3.org.conf"
+            owner: root
+            group: root
+            mode: '0644'
+          register: nginx_neko_site
+
+        - name: Enable browser.lv3.org site
+          file:
+            src: "/etc/nginx/sites-available/browser.lv3.org.conf"
+            dest: "/etc/nginx/sites-enabled/browser.lv3.org.conf"
+            state: link
+            force: yes
+
+        - name: Test NGINX configuration syntax
+          command:
+            argv:
+              - nginx
+              - -t
+          changed_when: false
+
+        - name: Reload NGINX to apply new site
+          service:
+            name: nginx
+            state: reloaded
+
+      tags: [nginx, neko, edge-publication]
+
+    - name: Wait for browser.lv3.org to respond
+      uri:
+        url: "https://browser.lv3.org/api/health"
+        validate_certs: false
+        status_code: 200
+        retries: 5
+        delay: 3
+      register: neko_health_check
+      tags: [nginx, neko, edge-publication]

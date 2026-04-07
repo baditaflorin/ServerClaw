@@ -214,10 +214,9 @@ This also regenerates the platform manifest which may include certificate data.
 
 ## Related Documentation
 
-- [ADR 0165: Public Edge Publication](../adr/0165.md)
-- [ADR 0249: HTTPS/TLS Assurance](../adr/0249.md)
+- [ADR 0165: Playbook Role Metadata Standard](../adr/0165-playbook-role-metadata-standard.md)
+- [ADR 0249: HTTPS/TLS Assurance](../adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md)
 - [Nginx Edge Configuration](configure-edge-publication.md)
-- [Certificate Renewal](renew-certificate.yaml)
 
 ## Logs
 

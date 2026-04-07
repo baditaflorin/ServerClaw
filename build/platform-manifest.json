@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.39",
+  "repo_version": "0.178.42",
   "platform_version": "0.131.1",
-  "generated_at": "2026-04-07T02:53:53Z",
-  "next_refresh_at": "2026-04-07T03:53:53Z",
+  "generated_at": "2026-04-07T04:45:41Z",
+  "next_refresh_at": "2026-04-07T05:45:41Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -454,6 +454,17 @@
         "lifecycle_status": "active",
         "primary_url": "nats://10.10.10.92:4222",
         "last_live_apply": "2026-04-06T00:00:00Z"
+      },
+      "neko": {
+        "service_name": "Neko Remote Desktop",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://browser.lv3.org",
+        "last_live_apply": "2026-04-04T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -2232,6 +2243,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-n8n.md"
+      },
+      {
+        "id": "converge-neko",
+        "description": "Converge Neko remote desktop on dedicated runtime-comms-lv3 VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
+        "tags": [
+          "converge-neko",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/adr/0380-neko-for-operator-remote-browser-access.md"
       },
       {
         "id": "converge-netbox",
@@ -4812,6 +4849,16 @@
         ]
       },
       {
+        "id": "0380-neko-for-operator-remote-browser-access",
+        "title": "ADR 0380: Neko Remote Desktop for Interactive Operator Browser Access",
+        "agent_trust_required": "T3",
+        "steps": 16,
+        "path": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
+        "workflow_ids": [
+          "converge-neko"
+        ]
+      },
+      {
         "id": "agent-observation-loop",
         "title": "Agent Observation Loop",
         "agent_trust_required": "T1",
@@ -6202,10 +6249,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.38",
+    "last_version": "0.178.39",
     "deployed_at": "2026-04-07",
-    "summary": "fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults deploy serverclaw:latest with baked-in system prompt as the default named model in chat.lv3.org; fix derive_service_defaults guard (use open_webui_site_dir is not defined), fix Ollama api/create URL for remote Ollama instance, add keycloak_local_artifact_dir fallback default, migrate woodpecker_runtime defaults to ADR 0373 pattern",
-    "release_notes_url": "docs/release-notes/0.178.39.md"
+    "summary": "made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults",
+    "release_notes_url": "docs/release-notes/0.178.42.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6256,20 +6303,6 @@
     "adr_corpus": "docs/adr"
   },
   "known_gaps": [
-    {
-      "adr": "0058",
-      "title": "NATS JetStream For Internal Event Bus And Agent Coordination",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md"
-    },
-    {
-      "adr": "0061",
-      "title": "GlitchTip For Application Exceptions And Task Failures",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md"
-    },
     {
       "adr": "0118",
       "title": "Replayable Failure Case Library",

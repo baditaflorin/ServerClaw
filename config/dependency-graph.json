@@ -318,6 +318,15 @@
       "adr": "0054"
     },
     {
+      "id": "neko",
+      "service": "neko",
+      "name": "Neko Remote Desktop",
+      "vm": "runtime-comms-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0380"
+    },
+    {
       "id": "nextcloud",
       "service": "nextcloud",
       "name": "Nextcloud",
@@ -1185,6 +1194,18 @@
       "to": "postgres",
       "type": "hard",
       "description": "NetBox stores all inventory, topology, and IPAM data in Postgres."
+    },
+    {
+      "from": "neko",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "Neko WebRTC signalling is proxied through the shared NGINX edge at browser.lv3.org with TLS termination and WebSocket upgrade support."
+    },
+    {
+      "from": "neko",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Neko operator access is controlled through Keycloak OIDC client configuration for Tailscale headscale management network."
     },
     {
       "from": "nextcloud",

@@ -3891,6 +3891,40 @@
           ]
         }
       }
+    },
+    "neko": {
+      "service_name": "neko",
+      "owning_vm": "runtime-comms-lv3",
+      "role": "neko_runtime",
+      "verify_file": "collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Neko responds on its local WebRTC signalling health endpoint.",
+        "timeout_seconds": 30,
+        "retries": 10,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Neko WebRTC signalling is ready to accept WebSocket connections after Docker container health checks pass.",
+        "timeout_seconds": 30,
+        "retries": 10,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "reason": "Neko is operator-facing and published through the edge at browser.lv3.org; public health monitoring is essential for remote access availability."
+      }
     }
   }
 }

@@ -9,23 +9,25 @@
   listen: "restart neko"
   tags: [neko, handlers]
 
-- name: reload neko configuration
-  block:
-    - name: Stop Neko container
-      docker_container:
-        name: "{{ neko_runtime_container_name }}"
-        state: stopped
+- name: stop neko container for reload
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: stopped
+  listen: "reload neko configuration"
+  tags: [neko, handlers]
 
-    - name: Remove Neko container
-      docker_container:
-        name: "{{ neko_runtime_container_name }}"
-        state: absent
+- name: remove neko container for reload
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: absent
+  listen: "reload neko configuration"
+  tags: [neko, handlers]
 
-    - name: Re-deploy Neko container
-      docker_compose:
-        project_src: "{{ neko_runtime_data_dir }}"
-        files:
-          - docker-compose.yml
-        state: present
+- name: redeploy neko container
+  community.docker.docker_compose_v2:
+    project_src: "{{ neko_runtime_data_dir }}"
+    files:
+      - docker-compose.yml
+    state: present
   listen: "reload neko configuration"
   tags: [neko, handlers]

@@ -2262,17 +2262,23 @@ platform_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: private-only
+    exposure_model: edge-published
     observability:
       guest_dashboard: false
       service_telemetry: true
     dns:
       managed: true
-      visibility: tailnet
+      visibility: public
       name: git
       type: A
-      target: 100.64.0.1
+      target: 65.108.75.123
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.92:3003
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
@@ -4713,17 +4719,23 @@ public_edge_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: private-only
+    exposure_model: edge-published
     observability:
       guest_dashboard: false
       service_telemetry: true
     dns:
       managed: true
-      visibility: tailnet
+      visibility: public
       name: git
       type: A
-      target: 100.64.0.1
+      target: 65.108.75.123
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.92:3003
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009

@@ -1,8 +1,9 @@
-# Release 0.178.39
+# Release 0.178.42
 
 - Date: 2026-04-07
 
 ## Summary
+- made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout
 - fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults
 - deploy serverclaw:latest with baked-in system prompt as the default named model in chat.lv3.org; fix derive_service_defaults guard (use open_webui_site_dir is not defined), fix Ollama api/create URL for remote Ollama instance, add keycloak_local_artifact_dir fallback default, migrate woodpecker_runtime defaults to ADR 0373 pattern
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).

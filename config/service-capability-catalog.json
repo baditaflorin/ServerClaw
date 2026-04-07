@@ -1529,6 +1529,40 @@
       }
     },
     {
+      "id": "neko",
+      "name": "Neko Remote Desktop",
+      "description": "WebRTC-based interactive remote desktop for operator browser debugging and exploration of platform integrations.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "runtime-comms-lv3",
+      "vmid": 121,
+      "internal_url": "http://10.10.10.41:8080",
+      "public_url": "https://browser.lv3.org",
+      "subdomain": "browser.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "neko",
+      "adr": "0380",
+      "adr_file": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/neko.yml",
+      "restart_domain": "runtime-comms-webrtc",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-comms",
+      "mobility_tier": "anchor",
+      "tags": [
+        "interactive",
+        "debugging",
+        "webrtc",
+        "remote-access"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://browser.lv3.org",
+          "subdomain": "browser.lv3.org"
+        }
+      }
+    },
+    {
       "id": "nextcloud",
       "name": "Nextcloud",
       "description": "Repo-managed personal data plane for durable files, attachments, and DAV-backed calendars, contacts, and tasks.",

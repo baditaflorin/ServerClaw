@@ -2,8 +2,51 @@
 sensitivity: INTERNAL
 portal_display: full
 tags:
-  - architecture
-  - dependency-graph
+- architecture
+- dependency-graph
+pagefind_section: architecture
+pagefind_audience:
+- contributors
+- operators
+contextual_help:
+  title: Contextual Help
+  summary: Use this page to understand service dependencies and likely blast radius
+    before a rollout or recovery action.
+  audience:
+  - Operators
+  - Contributors
+  glossary:
+  - term: Recovery tier
+    definition: The declared recovery expectation for a service, including the tolerated
+      blast radius and urgency of restoration.
+  - term: Drift
+    definition: A meaningful difference between the committed platform contract and
+      the currently observed runtime state.
+  - term: Handoff
+    definition: Passing the current task, evidence, and blocked state to another operator
+      or agent without relying on hidden chat context.
+  references:
+  - label: Services Directory
+    href: /services/
+    kind: reference
+  - label: Reference Glossary
+    href: /reference/glossary/
+    kind: reference
+  - label: Runbook Index
+    href: /runbooks/
+    kind: runbook
+  - label: Architecture Index
+    href: /architecture/
+    kind: adr
+  escalation:
+    backout: If this page leaves any doubt, stop before making live changes and return
+      to the owning runbook or ops portal.
+    runbook:
+      label: Platform Operations Portal
+      href: /runbooks/platform-operations-portal/
+      kind: runbook
+    handoff: Share the page URL, the question you were trying to answer, and the exact
+      mismatch or failure before handing off.
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -18,7 +61,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LiveKit, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
 | `3` | Homepage, Open WebUI, Platform API Gateway, ServerClaw, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -80,6 +123,7 @@ graph TD
     matrix_synapse["Matrix Synapse\nTier 2"]
     mattermost["Mattermost\nTier 2"]
     n8n["n8n\nTier 2"]
+    neko["Neko Remote Desktop\nTier 2"]
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
     ntfy["ntfy\nTier 2"]
@@ -211,6 +255,8 @@ graph TD
     n8n -->|soft| nginx_edge
     n8n -->|startup_only| openbao
     n8n -->|hard| postgres
+    neko -->|soft| keycloak
+    neko -->|hard| nginx_edge
     netbox -->|startup_only| openbao
     netbox -->|hard| postgres
     nextcloud -->|soft| nginx_edge

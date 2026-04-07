@@ -172,6 +172,7 @@ keycloak_startup_probe_retries: 60
 keycloak_startup_probe_delay: 5
 keycloak_repo_user_reconciliation_retries: 24
 keycloak_repo_user_reconciliation_delay: 5
+keycloak_reconcile_outline_users: true
 keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"
 keycloak_langfuse_root_url: https://langfuse.lv3.org
 keycloak_grist_root_url: https://grist.lv3.org
