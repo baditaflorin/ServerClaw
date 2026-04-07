@@ -62,6 +62,10 @@ gitea_oidc_discovery_url: "{{ gitea_keycloak_service_topology.urls.public }}/rea
 gitea_oidc_internal_discovery_url: "{{ gitea_keycloak_service_topology.urls.internal }}/realms/lv3/.well-known/openid-configuration"
 gitea_oidc_required_claim_name: groups
 gitea_oidc_required_claim_value: /lv3-platform-admins
+gitea_oidc_group_team_map:
+  /lv3-platform-admins:
+    ops:
+      - Owners
 gitea_minio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('minio') }}"
 gitea_minio_access_key_id: gitealfs
 gitea_minio_secret_key_local_file: "{{ gitea_local_artifact_dir }}/minio-secret-key.txt"
