@@ -1,0 +1,93 @@
+id: adr-0346-centralized-port-registry
+adr: '0346'
+title: Centralized port registry — eliminate hardcoded platform port numbers
+status: ready
+owner: claude
+branch: claude/modest-northcutt
+worktree_path: .claude/worktrees/modest-northcutt
+doc: docs/workstreams/adr-0346-centralized-port-registry.md
+depends_on:
+- adr-0165-role-interface-contracts
+- adr-0344-single-source-environment-topology
+conflicts_with: []
+shared_surfaces:
+- inventory/host_vars/proxmox_florin.yml
+- inventory/group_vars/platform.yml
+- scripts/generate_platform_vars.py
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_0346_docs
+    paths:
+    - docs/adr/0346-centralized-port-registry.md
+    - docs/workstreams/adr-0346-centralized-port-registry.md
+    mode: exclusive
+  - id: platform_topology_contract
+    paths:
+    - inventory/group_vars/platform.yml
+    - scripts/generate_platform_vars.py
+    mode: shared_contract
+    contract: platform-topology-v1
+  - id: port_registry
+    paths:
+    - inventory/host_vars/proxmox_florin.yml
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/playbooks/secret-rotation.yml
+    mode: exclusive
+  - id: workstream_source
+    paths:
+    - workstreams/active/adr-0346-centralized-port-registry.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: release_management
+    paths:
+    - README.md
+    - VERSION
+    - changelog.md
+    - docs/release-notes/0.178.7.md
+    - docs/release-notes/README.md
+    - docs/release-notes/index/*.md
+    mode: shared_contract
+    contract: release-management-v1
+  - id: platform_truth_generation
+    paths:
+    - versions/stack.yaml
+    mode: shared_contract
+    contract: canonical-truth-v1
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-range/*.yaml
+    - docs/adr/index/by-concern/*.yaml
+    - docs/adr/index/by-status/*.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: service_capability_catalog
+    paths:
+    - config/service-capability-catalog.json
+    mode: shared_contract
+    contract: service-catalog-v1
+  - id: generated_truth
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/site-generated/architecture/dependency-graph.md
+    - receipts/ops-portal-snapshot.html
+    - config/subdomain-exposure-registry.json
+    - build/platform-manifest.json
+    mode: shared_contract
+    contract: latest-main-generated-truth-v1
+ready_to_merge: true
+live_applied: true
+plane_issue_id: 1252ea02-4ff0-4c83-9752-33c1428ddb77
