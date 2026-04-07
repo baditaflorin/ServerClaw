@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Neko multi-instance browser sessions: each user gets an isolated Neko container keyed by Keycloak email; adding/removing entries in neko_instances auto-provisions/deprovisions the container and Keycloak user; NGINX routes authenticated users to their container via email map; single-instance containers removed in favour of the loop-based neko_runtime role
+
 - fix ops.lv3.org auth loop — expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused "Code not valid" on every login attempt
 
 - add LiteLLM Proxy + LibreChat to replace One API + Open WebUI — portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar
