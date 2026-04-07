@@ -1,0 +1,94 @@
+adr_number: 0229
+title: Gitea Actions Runners For On-Platform Validation And Release Preparation
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:adcb53c28
+  evidence: adcb53c28 [release] Recut ADR 0229 on top of 0.177.44
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234770'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:7495cb53c
+  evidence: 7495cb53c [merge] Refresh ws-0229 integration branch with latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:43.234799'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:d9716872d
+  evidence: d9716872d [release] Integrate ADR 0229 on top of 0.177.43
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234804'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:1c99ff0cc
+  evidence: '1c99ff0cc [merge] Bring ADR 0229 live-apply proof onto mainline branch\n\nPurpose:
+    Start the protected integration step from the latest origin/main with the verified
+    ADR 0229 live-apply evidence.\nScope: Merge the ws-0229 live-apply branch into
+    the dedicated main-merge branch before release-file updates.\nStatus: Integration
+    branch now contains the verified live-apply proof and awaits protected file refresh.\nNext:
+    Update VERSION, changelog, release notes, and workstream integration state, then
+    validate.\nSee also: ADR 0229'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234821'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:fb74a073c
+  evidence: 'fb74a073c [receipts] Refresh ADR 0229 latest-main proof\n\nPurpose: Record
+    the successful 0.177.42 live-apply replay and matching server-side runner workflow
+    proof for ADR 0229.\nScope: Update the ws-0229 workstream doc, live-apply receipt,
+    and workstream registry entry with the latest branch head and run metadata.\nStatus:
+    Live apply re-verified from latest origin/main and local validation plus pre-push
+    gate passed.\nNext: Rebuild the mainline integration branch from latest origin/main
+    and land the protected release-file updates.\nSee also: ADR 0229'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234842'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:65d4ed159
+  evidence: 65d4ed159 [receipts] Refresh ADR 0229 latest-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234881'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:9ccc86cb2
+  evidence: 9ccc86cb2 [receipts] Refresh ADR 0229 branch evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234884'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:83929e371
+  evidence: 83929e371 [gitea] Refresh ADR 0229 rebased live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234888'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:7c03e02ce
+  evidence: 7c03e02ce [gitea] Record ADR 0229 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234891'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:0d6182624
+  evidence: 0d6182624 [gitea] Fix ws-0229 validation gate blockers
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:43.234897'
+- marker_type: git-commit
+  adr_number: 0229
+  location: git:47390a4aa
+  evidence: 47390a4aa [gitea] Register ADR 0229 live-apply workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.234899'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=11
+
+  Implemented On: 2026-03-26'

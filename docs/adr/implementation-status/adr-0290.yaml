@@ -1,0 +1,46 @@
+adr_number: 0290
+title: Redpanda As The Kafka-Compatible Streaming Platform
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0290
+  location: git:e225fb605
+  evidence: e225fb605 Merge remote-tracking branch 'origin/main' into codex/ws-0290-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:10.836332'
+- marker_type: git-commit
+  adr_number: 0290
+  location: git:fc20b4c3f
+  evidence: fc20b4c3f Merge remote-tracking branch 'origin/main' into codex/ws-0290-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:10.837651'
+- marker_type: git-commit
+  adr_number: 0290
+  location: git:c8cbad392
+  evidence: c8cbad392 Merge remote-tracking branch 'origin/main' into codex/ws-0290-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:10.837666'
+- marker_type: git-commit
+  adr_number: 0290
+  location: git:f2dbff609
+  evidence: f2dbff609 Merge remote-tracking branch 'origin/main' into codex/ws-0290-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:10.837959'
+- marker_type: playbook
+  adr_number: 0290
+  location: playbooks/redpanda.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:10.916840'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=4, playbook=1
+
+  Implemented On: 2026-03-31'

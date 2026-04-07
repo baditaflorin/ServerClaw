@@ -1,0 +1,64 @@
+adr_number: 0249
+title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:96ef72e81
+  evidence: 96ef72e81 [release] Recut ADR 0249 on current main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901686'
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:d8be63a17
+  evidence: d8be63a17 [monitoring] Integrate ADR 0249 live apply on mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901728'
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:5d59c7aa0
+  evidence: 5d59c7aa0 [monitoring] Refresh ADR 0249 exact-main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901732'
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:dd6310c53
+  evidence: dd6310c53 [workstreams] Fix ADR 0249 live-apply metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901735'
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:43cd77b65
+  evidence: 43cd77b65 [receipts] Record ADR 0249 branch-local live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901738'
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:203fa3c15
+  evidence: 203fa3c15 [monitoring] Raise ADR 0249 TLS scan timeout budget
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901741'
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:aa2b08b39
+  evidence: aa2b08b39 [monitoring] Stabilize ADR 0249 live replay automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901744'
+- marker_type: git-commit
+  adr_number: 0249
+  location: git:71a918688
+  evidence: 71a918688 [monitoring] Implement ADR 0249 HTTPS/TLS assurance
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:51.901747'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8
+
+  Implemented On: 2026-03-29'

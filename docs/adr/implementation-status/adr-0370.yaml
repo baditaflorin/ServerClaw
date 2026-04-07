@@ -1,0 +1,144 @@
+adr_number: '0370'
+title: Service Lifecycle Task Includes
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:d2801b06f
+  evidence: "d2801b06f feat(api_gateway_runtime): use shared lifecycle includes \u2014\
+    \ ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788288'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:dadabbb8e
+  evidence: "dadabbb8e feat(batch-E): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788358'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:2fe0246d5
+  evidence: "2fe0246d5 feat(batch-D): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788381'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:d1052755b
+  evidence: "d1052755b feat(batch-C): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788415'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:dfc069904
+  evidence: 'dfc069904 chore: stage superset ADR 0370 prereq check migration'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788425'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:8b56897ad
+  evidence: '8b56897ad chore: stage pending ADR 0370/0371 task changes from background
+    agents'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788435'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:bc33cc248
+  evidence: "bc33cc248 feat(n8n_runtime): use shared lifecycle includes \u2014 ADR\
+    \ 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788499'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:a2615552c
+  evidence: "a2615552c feat(batch-A): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788597'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:0d610ba0f
+  evidence: "0d610ba0f feat(directus_runtime): use shared lifecycle task includes\
+    \ \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788648'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:aa49356e0
+  evidence: "aa49356e0 feat(common): add shared service lifecycle task includes \u2014\
+    \ ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.788671'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:66fd74a2c
+  evidence: "66fd74a2c feat(api_gateway_runtime): use shared lifecycle includes \u2014\
+    \ ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789482'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:7a9d0426e
+  evidence: "7a9d0426e feat(batch-E): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789505'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:cda5a5785
+  evidence: "cda5a5785 feat(batch-D): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789545'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:e42ff5bc1
+  evidence: "e42ff5bc1 feat(batch-C): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789598'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:3c1211123
+  evidence: '3c1211123 chore: stage superset ADR 0370 prereq check migration'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789608'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:c15bc7a74
+  evidence: 'c15bc7a74 chore: stage pending ADR 0370/0371 task changes from background
+    agents'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789618'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:adb74bdbd
+  evidence: "adb74bdbd feat(n8n_runtime): use shared lifecycle includes \u2014 ADR\
+    \ 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789707'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:3595ea0cc
+  evidence: "3595ea0cc feat(batch-A): use shared lifecycle includes \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.789872'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:fa6123951
+  evidence: "fa6123951 feat(directus_runtime): use shared lifecycle task includes\
+    \ \u2014 ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.790009'
+- marker_type: git-commit
+  adr_number: '0370'
+  location: git:effe80e22
+  evidence: "effe80e22 feat(common): add shared service lifecycle task includes \u2014\
+    \ ADR 0370"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.790028'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 20
+
+  Breakdown: git-commit=20'

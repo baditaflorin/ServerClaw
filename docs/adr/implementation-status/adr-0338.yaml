@@ -1,0 +1,22 @@
+adr_number: 0338
+title: Public Documentation Tiers And Private History Boundaries
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0338
+  location: git:266b73f59
+  evidence: 266b73f59 [adr-0338] Add documentation publication tier catalog
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:32.097712'
+inferred_implementation_status: Partial Evidence
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Partial Evidence
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-04-04'

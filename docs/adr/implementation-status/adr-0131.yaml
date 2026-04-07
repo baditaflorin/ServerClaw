@@ -1,0 +1,64 @@
+adr_number: '0131'
+title: Multi-Agent Handoff Protocol
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0131'
+  location: git:ddfc77571
+  evidence: ddfc77571 Release 0.126.0 for ADR 0131
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:59.892707'
+- marker_type: git-commit
+  adr_number: '0131'
+  location: git:a34df9998
+  evidence: a34df9998 Implement ADR 0131 handoff protocol
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:59.892737'
+- marker_type: git-commit
+  adr_number: '0131'
+  location: git:4012fcefe
+  evidence: 4012fcefe Release 0.125.0 for ADR 0131
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:59.892766'
+- marker_type: git-commit
+  adr_number: '0131'
+  location: git:5d00423eb
+  evidence: 5d00423eb Implement ADR 0131 handoff protocol
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:59.892776'
+- marker_type: git-commit
+  adr_number: '0131'
+  location: git:92bc5feb5
+  evidence: 92bc5feb5 Release 0.123.0 for ADR 0131
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:59.892829'
+- marker_type: git-commit
+  adr_number: '0131'
+  location: git:7f3fd5483
+  evidence: 7f3fd5483 Implement ADR 0131 handoff protocol
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:59.892842'
+- marker_type: git-commit
+  adr_number: '0131'
+  location: git:295ef7a68
+  evidence: 295ef7a68 Implement ADR 0131 handoff protocol
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:59.892858'
+- marker_type: config-file
+  adr_number: '0131'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:00.087411'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=7, config-file=1
+
+  Implemented On: 2026-03-24'

@@ -1,0 +1,20 @@
+adr_number: 0118
+title: Replayable Failure Case Library
+canonical_status: Proposed
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0118
+  location: git:979cabf87
+  evidence: 979cabf87 Implement ADR 0118 failure case library
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:54.310659'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1'

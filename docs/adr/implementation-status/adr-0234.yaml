@@ -1,0 +1,46 @@
+adr_number: '0234'
+title: Shared Human App Shell And Navigation Via PatternFly
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0234'
+  location: git:69fe90b21
+  evidence: 69fe90b21 [release] Integrate ADR 0234 PatternFly shell live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.312618'
+- marker_type: git-commit
+  adr_number: '0234'
+  location: git:dc478149b
+  evidence: dc478149b [ops-portal] Refresh ADR 0234 workstream metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.312650'
+- marker_type: git-commit
+  adr_number: '0234'
+  location: git:ac1229ecb
+  evidence: ac1229ecb [ops-portal] Record ADR 0234 live-apply blocker and cleanup
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.312654'
+- marker_type: git-commit
+  adr_number: '0234'
+  location: git:22dd7866e
+  evidence: 22dd7866e [ops-portal] Harden ADR 0234 live replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.312657'
+- marker_type: git-commit
+  adr_number: '0234'
+  location: git:448c08da9
+  evidence: 448c08da9 [ops-portal] Implement PatternFly shell for ADR 0234
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.312665'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-29'

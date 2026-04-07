@@ -1,0 +1,88 @@
+adr_number: 0148
+title: SearXNG for Agent Web Search
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:323a72496
+  evidence: 323a72496 Merge origin/main into ADR 0148 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766623'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:e3172a96b
+  evidence: e3172a96b Record ADR 0148 integration gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766656'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:c5ea86cda
+  evidence: c5ea86cda Refresh platform manifest for ADR 0148
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766662'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:785561a97
+  evidence: 785561a97 Integrate ADR 0148 on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766674'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:831002e13
+  evidence: 831002e13 Record ADR 0148 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766692'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:eeb1161c2
+  evidence: eeb1161c2 Implement ADR 0148 SearXNG web search
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766699'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:b97a37bea
+  evidence: b97a37bea Record ADR 0148 gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766821'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:cd3b5e0f6
+  evidence: cd3b5e0f6 Record ADR 0148 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766835'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:52563d650
+  evidence: 52563d650 Merge origin/main into ADR 0148 worktree
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766846'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:945a4b4a4
+  evidence: 945a4b4a4 Merge origin/main into ADR 0148 worktree
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.766894'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:ae1c8cfa3
+  evidence: ae1c8cfa3 Record ADR 0148 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.768729'
+- marker_type: git-commit
+  adr_number: 0148
+  location: git:116e6b4f6
+  evidence: 116e6b4f6 Implement ADR 0148 SearXNG web search
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:07.768756'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-03-26'

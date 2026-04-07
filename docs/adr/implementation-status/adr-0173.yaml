@@ -1,0 +1,28 @@
+adr_number: '0173'
+title: Workstream Surface Ownership Manifest
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0173'
+  location: git:0c7d793f1
+  evidence: 0c7d793f1 Mark ADR 0173 live applied on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:19.307658'
+- marker_type: git-commit
+  adr_number: '0173'
+  location: git:4f29046e3
+  evidence: 4f29046e3 Implement ADR 0173 workstream ownership manifests
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:19.307776'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-03-27'

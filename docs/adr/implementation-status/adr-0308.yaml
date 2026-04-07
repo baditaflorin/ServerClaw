@@ -1,0 +1,89 @@
+adr_number: 0308
+title: LLM Agent Execution Surface and Connectivity Contracts for Operator Provisioning
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:d54aa2e8f
+  evidence: d54aa2e8f [release] Finalize ws-0308 exact-main live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.292884'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:64b47f4f8
+  evidence: 64b47f4f8 [release] Cut 0.177.146 for ws-0308 exact-main integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.293020'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:695a621fe
+  evidence: 695a621fe Merge origin/main into codex/ws-0308-live-apply-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.293028'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:2116c8eb4
+  evidence: 2116c8eb4 [release] Cut 0.177.145 for ws-0308 exact-main integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.293056'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:a0048ba68
+  evidence: a0048ba68 Merge origin/main into codex/ws-0308-live-apply-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.293062'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:a44928e0f
+  evidence: a44928e0f [ops-portal] Integrate ADR 0308 and ADR 0312 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.293066'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:69bea8276
+  evidence: 69bea8276 [ops-portal] Merge ADR 0310 activation gating into ADR 0308
+    branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.293081'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:4a1ad5b45
+  evidence: 4a1ad5b45 [portal] Cut 0.177.140 for ADR 0308 journey replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.295498'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:fcd751f5d
+  evidence: fcd751f5d [release] Integrate ADR 0308 into 0.177.138
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.295809'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:fd421ca9d
+  evidence: fd421ca9d [operator-access] Close out rebased ADR 0308 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.295818'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:2592ab846
+  evidence: 2592ab846 [operator-access] Close out ADR 0308 branch validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.296636'
+- marker_type: git-commit
+  adr_number: 0308
+  location: git:85f57658c
+  evidence: 85f57658c [operator-access] Implement ADR 0308 execution-surface checks
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.296649'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-04-02'

@@ -1,0 +1,64 @@
+adr_number: '0117'
+title: Service Dependency Graph As First-Class Runtime
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:0d64b9707
+  evidence: 0d64b9707 Record ADR 0117 main integration gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.950975'
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:4d6bb8891
+  evidence: 4d6bb8891 Integrate ADR 0117 on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.951012'
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:e3bd23e8d
+  evidence: 'e3bd23e8d ADR 0117: record gate bypass receipt'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.951164'
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:3a4f0b4ba
+  evidence: '3a4f0b4ba ADR 0117: record live apply evidence'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.951167'
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:41e35cb67
+  evidence: '41e35cb67 ADR 0117: repair graph runtime live replay'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.951170'
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:2c5c88dae
+  evidence: '2c5c88dae ADR 0117: harden Windmill seed sync retries'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.951232'
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:30fdbe2ed
+  evidence: '30fdbe2ed ADR 0117: wire graph runtime live prerequisites'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.951260'
+- marker_type: git-commit
+  adr_number: '0117'
+  location: git:d5c8a0a31
+  evidence: d5c8a0a31 Implement ADR 0117 dependency graph runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.954375'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8
+
+  Implemented On: 2026-03-26'

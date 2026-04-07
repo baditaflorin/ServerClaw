@@ -1,0 +1,34 @@
+adr_number: '0174'
+title: Integration-Only Canonical Truth Assembly
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0174'
+  location: git:93aadaf1f
+  evidence: 93aadaf1f Advance ADR 0174 release to 0.176.3
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:19.837651'
+- marker_type: git-commit
+  adr_number: '0174'
+  location: git:22426e824
+  evidence: 22426e824 Rebase ADR 0174 release to 0.176.2
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:19.837694'
+- marker_type: git-commit
+  adr_number: '0174'
+  location: git:e2f1ada09
+  evidence: e2f1ada09 Implement ADR 0174 canonical truth assembly
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:19.837702'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 3
+
+  Breakdown: git-commit=3
+
+  Implemented On: 2026-03-27'

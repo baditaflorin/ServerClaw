@@ -1,0 +1,52 @@
+adr_number: '0151'
+title: n8n for Webhook and API Integration Automation
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0151'
+  location: git:9457e4694
+  evidence: '9457e4694 ADR 0151: live apply n8n on main'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.213254'
+- marker_type: git-commit
+  adr_number: '0151'
+  location: git:d8afb903b
+  evidence: d8afb903b Record ADR 0151 live-apply blockers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.214250'
+- marker_type: git-commit
+  adr_number: '0151'
+  location: git:a295d4b5c
+  evidence: a295d4b5c Merge origin/main into ADR 0151 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.214265'
+- marker_type: git-commit
+  adr_number: '0151'
+  location: git:686933227
+  evidence: 686933227 Merge ADR 0151 and cut release 0.148.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.214268'
+- marker_type: git-commit
+  adr_number: '0151'
+  location: git:3ca916657
+  evidence: 3ca916657 Implement ADR 0151 n8n runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.214283'
+- marker_type: playbook
+  adr_number: '0151'
+  location: playbooks/n8n.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:09.240492'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=5, playbook=1
+
+  Implemented On: 2026-03-26'

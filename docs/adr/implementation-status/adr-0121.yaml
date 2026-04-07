@@ -1,0 +1,107 @@
+adr_number: '0121'
+title: Local Search and Indexing Fabric
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:cae795766
+  evidence: cae795766 Release 0.174.1 for ADR 0121 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.516547'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:1a8fd5b5d
+  evidence: 1a8fd5b5d Merge remote-tracking branch 'origin/codex/ws-0121-live-apply'
+    into codex/ws-0121-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:55.516592'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:2d81f49c5
+  evidence: 2d81f49c5 Record ADR 0121 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.516680'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:edb470e49
+  evidence: edb470e49 Harden ADR 0121 live apply surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.516687'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:3522095a6
+  evidence: 3522095a6 Record ADR 0121 follow-up gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518486'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:a31cbdac4
+  evidence: a31cbdac4 Annotate ADR 0121 workstream implementation version
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518490'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:715faa4f4
+  evidence: 715faa4f4 Implement ADR 0121 local search fabric
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518493'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:bcd727d2a
+  evidence: bcd727d2a Record ADR 0121 mainline gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518496'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:331613192
+  evidence: 331613192 Cut release 0.119.0 for ADR 0121
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518499'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:948d6675b
+  evidence: 948d6675b Implement ADR 0121 local search fabric
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518502'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:dc9752c9f
+  evidence: dc9752c9f Record ADR 0121 push gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518527'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:a6db1b8a3
+  evidence: a6db1b8a3 Implement ADR 0121 local search fabric
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.518534'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:0c240dac3
+  evidence: '0c240dac3 Propose ADRs 0112-0121: CPU-only autonomous control layer'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:55.518664'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:ba242edd8
+  evidence: 'ba242edd8 Propose ADRs 0112-0121: CPU-only autonomous control layer'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:55.518685'
+- marker_type: git-commit
+  adr_number: '0121'
+  location: git:bd778d861
+  evidence: 'bd778d861 Propose ADRs 0112-0121: CPU-only autonomous control layer'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:55.518706'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=15
+
+  Implemented On: 2026-03-26'

@@ -1,0 +1,112 @@
+adr_number: '0143'
+title: Gitea for Self-Hosted Git and Webhook-Driven Automation
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:a7a039d88
+  evidence: a7a039d88 Record gate bypass for ADR 0143 main push
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444735'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:acca554b7
+  evidence: acca554b7 Refresh platform manifest after ADR 0143 rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444798'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:1804344a6
+  evidence: 1804344a6 Finalize ADR 0143 Gitea live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444802'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:55d37c613
+  evidence: 55d37c613 Refresh ADR 0143 rebased integration artifacts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444806'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:73d7b5d99
+  evidence: 73d7b5d99 Refresh ADR 0143 integration artifacts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444809'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:f2591aebf
+  evidence: f2591aebf Align ADR 0143 with current mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444812'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:55da19114
+  evidence: 55da19114 Implement ADR 0143 Gitea self-hosted CI
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444815'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:e6a3fcfd4
+  evidence: e6a3fcfd4 Fix remaining gate failures from ADR 0143 Gitea CI implementation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.444919'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:3ce4024a6
+  evidence: 3ce4024a6 Fix remaining gate failures from ADR 0143 Gitea CI implementation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.446037'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:03591056c
+  evidence: 03591056c Align ADR 0143 with current mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.446737'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:119c479a6
+  evidence: 119c479a6 Implement ADR 0143 Gitea self-hosted CI
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.446748'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:0024d3584
+  evidence: 0024d3584 Finalize ADR 0143 live rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.446756'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:19fb31b57
+  evidence: 19fb31b57 Merge codex/adr-0143-gitea-ci
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:05.446780'
+- marker_type: git-commit
+  adr_number: '0143'
+  location: git:7e7d015fb
+  evidence: 7e7d015fb Implement ADR 0143 Gitea self-hosted CI
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:05.446784'
+- marker_type: playbook
+  adr_number: '0143'
+  location: playbooks/server-resident-reconciliation.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:05.473948'
+- marker_type: playbook
+  adr_number: '0143'
+  location: playbooks/gitea.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:05.477934'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 16
+
+  Breakdown: git-commit=14, playbook=2
+
+  Implemented On: 2026-03-26'

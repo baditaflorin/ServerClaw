@@ -1,0 +1,82 @@
+adr_number: '0065'
+title: Secret Rotation Automation With OpenBao
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:c95ecfa1e
+  evidence: c95ecfa1e Merge branch 'codex/adr-0065-secret-rotation'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:33.258481'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:3648a7d08
+  evidence: 3648a7d08 Release ADR 0065 live apply on 0.74.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258516'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:e4e28fcbf
+  evidence: e4e28fcbf Repair ADR 0065 live apply path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258530'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:d69464f5c
+  evidence: d69464f5c Repair ADR 0065 live apply path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258533'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:4b45bed35
+  evidence: 4b45bed35 Release ADR 0065 contract hardening on 0.72.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258536'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:ca5e7d4ff
+  evidence: ca5e7d4ff Adapt ADR 0065 to current catalog contracts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258540'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:6fb2e4dad
+  evidence: 6fb2e4dad Adapt ADR 0065 to current catalog contracts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258547'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:29c5c664a
+  evidence: 29c5c664a Merge origin/main into ADR 0065 worktree
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258554'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:231d80947
+  evidence: 231d80947 Harden ADR 0065 worktree execution
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258661'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:cc32a5202
+  evidence: cc32a5202 Implement ADR 0065 secret rotation automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258765'
+- marker_type: git-commit
+  adr_number: '0065'
+  location: git:55cfd8d30
+  evidence: 55cfd8d30 Implement ADR 0065 secret rotation automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:33.258779'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=11
+
+  Implemented On: 2026-03-23'

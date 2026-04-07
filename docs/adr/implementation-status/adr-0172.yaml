@@ -1,0 +1,95 @@
+adr_number: '0172'
+title: Watchdog Escalation and Stale Job Self-Healing
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:7974d63ee
+  evidence: 7974d63ee Refresh platform manifest for ADR 0172 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.996103'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:c98ca6b86
+  evidence: c98ca6b86 Record ADR 0172 live apply and cut 0.170.1
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.996166'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:f6fbea9d4
+  evidence: f6fbea9d4 Repair ADR 0172 watchdog live runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.996176'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:d575d6695
+  evidence: "d575d6695 Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:18.998455'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:0ae31d92d
+  evidence: 0ae31d92d Release 0.146.2 for ADR 0172
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.998550'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:e10faf200
+  evidence: e10faf200 Implement ADR 0172 watchdog stale-job backstop
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.998554'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:5dfc8ca64
+  evidence: "5dfc8ca64 Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:18.998595'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:e5d4e9011
+  evidence: e5d4e9011 Implement ADR 0172 watchdog stale-job backstop
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.998606'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:e98e41b33
+  evidence: e98e41b33 Implement ADR 0172 watchdog stale-job backstop
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.998635'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:4d69a3c2b
+  evidence: "4d69a3c2b Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:18.998698'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:f34faf5bc
+  evidence: "f34faf5bc Merge ADRs 0163\u20130172: platform stability and reliability\
+    \ layer"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:18.999062'
+- marker_type: git-commit
+  adr_number: '0172'
+  location: git:fd91bdffd
+  evidence: "fd91bdffd Add ADRs 0163\u20130172: stability, reliability, and error-proofing"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:18.999069'
+- marker_type: config-file
+  adr_number: '0172'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:19.103223'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 13
+
+  Breakdown: git-commit=12, config-file=1
+
+  Implemented On: 2026-03-25'

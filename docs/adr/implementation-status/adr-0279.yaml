@@ -1,0 +1,109 @@
+adr_number: 0279
+title: Grist As The No-Code Operational Spreadsheet Database
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:b7dde631d
+  evidence: b7dde631d [grist] Integrate ADR 0279 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.793711'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:858accedf
+  evidence: 858accedf Merge remote-tracking branch 'origin/main' into codex/ws-0279-main-publish-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.793745'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:ec7d485f7
+  evidence: ec7d485f7 Merge remote-tracking branch 'origin/main' into codex/ws-0279-main-publish-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.793757'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:bb856f791
+  evidence: bb856f791 [ws-0279] Merge origin/main into live-apply branch
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.793763'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:884772ee8
+  evidence: 884772ee8 [workstream] Record ws-0279 blocker state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.794323'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:86a11a00d
+  evidence: 86a11a00d Merge remote-tracking branch 'origin/main' into codex/ws-0279-main-publish-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.794330'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:6c30ff169
+  evidence: 6c30ff169 Merge remote-tracking branch 'origin/main' into codex/ws-0279-main-publish-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.794514'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:b6fde88b2
+  evidence: b6fde88b2 Merge origin/main into codex/ws-0279-main-publish-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.794528'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:b8308f573
+  evidence: b8308f573 [grist] Replay ADR 0279 on current mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.794638'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:6ac85afc2
+  evidence: '6ac85afc2 [grist] Integrate ADR 0279 on latest main\n\nPurpose: Carry
+    the verified Grist rollout onto the latest origin/main and record canonical mainline
+    evidence\nScope: Update Grist publish verification, release truth, ADR/workstream
+    metadata, and live-apply receipts\nStatus: Full pre-push gate passed on the rebased
+    branch and the branch is ready to merge\nNext: Fast-forward main, flip ws-0279-main-merge
+    to merged, rerun final checks, and push origin/main\nSee also: ADR 0279'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.795550'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:06e51b359
+  evidence: '06e51b359 [grist] Integrate ADR 0279 on latest main\n\nPurpose: Carry
+    the verified Grist rollout onto the latest origin/main and record canonical mainline
+    evidence\nScope: Update Grist publish verification, release truth, ADR/workstream
+    metadata, and live-apply receipts\nStatus: Full pre-push gate passed on the rebased
+    branch and the branch is ready to merge\nNext: Fast-forward main, flip ws-0279-main-merge
+    to merged, rerun final checks, and push origin/main\nSee also: ADR 0279'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.797571'
+- marker_type: git-commit
+  adr_number: 0279
+  location: git:c4559adc6
+  evidence: 'c4559adc6 [grist] Integrate ADR 0279 on latest main\n\nPurpose: Carry
+    the verified Grist rollout onto the latest origin/main and record canonical mainline
+    evidence\nScope: Update Grist publish verification, release truth, ADR/workstream
+    metadata, and live-apply receipts\nStatus: Full pre-push gate passed on the rebased
+    branch and the branch is ready to merge\nNext: Fast-forward main, flip ws-0279-main-merge
+    to merged, rerun final checks, and push origin/main\nSee also: ADR 0279'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.797588'
+- marker_type: playbook
+  adr_number: 0279
+  location: playbooks/grist.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:05.838480'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 13
+
+  Breakdown: git-commit=12, playbook=1
+
+  Implemented On: 2026-03-30'

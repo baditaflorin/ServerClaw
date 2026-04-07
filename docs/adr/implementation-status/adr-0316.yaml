@@ -1,0 +1,65 @@
+adr_number: '0316'
+title: Journey Analytics And Onboarding Success Scorecards
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0316'
+  location: git:5172e8234
+  evidence: '5172e8234 [windmill] Record ADR 0311 pre-refresh mainline replay\n\nPurpose:
+    Preserve the release-cut and exact-main replay evidence completed before origin/main
+    advanced to the ADR 0316 integration baseline.\nScope: Record intermediate release
+    surfaces, mainline replay evidence, and repo-truth updates captured during the
+    first ADR 0311 exact-main pass.\nStatus: Successful exact-main replay preserved
+    locally; awaiting rebase onto newer origin/main for final latest-main verification.\nNext:
+    Rebase onto origin/main c7051f80, integrate ADR 0316 shared surfaces, and rerun
+    the final mainline validation bundle.\nSee also: ADR 0311'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.805083'
+- marker_type: git-commit
+  adr_number: '0316'
+  location: git:c7051f80c
+  evidence: c7051f80c [receipts] Stamp ADR 0316 promoted source commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.805778'
+- marker_type: git-commit
+  adr_number: '0316'
+  location: git:c2d53107c
+  evidence: c2d53107c [windmill] Promote ADR 0316 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.805791'
+- marker_type: git-commit
+  adr_number: '0316'
+  location: git:675f33675
+  evidence: 675f33675 [workstreams] Mark ADR 0316 runbooks as shared
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.805818'
+- marker_type: git-commit
+  adr_number: '0316'
+  location: git:990912ce7
+  evidence: 990912ce7 [windmill] Implement ADR 0316 journey analytics scorecards
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.805829'
+- marker_type: git-commit
+  adr_number: '0316'
+  location: git:d604cfe80
+  evidence: d604cfe80 [workstreams] Mark ADR 0316 runbooks as shared
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.806003'
+- marker_type: git-commit
+  adr_number: '0316'
+  location: git:eb7cd6651
+  evidence: eb7cd6651 [windmill] Implement ADR 0316 journey analytics scorecards
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.806012'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-04-02'

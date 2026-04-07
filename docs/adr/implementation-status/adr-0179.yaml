@@ -1,0 +1,40 @@
+adr_number: 0179
+title: Service Redundancy Tier Matrix
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0179
+  location: git:43d63977a
+  evidence: 43d63977a Record ADR 0179 mainline gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:22.778265'
+- marker_type: git-commit
+  adr_number: 0179
+  location: git:be6fdb2db
+  evidence: be6fdb2db Implement ADR 0179 redundancy tier matrix
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:22.778314'
+- marker_type: git-commit
+  adr_number: 0179
+  location: git:2a9dd26b0
+  evidence: 2a9dd26b0 Record ADR 0179 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:22.778329'
+- marker_type: git-commit
+  adr_number: 0179
+  location: git:398b56bb3
+  evidence: 398b56bb3 Implement ADR 0179 redundancy tier matrix
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:22.778364'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-27'

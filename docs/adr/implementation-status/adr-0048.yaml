@@ -1,0 +1,22 @@
+adr_number: 0048
+title: Command Catalog And Approval Gates
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0048
+  location: git:82df937b7
+  evidence: 82df937b7 Record ADR 0045, 0046, and 0048 live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:25.332360'
+inferred_implementation_status: Partial Evidence
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Partial Evidence
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-03-22'

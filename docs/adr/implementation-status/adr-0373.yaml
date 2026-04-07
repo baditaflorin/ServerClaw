@@ -1,0 +1,56 @@
+adr_number: '0373'
+title: Service Registry and Derived Defaults
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:3c3f4c5f3
+  evidence: "3c3f4c5f3 feat(batch-1-registry): migrate all runtime roles to service\
+    \ registry \u2014 ADR 0373"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:44.104886'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:efdf86bf3
+  evidence: 'efdf86bf3 feat(adr-0373): service registry, derivation task, validator,
+    directus migration'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:44.104936'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:4abad96cc
+  evidence: '4abad96cc feat(adr-0373): add service registry, derivation task, and
+    validator'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:44.104942'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:f2b4f1132
+  evidence: "f2b4f1132 feat(batch-1-registry): migrate all runtime roles to service\
+    \ registry \u2014 ADR 0373"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:44.105373'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:b51e9dc41
+  evidence: 'b51e9dc41 feat(adr-0373): service registry, derivation task, validator,
+    directus migration'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:44.105438'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:fb9dd760f
+  evidence: 'fb9dd760f feat(adr-0373): add service registry, derivation task, and
+    validator'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:44.105443'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=6'

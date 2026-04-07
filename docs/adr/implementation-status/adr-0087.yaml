@@ -1,0 +1,40 @@
+adr_number: 0087
+title: Repository Validation Gate (Pre-Push and CI)
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0087
+  location: git:ce6341310
+  evidence: ce6341310 Merge latest main into ADR 0087 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:41.666302'
+- marker_type: git-commit
+  adr_number: 0087
+  location: git:1cdbc4101
+  evidence: 1cdbc4101 Merge latest main into ADR 0087 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:41.666344'
+- marker_type: git-commit
+  adr_number: 0087
+  location: git:5cc59d38d
+  evidence: 5cc59d38d Merge ADR 0087 validation gate into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:41.666355'
+- marker_type: git-commit
+  adr_number: 0087
+  location: git:8c342402f
+  evidence: 8c342402f Implement ADR 0087 validation gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:41.666362'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-23'

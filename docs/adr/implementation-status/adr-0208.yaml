@@ -1,0 +1,58 @@
+adr_number: 0208
+title: Dependency Direction And Composition Roots
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0208
+  location: git:f7991a02c
+  evidence: f7991a02c [release] Integrate ADR 0208 live apply into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.134776'
+- marker_type: git-commit
+  adr_number: 0208
+  location: git:f0d1c6f42
+  evidence: f0d1c6f42 [receipts] Refresh ADR 0208 branch evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.135241'
+- marker_type: git-commit
+  adr_number: 0208
+  location: git:38ea06ee6
+  evidence: 38ea06ee6 [platform] Finish ADR 0208 latest-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.135265'
+- marker_type: git-commit
+  adr_number: 0208
+  location: git:5c908adb4
+  evidence: 5c908adb4 [platform] Enforce ADR 0208 dependency direction
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.135276'
+- marker_type: git-commit
+  adr_number: 0208
+  location: git:ff03405be
+  evidence: ff03405be [receipts] Refresh ADR 0208 branch evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.135300'
+- marker_type: git-commit
+  adr_number: 0208
+  location: git:734bef665
+  evidence: 734bef665 [platform] Finish ADR 0208 latest-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.135310'
+- marker_type: git-commit
+  adr_number: 0208
+  location: git:9e5ad805d
+  evidence: 9e5ad805d [platform] Enforce ADR 0208 dependency direction
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.135710'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-28'

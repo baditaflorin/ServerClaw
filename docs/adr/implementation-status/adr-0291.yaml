@@ -1,0 +1,117 @@
+adr_number: 0291
+title: SFTPGo As The Managed File Transfer Service With REST Provisioning
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:8164080a5
+  evidence: 8164080a5 [checkpoint] Preserve ws-0291 pre-rebase state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.394955'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:1e53c6f82
+  evidence: '1e53c6f82 [build] Refresh platform manifest for ADR 0291 release\n\nPurpose:
+    Update canonical manifest output after the ADR 0291 exact-main closeout metadata
+    refresh changed repository truth\nScope: Regenerate build/platform-manifest.json
+    and add the final candidate validation, receipt-validation, and diff-check transcripts
+    for the manifest-fixed tree\nStatus: Remote schema-validation blocker resolved
+    and the exact-main tree is ready for another mainline push attempt\nNext: Retry
+    detached HEAD:main publication against origin/main\nSee also: ADR 0291'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.396015'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:216483989
+  evidence: '216483989 [meta] Refresh ADR 0291 exact-main closeout\n\nPurpose: Align
+    the ADR 0291 exact-main closeout bundle with the latest origin/main platform baseline
+    and final candidate validations\nScope: Update release and workstream metadata
+    to 0.130.75, register the final candidate evidence surfaces, add the new validation
+    transcripts, and carry the regenerated coordination diagram\nStatus: Live apply
+    verified and exact-main release 0.177.116 is ready for mainline publication\nNext:
+    Push detached HEAD to origin/main after one final fetch confirms the remote tip
+    is still fast-forwardable\nSee also: ADR 0291'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.396129'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:c5bb3013c
+  evidence: c5bb3013c [meta] Register ws-0291 main rebase branch
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.396145'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:e9ce56936
+  evidence: e9ce56936 [release] Rebase ADR 0291 closeout onto 0.177.116
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.396150'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:188fe6753
+  evidence: 188fe6753 [jupyterhub] Finalize ADR 0291 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.396969'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:40305745c
+  evidence: 40305745c [jupyterhub] Refresh ADR 0291 evidence on moving main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.397001'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:af74b9afb
+  evidence: 'af74b9afb [jupyterhub] Checkpoint ADR 0291 exact-main closeout\n\nPurpose:
+    Preserve the validated ADR 0291 exact-main closeout before rebasing onto the newer
+    origin/main baseline\nScope: Record canonical receipt, truth surfaces, workstream
+    state, and validation evidence\nStatus: Validated against the pre-flagsmith latest-main
+    candidate and ready for rebase onto newer main\nNext: Rebase onto origin/main,
+    refresh exact-main release truth, and rerun the synchronized live-apply finish\nSee
+    also: ADR 0291'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.397007'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:d5988b28d
+  evidence: d5988b28d [release] Prepare ADR 0291 exact-main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.397010'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:d63f6ae20
+  evidence: d63f6ae20 [workstream] Scaffold ADR 0291 mainline integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.397018'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:cdf52e1ce
+  evidence: cdf52e1ce [jupyterhub] Implement ADR 0291 branch-local runtime and catalogs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.397064'
+- marker_type: git-commit
+  adr_number: 0291
+  location: git:f0b2d5048
+  evidence: f0b2d5048 [jupyterhub] Implement ADR 0291 branch-local runtime and catalogs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.404199'
+- marker_type: playbook
+  adr_number: 0291
+  location: playbooks/jupyterhub.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:11.449291'
+- marker_type: playbook
+  adr_number: 0291
+  location: playbooks/sftpgo.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:11.452373'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=12, playbook=2'

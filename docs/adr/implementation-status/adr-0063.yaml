@@ -1,0 +1,46 @@
+adr_number: '0063'
+title: Centralised Vars And Computed Facts Library
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0063'
+  location: git:a254c1984
+  evidence: a254c1984 Merge ADR 0068 main updates into ADR 0063 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:32.264432'
+- marker_type: git-commit
+  adr_number: '0063'
+  location: git:c7c5136d2
+  evidence: c7c5136d2 Release ADR 0063 centralised platform facts on 0.67.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:32.264460'
+- marker_type: git-commit
+  adr_number: '0063'
+  location: git:75dc425f7
+  evidence: 75dc425f7 Merge latest origin/main into ADR 0063 worktree
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:32.264468'
+- marker_type: git-commit
+  adr_number: '0063'
+  location: git:bae8b393f
+  evidence: bae8b393f Merge origin/main into ADR 0063 worktree
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:32.264475'
+- marker_type: git-commit
+  adr_number: '0063'
+  location: git:ed3e33b5d
+  evidence: ed3e33b5d Implement ADR 0063 platform facts library
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:32.264656'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-23'

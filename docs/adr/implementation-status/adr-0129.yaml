@@ -1,0 +1,40 @@
+adr_number: 0129
+title: Runbook Automation Executor
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0129
+  location: git:b21c60e21
+  evidence: b21c60e21 Record ADR 0129 remote gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:58.925402'
+- marker_type: git-commit
+  adr_number: 0129
+  location: git:2adfc0d0a
+  evidence: 2adfc0d0a Release 0.132.0 for ADR 0129
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:58.925440'
+- marker_type: git-commit
+  adr_number: 0129
+  location: git:48ec77bb4
+  evidence: 48ec77bb4 Implement ADR 0129 runbook automation executor
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:58.925444'
+- marker_type: git-commit
+  adr_number: 0129
+  location: git:5fea73e61
+  evidence: 5fea73e61 Implement ADR 0129 runbook automation executor
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:58.925655'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4
+
+  Implemented On: 2026-03-25'

@@ -29,6 +29,7 @@ platform_host:
       - 587
       - 993
       - 7881
+      - 8080
     public_ingress_tcp_forwards:
       - listen_port: 25
         target_host: 10.10.10.92
@@ -48,6 +49,10 @@ platform_host:
       - listen_port: 7881
         target_host: 10.10.10.20
         target_port: 7881
+      - listen_port: 8080
+        target_host: 10.10.10.41
+        target_port: 8080
+        description: Neko remote desktop signalling (proxied via NGINX edge as browser.lv3.org)
     tailscale_hostname: proxmox-florin-subnet-router
     tailscale_advertise_routes:
       - 10.10.10.0/24
@@ -2262,23 +2267,17 @@ platform_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: edge-published
+    exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: true
     dns:
       managed: true
-      visibility: public
+      visibility: tailnet
       name: git
       type: A
-      target: 65.108.75.123
+      target: 100.64.0.1
       ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      upstream: http://10.10.10.92:3003
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009
@@ -4719,23 +4718,17 @@ public_edge_service_topology:
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
-    exposure_model: edge-published
+    exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: true
     dns:
       managed: true
-      visibility: public
+      visibility: tailnet
       name: git
       type: A
-      target: 65.108.75.123
+      target: 100.64.0.1
       ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      upstream: http://10.10.10.92:3003
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:3009

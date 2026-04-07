@@ -1,0 +1,96 @@
+adr_number: '0347'
+title: Docker Runtime Workload Split
+canonical_status: Accepted
+canonical_implementation_status: Accepted
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:20857888e
+  evidence: "20857888e [release] Bump to 0.178.26 \u2014 wire ADR 0347-0357 coordination\
+    \ patterns into agent discovery surfaces"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.803411'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:b1ce1fd8c
+  evidence: "b1ce1fd8c [release] Bump to 0.178.25 \u2014 wire ADR 0347-0357 coordination\
+    \ patterns into agent discovery surfaces"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.803516'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:f3be40d4d
+  evidence: 'f3be40d4d docs: wire ADR 0347-0357 implementations into agent discovery
+    surfaces'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.803521'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:78da85cb9
+  evidence: '78da85cb9 docs: wire ADR 0347-0357 implementations into agent discovery
+    surfaces'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.803547'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:eea65509a
+  evidence: 'eea65509a chore: regenerate ADR index after status triage (0347-0358
+    superseded/deferred)'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:35.803711'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:f056ddce0
+  evidence: "f056ddce0 [release] Bump to 0.178.21 \u2014 ADR triage 0347-0358: 6 implementations\
+    \ + 3 superseded + 3 deferred"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:35.803745'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:7d103e68a
+  evidence: "7d103e68a [merge] claude/eager-buck \u2014 implement 6 ADRs (0347-0357\
+    \ triage + integration registry, nginx fragments, locking, receipts, provenance)"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:35.803755'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:1027d5d8a
+  evidence: 1027d5d8a [workstream] Register adr-0347-0358 multi-agent ops workstream
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.803990'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:1dc944e66
+  evidence: 1dc944e66 [adr-0346-0347] PostgreSQL domain split and docker-runtime workload
+    split
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:35.805148'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:51c033e0b
+  evidence: "51c033e0b Merge PR: epic-liskov \u2014 ADR 0347-0358 atomic multi-agent\
+    \ ops and LLM integration"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.805333'
+- marker_type: git-commit
+  adr_number: '0347'
+  location: git:ec2f8c830
+  evidence: ec2f8c830 [adr-0347-0358] Add 12 ADRs for atomic multi-agent ops and LLM
+    integration
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.805403'
+- marker_type: playbook
+  adr_number: '0347'
+  location: playbooks/runtime-comms-pool.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:35.847461'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Accepted
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=11, playbook=1'

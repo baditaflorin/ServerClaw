@@ -1,0 +1,82 @@
+adr_number: '0331'
+title: Repository-Relative Paths For Public Metadata And Generated Docs
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:90abb5045
+  evidence: 90abb5045 [workstreams] Archive ws-0331 after final branch validation
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.812524'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:68053d071
+  evidence: 68053d071 [workstreams] Reopen ws-0331 for merge validation
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.812549'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:6eea29a6e
+  evidence: 6eea29a6e [ws-0331] Integrate runtime pool mainline live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.812559'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:8502342ad
+  evidence: 8502342ad [ws-0331] Close out runtime pool mainline live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.812639'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:27660bb17
+  evidence: 27660bb17 [ws-0331] Merge exact-main workstream onto latest main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.812663'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:98d4bb464
+  evidence: 98d4bb464 [live-apply] Harden ws-0331 exact-main replay
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.812669'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:b3b199dbc
+  evidence: 'b3b199dbc [tests] Align OpenBao local-artifact expectation\n\nPurpose:
+    keep the ws-0331 post-rebase regression slice aligned with mainline''s shared
+    local-root contract before the final latest-main replay\nScope: update the OpenBao
+    runtime role test to expect repo_shared_local_root artifact paths\nStatus: targeted
+    post-rebase suite passed locally\nNext: rebase onto the newest origin/main and
+    rerun the latest-main runtime-control live apply\nSee also: ADR 0331'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.812745'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:d526fdd5f
+  evidence: 'd526fdd5f [runtime-control] Harden latest-main replay recovery\n\nPurpose:
+    keep the runtime-control latest-main live apply resilient across transient Keycloak
+    auth expiry, bridge-chain verification reconnects, and large host SBOM scans\nScope:
+    adjust Keycloak repo-user reconciliation, docker bridge helper final-state capture,
+    host SBOM timeout defaults, and focused regression coverage\nStatus: targeted
+    tests passing locally; latest-main rebase and final live-apply replay remain next\nNext:
+    rebase onto current origin/main, replay runtime-control-pool from latest mainline,
+    then close out ADR 0331 metadata and release truth\nSee also: ADR 0331'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:28.812763'
+- marker_type: git-commit
+  adr_number: '0331'
+  location: git:859683c7a
+  evidence: 859683c7a [workstream] Align ws-0331 exact-main validation state
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:28.812789'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=9
+
+  Implemented On: 2026-04-02'

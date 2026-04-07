@@ -1,0 +1,100 @@
+adr_number: 0286
+title: Vikunja As The Task And Project Management REST API
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:8e47a73c8
+  evidence: '8e47a73c8 [livekit] Refresh latest-main blocker evidence\n\nPurpose:
+    Keep the ws-0293 branch evidence aligned with the newest origin/main baseline
+    and the latest ADR 0153 lock state on vm:120.\nScope: Update the workstream notes
+    plus the branch validation, canonical-truth gate, and lock-blocker evidence artifacts
+    after rebasing to 0.177.104.\nStatus: The branch is rebased and validated on the
+    newest mainline base, but live mutation remains blocked because ws-0286-live-apply
+    holds vm:120 until 2026-03-30T16:22:24Z.\nNext: When the lock clears, acquire
+    the required resources, run the LiveKit converge and end-to-end verification,
+    then integrate and replay from main.'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.035593'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:f96047d77
+  evidence: f96047d77 [mainline] Merge latest origin/main into ws-0286 worktree
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.036206'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:eca6ae868
+  evidence: eca6ae868 [mainline] Merge latest origin/main into ws-0286 worktree
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.036245'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:b733997d2
+  evidence: b733997d2 [vikunja] Implement ADR 0286 runtime and live-apply hardening
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.036323'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:3157d9510
+  evidence: 3157d9510 [validation-gate] Record ADR 0286 push bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.042980'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:c666abf0a
+  evidence: c666abf0a [document-extraction] Integrate ADR 0286 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.042994'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:1bcc69f94
+  evidence: '1bcc69f94 [document-extraction] Stabilize Tika and Tesseract verification\n\nPurpose:
+    Align the OCR live-apply workflow with the working private Tika and Tesseract
+    contracts\nScope: Tika metadata verification, Tesseract workflow/runbook commands,
+    shared catalogs, tests, and workstream ownership metadata\nStatus: Verified with
+    targeted tests plus governed Tika and Tesseract live applies\nNext: Record the
+    committed-source receipt, cut the mainline release surfaces, and push origin/main\nSee
+    also: ADR 0275, ADR 0286'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.043111'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:1daefb549
+  evidence: '1daefb549 [document-extraction] Stabilize Tika and Tesseract verification\n\nPurpose:
+    Align the OCR live-apply workflow with the working private Tika and Tesseract
+    contracts\nScope: Tika metadata verification, Tesseract workflow/runbook commands,
+    shared catalogs, tests, and workstream ownership metadata\nStatus: Verified with
+    targeted tests plus governed Tika and Tesseract live applies\nNext: Record the
+    committed-source receipt, cut the mainline release surfaces, and push origin/main\nSee
+    also: ADR 0275, ADR 0286'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.043233'
+- marker_type: git-commit
+  adr_number: 0286
+  location: git:c0acb8a8b
+  evidence: c0acb8a8b [adr] Replace duplicate 0285/0286 with Paperless-ngx and Vikunja
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.046372'
+- marker_type: playbook
+  adr_number: 0286
+  location: playbooks/vikunja.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:09.101643'
+- marker_type: playbook
+  adr_number: 0286
+  location: playbooks/tesseract-ocr.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:09.109689'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=9, playbook=2'

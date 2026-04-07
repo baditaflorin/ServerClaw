@@ -1,0 +1,164 @@
+adr_number: '0371'
+title: Parameterized Service Verification Tasks
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:82c65cafc
+  evidence: "82c65cafc feat(batch-9-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224440'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:988b7352e
+  evidence: "988b7352e feat(batch-8-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224465'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:37283361f
+  evidence: "37283361f feat(woodpecker_runtime): use shared verify task \u2014 ADR\
+    \ 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224469'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:a539a11b9
+  evidence: "a539a11b9 feat(batch-7-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224478'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:b6832e500
+  evidence: "b6832e500 feat(batch-6-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224487'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:e5266d15f
+  evidence: "e5266d15f feat(batch-5-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224495'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:cdae98895
+  evidence: "cdae98895 feat(batch-4-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224498'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:8b56897ad
+  evidence: '8b56897ad chore: stage pending ADR 0370/0371 task changes from background
+    agents'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:43.224515'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:8ee325fe2
+  evidence: '8ee325fe2 fix(gitea_runtime): update verify.yml with ADR 0371 lifecycle
+    include'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224528'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:d5e169f3d
+  evidence: "d5e169f3d feat(batch-3-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224549'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:786b827d9
+  evidence: "786b827d9 feat(batch-1-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224592'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:5dc7503f7
+  evidence: "5dc7503f7 feat(directus_runtime): use shared verify task \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224601'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:56e962862
+  evidence: "56e962862 feat(batch-9-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224906'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:f95182e21
+  evidence: "f95182e21 feat(batch-8-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224910'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:44dfb2ede
+  evidence: "44dfb2ede feat(woodpecker_runtime): use shared verify task \u2014 ADR\
+    \ 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224913'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:adb565540
+  evidence: "adb565540 feat(batch-7-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224922'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:28c831f42
+  evidence: "28c831f42 feat(batch-6-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224931'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:7d461f717
+  evidence: "7d461f717 feat(batch-5-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224945'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:cce6934db
+  evidence: "cce6934db feat(batch-4-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224957'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:c15bc7a74
+  evidence: 'c15bc7a74 chore: stage pending ADR 0370/0371 task changes from background
+    agents'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:43.224974'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:4d08706d6
+  evidence: '4d08706d6 fix(gitea_runtime): update verify.yml with ADR 0371 lifecycle
+    include'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.224988'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:b9bb4fff0
+  evidence: "b9bb4fff0 feat(batch-3-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.225023'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:6f8816b59
+  evidence: "6f8816b59 feat(batch-1-verify): use shared verify tasks \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.225093'
+- marker_type: git-commit
+  adr_number: '0371'
+  location: git:5b0ac86c3
+  evidence: "5b0ac86c3 feat(directus_runtime): use shared verify task \u2014 ADR 0371"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.225108'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 24
+
+  Breakdown: git-commit=24'

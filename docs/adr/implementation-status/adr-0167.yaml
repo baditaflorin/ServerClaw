@@ -1,0 +1,106 @@
+adr_number: '0167'
+title: Graceful Degradation Mode Declarations
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:e294cf50d
+  evidence: 'e294cf50d Add ADR series 0163-0167: Agent discovery and onboarding standards'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:16.971808'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:748e779ea
+  evidence: 748e779ea Merge origin/main into ADR 0167 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972077'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:4a2df974b
+  evidence: 4a2df974b Record ADR 0167 live apply on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972086'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:a143f348f
+  evidence: a143f348f Cut release 0.164.0 for ADR 0167
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972138'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:0cfc54299
+  evidence: 0cfc54299 Merge remote-tracking branch 'origin/main' into codex/integration-0167-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:16.972149'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:a004bd5b2
+  evidence: a004bd5b2 Record ADR 0167 follow-up gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972163'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:fec5194b1
+  evidence: fec5194b1 Record ADR 0167 branch push gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972309'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:bbfde0e74
+  evidence: bbfde0e74 Merge remote-tracking branch 'origin/main' into codex/integration-0167-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:16.972325'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:3e14c8238
+  evidence: 3e14c8238 Merge origin/main into codex/integration-0167-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:16.972416'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:acf0c7ce1
+  evidence: acf0c7ce1 Document ADR 0167 live-apply blocker
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972769'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:75a5c8fbf
+  evidence: 75a5c8fbf Cut release 0.146.0 for ADR 0167
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972812'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:e099a69c1
+  evidence: e099a69c1 Merge remote-tracking branch 'origin/main' into codex/integration-0167-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:16.972836'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:0895ba701
+  evidence: 0895ba701 Cut release 0.145.0 for ADR 0167
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972857'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:ec2d7394d
+  evidence: ec2d7394d Merge ADR 0167 degradation declarations
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972868'
+- marker_type: git-commit
+  adr_number: '0167'
+  location: git:74bf3253d
+  evidence: 74bf3253d Implement ADR 0167 degradation declarations
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:16.972879'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=15
+
+  Implemented On: 2026-03-26'

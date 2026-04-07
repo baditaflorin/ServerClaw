@@ -1,0 +1,22 @@
+adr_number: 0180
+title: Standby Capacity Reservation and Placement Rules
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0180
+  location: git:242412580
+  evidence: 242412580 Implement ADR 0180 standby capacity rules
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:23.265293'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-03-27'

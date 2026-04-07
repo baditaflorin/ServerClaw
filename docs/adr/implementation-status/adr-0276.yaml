@@ -1,0 +1,70 @@
+adr_number: '0276'
+title: NATS JetStream As The Platform Event Bus
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0276'
+  location: git:7afd0b6e0
+  evidence: 7afd0b6e0 [nats] Finalize ADR 0276 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.495537'
+- marker_type: git-commit
+  adr_number: '0276'
+  location: git:11009b716
+  evidence: 11009b716 [release] Cut 0.177.97 for ADR 0276
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.495601'
+- marker_type: git-commit
+  adr_number: '0276'
+  location: git:88fad7ea6
+  evidence: 88fad7ea6 [nats] Record rebased ADR 0276 branch-local live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.495610'
+- marker_type: git-commit
+  adr_number: '0276'
+  location: git:959b10f38
+  evidence: '959b10f38 [nats] Preserve live JetStream principal catalog\n\nPurpose:
+    Bring the live multi-principal NATS auth contract under repo-managed automation
+    without breaking current consumers\nScope: Extend the runtime role to render preserved
+    service principals, document the local password files, and add role coverage\nStatus:
+    Ready for exact-commit live apply from the rebased ws-0276 branch\nNext: Converge
+    docker-runtime-lv3, reconcile streams, verify end to end, and record the live-apply
+    receipt\nSee also: ADR 0276'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.495625'
+- marker_type: git-commit
+  adr_number: '0276'
+  location: git:27c676e46
+  evidence: '27c676e46 [nats] Add repo-managed JetStream runtime and ADR 0276 contract\n\nPurpose:
+    Recover the stopped NATS runtime under version-controlled automation and align
+    launch subjects with ADR 0276\nScope: Add the NATS JetStream playbook/role, update
+    event subjects and catalogs, and record the ws-0276 workstream surfaces\nStatus:
+    Repo implementation checkpointed before latest-main integration and live apply\nNext:
+    Rebase onto origin/main, apply live, verify, and finish ADR/workstream metadata\nSee
+    also: ADR 0276'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:04.495631'
+- marker_type: playbook
+  adr_number: '0276'
+  location: playbooks/nats-jetstream.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:04.525423'
+- marker_type: playbook
+  adr_number: '0276'
+  location: playbooks/falco.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:04.531509'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=5, playbook=2
+
+  Implemented On: 2026-03-30'

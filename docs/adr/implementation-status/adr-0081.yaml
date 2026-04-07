@@ -1,0 +1,35 @@
+adr_number: 0081
+title: Platform Changelog And Deployment History Portal
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0081
+  location: git:757ce187c
+  evidence: 757ce187c Implement ADR 0081 deployment history portal
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:39.437175'
+- marker_type: git-commit
+  adr_number: 0081
+  location: git:b96fe4925
+  evidence: b96fe4925 Implement ADR 0081 deployment history portal
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:39.437227'
+- marker_type: git-commit
+  adr_number: 0081
+  location: git:a6ee54f2a
+  evidence: a6ee54f2a Add ADRs 0072-0081 with workstreams, roadmap runbook, and bump
+    to 0.50.0
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:39.437796'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 3
+
+  Breakdown: git-commit=3
+
+  Implemented On: 2026-03-23'

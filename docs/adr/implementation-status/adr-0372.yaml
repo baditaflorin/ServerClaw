@@ -1,0 +1,84 @@
+adr_number: '0372'
+title: Data-Driven Playbook Composition
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:b1ad77bbd
+  evidence: "b1ad77bbd feat(batch-4): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.695620'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:256167fca
+  evidence: "256167fca feat(batch-3): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.695680'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:fef8fc701
+  evidence: "fef8fc701 feat(batch-2): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.695699'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:f7f6da299
+  evidence: "f7f6da299 feat(batch-1): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.695704'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:e9ae3204b
+  evidence: "e9ae3204b feat(directus): use data-driven playbook composition \u2014\
+    \ ADR 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.695708'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:1fa71d542
+  evidence: "1fa71d542 feat(batch-4): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.697338'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:b48796f44
+  evidence: "b48796f44 feat(batch-3): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.697349'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:a80d35b9f
+  evidence: "a80d35b9f feat(batch-2): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.697357'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:739f01054
+  evidence: "739f01054 feat(batch-1): data-driven playbook composition \u2014 ADR\
+    \ 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.697361'
+- marker_type: git-commit
+  adr_number: '0372'
+  location: git:b039c7ee3
+  evidence: "b039c7ee3 feat(directus): use data-driven playbook composition \u2014\
+    \ ADR 0372"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:43.697365'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=10'

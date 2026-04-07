@@ -1,0 +1,106 @@
+adr_number: 0149
+title: Semaphore For Ansible Job Management UI And API
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:3b64b7a6b
+  evidence: 3b64b7a6b Merge latest origin/main before ADR 0149 main push
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259211'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:db6534859
+  evidence: db6534859 Restamp ADR 0149 receipt after rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259248'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:3d3251870
+  evidence: 3d3251870 Live apply ADR 0149 from main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259255'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:7440582fe
+  evidence: 7440582fe Release 0.158.0 for ADR 0149
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259263'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:3a84a6827
+  evidence: 3a84a6827 Record ADR 0149 live apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259266'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:45b4bc4cc
+  evidence: 45b4bc4cc Finalize ADR 0149 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259269'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:d04fb18f9
+  evidence: d04fb18f9 Revalidate ADR 0149 after rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259272'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:ac28124e3
+  evidence: ac28124e3 Implement ADR 0149 semaphore service baseline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259275'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:3cdf0e071
+  evidence: 3cdf0e071 Live apply ADR 0149 from main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259278'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:89aeaaa3b
+  evidence: 89aeaaa3b Release 0.158.0 for ADR 0149
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259289'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:ed5c76bdf
+  evidence: ed5c76bdf Merge ADR 0149 semaphore workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259292'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:25d1d4543
+  evidence: 25d1d4543 Record ADR 0149 live apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259295'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:2a1b61f17
+  evidence: 2a1b61f17 Finalize ADR 0149 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259297'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:72dcda34d
+  evidence: 72dcda34d Revalidate ADR 0149 after rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259300'
+- marker_type: git-commit
+  adr_number: 0149
+  location: git:5eec6c263
+  evidence: 5eec6c263 Implement ADR 0149 semaphore service baseline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.259303'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=15
+
+  Implemented On: 2026-03-25'

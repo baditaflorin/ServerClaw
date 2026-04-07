@@ -1,0 +1,79 @@
+adr_number: '0133'
+title: Portal Authentication by Default
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:916598953
+  evidence: "916598953 Add ADRs 0133\u20130152: security hardening and new service\
+    \ integrations"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:00.905124'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:ba6eeaa6c
+  evidence: ba6eeaa6c Record ADR 0133 remote gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.905407'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:0c23521da
+  evidence: 0c23521da Merge origin/main and release ADR 0133 as 0.130.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.905416'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:18accb302
+  evidence: 18accb302 Merge origin/main and finalize ADR 0133
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.905420'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:ebae2da78
+  evidence: ebae2da78 Correct ADR 0133 receipt release context
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.905445'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:8f65c63d9
+  evidence: 8f65c63d9 Record ADR 0133 live apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.905456'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:d00d80ea1
+  evidence: d00d80ea1 Implement ADR 0133 portal authentication by default
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:00.905461'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:1a5d2cb11
+  evidence: "1a5d2cb11 Add ADRs 0133\u20130152: security hardening and new service\
+    \ integrations"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:00.905628'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:7229a24b0
+  evidence: "7229a24b0 Merge ADRs 0133\u20130152: security hardening and new services"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:00.906850'
+- marker_type: git-commit
+  adr_number: '0133'
+  location: git:6041dfc17
+  evidence: "6041dfc17 Add ADRs 0133\u20130152: security hardening and new service\
+    \ integrations"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:00.906865'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=10
+
+  Implemented On: 2026-03-24'

@@ -1,0 +1,203 @@
+adr_number: '0251'
+title: Stage-Scoped Smoke Suites And Promotion Gates
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:9ce18e9c3
+  evidence: 9ce18e9c3 [live-apply] Refresh ADR 0251 exact-main receipt on 0.177.101
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.845989'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:57b077a1c
+  evidence: 57b077a1c [release] Cut 0.177.101 for ADR 0251
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.846139'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:11657fd4b
+  evidence: 11657fd4b Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.846151'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:5d0aeb9d0
+  evidence: 5d0aeb9d0 [adr-0251] Record exact-main live apply on 0.177.100
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.846156'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:fad05e6af
+  evidence: fad05e6af [release] Cut 0.177.100 for ADR 0251
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.846160'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:ae072b9e6
+  evidence: ae072b9e6 Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.846180'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:3a31ab7bb
+  evidence: 3a31ab7bb [adr-0251] Checkpoint latest-main rereverification before main
+    refresh
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.846184'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:ba8c8431f
+  evidence: ba8c8431f Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.846295'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:f3f5090a8
+  evidence: f3f5090a8 Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.846359'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:c9104ce3b
+  evidence: c9104ce3b Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.846480'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:520fae069
+  evidence: 520fae069 Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.846569'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:7a16f60ca
+  evidence: 7a16f60ca [adr-0251] Harden post-restart OpenBao and Windmill gate replay
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.846585'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:edf8a658e
+  evidence: edf8a658e Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.846885'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:2fc027a10
+  evidence: 2fc027a10 [adr-0251] Harden mainline replay verification and evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.846889'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:77cdccd1c
+  evidence: 77cdccd1c Merge remote-tracking branch 'origin/main' into codex/ws-0251-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.847057'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:12d9016a6
+  evidence: 12d9016a6 [merge] Bring ws-0251 exact-main replay onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:52.847179'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:637aa86cf
+  evidence: 637aa86cf [release] Cut 0.177.88 for ADR 0251 follow-up
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.847317'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:b6c70600b
+  evidence: b6c70600b [adr-0251] Capture durable latest-server-state verification
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.847329'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:bae420263
+  evidence: bae420263 [merge] Mark ADR 0251 integration merged on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.847562'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:e8a085185
+  evidence: e8a085185 [adr-0251] Record exact-main durable verification on 0.177.87
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.847583'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:a59a97d63
+  evidence: a59a97d63 [adr-0251] Mark exact-main live verification complete
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.847596'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:34559f591
+  evidence: 34559f591 [release] Cut ADR 0251 merge release 0.177.86
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.847790'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:cdafd4224
+  evidence: cdafd4224 [release] Prepare ADR 0251 mainline integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.847797'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:6b22cd541
+  evidence: 6b22cd541 [release] Finalize ADR 0251 live apply and merge readiness
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.847808'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:f8f4e6c4f
+  evidence: 'f8f4e6c4f [smoke] Implement ADR 0251 stage-scoped smoke suites\n\nPurpose:
+    Add repo-managed stage smoke suite catalogs, promotion gates, and Windmill live-apply
+    verification for ADR 0251\nScope: Smoke catalog, integration runner targeting,
+    promotion receipts, Windmill runtime verification, tests, runbooks, and workstream
+    state\nStatus: Branch implementation complete and ready for live apply from the
+    isolated worktree\nNext: Replay Windmill live apply, capture receipts and evidence,
+    then integrate on latest origin/main\nSee also: ADR 0251'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.847843'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:a9a71f9af
+  evidence: a9a71f9af [adr-0251] Mark exact-main live verification complete
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.847880'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:2efaafb20
+  evidence: 2efaafb20 [adr-0251] Merge stage-smoke gate enforcement
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.848292'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:d1cfe6a07
+  evidence: d1cfe6a07 [api-gateway] Capture ADR 0251 runtime-assurance drift
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:52.848307'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:26b3a87c2
+  evidence: 26b3a87c2 [adr-0251] Record live apply drift evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.848323'
+- marker_type: git-commit
+  adr_number: '0251'
+  location: git:3bcc64deb
+  evidence: 3bcc64deb [adr-0251] Enforce stage smoke suites in gates and assurance
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:52.848328'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 30
+
+  Breakdown: git-commit=30
+
+  Implemented On: 2026-03-29'

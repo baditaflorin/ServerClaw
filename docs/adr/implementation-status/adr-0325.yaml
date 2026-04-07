@@ -1,0 +1,65 @@
+adr_number: '0325'
+title: Faceted ADR Index Shards And Reservation Windows
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:eda5fa07f
+  evidence: eda5fa07f [adr] Refresh ADR 0325 rebased exact-main evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.558277'
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:001c5dffb
+  evidence: 001c5dffb [adr] Extend ws-0325 ownership for discovery regression coverage
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.558332'
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:013ab17ed
+  evidence: 013ab17ed [adr] Integrate ADR 0325 exact-main discovery rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.558340'
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:6e2653ef2
+  evidence: 6e2653ef2 [adr] Record ADR 0325 live apply state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.558344'
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:a2f2ea16d
+  evidence: a2f2ea16d [release] Cut 0.177.136 for ws-0325 uptime hardening
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.559587'
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:fef0199b4
+  evidence: fef0199b4 Merge branch 'codex/ws-0325-service-uptime-investigation' into
+    HEAD
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.559593'
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:3b09348c5
+  evidence: 3b09348c5 [ws-0325] Refresh ADR index after mainline rebase
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.559599'
+- marker_type: git-commit
+  adr_number: '0325'
+  location: git:18bafb816
+  evidence: 18bafb816 [ws-0325] Mark uptime hardening ready for merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.559604'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8
+
+  Implemented On: 2026-04-03'

@@ -425,28 +425,6 @@ server {
         proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
     }
 
-    # Exact-match override for /oauth2/callback — intercepts 500 (invalid_grant after
-    # Keycloak restart) and resets the session so the user restarts login automatically.
-    location = /oauth2/callback {
-        proxy_pass {{ protected_site.auth_proxy_upstream }};
-        proxy_http_version 1.1;
-{{ hide_upstream_security_headers(site) }}
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Uri $request_uri;
-        proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
-        proxy_intercept_errors on;
-        error_page 500 = @oauth2_session_reset;
-    }
-
-    location @oauth2_session_reset {
-        add_header Cache-Control "no-store" always;
-        return 302 /oauth2/sign_out?rd=/;
-    }
-
     location = /oauth2/auth {
         proxy_pass {{ protected_site.auth_proxy_upstream }};
         proxy_http_version 1.1;

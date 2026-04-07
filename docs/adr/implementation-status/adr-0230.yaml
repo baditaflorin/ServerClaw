@@ -1,0 +1,47 @@
+adr_number: '0230'
+title: Policy Decisions Via Open Policy Agent And Conftest
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0230'
+  location: git:7161c2df3
+  evidence: 7161c2df3 [release] Cut 0.177.49 for ADR 0230 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.641081'
+- marker_type: git-commit
+  adr_number: '0230'
+  location: git:b6c15e1ed
+  evidence: b6c15e1ed [policy] Record ADR 0230 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.641120'
+- marker_type: git-commit
+  adr_number: '0230'
+  location: git:4bbd92d6e
+  evidence: 4bbd92d6e [policy] Implement ADR 0230 shared policy engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.641175'
+- marker_type: git-commit
+  adr_number: '0230'
+  location: git:fe633a803
+  evidence: fe633a803 [policy] Record ADR 0230 live-apply evidence and validation
+    fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.641364'
+- marker_type: git-commit
+  adr_number: '0230'
+  location: git:4014b9f8d
+  evidence: 4014b9f8d [policy] Snapshot ADR 0230 live-apply work
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:43.641367'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-28'

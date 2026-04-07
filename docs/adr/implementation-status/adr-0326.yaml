@@ -1,0 +1,46 @@
+adr_number: '0326'
+title: Workstream Registry Shards With Active And Archive Assembly
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0326'
+  location: git:e9a08b3f0
+  evidence: e9a08b3f0 [workstreams] Integrate ADR 0326 on exact main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:27.003650'
+- marker_type: git-commit
+  adr_number: '0326'
+  location: git:d0b7df2e5
+  evidence: d0b7df2e5 [workstreams] Refresh ADR 0326 final verification state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:27.003679'
+- marker_type: git-commit
+  adr_number: '0326'
+  location: git:53772a4fc
+  evidence: 53772a4fc [workstreams] Repair ws-0326 validation status handling
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:27.003686'
+- marker_type: git-commit
+  adr_number: '0326'
+  location: git:92e61f424
+  evidence: 92e61f424 [workstreams] Mark ADR 0326 publication blockers explicitly
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:27.003689'
+- marker_type: git-commit
+  adr_number: '0326'
+  location: git:6b3f86d94
+  evidence: 6b3f86d94 [workstreams] Record ADR 0326 live-apply evidence and blockers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:27.003693'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-04-03'

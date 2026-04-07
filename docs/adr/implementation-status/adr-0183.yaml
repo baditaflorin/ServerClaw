@@ -1,0 +1,46 @@
+adr_number: 0183
+title: Multi-Environment Live Lanes
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0183
+  location: git:73121fc9e
+  evidence: 73121fc9e Release 0.177.12 for ADR 0183 staging live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.612489'
+- marker_type: git-commit
+  adr_number: 0183
+  location: git:e48d63c21
+  evidence: e48d63c21 Release 0.177.9 for ADR 0183 staging lane activation path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.612586'
+- marker_type: git-commit
+  adr_number: 0183
+  location: git:c67abeb9a
+  evidence: c67abeb9a Implement ADR 0183 environment lanes and staging bridge path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.612590'
+- marker_type: git-commit
+  adr_number: 0183
+  location: git:81eac61ef
+  evidence: 81eac61ef Implement ADR 0183 environment lanes and staging bridge path
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:24.612593'
+- marker_type: git-commit
+  adr_number: 0183
+  location: git:0a9030cc2
+  evidence: 0a9030cc2 Add implementation prompts for ADRs 0183-0192
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:24.612816'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-27'

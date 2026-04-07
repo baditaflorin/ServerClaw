@@ -1,0 +1,100 @@
+adr_number: 0292
+title: Lago As The Usage Metering And Billing API Layer
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:d13de3046
+  evidence: d13de3046 [superset] Implement ADR 0292 runtime and contracts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.779185'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:28c71d6f1
+  evidence: 28c71d6f1 [mainline] Rebase ADR 0292 onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.779288'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:09a442e66
+  evidence: 09a442e66 [lago] Promote ADR 0292 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.779296'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:001d039cb
+  evidence: 001d039cb [main] Refresh ws-0292 onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.779340'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:1a5ce2d9e
+  evidence: 1a5ce2d9e Merge origin/main into codex/ws-0292-main-integration-r1
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.779468'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:ddc1159bd
+  evidence: ddc1159bd Merge remote-tracking branch 'origin/main' into codex/ws-0292-main-integration-r1
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.779656'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:89655c619
+  evidence: 89655c619 Merge origin/main into codex/ws-0292-main-integration-r1
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.779692'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:f894af2f6
+  evidence: f894af2f6 Merge origin/main into codex/ws-0292-main-integration-r1
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.779707'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:94d608597
+  evidence: 94d608597 Merge origin/main into codex/ws-0292-main-integration-r1
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.779878'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:12f03707d
+  evidence: 12f03707d [lago] Cut ADR 0292 mainline release surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:11.780004'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:11d8bbb4e
+  evidence: 11d8bbb4e Merge remote-tracking branch 'origin/main' into codex/ws-0292-main-integration-r1
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.780153'
+- marker_type: git-commit
+  adr_number: 0292
+  location: git:25b9548a6
+  evidence: 25b9548a6 [lago] Merge ws-0292 onto latest main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:11.780566'
+- marker_type: playbook
+  adr_number: 0292
+  location: playbooks/superset.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:11.815960'
+- marker_type: playbook
+  adr_number: 0292
+  location: playbooks/lago.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:11.818068'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=12, playbook=2
+
+  Implemented On: 2026-03-31'

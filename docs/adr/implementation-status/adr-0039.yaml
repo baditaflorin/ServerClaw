@@ -1,0 +1,28 @@
+adr_number: 0039
+title: Shared Controller Automation Toolkit
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0039
+  location: git:dfc4852fd
+  evidence: dfc4852fd Implement ADR 0039 shared controller automation toolkit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:20.758249'
+- marker_type: git-commit
+  adr_number: 0039
+  location: git:84dee23a8
+  evidence: 84dee23a8 Add proposed ADRs 0035-0039
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:20.758318'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-03-22'

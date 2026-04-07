@@ -1,0 +1,22 @@
+adr_number: '0001'
+title: Bootstrap Dedicated Host With Ansible
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: playbook
+  adr_number: '0001'
+  location: playbooks/proxmox-install.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:04.398118'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: playbook=1
+
+  Implemented On: 2026-03-21'

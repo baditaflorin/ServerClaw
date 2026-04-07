@@ -1,0 +1,110 @@
+adr_number: '0324'
+title: Service Definition Shards And Generated Service Catalog Assembly
+canonical_status: Accepted
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:aed6da133
+  evidence: aed6da133 [ws-0324] Record live apply follow-through and worker gate fixes
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.191736'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:01143254e
+  evidence: 01143254e [service-catalog] Repair ws-0324 live apply and Windmill sync
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.191773'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:0c6d0e0c5
+  evidence: 0c6d0e0c5 [service-catalog] Reconcile ADR 0324 with mainline validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.191788'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:39f8031e7
+  evidence: 39f8031e7 [service-catalog] Implement ADR 0324 bundle assembly
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.191793'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:fde4cc9e7
+  evidence: fde4cc9e7 [ws-0324] Record live apply follow-through and worker gate fixes
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.193251'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:9063d5594
+  evidence: 9063d5594 [service-catalog] Repair ws-0324 live apply and Windmill sync
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.193257'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:a4035d0f7
+  evidence: a4035d0f7 [service-catalog] Reconcile ADR 0324 with mainline validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.193260'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:0e87bbcd5
+  evidence: 0e87bbcd5 [service-catalog] Implement ADR 0324 bundle assembly
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.193264'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:514991a3e
+  evidence: 514991a3e [ws-0324] Record live apply follow-through and worker gate fixes
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.193270'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:c1a7850af
+  evidence: c1a7850af [ws-0324] Record live apply follow-through and worker gate fixes
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.193276'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:34d276fb7
+  evidence: 34d276fb7 [service-catalog] Repair ws-0324 live apply and Windmill sync
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.193282'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:c6b83065a
+  evidence: c6b83065a [service-catalog] Reconcile ADR 0324 with mainline validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.193285'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:bef71c663
+  evidence: bef71c663 [service-catalog] Implement ADR 0324 bundle assembly
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:26.193288'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:fba9428ec
+  evidence: fba9428ec [merge] Integrate origin/main before ws-0324 release
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.194819'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:94da73c13
+  evidence: 94da73c13 [meta] Align ws-0324 ownership surfaces with release outputs
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.194833'
+- marker_type: git-commit
+  adr_number: '0324'
+  location: git:6f72f70e5
+  evidence: 6f72f70e5 Merge branch 'codex/ws-0324-programmatic-doc-shards' into codex/ws-0324-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:26.194864'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 16
+
+  Breakdown: git-commit=16'

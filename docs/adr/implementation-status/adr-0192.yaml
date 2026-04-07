@@ -1,0 +1,83 @@
+adr_number: 0192
+title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:06ffb7f7c
+  evidence: 06ffb7f7c Merge ADR 0192 mainline release into codex/ws-0184-live-apply
+    before retrying ADR 0184 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.473972'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:19f5a9021
+  evidence: 19f5a9021 Release 0.177.15 for ADR 0192 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.474046'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:0532104fa
+  evidence: 0532104fa Release 0.177.14 for ADR 0192 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.474056'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:4fb6bdb93
+  evidence: 4fb6bdb93 Release 0.177.13 for ADR 0192 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.474060'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:742b568f6
+  evidence: 742b568f6 [capacity] Refresh platform manifest for ADR 0192
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.474067'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:ed976535f
+  evidence: ed976535f [capacity] Record ADR 0192 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.474075'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:bb0046ae8
+  evidence: bb0046ae8 [capacity] Implement ADR 0192 admission classes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.474078'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:088d67f21
+  evidence: 088d67f21 [capacity] Refresh platform manifest for ADR 0192
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.475026'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:560622bec
+  evidence: 560622bec [capacity] Record ADR 0192 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.475058'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:40df29357
+  evidence: 40df29357 [capacity] Implement ADR 0192 admission classes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:28.475066'
+- marker_type: git-commit
+  adr_number: 0192
+  location: git:0a9030cc2
+  evidence: 0a9030cc2 Add implementation prompts for ADRs 0183-0192
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:28.475370'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=11
+
+  Implemented On: 2026-03-27'

@@ -1,0 +1,130 @@
+adr_number: '0136'
+title: HTTP Security Headers Hardening
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:acec39b6c
+  evidence: acec39b6c Drop stale ADR 0136 duplicate role tests
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.365351'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:fcaf1f996
+  evidence: fcaf1f996 Merge remote-tracking branch 'origin/main' into codex/integration-0136-main-v4
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:02.365378'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:715ffcaa2
+  evidence: 715ffcaa2 Record ADR 0136 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366577'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:c14a25252
+  evidence: c14a25252 Finalize ADR 0136 release 0.141.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366588'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:5e2444f7c
+  evidence: 5e2444f7c Merge remote-tracking branch 'origin/main' into codex/integration-0136-main-v7
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:02.366596'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:a434bfa5a
+  evidence: a434bfa5a Finalize ADR 0136 release 0.136.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366599'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:34a47046f
+  evidence: 34a47046f Merge remote-tracking branch 'origin/main' into codex/integration-0136-main-v7
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:02.366623'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:1696f3707
+  evidence: 1696f3707 Implement ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366630'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:153349b12
+  evidence: 153349b12 Finalize ADR 0136 release 0.133.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366649'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:221564bf8
+  evidence: 221564bf8 Implement ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366665'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:2947769fe
+  evidence: 2947769fe Finalize ADR 0136 release 0.132.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366960'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:d57c6f83a
+  evidence: d57c6f83a Implement ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.366979'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:1e8d0cd56
+  evidence: 1e8d0cd56 Finalize ADR 0136 release 0.131.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.367002'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:25de893ad
+  evidence: 25de893ad Implement ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.367013'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:6a18345c7
+  evidence: 6a18345c7 Implement ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.367020'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:d39450c72
+  evidence: d39450c72 Implement ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.367039'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:fd26e02e8
+  evidence: fd26e02e8 Record ADR 0136 live rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.367265'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:aa9b36710
+  evidence: aa9b36710 Merge ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.367383'
+- marker_type: git-commit
+  adr_number: '0136'
+  location: git:dec5383c4
+  evidence: dec5383c4 Implement ADR 0136 HTTP security headers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:02.367390'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 19
+
+  Breakdown: git-commit=19
+
+  Implemented On: 2026-03-25'

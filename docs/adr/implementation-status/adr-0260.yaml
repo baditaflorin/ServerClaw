@@ -1,0 +1,233 @@
+adr_number: '0260'
+title: Nextcloud As The Canonical Personal Data Plane For ServerClaw
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:46df65e7f
+  evidence: 46df65e7f [workstreams] Close ADR 0260 main integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.392980'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:34b7fb9a5
+  evidence: 34b7fb9a5 [truth] Record ADR 0260 exact-main replay for 0.177.93
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393024'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:7ce1839ee
+  evidence: 7ce1839ee [merge] Refresh ADR 0260 release candidate onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393043'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:3195c1d2c
+  evidence: 3195c1d2c [release] Cut 0.177.93 for ADR 0260
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393051'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:e47f5e84b
+  evidence: e47f5e84b [merge] Refresh ADR 0260 integration onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393067'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:4127b69de
+  evidence: 4127b69de [truth] Record ADR 0260 exact-main replay for 0.177.92
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393080'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:abc716f9e
+  evidence: abc716f9e [truth] Refresh ADR 0260 canonical truth for 0.177.92
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393146'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:e7b4fe3dd
+  evidence: e7b4fe3dd [release] Cut 0.177.92 for ADR 0260
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393149'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:869de78f7
+  evidence: 869de78f7 [workstreams] Cover ADR 0260 merge-base surfaces in ownership
+    manifest
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393175'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:30c989cc9
+  evidence: 30c989cc9 [receipts] Record ADR 0260 exact-main verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393200'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:9db570487
+  evidence: 9db570487 [release] Cut 0.177.91 for ADR 0260
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393349'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:c3616bdd3
+  evidence: c3616bdd3 [merge] Refresh ADR 0260 branch from origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393356'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:1483a11b2
+  evidence: 1483a11b2 [release] Cut 0.177.89 for ADR 0260
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393508'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:9b21b5716
+  evidence: 9b21b5716 Merge remote-tracking branch 'origin/main' into codex/ws-0260-final-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.393540'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:a37a6a681
+  evidence: a37a6a681 [merge] Integrate ADR 0260 onto mainline candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393573'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:e37b32ef7
+  evidence: e37b32ef7 Merge remote-tracking branch 'origin/main' into codex/ws-0260-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.393734'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:056dffef2
+  evidence: 056dffef2 [merge] Prepare ADR 0260 exact-main integration candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393891'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:ece93c5a7
+  evidence: ece93c5a7 Merge remote-tracking branch 'origin/main' into codex/ws-0260-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.393941'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:1213b4e82
+  evidence: 1213b4e82 [release] Prepare ADR 0260 exact-main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.393944'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:01cb6cc3e
+  evidence: 01cb6cc3e Merge origin/main into codex/ws-0260-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.393993'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:2ace9d512
+  evidence: 2ace9d512 Merge origin/main into codex/ws-0260-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:57.394109'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:671480fd3
+  evidence: 671480fd3 [release] Cut 0.177.86 for ADR 0260
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394113'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:f796d47fd
+  evidence: f796d47fd [nextcloud] Harden ADR 0260 live apply replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394116'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:d10f8e008
+  evidence: d10f8e008 [nextcloud] Add ADR 0260 repo-managed runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394127'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:cbf3e9995
+  evidence: cbf3e9995 [validation] Snapshot ADR 0260 pre-rebase after main advanced
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394134'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:758d5e20d
+  evidence: 758d5e20d [nextcloud] Harden ADR 0260 live apply replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394185'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:7c802bf86
+  evidence: 7c802bf86 [nextcloud] Add ADR 0260 repo-managed runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394193'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:d7d6ba322
+  evidence: d7d6ba322 [validation] Snapshot ADR 0260 pre-rebase metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394200'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:39e05daaa
+  evidence: 39e05daaa [release] Cut 0.177.81 for ADR 0260
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394977'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:04f5b2208
+  evidence: 04f5b2208 [receipts] Record ADR 0260 latest-main replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.394980'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:82030de94
+  evidence: 82030de94 [nextcloud] Harden ADR 0260 live apply replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.395035'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:d83470fb0
+  evidence: d83470fb0 [nextcloud] Add ADR 0260 repo-managed runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.395038'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:4e24cc947
+  evidence: 4e24cc947 [receipts] Record ADR 0260 latest-main replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.395185'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:27a9ce9db
+  evidence: 27a9ce9db [nextcloud] Harden ADR 0260 live apply replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.395197'
+- marker_type: git-commit
+  adr_number: '0260'
+  location: git:97f4a377a
+  evidence: 97f4a377a [nextcloud] Add ADR 0260 repo-managed runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:57.395200'
+- marker_type: playbook
+  adr_number: '0260'
+  location: playbooks/nextcloud.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:57.414077'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 36
+
+  Breakdown: git-commit=35, playbook=1
+
+  Implemented On: 2026-03-30'

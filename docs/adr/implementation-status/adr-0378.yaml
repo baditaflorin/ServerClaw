@@ -1,0 +1,21 @@
+adr_number: 0378
+title: ServerClaw Tool Surface In Open WebUI
+canonical_status: Proposed
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0378
+  location: git:43e46b2ff
+  evidence: "43e46b2ff [release] Bump to 0.178.29 \u2014 ADR 0377/0378 Open WebUI\
+    \ platform knowledge + ServerClaw tools"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:45.954084'
+inferred_implementation_status: Partial Evidence
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Partial Evidence
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1'

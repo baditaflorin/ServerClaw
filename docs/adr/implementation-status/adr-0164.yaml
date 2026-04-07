@@ -1,0 +1,46 @@
+adr_number: '0164'
+title: Circuit Breaker Pattern for External Service Calls
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0164'
+  location: git:bd36d26cb
+  evidence: bd36d26cb Align ADR 0164 receipt with rebased source commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.808804'
+- marker_type: git-commit
+  adr_number: '0164'
+  location: git:eca8820fc
+  evidence: eca8820fc Record ADR 0164 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.808825'
+- marker_type: git-commit
+  adr_number: '0164'
+  location: git:56bb0d709
+  evidence: 56bb0d709 Fix API gateway runtime packaging for ADR 0164
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.808829'
+- marker_type: git-commit
+  adr_number: '0164'
+  location: git:6cb8636f6
+  evidence: 6cb8636f6 Cut release 0.152.0 for ADR 0164
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.808928'
+- marker_type: git-commit
+  adr_number: '0164'
+  location: git:36a333891
+  evidence: 36a333891 Implement ADR 0164 circuit breaker pattern
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:15.808939'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-25'

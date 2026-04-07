@@ -1,0 +1,62 @@
+adr_number: '0340'
+title: Dedicated Coolify Apps VM Separation
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0340'
+  location: git:591eb347c
+  evidence: '591eb347c [ws-0340] Finalize live apply: HTTP upstream, DB migration,
+    full completion'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:32.897212'
+- marker_type: git-commit
+  adr_number: '0340'
+  location: git:26e6849be
+  evidence: '26e6849be [ws-0340] Live apply fixes: chdir, auth-file, API 201/422,
+    migration fallback'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:32.897255'
+- marker_type: git-commit
+  adr_number: '0340'
+  location: git:d1e40196e
+  evidence: d1e40196e [ws-0340] Merge dedicated Coolify apps VM separation (ADR 0340)
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:32.897398'
+- marker_type: git-commit
+  adr_number: '0340'
+  location: git:42e2da272
+  evidence: "42e2da272 [ws-0340] Regenerate ADR index after rebase \u2014 0340 Implemented,\
+    \ 313 total"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:32.897407'
+- marker_type: git-commit
+  adr_number: '0340'
+  location: git:e8a0a9319
+  evidence: e8a0a9319 [ws-0340] Add gate bypass receipt for pre-push hook
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:32.897413'
+- marker_type: git-commit
+  adr_number: '0340'
+  location: git:28b49b1e9
+  evidence: 28b49b1e9 [ws-0340] Implement dedicated Coolify apps VM separation (ADR
+    0340)
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:32.897417'
+- marker_type: playbook
+  adr_number: '0340'
+  location: playbooks/coolify.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:32.928735'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=6, playbook=1
+
+  Implemented On: 2026-04-03'

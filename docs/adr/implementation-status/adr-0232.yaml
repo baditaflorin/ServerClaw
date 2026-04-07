@@ -1,0 +1,70 @@
+adr_number: '0232'
+title: Nomad For Durable Batch And Long-Running Internal Jobs
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0232'
+  location: git:31f963ae0
+  evidence: 31f963ae0 [nomad] Recut ADR 0232 after main moved
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:44.583074'
+- marker_type: git-commit
+  adr_number: '0232'
+  location: git:73efb105d
+  evidence: 73efb105d [nomad] Integrate ADR 0232 exact-main release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:44.583134'
+- marker_type: git-commit
+  adr_number: '0232'
+  location: git:2795d7e94
+  evidence: 2795d7e94 [nomad] Integrate ADR 0232 release and live proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:44.583138'
+- marker_type: git-commit
+  adr_number: '0232'
+  location: git:a2ec7b67d
+  evidence: a2ec7b67d [nomad] Implement ADR 0232 scheduler automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:44.583152'
+- marker_type: git-commit
+  adr_number: '0232'
+  location: git:ddbd2d7c5
+  evidence: ddbd2d7c5 [nomad] Implement ADR 0232 scheduler automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:44.592583'
+- marker_type: playbook
+  adr_number: '0232'
+  location: playbooks/runtime-general-pool.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:44.622735'
+- marker_type: playbook
+  adr_number: '0232'
+  location: playbooks/runtime-control-pool.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:44.623715'
+- marker_type: playbook
+  adr_number: '0232'
+  location: playbooks/nomad.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:44.624443'
+- marker_type: playbook
+  adr_number: '0232'
+  location: playbooks/runtime-ai-pool.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:44.633045'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=5, playbook=4
+
+  Implemented On: 2026-03-29'

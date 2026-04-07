@@ -1,0 +1,58 @@
+adr_number: 0169
+title: Structured Log Field Contract
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0169
+  location: git:61aa0700c
+  evidence: 61aa0700c Record ADR 0169 gate bypass receipts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.841330'
+- marker_type: git-commit
+  adr_number: 0169
+  location: git:549432769
+  evidence: 549432769 Refresh README status after ADR 0169 rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.841360'
+- marker_type: git-commit
+  adr_number: 0169
+  location: git:0d4d47172
+  evidence: 0d4d47172 Record ADR 0169 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.841363'
+- marker_type: git-commit
+  adr_number: 0169
+  location: git:d432a8746
+  evidence: d432a8746 Record ADR 0169 live-apply blocker
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.841768'
+- marker_type: git-commit
+  adr_number: 0169
+  location: git:f00864bf4
+  evidence: f00864bf4 Release 0.146.1 for ADR 0169
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.841778'
+- marker_type: git-commit
+  adr_number: 0169
+  location: git:1ad730638
+  evidence: 1ad730638 Implement ADR 0169 structured log contract
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.841785'
+- marker_type: git-commit
+  adr_number: 0169
+  location: git:afcfe40f2
+  evidence: afcfe40f2 Implement ADR 0169 structured log contract
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:17.841827'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-26'

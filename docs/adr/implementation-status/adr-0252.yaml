@@ -1,0 +1,124 @@
+adr_number: '0252'
+title: Route And DNS Publication Assertion Ledger
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:40d28b7ad
+  evidence: 40d28b7ad [release] Integrate ADR 0252 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.330678'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:40283fc55
+  evidence: 40283fc55 [adr-0252] Fix active workstream status enum
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:53.330708'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:bae7e055e
+  evidence: bae7e055e [adr-0252] Refresh latest-main replay evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:53.330713'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:c777c85d0
+  evidence: c777c85d0 [adr-0252] Fix active workstream status enum
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:53.330721'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:65261a22e
+  evidence: 65261a22e [adr-0252] Refresh latest-main replay evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:53.330732'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:a7ae24764
+  evidence: a7ae24764 [route-dns] Integrate ADR 0252 into mainline release 0.177.68
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.330996'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:c5933539a
+  evidence: c5933539a [merge] Refresh ADR 0252 integration onto origin/main 0.177.67
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.330999'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:30ec249bd
+  evidence: 30ec249bd [route-dns] Integrate ADR 0252 into mainline release 0.177.67
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331035'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:ab1657b4d
+  evidence: ab1657b4d [merge] Refresh ADR 0252 integration onto origin/main 0.177.66
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331051'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:b49cf49a4
+  evidence: b49cf49a4 [route-dns] Preserve ADR 0252 validated recut candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331054'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:e63f16a2c
+  evidence: e63f16a2c [merge] Refresh ADR 0252 integration onto origin/main 0.177.65
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331126'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:9e232065a
+  evidence: 9e232065a [route-dns] Recut ADR 0252 on top of origin/main 0.177.64
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331134'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:ef84442f3
+  evidence: ef84442f3 [merge] Refresh ADR 0252 integration onto origin/main 0.177.64
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331211'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:fd270a541
+  evidence: fd270a541 [route-dns] Integrate ADR 0252 into mainline release 0.177.63
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331237'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:6a721e8c2
+  evidence: 6a721e8c2 Merge branch 'codex/ws-0252-live-apply' into HEAD
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:53.331338'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:04697d95a
+  evidence: 04697d95a [merge] Refresh ws-0252 live apply branch from origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:53.331379'
+- marker_type: git-commit
+  adr_number: '0252'
+  location: git:d4d25d35b
+  evidence: d4d25d35b [route-dns] Live apply ADR 0252 ledger
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:53.331398'
+- marker_type: playbook
+  adr_number: '0252'
+  location: playbooks/route-dns-assertion-ledger.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:53.346476'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 18
+
+  Breakdown: git-commit=17, playbook=1
+
+  Implemented On: 2026-03-29'

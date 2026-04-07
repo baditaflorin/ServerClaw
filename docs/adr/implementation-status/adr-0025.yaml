@@ -2,11 +2,32 @@ adr_number: '0025'
 title: Compose-Managed Runtime Stacks
 canonical_status: Accepted
 canonical_implementation_status: Not Implemented
-detected_markers: []
-inferred_implementation_status: No Evidence
-status_match: true
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0025'
+  location: git:ab755354d
+  evidence: "ab755354d [release] Bump to 0.178.41 \u2014 ADR 0025 implementation roadmap"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:14.906161'
+- marker_type: git-commit
+  adr_number: '0025'
+  location: git:dcc9aa4fa
+  evidence: "dcc9aa4fa [merge] WS-0403 \u2014 ADR 0025 deep dive and implementation\
+    \ roadmap"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:14.906192'
+- marker_type: git-commit
+  adr_number: '0025'
+  location: git:d718979ec
+  evidence: d718979ec [adr-0025] Deep dive roadmap and gap analysis
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:14.906303'
+inferred_implementation_status: Possibly Implemented
+status_match: false
 summary: 'Canonical Status: Not Implemented
 
-  Inferred Status: No Evidence
+  Inferred Status: Possibly Implemented
 
-  Markers Found: 0'
+  Markers Found: 3
+
+  Breakdown: git-commit=3'

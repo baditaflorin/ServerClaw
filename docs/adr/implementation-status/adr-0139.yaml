@@ -1,0 +1,28 @@
+adr_number: 0139
+title: Subdomain Exposure Audit and Registry
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0139
+  location: git:f7fb11745
+  evidence: 'f7fb11745 Implement ADR 0139: subdomain exposure audit and registry'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:03.707358'
+- marker_type: playbook
+  adr_number: 0139
+  location: playbooks/route-dns-assertion-ledger.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:03.715076'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=1, playbook=1
+
+  Implemented On: 2026-03-24'

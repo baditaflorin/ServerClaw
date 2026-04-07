@@ -1,0 +1,28 @@
+adr_number: 0178
+title: Dependency Wave Manifests for Parallel Apply
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0178
+  location: git:c9dd37d11
+  evidence: c9dd37d11 Record ADR 0178 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:22.415753'
+- marker_type: git-commit
+  adr_number: 0178
+  location: git:0af84b92c
+  evidence: 0af84b92c Implement ADR 0178 dependency wave manifests
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:22.415794'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-03-27'

@@ -1,0 +1,52 @@
+adr_number: '0161'
+title: Real-Time Agent Coordination Map
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0161'
+  location: git:50dbe4577
+  evidence: 50dbe4577 Record ADR 0161 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.021421'
+- marker_type: git-commit
+  adr_number: '0161'
+  location: git:ba28450e3
+  evidence: ba28450e3 Fix ADR 0161 live runtime apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.021445'
+- marker_type: git-commit
+  adr_number: '0161'
+  location: git:2433a661d
+  evidence: 2433a661d Release 0.151.0 for ADR 0161 coordination map
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.021758'
+- marker_type: git-commit
+  adr_number: '0161'
+  location: git:7dc13ae60
+  evidence: 7dc13ae60 Implement ADR 0161 agent coordination map
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.021762'
+- marker_type: git-commit
+  adr_number: '0161'
+  location: git:c489623ab
+  evidence: c489623ab Implement ADR 0161 agent coordination map
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:14.024077'
+- marker_type: config-file
+  adr_number: '0161'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:14.139563'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=5, config-file=1
+
+  Implemented On: 2026-03-25'

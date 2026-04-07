@@ -1,50 +1,62 @@
 adr_number: 0058
 title: NATS JetStream For Internal Event Bus And Agent Coordination
-canonical_status: Proposed
+canonical_status: Deprecated
 canonical_implementation_status: Not Implemented
 detected_markers:
+- marker_type: git-commit
+  adr_number: 0058
+  location: git:aa5cbd48d
+  evidence: "aa5cbd48d [release] Bump to 0.178.38 \u2014 ADR 0058/0061 status corrections"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.045071'
+- marker_type: git-commit
+  adr_number: 0058
+  location: git:512db76c9
+  evidence: "512db76c9 [merge] WS-0400 \u2014 ADR 0058/0061 marked Superseded"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.045098'
 - marker_type: git-commit
   adr_number: 0058
   location: git:a1d1cccd0
   evidence: a1d1cccd0 [adr-index] Regenerated for ADR 0058/0061 supersession
   confidence: 1.0
-  detected_on: '2026-04-06T22:09:01.917639'
+  detected_on: '2026-04-07T07:53:30.045193'
 - marker_type: git-commit
   adr_number: 0058
   location: git:744319c63
   evidence: 744319c63 [adr] Mark 0058 and 0061 as Superseded (ADR 0061)
   confidence: 0.6
-  detected_on: '2026-04-06T22:09:01.917680'
+  detected_on: '2026-04-07T07:53:30.045199'
 - marker_type: git-commit
   adr_number: 0058
   location: git:b29f77add
   evidence: b29f77add [adr] Mark 0058 and 0061 as Superseded
   confidence: 0.6
-  detected_on: '2026-04-06T22:09:01.917686'
+  detected_on: '2026-04-07T07:53:30.045205'
 - marker_type: git-commit
   adr_number: 0058
   location: git:634417c98
   evidence: 634417c98 Fix ADR 0058 JetStream integration and idempotency
   confidence: 1.0
-  detected_on: '2026-04-06T22:09:01.947636'
+  detected_on: '2026-04-07T07:53:30.090574'
 - marker_type: git-commit
   adr_number: 0058
   location: git:4439ec473
   evidence: 4439ec473 Implement ADR 0058 NATS JetStream event bus
   confidence: 1.0
-  detected_on: '2026-04-06T22:09:01.947657'
+  detected_on: '2026-04-07T07:53:30.090597'
 - marker_type: git-commit
   adr_number: 0058
   location: git:f12e9eb39
   evidence: f12e9eb39 Implement ADR 0058 NATS JetStream event bus
   confidence: 1.0
-  detected_on: '2026-04-06T22:09:01.947802'
+  detected_on: '2026-04-07T07:53:30.090743'
 inferred_implementation_status: Likely Implemented
 status_match: false
 summary: 'Canonical Status: Not Implemented
 
   Inferred Status: Likely Implemented
 
-  Markers Found: 6
+  Markers Found: 8
 
-  Breakdown: git-commit=6'
+  Breakdown: git-commit=8'
