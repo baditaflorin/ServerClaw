@@ -77,7 +77,8 @@ ownership_manifest:
   - id: service_capability_catalog
     paths:
     - config/service-capability-catalog.json
-    mode: exclusive
+    mode: shared_contract
+    contract: service-catalog-v1
   - id: generated_truth
     paths:
     - docs/diagrams/agent-coordination-map.excalidraw

@@ -44,7 +44,13 @@ ownership_manifest:
     - config/service-completeness.json
     - config/service-redundancy-catalog.json
     - config/health-probe-catalog.json
+    - collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml
     mode: exclusive
+  - id: adr_0364_service_capability_catalog
+    paths:
+    - config/service-capability-catalog.json
+    mode: shared_contract
+    contract: service-catalog-v1
   - id: workstream_registry
     paths:
     - workstreams.yaml
@@ -54,6 +60,7 @@ ownership_manifest:
     - workstreams/archive/2026/ws-0364-outline-agent-tools.yaml
     - workstreams/active/ws-0375-certificate-validation-codification.yaml
     - workstreams/active/ws-0364-service-api-agent-tools.yaml
+    - workstreams/active/adr-0346-centralized-port-registry.yaml
     mode: shared_contract
     contract: workstream-registry-v1
   - id: adr_index_generation
@@ -74,6 +81,7 @@ ownership_manifest:
     - .repo-structure.yaml
     - .config-locations.yaml
     - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/diagrams/service-dependency-graph.excalidraw
     - config/prometheus/file_sd/https_tls_targets.yml
     - config/prometheus/rules/https_tls_alerts.yml
     - docs/site-generated/architecture/dependency-graph.md
