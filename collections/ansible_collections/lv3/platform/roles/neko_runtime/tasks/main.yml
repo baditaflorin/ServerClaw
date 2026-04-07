@@ -1,80 +1,56 @@
 ---
-# Neko Runtime Convergence Tasks
+# Neko Runtime Convergence — Multi-Instance
+# Manages N isolated browser containers driven by neko_instances dict.
+# Graceful: each instance deploys independently; one failing never blocks others.
 
-- name: Create Neko data directory
-  file:
-    path: "{{ neko_runtime_data_dir }}"
+- name: Assert neko_instances is defined
+  ansible.builtin.assert:
+    that:
+      - neko_instances is mapping
+    fail_msg: "neko_instances must be a dict (can be empty: {})"
+
+- name: Ensure base Neko data directory exists
+  ansible.builtin.file:
+    path: "{{ neko_data_dir }}"
     state: directory
     owner: root
     group: root
-    mode: '0755'
-  tags: [neko, convergence]
+    mode: "0755"
 
-- name: Pull Neko Docker image
+- name: Pull Neko Docker image (shared across all instances)
   community.docker.docker_image:
     name: "{{ neko_runtime_image_name }}"
     tag: "{{ neko_runtime_image_tag }}"
     source: pull
     force_tag: true
   register: neko_image_pulled
-  tags: [neko, convergence]
 
-- name: Capture Docker image digest for change detection
-  shell: |
+- name: Capture image digest for change detection
+  ansible.builtin.shell: |
     docker inspect {{ neko_runtime_image_name }}:{{ neko_runtime_image_tag }} \
       --format='{{ "{{" }}index .RepoDigests 0{{ "}}" }}'
   register: neko_image_digest_output
   changed_when: false
-  tags: [neko, convergence]
 
-- name: Set fact for image digest
-  set_fact:
+- name: Set image digest fact
+  ansible.builtin.set_fact:
     neko_runtime_image_pull_digest: "{{ neko_image_digest_output.stdout }}"
-  tags: [neko, convergence]
 
-- name: Render Neko docker-compose template
-  template:
-    src: docker-compose.yml.j2
-    dest: "{{ neko_runtime_data_dir }}/docker-compose.yml"
-    owner: root
-    group: root
-    mode: '0644'
-  register: neko_compose_rendered
-  tags: [neko, convergence]
+# Deploy each configured instance (failures are isolated — other instances continue)
+- name: Deploy Neko instances
+  ansible.builtin.include_tasks: deploy_instance.yml
+  loop: "{{ neko_instances | dict2items }}"
+  loop_control:
+    loop_var: _neko_inst_item
+    label: "neko-{{ _neko_inst_item.key }}"
 
-- name: Render Neko runtime environment file
-  template:
-    src: runtime.env.j2
-    dest: "{{ neko_runtime_data_dir }}/runtime.env"
-    owner: root
-    group: root
-    mode: '0600'
-  register: neko_env_rendered
-  tags: [neko, convergence]
+# Remove containers for instances that were removed from neko_instances
+- name: Clean up removed Neko instances
+  ansible.builtin.include_tasks: cleanup_removed_instances.yml
 
-- name: Remove existing Neko container to apply configuration changes
-  shell: docker rm -f {{ neko_runtime_container_name }} 2>/dev/null || true
-  when: neko_compose_rendered.changed or neko_env_rendered.changed
-  changed_when: neko_compose_rendered.changed or neko_env_rendered.changed
-  tags: [neko, convergence]
-
-- name: Deploy Neko via docker-compose
-  shell: |
-    docker compose -f {{ neko_runtime_data_dir }}/docker-compose.yml up -d \
-      {{ '--force-recreate' if (neko_compose_rendered.changed or neko_env_rendered.changed or neko_image_pulled.changed) else '' }}
-  register: neko_compose_result
-  changed_when: neko_compose_rendered.changed or neko_env_rendered.changed or neko_image_pulled.changed
-  tags: [neko, convergence]
-
-- name: Wait for Neko container to be healthy
-  community.docker.docker_container_info:
-    name: "{{ neko_runtime_container_name }}"
-  register: neko_container
-  until: neko_container.container.State.Health.Status | default('') == 'healthy'
-  retries: 10
-  delay: 5
-  tags: [neko, convergence]
-
-- name: Run Neko verify tasks
-  include_tasks: verify.yml
-  tags: [neko, verify]
+# Remove the legacy single-instance container if it exists (migration)
+- name: Remove legacy neko container if present (replaced by named instances)
+  ansible.builtin.shell: |
+    docker rm -f neko 2>/dev/null && echo removed || echo absent
+  register: _neko_legacy_cleanup
+  changed_when: "'removed' in _neko_legacy_cleanup.stdout"
