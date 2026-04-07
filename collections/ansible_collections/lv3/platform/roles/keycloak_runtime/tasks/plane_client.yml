@@ -153,7 +153,7 @@
     validate_certs: false
   register: plane_client_create
   when: not plane_client_exists
-  no_log: false
+  no_log: true
 
 - name: Update Plane OIDC client redirect URIs
   ansible.builtin.uri:
@@ -179,10 +179,8 @@
 
 - name: Write Plane OIDC client secret to local artifact
   ansible.builtin.copy:
-    content: "{{ plane_oidc_client_secret }}"
+    content: "{{ plane_oidc_client_secret }}\n"
     dest: "{{ plane_oidc_client_secret_local_file }}"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user_group }}"
     mode: "0600"
   delegate_to: localhost
   become: false
