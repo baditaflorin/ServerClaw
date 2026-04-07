@@ -1107,6 +1107,10 @@ converge-livekit:
 converge-neko:
 	$(MAKE) preflight WORKFLOW=converge-neko
 	$(MAKE) generate-edge-static-sites
+	@echo "Syncing neko_instances from Keycloak (--dry-run to preview)..."
+	python3 $(REPO_ROOT)/scripts/neko_tool.py sync-from-keycloak \
+	  --keycloak-url http://10.10.10.20:8091 \
+	  --group /lv3-platform-admins
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/neko.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
