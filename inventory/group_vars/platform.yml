@@ -6666,6 +6666,6 @@ mail_platform_internal_submission_port: 1587
 #       udp_range: "53000-55999"
 neko_instances:
   florin:
-    email: florin@lv3.org
+    email: busui.matei1994@gmail.com
     port: 8080
     udp_range: "50000-52999"
