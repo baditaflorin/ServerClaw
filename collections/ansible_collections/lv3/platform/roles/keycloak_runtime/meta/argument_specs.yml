@@ -362,3 +362,48 @@ argument_specs:
         required: true
         description:
           - Public ServerClaw base URL used when provisioning redirect URIs.
+      keycloak_container_name:
+        type: str
+        required: true
+        description:
+          - Container name for the Keycloak runtime service.
+      keycloak_data_dir:
+        type: path
+        required: true
+        description:
+          - Data directory for Keycloak runtime persistence.
+      keycloak_openbao_agent_dir:
+        type: path
+        required: true
+        description:
+          - OpenBao agent configuration directory for Keycloak.
+      keycloak_openbao_agent_image:
+        type: str
+        required: true
+        description:
+          - OpenBao agent container image reference.
+      keycloak_openbao_agent_container_name:
+        type: str
+        required: true
+        description:
+          - Container name for the Keycloak OpenBao agent sidecar.
+      keycloak_openbao_secret_path:
+        type: str
+        required: true
+        description:
+          - OpenBao secret path for Keycloak runtime environment.
+      keycloak_openbao_policy_name:
+        type: str
+        required: true
+        description:
+          - OpenBao policy name for Keycloak access.
+      keycloak_openbao_approle_name:
+        type: str
+        required: true
+        description:
+          - OpenBao AppRole name for Keycloak authentication.
+      keycloak_legacy_env_file:
+        type: path
+        required: true
+        description:
+          - Legacy environment file path for Keycloak cleanup.
