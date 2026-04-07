@@ -3903,7 +3903,7 @@
         "timeout_seconds": 30,
         "retries": 10,
         "delay_seconds": 3,
-        "url": "http://127.0.0.1:8080/api/health",
+        "url": "http://127.0.0.1:8080/",
         "method": "GET",
         "expected_status": [
           200
@@ -3915,7 +3915,7 @@
         "timeout_seconds": 30,
         "retries": 10,
         "delay_seconds": 3,
-        "url": "http://127.0.0.1:8080/api/health",
+        "url": "http://127.0.0.1:8080/",
         "method": "GET",
         "expected_status": [
           200
