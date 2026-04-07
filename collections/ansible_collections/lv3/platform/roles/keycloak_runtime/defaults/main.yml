@@ -16,9 +16,7 @@ keycloak_site_dir: /opt/keycloak
 keycloak_secret_dir: "{{ keycloak_site_dir }}/secrets"
 keycloak_compose_file: "{{ keycloak_site_dir }}/docker-compose.yml"
 keycloak_env_file: "{{ keycloak_site_dir }}/runtime.env"
-# NOTE: keycloak_image is a required conventional variable derived by derive_service_defaults (ADR 0373)
-# Before tasks execute, derive_service_defaults imports service definitions and resolves image refs
-keycloak_image: null
+keycloak_image: "quay.io/keycloak/keycloak:26.5.4"
 keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
 
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
