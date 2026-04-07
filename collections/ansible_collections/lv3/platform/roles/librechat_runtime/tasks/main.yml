@@ -22,8 +22,6 @@
     name:
       - openssl
     state: present
-    update_cache: true
-    force_apt_get: true
 
 - name: Ensure the LibreChat runtime directories exist
   ansible.builtin.file:
@@ -43,6 +41,8 @@
       mode: "0755"
     - path: "{{ librechat_meilisearch_data_dir }}"
       mode: "0755"
+    - path: "{{ librechat_env_file | dirname }}"
+      mode: "0700"
 
 - name: Generate the LibreChat JWT secret
   ansible.builtin.shell: |
@@ -86,6 +86,21 @@
   changed_when: "'changed' in librechat_creds_iv_gen.stdout"
   no_log: true
 
+- name: Generate the OIDC session secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ librechat_secret_dir }}/oidc-session-secret" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ librechat_secret_dir }}/oidc-session-secret"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_oidc_session_gen
+  changed_when: "'changed' in librechat_oidc_session_gen.stdout"
+  no_log: true
+  when: librechat_enable_oidc | bool
+
 - name: Read the LibreChat secrets
   ansible.builtin.slurp:
     src: "{{ item }}"
@@ -96,11 +111,19 @@
   register: librechat_secrets_raw
   no_log: true
 
+- name: Read the OIDC session secret
+  ansible.builtin.slurp:
+    src: "{{ librechat_secret_dir }}/oidc-session-secret"
+  register: librechat_oidc_session_raw
+  no_log: true
+  when: librechat_enable_oidc | bool
+
 - name: Record the LibreChat runtime secrets
   ansible.builtin.set_fact:
     librechat_jwt_secret: "{{ librechat_secrets_raw.results[0].content | b64decode | trim }}"
     librechat_creds_key: "{{ librechat_secrets_raw.results[1].content | b64decode | trim }}"
     librechat_creds_iv: "{{ librechat_secrets_raw.results[2].content | b64decode | trim }}"
+    librechat_oidc_session_secret: "{{ librechat_oidc_session_raw.content | b64decode | trim if librechat_enable_oidc | bool else '' }}"
   no_log: true
 
 - name: Read the OIDC client secret
@@ -187,9 +210,9 @@
   no_log: true
   when: librechat_enable_openbao_agent | bool
 
-- name: Copy the system prompt preset file
+- name: Deploy the system prompt preset file
   ansible.builtin.copy:
-    src: "{{ librechat_system_prompt_src }}"
+    content: "You are ServerClaw, the LV3 platform assistant.\n"
     dest: "{{ librechat_system_prompt_file }}"
     owner: root
     group: root
@@ -253,6 +276,53 @@
     'Creating' in librechat_up.stdout
     or 'Recreating' in librechat_up.stdout
     or 'Starting' in librechat_up.stdout
+
+- name: Patch openid-client to allow internal HTTP OIDC issuer
+  ansible.builtin.shell: |
+    set -euo pipefail
+    TARGET="/app/api/node_modules/openid-client/build/index.js"
+    PATCH_MARKER="execute: [client.allowInsecureRequests],"
+    ISSUER_PATCH="if (false && resolve && new URL(as.issuer).href !== server.href)"
+    # Patch the strategy to pass allowInsecureRequests to discovery
+    STRATEGY="/app/api/strategies/openidStrategy.js"
+    if ! docker exec {{ librechat_container_name }} grep -q "$PATCH_MARKER" "$STRATEGY"; then
+      docker exec {{ librechat_container_name }} sed -i 's|      {$|      {\n        execute: [client.allowInsecureRequests],|' "$STRATEGY"
+      # This sed is too broad — re-extract and do a targeted patch
+      docker run --rm --entrypoint cat {{ librechat_image }} "$STRATEGY" > /tmp/openidStrategy.original.js
+      python3 -c "
+    with open('/tmp/openidStrategy.original.js') as f:
+        c = f.read()
+    old = '      {\n        [client.customFetch]: customFetch,\n      },\n    );\n\n    logger.info'
+    new = '      {\n        execute: [client.allowInsecureRequests],\n        [client.customFetch]: customFetch,\n      },\n    );\n\n    logger.info'
+    c = c.replace(old, new, 1)
+    with open('/tmp/openidStrategy.patched.js', 'w') as f:
+        f.write(c)
+    "
+      docker cp /tmp/openidStrategy.patched.js {{ librechat_container_name }}:"$STRATEGY"
+      echo changed_strategy
+    fi
+    # Patch openid-client to skip issuer mismatch (internal HTTP vs external HTTPS)
+    if ! docker exec {{ librechat_container_name }} grep -q "false && resolve" "$TARGET"; then
+      docker exec {{ librechat_container_name }} sed -i \
+        "s|if (resolve && new URL(as.issuer).href !== server.href)|if (false \&\& resolve \&\& new URL(as.issuer).href !== server.href)|" \
+        "$TARGET"
+      echo changed_client
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_oidc_patch
+  changed_when: "'changed' in librechat_oidc_patch.stdout"
+  when: librechat_enable_oidc | bool
+
+- name: Restart LibreChat after OIDC patches
+  ansible.builtin.command:
+    argv:
+      - docker
+      - restart
+      - "{{ librechat_container_name }}"
+  when:
+    - librechat_enable_oidc | bool
+    - librechat_oidc_patch is changed
 
 - name: Verify the LibreChat runtime
   ansible.builtin.import_tasks: verify.yml
