@@ -5,6 +5,7 @@ status: planned
 owner: unassigned
 priority: medium
 branch: main
+worktree_path: .claude/worktrees/service-api-agent-tools
 doc: docs/adr/0362-agent-service-api-gateway-pattern.md
 ownership_manifest:
   owned_surfaces:

@@ -68,6 +68,7 @@ related_adrs:
 
 branch: claude/nervous-feistel
 worktree: nervous-feistel
+worktree_path: .claude/worktrees/nervous-feistel
 doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
 ownership_manifest:
   owned_surfaces:

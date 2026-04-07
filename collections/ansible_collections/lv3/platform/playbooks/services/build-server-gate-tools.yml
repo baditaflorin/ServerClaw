@@ -9,6 +9,8 @@
 #   gate_tools_trivy_version: trivy binary version (default: 0.59.2)
 #   gate_tools_tofu_version: opentofu version (default: 1.9.1)
 #   gate_tools_mypy_version: mypy pip package version (default: 1.13.0)
+#   gate_tools_hcl2_version: python-hcl2 pip package version (default: 8.1.1)
+#   gate_tools_qdrant_client_version: qdrant-client pip package version (default: 1.17.1)
 # Outputs: All gate tools installed under /usr/local/bin or system python3, with versions
 #   recorded in /opt/builds/gate-tool-versions.json for capability attestation.
 # Idempotency: Y — pip install --upgrade uses exact versions; binary downloads are
@@ -30,6 +32,8 @@
     gate_tools_jsonschema_version: "4.23.0"
     gate_tools_checkov_version: "3.2.469"
     gate_tools_pytest_version: "8.4.2"
+    gate_tools_hcl2_version: "8.1.1"
+    gate_tools_qdrant_client_version: "1.17.1"
     gate_tools_version_file: "/opt/builds/gate-tool-versions.json"
 
   tasks:
@@ -45,6 +49,8 @@
           - "types-PyYAML"
           - "checkov=={{ gate_tools_checkov_version }}"
           - "pytest=={{ gate_tools_pytest_version }}"
+          - "python-hcl2=={{ gate_tools_hcl2_version }}"
+          - "qdrant-client=={{ gate_tools_qdrant_client_version }}"
           - "httpx"
         state: present
         executable: pip3
@@ -135,3 +141,5 @@
           jsonschema: "{{ gate_tools_jsonschema_version }}"
           checkov: "{{ gate_tools_checkov_version }}"
           pytest: "{{ gate_tools_pytest_version }}"
+          python_hcl2: "{{ gate_tools_hcl2_version }}"
+          qdrant_client: "{{ gate_tools_qdrant_client_version }}"
