@@ -31,7 +31,7 @@
     - role: lv3.platform.proxmox_network
 
 - name: Provision the LiteLLM PostgreSQL database
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-vm-lv3' }}"
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
   become: true
   gather_facts: true
   tags:
