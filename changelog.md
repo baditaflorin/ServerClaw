@@ -44,3 +44,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 - [Release note archives](docs/release-notes/index/README.md)
 - [2026 (377 releases)](docs/release-notes/index/2026.md)
+
+## Unreleased
+
+- ADR 0058 and 0061 marked as Superseded (deployed via ADRs 0276, 0281)
