@@ -190,6 +190,11 @@ workstreams:
       - config/service-capability-catalog.json
       mode: shared_contract
       contract: service-catalog-v1
+    - id: adr_0364_uptime_kuma
+      paths:
+      - config/uptime-kuma/monitors.json
+      mode: shared_contract
+      contract: service-catalog-and-automation-contract-v1
     - id: workstream_registry
       paths:
       - workstreams.yaml
