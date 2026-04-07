@@ -52,20 +52,10 @@
   register: neko_env_rendered
   tags: [neko, convergence]
 
-- name: Stop existing Neko container (if configuration changed)
-  docker_container:
-    name: "{{ neko_runtime_container_name }}"
-    state: stopped
+- name: Remove existing Neko container to apply configuration changes
+  shell: docker rm -f {{ neko_runtime_container_name }} 2>/dev/null || true
   when: neko_compose_rendered.changed or neko_env_rendered.changed
-  ignore_errors: yes
-  tags: [neko, convergence]
-
-- name: Remove existing Neko container (if configuration changed)
-  docker_container:
-    name: "{{ neko_runtime_container_name }}"
-    state: absent
-  when: neko_compose_rendered.changed or neko_env_rendered.changed
-  ignore_errors: yes
+  changed_when: neko_compose_rendered.changed or neko_env_rendered.changed
   tags: [neko, convergence]
 
 - name: Deploy Neko via docker-compose

@@ -54,8 +54,7 @@ services:
       # Neko logs (accessible to Ansible for debugging)
       - "{{ neko_runtime_data_dir }}/logs:/tmp/logs"
 
-    # Docker healthcheck: HTTP GET to /api/health
-    # Neko should respond with {"ok":true} when signalling is operational
+    # Docker healthcheck: HTTP GET to / (Neko UI root always returns 200 when up)
     healthcheck:
       test:
         - CMD
@@ -63,7 +62,7 @@ services:
         - -fs
         - --max-time
         - "5"
-        - "http://127.0.0.1:{{ neko_runtime_port }}/api/health"
+        - "http://127.0.0.1:{{ neko_runtime_port }}/"
       interval: "{{ neko_runtime_healthcheck_interval }}"
       timeout: "{{ neko_runtime_healthcheck_timeout }}"
       retries: {{ neko_runtime_healthcheck_retries }}

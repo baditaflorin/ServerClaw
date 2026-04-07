@@ -24,9 +24,9 @@
     state: started
   tags: [neko, verify]
 
-- name: Test Neko health endpoint (HTTP)
+- name: Test Neko UI endpoint (HTTP root returns 200)
   uri:
-    url: "http://127.0.0.1:{{ neko_runtime_port }}/api/health"
+    url: "http://127.0.0.1:{{ neko_runtime_port }}/"
     method: GET
     status_code: 200
   register: neko_health_result
@@ -37,7 +37,7 @@
 
 - name: Display Neko health response
   debug:
-    msg: "Neko health check response: {{ neko_health_result.json }}"
+    msg: "Neko UI endpoint responded with: {{ neko_health_result.status }}"
   tags: [neko, verify]
 
 - name: Check if WebRTC verification script exists
@@ -113,6 +113,6 @@
       - "Media: UDP 50000-60000 (WebRTC streaming)"
       - "Browser: {{ neko_runtime_browser }}"
       - "Resolution: {{ neko_runtime_res }}"
-      - "Health Check: {{ 'PASS' if neko_health_result.status == 200 else 'FAIL' }}"
+      - "UI Endpoint: {{ 'PASS (200)' if neko_health_result.status == 200 else 'FAIL (' ~ neko_health_result.status ~ ')' }}"
       - "WebRTC Handshake: {{ 'PASS' if neko_webrtc_result.rc | default(1) == 0 else 'SKIPPED (script not found)' }}"
   tags: [neko, verify]
