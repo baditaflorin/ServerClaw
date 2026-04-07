@@ -1,0 +1,99 @@
+---
+# Playbook: litellm.yml
+# Purpose: Converge the LiteLLM Proxy, its PostgreSQL database, and expose it on the Docker runtime VM.
+# Use case: Run during LiteLLM deployment, upgrade, or recovery.
+#
+# Inputs (required):
+#   - env (str, required): Target environment selector.
+#
+# Outputs:
+#   - LiteLLM Proxy is deployed on docker-runtime-lv3 with PostgreSQL database provisioned.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - Requires: docker-runtime-lv3 and postgres-vm-lv3 to be reachable.
+#   - Role: lv3.platform.litellm_postgres
+#   - Role: lv3.platform.litellm_runtime
+
+- name: Converge the Proxmox guest network policy for LiteLLM
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - access
+    - service-litellm
+
+  roles:
+    - role: lv3.platform.proxmox_network
+
+- name: Provision the LiteLLM PostgreSQL database
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-vm-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - data
+    - service-litellm
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.litellm_postgres
+
+- name: Converge LiteLLM Proxy on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  vars:
+    litellm_control_plane_host: "{{ groups['proxmox_hosts'][0] }}"
+    platform_service_topology: "{{ hostvars[litellm_control_plane_host].platform_service_topology }}"
+  tags:
+    - tier-2
+    - compute
+    - service-litellm
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.litellm
+        playbook_execution_audit_target: litellm
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+    - name: Assert the Docker runtime engine is available
+      ansible.builtin.command:
+        argv:
+          - docker
+          - info
+          - --format
+          - '{{ "{{.ServerVersion}}" }}'
+      changed_when: false
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.litellm_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: litellm
+        playbook_execution_post_verify_audit_action: playbook.verify.litellm
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: litellm

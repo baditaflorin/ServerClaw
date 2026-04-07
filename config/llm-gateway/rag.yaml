@@ -1,0 +1,17 @@
+schema_version: "1.0.0"
+vector_db:
+  engine: qdrant
+  uri: http://host.docker.internal:6333
+embedding:
+  engine: ollama
+  model: nomic-embed-text
+  # base_url derived from providers.ollama-local.base_url in model-catalog.yaml
+search:
+  top_k: 5
+  relevance_threshold: 0.2
+  hybrid_search: true
+web_search:
+  engine: searxng
+  # query_url derived from platform_service_topology at deploy time
+  result_count: 3
+  concurrent_requests: 1

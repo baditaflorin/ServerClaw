@@ -1,0 +1,39 @@
+schema_version: "1.0.0"
+providers:
+  ollama-local:
+    type: ollama
+    base_url: http://10.10.10.20:11434
+    models:
+      - id: gemma4:e4b
+        capabilities: [chat, function_calling]
+        context_window: 131072
+      - id: nomic-embed-text
+        capabilities: [embedding]
+        dimensions: 768
+  anthropic:
+    type: anthropic
+    # API key injected via OpenBao at runtime
+    models:
+      - id: claude-sonnet-4-20250514
+        capabilities: [chat, function_calling, vision]
+        context_window: 200000
+      - id: claude-haiku-4-5-20251001
+        capabilities: [chat, function_calling, vision]
+        context_window: 200000
+      - id: claude-opus-4-20250115
+        capabilities: [chat, function_calling, vision]
+        context_window: 200000
+
+aliases:
+  gpt-4o-mini: gemma4:e4b
+  gpt-4.1-mini: gemma4:e4b
+  text-embedding-3-small: nomic-embed-text
+
+fallback_chains:
+  chat:
+    - gemma4:e4b
+    - qwen2.5:7b  # kept as emergency fallback only
+
+defaults:
+  chat_model: gemma4:e4b
+  embedding_model: nomic-embed-text

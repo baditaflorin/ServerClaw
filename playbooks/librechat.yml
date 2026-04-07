@@ -1,0 +1,147 @@
+---
+# Playbook: librechat.yml
+# Purpose: Converge LibreChat, its Keycloak OIDC client, and the authenticated public edge publication on chat.lv3.org.
+# Use case: Run during LibreChat deployment, upgrade, or recovery when the chat surface must match repo truth.
+#
+# Inputs (required):
+#   - env (str, required): Target environment selector.
+#
+# Outputs:
+#   - LibreChat is deployed on coolify-lv3, Keycloak OIDC is configured, chat.lv3.org is published through the shared edge.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - Requires: coolify-lv3, docker-runtime-lv3, and nginx-lv3 to be reachable.
+
+- name: Ensure Hetzner DNS publication for LibreChat
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+  tags:
+    - tier-1
+    - access
+    - service-librechat
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Converge the Proxmox guest network policy for LibreChat
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - access
+    - service-librechat
+
+  roles:
+    - role: lv3.platform.proxmox_network
+
+- name: Converge the LibreChat Keycloak client on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - access
+    - service-librechat
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.docker_runtime
+
+  tasks:
+    - name: Reconcile the dedicated LibreChat Keycloak client
+      ansible.builtin.include_role:
+        name: lv3.platform.keycloak_runtime
+        tasks_from: serverclaw_client.yml
+
+- name: Converge LibreChat on the Coolify runtime VM
+  hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
+  become: true
+  gather_facts: true
+  vars:
+    librechat_control_plane_host: "{{ groups['proxmox_hosts'][0] }}"
+    proxmox_guests: "{{ hostvars[librechat_control_plane_host].proxmox_guests }}"
+    platform_service_topology: "{{ hostvars[librechat_control_plane_host].platform_service_topology }}"
+  tags:
+    - tier-2
+    - access
+    - service-librechat
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.librechat
+        playbook_execution_audit_target: librechat
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.coolify[playbook_execution_env] }}"
+
+    - name: Assert the Coolify runtime Docker engine is available
+      ansible.builtin.command:
+        argv:
+          - docker
+          - info
+          - --format
+          - '{{ "{{.ServerVersion}}" }}'
+      changed_when: false
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.librechat_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: librechat
+        playbook_execution_post_verify_audit_action: playbook.verify.librechat
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: librechat
+
+- name: Publish LibreChat through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - access
+    - service-librechat
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+      vars:
+        public_edge_sync_generated_static_dirs: false

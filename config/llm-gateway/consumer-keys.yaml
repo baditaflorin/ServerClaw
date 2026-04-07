@@ -1,0 +1,22 @@
+schema_version: "1.0.0"
+consumers:
+  - name: lv3-controller-verifier
+    description: Platform health probes and convergence verification
+    models: ["*"]
+    rate_limit: null
+  - name: codex-cli
+    description: Claude Code / codex CLI agent access
+    models: ["*"]
+    rate_limit: null
+  - name: n8n
+    description: n8n workflow automation
+    models: [gemma4:e4b, nomic-embed-text, claude-sonnet-4-20250514]
+    rate_limit: null
+  - name: dify
+    description: Dify AI application platform
+    models: [gemma4:e4b, nomic-embed-text, claude-sonnet-4-20250514]
+    rate_limit: null
+  - name: windmill
+    description: Windmill workflow engine
+    models: [gemma4:e4b, nomic-embed-text]
+    rate_limit: null

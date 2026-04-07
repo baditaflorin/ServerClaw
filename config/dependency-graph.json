@@ -408,6 +408,22 @@
       "adr": "0294"
     },
     {
+      "id": "litellm",
+      "service": "litellm",
+      "name": "LiteLLM Proxy",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation"
+    },
+    {
+      "id": "librechat",
+      "service": "librechat",
+      "name": "LibreChat",
+      "vm": "coolify-lv3",
+      "tier": 3,
+      "category": "automation"
+    },
+    {
       "id": "openbao",
       "service": "openbao",
       "name": "OpenBao",
@@ -1272,6 +1288,48 @@
       "to": "ollama",
       "type": "hard",
       "description": "One-API forwards local chat and embedding aliases to the private Ollama runtime."
+    },
+    {
+      "from": "litellm",
+      "to": "ollama",
+      "type": "hard",
+      "description": "LiteLLM Proxy forwards local chat and embedding aliases to the private Ollama runtime."
+    },
+    {
+      "from": "litellm",
+      "to": "postgres",
+      "type": "hard",
+      "description": "LiteLLM Proxy stores virtual keys and usage data in PostgreSQL."
+    },
+    {
+      "from": "litellm",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "LiteLLM Proxy consumes runtime secrets from the OpenBao sidecar."
+    },
+    {
+      "from": "librechat",
+      "to": "ollama",
+      "type": "hard",
+      "description": "LibreChat connects directly to Ollama for local model inference."
+    },
+    {
+      "from": "librechat",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "LibreChat uses Keycloak OIDC for authentication but can fall back to local login."
+    },
+    {
+      "from": "librechat",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "LibreChat consumes runtime secrets from the OpenBao sidecar."
+    },
+    {
+      "from": "librechat",
+      "to": "searxng",
+      "type": "soft",
+      "description": "LibreChat delegates optional web-search requests to the private SearXNG runtime."
     },
     {
       "from": "openfga",
