@@ -1,8 +1,10 @@
-# Release 0.178.52
+# Release 0.178.54
 
 - Date: 2026-04-07
 
 ## Summary
+- add LiteLLM Proxy + LibreChat to replace One API + Open WebUI — portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar
+- deploy Neko remote desktop at browser.lv3.org (ADR 0380) — dedicated runtime-comms-lv3 VM (VMID 121, 10.10.10.21), Chromium over WebRTC with host-mode networking for UDP media (50000-60000), TLS cert via certbot, published through nginx_edge_publication role with 3600s proxy timeout for long-lived streaming sessions
 - ADR governance system: pre-commit hook validates ADR status transitions (requires evidence for upgrades, reason for downgrades), Plane integration syncs 406 ADRs for team visibility, quarterly audit detects implementation drift automatically
 - fix redirect loop: stale session reset now redirects to Keycloak logout (kills Keycloak session + clears sso.lv3.org cookie) instead of /oauth2/sign_in, preventing Keycloak from auto-logging back in with a poisoned session
 - NGINX auto-clears stale session cookie on oauth2-proxy 500 at /oauth2/callback — users no longer see 500 errors or need to manually clear cookies after Keycloak restarts
