@@ -48,3 +48,5 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Unreleased
 
 - ADR 0058 and 0061 marked as Superseded (deployed via ADRs 0276, 0281)
+
+- ADR implementation scanner tool created for automated discovery (618 lines)
