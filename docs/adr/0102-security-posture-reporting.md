@@ -1,7 +1,7 @@
 # ADR 0102: Security Posture Reporting and Benchmark Drift
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.109.0
 - Implemented In Platform Version: 0.130.21
 - Implemented On: 2026-03-26

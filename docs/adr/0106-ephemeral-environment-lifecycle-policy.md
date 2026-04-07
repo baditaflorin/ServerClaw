@@ -1,7 +1,7 @@
 # ADR 0106: Ephemeral Environment Lifecycle and Teardown Policy
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-26

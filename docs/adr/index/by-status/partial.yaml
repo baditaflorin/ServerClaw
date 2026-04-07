@@ -10,7 +10,7 @@ generated: '2026-04-07'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 34
+total_adrs: 60
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -382,6 +382,413 @@ adrs:
     implemented_in_repo_version: 0.92.0
     implemented_in_platform_version: 0.39.0
     implemented_on: '2026-03-23'
+  - adr: 0087
+    title: Repository Validation Gate (Pre-Push and CI)
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - gate
+      - pre-push
+      - ci
+    summary: We will implement a two-layer validation gate — local pre-commit hooks and a remote build server check — enforced
+      on every git push to any branch.
+    filename: 0087-repository-validation-gate.md
+    path: docs/adr/0087-repository-validation-gate.md
+    implemented_in_repo_version: 0.93.0
+    implemented_on: '2026-03-23'
+  - adr: 0088
+    title: Ephemeral Infrastructure Fixtures
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - ephemeral
+      - infrastructure
+      - fixtures
+    summary: We will implement ephemeral infrastructure fixtures — on-demand VMs provisioned from Packer templates, used for
+      tests, and destroyed automatically.
+    filename: 0088-ephemeral-infrastructure-fixtures.md
+    path: docs/adr/0088-ephemeral-infrastructure-fixtures.md
+    implemented_in_repo_version: 0.95.0
+    implemented_on: '2026-03-23'
+  - adr: 0089
+    title: Build Artifact Cache and Layer Registry
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - build
+      - artifact
+      - cache
+      - layer
+      - registry
+    summary: We will maintain a multi-layer build artifact cache on the build server, consisting of four components.
+    filename: 0089-build-artifact-cache.md
+    path: docs/adr/0089-build-artifact-cache.md
+    implemented_in_repo_version: 0.87.0
+    implemented_on: '2026-03-23'
+  - adr: 0091
+    title: Continuous Drift Detection and Reconciliation
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - continuous
+      - drift
+      - detection
+      - reconciliation
+    summary: 'We will implement continuous drift detection as a scheduled Windmill workflow that:'
+    filename: 0091-continuous-drift-detection.md
+    path: docs/adr/0091-continuous-drift-detection.md
+    implemented_in_repo_version: 0.94.0
+    implemented_on: '2026-03-23'
+  - adr: 0093
+    title: Interactive Ops Portal with Live Actions
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - interactive
+      - ops
+      - portal
+      - live
+      - actions
+    summary: 'We will replace the static generated ops portal with a server-side-rendered interactive portal built with FastHTML
+      (Python) or HTMX-augmented Jinja2 templates, '
+    filename: 0093-interactive-ops-portal.md
+    path: docs/adr/0093-interactive-ops-portal.md
+    implemented_in_repo_version: 0.97.0
+    implemented_in_platform_version: 0.105.0
+    implemented_on: '2026-03-24'
+  - adr: 0094
+    title: Developer Portal and Service Documentation Site
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - developer
+      - portal
+      - service
+      - documentation
+      - site
+    summary: We will generate a static documentation site using MkDocs with the Material theme, auto-populated from the canonical
+      platform data sources, and published at doc
+    filename: 0094-developer-portal-and-documentation-site.md
+    path: docs/adr/0094-developer-portal-and-documentation-site.md
+    implemented_in_repo_version: 0.97.0
+    implemented_in_platform_version: 0.105.0
+    implemented_on: '2026-03-23'
+  - adr: 0097
+    title: Alerting Routing and On-Call Runbook Model
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - alerting
+      - routing
+      - on-call
+      - runbook
+      - model
+    summary: We will implement a two-tier alert routing model with Alertmanager as the routing engine, severity-based destination
+      mapping, mandatory runbook links on every a
+    filename: 0097-alerting-routing-and-oncall-runbook-model.md
+    path: docs/adr/0097-alerting-routing-and-oncall-runbook-model.md
+    implemented_in_repo_version: 0.114.0
+    implemented_on: '2026-03-24'
+  - adr: 0098
+    title: Postgres High Availability and Automated Failover
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - postgres
+      - high
+      - availability
+      - automated
+      - failover
+    summary: We will provision a second PostgreSQL VM (postgres-replica-lv3, VMID 151) and implement Patroni-managed streaming
+      replication with automatic failover, keeping p
+    filename: 0098-postgres-high-availability.md
+    path: docs/adr/0098-postgres-high-availability.md
+    implemented_in_repo_version: 0.103.0
+    implemented_on: '2026-03-23'
+  - adr: 0099
+    title: Automated Backup Restore Verification
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: storage
+    keywords:
+      - automated
+      - backup
+      - restore
+      - verification
+    summary: 'We will implement a weekly automated restore verification workflow that restores the three most critical VM
+      backups into ephemeral infrastructure fixtures (ADR '
+    filename: 0099-automated-backup-restore-verification.md
+    path: docs/adr/0099-automated-backup-restore-verification.md
+    implemented_in_repo_version: 0.99.0
+    implemented_on: '2026-03-23'
+  - adr: '0102'
+    title: Security Posture Reporting and Benchmark Drift
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: security
+    keywords:
+      - security
+      - posture
+      - reporting
+      - benchmark
+      - drift
+    summary: We will implement a weekly automated security posture report using two complementary tools — Lynis for host or
+      guest OS-level hardening checks and Trivy for con
+    filename: 0102-security-posture-reporting.md
+    path: docs/adr/0102-security-posture-reporting.md
+    implemented_in_repo_version: 0.109.0
+    implemented_in_platform_version: 0.130.21
+    implemented_on: '2026-03-26'
+  - adr: '0103'
+    title: Data Classification and Retention Policy
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - data
+      - classification
+      - retention
+      - policy
+    summary: 'We will define a platform data classification model with four classes, assign every data store in the platform
+      to a class, and enforce class-specific retention '
+    filename: 0103-data-classification-and-retention-policy.md
+    path: docs/adr/0103-data-classification-and-retention-policy.md
+    implemented_in_repo_version: 0.102.0
+    implemented_on: '2026-03-23'
+  - adr: '0104'
+    title: Service Dependency Graph and Failure Propagation Model
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - service
+      - dependency
+      - graph
+      - failure
+      - propagation
+      - model
+    summary: We will define a machine-readable service dependency graph in config/dependency-graph.json, generate a visual
+      dependency diagram for the docs site (ADR 0094), a
+    filename: 0104-service-dependency-graph.md
+    path: docs/adr/0104-service-dependency-graph.md
+    implemented_in_repo_version: 0.108.0
+    implemented_on: '2026-03-24'
+  - adr: '0106'
+    title: Ephemeral Environment Lifecycle and Teardown Policy
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - ephemeral
+      - environment
+      - lifecycle
+      - teardown
+      - policy
+    summary: We will establish a formal ephemeral environment lifecycle policy with a defined VMID range, a maximum lifetime
+      enforced by an automated reaper, a mandatory own
+    filename: 0106-ephemeral-environment-lifecycle-policy.md
+    path: docs/adr/0106-ephemeral-environment-lifecycle-policy.md
+    implemented_in_repo_version: 0.97.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
+  - adr: '0107'
+    title: Platform Extension Model for Adding New Services
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - platform
+      - extension
+      - model
+      - adding
+      - new
+      - services
+    summary: We will define a platform extension checklist as a machine-readable schema, enhance the scaffold generator (ADR
+      0078) to generate all required artifacts, and ad
+    filename: 0107-platform-extension-model.md
+    path: docs/adr/0107-platform-extension-model.md
+    implemented_in_repo_version: 0.107.0
+    implemented_on: '2026-03-24'
+  - adr: 0109
+    title: Public Status Page
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - public
+      - status
+      - page
+    summary: We will publish a repo-managed public status page at status.lv3.org, backed by Uptime Kuma and supplemented by
+      an independent Uptime Robot probe set.
+    filename: 0109-public-status-page.md
+    path: docs/adr/0109-public-status-page.md
+    implemented_in_repo_version: 0.104.0
+    implemented_on: '2026-03-23'
+  - adr: '0110'
+    title: Platform Versioning, Release Notes, and Upgrade Path
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: release
+    keywords:
+      - platform
+      - versioning
+      - release
+      - notes
+      - upgrade
+      - path
+    summary: We will define platform-level semantic versioning semantics, a structured release process, machine-readable release
+      notes, and an upgrade path document that spe
+    filename: 0110-platform-versioning-and-upgrade-path.md
+    path: docs/adr/0110-platform-versioning-and-upgrade-path.md
+    implemented_in_repo_version: 0.104.0
+    implemented_on: '2026-03-23'
+  - adr: '0111'
+    title: End-to-End Integration Test Suite
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-23'
+    concern: testing
+    keywords:
+      - end-to-end
+      - integration
+      - test
+      - suite
+    summary: We will build an end-to-end integration test suite (tests/integration/) written in Python using pytest with httpx
+      for HTTP interactions, targeting the live plat
+    filename: 0111-end-to-end-integration-test-suite.md
+    path: docs/adr/0111-end-to-end-integration-test-suite.md
+    implemented_in_repo_version: 0.100.0
+    implemented_on: '2026-03-23'
+  - adr: '0112'
+    title: Deterministic Goal Compiler
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - deterministic
+      - goal
+      - compiler
+    summary: 'We will introduce a deterministic goal compiler as a Python module rooted at platform/goalcompiler/ that transforms
+      operator input into a typed ExecutionIntent '
+    filename: 0112-deterministic-goal-compiler.md
+    path: docs/adr/0112-deterministic-goal-compiler.md
+    implemented_in_repo_version: 0.117.1
+    implemented_on: '2026-03-24'
+  - adr: '0113'
+    title: World-State Materializer
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - world-state
+      - materializer
+    summary: We will build a world-state materializer that continuously refreshes a canonical materialized view of platform
+      state into a dedicated Postgres schema (worldstat
+    filename: 0113-world-state-materializer.md
+    path: docs/adr/0113-world-state-materializer.md
+    implemented_in_repo_version: 0.113.0
+    implemented_in_platform_version: 0.130.28
+    implemented_on: '2026-03-27'
+  - adr: '0114'
+    title: Rule-Based Incident Triage Engine
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - rule-based
+      - incident
+      - triage
+      - engine
+    summary: We will implement a rule-based incident triage engine as a Windmill workflow triggered on every firing alert
+      from the alerting router (ADR 0097).
+    filename: 0114-rule-based-incident-triage-engine.md
+    path: docs/adr/0114-rule-based-incident-triage-engine.md
+    implemented_in_repo_version: 0.111.0
+    implemented_on: '2026-03-24'
+  - adr: '0115'
+    title: Event-Sourced Mutation Ledger
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - event-sourced
+      - mutation
+      - ledger
+    summary: 'We will promote the mutation audit log into a full event-sourced mutation ledger by replacing the flat audit
+      log table with a structured event stream schema in '
+    filename: 0115-event-sourced-mutation-ledger.md
+    path: docs/adr/0115-event-sourced-mutation-ledger.md
+    implemented_in_repo_version: 0.110.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
+  - adr: '0116'
+    title: Change Risk Scoring Without LLMs
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - change
+      - risk
+      - scoring
+      - without
+      - llms
+    summary: 'We will implement a deterministic change risk scoring engine as a Python module at scripts/riskscorer/ that
+      computes a numeric risk score (0–100) and a derived '
+    filename: 0116-change-risk-scoring.md
+    path: docs/adr/0116-change-risk-scoring.md
+    implemented_in_repo_version: 0.112.0
+    implemented_on: '2026-03-24'
+  - adr: '0117'
+    title: Service Dependency Graph As First-Class Runtime
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - service
+      - dependency
+      - graph
+      - as
+      - first-class
+      - runtime
+    summary: We will persist a machine-usable dependency graph for services, hosts, networks, DNS names, certificates, and
+      data flows as a directed acyclic graph (DAG) store
+    filename: 0117-service-dependency-graph-runtime.md
+    path: docs/adr/0117-service-dependency-graph-runtime.md
+    implemented_in_repo_version: 0.117.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
   - adr: 0118
     title: Replayable Failure Case Library
     status: Proposed
@@ -397,6 +804,59 @@ adrs:
       the platform API gateway and surfaced in Matterm
     filename: 0118-replayable-failure-case-library.md
     path: docs/adr/0118-replayable-failure-case-library.md
+  - adr: 0119
+    title: Budgeted Workflow Scheduler
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - budgeted
+      - workflow
+      - scheduler
+    summary: We will implement a budgeted workflow scheduler as a thin orchestration layer between the goal compiler (ADR
+      0112) and Windmill (ADR 0044). The scheduler receiv
+    filename: 0119-budgeted-workflow-scheduler.md
+    path: docs/adr/0119-budgeted-workflow-scheduler.md
+    implemented_in_repo_version: 0.118.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
+  - adr: '0121'
+    title: Local Search and Indexing Fabric
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - local
+      - search
+      - indexing
+      - fabric
+    summary: We will build a local search and indexing fabric entirely within Postgres, using pgtrgm (trigram matching) and
+      the built-in tsvector/tsquery (BM25 full-text sea
+    filename: 0121-local-search-and-indexing-fabric.md
+    path: docs/adr/0121-local-search-and-indexing-fabric.md
+    implemented_in_repo_version: 0.119.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
+  - adr: '0122'
+    title: Windmill Operator Access Admin Surface
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - windmill
+      - operator
+      - access
+      - admin
+      - surface
+    summary: We will add a repo-managed Windmill raw app that acts as the operator access admin console for ADR 0108.
+    filename: 0122-windmill-operator-access-admin.md
+    path: docs/adr/0122-windmill-operator-access-admin.md
+    implemented_in_repo_version: 0.120.0
+    implemented_in_platform_version: 0.114.4
+    implemented_on: '2026-03-24'
   - adr: '0166'
     title: Canonical Configuration Locations Registry
     status: Implemented
