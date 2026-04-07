@@ -8095,6 +8095,103 @@
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "converge-litellm": {
+      "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend, replacing One API as the programmatic LLM gateway.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-litellm",
+        "command": "make converge-litellm"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "litellm_database_password",
+          "litellm_master_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/litellm.yml",
+        "collections/ansible_collections/lv3/platform/roles/litellm_postgres",
+        "collections/ansible_collections/lv3/platform/roles/litellm_runtime",
+        "config/llm-gateway/model-catalog.yaml",
+        "config/llm-gateway/consumer-keys.yaml",
+        "scripts/litellm_bootstrap.py"
+      ],
+      "outputs": [
+        "A private LiteLLM Proxy on docker-runtime-lv3:4000 with PostgreSQL backend, YAML-driven model routing, fallback chains, and OpenBao secret injection."
+      ],
+      "verification_commands": [
+        "curl -fsS http://100.64.0.1:4000/health/liveliness",
+        "curl -fsS http://100.64.0.1:4000/v1/models"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-librechat": {
+      "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge, replacing Open WebUI.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-librechat",
+        "command": "make converge-librechat"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "librechat_jwt_secret",
+          "librechat_creds_key",
+          "librechat_creds_iv"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/librechat.yml",
+        "collections/ansible_collections/lv3/platform/roles/librechat_runtime",
+        "config/llm-gateway/auth.yaml",
+        "config/serverclaw/system-prompt.md"
+      ],
+      "outputs": [
+        "LibreChat deployed on coolify-lv3:8096 with OIDC auth, Ollama + Anthropic backends, ServerClaw system prompt preset, and edge publication at chat.lv3.org."
+      ],
+      "verification_commands": [
+        "curl -fsS https://chat.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }
