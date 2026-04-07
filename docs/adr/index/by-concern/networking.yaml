@@ -50,7 +50,7 @@ adrs:
     implemented_on: '2026-03-22'
   - adr: 0058
     title: NATS JetStream For Internal Event Bus And Agent Coordination
-    status: Proposed
+    status: Deprecated
     implementation_status: Not Implemented
     date: '2026-03-22'
     concern: networking

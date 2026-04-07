@@ -42,7 +42,7 @@ adrs:
     path: docs/adr/0025-compose-managed-runtime-stacks.md
   - adr: 0058
     title: NATS JetStream For Internal Event Bus And Agent Coordination
-    status: Proposed
+    status: Deprecated
     implementation_status: Not Implemented
     date: '2026-03-22'
     concern: networking
@@ -59,7 +59,7 @@ adrs:
     path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
   - adr: '0061'
     title: GlitchTip For Application Exceptions And Task Failures
-    status: Proposed
+    status: Deprecated
     implementation_status: Not Implemented
     date: '2026-03-22'
     concern: platform

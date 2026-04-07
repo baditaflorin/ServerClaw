@@ -1,6 +1,7 @@
 # ADR 0058: NATS JetStream For Internal Event Bus And Agent Coordination
 
-- Status: Proposed
+- Status: Superseded
+- Superseded By: 0276
 - Implementation Status: Not Implemented
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
@@ -49,3 +50,7 @@ Steady-state expectations:
 - JetStream is not a replacement for PostgreSQL, receipts, or long-term document storage.
 - Public publication of internal event subjects is out of scope.
 - We do not need every service to move to the event bus before the first rollout is useful.
+
+## Supersession Note
+
+ADR 0058 has been superseded by ADR 0276 (NATS JetStream event bus and agent coordination — accepted and deployed). The newer ADR provides the final accepted design and implementation details based on production experience.
