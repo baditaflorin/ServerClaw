@@ -453,6 +453,9 @@ playbook_execution_host_patterns:
   runtime_general:
     production: runtime-general-lv3
     staging: docker-runtime-staging-lv3
+  runtime_comms:
+    production: runtime-comms-lv3
+    staging: docker-runtime-staging-lv3
   docker_build:
     production: docker-build-lv3
     staging: docker-build-staging-lv3

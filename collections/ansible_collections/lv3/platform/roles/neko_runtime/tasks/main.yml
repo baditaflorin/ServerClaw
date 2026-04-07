@@ -15,7 +15,7 @@
     name: "{{ neko_runtime_image_name }}"
     tag: "{{ neko_runtime_image_tag }}"
     source: pull
-    pull: yes
+    force_tag: true
   register: neko_image_pulled
   tags: [neko, convergence]
 
