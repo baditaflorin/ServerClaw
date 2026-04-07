@@ -15,7 +15,7 @@ litellm_legacy_env_file: "{{ litellm_site_dir }}/litellm.env"
 litellm_openbao_agent_dir: "{{ litellm_site_dir }}/openbao"
 litellm_openbao_agent_image: "{{ openbao_agent_image }}"
 litellm_openbao_agent_container_name: litellm-openbao-agent
-litellm_enable_openbao_agent: true
+litellm_enable_openbao_agent: false
 litellm_openbao_secret_path: services/litellm/runtime-env
 litellm_openbao_policy_name: lv3-service-litellm-runtime
 litellm_openbao_approle_name: litellm-runtime
