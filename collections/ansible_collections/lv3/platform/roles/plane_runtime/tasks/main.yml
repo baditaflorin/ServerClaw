@@ -228,6 +228,7 @@
     group: root
     mode: "0600"
   no_log: true
+  register: plane_env_render
 
 - name: Render the Plane compose file
   ansible.builtin.template:
@@ -238,6 +239,33 @@
     mode: "0644"
   vars:
     ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
+  register: plane_compose_render
+
+- name: Check if Plane stack is already running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plane_compose_file }}"
+      - ps
+      - --quiet
+  args:
+    chdir: "{{ plane_site_dir }}"
+  register: plane_running_check
+  changed_when: false
+  failed_when: false
+
+- name: Determine if Plane convergence is needed
+  ansible.builtin.set_fact:
+    plane_needs_converge: >-
+      {{
+        plane_env_render is changed
+        or plane_compose_render is changed
+        or plane_running_check.rc != 0
+        or plane_running_check.stdout | trim | length == 0
+        or (plane_force_converge | default(false) | bool)
+      }}
 
 - name: Pull the Plane images
   ansible.builtin.command:
@@ -257,6 +285,7 @@
     'Pulling' in plane_pull.stdout
     or 'Downloaded newer image' in plane_pull.stdout
     or 'Pull complete' in plane_pull.stdout
+  when: plane_needs_converge
 
 - name: Start the Plane stack
   ansible.builtin.command:
@@ -275,6 +304,12 @@
     'Creating' in plane_up.stdout
     or 'Recreating' in plane_up.stdout
     or 'Starting' in plane_up.stdout
+  when: plane_needs_converge
+
+- name: Report Plane convergence skipped (no changes detected)
+  ansible.builtin.debug:
+    msg: "Plane stack unchanged and running — skipped pull and recreate (saved ~2-4 min)"
+  when: not plane_needs_converge
 
 - name: Wait for Plane to listen locally
   ansible.builtin.wait_for:
