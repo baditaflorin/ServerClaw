@@ -278,12 +278,14 @@
     keycloak_repo_user_outline_admin_token.status == 200
     and (keycloak_repo_user_outline_admin_token.json.access_token | default('') | length) > 0
   no_log: true
+  when: keycloak_reconcile_outline_users | bool
 
 - name: Record the refreshed Keycloak admin headers for Outline automation reconciliation
   ansible.builtin.set_fact:
     keycloak_repo_user_admin_headers:
       Authorization: "Bearer {{ keycloak_repo_user_outline_admin_token.json.access_token }}"
   no_log: true
+  when: keycloak_reconcile_outline_users | bool
 
 - name: Look up the Outline automation user in Keycloak
   ansible.builtin.uri:
@@ -298,6 +300,7 @@
   until: keycloak_outline_automation_lookup.status == 200
   changed_when: false
   no_log: true
+  when: keycloak_reconcile_outline_users | bool
 
 - name: Create the Outline automation user in Keycloak when missing
   ansible.builtin.uri:
@@ -321,7 +324,9 @@
   retries: "{{ keycloak_repo_user_reconciliation_retries }}"
   delay: "{{ keycloak_repo_user_reconciliation_delay }}"
   until: keycloak_outline_automation_create.status in [201, 204, 409]
-  when: (keycloak_outline_automation_lookup.json | length) == 0
+  when:
+    - keycloak_reconcile_outline_users | bool
+    - (keycloak_outline_automation_lookup.json | default([]) | length) == 0
   no_log: true
 
 - name: Re-read the Outline automation user in Keycloak
@@ -337,6 +342,7 @@
   until: keycloak_outline_automation_lookup_final.status == 200
   changed_when: false
   no_log: true
+  when: keycloak_reconcile_outline_users | bool
 
 - name: Read the Outline automation user details from Keycloak
   ansible.builtin.uri:
@@ -351,6 +357,7 @@
   until: keycloak_outline_automation_details.status == 200
   changed_when: false
   no_log: true
+  when: keycloak_reconcile_outline_users | bool
 
 - name: Update the Outline automation user profile in Keycloak
   ansible.builtin.uri:
@@ -368,13 +375,15 @@
       enabled: true
       requiredActions: []
     status_code: 204
-  when: >-
-    (keycloak_outline_automation_details.json.firstName | default('')) != keycloak_outline_automation_first_name
-    or (keycloak_outline_automation_details.json.lastName | default('')) != keycloak_outline_automation_last_name
-    or (keycloak_outline_automation_details.json.email | default('')) != keycloak_outline_automation_email
-    or not (keycloak_outline_automation_details.json.emailVerified | default(false) | bool)
-    or not (keycloak_outline_automation_details.json.enabled | default(false) | bool)
-    or (keycloak_outline_automation_details.json.requiredActions | default([]) | length) > 0
+  when:
+    - keycloak_reconcile_outline_users | bool
+    - >-
+      (keycloak_outline_automation_details.json.firstName | default('')) != keycloak_outline_automation_first_name
+      or (keycloak_outline_automation_details.json.lastName | default('')) != keycloak_outline_automation_last_name
+      or (keycloak_outline_automation_details.json.email | default('')) != keycloak_outline_automation_email
+      or not (keycloak_outline_automation_details.json.emailVerified | default(false) | bool)
+      or not (keycloak_outline_automation_details.json.enabled | default(false) | bool)
+      or (keycloak_outline_automation_details.json.requiredActions | default([]) | length) > 0
   register: keycloak_outline_automation_update
   retries: "{{ keycloak_repo_user_reconciliation_retries }}"
   delay: "{{ keycloak_repo_user_reconciliation_delay }}"
@@ -398,6 +407,7 @@
   until: keycloak_outline_automation_password_reset.status == 204
   changed_when: false
   no_log: true
+  when: keycloak_reconcile_outline_users | bool
 
 - name: Read the Outline automation user groups from Keycloak
   ansible.builtin.uri:
@@ -412,6 +422,7 @@
   until: keycloak_outline_automation_groups.status == 200
   changed_when: false
   no_log: true
+  when: keycloak_reconcile_outline_users | bool
 
 - name: Ensure the Outline automation user belongs to lv3-platform-admins
   ansible.builtin.uri:
@@ -419,13 +430,15 @@
     method: PUT
     headers: "{{ keycloak_repo_user_admin_headers }}"
     status_code: 204
-  when: >-
-    (
-      keycloak_outline_automation_groups.json
-      | selectattr('name', 'equalto', 'lv3-platform-admins')
-      | list
-      | length
-    ) == 0
+  when:
+    - keycloak_reconcile_outline_users | bool
+    - >-
+      (
+        keycloak_outline_automation_groups.json
+        | selectattr('name', 'equalto', 'lv3-platform-admins')
+        | list
+        | length
+      ) == 0
   register: keycloak_outline_platform_group_membership
   retries: "{{ keycloak_repo_user_reconciliation_retries }}"
   delay: "{{ keycloak_repo_user_reconciliation_delay }}"
@@ -438,13 +451,15 @@
     method: PUT
     headers: "{{ keycloak_repo_user_admin_headers }}"
     status_code: 204
-  when: >-
-    (
-      keycloak_outline_automation_groups.json
-      | selectattr('name', 'equalto', keycloak_grafana_groups.admins)
-      | list
-      | length
-    ) == 0
+  when:
+    - keycloak_reconcile_outline_users | bool
+    - >-
+      (
+        keycloak_outline_automation_groups.json
+        | selectattr('name', 'equalto', keycloak_grafana_groups.admins)
+        | list
+        | length
+      ) == 0
   register: keycloak_outline_grafana_group_membership
   retries: "{{ keycloak_repo_user_reconciliation_retries }}"
   delay: "{{ keycloak_repo_user_reconciliation_delay }}"

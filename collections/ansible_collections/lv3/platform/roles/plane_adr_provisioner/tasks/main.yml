@@ -1,0 +1,60 @@
+---
+# Plane ADR Project Provisioner
+# Automatically creates the adr-index project and API token for ADR governance
+#
+# This role:
+# 1. Waits for Plane to be ready
+# 2. Creates the adr-index project (if not present)
+# 3. Creates an API token for ADR sync
+# 4. Stores credentials for consumption by ADR governance tools
+
+- name: Ensure Plane is responding
+  ansible.builtin.uri:
+    url: "{{ plane_private_base_url }}/workspaces/"
+    method: GET
+    timeout: 30
+    status_code: [200, 401, 403]
+  register: plane_health
+  retries: 30
+  delay: 5
+  until: plane_health.status in [200, 401, 403]
+  tags:
+    - plane_adr_provisioner_health
+
+- name: Provision ADR project and API token
+  ansible.builtin.command:
+    cmd: >-
+      python3 scripts/provision_plane_adr_project.py
+      --plane-url {{ plane_private_base_url }}/api/v1
+      --workspace-slug {{ plane_workspace_slug | default('default') }}
+      --output-file {{ provisioned_plane_env_path }}
+    chdir: "{{ repo_root }}"
+  environment:
+    PLANE_ADMIN_TOKEN: "{{ plane_admin_bootstrap_token }}"
+  register: provisioner_result
+  changed_when: "'created' in provisioner_result.stdout.lower() or 'ready' in provisioner_result.stdout.lower()"
+  tags:
+    - plane_adr_provisioner
+
+- name: Display provisioning result
+  ansible.builtin.debug:
+    msg: "{{ provisioner_result.stdout_lines }}"
+  tags:
+    - plane_adr_provisioner
+    - plane_adr_provisioner_verbose
+
+- name: Verify credentials file was created
+  ansible.builtin.stat:
+    path: "{{ provisioned_plane_env_path }}"
+  register: plane_env_stat
+  failed_when: not plane_env_stat.stat.exists
+  tags:
+    - plane_adr_provisioner
+
+- name: Load provisioned credentials
+  ansible.builtin.include_vars:
+    file: "{{ provisioned_plane_env_path }}"
+    name: provisioned_plane_config
+  when: plane_env_stat.stat.exists
+  tags:
+    - plane_adr_provisioner

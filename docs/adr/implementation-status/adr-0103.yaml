@@ -1,0 +1,34 @@
+adr_number: '0103'
+title: Data Classification and Retention Policy
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0103'
+  location: git:880dd779f
+  evidence: 880dd779f Implement ADR 0103 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:48.341409'
+- marker_type: git-commit
+  adr_number: '0103'
+  location: git:bd12ef7cd
+  evidence: bd12ef7cd Cut 0.102.0 release metadata for ADR 0103
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:48.343572'
+- marker_type: git-commit
+  adr_number: '0103'
+  location: git:d5868edc7
+  evidence: d5868edc7 Implement ADR 0103 data retention automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:48.343579'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 3
+
+  Breakdown: git-commit=3
+
+  Implemented On: 2026-03-23'

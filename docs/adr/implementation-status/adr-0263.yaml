@@ -1,0 +1,107 @@
+adr_number: '0263'
+title: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:f965aa310
+  evidence: f965aa310 [release] Cut 0.177.90 for ADR 0263
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.738571'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:7ce10008d
+  evidence: 7ce10008d [merge] Rebase ADR 0263 onto current main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.738621'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:b520fb213
+  evidence: b520fb213 [serverclaw] Record ADR 0263 exact-main proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.745085'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:7fe9af77c
+  evidence: 7fe9af77c [serverclaw] Align ADR 0263 workstream metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.747998'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:35030965d
+  evidence: 35030965d Merge remote-tracking branch 'origin/main' into codex/ws-0263-mainline-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.748014'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:f1cd5b446
+  evidence: f1cd5b446 Merge remote-tracking branch 'origin/main' into codex/ws-0263-mainline-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:58.748212'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:f84cc698f
+  evidence: f84cc698f [serverclaw] Sync ADR 0263 with origin/main 0.177.86
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.748288'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:63594dd95
+  evidence: 63594dd95 [serverclaw] Sync ADR 0263 branch with latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.748650'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:40ada497a
+  evidence: 40ada497a [serverclaw] Cut ADR 0263 exact-main release candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.748891'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:dbe24b701
+  evidence: 'dbe24b701 [serverclaw] Skip sentence-transformers on ollama runtime\n\nPurpose:
+    prevent the rag-context live apply from pulling the massive CUDA Torch stack when
+    the production platform-context service uses the Ollama embedding backend\nScope:
+    platform-context runtime requirements, rendered Dockerfile logic, and focused
+    role regression coverage\nStatus: focused ADR 0263 tests and rag-context syntax-check
+    pass; live replay retry is next\nNext: rerun the exact-main rag-context live apply,
+    verify the memory substrate end to end, and record receipts plus platform-version
+    truth\nSee also: ADR 0263'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.748941'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:8c26cddb7
+  evidence: 8c26cddb7 [serverclaw] Fix ADR 0263 rebase follow-ups
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.748945'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:42552ba14
+  evidence: 42552ba14 [serverclaw] Implement ADR 0263 memory substrate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.748948'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:30a9fd7df
+  evidence: 30a9fd7df [serverclaw] Fix ADR 0263 rebase follow-ups
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.749379'
+- marker_type: git-commit
+  adr_number: '0263'
+  location: git:3a8871fb8
+  evidence: 3a8871fb8 [serverclaw] Implement ADR 0263 memory substrate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:58.749382'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=14
+
+  Implemented On: 2026-03-29'

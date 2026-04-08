@@ -1,6 +1,14 @@
 ---
 # repowise_runtime — deploy semantic code search service
 
+- name: Derive Repowise conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: repowise
+
+
 - name: Create repowise directories
   ansible.builtin.file:
     path: "{{ item }}"
@@ -58,7 +66,7 @@
     mode: "0755"
 
 - name: Start repowise service
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ repowise_base_dir }}"
     state: present
     pull: missing

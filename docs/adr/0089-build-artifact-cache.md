@@ -1,7 +1,7 @@
 # ADR 0089: Build Artifact Cache and Layer Registry
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.87.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-23

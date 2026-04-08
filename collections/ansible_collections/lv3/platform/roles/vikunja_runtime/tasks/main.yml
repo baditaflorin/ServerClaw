@@ -29,6 +29,14 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
+- name: Derive Vikunja conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: vikunja
+
+
 - name: Validate Vikunja runtime inputs
   ansible.builtin.assert:
     that:
@@ -48,47 +56,21 @@
       vikunja_runtime requires runtime paths, pinned image refs, database auth,
       the Keycloak OIDC client secret, and the NATS publish credential.
 
-- name: Ensure the Vikunja database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ vikunja_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: vikunja_database_password_local
-
-- name: Ensure the Vikunja Keycloak client secret exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ vikunja_keycloak_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: vikunja_keycloak_client_secret_local
-
-- name: Ensure the NATS publish password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ vikunja_event_nats_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: vikunja_event_nats_password_local
-
-- name: Fail if the Vikunja database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ vikunja_database_password_local_file }} is missing on the control machine.
-      Converge vikunja_postgres before deploying Vikunja.
-  when: not vikunja_database_password_local.stat.exists
-
-- name: Fail if the Vikunja Keycloak client secret is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ vikunja_keycloak_client_secret_local_file }} is missing on the control machine.
-      Converge the Keycloak runtime before deploying Vikunja.
-  when: not vikunja_keycloak_client_secret_local.stat.exists
-
-- name: Fail if the NATS publish password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ vikunja_event_nats_password_local_file }} is missing on the control machine.
-      Converge the NATS runtime before deploying the Vikunja webhook bridge.
-  when: not vikunja_event_nats_password_local.stat.exists
+- name: Check Vikunja prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ vikunja_database_password_local_file }}"
+        description: "Vikunja database password"
+        prerequisite: "Converge vikunja_postgres before deploying Vikunja"
+      - path: "{{ vikunja_keycloak_client_secret_local_file }}"
+        description: "Vikunja Keycloak client secret"
+        prerequisite: "Converge the Keycloak runtime before deploying Vikunja"
+      - path: "{{ vikunja_event_nats_password_local_file }}"
+        description: "Vikunja NATS publish password"
+        prerequisite: "Converge the NATS runtime before deploying Vikunja"
 
 - name: Ensure the Vikunja runtime packages are present
   ansible.builtin.apt:
@@ -264,6 +246,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: vikunja_compose_template
 
 - name: Pull the Vikunja images

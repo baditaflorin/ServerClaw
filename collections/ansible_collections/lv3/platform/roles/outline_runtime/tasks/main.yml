@@ -1,5 +1,12 @@
 ---
 # Purpose: Deploy Outline and seed the repo-managed living knowledge surfaces.
+- name: Derive Outline conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: outline
+
 
 - name: Validate Outline runtime inputs
   ansible.builtin.assert:
@@ -21,33 +28,18 @@
       outline_runtime requires runtime paths, image refs, database auth,
       and Keycloak OIDC credentials.
 
-- name: Check whether the Outline database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ outline_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: outline_database_password_local
-
-- name: Check whether the Outline Keycloak client secret exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ outline_keycloak_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: outline_keycloak_client_secret_local
-
-- name: Fail if the Outline database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ outline_database_password_local_file }} is missing on the control machine.
-      Converge outline_postgres before deploying Outline.
-  when: not outline_database_password_local.stat.exists
-
-- name: Fail if the Outline Keycloak client secret is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ outline_keycloak_client_secret_local_file }} is missing on the control machine.
-      Converge the Keycloak runtime before deploying Outline.
-  when: not outline_keycloak_client_secret_local.stat.exists
+- name: Check Outline prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ outline_database_password_local_file }}"
+        description: "Outline database password"
+        prerequisite: "Converge outline_postgres before deploying Outline"
+      - path: "{{ outline_keycloak_client_secret_local_file }}"
+        description: "Outline Keycloak client secret"
+        prerequisite: "Converge the Keycloak runtime before deploying Outline"
 
 - name: Ensure the Outline runtime packages are present
   ansible.builtin.apt:
@@ -76,84 +68,60 @@
     - path: "{{ outline_secret_dir }}"
       mode: "0700"
 
-- name: Generate the Outline runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ outline_secret_key_remote_file }}"
-      command: "openssl rand -hex 32"
-    - path: "{{ outline_utils_secret_remote_file }}"
-      command: "openssl rand -hex 32"
-    - path: "{{ outline_redis_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
-    - path: "{{ outline_minio_root_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
-  register: outline_secret_generation
-  changed_when: "'changed' in outline_secret_generation.stdout"
-  no_log: true
-
-- name: Read the Outline runtime secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  register: outline_secret_reads
-  loop:
-    - "{{ outline_secret_key_remote_file }}"
-    - "{{ outline_utils_secret_remote_file }}"
-    - "{{ outline_redis_password_remote_file }}"
-    - "{{ outline_minio_root_password_remote_file }}"
+- name: Manage Outline runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ outline_secret_key_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "outline-secret-key"
+      - path: "{{ outline_utils_secret_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "outline-utils-secret"
+      - path: "{{ outline_redis_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "outline-redis-password"
+      - path: "{{ outline_minio_root_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "outline-minio-root-password"
+    common_manage_service_secrets_read:
+      - "{{ outline_secret_key_remote_file }}"
+      - "{{ outline_utils_secret_remote_file }}"
+      - "{{ outline_redis_password_remote_file }}"
+      - "{{ outline_minio_root_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ outline_secret_key_local_file }}"
+        content_index: 0
+      - dest: "{{ outline_utils_secret_local_file }}"
+        content_index: 1
+      - dest: "{{ outline_redis_password_local_file }}"
+        content_index: 2
+      - dest: "{{ outline_minio_root_password_local_file }}"
+        content_index: 3
+    common_manage_service_secrets_local_artifact_dir: "{{ outline_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "outline_decoded_secrets"
   no_log: true
 
 - name: Record the Outline runtime secrets
   ansible.builtin.set_fact:
-    outline_secret_key: "{{ outline_secret_reads.results[0].content | b64decode | trim }}"
-    outline_utils_secret: "{{ outline_secret_reads.results[1].content | b64decode | trim }}"
-    outline_redis_password: "{{ outline_secret_reads.results[2].content | b64decode | trim }}"
-    outline_minio_root_password: "{{ outline_secret_reads.results[3].content | b64decode | trim }}"
+    outline_secret_key: "{{ outline_decoded_secrets[0] }}"
+    outline_utils_secret: "{{ outline_decoded_secrets[1] }}"
+    outline_redis_password: "{{ outline_decoded_secrets[2] }}"
+    outline_minio_root_password: "{{ outline_decoded_secrets[3] }}"
     outline_database_password: "{{ lookup('ansible.builtin.file', outline_database_password_local_file) | trim }}"
     outline_keycloak_client_secret: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
     outline_runtime_secret_payload:
       DATABASE_URL: >-
         postgres://{{ outline_database_user }}:{{ (lookup('ansible.builtin.file', outline_database_password_local_file) | trim) | urlencode }}@{{ outline_database_host }}:5432/{{ outline_database_name }}
       PGSSLMODE: disable
-      REDIS_URL: "redis://:{{ outline_secret_reads.results[2].content | b64decode | trim | urlencode | replace('/', '%2F') }}@redis:6379/0"
-      SECRET_KEY: "{{ outline_secret_reads.results[0].content | b64decode | trim }}"
-      UTILS_SECRET: "{{ outline_secret_reads.results[1].content | b64decode | trim }}"
+      REDIS_URL: "redis://:{{ outline_decoded_secrets[2] | urlencode | replace('/', '%2F') }}@redis:6379/0"
+      SECRET_KEY: "{{ outline_decoded_secrets[0] }}"
+      UTILS_SECRET: "{{ outline_decoded_secrets[1] }}"
       OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
-      AWS_SECRET_ACCESS_KEY: "{{ outline_secret_reads.results[3].content | b64decode | trim }}"
+      AWS_SECRET_ACCESS_KEY: "{{ outline_decoded_secrets[3] }}"
       AWS_S3_UPLOAD_BUCKET_URL: "http://minio:9000"
-  no_log: true
-
-- name: Ensure the local Outline artifact directory exists
-  ansible.builtin.file:
-    path: "{{ outline_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the Outline runtime secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ outline_secret_key_local_file }}"
-      content: "{{ outline_secret_key }}"
-    - dest: "{{ outline_utils_secret_local_file }}"
-      content: "{{ outline_utils_secret }}"
-    - dest: "{{ outline_redis_password_local_file }}"
-      content: "{{ outline_redis_password }}"
-    - dest: "{{ outline_minio_root_password_local_file }}"
-      content: "{{ outline_minio_root_password }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Outline
@@ -208,6 +176,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: outline_compose_template
 
 - name: Pull the Outline images

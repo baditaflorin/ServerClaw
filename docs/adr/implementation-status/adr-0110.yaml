@@ -1,0 +1,70 @@
+adr_number: '0110'
+title: Platform Versioning, Release Notes, and Upgrade Path
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:a5e6b14bd
+  evidence: a5e6b14bd Merge origin/main into ADR 0110 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189843'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:ecd3334c0
+  evidence: ecd3334c0 Merge ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189886'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:b8633d5b9
+  evidence: b8633d5b9 Merge ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189889'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:66654e0b2
+  evidence: 66654e0b2 Merge ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189896'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:679eed04e
+  evidence: 679eed04e Merge ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189909'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:21f72f9ab
+  evidence: 21f72f9ab Merge ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189940'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:1afe56a2f
+  evidence: 1afe56a2f Merge ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189972'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:9ea653cc4
+  evidence: 9ea653cc4 Merge ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.189999'
+- marker_type: git-commit
+  adr_number: '0110'
+  location: git:2e2356dd7
+  evidence: 2e2356dd7 Implement ADR 0110 release management
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.190006'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=9
+
+  Implemented On: 2026-03-23'

@@ -1,0 +1,167 @@
+adr_number: '0346'
+title: "\u2014 Repowise: local semantic code search over the git repo"
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:b3e8fd1b6
+  evidence: b3e8fd1b6 [repowise] Add service catalog entry for semantic code search
+    (ADR 0346)
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.429396'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:cca47c4f2
+  evidence: cca47c4f2 [adr-0346] Add repowise to nginx edge publication topology
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.429492'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:bc7aad60a
+  evidence: "bc7aad60a [release] Bump to 0.178.19 \u2014 adds repowise semantic code\
+    \ search (ADR 0346)"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.429650'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:b9d7049a2
+  evidence: "b9d7049a2 [release] Bump to 0.178.16 \u2014 ADR 0346 Outline wiki automation"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.430164'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:cefbc9e76
+  evidence: "cefbc9e76 [adr-0346] Outline wiki automation \u2014 shared client, agent\
+    \ CLI, collection hooks"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430179'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:15cf320f0
+  evidence: "15cf320f0 [adr-0346] Outline wiki automation \u2014 shared client, agent\
+    \ CLI, collection hooks"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430229'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:1dc944e66
+  evidence: 1dc944e66 [adr-0346-0347] PostgreSQL domain split and docker-runtime workload
+    split
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430437'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:e941cd1e5
+  evidence: e941cd1e5 [adr-0346] Log gate bypass receipt for agent-standards fix push
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430452'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:979885529
+  evidence: 979885529 [adr-0346] Fix agent-standards validation failures
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430456'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:15b83e010
+  evidence: 15b83e010 [adr-0346] Add service-capability-catalog.json to ownership
+    manifest
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430461'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:efa723069
+  evidence: efa723069 [adr-0346] Log gate bypass receipt for build-server-unreachable
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430743'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:d329d1427
+  evidence: d329d1427 [adr-0346] Fix generator keycloak port extraction and update
+    to v0.178.7
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430749'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:aa9365ab9
+  evidence: aa9365ab9 [adr-0346] Complete generated artifact registration and ownership
+    manifest
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430754'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:3ded773bb
+  evidence: 3ded773bb [adr-0346] Fix adr-index contract version (v1 not v2)
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430759'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:521c1a41b
+  evidence: 521c1a41b [adr-0346] Fix workstream surface ownership and platform manifest
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430763'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:ff75ca77b
+  evidence: ff75ca77b [adr-0346] Replay canonical truth for 0.178.4
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430767'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:7195253a2
+  evidence: 7195253a2 [adr-0346] Fix validation gate failures
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430771'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:d276131c7
+  evidence: d276131c7 [adr-0346] Register workstream and update registry
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430775'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:2d15eca4e
+  evidence: "2d15eca4e [adr-0346] Centralized port registry \u2014 eliminate hardcoded\
+    \ platform ports"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.430780'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:1da65d42e
+  evidence: 1da65d42e [validation] Refresh ADR 0336 evidence on ADR 0346 mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:35.431365'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:61900f1de
+  evidence: 61900f1de [adr-0346] Reconcile exact-main generators and ownership
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.431435'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:3385d1cb9
+  evidence: 3385d1cb9 [adr-0346] Integrate exact-main resilience truth
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.431440'
+- marker_type: git-commit
+  adr_number: '0346'
+  location: git:aa6ac693f
+  evidence: aa6ac693f [adr-0346] Record ws-0332 live-apply evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:35.431450'
+- marker_type: playbook
+  adr_number: '0346'
+  location: playbooks/runtime-apps-pool.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:35.469580'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 24
+
+  Breakdown: git-commit=23, playbook=1'

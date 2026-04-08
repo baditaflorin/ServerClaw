@@ -3402,8 +3402,8 @@ platform_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
-    private_ip: 10.10.10.92
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -3423,7 +3423,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.92:8091
+      internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -3928,6 +3928,8 @@ platform_session_authority:
   shared_proxy_cleanup_url: https://ops.lv3.org/.well-known/lv3/session/proxy-logout
   shared_logged_out_path: /.well-known/lv3/session/logged-out
   shared_logged_out_url: https://ops.lv3.org/.well-known/lv3/session/logged-out
+  cookie_name: "_lv3_ops_portal_proxy"
+  cookie_domain: ".lv3.org"
 platform_dns_records:
   public: &id001
     - name: '@'
@@ -5916,8 +5918,8 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
-    private_ip: 10.10.10.92
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -5937,7 +5939,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8091
     urls:
       public: https://sso.lv3.org
-      internal: http://10.10.10.92:8091
+      internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
     deployment_surface: playbooks/keycloak.yml
@@ -6522,7 +6524,7 @@ matrix_synapse_controller_url: http://100.64.0.1:8015
 matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
-gitea_root_url: http://100.64.0.1:3009
+gitea_root_url: https://git.lv3.org
 gitea_private_base_url: http://10.10.10.92:3003
 gitea_controller_url: http://100.64.0.1:3009
 minio_public_url: https://minio.lv3.org
@@ -6639,3 +6641,59 @@ tika_port: 9998
 tesseract_ocr_port: 3008
 keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587
+
+# ---------------------------------------------------------------------------
+# Neko multi-instance browser sessions
+# ---------------------------------------------------------------------------
+# Each entry provisions an isolated browser container on runtime-comms-lv3
+# and a Keycloak user in the lv3 realm. Removing an entry destroys the
+# container and the Keycloak user on the next converge.
+#
+# Key         = instance name (container name: neko-<key>, data dir: /opt/neko/instances/<key>)
+# email       = Keycloak user email and routing key for NGINX → container mapping
+# port        = TCP port the Neko signalling server binds on (must be unique per instance)
+# udp_range   = Ephemeral UDP port range for WebRTC media (must be unique per instance)
+#
+# Example:
+#   neko_instances:
+#     florin:
+#       email: florin@lv3.org
+#       port: 8080
+#       udp_range: "50000-52999"
+#     alice:
+#       email: alice@lv3.org
+#       port: 8081
+#       udp_range: "53000-55999"
+neko_instances:
+  baditaflorin:
+    email: baditaflorin@gmail.com
+    port: 8082
+    udp_range: "52000-52999"
+  baditaflorin_tmp002:
+    email: baditaflorin+tmp002@gmail.com
+    port: 8081
+    udp_range: "51000-51999"
+  browser_smoke:
+    email: browser.smoke@lv3.org
+    port: 8083
+    udp_range: "53000-53999"
+  demo-20260327-0430:
+    email: demo-20260327-0430@lv3.org
+    port: 8084
+    udp_range: "54000-54999"
+  florin:
+    email: busui.matei1994@gmail.com
+    port: 8080
+    udp_range: "50000-50999"
+  florin2:
+    email: florin@badita.org
+    port: 8085
+    udp_range: "55000-55999"
+  outline_automation:
+    email: outline.automation@lv3.org
+    port: 8086
+    udp_range: "56000-56999"
+  test:
+    email: test@lv3.org
+    port: 8087
+    udp_range: "57000-57999"

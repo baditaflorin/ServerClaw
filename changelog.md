@@ -12,19 +12,33 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- fix(cert-validator): TLS 1.3 support via uv run python3, DER cert parsing for internal CA (step-ca), correct fqdn/target field mapping, warn_hours policy support for short-lived certs (OpenBao), OpenBao renewal script fixed (72h→24h, deduplicated SAN)
+- ws-0377 LibreChat OIDC SSO integration with Keycloak; adds OpenAI and Anthropic API endpoint support; enables session token management and dynamic model fetching for serverless LLM integration
+- fix: docker_compose_v2 module in repowise_runtime (community.docker v4.0.0 removed docker_compose v1); Keycloak protocolMapper field name correction; Ansible user group variable in Plane secret tasks; missing Semaphore OpenBao compose_macros template; workstreams cleanup (move completed ADR 0346, 0254, 0375, and ops items to done)
+- adds ADR 0364 native build server gate execution — LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions
+- ADR 0376 identity-core watchdog: 15s OIDC discovery probes + auto-restart on 2 failures (6/hr rate limit); KC_CACHE=local prevents stale JGroups TCP loops; oauth2-proxy watchdog on nginx-lv3 restarts proxy on unresponsive state
+- ADR 0346 repowise semantic search: local code search using Ollama nomic-embed-text + Qdrant; repowise_corpus.py chunks code by language, repowise_index.py embeds and stores, repowise_service.py serves FastAPI /search with filters
+- ADR 0317/0318 operator provisioning: Keycloak direct-API provisioning via SSH proxy (ADR 0317); provision_operator.py v2 with Headscale + step-ca fingerprint in single onboarding email (ADR 0318)
+- LiteLLM Proxy + LibreChat deployed to production, replacing One API + Open WebUI; deployment fixes for OpenBao, Prisma, Docker port conflicts, and LibreChat config schema
+- ADR 0380 updated to Implemented status with multi-instance amendment; neko_tool.py CLI for programmatic instance management (add/remove/check/validate, auto-assigns ports and UDP ranges, JSON output for automation)
 
-- fix: Gitea OAuth2 login — ROOT_URL changed to Tailscale access URL (http://100.64.0.1:3009) to fix OAuth2 state cookie mismatch; remove invalid `groups` scope from OPENID_CONNECT_SCOPES in ctmpl template
-- Fixed browser-runner service accessibility — added firewall rules to open port 8096 on docker-runtime-lv3 from management network, all guests, and Docker bridge networks; service now accessible from headscale at http://10.10.10.20:8096/
-- ADR 0377/0378: Wire platform knowledge and RAG into Open WebUI — enable Ollama API, Qdrant vector DB backend, nomic-embed-text embeddings, ServerClaw system prompt injection, expose Qdrant port 6333 on host for cross-compose access
-- ADR 0376: Credential isolation and agent safety — .gitignore hardening for .local symlink blind spot, pre-commit guard to block .local from index, recovery runbook (recover_local_secrets.sh), agent credential access contract, bootstrap key rotation procedure, server migration security checklist
-- wire ADR 0347-0357 agent coordination patterns into all discovery surfaces: AGENTS.md coordination section with code examples, config/integrations/ in .config-locations.yaml, validate_integrations.py + check_provenance_headers.py in scripts discovery, regenerated onboarding packs (service-catalog, automation, fork-bootstrap) now reference all 6 implemented ADRs
-- fix Woodpecker OAuth login: add nginx edge + TLS for git.lv3.org, fix WOODPECKER_GITEA_URL to use private IP (cross-host LAN), remove dead gitea_runtime_default external network from Woodpecker compose
+- Neko multi-instance browser sessions: each user gets an isolated Neko container keyed by Keycloak email; adding/removing entries in neko_instances auto-provisions/deprovisions the container and Keycloak user; NGINX routes authenticated users to their container via email map; single-instance containers removed in favour of the loop-based neko_runtime role
 
-- AW-22 + AW-23 + provision-outline-api-token: generic _resolve_service_auth() helper (ADR 0362 gap); Outline agent tools — list-outline-collections, search-outline-documents, get-outline-document, create-outline-document (ADR 0364); provision-outline-api-token agent tool for headless credential rotation via DB
+- fix ops.lv3.org auth loop — expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused "Code not valid" on every login attempt
 
-- ADR triage 0347-0358: implement 6 CPU-only ADRs — Integration Contract Registry (config/integrations/, validate_integrations.py), Nginx Fragment Config role (write-validate-reload), File-Domain Locking + Apply Semaphore (platform/locking/file_domain.py extending ADR 0153), Workstream Apply Receipts state machine (platform/workstream_receipts.py), Change Provenance Tagging (Jinja2 macro + check_provenance_headers.py); mark 3 ADRs Superseded (LLM-heavy: 0348, 0352, 0356) and 3 Deferred (0349, 0354, 0358)
-- ADR 0375: Certificate validation and concordance enforcement — automated SSL checking for all edge-published domains, pre-push gate integration, Uptime Kuma monitors, and fix playbook for NGINX edge certificate hostname mismatches (ci.lv3.org, bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org, ntfy.lv3.org); certificate_validator.py now uses certificate-catalog.json (ADR 0101 canonical) as primary source; pre-push gate ADR ref corrected to 0375; validate-certificates Makefile target hooked into configure-edge-publication; back-references added to ADR 0101 and ADR 0273.
+- add LiteLLM Proxy + LibreChat to replace One API + Open WebUI — portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar
+
+- deploy Neko remote desktop at browser.lv3.org (ADR 0380) — dedicated runtime-comms-lv3 VM (VMID 121, 10.10.10.21), Chromium over WebRTC with host-mode networking for UDP media (50000-60000), TLS cert via certbot, published through nginx_edge_publication role with 3600s proxy timeout for long-lived streaming sessions
+
+- ADR governance system: pre-commit hook validates ADR status transitions (requires evidence for upgrades, reason for downgrades), Plane integration syncs 406 ADRs for team visibility, quarterly audit detects implementation drift automatically
+
+- fix redirect loop: stale session reset now redirects to Keycloak logout (kills Keycloak session + clears sso.lv3.org cookie) instead of /oauth2/sign_in, preventing Keycloak from auto-logging back in with a poisoned session
+
+- NGINX auto-clears stale session cookie on oauth2-proxy 500 at /oauth2/callback — users no longer see 500 errors or need to manually clear cookies after Keycloak restarts
+
+- made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout
+- fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults
+- deploy serverclaw:latest with baked-in system prompt as the default named model in chat.lv3.org; fix derive_service_defaults guard (use open_webui_site_dir is not defined), fix Ollama api/create URL for remote Ollama instance, add keycloak_local_artifact_dir fallback default, migrate woodpecker_runtime defaults to ADR 0373 pattern
+
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network
 - removed dead Plausible OIDC config (OIDC_DISCOVERY_URI, OIDC_CLIENT_SECRET, extra_hosts, /login redirect) — Plausible CE v3.x dropped community OIDC; auth is now exclusively via oauth2-proxy at the NGINX edge
@@ -33,24 +47,24 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.32 release notes](docs/release-notes/0.178.32.md)
+- [0.178.60 release notes](docs/release-notes/0.178.60.md)
 
 ## Previous Releases
 
-- [0.178.31 release notes](docs/release-notes/0.178.31.md)
-- [0.178.30 release notes](docs/release-notes/0.178.30.md)
-- [0.178.29 release notes](docs/release-notes/0.178.29.md)
-- [0.178.28 release notes](docs/release-notes/0.178.28.md)
-- [0.178.27 release notes](docs/release-notes/0.178.27.md)
-- [0.178.26 release notes](docs/release-notes/0.178.26.md)
-- [0.178.25 release notes](docs/release-notes/0.178.25.md)
-- [0.178.24 release notes](docs/release-notes/0.178.24.md)
-- [0.178.23 release notes](docs/release-notes/0.178.23.md)
-- [0.178.22 release notes](docs/release-notes/0.178.22.md)
-- [0.178.21 release notes](docs/release-notes/0.178.21.md)
-- [0.178.20 release notes](docs/release-notes/0.178.20.md)
+- [0.178.59 release notes](docs/release-notes/0.178.59.md)
+- [0.178.58 release notes](docs/release-notes/0.178.58.md)
+- [0.178.57 release notes](docs/release-notes/0.178.57.md)
+- [0.178.56 release notes](docs/release-notes/0.178.56.md)
+- [0.178.55 release notes](docs/release-notes/0.178.55.md)
+- [0.178.54 release notes](docs/release-notes/0.178.54.md)
+- [0.178.53 release notes](docs/release-notes/0.178.53.md)
+- [0.178.52 release notes](docs/release-notes/0.178.52.md)
+- [0.178.51 release notes](docs/release-notes/0.178.51.md)
+- [0.178.50 release notes](docs/release-notes/0.178.50.md)
+- [0.178.49 release notes](docs/release-notes/0.178.49.md)
+- [0.178.48 release notes](docs/release-notes/0.178.48.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (371 releases)](docs/release-notes/index/2026.md)
+- [2026 (396 releases)](docs/release-notes/index/2026.md)

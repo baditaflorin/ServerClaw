@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 ollama_runtime_site_dir: /opt/ollama
 ollama_runtime_data_dir: /data/ollama
 ollama_runtime_model_dir: "{{ ollama_runtime_data_dir }}/models"
@@ -9,7 +12,7 @@ ollama_runtime_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
 ollama_runtime_port: "{{ platform_service_topology | platform_service_port('ollama', 'internal') }}"
 ollama_runtime_base_url: "{{ platform_service_topology | platform_service_url('ollama', 'internal') }}"
 ollama_runtime_model_catalog_path: "{{ inventory_dir | dirname }}/config/ollama-models.yaml"
-ollama_runtime_default_model: llama3.2:3b
+ollama_runtime_default_model: gemma4:e4b
 ollama_runtime_image_pull_retries: 3
 ollama_runtime_image_pull_delay_seconds: 15
 ollama_runtime_memory_limit: 8g

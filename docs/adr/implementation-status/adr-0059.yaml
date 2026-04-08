@@ -1,0 +1,58 @@
+adr_number: 0059
+title: ntopng For Private Network Flow Visibility
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0059
+  location: git:311c8892d
+  evidence: 311c8892d Refresh ADR 0059 receipt for 0.53 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.427389'
+- marker_type: git-commit
+  adr_number: 0059
+  location: git:9fc69d85c
+  evidence: 9fc69d85c Merge latest main into ADR 0059 branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.427422'
+- marker_type: git-commit
+  adr_number: 0059
+  location: git:d14892546
+  evidence: d14892546 Refresh ADR 0059 receipt after main merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.427432'
+- marker_type: git-commit
+  adr_number: 0059
+  location: git:f73dd76d2
+  evidence: f73dd76d2 Finalize ADR 0059 release metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.427439'
+- marker_type: git-commit
+  adr_number: 0059
+  location: git:f308e5113
+  evidence: f308e5113 Merge origin/main into ADR 0059 workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.427456'
+- marker_type: git-commit
+  adr_number: 0059
+  location: git:5455ba648
+  evidence: 5455ba648 Record ADR 0059 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.427477'
+- marker_type: git-commit
+  adr_number: 0059
+  location: git:11581a5b2
+  evidence: 11581a5b2 Implement ADR 0059 ntopng visibility
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:30.427487'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-22'

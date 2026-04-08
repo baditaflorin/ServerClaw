@@ -21,127 +21,25 @@
 # Related ADRs: 0021, 0042, 0063, 0077, 0292
 # Related Runbooks: docs/runbooks/configure-superset.md
 #
+# Invocation: ansible-playbook playbooks/superset.yml -e @playbooks/vars/superset.yml -e env=production
+#
 # Author: LV3 Platform
-# Last Updated: 2026-03-31
+# Last Updated: 2026-04-06
 
-- name: Ensure Hetzner DNS publication for Superset
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-    subdomain_fqdn: bi.lv3.org
+# --- Standard plays (driven by vars/superset.yml) ---
 
-  tasks:
-    - name: Load controller defaults
-      ansible.builtin.include_vars:
-        file: "{{ inventory_defaults_path }}"
+- import_playbook: _includes/dns_publication.yml
+  when: service_needs_dns | default(false)
 
-    - name: Load the subdomain catalog
-      ansible.builtin.include_vars:
-        file: "{{ subdomain_catalog_path }}"
-        name: subdomain_catalog
+- import_playbook: _includes/postgres_preparation.yml
+  when: service_needs_postgres | default(false)
 
-    - name: Select the Superset subdomain entry
-      ansible.builtin.set_fact:
-        selected_subdomain: >-
-          {{
-            (
-              subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', subdomain_fqdn)
-              | list
-              | first
-            ) | default({})
-          }}
+- import_playbook: _includes/docker_runtime_converge.yml
 
-    - name: Assert the Superset subdomain is catalogued
-      ansible.builtin.assert:
-        that:
-          - selected_subdomain != {}
-          - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "bi.lv3.org must exist in config/subdomain-catalog.json before live apply."
+- import_playbook: _includes/nginx_edge_publication.yml
+  when: service_needs_nginx_edge | default(false)
 
-    - name: Derive the managed Hetzner record name
-      ansible.builtin.set_fact:
-        selected_subdomain_record_name: >-
-          {{
-            '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
-            else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
-            )
-          }}
-
-    - name: Converge the Superset Hetzner DNS record
-      ansible.builtin.include_role:
-        name: lv3.platform.hetzner_dns_record
-      vars:
-        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
-        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
-        hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
-        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
-
-- name: Prepare PostgreSQL for Superset
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
-  become: true
-  gather_facts: true
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.postgres_vm
-    - role: lv3.platform.superset_postgres
-
-- name: Converge Superset on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
-  become: true
-  gather_facts: true
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_audit_action: playbook.start.superset
-        playbook_execution_audit_target: superset
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
-    - role: lv3.platform.superset_runtime
-
-- name: Publish Superset through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
-  become: true
-  gather_facts: true
-  vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.nginx_edge_publication
+# --- Superset-specific plays ---
 
 - name: Verify the public Superset publication
   hosts: localhost

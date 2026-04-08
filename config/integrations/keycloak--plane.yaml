@@ -1,0 +1,47 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0353 role=keycloak_runtime + plane_runtime
+schema_version: "1.0.0"
+contract_id: keycloak--plane
+consumer: plane_runtime
+provider: keycloak_runtime
+integration_type: oidc
+adr: "0193"
+
+connection:
+  oidc_provider_url_var: keycloak_service_topology.public_base_url
+  oidc_realm: lv3
+  client_id: lv3-plane-oidc
+  client_secret_var: plane_oidc_client_secret
+
+environment_variables:
+  OIDC_SERVER_URL: "{{ keycloak_service_topology.public_base_url }}/realms/lv3"
+  OIDC_CLIENT_ID: "lv3-plane-oidc"
+  OIDC_CLIENT_SECRET: "{{ plane_oidc_client_secret }}"
+  OIDC_DISCOVERY_URL: "{{ keycloak_service_topology.public_base_url }}/realms/lv3/.well-known/openid-configuration"
+  OIDC_CALLBACK_URL: "{{ plane_service_topology.public_base_url }}/auth/callback/keycloak"
+  ENABLE_OIDC: "true"
+  OIDC_ENABLE_AUTO_SIGNUP: "true"
+  OIDC_SCOPES: "openid profile email"
+
+secrets:
+  - path: openbao/services/plane/oidc-client-secret
+    env_var: OIDC_CLIENT_SECRET
+
+health_check:
+  endpoint: "{{ keycloak_service_topology.public_base_url }}/realms/lv3/.well-known/openid-configuration"
+  expected_status: 200
+  timeout_seconds: 5
+
+pre_flight:
+  - check: keycloak_realm_exists
+    realm: lv3
+  - check: keycloak_client_exists
+    client_id: lv3-plane-oidc
+  - check: plane_deployment_ready
+    service_name: plane
+
+post_deployment:
+  - action: notify
+    service: plane
+    message: "Keycloak OIDC integration configured. Users can now login via SSO."

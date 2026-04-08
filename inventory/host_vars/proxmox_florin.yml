@@ -126,6 +126,7 @@ platform_port_assignments:
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
   keycloak_internal_http_port: 8091
+  neko_runtime_port: 8080
 monitoring_prometheus_listen_address: 0.0.0.0:9090
 openbao_http_extra_bind_addresses:
   - "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
@@ -143,6 +144,7 @@ proxmox_public_ingress_tcp_ports:
   - 587
   - 993
   - 7881
+  - 8080
 proxmox_public_ingress_tcp_forwards:
   - listen_port: 25
     target_host: 10.10.10.92
@@ -162,10 +164,19 @@ proxmox_public_ingress_tcp_forwards:
   - listen_port: 7881
     target_host: 10.10.10.20
     target_port: 7881
+  - listen_port: 8080
+    target_host: 10.10.10.41
+    target_port: 8080
+    description: Neko remote desktop signalling (proxied via NGINX edge as browser.lv3.org)
 proxmox_public_ingress_udp_forwards:
   - listen_port: 7882
     target_host: 10.10.10.20
     target_port: 7882
+  - listen_port_range: 50000-60000
+    target_host: 10.10.10.41
+    target_port_start: 50000
+    target_port_range: 50000-60000
+    description: Neko WebRTC media streams (UDP RTP/STUN for browser.lv3.org)
 platform_failure_domains:
   - id: host:proxmox_florin
     kind: host
@@ -1318,10 +1329,11 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 3003
             - 8083
             - 8091
             - 8095
-          description: Shared edge access to the API gateway, Keycloak, and Harbor
+          description: Shared edge access to the API gateway, Keycloak, Harbor, and Gitea
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -1754,6 +1766,17 @@ network_policy:
           ports:
             - 9644
           description: Redpanda admin API from monitoring
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8080
+          description: Neko signalling proxy from NGINX edge (browser.lv3.org)
+        - source: public
+          protocol: udp
+          ports:
+            - 50000
+            - 60000
+          description: Neko WebRTC media streams (UDP RTP/STUN) from public internet
     runtime-apps-lv3:
       allowed_inbound:
         - source: management

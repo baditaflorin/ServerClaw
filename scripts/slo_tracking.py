@@ -14,6 +14,12 @@ from typing import Any, Callable
 
 from controller_automation_toolkit import PYYAML_INSTALL_HINT, load_json, load_yaml, repo_path
 
+import sys
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
+
 
 SLO_CATALOG_PATH = repo_path("config", "slo-catalog.json")
 PROMETHEUS_RULES_PATH = repo_path("config", "prometheus", "rules", "slo_rules.yml")
@@ -31,32 +37,6 @@ SLO_STATUS_BUDGET_CRITICAL = 0.10
 K6_WARNING_THRESHOLD_PCT = 20.0
 SLO_INDICATORS = {"availability", "latency"}
 SLO_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 0) -> int:
-    if not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_number(value: Any, path: str, *, minimum: float | None = None, maximum: float | None = None) -> float:
@@ -130,7 +110,7 @@ def validate_slo_catalog(
         seen_pairs.add(pair)
 
         require_number(slo.get("objective_percent"), f"{path}.objective_percent", minimum=0.01, maximum=99.999)
-        require_int(slo.get("window_days"), f"{path}.window_days", 1)
+        require_int(slo.get("window_days"), f"{path}.window_days", minimum=1)
         target_url = require_str(slo.get("target_url"), f"{path}.target_url")
         if not (target_url.startswith("http://") or target_url.startswith("https://")):
             raise ValueError(f"{path}.target_url must start with http:// or https://")

@@ -1,0 +1,64 @@
+adr_number: '0303'
+title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0303'
+  location: git:24214be73
+  evidence: 24214be73 [pgaudit] Finalize ADR 0303 mainline release and evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.026047'
+- marker_type: git-commit
+  adr_number: '0303'
+  location: git:99b51ba15
+  evidence: 99b51ba15 Merge origin/main into codex/ws-0303-main-final
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:17.026091'
+- marker_type: git-commit
+  adr_number: '0303'
+  location: git:6f64b2efd
+  evidence: 6f64b2efd [pgaudit] Finalize ADR 0303 mainline live-apply proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.026096'
+- marker_type: git-commit
+  adr_number: '0303'
+  location: git:f2af947c0
+  evidence: f2af947c0 [merge] Integrate latest origin/main into ADR 0303 final branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.026125'
+- marker_type: git-commit
+  adr_number: '0303'
+  location: git:8e71f80e1
+  evidence: 8e71f80e1 Merge remote-tracking branch 'origin/main' into codex/ws-0303-main-final
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:17.026145'
+- marker_type: git-commit
+  adr_number: '0303'
+  location: git:bf15ec601
+  evidence: bf15ec601 [postgres] Implement ADR 0303 audit pipeline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.026311'
+- marker_type: git-commit
+  adr_number: '0303'
+  location: git:ceeab3664
+  evidence: ceeab3664 [postgres] Implement ADR 0303 audit pipeline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:17.026493'
+- marker_type: config-file
+  adr_number: '0303'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:17.340344'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=7, config-file=1
+
+  Implemented On: 2026-03-31'

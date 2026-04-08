@@ -1,0 +1,131 @@
+adr_number: '0235'
+title: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:7e9dcac82
+  evidence: 7e9dcac82 [ops-portal] Record ws-0235 mainline live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.667990'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:7fd2198e8
+  evidence: 7fd2198e8 Merge origin/main into codex/ws-0235-main-merge-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668032'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:a2cfad819
+  evidence: a2cfad819 [ops-portal] Stage ws-0235 mainline integration candidate
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668042'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:0219380d7
+  evidence: 0219380d7 Merge remote-tracking branch 'origin/main' into codex/ws-0235-main-merge-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668070'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:7d072e506
+  evidence: 7d072e506 Merge remote-tracking branch 'origin/main' into codex/ws-0235-main-merge-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668118'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:14ba756e4
+  evidence: 14ba756e4 Merge remote-tracking branch 'origin/main' into codex/ws-0235-main-merge-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668224'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:1ade462e3
+  evidence: 1ade462e3 [ops-portal] Merge ADR 0235 onto the latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.668299'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:993f15f97
+  evidence: 993f15f97 Merge remote-tracking branch 'origin/codex/ws-0235-live-apply'
+    into codex/ws-0235-main-merge-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668363'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:f65da9114
+  evidence: f65da9114 [release] Refresh generated artifacts for ws-0235
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668372'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:607e2650e
+  evidence: 607e2650e [ops-portal] Record ADR 0235 live apply state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.668412'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:de00cb591
+  evidence: de00cb591 Merge remote-tracking branch 'origin/main' into codex/ws-0235-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668423'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:70bb9978d
+  evidence: 70bb9978d [merge] Refresh ws-0235 worktree onto newer origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668458'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:182a3d3f3
+  evidence: 182a3d3f3 [merge] Refresh ws-0235 worktree onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668482'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:a1792efb3
+  evidence: a1792efb3 Merge remote-tracking branch 'origin/main' into codex/ws-0235-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668626'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:c60e13286
+  evidence: c60e13286 Merge remote-tracking branch 'origin/main' into codex/ws-0235-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668657'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:304897f20
+  evidence: 304897f20 Merge remote-tracking branch 'origin/main' into codex/ws-0235-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668800'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:271495d13
+  evidence: 271495d13 Merge remote-tracking branch 'origin/main' into codex/ws-0235-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.668926'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:b409b0782
+  evidence: b409b0782 [repo] Refresh canonical truth for ADR 0235 candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:45.669034'
+- marker_type: git-commit
+  adr_number: '0235'
+  location: git:62c2bcc25
+  evidence: 62c2bcc25 Merge branch 'codex/ws-0235-live-apply' into codex/ws-0235-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:45.669040'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 19
+
+  Breakdown: git-commit=19
+
+  Implemented On: 2026-03-29'

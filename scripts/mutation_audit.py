@@ -20,6 +20,8 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
+from validation_toolkit import require_mapping, require_str
+
 
 REPO_ROOT: Final[Path] = repo_path()
 if str(REPO_ROOT) not in sys.path:
@@ -57,20 +59,6 @@ ALLOWED_SURFACES: Final[set[str]] = {
 }
 ALLOWED_OUTCOMES: Final[set[str]] = {"success", "failure", "rejected"}
 ACTION_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_str(value: Any, path: str, *, allow_empty: bool = False) -> str:
-    if not isinstance(value, str):
-        raise ValueError(f"{path} must be a string")
-    if not allow_empty and not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def require_enum(value: Any, path: str, allowed: set[str]) -> str:

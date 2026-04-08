@@ -1,43 +1,23 @@
 ---
-- name: Verify the Homepage HTTP surface
-  ansible.builtin.uri:
-    url: "{{ homepage_internal_url }}"
-    method: GET
-    status_code: 200
-  register: homepage_verify_http
-  retries: 24
-  delay: 5
-  until: homepage_verify_http.status == 200
-  changed_when: false
-
-- name: Verify Homepage publishes the rendered services catalog
-  ansible.builtin.uri:
-    url: "{{ homepage_internal_url }}/api/services"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: homepage_verify_services
-  changed_when: false
-
-- name: Assert Homepage rendered the expected services catalog
-  ansible.builtin.assert:
-    that:
-      - "'Homepage' in homepage_verify_services.content"
-      - "'https://home.lv3.org' in homepage_verify_services.content"
-    fail_msg: "Homepage started, but the repo-managed services catalog was not rendered."
-
-- name: Verify Homepage publishes the rendered bookmarks catalog
-  ansible.builtin.uri:
-    url: "{{ homepage_internal_url }}/api/bookmarks"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: homepage_verify_bookmarks
-  changed_when: false
-
-- name: Assert Homepage rendered the expected bookmarks catalog
-  ansible.builtin.assert:
-    that:
-      - "'Ops Portal' in homepage_verify_bookmarks.content"
-      - "'https://ops.lv3.org' in homepage_verify_bookmarks.content"
-    fail_msg: "Homepage started, but the repo-managed bookmarks catalog was not rendered."
+# Dependencies: ADR 0371.
+- name: Verify the Homepage runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: homepage
+    common_verify_port: "{{ homepage_port }}"
+    common_verify_health_url: "{{ homepage_internal_url }}"
+    common_verify_health_retries: 24
+    common_verify_health_delay: 5
+    common_verify_extra_endpoints:
+      - url: "{{ homepage_internal_url }}/api/services"
+        assertions:
+          - "'Homepage' in common_verify_extra_response.content"
+          - "'https://home.lv3.org' in common_verify_extra_response.content"
+        assertion_msg: "Homepage started, but the repo-managed services catalog was not rendered."
+      - url: "{{ homepage_internal_url }}/api/bookmarks"
+        assertions:
+          - "'Ops Portal' in common_verify_extra_response.content"
+          - "'https://ops.lv3.org' in common_verify_extra_response.content"
+        assertion_msg: "Homepage started, but the repo-managed bookmarks catalog was not rendered."

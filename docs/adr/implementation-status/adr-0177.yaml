@@ -1,0 +1,28 @@
+adr_number: '0177'
+title: Run Namespace Partitioning for Parallel Tooling
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0177'
+  location: git:cdccd22e1
+  evidence: cdccd22e1 Release 0.177.2 for ADR 0177 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:21.897825'
+- marker_type: git-commit
+  adr_number: '0177'
+  location: git:1bdcf7da1
+  evidence: 1bdcf7da1 Implement ADR 0177 run namespace partitioning
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:21.897870'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-03-27'

@@ -1,0 +1,88 @@
+adr_number: 0109
+title: Public Status Page
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:67b53677a
+  evidence: 67b53677a Record gate bypass for ADR 0109 completion push
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.818996'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:0ea04a276
+  evidence: 0ea04a276 Make Uptime Robot optional for ADR 0109
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819030'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:c7945d09c
+  evidence: c7945d09c Expand ADR 0109 to 34 public monitors
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819250'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:1b036c489
+  evidence: 1b036c489 Record ADR 0109 push gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819415'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:6bd13dc53
+  evidence: 6bd13dc53 Expand ADR 0109 public status monitors
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819444'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:5cc2252be
+  evidence: 5cc2252be Record ADR 0109 hairpin gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819688'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:b69cdf376
+  evidence: b69cdf376 Record ADR 0109 hairpin live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819706'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:bd78efcec
+  evidence: bd78efcec Fix ADR 0109 status-page hairpin ingress
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819714'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:cd8972b72
+  evidence: cd8972b72 Record ADR 0109 gate bypass
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819848'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:a31eb1b3e
+  evidence: a31eb1b3e Record ADR 0109 live apply status
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.819854'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:caa3fa842
+  evidence: caa3fa842 Implement ADR 0109 public status page
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.825339'
+- marker_type: git-commit
+  adr_number: 0109
+  location: git:7e1b4cff8
+  evidence: 7e1b4cff8 Implement ADR 0109 public status page
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:50.825509'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-03-23'

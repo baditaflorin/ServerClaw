@@ -341,6 +341,8 @@ validate_ansible_syntax() {
 validate_generated_vars() {
   echo "Generated platform vars validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
+  # ADR 0374 Phase 1: validate hairpin NAT declarations
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_cross_cutting_artifacts.py" --check --only hairpin
 }
 
 validate_yaml() {

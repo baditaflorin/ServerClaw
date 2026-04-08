@@ -1,9 +1,8 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 mailpit_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('mailpit') }}"
-mailpit_site_dir: /opt/dev-tools/mailpit
-mailpit_compose_file: "{{ mailpit_site_dir }}/docker-compose.yml"
-mailpit_container_name: mailpit
-mailpit_image: "{{ container_image_catalog.images.mailpit_runtime.ref }}"
 mailpit_http_port: "{{ mailpit_service_topology.ports.internal }}"
 mailpit_smtp_port: "{{ mailpit_service_topology.ports.smtp }}"
 mailpit_bind_host: "{{ ansible_host }}"

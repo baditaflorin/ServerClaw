@@ -1,0 +1,5 @@
+---
+# Service-Level Neko Deployment Wrapper
+# Imports the main neko.yml playbook
+
+- import_playbook: ../neko.yml

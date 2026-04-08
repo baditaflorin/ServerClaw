@@ -1,0 +1,44 @@
+adr_number: '0061'
+title: GlitchTip For Application Exceptions And Task Failures
+canonical_status: Deprecated
+canonical_implementation_status: Not Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0061'
+  location: git:aa5cbd48d
+  evidence: "aa5cbd48d [release] Bump to 0.178.38 \u2014 ADR 0058/0061 status corrections"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:31.292151'
+- marker_type: git-commit
+  adr_number: '0061'
+  location: git:512db76c9
+  evidence: "512db76c9 [merge] WS-0400 \u2014 ADR 0058/0061 marked Superseded"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:31.292265'
+- marker_type: git-commit
+  adr_number: '0061'
+  location: git:a1d1cccd0
+  evidence: a1d1cccd0 [adr-index] Regenerated for ADR 0058/0061 supersession
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:31.293137'
+- marker_type: git-commit
+  adr_number: '0061'
+  location: git:744319c63
+  evidence: 744319c63 [adr] Mark 0058 and 0061 as Superseded (ADR 0061)
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:31.293164'
+- marker_type: git-commit
+  adr_number: '0061'
+  location: git:b29f77add
+  evidence: b29f77add [adr] Mark 0058 and 0061 as Superseded
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:31.293194'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Not Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5'

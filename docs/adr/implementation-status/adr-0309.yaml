@@ -1,0 +1,120 @@
+adr_number: 0309
+title: Task-Oriented Information Architecture Across The Platform Workbench
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:bdd326164
+  evidence: bdd326164 [ops-portal] Finalize ADR 0309 mainline closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.725805'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:2b5586ead
+  evidence: 2b5586ead [merge] Sync ws-0309 integration branch with latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.725847'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:571572815
+  evidence: 571572815 [ops-portal] Merge latest origin/main into ws-0309 integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.725858'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:ddfa27098
+  evidence: ddfa27098 [ops-portal] Merge ADR 0310 activation into ws-0309 branch
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.725866'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:ec18655af
+  evidence: ec18655af [ops-portal] Repair ws-0309 mainline runtime sync
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.725906'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:1da01a5c9
+  evidence: 1da01a5c9 [ops-portal] Normalize ws-0309 workstream paths for latest validator
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.725982'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:75a43d62c
+  evidence: 75a43d62c Merge remote-tracking branch 'origin/main' into codex/ws-0309-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.725989'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:42909d007
+  evidence: 42909d007 Merge remote-tracking branch 'origin/main' into codex/ws-0309-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:19.726019'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:c3781f48a
+  evidence: c3781f48a [ops-portal] Integrate ADR 0309 exact-main release tree
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.726068'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:d0c9dbe11
+  evidence: 'd0c9dbe11 [ops-portal] Record ADR 0309 branch replay blocker\n\nPurpose:
+    Preserve the first branch-local live-apply attempt and explain why the actual
+    production replay moves to the exact-main integration step.\nScope: Update the
+    ws-0309 workstream notes and add the blocked branch replay transcript.\nStatus:
+    Branch-safe validation is green; branch-local live apply is gated on canonical
+    truth because README.md is a protected integration-only surface.\nNext: Merge
+    onto the latest mainline integration worktree, refresh protected truth there,
+    and run the exact-main live replay.\nSee also: ADR 0309'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.726077'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:b32c859df
+  evidence: b32c859df [ops-portal] Reconcile ADR 0309 on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.726080'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:73a3b7302
+  evidence: 73a3b7302 [ops-portal] Checkpoint ADR 0309 lane catalog integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.726086'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:25d7d5707
+  evidence: '25d7d5707 [ops-portal] Record ADR 0309 branch replay blocker\n\nPurpose:
+    Preserve the first branch-local live-apply attempt and explain why the actual
+    production replay moves to the exact-main integration step.\nScope: Update the
+    ws-0309 workstream notes and add the blocked branch replay transcript.\nStatus:
+    Branch-safe validation is green; branch-local live apply is gated on canonical
+    truth because README.md is a protected integration-only surface.\nNext: Merge
+    onto the latest mainline integration worktree, refresh protected truth there,
+    and run the exact-main live replay.\nSee also: ADR 0309'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.726272'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:4e737f85c
+  evidence: 4e737f85c [ops-portal] Reconcile ADR 0309 on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.726279'
+- marker_type: git-commit
+  adr_number: 0309
+  location: git:64c345745
+  evidence: 64c345745 [ops-portal] Checkpoint ADR 0309 lane catalog integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:19.726293'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=15
+
+  Implemented On: 2026-04-03'

@@ -1,0 +1,52 @@
+adr_number: '0112'
+title: Deterministic Goal Compiler
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0112'
+  location: git:83fc33a05
+  evidence: 83fc33a05 Fix ADR 0112 direct-workflow CLI expectation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.947078'
+- marker_type: git-commit
+  adr_number: '0112'
+  location: git:6e1b82887
+  evidence: 6e1b82887 Implement ADR 0112 goal compiler
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.947107'
+- marker_type: git-commit
+  adr_number: '0112'
+  location: git:0c240dac3
+  evidence: '0c240dac3 Propose ADRs 0112-0121: CPU-only autonomous control layer'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:51.947252'
+- marker_type: git-commit
+  adr_number: '0112'
+  location: git:ba242edd8
+  evidence: 'ba242edd8 Propose ADRs 0112-0121: CPU-only autonomous control layer'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:51.947274'
+- marker_type: git-commit
+  adr_number: '0112'
+  location: git:bd778d861
+  evidence: 'bd778d861 Propose ADRs 0112-0121: CPU-only autonomous control layer'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:51.947294'
+- marker_type: config-file
+  adr_number: '0112'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:52.098051'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=5, config-file=1
+
+  Implemented On: 2026-03-24'

@@ -17,10 +17,12 @@ ALLOWED_COMPATIBILITY_POLICIES = {
     "versioned_breaking_change",
 }
 ALLOWED_WORKSTREAM_STATUSES = {
+    "blocked",
     "implemented",
     "in_progress",
     "live_applied",
     "merged",
+    "planned",
     "ready",
     "ready_for_merge",
 }

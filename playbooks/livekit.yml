@@ -24,68 +24,17 @@
 # Related ADRs: 0021, 0077, 0293
 # Related Runbooks: docs/runbooks/configure-livekit.md
 #
+# Invocation: ansible-playbook playbooks/livekit.yml -e @playbooks/vars/livekit.yml -e env=production
+#
 # Author: LV3 Platform
-# Last Updated: 2026-03-30
+# Last Updated: 2026-04-06
 
-- name: Ensure Hetzner DNS publication for LiveKit
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-    subdomain_fqdn: livekit.lv3.org
+# --- Standard plays (driven by vars/livekit.yml) ---
 
-  tasks:
-    - name: Load controller defaults
-      ansible.builtin.include_vars:
-        file: "{{ inventory_defaults_path }}"
+- import_playbook: _includes/dns_publication.yml
+  when: service_needs_dns | default(false)
 
-    - name: Load the subdomain catalog
-      ansible.builtin.include_vars:
-        file: "{{ subdomain_catalog_path }}"
-        name: subdomain_catalog
-
-    - name: Select the LiveKit subdomain entry
-      ansible.builtin.set_fact:
-        selected_subdomain: >-
-          {{
-            (
-              subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', subdomain_fqdn)
-              | list
-              | first
-            ) | default({})
-          }}
-
-    - name: Assert the LiveKit subdomain is catalogued
-      ansible.builtin.assert:
-        that:
-          - selected_subdomain != {}
-          - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "livekit.lv3.org must exist in config/subdomain-catalog.json before live apply."
-
-    - name: Derive the managed Hetzner record name
-      ansible.builtin.set_fact:
-        selected_subdomain_record_name: >-
-          {{
-            '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
-            else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
-            )
-          }}
-
-    - name: Converge the LiveKit Hetzner DNS record
-      ansible.builtin.include_role:
-        name: lv3.platform.hetzner_dns_record
-      vars:
-        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
-        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
-        hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
-        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+# --- LiveKit-specific plays ---
 
 - name: Converge Proxmox public ingress forwarding for LiveKit
   hosts: proxmox_hosts
@@ -138,24 +87,8 @@
       vars:
         playbook_execution_notification_service: livekit
 
-- name: Publish LiveKit through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
-  become: true
-  gather_facts: true
-  vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.nginx_edge_publication
+- import_playbook: _includes/nginx_edge_publication.yml
+  when: service_needs_nginx_edge | default(false)
 
 - name: Verify public LiveKit room lifecycle from the controller
   hosts: localhost

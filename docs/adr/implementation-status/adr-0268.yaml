@@ -1,0 +1,100 @@
+adr_number: 0268
+title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:8871117b4
+  evidence: 8871117b4 [live-apply] Finalize ADR 0268 exact-main verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093058'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:813f0a4f6
+  evidence: 813f0a4f6 [docs] Sync ADR 0268 dependency graph
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093095'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:b8263bee0
+  evidence: b8263bee0 [release] Prepare ADR 0268 final mainline cut
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093099'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:e53ebe2fd
+  evidence: e53ebe2fd [live-apply] Finalize ADR 0268 exact-main verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093107'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:b8d3b8fac
+  evidence: b8d3b8fac [release] Prepare ADR 0268 final mainline cut
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093110'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:eea119f30
+  evidence: eea119f30 [docs] Refresh ADR 0268 latest-main truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093113'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:5d210a57e
+  evidence: 5d210a57e [live-apply] Record ADR 0268 mainline verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093117'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:ddd631ce2
+  evidence: ddd631ce2 [automation] Fix ADR 0268 public-edge wrapper guards
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093120'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:1e4b3b130
+  evidence: 1e4b3b130 [docs] Refresh ADR 0268 canonical truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093123'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:e7f5d94e2
+  evidence: e7f5d94e2 [release] Integrate ADR 0268 on current main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093126'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:678606954
+  evidence: 678606954 [receipts] Record ADR 0268 branch live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093129'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:53be11a25
+  evidence: 53be11a25 [preflight] Implement ADR 0268 worktree bootstrap manifests
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093132'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:7069b0eb0
+  evidence: 7069b0eb0 [receipts] Record ADR 0268 branch live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093419'
+- marker_type: git-commit
+  adr_number: 0268
+  location: git:4afedf213
+  evidence: 4afedf213 [preflight] Implement ADR 0268 worktree bootstrap manifests
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.093422'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 14
+
+  Breakdown: git-commit=14
+
+  Implemented On: 2026-03-29'

@@ -1,0 +1,64 @@
+---
+# _includes/dns_publication.yml
+# Purpose: Converge a single Hetzner DNS A record from the subdomain catalog.
+# Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.lv3.org")
+# Usage: import_playbook with -e service_dns_fqdn=data.lv3.org, or set in a vars file.
+
+- name: "Ensure Hetzner DNS publication for {{ service_dns_fqdn }}"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../../inventory/group_vars/all.yml"
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: "Select the {{ service_dns_fqdn }} subdomain entry"
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', service_dns_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: "Assert {{ service_dns_fqdn }} is catalogued"
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "{{ service_dns_fqdn }} must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: "Converge the {{ service_dns_fqdn }} Hetzner DNS record"
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"

@@ -1,8 +1,8 @@
 # ADR 0017: ADR Lifecycle And Implementation Metadata
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.7.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: n/a
 - Implemented On: 2026-03-21
 - Date: 2026-03-21

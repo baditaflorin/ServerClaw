@@ -9,37 +9,18 @@
 #   - plane_bootstrap_workspace_slug (str, required): Seeded Plane workspace slug.
 #   - plane_bootstrap_project_identifier (str, required): Seeded Plane project identifier.
 #
-# Inputs (optional):
-#   - none
-#
-# Outputs:
-#   - Read-only verification results for health, admin identity, project listing, and issue listing.
-#
-# Idempotency: Fully idempotent
-#              This task file performs read-only checks and does not mutate runtime state.
-#
 # Dependencies:
-#   - ADR 0193: Requires controller-local Plane verification after deployment.
-#   - Requires: plane_runtime main tasks have rendered the stack and bootstrap auth.
-#   - Role: plane_runtime — verifies the converged Plane service.
-#
-# Related ADRs: 0165, 0193
-# Related Runbooks: docs/runbooks/configure-plane.md
-#
-# Author: LV3 Platform
-# Last Updated: 2026-03-28
-- name: Verify the Plane local health endpoint
-  ansible.builtin.uri:
-    url: "{{ plane_internal_base_url }}{{ plane_healthcheck_path }}"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: plane_verify_health
-  retries: 30
-  delay: 5
-  until:
-    - plane_verify_health.status == 200
-  changed_when: false
+#   - ADR 0193, ADR 0165, ADR 0371
+- name: Verify the Plane runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: plane
+    common_verify_port: "{{ plane_internal_port }}"
+    common_verify_health_url: "{{ plane_internal_base_url }}{{ plane_healthcheck_path }}"
+    common_verify_health_retries: 30
+    common_verify_health_delay: 5
 
 - name: Verify the Plane controller auth identity
   ansible.builtin.command:

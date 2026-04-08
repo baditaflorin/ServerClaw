@@ -1,89 +1,111 @@
 ---
-# Purpose: Declare the shared defaults for converging the Woodpecker runtime, Gitea OAuth bootstrap, and controller-local access paths.
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry via derive_service_defaults task — ADR 0373.
+# Purpose: Declare service-specific defaults for Woodpecker runtime.
 # Use case: Used whenever the woodpecker_runtime role renders the Woodpecker stack, secrets, and verification commands.
 #
-# Inputs (required):
-#   - generated platform vars (required): Supplies Woodpecker and Gitea URLs plus assigned ports.
-#   - container image catalog (required): Supplies pinned Woodpecker server and agent image references.
-#
-# Inputs (optional):
-#   - woodpecker_secret_smoke_name (str, optional, default=LV3_WOODPECKER_SECRET_SMOKE): Seed secret name used by the repo smoke pipeline.
-#
 # Outputs:
-#   - Default variable values consumed by the Woodpecker runtime role tasks and templates.
+#   - Service-specific default variable values consumed by the Woodpecker runtime role tasks and templates.
 #
 # Idempotency: Fully idempotent
 #              This file only declares role defaults.
 #
 # Dependencies:
 #   - ADR 0287: Defines Woodpecker deployment, Gitea OAuth bootstrap, and controller access.
+#   - ADR 0373: Conventional defaults are derived from platform_service_registry
 #   - Requires: Generated topology and image catalog facts to be current.
 #
-# Related ADRs: 0165, 0287
+# Related ADRs: 0165, 0287, 0373
 # Related Runbooks: docs/runbooks/configure-woodpecker.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-03-30
-woodpecker_service_topology: "{{ platform_service_topology | service_topology_get('woodpecker') }}"
-woodpecker_gitea_service_topology: "{{ platform_service_topology | service_topology_get('gitea') }}"
+# Last Updated: 2026-04-06
+
+# Conventional variables derived from platform_service_registry (ADR 0373)
+# These follow the standard naming pattern for all services
 woodpecker_site_dir: /opt/woodpecker
-woodpecker_data_dir: "{{ woodpecker_site_dir }}/data"
-woodpecker_server_data_dir: "{{ woodpecker_data_dir }}/server"
-woodpecker_agent_data_dir: "{{ woodpecker_data_dir }}/agent"
+woodpecker_data_dir: /opt/woodpecker/data
 woodpecker_secret_dir: /etc/lv3/woodpecker
 woodpecker_compose_file: "{{ woodpecker_site_dir }}/docker-compose.yml"
 woodpecker_env_file: "{{ compose_runtime_secret_root }}/woodpecker/runtime.env"
 woodpecker_legacy_env_file: "{{ woodpecker_site_dir }}/woodpecker.env"
+woodpecker_http_port: "{{ woodpecker_service_topology.ports.internal }}"
+woodpecker_internal_base_url: "http://127.0.0.1:{{ woodpecker_http_port }}"
+woodpecker_local_artifact_dir: "{{ repo_shared_local_root }}/woodpecker"
 woodpecker_openbao_agent_dir: "{{ woodpecker_site_dir }}/openbao"
 woodpecker_openbao_agent_image: "{{ openbao_agent_image }}"
 woodpecker_openbao_agent_container_name: woodpecker-openbao-agent
 woodpecker_openbao_secret_path: services/woodpecker/runtime-env
 woodpecker_openbao_policy_name: lv3-service-woodpecker-runtime
 woodpecker_openbao_approle_name: woodpecker-runtime
-woodpecker_http_port: "{{ woodpecker_service_topology.ports.internal }}"
-woodpecker_host_proxy_port: "{{ woodpecker_service_topology.ports.controller }}"
+
+# Service-specific Woodpecker runtime defaults
+woodpecker_server_container_name: woodpecker-server
+woodpecker_agent_container_name: woodpecker-agent
+woodpecker_agent_image: "{{ container_image_catalog.images.woodpecker_agent_runtime.ref }}"
+woodpecker_image: "{{ container_image_catalog.images.woodpecker_server_runtime.ref }}"
+woodpecker_server_image: "{{ container_image_catalog.images.woodpecker_server_runtime.ref }}"
+
+# Database configuration (shared PostgreSQL) — service-specific
+woodpecker_database_name: woodpecker
+woodpecker_database_user: woodpecker
+woodpecker_database_port: 5432
+woodpecker_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+woodpecker_database_password_local_file: "{{ repo_shared_local_root }}/woodpecker/database-password.txt"
+
+# Service topology derived from platform facts
+woodpecker_service_topology: "{{ platform_service_topology | service_topology_get('woodpecker') }}"
+woodpecker_gitea_service_topology: "{{ platform_service_topology | service_topology_get('gitea') }}"
+woodpecker_server_data_dir: "{{ woodpecker_data_dir }}/server"
+woodpecker_agent_data_dir: "{{ woodpecker_data_dir }}/agent"
 woodpecker_internal_url: "{{ woodpecker_service_topology.urls.internal }}"
 woodpecker_controller_url: "{{ woodpecker_service_topology.urls.controller }}"
 woodpecker_public_url: "{{ woodpecker_service_topology.urls.public }}"
+woodpecker_host_proxy_port: "{{ woodpecker_service_topology.ports.controller }}"
 woodpecker_public_hostname: "{{ woodpecker_service_topology.public_hostname }}"
-woodpecker_grpc_port: 9000
-woodpecker_server_image: "{{ container_image_catalog.images.woodpecker_server_runtime.ref }}"
-woodpecker_agent_image: "{{ container_image_catalog.images.woodpecker_agent_runtime.ref }}"
-woodpecker_server_container_name: woodpecker-server
-woodpecker_agent_container_name: woodpecker-agent
-woodpecker_database_name: woodpecker
-woodpecker_database_user: woodpecker
-woodpecker_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-woodpecker_database_port: 5432
-woodpecker_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/database-password.txt
-woodpecker_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker
-woodpecker_gitea_admin_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt
-woodpecker_gitea_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-password.txt
+
+# Gitea integration
 woodpecker_gitea_oauth_app_name: LV3 Woodpecker
-woodpecker_gitea_client_id_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/gitea-client-id.txt
-woodpecker_gitea_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/gitea-client-secret.txt
-woodpecker_agent_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/agent-secret.txt
+woodpecker_gitea_admin_token_local_file: "{{ repo_shared_local_root }}/gitea/admin-token.txt"
+woodpecker_gitea_admin_password_local_file: "{{ repo_shared_local_root }}/gitea/admin-password.txt"
+woodpecker_gitea_client_id_local_file: "{{ repo_shared_local_root }}/woodpecker/gitea-client-id.txt"
+woodpecker_gitea_client_secret_local_file: "{{ repo_shared_local_root }}/woodpecker/gitea-client-secret.txt"
+woodpecker_gitea_runtime_url: "{{ gitea_private_base_url }}"
+woodpecker_gitea_api_url: "{{ gitea_controller_url }}"
+woodpecker_gitea_oauth_url: "{{ gitea_root_url }}"
+woodpecker_gitea_internal_api_url: "{{ gitea_private_base_url }}"
+
+# Controller-local artifact paths
+woodpecker_agent_secret_local_file: "{{ repo_shared_local_root }}/woodpecker/agent-secret.txt"
+woodpecker_api_token_local_file: "{{ repo_shared_local_root }}/woodpecker/api-token.txt"
+woodpecker_admin_auth_local_file: "{{ repo_shared_local_root }}/woodpecker/admin-auth.json"
+woodpecker_bootstrap_spec_local_file: "{{ repo_shared_local_root }}/woodpecker/bootstrap-spec.json"
+
+# Local artifact paths (conventional but referenced in templates)
 woodpecker_agent_secret_guest_file: "{{ woodpecker_secret_dir }}/agent-secret"
-woodpecker_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/api-token.txt
-woodpecker_admin_auth_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/admin-auth.json
-woodpecker_bootstrap_spec_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/bootstrap-spec.json
-woodpecker_secret_smoke_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/repo-secret-smoke.txt
+woodpecker_secret_smoke_local_file: "{{ repo_shared_local_root }}/woodpecker/repo-secret-smoke.txt"
+
+# Agent and admin configuration
 woodpecker_admin_username: ops-gitea
 woodpecker_admins:
   - ops-gitea
 woodpecker_repo_owners:
   - ops
+
+# Seed repository activation
 woodpecker_seed_repo_full_name: ops/proxmox_florin_server
 woodpecker_seed_repo_branch: main
+
+# Smoke test secret configuration
 woodpecker_secret_smoke_name: LV3_WOODPECKER_SECRET_SMOKE
 woodpecker_secret_smoke_events:
   - push
   - pull_request
   - manual
-woodpecker_gitea_runtime_url: "{{ gitea_private_base_url }}"
-woodpecker_gitea_api_url: "{{ gitea_controller_url }}"
-woodpecker_gitea_oauth_url: "{{ gitea_root_url }}"
-woodpecker_gitea_internal_api_url: "{{ gitea_private_base_url }}"
+
+# Runtime configuration
+woodpecker_grpc_port: 9000
 woodpecker_backend_network: woodpecker_default
 woodpecker_max_workflows: 1
 woodpecker_healthcheck_path: /healthz

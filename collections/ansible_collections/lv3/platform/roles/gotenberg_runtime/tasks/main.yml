@@ -4,6 +4,14 @@
 # Outputs: Rendered compose file plus a running Gotenberg container with Chromium and LibreOffice renderers available.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and host port binding.
 # Dependencies: ADR 0278 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
+- name: Derive Gotenberg conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: gotenberg
+
+
 - name: Validate Gotenberg runtime inputs
   ansible.builtin.assert:
     that:

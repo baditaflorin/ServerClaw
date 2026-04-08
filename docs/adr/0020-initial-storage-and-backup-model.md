@@ -1,8 +1,8 @@
 # ADR 0020: Initial Storage And Backup Model
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: not yet
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: not yet
 - Implemented On: not yet
 - Date: 2026-03-22

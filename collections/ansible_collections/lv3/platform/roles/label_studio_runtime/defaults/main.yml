@@ -5,33 +5,20 @@
 # Idempotency: Fully idempotent because this file only declares desired defaults.
 # Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0077, and ADR 0289.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 label_studio_repo_root: "{{ inventory_dir | dirname }}"
 label_studio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('label_studio') }}"
-label_studio_site_dir: /opt/label-studio
-label_studio_data_dir: "{{ label_studio_site_dir }}/data"
-label_studio_secret_dir: /etc/lv3/label-studio
-label_studio_compose_file: "{{ label_studio_site_dir }}/docker-compose.yml"
-label_studio_env_file: "{{ compose_runtime_secret_root }}/label-studio/runtime.env"
-label_studio_legacy_env_file: "{{ label_studio_site_dir }}/label-studio.env"
-label_studio_openbao_agent_dir: "{{ label_studio_site_dir }}/openbao"
-label_studio_openbao_agent_image: "{{ openbao_agent_image }}"
-label_studio_openbao_agent_container_name: label-studio-openbao-agent
-label_studio_openbao_secret_path: services/label-studio/runtime-env
-label_studio_openbao_policy_name: lv3-service-label-studio-runtime
-label_studio_openbao_approle_name: label-studio-runtime
-label_studio_internal_port: "{{ platform_service_topology | platform_service_port('label_studio', 'internal') }}"
 label_studio_internal_base_url: "{{ platform_service_topology | platform_service_url('label_studio', 'internal') }}"
 label_studio_public_base_url: "https://{{ label_studio_service_topology.public_hostname }}"
 label_studio_compose_project_name: label_studio
 label_studio_compose_network_name: "{{ label_studio_compose_project_name }}_default"
-label_studio_container_name: label-studio
 label_studio_container_port: 8080
-label_studio_image: "{{ container_image_catalog.images.label_studio_runtime.ref }}"
 label_studio_database_name: label_studio
 label_studio_database_user: label_studio
 label_studio_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 label_studio_database_port: 5432
-label_studio_local_artifact_dir: "{{ label_studio_repo_root }}/.local/label-studio"
 label_studio_database_password_local_file: "{{ label_studio_repo_root }}/.local/label-studio/database-password.txt"
 label_studio_admin_password_local_file: "{{ label_studio_repo_root }}/.local/label-studio/admin-password.txt"
 label_studio_admin_token_local_file: "{{ label_studio_repo_root }}/.local/label-studio/admin-token.txt"

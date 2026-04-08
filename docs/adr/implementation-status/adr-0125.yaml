@@ -1,0 +1,28 @@
+adr_number: '0125'
+title: Agent Capability Bounds and Autonomous Action Policy
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0125'
+  location: git:3aed1193e
+  evidence: 3aed1193e Cut ADR 0125 release as 0.143.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.088236'
+- marker_type: git-commit
+  adr_number: '0125'
+  location: git:d0e79fa92
+  evidence: d0e79fa92 Implement ADR 0125 agent capability bounds
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:57.088285'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-03-25'

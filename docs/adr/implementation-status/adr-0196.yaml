@@ -1,0 +1,113 @@
+adr_number: 0196
+title: Netdata Realtime Streaming Metrics
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:27d9ed13a
+  evidence: 27d9ed13a [adr-0196] Update child topology reference to dynamic inventory
+    model
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:29.680963'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:a3456a3bd
+  evidence: a3456a3bd [release] Cut 0.177.25 for ADR 0196
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.711549'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:b410d17ed
+  evidence: b410d17ed [realtime] Reconcile ADR 0196 governance outputs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.711567'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:14311336b
+  evidence: 14311336b [realtime] Live apply ADR 0196 Netdata metrics
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.711571'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:1bcc17bc6
+  evidence: 1bcc17bc6 [release] Cut 0.177.21 for ADR 0196
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.711621'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:5dd7a9575
+  evidence: 5dd7a9575 [realtime] Reconcile ADR 0196 governance outputs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.711633'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:c83708ca5
+  evidence: c83708ca5 [realtime] Live apply ADR 0196 Netdata metrics
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.711636'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:ad6bf99d8
+  evidence: ad6bf99d8 Release 0.177.13 for ADR 0196 realtime metrics live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.712309'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:0a58cd9a9
+  evidence: 0a58cd9a9 [realtime] Record ADR 0196 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.712316'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:43e81d948
+  evidence: 43e81d948 [realtime] Reconcile ADR 0196 governance outputs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.712320'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:0c141aae9
+  evidence: 0c141aae9 [realtime] Live apply ADR 0196 Netdata metrics
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.712323'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:85276d7be
+  evidence: 85276d7be [realtime] Record ADR 0196 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.712430'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:93254b693
+  evidence: 93254b693 [realtime] Reconcile ADR 0196 governance outputs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.712433'
+- marker_type: git-commit
+  adr_number: 0196
+  location: git:cac3735a3
+  evidence: cac3735a3 [realtime] Live apply ADR 0196 Netdata metrics
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.712463'
+- marker_type: playbook
+  adr_number: 0196
+  location: playbooks/realtime.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:29.742965'
+- marker_type: playbook
+  adr_number: 0196
+  location: playbooks/monitoring-stack.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:29.757999'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 16
+
+  Breakdown: git-commit=14, playbook=2
+
+  Implemented On: 2026-03-27'

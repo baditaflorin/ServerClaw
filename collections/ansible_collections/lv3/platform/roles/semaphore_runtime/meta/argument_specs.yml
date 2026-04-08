@@ -60,3 +60,40 @@ argument_specs:
       semaphore_bootstrap_spec_local_file:
         type: path
         required: true
+      semaphore_enable_oidc:
+        type: bool
+        required: false
+        default: true
+        description: Enable Keycloak OIDC SSO authentication
+      semaphore_oidc_provider:
+        type: str
+        required: false
+        default: keycloak
+        description: OIDC provider name
+      semaphore_oidc_client_id:
+        type: str
+        required: false
+        default: semaphore
+        description: Keycloak OIDC client ID
+      semaphore_oidc_client_secret_local_file:
+        type: path
+        required: false
+        description: Path to OIDC client secret on control machine
+      semaphore_oidc_issuer_url:
+        type: str
+        required: false
+        description: Keycloak realm issuer URL
+      semaphore_oidc_callback_url:
+        type: str
+        required: false
+        description: OIDC callback/redirect URL
+      semaphore_oidc_scopes:
+        type: str
+        required: false
+        default: "openid profile email"
+        description: OpenID Connect scopes to request
+      semaphore_oidc_auto_provision_user:
+        type: bool
+        required: false
+        default: true
+        description: Auto-provision users on first OIDC login

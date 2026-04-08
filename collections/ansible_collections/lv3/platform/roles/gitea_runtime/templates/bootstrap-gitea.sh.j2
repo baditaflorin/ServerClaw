@@ -13,6 +13,7 @@ oidc_internal_discovery="{{ gitea_oidc_internal_discovery_url }}"
 oidc_client_id="{{ gitea_oidc_client_id }}"
 required_claim_name="{{ gitea_oidc_required_claim_name }}"
 required_claim_value="{{ gitea_oidc_required_claim_value }}"
+group_team_map='{{ gitea_oidc_group_team_map | to_json }}'
 db_uri="postgresql://{{ gitea_database_user }}:${GITEA_DATABASE_PASSWORD}@{{ gitea_database_host }}:{{ gitea_database_port }}/{{ gitea_database_name }}"
 admin_password="${GITEA_ADMIN_PASSWORD}"
 oidc_client_secret="${GITEA_KEYCLOAK_CLIENT_SECRET}"
@@ -106,8 +107,10 @@ if [[ -n "${auth_source_id}" ]]; then
     --key "${oidc_client_id}" \
     --secret "${oidc_client_secret}" \
     --auto-discover-url "${oidc_internal_discovery}" \
-    --scopes "openid profile email groups" \
+    --scopes "openid profile email" \
     --group-claim-name "groups" \
+    --group-team-map "${group_team_map}" \
+    --group-team-map-removal \
     --required-claim-name "${required_claim_name}" \
     --required-claim-value "${required_claim_value}" >/dev/null
 else
@@ -117,8 +120,10 @@ else
     --key "${oidc_client_id}" \
     --secret "${oidc_client_secret}" \
     --auto-discover-url "${oidc_internal_discovery}" \
-    --scopes "openid profile email groups" \
+    --scopes "openid profile email" \
     --group-claim-name "groups" \
+    --group-team-map "${group_team_map}" \
+    --group-team-map-removal \
     --required-claim-name "${required_claim_name}" \
     --required-claim-value "${required_claim_value}" >/dev/null
   changed=true

@@ -1,0 +1,53 @@
+adr_number: '0271'
+title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0271'
+  location: git:c6f5a774b
+  evidence: c6f5a774b [release] Integrate ADR 0271 backup coverage live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:02.354244'
+- marker_type: git-commit
+  adr_number: '0271'
+  location: git:4f2cbb187
+  evidence: 4f2cbb187 Merge remote-tracking branch 'origin/codex/ws-0271-backup-coverage-ledger'
+    into codex/ws-0271-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:02.354312'
+- marker_type: git-commit
+  adr_number: '0271'
+  location: git:3ba160da4
+  evidence: 3ba160da4 [build] Refresh generated artifacts for ADR 0271 merge base
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:02.354322'
+- marker_type: git-commit
+  adr_number: '0271'
+  location: git:ddc1cab22
+  evidence: ddc1cab22 [backup] Record ADR 0271 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:02.354333'
+- marker_type: git-commit
+  adr_number: '0271'
+  location: git:b18d04ad3
+  evidence: b18d04ad3 Merge remote-tracking branch 'origin/main' into codex/ws-0271-backup-coverage-ledger
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:02.354364'
+- marker_type: git-commit
+  adr_number: '0271'
+  location: git:8c1890710
+  evidence: 8c1890710 [backup] Implement ADR 0271 coverage ledger
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:02.354367'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=6
+
+  Implemented On: 2026-03-29'

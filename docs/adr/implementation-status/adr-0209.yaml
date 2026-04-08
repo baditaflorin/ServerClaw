@@ -1,0 +1,46 @@
+adr_number: 0209
+title: Use-Case Services And Thin Delivery Adapters
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0209
+  location: git:28ad4aa97
+  evidence: 28ad4aa97 [merge] Absorb latest ADR 0209 mainline release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.616523'
+- marker_type: git-commit
+  adr_number: 0209
+  location: git:9b545cb2d
+  evidence: 9b545cb2d [merge] Absorb latest origin/main after ADR 0209 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.619784'
+- marker_type: git-commit
+  adr_number: 0209
+  location: git:af6a219b9
+  evidence: af6a219b9 [release] Integrate ADR 0209 live apply into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.625500'
+- marker_type: git-commit
+  adr_number: 0209
+  location: git:468288382
+  evidence: 468288382 [meta] Refresh generated manifest for ADR 0209
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.625577'
+- marker_type: git-commit
+  adr_number: 0209
+  location: git:78fd5ec47
+  evidence: 78fd5ec47 [meta] Fix ADR 0209 push-gate follow-ups
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:34.625588'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-28'

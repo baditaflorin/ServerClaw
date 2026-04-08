@@ -1,0 +1,12 @@
+---
+# Purpose: Verify the Repowise semantic search API health endpoint responds after convergence.
+- name: Verify the Repowise health endpoint responds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ repowise_port }}/health"
+    method: GET
+    status_code: 200
+  register: repowise_health
+  retries: 24
+  delay: 5
+  until: repowise_health.status == 200
+  changed_when: false

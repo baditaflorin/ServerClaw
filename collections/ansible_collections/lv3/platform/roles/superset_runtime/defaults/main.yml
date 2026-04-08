@@ -5,25 +5,15 @@
 # Idempotency: Fully idempotent because this file only declares desired defaults.
 # Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0063, ADR 0077, and ADR 0292.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 superset_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('superset') }}"
 superset_session_authority: "{{ platform_session_authority }}"
-superset_site_dir: /opt/superset
 superset_build_dir: "{{ superset_site_dir }}/build"
-superset_data_dir: "{{ superset_site_dir }}/data"
 superset_pythonpath_dir: "{{ superset_site_dir }}/pythonpath"
 superset_asset_dir: "{{ superset_site_dir }}/assets"
-superset_secret_dir: /etc/lv3/superset
-superset_compose_file: "{{ superset_site_dir }}/docker-compose.yml"
 superset_static_env_file: "{{ superset_site_dir }}/runtime.env"
-superset_env_file: "{{ compose_runtime_secret_root }}/superset/runtime.env"
-superset_legacy_env_file: "{{ superset_site_dir }}/superset.env"
-superset_openbao_agent_dir: "{{ superset_site_dir }}/openbao"
-superset_openbao_agent_image: "{{ openbao_agent_image }}"
-superset_openbao_agent_container_name: superset-openbao-agent
-superset_openbao_secret_path: services/superset/runtime-env
-superset_openbao_policy_name: lv3-service-superset-runtime
-superset_openbao_approle_name: superset-runtime
-superset_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.superset_port }}"
 superset_internal_base_url: "http://127.0.0.1:{{ superset_internal_port }}"
 superset_public_base_url: "https://{{ superset_service_topology.public_hostname }}"
 superset_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
@@ -34,7 +24,6 @@ superset_public_hostname_overrides:
     address: "{{ superset_public_edge_private_ip }}"
 superset_compose_project_name: superset
 superset_compose_network_name: "{{ superset_compose_project_name }}_default"
-superset_container_name: superset
 superset_container_port: 8088
 superset_image_name: lv3/superset
 superset_base_image: docker.io/apache/superset:6.0.0@sha256:f2b551dda3c6b53167760aaeda3fe4252fd3777486a6ab264a1ff06b2e9d72d1
@@ -43,13 +32,12 @@ superset_python_dependencies:
   - authlib==1.6.9
   - psycopg2-binary==2.9.11
   - clickhouse-connect==0.8.18
-superset_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/superset
 superset_database_password_local_file: "{{ superset_local_artifact_dir }}/database-password.txt"
 superset_reader_password_local_file: "{{ superset_local_artifact_dir }}/reader-password.txt"
 superset_postgres_database_catalog_local_file: "{{ superset_local_artifact_dir }}/postgres-databases.json"
 superset_secret_key_local_file: "{{ superset_local_artifact_dir }}/secret-key.txt"
 superset_admin_password_local_file: "{{ superset_local_artifact_dir }}/admin-password.txt"
-superset_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/superset-client-secret.txt
+superset_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/superset-client-secret.txt"
 superset_secret_key_remote_file: "{{ superset_secret_dir }}/secret-key.txt"
 superset_admin_password_remote_file: "{{ superset_secret_dir }}/admin-password.txt"
 superset_bootstrap_definition_file: "{{ superset_asset_dir }}/superset-bootstrap.json"

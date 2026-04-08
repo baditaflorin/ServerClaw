@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 ntfy_runtime_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('ntfy') }}"
 ntfy_runtime_image: "{{ container_image_catalog.images.ntfy_runtime.ref }}"
 ntfy_runtime_container_name: ntfy

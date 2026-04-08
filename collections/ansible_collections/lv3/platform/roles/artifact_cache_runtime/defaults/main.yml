@@ -1,9 +1,10 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Define the filesystem layout, upstream registry mappings, and seed-plan inputs for the shared artifact cache runtime.
 artifact_cache_state: present
-artifact_cache_site_dir: /opt/artifact-cache
 artifact_cache_data_root: "{{ artifact_cache_site_dir }}/data"
-artifact_cache_compose_file: "{{ artifact_cache_site_dir }}/docker-compose.yml"
 artifact_cache_seed_plan_file: "{{ artifact_cache_site_dir }}/seed-plan.json"
 artifact_cache_bind_host: "{{ ansible_host }}"
 artifact_cache_network_mode: host

@@ -1123,7 +1123,7 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         if service_id not in allowed_service_ids:
             raise ValueError(f"{path}.service_id references unknown platform service '{service_id}'")
 
-        require_enum(item.get("status"), f"{path}.status", {"active", "planned"})
+        require_enum(item.get("status"), f"{path}.status", {"active", "planned", "lan_only", "tls_pending"})
         require_str(item.get("summary"), f"{path}.summary")
         require_enum(item.get("expected_issuer"), f"{path}.expected_issuer", {"any", "letsencrypt", "self-signed", "step-ca"})
 

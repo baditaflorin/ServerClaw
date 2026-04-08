@@ -1,0 +1,324 @@
+---
+# One-Way Environment Data Flow and Replication Authority Policy
+# Implements ADR 0217: One-Way Environment Data Flow And Replication Authority
+# Date: 2026-04-07
+# Version: 1.0.0
+
+schema_version: "1.0.0"
+description: |
+  This policy enforces one-way data authority between environments and defines the
+  allowed patterns for moving data between production and staging.
+
+  Core principle: production is the authority for live mutable data. Staging must
+  never write upstream into production data stores. Promotion moves code and
+  configuration, not mutable business data.
+
+environments:
+  production:
+    title: "Production Environment"
+    role: authority
+    description: |
+      The authoritative source for live mutable production data. Production remains
+      the clear system of record for all business-critical information.
+    characteristics:
+      - authority_for_mutable_data: true
+      - accepts_writes_from: []  # No other environment writes to production
+      - exports_data_to: ["staging"]
+      - is_failover_target: false  # Not an automatic failover for any other environment
+
+  staging:
+    title: "Staging Environment"
+    role: validation
+    description: |
+      A validation environment that can receive data from production through approved
+      flows. Must never write upstream into production data stores. Used for testing
+      code and configuration promotion, and for realistic test data scenarios.
+    characteristics:
+      - authority_for_mutable_data: false  # Staging is not authoritative
+      - accepts_writes_from: []  # Staging data never writes back to production
+      - imports_data_from: ["production"]
+      - imports_via_patterns: ["synthetic_seed", "sanitized_snapshot", "logical_subset", "event_replay"]
+      - is_failover_target: false
+
+data_flow_model:
+  title: "One-Way Authority Model"
+  direction: "production → staging only"
+  forbidden_patterns:
+    - bidirectional_database_replication: |
+        Bidirectional replication between production and staging is forbidden.
+        This prevents staging from accidentally writing back into production data.
+
+    - staging_in_production_quorum: |
+        Staging members must never participate in production quorum or leader election.
+        This ensures production availability is not dependent on staging health.
+
+    - staging_as_automatic_failover: |
+        Staging is never treated as an automatic production failover target.
+        Cross-environment failover must be an explicit, reviewed operational decision.
+
+    - staging_mutated_records_to_production: |
+        Records mutated in staging must not be imported back into production outside
+        an explicit, reviewed business workflow. Staging remains a test environment.
+
+allowed_data_movement_patterns:
+  synthetic_seed:
+    title: "Synthetic Seed Data"
+    description: |
+      Fully generated, non-production data created for testing and validation.
+      Staging can generate and use synthetic data without any production data flow.
+    characteristics:
+      - source_environment: staging_generated
+      - authority: staging
+      - produces_realistic_test_scenarios: false
+      - examples:
+          - "Generated user accounts with deterministic IDs"
+          - "Synthetic transaction histories for load testing"
+          - "Mock API response datasets"
+          - "Placeholder images and content"
+    usage_rules:
+      - Synthetic data must be clearly labeled in staging
+      - Test frameworks should prefer synthetic over production data
+      - Synthetic data can use production schema but with fake values
+
+  sanitized_snapshot:
+    title: "Sanitized Snapshot Export"
+    description: |
+      Masked snapshot exported from production to staging. Personal data, credentials,
+      and sensitive values are scrubbed before export.
+    characteristics:
+      - source_environment: production
+      - authority: production
+      - produces_realistic_test_scenarios: true
+      - data_transformation: PII masking, credential removal, encryption key rotation
+      - examples:
+          - "User table with emails and names replaced with placeholders"
+          - "Transaction history with amounts nullified or randomized"
+          - "File uploads deleted; metadata retained"
+    usage_rules:
+      - Sanitization rules must be version-controlled in docs/runbooks
+      - Snapshot frequency must be documented (daily, weekly, etc.)
+      - Staging must not export sanitized data further
+      - Snapshots are point-in-time; not continuous replication
+
+  logical_subset:
+    title: "Logical Subset Replication"
+    description: |
+      Filtered and approved subset replication from production to staging.
+      Only selected rows, tables, or schemas are replicated based on explicit rules.
+    characteristics:
+      - source_environment: production
+      - authority: production
+      - data_filter: explicit allow-list of tables and row conditions
+      - produces_realistic_test_scenarios: true
+      - examples:
+          - "Only public/non-sensitive tables from production"
+          - "Application configuration only; no user data"
+          - "Product catalog; no customer orders or PII"
+    usage_rules:
+      - Subset rules must be version-controlled and reviewed
+      - Rules should be expressed as SQL or logical predicates
+      - Changes to subset rules trigger re-export approval
+      - Staging users must understand what data is present and what is filtered
+
+  event_replay:
+    title: "Bounded Event Replay"
+    description: |
+      Bounded replay of approved events from production into staging. Allows realistic
+      event sequences without exposing mutable production state.
+    characteristics:
+      - source_environment: production event log
+      - authority: production
+      - event_filter: time window, event types, source systems
+      - produces_realistic_test_scenarios: true
+      - examples:
+          - "Last 24 hours of application events (no user data)"
+          - "API request trace logs (auth tokens redacted)"
+          - "State machine transitions (PII scrubbed)"
+    usage_rules:
+      - Events must be scrubbed of credentials and PII
+      - Replay must have explicit time bounds (e.g., last 7 days)
+      - Event consumption in staging must not write back to production
+      - Replay tooling must be idempotent and safe for repeated execution
+
+forbidden_patterns_explained:
+  bidirectional_replication:
+    summary: "No changes in staging can flow back into production data."
+    reason: |
+      Staging is a validation and test environment. Any bidirectional replication
+      creates accidental coupling and opens the risk that test data or corrupted
+      records could overwrite production truth. Production remains the sole authority.
+    remediation: |
+      If a business requirement demands moving records from staging to production,
+      implement an explicit, reviewed business workflow outside the replication system.
+      Such workflows should require approval and clear audit trails.
+
+  staging_in_production_quorum:
+    summary: "Staging nodes cannot participate in production consensus."
+    reason: |
+      If a staging node were part of the production quorum, production availability
+      would depend on staging health. A staging outage would degrade production.
+      Environment isolation requires separate failure domains.
+    remediation: |
+      Use environment-local quorums. Each environment has its own leader election,
+      consensus, or replica set. Cross-environment replication is read-only from
+      the perspective of staging.
+
+  staging_as_automatic_failover:
+    summary: "Staging is not an automatic failover target for production."
+    reason: |
+      Staging runs validated, promotion-tested configuration, but it is not the
+      production cell. Promoting staging to production authority requires explicit
+      operational decision, verification, and business approval.
+    remediation: |
+      If cross-environment failover is required, define a manual runbook with
+      explicit verification steps. Consider promoting staging to production only
+      after operator review and confirmation of data integrity.
+
+  staging_mutated_records_to_production:
+    summary: "Test data created in staging stays in staging."
+    reason: |
+      Staging mutations (test records, synthetic modifications, experimental data)
+      are not suitable for production. If allowed to flow back, they corrupt the
+      production system of record.
+    remediation: |
+      If a legitimate business workflow requires moving data from staging to production,
+      implement it as a separate, reviewed system outside the environment replication.
+
+data_class_flow_rules:
+  relational_databases:
+    rule: "Single-writer per environment, one-way snapshot/logical export only."
+    from_production_to_staging:
+      - sanitized_snapshot
+      - logical_subset
+      - event_replay
+    from_staging_to_production: []
+
+  queues_and_streams:
+    rule: "Intra-environment replication only; bounded export or replay for staging."
+    from_production_to_staging:
+      - event_replay  # bounded time window, scrubbed
+    from_staging_to_production: []
+
+  object_stores:
+    rule: "Versioned replication of approved prefixes; staging writes isolated."
+    from_production_to_staging:
+      - logical_subset  # approved prefixes only
+    from_staging_to_production: []
+
+  search_and_vector_indexes:
+    rule: "Derived state; rebuild from canonical data instead of cross-env replication."
+    from_production_to_staging:
+      - synthetic_seed  # re-index from seed data
+    from_staging_to_production: []
+
+  cache_and_sessions:
+    rule: "Environment-local only; rebuilt or repopulated, not cross-replicated."
+    from_production_to_staging: []  # No replication; cache is ephemeral
+    from_staging_to_production: []
+
+  secrets_and_keys:
+    rule: "Each environment has its own authority; only bootstrap trust anchors exported."
+    from_production_to_staging:
+      - bootstrap_only  # narrow trust anchors, carefully controlled
+    from_staging_to_production: []
+
+  time_series_and_observability:
+    rule: "Optional forwarding/downsampling to staging-visible analysis surface."
+    from_production_to_staging:
+      - downsampled_observability  # sampled metrics, logs, traces
+    from_staging_to_production: []
+
+operational_enforcement:
+  title: "Enforcement Mechanisms"
+  rules:
+    - rule: "Network isolation enforces environment separation."
+      detail: |
+        Production and staging run in separate network cells with controlled cross-cell
+        connectivity. Production databases cannot be accessed from staging except through
+        read-only snapshot export mechanisms.
+
+    - rule: "PostgreSQL endpoint contracts make writer direction explicit."
+      detail: |
+        Each relational service declares rw_endpoint (writer) and ro_endpoint (read-only).
+        Staging applications are configured to use ro_endpoint or get no database access.
+
+    - rule: "Secret authorities are environment-local."
+      detail: |
+        OpenBao and step-ca maintain separate sealing boundaries per environment.
+        Production secrets cannot be unsealed in staging without explicit export workflow.
+
+    - rule: "Event consumers declare their environment."
+      detail: |
+        NATS and other event systems allow subscribers to declare environment membership.
+        Cross-environment subscriptions are forbidden unless explicitly approved and logged.
+
+    - rule: "Backup and snapshot exports are logged and audited."
+      detail: |
+        Every export of data from production to staging is logged with timestamp,
+        export type, data classification, and approver. Audit trail must be maintained.
+
+  implementation_checklist:
+    - id: "db_endpoints"
+      title: "Relational endpoints declared in service catalog"
+      status: "pending"
+      responsible_adr: "0218"
+
+    - id: "snapshot_export_tooling"
+      title: "Sanitization and export tooling for snapshot and logical_subset patterns"
+      status: "pending"
+      responsible_adr: "0217"
+
+    - id: "event_replay_bounds"
+      title: "Bounded event replay system with time and event-type filters"
+      status: "pending"
+      responsible_adr: "0217"
+
+    - id: "audit_logging"
+      title: "Audit logging for all environment-to-environment data flows"
+      status: "pending"
+      responsible_adr: "0217"
+
+    - id: "network_isolation_validation"
+      title: "Validation that staging cannot initiate connections to production"
+      status: "pending"
+      responsible_adr: "0217"
+
+    - id: "secret_authority_validation"
+      title: "Validation that staging secrets are sealed with staging authority"
+      status: "pending"
+      responsible_adr: "0217"
+
+cross_environment_operation_approval:
+  title: "Approval Gates for Cross-Environment Data Movement"
+  process:
+    - step: 1
+      action: "Operator initiates environment data export"
+      approval_level: "operator"
+      documentation: "Must document reason, data classification, and export type"
+
+    - step: 2
+      action: "System validates export against this policy"
+      approval_level: "automated"
+      documentation: "Validation confirms export type is in allowed list for data class"
+
+    - step: 3
+      action: "Sanitization rules are applied (if applicable)"
+      approval_level: "automated"
+      documentation: "PII removal, credential redaction executed by audited automation"
+
+    - step: 4
+      action: "Export is logged to audit trail with all context"
+      approval_level: "automated"
+      documentation: "Timestamp, operator, export type, data size, hash"
+
+    - step: 5
+      action: "Import into staging can proceed with caution period"
+      approval_level: "operator"
+      documentation: "Operator confirms staging is ready for import"
+
+notes: |
+  This policy is the operational manifestation of ADR 0217. It should be reviewed
+  quarterly and updated when new patterns or services require cross-environment data flows.
+
+  Historical precedent: Many platforms silently share production databases with staging,
+  creating hidden couplings. This policy makes the coupling explicit and controlled.

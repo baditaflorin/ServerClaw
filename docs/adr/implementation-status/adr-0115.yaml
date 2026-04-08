@@ -1,0 +1,70 @@
+adr_number: '0115'
+title: Event-Sourced Mutation Ledger
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0115'
+  location: git:074b32c28
+  evidence: 074b32c28 Integrate ADR 0115 mainline live apply and release 0.177.1
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.197398'
+- marker_type: git-commit
+  adr_number: '0115'
+  location: git:227894da6
+  evidence: 227894da6 Implement ADR 0115 live-apply evidence and runtime fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.197431'
+- marker_type: git-commit
+  adr_number: '0115'
+  location: git:b0fd382a3
+  evidence: b0fd382a3 Implement ADR 0115 live-apply evidence and runtime fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.197907'
+- marker_type: git-commit
+  adr_number: '0115'
+  location: git:7bc46a08a
+  evidence: 7bc46a08a Release ADR 0115 mutation ledger on 0.110.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.202592'
+- marker_type: git-commit
+  adr_number: '0115'
+  location: git:1ffa43550
+  evidence: 1ffa43550 Implement ADR 0115 mutation ledger
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.202608'
+- marker_type: git-commit
+  adr_number: '0115'
+  location: git:9d3f2d14f
+  evidence: 9d3f2d14f Record ADR 0115 gate bypass receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.202619'
+- marker_type: git-commit
+  adr_number: '0115'
+  location: git:ef6d18053
+  evidence: ef6d18053 Implement ADR 0115 mutation ledger
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:53.202630'
+- marker_type: playbook
+  adr_number: '0115'
+  location: playbooks/falco.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:53:53.212916'
+- marker_type: config-file
+  adr_number: '0115'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:53.316241'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=7, playbook=1, config-file=1
+
+  Implemented On: 2026-03-26'

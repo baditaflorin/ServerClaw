@@ -1,7 +1,7 @@
 # ADR 0093: Interactive Ops Portal with Live Actions
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: 0.105.0
 - Implemented On: 2026-03-24

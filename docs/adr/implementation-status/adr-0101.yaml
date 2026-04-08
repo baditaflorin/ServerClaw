@@ -1,0 +1,88 @@
+adr_number: '0101'
+title: Automated Certificate Lifecycle Management
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:dc2a1def5
+  evidence: dc2a1def5 Release 0.177.6 for ADR 0101 mainline live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300400'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:c2361b2a8
+  evidence: c2361b2a8 Finalize ADR 0101 mainline live apply release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300424'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:838177774
+  evidence: 838177774 Integrate ADR 0101 live apply on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300428'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:997802a76
+  evidence: 997802a76 Fix remaining ADR 0101 live-apply issues
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300431'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:590a5d0aa
+  evidence: 590a5d0aa Implement ADR 0101 live apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300434'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:48bb30646
+  evidence: 48bb30646 Refresh platform manifest for ADR 0101 fixes
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300635'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:6864a8d2f
+  evidence: 6864a8d2f Fix remaining ADR 0101 live-apply issues
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300646'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:ed1d55fb8
+  evidence: ed1d55fb8 Implement ADR 0101 live apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.300893'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:e1f42e321
+  evidence: e1f42e321 Merge origin/main into ADR 0101 release branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.303170'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:b9917302f
+  evidence: b9917302f Release 0.98.0 for ADR 0101
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.303194'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:b988e23fc
+  evidence: b988e23fc Merge ADR 0101 certificate lifecycle workstream
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.303224'
+- marker_type: git-commit
+  adr_number: '0101'
+  location: git:334206d15
+  evidence: 334206d15 Implement ADR 0101 certificate lifecycle surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:47.303231'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-03-27'

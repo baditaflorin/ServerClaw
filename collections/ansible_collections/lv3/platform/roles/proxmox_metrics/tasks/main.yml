@@ -10,19 +10,15 @@
       - hostvars['monitoring-lv3'].ansible_host is defined
     fail_msg: "proxmox_metrics requires the mirrored writer token plus monitoring-lv3 host metadata."
 
-- name: Ensure proxmox writer token exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ monitoring_proxmox_writer_token_local_file }}"
-  register: proxmox_metrics_local_token
-  delegate_to: localhost
-  become: false
-
-- name: Fail if proxmox writer token is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ monitoring_proxmox_writer_token_local_file }} is missing on the control
-      machine. Run the monitoring VM portion of the monitoring playbook first.
-  when: not proxmox_metrics_local_token.stat.exists
+- name: Check Proxmox metrics prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ monitoring_proxmox_writer_token_local_file }}"
+        description: "Proxmox metrics writer token"
+        prerequisite: "Run the monitoring VM portion of the monitoring playbook first"
 
 - name: Read proxmox writer token from the control machine
   ansible.builtin.set_fact:

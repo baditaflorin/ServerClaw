@@ -1,0 +1,34 @@
+adr_number: '0160'
+title: Parallel Dry-Run Fan-Out for Intent Batch Validation
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0160'
+  location: git:1a414ea34
+  evidence: 1a414ea34 Merge origin/main into codex/adr-0160-main-integration
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:13.544262'
+- marker_type: git-commit
+  adr_number: '0160'
+  location: git:22b541a3b
+  evidence: 22b541a3b Merge branch 'codex/adr-0160-live-apply'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:13.544307'
+- marker_type: git-commit
+  adr_number: '0160'
+  location: git:a031a8f73
+  evidence: a031a8f73 Implement ADR 0160 parallel dry-run batch planning
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:13.544315'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 3
+
+  Breakdown: git-commit=3
+
+  Implemented On: 2026-03-25'

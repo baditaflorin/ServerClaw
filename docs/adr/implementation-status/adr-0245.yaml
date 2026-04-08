@@ -1,0 +1,178 @@
+adr_number: '0245'
+title: Declared-To-Live Service Attestation
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:581c8865d
+  evidence: 581c8865d [merge] Bring ADR 0245 integration onto origin/main 4a1f518a
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.186550'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:dfcb70ea2
+  evidence: dfcb70ea2 [merge] Integrate ADR 0245 onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.186608'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:d5db974dd
+  evidence: d5db974dd [merge] Refresh ws-0245 onto origin/main 90c3b26f
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.186658'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:146fb2114
+  evidence: 146fb2114 [merge] Refresh ws-0245 onto origin/main 2da64d1c
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.186664'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:50ecbf385
+  evidence: 50ecbf385 [merge] Refresh ws-0245 onto origin/main 0ce2684b
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.186721'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:29c001808
+  evidence: 29c001808 [merge] Bring ws-0245 onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.186757'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:ae13dcd41
+  evidence: ae13dcd41 [receipts] Refresh ADR 0245 latest-main live evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.186786'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:b7f10ba20
+  evidence: b7f10ba20 Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.186829'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:78a932937
+  evidence: 78a932937 Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.186846'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:7d457df28
+  evidence: 7d457df28 [release] Prepare ADR 0245 exact-main candidate on 0.177.72
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.186855'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:155e1b201
+  evidence: 155e1b201 Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.186861'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:c5c769d1a
+  evidence: c5c769d1a [receipts] Refresh ADR 0245 0.177.67 replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.186933'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:a639fe4fc
+  evidence: a639fe4fc [release] Prepare ADR 0245 exact-main candidate on 0.177.67
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.186999'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:2cf5569fc
+  evidence: 2cf5569fc Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.187014'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:ce18654d5
+  evidence: ce18654d5 [release] Prepare ADR 0245 final exact-main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187053'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:6deeeb346
+  evidence: 6deeeb346 Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.187060'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:c2100ac13
+  evidence: c2100ac13 [receipts] Refresh ADR 0245 exact-main evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187070'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:0f9fad63d
+  evidence: 0f9fad63d [release] Prepare ADR 0245 exact-main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187169'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:7d5f3e641
+  evidence: 7d5f3e641 Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.187179'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:e7781498e
+  evidence: e7781498e [receipts] Record ADR 0245 exact-main verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187182'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:0fc12d6ca
+  evidence: 0fc12d6ca [release] Prepare ADR 0245 exact-main candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187288'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:3247e394d
+  evidence: 3247e394d Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.187299'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:40127abe7
+  evidence: 40127abe7 [docs] Record ADR 0245 live-apply branch state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187302'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:ae63d4ca0
+  evidence: ae63d4ca0 Merge remote-tracking branch 'origin/main' into codex/ws-0245-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.187355'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:646e72ba1
+  evidence: 646e72ba1 [ops-portal] Harden ADR 0245 live apply recovery
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187358'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:cf83ce298
+  evidence: cf83ce298 [ops-portal] Reconcile ADR 0245 with current portal runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.187489'
+- marker_type: git-commit
+  adr_number: '0245'
+  location: git:26f8aee02
+  evidence: 26f8aee02 [adr-0245] Add declared-live attestation surfaces
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:50.187498'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 27
+
+  Breakdown: git-commit=27
+
+  Implemented On: 2026-03-29'

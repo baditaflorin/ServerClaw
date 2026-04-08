@@ -1,0 +1,8 @@
+---
+service_audit_name: ntfy
+service_dns_fqdn: ntfy.lv3.org
+service_runtime_roles:
+  - lv3.platform.ntfy_runtime
+service_needs_dns: true
+service_needs_postgres: false
+service_needs_nginx_edge: true

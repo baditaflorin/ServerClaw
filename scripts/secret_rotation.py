@@ -12,6 +12,12 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, run_command
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
+
 from glitchtip_event import emit_glitchtip_event
 from workflow_catalog import load_secret_manifest, validate_secret_manifest
 
@@ -64,32 +70,6 @@ def normalize_rotation_contract(catalog: dict) -> tuple[dict, dict]:
         if key not in metadata:
             raise ValueError(f"rotation metadata must define {key}")
     return metadata, secrets
-
-
-def require_mapping(value: Any, path: str) -> dict:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_nullable_timestamp(value: Any, path: str) -> str | None:
@@ -160,8 +140,8 @@ def validate_secret_catalog(catalog: dict, secret_manifest: dict) -> None:
             )
 
         require_str(secret.get("command_contract"), f"secrets.{secret_id}.command_contract")
-        period = require_int(secret.get("rotation_period_days"), f"secrets.{secret_id}.rotation_period_days", 1)
-        warning = require_int(secret.get("warning_window_days"), f"secrets.{secret_id}.warning_window_days", 0)
+        period = require_int(secret.get("rotation_period_days"), f"secrets.{secret_id}.rotation_period_days", minimum=1)
+        warning = require_int(secret.get("warning_window_days"), f"secrets.{secret_id}.warning_window_days", minimum=0)
         if warning >= period:
             raise ValueError(
                 f"secrets.{secret_id}.warning_window_days must be smaller than rotation_period_days"

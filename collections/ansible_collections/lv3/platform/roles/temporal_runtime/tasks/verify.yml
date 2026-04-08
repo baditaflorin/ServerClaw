@@ -3,7 +3,7 @@
 # Inputs: Loopback URLs, compose project paths, and expected namespace/bootstrap values exposed by the runtime role.
 # Outputs: Confirms the Temporal cluster, UI, and namespace contract without mutating service state.
 # Idempotency: Fully idempotent because these tasks only read state and assert expected behavior.
-# Dependencies: ADR 0165 and ADR 0293.
+# Dependencies: ADR 0165, ADR 0293, ADR 0371.
 ---
 - name: Verify the Temporal gRPC frontend is listening on loopback
   ansible.builtin.wait_for:
@@ -13,13 +13,16 @@
     state: started
   changed_when: false
 
-- name: Verify the Temporal UI responds on the loopback diagnostic endpoint
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ temporal_ui_port }}"
-    method: GET
-    status_code: 200
-  register: temporal_verify_ui
-  changed_when: false
+- name: Verify the Temporal runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: temporal
+    common_verify_port: "{{ temporal_ui_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ temporal_ui_port }}"
+    common_verify_health_retries: 24
+    common_verify_health_delay: 5
 
 - name: Verify Temporal cluster health through the repo-managed admin-tools profile
   ansible.builtin.command:
@@ -68,10 +71,9 @@
   register: temporal_verify_namespace
   changed_when: false
 
-- name: Assert Temporal UI, cluster health, and namespace verification are working
+- name: Assert Temporal cluster health and namespace verification are working
   ansible.builtin.assert:
     that:
-      - temporal_verify_ui.status == 200
       - temporal_verify_cluster_health.rc == 0
       - temporal_verify_namespace.rc == 0
       - temporal_default_namespace in temporal_verify_namespace.stdout

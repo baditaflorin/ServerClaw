@@ -1,0 +1,1516 @@
+---
+# platform_services.yml — service registry — ADR 0373 + ADR 0374
+# GENERATED: false (maintained by hand, validated by scripts/validate_service_registry.py)
+#
+# Each entry declares a service's identity. The common/tasks/derive_service_defaults.yml
+# task derives all conventional variables (site_dir, image, openbao_*, etc.) from these
+# entries at play time. Roles should NOT define conventional variables in their
+# defaults/main.yml — those are computed here.
+#
+# Required fields per entry:
+#   image_catalog_key  — key in container_image_catalog.images (config/image-catalog.json)
+#   internal_port      — port the container listens on inside the host
+#   host_group         — Ansible host/group this service deploys to (production host name)
+#
+# Optional fields:
+#   site_dir           — override /opt/<service_name>
+#   secret_dir         — override /etc/lv3/<service_name>
+#   container_name     — override <service_name>
+#   needs_openbao      — default true; set false to skip OpenBao variable derivation
+#   needs_redis        — informational, default false
+#   needs_postgres     — informational, default false
+#   local_artifact_dir — relative path under .local/ (default: .local/<service_name>)
+#   extra_defaults     — map of additional key-value variables to set as facts
+#
+# Cross-cutting fields (ADR 0374):
+#   dns                — DNS publication declarations. Generator: scripts/generate_cross_cutting_artifacts.py --only dns
+#     records          — list of DNS records this service needs
+#       fqdn           — fully-qualified domain name
+#       type           — 'public' (edge-published) or 'internal' (private/internal only)
+#       target_host    — platform guest that owns the IP (resolved via platform_guest_catalog)
+#       ttl            — DNS TTL in seconds (default: 3600)
+#   proxy              — nginx edge publication declarations. Generator: scripts/generate_cross_cutting_artifacts.py --only proxy
+#     enabled          — whether this service is nginx edge-published (bool)
+#     upstream_port    — port the upstream service listens on (defaults to internal_port)
+#     upstream_host    — platform guest that runs the service (resolved to IP via inventory)
+#     public_fqdn      — the public FQDN (must match a dns.records entry or subdomain-catalog entry)
+#     auth_proxy       — whether to front with oauth2-proxy (bool, default: false)
+#     websocket        — whether to add WebSocket upgrade headers (bool, default: false)
+#     max_body_size    — nginx client_max_body_size (default: '10m')
+#     extra_fqdns      — additional FQDNs served by the same upstream (list, optional)
+
+platform_service_registry:
+
+  # ---------------------------------------------------------------------------
+  # A
+  # ---------------------------------------------------------------------------
+
+  api_gateway:
+    image_catalog_key: ""            # api-gateway is a bespoke binary, no catalog entry
+    internal_port: 8080
+    host_group: runtime-control-lv3
+    site_dir: /opt/api-gateway
+    container_name: api-gateway
+    needs_openbao: false
+    extra_defaults:
+      api_gateway_database_port: 5432
+    dns:
+      records:
+        - fqdn: api.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    tls:
+      domains:
+        - api.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: api-gateway
+      client_secret_local_file: .local/keycloak/api-gateway-client-secret.txt
+      redirect_uris: []
+      scopes:
+        - openid
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8080
+      upstream_host: runtime-control-lv3
+      public_fqdn: api.lv3.org
+      auth_proxy: false             # upstream handles its own auth
+
+  artifact_cache:
+    image_catalog_key: ""            # uses upstream docker.io/library/registry — no catalog key
+    internal_port: 5001
+    host_group: artifact-cache-lv3
+    site_dir: /opt/artifact-cache
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # B
+  # ---------------------------------------------------------------------------
+
+  browser_runner:
+    image_catalog_key: ""            # built locally from Dockerfile.j2
+    internal_port: 8096
+    host_group: docker-runtime-lv3
+    site_dir: /opt/browser-runner
+    container_name: browser-runner
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # C
+  # ---------------------------------------------------------------------------
+
+  changedetection:
+    image_catalog_key: changedetection_runtime
+    internal_port: 5000
+    host_group: docker-runtime-lv3
+    site_dir: /opt/changedetection
+    container_name: changedetection
+    needs_openbao: false
+
+  coolify:
+    image_catalog_key: ""            # uses upstream ghcr.io/coollabsio/coolify
+    internal_port: 8000
+    host_group: coolify-lv3
+    site_dir: /opt/coolify
+    needs_openbao: false
+    proxy:
+      enabled: true
+      upstream_port: 8000
+      upstream_host: coolify-lv3
+      public_fqdn: coolify.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  crawl4ai:
+    image_catalog_key: crawl4ai_runtime
+    internal_port: 11235
+    host_group: docker-runtime-lv3
+    site_dir: /opt/crawl4ai
+    container_name: crawl4ai
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # D
+  # ---------------------------------------------------------------------------
+
+  dify:
+    image_catalog_key: dify_api_runtime
+    internal_port: 8094
+    host_group: docker-runtime-lv3
+    site_dir: /opt/dify
+    container_name: dify-api
+    needs_openbao: true
+    hairpin:
+      publish:
+        - hostname: agents.lv3.org
+          address_host: nginx-lv3
+        - hostname: dify.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: agents.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    tls:
+      domains:
+        - agents.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: dify
+      client_secret_local_file: .local/keycloak/dify-client-secret.txt
+      redirect_uris:
+        - https://agents.lv3.org/console/api/oauth/login/oidc/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8094
+      upstream_host: docker-runtime-lv3
+      public_fqdn: agents.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  directus:
+    image_catalog_key: directus_runtime
+    internal_port: 8055
+    host_group: docker-runtime-lv3
+    site_dir: /opt/directus
+    container_name: directus
+    needs_openbao: true
+    needs_postgres: true
+    extra_defaults:
+      directus_admin_email: directus.admin@lv3.org
+      directus_health_path: /server/health
+      directus_ping_path: /server/ping
+      directus_graphql_path: /graphql
+      directus_openapi_path: /server/specs/oas
+    hairpin:
+      publish:
+        - hostname: data.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: data.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    tls:
+      domains:
+        - data.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: directus
+      client_secret_local_file: .local/keycloak/directus-client-secret.txt
+      redirect_uris:
+        - https://data.lv3.org/auth/login/keycloak/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8055
+      upstream_host: docker-runtime-lv3
+      public_fqdn: data.lv3.org
+      auth_proxy: false             # upstream Keycloak OIDC handles auth
+
+  dozzle:
+    image_catalog_key: dozzle_runtime
+    internal_port: 8089
+    host_group: docker-runtime-lv3
+    site_dir: /opt/dozzle
+    container_name: dozzle
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: logs.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - logs.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8089
+      upstream_host: docker-runtime-lv3
+      public_fqdn: logs.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  # ---------------------------------------------------------------------------
+  # E
+  # ---------------------------------------------------------------------------
+
+  excalidraw:
+    image_catalog_key: ""            # uses upstream docker.io/excalidraw/excalidraw
+    internal_port: 3095
+    host_group: docker-runtime-lv3
+    site_dir: /opt/excalidraw
+    container_name: excalidraw-app
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: draw.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - draw.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 3095
+      upstream_host: docker-runtime-lv3
+      public_fqdn: draw.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  # ---------------------------------------------------------------------------
+  # F
+  # ---------------------------------------------------------------------------
+
+  flagsmith:
+    image_catalog_key: flagsmith_runtime
+    internal_port: 8017
+    host_group: docker-runtime-lv3
+    site_dir: /opt/flagsmith
+    container_name: flagsmith
+    needs_openbao: true
+    needs_postgres: true
+    extra_defaults:
+      flagsmith_health_path: /health
+    dns:
+      records:
+        - fqdn: flags.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - flags.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8017
+      upstream_host: docker-runtime-lv3
+      public_fqdn: flags.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  # ---------------------------------------------------------------------------
+  # G
+  # ---------------------------------------------------------------------------
+
+  gitea:
+    image_catalog_key: ""            # uses upstream docker.io/gitea/gitea — pinned by digest in defaults
+    internal_port: 3003
+    host_group: docker-runtime-lv3
+    site_dir: /opt/gitea
+    container_name: gitea
+    needs_openbao: true
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: git.lv3.org
+          type: internal
+          target_host: nginx-lv3
+          ttl: 3600
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: gitea-oauth
+      client_secret_local_file: .local/keycloak/gitea-client-secret.txt
+      redirect_uris:
+        - https://git.lv3.org/user/oauth2/Keycloak/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+
+  glitchtip:
+    image_catalog_key: glitchtip_runtime
+    internal_port: 3005
+    host_group: docker-runtime-lv3
+    site_dir: /opt/glitchtip
+    container_name: glitchtip
+    needs_openbao: true
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: errors.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - errors.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: glitchtip
+      client_secret_local_file: .local/keycloak/glitchtip-client-secret.txt
+      redirect_uris:
+        - https://errors.lv3.org/accounts/oidc/keycloak/login/callback/
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 3005
+      upstream_host: docker-runtime-lv3
+      public_fqdn: errors.lv3.org
+      auth_proxy: false             # upstream Keycloak OIDC handles auth
+
+  gotenberg:
+    image_catalog_key: gotenberg_runtime
+    internal_port: 3007
+    host_group: docker-runtime-lv3
+    site_dir: /opt/gotenberg
+    container_name: gotenberg
+    needs_openbao: false
+
+  grist:
+    image_catalog_key: grist_runtime
+    internal_port: 8484
+    host_group: docker-runtime-lv3
+    site_dir: /opt/grist
+    container_name: grist
+    needs_openbao: true
+    needs_postgres: false
+    hairpin:
+      publish:
+        - hostname: grist.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: grist.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - grist.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: grist
+      client_secret_local_file: .local/keycloak/grist-client-secret.txt
+      redirect_uris:
+        - https://grist.lv3.org/oauth2/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8484
+      upstream_host: docker-runtime-lv3
+      public_fqdn: grist.lv3.org
+      auth_proxy: false             # upstream Keycloak OIDC handles auth
+
+  # ---------------------------------------------------------------------------
+  # H
+  # ---------------------------------------------------------------------------
+
+  harbor:
+    image_catalog_key: ""            # harbor is multi-component, no single catalog key
+    internal_port: 8095
+    host_group: runtime-control-lv3
+    site_dir: /opt/harbor
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: registry.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - registry.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: harbor
+      client_secret_local_file: .local/keycloak/harbor-client-secret.txt
+      redirect_uris:
+        - https://registry.lv3.org/c/oidc/callback
+      scopes:
+        - openid
+        - profile
+        - email
+        - groups
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8095
+      upstream_host: runtime-control-lv3
+      public_fqdn: registry.lv3.org
+      auth_proxy: false             # harbor has its own auth; OCI clients authenticate directly
+
+  homepage:
+    image_catalog_key: homepage_runtime
+    internal_port: 3090
+    host_group: runtime-general-lv3
+    site_dir: /opt/homepage
+    container_name: homepage
+    needs_openbao: false
+    proxy:
+      enabled: true
+      upstream_port: 3090
+      upstream_host: runtime-general-lv3
+      public_fqdn: home.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  # ---------------------------------------------------------------------------
+  # J
+  # ---------------------------------------------------------------------------
+
+  jupyterhub:
+    image_catalog_key: ""            # uses upstream quay.io/jupyterhub/jupyterhub — pinned in defaults
+    internal_port: 8097
+    host_group: docker-runtime-lv3
+    site_dir: /opt/jupyterhub
+    container_name: jupyterhub
+    needs_openbao: true
+    hairpin:
+      publish:
+        - hostname: notebooks.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: notebooks.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - notebooks.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: jupyterhub
+      client_secret_local_file: .local/keycloak/jupyterhub-client-secret.txt
+      redirect_uris:
+        - https://notebooks.lv3.org/hub/oauth_callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8097
+      upstream_host: docker-runtime-lv3
+      public_fqdn: notebooks.lv3.org
+      auth_proxy: false             # JupyterHub has native SSO via Keycloak OIDC
+      websocket: true               # JupyterHub uses WebSockets for kernel comms
+
+  # ---------------------------------------------------------------------------
+  # K
+  # ---------------------------------------------------------------------------
+
+  keycloak:
+    image_catalog_key: ""            # uses upstream quay.io/keycloak/keycloak — pinned in defaults
+    internal_port: 8091
+    host_group: docker-runtime-lv3
+    site_dir: /opt/keycloak
+    container_name: keycloak
+    needs_openbao: true
+    hairpin:
+      publish:
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: sso.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    tls:
+      domains:
+        - sso.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8091
+      upstream_host: docker-runtime-lv3
+      public_fqdn: sso.lv3.org
+      auth_proxy: false             # Keycloak IS the SSO provider; cannot front itself
+      extra_fqdns:
+        - sso.staging.lv3.org
+
+  # ---------------------------------------------------------------------------
+  # L
+  # ---------------------------------------------------------------------------
+
+  label_studio:
+    image_catalog_key: label_studio_runtime
+    internal_port: 8110
+    host_group: docker-runtime-lv3
+    site_dir: /opt/label-studio
+    container_name: label-studio
+    needs_openbao: true
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: annotate.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - annotate.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8110
+      upstream_host: docker-runtime-lv3
+      public_fqdn: annotate.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  lago:
+    image_catalog_key: lago_api_runtime
+    internal_port: 8099
+    host_group: docker-runtime-lv3
+    site_dir: /opt/lago
+    container_name: lago-api
+    needs_openbao: false
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: billing.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - billing.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8099
+      upstream_host: docker-runtime-lv3
+      public_fqdn: billing.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  langfuse:
+    image_catalog_key: langfuse_runtime
+    internal_port: 3002
+    host_group: docker-runtime-lv3
+    site_dir: /opt/langfuse
+    container_name: langfuse-web
+    needs_openbao: true
+    needs_postgres: true
+    hairpin:
+      publish:
+        - hostname: langfuse.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: langfuse.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - langfuse.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: langfuse
+      client_secret_local_file: .local/keycloak/langfuse-client-secret.txt
+      redirect_uris:
+        - https://langfuse.lv3.org/api/auth/callback/keycloak
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 3002
+      upstream_host: docker-runtime-lv3
+      public_fqdn: langfuse.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+
+  livekit:
+    image_catalog_key: livekit_runtime
+    internal_port: 7880
+    host_group: docker-runtime-lv3
+    site_dir: /opt/livekit
+    container_name: lv3-livekit
+    needs_openbao: true
+    dns:
+      records:
+        - fqdn: livekit.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 60
+    tls:
+      domains:
+        - livekit.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 7880
+      upstream_host: docker-runtime-lv3
+      public_fqdn: livekit.lv3.org
+      auth_proxy: false             # LiveKit SDK handles token-based auth
+      websocket: true               # LiveKit uses WebSockets / WebRTC signalling
+
+  # ---------------------------------------------------------------------------
+  # M
+  # ---------------------------------------------------------------------------
+
+  mail_platform:
+    image_catalog_key: mail_platform_stalwart_runtime
+    internal_port: 8081
+    host_group: docker-runtime-lv3
+    site_dir: /opt/mail-platform
+    container_name: lv3-mail-stalwart
+    needs_openbao: true
+    dns:
+      records:
+        - fqdn: mail.lv3.org
+          type: internal
+          target_host: docker-runtime-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - mail.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+
+  mailpit:
+    image_catalog_key: mailpit_runtime
+    internal_port: 8025
+    host_group: runtime-general-lv3
+    site_dir: /opt/dev-tools/mailpit
+    container_name: mailpit
+    needs_openbao: false
+
+  matrix_synapse:
+    image_catalog_key: matrix_synapse_runtime
+    internal_port: 8008
+    host_group: docker-runtime-lv3
+    site_dir: /opt/matrix-synapse
+    container_name: matrix-synapse
+    needs_openbao: true
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: matrix.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - matrix.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8008
+      upstream_host: docker-runtime-lv3
+      public_fqdn: matrix.lv3.org
+      auth_proxy: false             # Matrix handles its own auth via homeserver
+      websocket: true               # Matrix client-server API uses WebSockets
+
+  mattermost:
+    image_catalog_key: ""            # uses upstream mattermost/mattermost-team-edition — pinned in defaults
+    internal_port: 8065
+    host_group: docker-runtime-lv3
+    site_dir: /opt/mattermost
+    container_name: lv3-mattermost
+    needs_openbao: true
+    needs_postgres: true
+
+  minio:
+    image_catalog_key: minio_runtime
+    internal_port: 9010
+    host_group: docker-runtime-lv3
+    site_dir: /opt/minio
+    container_name: minio
+    needs_openbao: true
+    dns:
+      records:
+        - fqdn: minio.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+        - fqdn: minio-console.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - minio.lv3.org
+        - minio-console.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 9010
+      upstream_host: docker-runtime-lv3
+      public_fqdn: minio.lv3.org
+      auth_proxy: false             # MinIO S3 API uses access-key auth
+
+  # NOTE: minio-console.lv3.org proxies to port 9011 (console). Declared as a
+  # separate upstream in the generated config; the extra_fqdns approach is
+  # insufficient because it uses a different port. See config/generated/.
+  # ---------------------------------------------------------------------------
+  # N
+  # ---------------------------------------------------------------------------
+
+  n8n:
+    image_catalog_key: n8n_runtime
+    internal_port: 5678
+    host_group: docker-runtime-lv3
+    site_dir: /opt/n8n
+    container_name: n8n
+    needs_openbao: true
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: n8n.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - n8n.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 5678
+      upstream_host: docker-runtime-lv3
+      public_fqdn: n8n.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+      websocket: true               # n8n uses WebSockets for workflow execution events
+
+  nats_jetstream:
+    image_catalog_key: ""            # uses upstream nats:2.11-alpine
+    internal_port: 4222
+    host_group: runtime-control-lv3
+    site_dir: /opt/nats-jetstream
+    container_name: lv3-nats-jetstream
+    needs_openbao: false
+
+  netbox:
+    image_catalog_key: netbox_runtime
+    internal_port: 8082
+    host_group: docker-runtime-lv3
+    site_dir: /opt/netbox
+    container_name: netbox
+    needs_openbao: true
+    needs_postgres: true
+    # NOTE: netbox.lv3.org is not in subdomain-catalog.json; no dns section until it is registered.
+
+  nextcloud:
+    image_catalog_key: nextcloud_runtime
+    internal_port: 8084
+    host_group: docker-runtime-lv3
+    site_dir: /opt/nextcloud
+    container_name: nextcloud-app
+    needs_openbao: true
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: cloud.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - cloud.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8084
+      upstream_host: docker-runtime-lv3
+      public_fqdn: cloud.lv3.org
+      auth_proxy: false             # Nextcloud has native OIDC via Keycloak
+      max_body_size: 4096m          # large file uploads
+
+  ntfy:
+    image_catalog_key: ntfy_runtime
+    internal_port: 2586
+    host_group: docker-runtime-lv3
+    site_dir: /opt/ntfy
+    container_name: ntfy
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: ntfy.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - ntfy.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 2586
+      upstream_host: docker-runtime-lv3
+      public_fqdn: ntfy.lv3.org
+      auth_proxy: false             # ntfy has its own access-control layer
+
+  # ---------------------------------------------------------------------------
+  # O
+  # ---------------------------------------------------------------------------
+
+  ollama:
+    image_catalog_key: ollama_runtime
+    internal_port: 11434
+    host_group: runtime-ai-lv3
+    site_dir: /opt/ollama
+    container_name: ollama
+    needs_openbao: false
+
+  one_api:
+    image_catalog_key: one_api_runtime
+    internal_port: 8101
+    host_group: docker-runtime-lv3
+    site_dir: /opt/one-api
+    container_name: one-api
+    needs_openbao: true
+
+  open_webui:
+    image_catalog_key: open_webui_runtime
+    internal_port: 8088
+    host_group: docker-runtime-lv3
+    site_dir: /opt/open-webui
+    container_name: open-webui
+    needs_openbao: true
+    dns:
+      records:
+        - fqdn: chat.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - chat.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: open-webui
+      client_secret_local_file: .local/keycloak/open-webui-client-secret.txt
+      redirect_uris:
+        - https://chat.lv3.org/oauth/oidc/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+
+  openbao:
+    image_catalog_key: openbao_runtime
+    internal_port: 8201
+    host_group: docker-runtime-lv3
+    site_dir: /opt/openbao
+    container_name: lv3-openbao
+    needs_openbao: false
+
+  openfga:
+    image_catalog_key: openfga_runtime
+    internal_port: 8098
+    host_group: docker-runtime-lv3
+    site_dir: /opt/openfga
+    container_name: lv3-openfga
+    needs_openbao: true
+
+  ops_portal:
+    image_catalog_key: ""            # ops-portal is a bespoke container built locally
+    internal_port: 8092
+    host_group: docker-runtime-lv3
+    site_dir: /opt/ops-portal
+    container_name: ops-portal
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: ops.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - ops.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: ops-portal-oauth
+      client_secret_local_file: .local/keycloak/ops-portal-client-secret.txt
+      redirect_uris:
+        - https://ops.lv3.org/oauth2/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8092
+      upstream_host: docker-runtime-lv3
+      public_fqdn: ops.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+      extra_fqdns:
+        - ops.staging.lv3.org
+
+  outline:
+    image_catalog_key: outline_runtime
+    internal_port: 3006
+    host_group: docker-runtime-lv3
+    site_dir: /opt/outline
+    container_name: outline
+    needs_openbao: true
+    needs_postgres: true
+    hairpin:
+      publish:
+        - hostname: wiki.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: wiki.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - wiki.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: outline
+      client_secret_local_file: .local/keycloak/outline-client-secret.txt
+      redirect_uris:
+        - https://wiki.lv3.org/auth/oidc.callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 3006
+      upstream_host: docker-runtime-lv3
+      public_fqdn: wiki.lv3.org
+      auth_proxy: false             # Outline OIDC via Keycloak handles auth
+      websocket: true               # Outline real-time collab uses WebSockets
+
+  # ---------------------------------------------------------------------------
+  # P
+  # ---------------------------------------------------------------------------
+
+  paperless:
+    image_catalog_key: paperless_runtime
+    internal_port: 8018
+    host_group: docker-runtime-lv3
+    site_dir: /opt/paperless
+    container_name: paperless
+    needs_openbao: true
+    needs_postgres: true
+    hairpin:
+      publish:
+        - hostname: paperless.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: paperless.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - paperless.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: paperless
+      client_secret_local_file: .local/keycloak/paperless-client-secret.txt
+      redirect_uris:
+        - https://paperless.lv3.org/accounts/oidc/keycloak/login/callback/
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8018
+      upstream_host: docker-runtime-lv3
+      public_fqdn: paperless.lv3.org
+      auth_proxy: false             # upstream Keycloak OIDC handles auth
+      max_body_size: 256m           # large document uploads
+
+  piper:
+    image_catalog_key: ""            # built locally from python base image
+    internal_port: 8106
+    host_group: runtime-ai-lv3
+    site_dir: /opt/piper
+    container_name: piper
+    needs_openbao: false
+
+  plane:
+    image_catalog_key: plane_frontend_runtime
+    internal_port: 8093
+    host_group: docker-runtime-lv3
+    site_dir: /opt/plane
+    container_name: plane-web
+    needs_openbao: true
+    needs_postgres: true
+    dns:
+      records:
+        - fqdn: tasks.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - tasks.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8093
+      upstream_host: docker-runtime-lv3
+      public_fqdn: tasks.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+      websocket: true               # Plane uses WebSockets for real-time updates
+
+  plausible:
+    image_catalog_key: plausible_runtime
+    internal_port: 8016
+    host_group: docker-runtime-lv3
+    site_dir: /opt/plausible
+    container_name: plausible
+    needs_openbao: true
+    dns:
+      records:
+        - fqdn: analytics.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - analytics.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 8016
+      upstream_host: docker-runtime-lv3
+      public_fqdn: analytics.lv3.org
+      auth_proxy: true              # dashboard gated; /js/ and /api/event are unauthenticated paths
+
+  portainer:
+    image_catalog_key: portainer_runtime
+    internal_port: 9443
+    host_group: docker-runtime-lv3
+    site_dir: /opt/portainer
+    container_name: portainer
+    needs_openbao: false
+
+  # ---------------------------------------------------------------------------
+  # R
+  # ---------------------------------------------------------------------------
+
+  rag_context:
+    image_catalog_key: ""            # rag-context uses qdrant/qdrant — no catalog key for main service
+    internal_port: 8010
+    host_group: docker-runtime-lv3
+    site_dir: /opt/platform-context
+    container_name: platform-context
+    needs_openbao: true
+
+  redpanda:
+    image_catalog_key: redpanda_runtime
+    internal_port: 9092
+    host_group: runtime-control-lv3
+    site_dir: /opt/redpanda
+    container_name: lv3-redpanda
+    needs_openbao: true
+
+  repowise:
+    image_catalog_key: ""            # uses upstream python:3.12-slim
+    internal_port: 7070
+    host_group: docker-runtime-lv3
+    site_dir: /opt/repowise
+    container_name: repowise
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: repowise.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - repowise.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 7070
+      upstream_host: docker-runtime-lv3
+      public_fqdn: repowise.lv3.org
+      auth_proxy: false             # upstream auth handles its own access control
+
+  # ---------------------------------------------------------------------------
+  # S
+  # ---------------------------------------------------------------------------
+
+  searxng:
+    image_catalog_key: searxng_runtime
+    internal_port: 8881
+    host_group: docker-runtime-lv3
+    site_dir: /opt/searxng
+    container_name: searxng
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: search.lv3.org
+          type: internal
+          target_host: nginx-lv3
+          ttl: 3600
+
+  semaphore:
+    image_catalog_key: semaphore_runtime
+    internal_port: 3004
+    host_group: docker-runtime-lv3
+    site_dir: /opt/semaphore
+    container_name: semaphore
+    needs_openbao: true
+
+  sftpgo:
+    image_catalog_key: ""            # uses upstream drakkan/sftpgo — no catalog key
+    internal_port: 8080
+    host_group: docker-runtime-lv3
+    site_dir: /opt/sftpgo
+    container_name: sftpgo
+    needs_openbao: true
+    hairpin:
+      publish:
+        - hostname: files.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: files.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - files.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: sftpgo
+      client_secret_local_file: .local/keycloak/sftpgo-client-secret.txt
+      redirect_uris:
+        - https://files.lv3.org/web/oidc/redirect
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+
+  step_ca:
+    image_catalog_key: step_ca_runtime
+    internal_port: 9000
+    host_group: runtime-control-lv3
+    site_dir: /opt/step-ca
+    container_name: step-ca
+    needs_openbao: false
+
+  superset:
+    image_catalog_key: ""            # uses upstream docker.io/apache/superset — pinned in defaults
+    internal_port: 8105
+    host_group: docker-runtime-lv3
+    site_dir: /opt/superset
+    container_name: superset
+    needs_openbao: true
+    needs_postgres: true
+    hairpin:
+      publish:
+        - hostname: bi.lv3.org
+          address_host: nginx-lv3
+        - hostname: sso.lv3.org
+          address_host: nginx-lv3
+    dns:
+      records:
+        - fqdn: bi.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - bi.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: superset
+      client_secret_local_file: .local/keycloak/superset-client-secret.txt
+      redirect_uris:
+        - https://bi.lv3.org/oauth-authorized/keycloak
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8105
+      upstream_host: docker-runtime-lv3
+      public_fqdn: bi.lv3.org
+      auth_proxy: false             # Superset native Keycloak OIDC handles auth
+
+  # ---------------------------------------------------------------------------
+  # T
+  # ---------------------------------------------------------------------------
+
+  temporal:
+    image_catalog_key: temporal_server_runtime
+    internal_port: 7243
+    host_group: docker-runtime-lv3
+    site_dir: /opt/temporal
+    container_name: temporal-server
+    needs_openbao: true
+    needs_postgres: true
+
+  tesseract_ocr:
+    image_catalog_key: ""            # built locally from python base image
+    internal_port: 3008
+    host_group: runtime-ai-lv3
+    site_dir: /opt/tesseract-ocr
+    container_name: tesseract-ocr
+    needs_openbao: false
+
+  tika:
+    image_catalog_key: tika_runtime
+    internal_port: 9998
+    host_group: runtime-ai-lv3
+    site_dir: /opt/tika
+    container_name: tika
+    needs_openbao: false
+
+  typesense:
+    image_catalog_key: typesense_runtime
+    internal_port: 8108
+    host_group: docker-runtime-lv3
+    site_dir: /opt/typesense
+    container_name: typesense
+    needs_openbao: true
+
+  # ---------------------------------------------------------------------------
+  # U
+  # ---------------------------------------------------------------------------
+
+  uptime_kuma:
+    image_catalog_key: uptime_kuma_runtime
+    internal_port: 3001
+    host_group: docker-runtime-lv3
+    site_dir: /opt/uptime-kuma
+    container_name: uptime-kuma
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: uptime.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - uptime.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 3001
+      upstream_host: docker-runtime-lv3
+      public_fqdn: uptime.lv3.org
+      auth_proxy: false             # upstream auth handles its own access control
+      websocket: true               # Uptime Kuma uses WebSockets for live status updates
+      extra_fqdns:
+        - uptime.staging.lv3.org
+
+  # ---------------------------------------------------------------------------
+  # V
+  # ---------------------------------------------------------------------------
+
+  vaultwarden:
+    image_catalog_key: vaultwarden_runtime
+    internal_port: 8222
+    host_group: docker-runtime-lv3
+    site_dir: /opt/vaultwarden
+    container_name: vaultwarden
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: vault.lv3.org
+          type: internal
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - vault.lv3.org
+      cert_source: step-ca
+      wildcard: false
+      cert_validity_days: 90
+
+  vikunja:
+    image_catalog_key: ""            # uses upstream vikunja/api — no catalog key
+    internal_port: 3456
+    host_group: docker-runtime-lv3
+    site_dir: /opt/vikunja
+    container_name: vikunja
+    needs_openbao: true
+    needs_postgres: true
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: vikunja
+      client_secret_local_file: .local/keycloak/vikunja-client-secret.txt
+      redirect_uris:
+        - https://tasks.lv3.org/auth/openid/lv3
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+
+  # ---------------------------------------------------------------------------
+  # W
+  # ---------------------------------------------------------------------------
+
+  windmill:
+    image_catalog_key: windmill_runtime
+    internal_port: 8000
+    host_group: docker-runtime-lv3
+    site_dir: /opt/windmill
+    container_name: windmill-server
+    needs_openbao: true
+    needs_postgres: true
+
+  woodpecker:
+    image_catalog_key: woodpecker_server_runtime
+    internal_port: 8102
+    host_group: docker-runtime-lv3
+    site_dir: /opt/woodpecker
+    container_name: woodpecker-server
+    needs_openbao: true
+    proxy:
+      enabled: true
+      upstream_port: 8102
+      upstream_host: docker-runtime-lv3
+      public_fqdn: ci.lv3.org
+      auth_proxy: false             # Woodpecker has native Gitea OAuth handles auth
+      websocket: true               # Woodpecker uses WebSockets for live build logs
+    dns:
+      records:
+        - fqdn: ci.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - ci.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90

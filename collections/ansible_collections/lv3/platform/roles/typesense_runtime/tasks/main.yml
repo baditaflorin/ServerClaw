@@ -5,6 +5,14 @@
 # Outputs: Rendered compose runtime, runtime environment, and a running Typesense service.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and secret-backed config.
 # Dependencies: ADR 0165, ADR 0277, and the shared Docker runtime plus OpenBao contracts.
+- name: Derive Typesense conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: typesense
+
+
 - name: Validate Typesense runtime inputs
   ansible.builtin.assert:
     that:
@@ -129,6 +137,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: typesense_compose_template
 
 - name: Pull the Typesense image

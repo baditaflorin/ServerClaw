@@ -5,6 +5,14 @@
 # Outputs: Rendered compose runtime, seeded verification artifacts, and a running Lago service set.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack, artifacts, and verification inputs.
 # Dependencies: ADR 0165, ADR 0292, the shared Docker runtime, and PostgreSQL readiness.
+- name: Derive Lago conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: lago
+
+
 - name: Validate Lago runtime inputs
   ansible.builtin.assert:
     that:
@@ -33,19 +41,15 @@
       lago_runtime requires compose paths, pinned images, publication URLs,
       shared PostgreSQL credentials, and the repo-managed smoke identifiers.
 
-- name: Check whether the Lago database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ lago_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: lago_database_password_local
-
-- name: Fail if the Lago database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ lago_database_password_local_file }} is missing on the control machine.
-      Converge lago_postgres before deploying Lago.
-  when: not lago_database_password_local.stat.exists
+- name: Check Lago prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ lago_database_password_local_file }}"
+        description: "Lago database password"
+        prerequisite: "Converge lago_postgres before deploying Lago"
 
 - name: Ensure the Lago runtime packages are present
   ansible.builtin.apt:

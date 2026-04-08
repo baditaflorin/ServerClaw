@@ -1,0 +1,63 @@
+---
+# ADR 0350: Nginx Fragment-Based Atomic Configuration
+# Role: nginx_runtime
+# Purpose: Initialize nginx runtime with fragment-based atomic configuration
+
+- name: nginx_runtime | assert nginx is installed
+  ansible.builtin.command:
+    cmd: nginx -v
+  changed_when: false
+  failed_when: false
+  register: _nginx_version
+
+- name: nginx_runtime | fail if nginx is not installed
+  ansible.builtin.fail:
+    msg: "nginx must be installed before running nginx_runtime role"
+  when: _nginx_version.rc != 0
+
+- name: nginx_runtime | ensure fragments directory exists
+  ansible.builtin.file:
+    path: "{{ nginx_fragment_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: nginx_fragments_enabled | bool
+
+- name: nginx_runtime | create platform-includes.conf with fragment glob
+  ansible.builtin.file:
+    path: "{{ nginx_config_root }}/{{ nginx_fragment_platform_include }}"
+    state: directory
+  register: _include_dir
+
+- name: nginx_runtime | write platform-includes.conf fragment loader
+  ansible.builtin.copy:
+    content: |
+      # Nginx platform includes loader
+      # Managed by: roles/nginx_runtime
+      # ADR: 0350 — Nginx Fragment-Based Atomic Configuration
+      # Workstream: {{ workstream_id | default('unset') }}
+      # Applied: {{ ansible_date_time.iso8601 }}
+      # Do not edit by hand — regenerated on each apply
+
+      # Include all per-service nginx fragments
+      include {{ nginx_fragment_dir }}/*.conf;
+    dest: "{{ nginx_config_root }}/{{ nginx_fragment_platform_include }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: nginx_fragments_enabled | bool
+
+- name: nginx_runtime | validate nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t -c {{ nginx_config_root }}/nginx.conf
+  changed_when: false
+  when: nginx_fragments_enabled | bool
+  register: _nginx_validate
+
+- name: nginx_runtime | report validation status
+  ansible.builtin.debug:
+    msg: "nginx configuration is valid"
+  when:
+    - nginx_fragments_enabled | bool
+    - _nginx_validate is succeeded

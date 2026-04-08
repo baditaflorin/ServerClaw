@@ -1,0 +1,70 @@
+adr_number: 0194
+title: Coolify PaaS Deploy From Repo
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:5d7f755dc
+  evidence: 5d7f755dc [coolify] Refresh ADR 0194 final mainline evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.269305'
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:093af3536
+  evidence: 093af3536 [merge] Integrate ADR 0194 on top of 0.177.29 mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.269342'
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:882f11695
+  evidence: 882f11695 [coolify] Refresh ADR 0194 merged-main evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.269402'
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:2a99afaaa
+  evidence: 2a99afaaa Merge remote-tracking branch 'origin/main' into codex/ws-0194-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:29.269422'
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:08c7c6342
+  evidence: 08c7c6342 [coolify] Record ADR 0194 mainline replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.269430'
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:d4e924501
+  evidence: d4e924501 [merge] Refresh ADR 0194 integration from latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.269442'
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:44ead0dbf
+  evidence: 44ead0dbf [coolify] Merge ADR 0194 for mainline replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.269465'
+- marker_type: git-commit
+  adr_number: 0194
+  location: git:7393cb598
+  evidence: 7393cb598 [coolify] Live-apply ADR 0194 repo deploy lane
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:29.269801'
+- marker_type: playbook
+  adr_number: 0194
+  location: playbooks/coolify.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:29.297533'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=8, playbook=1
+
+  Implemented On: 2026-03-28'

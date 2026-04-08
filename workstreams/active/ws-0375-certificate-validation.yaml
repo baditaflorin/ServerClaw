@@ -2,6 +2,8 @@ id: ws-0375-certificate-validation
 adr: "0375"
 title: "Certificate Validation and Concordance Enforcement"
 status: ready
+ready_to_merge: false
+live_applied: false
 owner: platform-infrastructure
 branch: claude/nervous-feistel
 worktree_path: .claude/worktrees/nervous-feistel
@@ -15,6 +17,21 @@ shared_surfaces:
   - scripts/certificate_validator.py
   - playbooks/certificate-validation.yml
   - playbooks/fix-edge-certificate.yml
+ownership_manifest:
+  owned_surfaces:
+  - id: certificate_validator
+    paths:
+    - scripts/certificate_validator.py
+    - playbooks/certificate-validation.yml
+    - playbooks/fix-edge-certificate.yml
+    - .githooks/pre-push
+    mode: exclusive
+  - id: ws_0375_cert_validation_workstream
+    paths:
+    - workstreams/active/ws-0375-certificate-validation.yaml
+    - docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+    mode: shared_contract
+    contract: workstream-registry-v1
 notes: |
   Implements ADR 0375: automated SSL certificate validation for all 53
   edge-published domains. Fixes hostname mismatches on ci.lv3.org,

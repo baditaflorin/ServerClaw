@@ -32,17 +32,17 @@ model_list:
   # Anthropic Claude models
   - model_name: claude-sonnet-4-20250514
     litellm_params:
-      model: claude-sonnet-4-20250514
+      model: anthropic/claude-sonnet-4-20250514
       api_key: os.environ/ANTHROPIC_API_KEY
 
   - model_name: claude-haiku-4-5-20251001
     litellm_params:
-      model: claude-haiku-4-5-20251001
+      model: anthropic/claude-haiku-4-5-20251001
       api_key: os.environ/ANTHROPIC_API_KEY
 
   - model_name: claude-opus-4-20250115
     litellm_params:
-      model: claude-opus-4-20250115
+      model: anthropic/claude-opus-4-20250115
       api_key: os.environ/ANTHROPIC_API_KEY
 
 litellm_settings:
@@ -57,4 +57,3 @@ litellm_settings:
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
-  database_url: os.environ/DATABASE_URL

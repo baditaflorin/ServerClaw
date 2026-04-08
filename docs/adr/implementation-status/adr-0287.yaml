@@ -1,0 +1,59 @@
+adr_number: 0287
+title: Woodpecker CI As The API-Driven Continuous Integration Server
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0287
+  location: git:f9bc208e7
+  evidence: f9bc208e7 [woodpecker] Integrate ADR 0287 mainline closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.473862'
+- marker_type: git-commit
+  adr_number: 0287
+  location: git:903348d26
+  evidence: 903348d26 [woodpecker] Sync ws-0287 with latest mainline drift
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.474025'
+- marker_type: git-commit
+  adr_number: 0287
+  location: git:770826115
+  evidence: 770826115 [woodpecker] Implement ADR 0287 branch and record DNS blocker
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.474044'
+- marker_type: git-commit
+  adr_number: 0287
+  location: git:d7c54ce4f
+  evidence: d7c54ce4f [woodpecker] Sync ws-0287 with latest mainline drift
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.474210'
+- marker_type: git-commit
+  adr_number: 0287
+  location: git:8a6a72aba
+  evidence: 8a6a72aba [woodpecker] Implement ADR 0287 branch and record DNS blocker
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:09.474228'
+- marker_type: git-commit
+  adr_number: 0287
+  location: git:73fb0ec13
+  evidence: 73fb0ec13 [adr] Supersede LiteLLM (0287) with One-API (0294) due to supply-chain
+    attack
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:09.489823'
+- marker_type: playbook
+  adr_number: 0287
+  location: playbooks/woodpecker.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:09.537154'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=6, playbook=1
+
+  Implemented On: 2026-03-30'

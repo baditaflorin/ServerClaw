@@ -5,6 +5,9 @@
 # Idempotency: Fully idempotent; defaults declare desired values only.
 # Dependencies: ADR 0165 metadata standard, ADR 0130, and the mail_platform_runtime role tasks.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the canonical mail-platform runtime defaults, secrets, ports, and policy metadata used by the managed Stalwart and gateway stack.
 # Use case: Loaded whenever the mail_platform_runtime role converges or verifies the live mail platform.
 # Inputs: Inventory-derived platform port assignments, container image catalog entries, OpenBao defaults, and controller-local artifact paths.
@@ -18,7 +21,6 @@ mail_platform_mailbox_localpart: server
 mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
 mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
 mail_platform_mailbox_description: LV3 managed server mailbox
-mail_platform_site_dir: /opt/mail-platform
 mail_platform_stalwart_dir: /opt/mail-platform/stalwart
 mail_platform_gateway_dir: /opt/mail-platform/gateway
 mail_platform_gateway_app_dir: "{{ mail_platform_gateway_dir }}/app"
@@ -27,14 +29,7 @@ mail_platform_gateway_profiles_file: "{{ mail_platform_gateway_dir }}/notificati
 mail_platform_gateway_profiles_container_file: /config/notification-profiles.json
 mail_platform_gateway_env_file: "{{ compose_runtime_secret_root }}/mail-platform/runtime.env"
 mail_platform_gateway_legacy_env_file: "{{ mail_platform_gateway_dir }}/gateway.env"
-mail_platform_openbao_agent_dir: "{{ mail_platform_site_dir }}/openbao"
-mail_platform_openbao_agent_image: "{{ openbao_agent_image }}"
-mail_platform_openbao_agent_container_name: mail-platform-openbao-agent
 mail_platform_docker_network_name: mail-platform_default
-mail_platform_openbao_secret_path: services/mail-platform/runtime
-mail_platform_openbao_policy_name: lv3-service-mail-platform-runtime
-mail_platform_openbao_approle_name: mail-platform-runtime
-mail_platform_compose_file: "{{ mail_platform_site_dir }}/docker-compose.yml"
 mail_platform_stalwart_config_file: "{{ mail_platform_stalwart_dir }}/etc/config.toml"
 mail_platform_stalwart_bootstrap_file: "{{ mail_platform_site_dir }}/bootstrap-mail-platform.py"
 mail_platform_stalwart_container_name: lv3-mail-stalwart
@@ -46,19 +41,17 @@ mail_platform_stalwart_http_port: 8080
 mail_platform_internal_submission_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port }}"
 mail_platform_submission_auth_retries: 12
 mail_platform_submission_auth_delay_seconds: 5
-mail_platform_secret_dir: /etc/lv3/mail-platform
 mail_platform_profile_secret_dir: "{{ mail_platform_secret_dir }}/profiles"
 mail_platform_admin_password_file: "{{ mail_platform_secret_dir }}/stalwart-admin-password"
 mail_platform_mailbox_password_file: "{{ mail_platform_secret_dir }}/server-mailbox-password"
 mail_platform_metrics_password_file: "{{ mail_platform_secret_dir }}/metrics-password"
 mail_platform_gateway_api_key_file: "{{ mail_platform_secret_dir }}/gateway-api-key"
-mail_platform_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform
 mail_platform_profile_local_artifact_dir: "{{ mail_platform_local_artifact_dir }}/profiles"
-mail_platform_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/stalwart-admin-password.txt
-mail_platform_mailbox_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
-mail_platform_metrics_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/metrics-password.txt
-mail_platform_gateway_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt
-mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/brevo-api-key.txt
+mail_platform_admin_password_local_file: "{{ repo_shared_local_root }}/mail-platform/stalwart-admin-password.txt"
+mail_platform_mailbox_password_local_file: "{{ repo_shared_local_root }}/mail-platform/server-mailbox-password.txt"
+mail_platform_metrics_password_local_file: "{{ repo_shared_local_root }}/mail-platform/metrics-password.txt"
+mail_platform_gateway_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/gateway-api-key.txt"
+mail_platform_brevo_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/brevo-api-key.txt"
 mail_platform_brevo_api_url: https://api.brevo.com/v3/smtp/email
 mail_platform_brevo_sender_email: florin@badita.org
 mail_platform_brevo_sender_name: Florin Mail Bridge

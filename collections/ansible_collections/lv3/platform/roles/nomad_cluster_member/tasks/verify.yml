@@ -14,14 +14,14 @@
     nomad_cluster_service_status.rc not in [0, 3]
     or nomad_cluster_service_status.stdout | trim not in ["active", "activating"]
 
-- name: Wait for the local Nomad HTTP API port
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ nomad_cluster_http_port }}"
-    delay: 0
-    timeout: 60
-    state: started
-  changed_when: false
+- name: Verify the Nomad runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: nomad
+    common_verify_port: "{{ nomad_cluster_http_port }}"
+    common_verify_port_timeout: 60
 
 - name: Verify Nomad reports the pinned version
   ansible.builtin.command: nomad version

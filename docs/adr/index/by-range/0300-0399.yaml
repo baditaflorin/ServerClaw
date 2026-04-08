@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-08'
 facet: range
 label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 82
+total_adrs: 92
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1050,7 +1050,7 @@ adrs:
   - adr: '0346'
     title: Outline Programmatic Wiki API and Automation Hooks
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-04-05'
     concern: automation
     keywords:
@@ -1064,7 +1064,6 @@ adrs:
       ensuredocument, loadapitoken) into a shared module '
     filename: 0346-outline-programmatic-wiki-api-and-automation-hooks.md
     path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
-    implemented_in_repo_version: 0.178.4
     implemented_in_platform_version: 0.178.4
     implemented_on: '2026-04-05'
   - adr: '0346'
@@ -1424,6 +1423,21 @@ adrs:
     summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
+  - adr: '0361'
+    title: Semaphore Keycloak OIDC Integration
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - semaphore
+      - keycloak
+      - oidc
+      - integration
+    summary: 'Extend Semaphore runtime configuration to support Keycloak OpenID Connect (OIDC) authentication while maintaining
+      fallback username/password login for recovery '
+    filename: 0361-semaphore-keycloak-oidc-integration.md
+    path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted
@@ -1468,6 +1482,21 @@ adrs:
     path: docs/adr/0363-plane-agent-tools.md
     implemented_in_repo_version: 0.178.19
     implemented_on: '2026-04-06'
+  - adr: '0364'
+    title: Native Build Server Gate Execution
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - native
+      - build
+      - server
+      - gate
+      - execution
+    summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
+    filename: 0364-native-build-server-gate-execution.md
+    path: docs/adr/0364-native-build-server-gate-execution.md
   - adr: '0364'
     title: Outline Agent Tools — Programmatic Wiki Access for Agents
     status: Accepted
@@ -1617,41 +1646,125 @@ adrs:
       - isolation
       - agent
       - safety
+      - local
       - secrets
-    summary: Credential isolation and agent safety rules for .local/ secret files
+    summary: Add an explicit entry for the .local symlink (without trailing slash) to
     filename: 0376-credential-isolation-and-agent-safety.md
     path: docs/adr/0376-credential-isolation-and-agent-safety.md
+    implemented_on: '2026-04-06'
+  - adr: '0376'
+    title: Identity Core VM Isolation and Aggressive Health Watchdog
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-04-06'
+    concern: vm-topology
+    keywords:
+      - vm-topology
+      - identity
+      - keycloak
+      - step-ca
+      - openbao
+      - api-gateway
+      - watchdog
+      - health
+      - reliability
+      - core
+    summary: 'runtime-control-lv3 retains only the four identity-core services:'
+    filename: 0376-identity-core-vm-isolation-and-watchdog.md
+    path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
   - adr: '0377'
     title: Open WebUI Platform Knowledge Integration
     status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-06'
-    concern: agent-discovery
+    concern: platform
     keywords:
-      - open-webui
-      - rag
-      - platform-context
+      - open
+      - webui
+      - platform
       - knowledge
-      - serverclaw
-      - chatbot
-    summary: Wire platform knowledge (RAG via Qdrant, system prompt, knowledge documents)
-      into Open WebUI so chat.lv3.org answers are grounded in actual platform documentation
+      - integration
+    summary: 'We will wire platform knowledge into Open WebUI through three layers:'
     filename: 0377-open-webui-platform-knowledge-integration.md
     path: docs/adr/0377-open-webui-platform-knowledge-integration.md
-  - adr: '0378'
+  - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
     status: Proposed
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-04-06'
-    concern: agent-discovery
+    concern: platform
     keywords:
       - serverclaw
-      - open-webui
-      - tool-server
-      - governed-tools
-      - function-calling
-      - chatbot
-    summary: Expose ServerClaw governed tools (observe and execute categories) through
-      Open WebUI via a tool server so the chatbot can query live platform state
+      - tool
+      - surface
+      - open
+      - webui
+    summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
     filename: 0378-serverclaw-tool-surface-in-open-webui.md
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+  - adr: 0380
+    title: Neko Remote Desktop for Interactive Operator Browser Access
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: identity
+    keywords:
+      - neko
+      - remote
+      - desktop
+      - interactive
+      - operator
+      - browser
+      - access
+    summary: Neko Remote Desktop for Interactive Operator Browser Access
+    filename: 0380-neko-for-operator-remote-browser-access.md
+    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+  - adr: 0381
+    title: Login Service Contracts and Session Recovery Automation
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: automation
+    keywords:
+      - login
+      - service
+      - contracts
+      - session
+      - recovery
+      - automation
+    summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
+      .lv3.org.
+    filename: 0381-login-service-contracts-and-session-recovery-automation.md
+    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+  - adr: 0382
+    title: Convergence Speed and Incremental Apply
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - convergence
+      - speed
+      - incremental
+      - apply
+    summary: 'Plays that only delegate to localhost (DNS, preflight) do not need remote facts. Change from:'
+    filename: 0382-convergence-speed-and-incremental-apply.md
+    path: docs/adr/0382-convergence-speed-and-incremental-apply.md
+  - adr: 0382
+    title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - adr-0382
+      - keycloak
+      - sign-in
+      - button
+      - stuck
+      - active
+      - incident
+      - postmortem
+    summary: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    filename: 0382-keycloak-sign-in-button-stuck-postmortem.md
+    path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md

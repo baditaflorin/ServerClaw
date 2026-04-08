@@ -5,6 +5,7 @@
 # Outputs: Rendered compose runtime, validated service configuration, and Gitea bootstrap state.
 # Idempotency: Partially idempotent; reruns reconcile the same runtime, config files, and seeded settings.
 # Dependencies: ADR 0143, ADR 0165, and the shared PostgreSQL plus Keycloak surfaces.
+
 - name: Validate Gitea runtime inputs
   ansible.builtin.assert:
     that:
@@ -56,103 +57,33 @@
       - gitea_repo_name | length > 0
     fail_msg: "gitea_runtime requires runtime paths, database credentials, OIDC inputs, and bootstrap artifact paths."
 
-- name: Ensure the Gitea database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ gitea_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_database_password_local
-
-- name: Fail if the Gitea database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ gitea_database_password_local_file }} is missing on the control machine.
-      Run the Gitea PostgreSQL converge first so the runtime can connect to postgres-lv3.
-  when: not gitea_database_password_local.stat.exists
-
-- name: Ensure the Gitea OIDC client secret exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ gitea_oidc_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_oidc_client_secret_local
-
-- name: Ensure the Gitea MinIO secret key exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ gitea_minio_secret_key_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_minio_secret_key_local
-
-- name: Fail if the Gitea OIDC client secret is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ gitea_oidc_client_secret_local_file }} is missing on the control machine.
-      Re-run the Keycloak converge so the Gitea OIDC client is provisioned before bootstrapping Gitea.
-  when: not gitea_oidc_client_secret_local.stat.exists
-
-- name: Fail if the Gitea MinIO secret key is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ gitea_minio_secret_key_local_file }} is missing on the control machine.
-      Converge MinIO before deploying Gitea so the shared LFS object store credentials exist.
-  when: not gitea_minio_secret_key_local.stat.exists
-
-- name: Ensure the release-bundle Cosign private key exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ gitea_release_bundle_cosign_private_key_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_release_bundle_private_key_local
-
-- name: Fail if the release-bundle Cosign private key is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ gitea_release_bundle_cosign_private_key_local_file }} is missing on the control machine.
-      Run `python3 scripts/release_bundle.py init-signing` from the repository root before converging Gitea.
-  when: not gitea_release_bundle_private_key_local.stat.exists
-
-- name: Ensure the release-bundle Cosign password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ gitea_release_bundle_cosign_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_release_bundle_password_local
-
-- name: Fail if the release-bundle Cosign password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ gitea_release_bundle_cosign_password_local_file }} is missing on the control machine.
-      Run `python3 scripts/release_bundle.py init-signing` from the repository root before converging Gitea.
-  when: not gitea_release_bundle_password_local.stat.exists
-
-- name: Ensure the committed release-bundle Cosign public key exists
-  ansible.builtin.stat:
-    path: "{{ gitea_release_bundle_cosign_public_key_repo_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_release_bundle_public_key_repo
-
-- name: Fail if the committed release-bundle Cosign public key is missing
-  ansible.builtin.fail:
-    msg: >-
-      {{ gitea_release_bundle_cosign_public_key_repo_file }} is missing from the repository checkout.
-      Commit the matching public key before converging Gitea so release bundles can be verified later.
-  when: not gitea_release_bundle_public_key_repo.stat.exists
-
-- name: Ensure the ntfy Actions token exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ gitea_ntfy_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_ntfy_token_local
-
-- name: Fail if the ntfy Actions token is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ gitea_ntfy_token_local_file }} is missing on the control machine.
-      Converge ntfy first so the repo-managed validation workflow can publish failure alerts.
-  when: not gitea_ntfy_token_local.stat.exists
+- name: Check Gitea prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ gitea_database_password_local_file }}"
+        description: "Gitea database password"
+        prerequisite: "Converge gitea_postgres before deploying Gitea"
+      - path: "{{ gitea_oidc_client_secret_local_file }}"
+        description: "Gitea OIDC client secret"
+        prerequisite: "Converge the Keycloak runtime before deploying Gitea"
+      - path: "{{ gitea_minio_secret_key_local_file }}"
+        description: "Gitea MinIO secret key"
+        prerequisite: "Converge MinIO before deploying Gitea"
+      - path: "{{ gitea_release_bundle_cosign_private_key_local_file }}"
+        description: "release-bundle Cosign private key"
+        prerequisite: "Run python3 scripts/release_bundle.py init-signing before converging Gitea"
+      - path: "{{ gitea_release_bundle_cosign_password_local_file }}"
+        description: "release-bundle Cosign password"
+        prerequisite: "Run python3 scripts/release_bundle.py init-signing before converging Gitea"
+      - path: "{{ gitea_release_bundle_cosign_public_key_repo_file }}"
+        description: "committed release-bundle Cosign public key"
+        prerequisite: "Commit the matching public key before converging Gitea"
+      - path: "{{ gitea_ntfy_token_local_file }}"
+        description: "ntfy Actions token"
+        prerequisite: "Converge ntfy before deploying Gitea"
 
 - name: Ensure Gitea runtime packages are present
   ansible.builtin.apt:
@@ -185,123 +116,54 @@
       group: root
       mode: "0700"
 
-- name: Generate the Gitea admin password when missing
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ gitea_admin_password_remote_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 > "{{ gitea_admin_password_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: gitea_admin_password_generation
-  changed_when: "'changed' in gitea_admin_password_generation.stdout"
+- name: Manage Gitea runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ gitea_admin_password_remote_file }}"
+        command: "openssl rand -base64 24"
+        label: "gitea-admin-password"
+      - path: "{{ gitea_webhook_secret_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "gitea-webhook-secret"
+      - path: "{{ gitea_renovate_password_remote_file }}"
+        command: "openssl rand -base64 24"
+        label: "gitea-renovate-password"
+    common_manage_service_secrets_read:
+      - "{{ gitea_admin_password_remote_file }}"
+      - "{{ gitea_webhook_secret_remote_file }}"
+      - "{{ gitea_renovate_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ gitea_admin_password_local_file }}"
+        content_index: 0
+      - dest: "{{ gitea_webhook_secret_local_file }}"
+        content_index: 1
+      - dest: "{{ gitea_renovate_password_local_file }}"
+        content_index: 2
+    common_manage_service_secrets_local_artifact_dir: "{{ gitea_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "gitea_decoded_secrets"
   no_log: true
 
-- name: Generate the Gitea webhook secret when missing
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ gitea_webhook_secret_remote_file }}" ]; then
-      umask 077
-      openssl rand -hex 32 > "{{ gitea_webhook_secret_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: gitea_webhook_secret_generation
-  changed_when: "'changed' in gitea_webhook_secret_generation.stdout"
-  no_log: true
-
-- name: Generate the Gitea Renovate bot password when missing
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ gitea_renovate_password_remote_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 > "{{ gitea_renovate_password_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: gitea_renovate_password_generation
-  changed_when: "'changed' in gitea_renovate_password_generation.stdout"
-  no_log: true
-
-- name: Read the Gitea admin password
-  ansible.builtin.slurp:
-    src: "{{ gitea_admin_password_remote_file }}"
-  register: gitea_admin_password_raw
-  no_log: true
-
-- name: Read the Gitea Renovate bot password
-  ansible.builtin.slurp:
-    src: "{{ gitea_renovate_password_remote_file }}"
-  register: gitea_renovate_password_raw
-  no_log: true
-
-- name: Read the Gitea webhook secret
-  ansible.builtin.slurp:
-    src: "{{ gitea_webhook_secret_remote_file }}"
-  register: gitea_webhook_secret_raw
-  no_log: true
-
-- name: Record Gitea secret facts
+- name: Record the Gitea runtime secrets
   ansible.builtin.set_fact:
-    gitea_admin_password: "{{ gitea_admin_password_raw.content | b64decode | trim }}"
+    gitea_admin_password: "{{ gitea_decoded_secrets[0] }}"
+    gitea_webhook_secret: "{{ gitea_decoded_secrets[1] }}"
+    gitea_renovate_password: "{{ gitea_decoded_secrets[2] }}"
     gitea_database_password: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
     gitea_oidc_client_secret: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
     gitea_minio_secret_key: "{{ lookup('ansible.builtin.file', gitea_minio_secret_key_local_file) | trim }}"
-    gitea_renovate_password: "{{ gitea_renovate_password_raw.content | b64decode | trim }}"
     gitea_release_bundle_cosign_private_key: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_private_key_local_file) }}"
     gitea_release_bundle_cosign_password: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_password_local_file) | trim }}"
     gitea_ntfy_token: "{{ lookup('ansible.builtin.file', gitea_ntfy_token_local_file) | trim }}"
-    gitea_webhook_secret: "{{ gitea_webhook_secret_raw.content | b64decode | trim }}"
-  no_log: true
-
-- name: Build Gitea runtime secret payload
-  ansible.builtin.set_fact:
     gitea_runtime_secret_payload:
-      GITEA__database__PASSWD: "{{ gitea_database_password }}"
-      GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
-      GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
-      GITEA__lfs__MINIO_SECRET_ACCESS_KEY: "{{ gitea_minio_secret_key }}"
-      GITEA_WEBHOOK_SECRET: "{{ gitea_webhook_secret }}"
-      GITEA_NTFY_TOKEN: "{{ gitea_ntfy_token }}"
-  no_log: true
-
-- name: Ensure the local Gitea artifact directory exists
-  ansible.builtin.file:
-    path: "{{ gitea_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the Gitea admin password to the control machine
-  ansible.builtin.copy:
-    dest: "{{ gitea_admin_password_local_file }}"
-    content: "{{ gitea_admin_password }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  no_log: true
-
-- name: Mirror the Gitea webhook secret to the control machine
-  ansible.builtin.copy:
-    dest: "{{ gitea_webhook_secret_local_file }}"
-    content: "{{ gitea_webhook_secret }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  no_log: true
-
-- name: Mirror the Gitea Renovate bot password to the control machine
-  ansible.builtin.copy:
-    dest: "{{ gitea_renovate_password_local_file }}"
-    content: "{{ gitea_renovate_password }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
+      GITEA__database__PASSWD: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
+      GITEA_ADMIN_PASSWORD: "{{ gitea_decoded_secrets[0] }}"
+      GITEA_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
+      GITEA__lfs__MINIO_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', gitea_minio_secret_key_local_file) | trim }}"
+      GITEA_WEBHOOK_SECRET: "{{ gitea_decoded_secrets[1] }}"
+      GITEA_NTFY_TOKEN: "{{ lookup('ansible.builtin.file', gitea_ntfy_token_local_file) | trim }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Gitea

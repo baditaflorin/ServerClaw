@@ -11,6 +11,11 @@ from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_int, require_list, require_mapping, require_str
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = repo_path("config", "repo-deploy-catalog.json")
@@ -19,32 +24,6 @@ SUPPORTED_SCHEMA_VERSION = "1.0.0"
 ALLOWED_SOURCES = {"auto", "public", "private-deploy-key"}
 ALLOWED_BUILD_PACKS = {"nixpacks", "static", "dockerfile", "dockercompose"}
 ALLOWED_LLM_ASSISTANCE = {"allowed", "required", "prohibited"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value.strip()
-
-
-def require_int(value: Any, path: str, minimum: int = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def load_repo_deploy_catalog(path: Path = CATALOG_PATH) -> dict[str, Any]:
@@ -119,7 +98,7 @@ def validate_repo_deploy_catalog(payload: dict[str, Any], *, path: Path = CATALO
             require_int(
                 verification.get("minimum_activity_count"),
                 f"{profile_path}.verification.minimum_activity_count",
-                1,
+                minimum=1,
             )
 
 

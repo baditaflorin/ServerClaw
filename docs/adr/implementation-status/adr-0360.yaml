@@ -1,0 +1,69 @@
+adr_number: '0360'
+title: "Plane as Agent Task HQ \u2014 Live Work Tracking for LLM Agents"
+canonical_status: Accepted
+canonical_implementation_status: Accepted
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:9ef508478
+  evidence: "9ef508478 [live-apply] openbao deployed \u2014 ADR-0360 TLS cert hardening\
+    \ (72h lifetime)"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:40.156603'
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:33b52b1dd
+  evidence: '33b52b1dd chore: add gate bypass receipt for ADR-0360 push'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:40.156677'
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:c07a73a6a
+  evidence: 'c07a73a6a [adr-0360] Harden OpenBao TLS cert renewal: 72h lifetime +
+    expiry alert'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:40.156693'
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:0e6d04a63
+  evidence: '0e6d04a63 Merge claude/pensive-heyrovsky: Plane RabbitMQ secret fix +
+    ADR 0360 agent task HQ'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:40.156816'
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:951684efa
+  evidence: "951684efa [release] Bump to 0.178.11 \u2014 Plane RabbitMQ secret fix\
+    \ + ADR 0360 agent task HQ"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:40.156821'
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:e829c30d3
+  evidence: e829c30d3 [plane] Move RabbitMQ credentials to openbao env_file + ADR
+    0360 agent task HQ
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:40.156825'
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:9fbec41ef
+  evidence: "9fbec41ef [release] Bump to 0.178.10 \u2014 Plane RabbitMQ secret fix\
+    \ + ADR 0360 agent task HQ"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:40.156837'
+- marker_type: git-commit
+  adr_number: '0360'
+  location: git:b33bd13af
+  evidence: b33bd13af [plane] Move RabbitMQ credentials to openbao env_file + ADR
+    0360 agent task HQ
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:40.156841'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Accepted
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8'

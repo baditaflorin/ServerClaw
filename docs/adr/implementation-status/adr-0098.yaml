@@ -1,0 +1,58 @@
+adr_number: 0098
+title: Postgres High Availability and Automated Failover
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0098
+  location: git:bd0ddfbda
+  evidence: bd0ddfbda Merge origin/main into ADR 0098 release branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.104391'
+- marker_type: git-commit
+  adr_number: 0098
+  location: git:6f1d1eb91
+  evidence: 6f1d1eb91 Merge origin/main and re-cut ADR 0098 as 0.103.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.104452'
+- marker_type: git-commit
+  adr_number: 0098
+  location: git:865fc3a14
+  evidence: 865fc3a14 Merge origin/main and re-cut ADR 0098 as 0.101.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.104468'
+- marker_type: git-commit
+  adr_number: 0098
+  location: git:020147c44
+  evidence: 020147c44 Release 0.98.0 with ADR 0098
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.104511'
+- marker_type: git-commit
+  adr_number: 0098
+  location: git:4f700b430
+  evidence: 4f700b430 Merge remote-tracking branch 'origin/main' into codex/integration-0098-main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:46.104545'
+- marker_type: git-commit
+  adr_number: 0098
+  location: git:23bac436c
+  evidence: 23bac436c Merge branch 'codex/adr-0098-postgres-ha' into codex/integration-0098-main
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:46.104561'
+- marker_type: git-commit
+  adr_number: 0098
+  location: git:63877d2ef
+  evidence: 63877d2ef Implement ADR 0098 Postgres HA
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:46.104571'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-03-23'

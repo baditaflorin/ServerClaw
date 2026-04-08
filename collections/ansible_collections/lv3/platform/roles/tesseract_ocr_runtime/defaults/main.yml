@@ -5,6 +5,9 @@
 # Idempotency: Fully idempotent; defaults describe desired values only.
 # Dependencies: ADR 0165 metadata standard, ADR 0286, and the tesseract_ocr_runtime role.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 tesseract_ocr_runtime_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('tesseract_ocr') }}"
 tesseract_ocr_runtime_site_dir: /opt/tesseract-ocr
 tesseract_ocr_runtime_service_dir: "{{ tesseract_ocr_runtime_site_dir }}/app"

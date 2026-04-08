@@ -1,0 +1,33 @@
+---
+# Neko Runtime Handlers
+
+- name: restart neko
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: restarted
+    restart_timeout: 10
+  listen: "restart neko"
+  tags: [neko, handlers]
+
+- name: stop neko container for reload
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: stopped
+  listen: "reload neko configuration"
+  tags: [neko, handlers]
+
+- name: remove neko container for reload
+  docker_container:
+    name: "{{ neko_runtime_container_name }}"
+    state: absent
+  listen: "reload neko configuration"
+  tags: [neko, handlers]
+
+- name: redeploy neko container
+  community.docker.docker_compose_v2:
+    project_src: "{{ neko_runtime_data_dir }}"
+    files:
+      - docker-compose.yml
+    state: present
+  listen: "reload neko configuration"
+  tags: [neko, handlers]

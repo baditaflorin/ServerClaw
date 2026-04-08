@@ -14,78 +14,25 @@
 #   - Shared-edge publication for https://draw.lv3.org with the repo-managed oauth2-proxy gate
 #
 # Idempotency: Partially idempotent
-#              Reruns reconcile the same containers, shared-edge config, and certificate SAN set without changing shared release truth.
 #
 # Dependencies:
 #   - ADR 0202: Defines the self-hosted Excalidraw and generated diagram publication model.
 #   - Requires: docker-runtime-lv3, nginx-lv3, and the shared edge auth stack to be reachable.
-#   - Role: lv3.platform.excalidraw_runtime — converges the frontend and collaboration room.
-#   - Role: lv3.platform.nginx_edge_publication — publishes draw.lv3.org through the shared edge.
 #
 # Related ADRs: 0133, 0136, 0165
 # Related Runbooks: docs/runbooks/configure-excalidraw.md
 #
+# Invocation: ansible-playbook playbooks/excalidraw.yml -e @playbooks/vars/excalidraw.yml -e env=production
+#
 # Author: LV3 Platform
-# Last Updated: 2026-03-27
-- name: Ensure Hetzner DNS publication for Excalidraw
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-    subdomain_fqdn: draw.lv3.org
+# Last Updated: 2026-04-06
 
-  tasks:
-    - name: Load controller defaults
-      ansible.builtin.include_vars:
-        file: "{{ inventory_defaults_path }}"
+# --- Standard plays (driven by vars/excalidraw.yml) ---
 
-    - name: Load the subdomain catalog
-      ansible.builtin.include_vars:
-        file: "{{ subdomain_catalog_path }}"
-        name: subdomain_catalog
+- import_playbook: _includes/dns_publication.yml
+  when: service_needs_dns | default(false)
 
-    - name: Select the Excalidraw subdomain entry
-      ansible.builtin.set_fact:
-        selected_subdomain: >-
-          {{
-            (
-              subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', subdomain_fqdn)
-              | list
-              | first
-            ) | default({})
-          }}
-
-    - name: Assert the Excalidraw subdomain is catalogued
-      ansible.builtin.assert:
-        that:
-          - selected_subdomain != {}
-          - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "draw.lv3.org must exist in config/subdomain-catalog.json before live apply."
-
-    - name: Derive the managed Hetzner record name
-      ansible.builtin.set_fact:
-        selected_subdomain_record_name: >-
-          {{
-            '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
-            else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
-            )
-          }}
-
-    - name: Converge the Excalidraw Hetzner DNS record
-      ansible.builtin.include_role:
-        name: lv3.platform.hetzner_dns_record
-      vars:
-        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
-        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
-        hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
-        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+# --- Excalidraw-specific plays (fixed hosts, custom preflight) ---
 
 - name: Converge Excalidraw on the Docker runtime VM
   hosts: docker-runtime-lv3

@@ -1,0 +1,113 @@
+adr_number: 0184
+title: Failure-Domain Labels and Anti-Affinity Policy
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:2859e11ba
+  evidence: 2859e11ba [release] Cut 0.177.18 for ADR 0184
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126360'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:170b3c30b
+  evidence: 170b3c30b Merge stable origin/main after diagram refresh into codex/ws-0184-live-apply
+    before final ADR 0184 release attempt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126394'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:078b76985
+  evidence: 078b76985 [release] Cut 0.177.17 for ADR 0184
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126428'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:854493b9d
+  evidence: 854493b9d Merge ADR 0202 mainline release into codex/ws-0184-live-apply
+    before final ADR 0184 release retry
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126433'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:b42445a28
+  evidence: b42445a28 [release] Cut 0.177.16 for ADR 0184
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126487'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:06ffb7f7c
+  evidence: 06ffb7f7c Merge ADR 0192 mainline release into codex/ws-0184-live-apply
+    before retrying ADR 0184 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126536'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:dcf39d2de
+  evidence: dcf39d2de [release] Cut 0.177.15 for ADR 0184
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126540'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:72dd65b2e
+  evidence: 72dd65b2e Merge ADR 0198 mainline release into codex/ws-0184-live-apply
+    before retrying ADR 0184 release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126574'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:1b915b8fc
+  evidence: 1b915b8fc [release] Cut 0.177.14 for ADR 0184
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126586'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:d7f0d10a9
+  evidence: d7f0d10a9 Merge release-cut origin/main into codex/ws-0184-live-apply
+    before ADR 0184 mainline release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126650'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:4c7156744
+  evidence: 4c7156744 Merge updated origin/main into codex/ws-0184-live-apply before
+    retrying mainline integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:25.126693'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:adf984371
+  evidence: adf984371 Merge origin/main into codex/ws-0184-live-apply before mainline
+    integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:25.126709'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:4a198dcf6
+  evidence: 4a198dcf6 [build] Refresh platform manifest for ADR 0184 push gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126875'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:79acfedee
+  evidence: 79acfedee [placement] Record ADR 0184 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126883'
+- marker_type: git-commit
+  adr_number: 0184
+  location: git:7170cd157
+  evidence: 7170cd157 [placement] Implement ADR 0184 repo policy and live labels
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:25.126900'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=15
+
+  Implemented On: 2026-03-27'

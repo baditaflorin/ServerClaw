@@ -1,0 +1,58 @@
+adr_number: '0150'
+title: Dozzle for Real-Time Container Log Access
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0150'
+  location: git:3b06e300b
+  evidence: 3b06e300b Record gate bypass for ADR 0150 main push
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.758258'
+- marker_type: git-commit
+  adr_number: '0150'
+  location: git:d4f82f542
+  evidence: d4f82f542 Cut 0.168.0 for ADR 0150 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.758290'
+- marker_type: git-commit
+  adr_number: '0150'
+  location: git:af4bbad41
+  evidence: af4bbad41 Record ADR 0150 live apply and cut 0.167.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.758298'
+- marker_type: git-commit
+  adr_number: '0150'
+  location: git:b7272e3af
+  evidence: b7272e3af Implement ADR 0150 Dozzle runtime and edge publication
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.758331'
+- marker_type: git-commit
+  adr_number: '0150'
+  location: git:0feda573f
+  evidence: 0feda573f Record ADR 0150 live apply and cut 0.167.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.758340'
+- marker_type: git-commit
+  adr_number: '0150'
+  location: git:d0f3339ba
+  evidence: d0f3339ba Implement ADR 0150 Dozzle runtime and edge publication
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:08.758385'
+- marker_type: playbook
+  adr_number: '0150'
+  location: playbooks/mattermost.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:08.775851'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=6, playbook=1
+
+  Implemented On: 2026-03-26'

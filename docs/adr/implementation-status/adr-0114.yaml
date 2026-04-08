@@ -1,0 +1,70 @@
+adr_number: '0114'
+title: Rule-Based Incident Triage Engine
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:ecef64589
+  evidence: ecef64589 Record ADR 0114 live apply receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.784881'
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:9805ac855
+  evidence: 9805ac855 Finalize ADR 0114 live triage rollout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.784920'
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:e76b10283
+  evidence: e76b10283 Seed ADR 0114 triage workflows in Windmill
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.784964'
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:6b4efa289
+  evidence: 6b4efa289 Cut 0.111.0 for ADR 0114 incident triage engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.787020'
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:b00b58ac2
+  evidence: b00b58ac2 Implement ADR 0114 incident triage engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.787027'
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:f90a7f166
+  evidence: f90a7f166 Cut 0.110.0 for ADR 0114 incident triage engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.787031'
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:790719028
+  evidence: 790719028 Implement ADR 0114 incident triage engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.787049'
+- marker_type: git-commit
+  adr_number: '0114'
+  location: git:fd003f3ae
+  evidence: fd003f3ae Implement ADR 0114 incident triage engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:52.787056'
+- marker_type: config-file
+  adr_number: '0114'
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:52.929976'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=8, config-file=1
+
+  Implemented On: 2026-03-24'

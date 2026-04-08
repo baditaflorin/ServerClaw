@@ -1,0 +1,118 @@
+adr_number: '0207'
+title: Anti-Corruption Layers At Provider Boundaries
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:a74133090
+  evidence: a74133090 [release] Recut ADR 0207 on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646345'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:d04e99a25
+  evidence: d04e99a25 [validation] Unblock ADR 0207 pre-push gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646375'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:3c5dbc27d
+  evidence: 3c5dbc27d [release] Integrate ADR 0207 on mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646392'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:1861837e3
+  evidence: 1861837e3 [release] Integrate ADR 0207 on mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646414'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:f851758e8
+  evidence: f851758e8 [integration] Checkpoint ADR 0207 recut before latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646429'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:9e090af22
+  evidence: 9e090af22 [release] Prepare ADR 0207 integration truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646491'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:161062f18
+  evidence: 161062f18 [merge] Integrate latest origin/main into ADR 0207 branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646507'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:cfde9f974
+  evidence: cfde9f974 [docs] Record ADR 0207 mainline verification evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646515'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:88e37bc9e
+  evidence: 88e37bc9e [release] Recut ADR 0207 on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646577'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:15ca116fb
+  evidence: 15ca116fb [docs] Record ADR 0207 branch evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646584'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:cb27d5f4f
+  evidence: cb27d5f4f [integration] Prepare ADR 0207 main merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646587'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:9bdc46535
+  evidence: 9bdc46535 [adr-0207] Enforce provider boundary normalization
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:33.646595'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:3651ffa61
+  evidence: 3651ffa61 [docs] Record ADR 0207 branch evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646608'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:d0b11bdb5
+  evidence: d0b11bdb5 [release] Cut 0.177.36 for ADR 0207 mainline candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646623'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:54069f3b4
+  evidence: 54069f3b4 [integration] Prepare ADR 0207 main merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.646626'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:ac0b099ef
+  evidence: ac0b099ef [adr-0207] Enforce provider boundary normalization
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:33.646634'
+- marker_type: git-commit
+  adr_number: '0207'
+  location: git:855e874d0
+  evidence: 855e874d0 [adr-0207] Enforce provider boundary normalization
+  confidence: 0.8
+  detected_on: '2026-04-07T07:54:33.646748'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 17
+
+  Breakdown: git-commit=17
+
+  Implemented On: 2026-03-28'

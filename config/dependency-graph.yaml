@@ -21,6 +21,14 @@ extra_nodes:
     metadata:
       category: observability
       source: manifest
+  - id: service:neko
+    kind: service
+    label: Neko Remote Desktop
+    tier: 2
+    metadata:
+      category: automation
+      service_id: neko
+      source: catalog
   - id: network:vlan:10
     kind: network
     label: guest-network
@@ -85,3 +93,19 @@ extra_edges:
       relationship: alert_review
       strength: soft
       description: Alert triage is materially degraded when operators cannot pivot from Alertmanager to Grafana dashboards.
+  - from: service:neko
+    to: service:nginx_edge
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: edge_publication
+      strength: hard
+      description: Neko WebRTC signalling is proxied through the shared NGINX edge at browser.lv3.org with TLS termination and WebSocket upgrade support.
+  - from: service:neko
+    to: service:keycloak
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: operator_authentication
+      strength: soft
+      description: Neko operator access is controlled through Keycloak OIDC client configuration for Tailscale headscale management network.

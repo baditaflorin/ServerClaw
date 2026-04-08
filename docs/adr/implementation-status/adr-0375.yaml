@@ -1,0 +1,40 @@
+adr_number: '0375'
+title: Certificate Validation And Concordance Enforcement
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0375'
+  location: git:398541d8c
+  evidence: "398541d8c [release] Bump to 0.178.27 \u2014 ADR 0375 certificate validation\
+    \ integration fixes"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:44.768020'
+- marker_type: git-commit
+  adr_number: '0375'
+  location: git:42c3cde42
+  evidence: 42c3cde42 [workstreams] Register ws-0375 certificate validation workstream
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:44.768349'
+- marker_type: git-commit
+  adr_number: '0375'
+  location: git:bf55b26a2
+  evidence: bf55b26a2 [workstreams] Register ws-0375 certificate validation workstream
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:44.768356'
+- marker_type: git-commit
+  adr_number: '0375'
+  location: git:17bfc0919
+  evidence: "17bfc0919 [release] Bump to 0.178.20 \u2014 ADR 0375 certificate validation\
+    \ and concordance enforcement"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:44.768373'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 4
+
+  Breakdown: git-commit=4'

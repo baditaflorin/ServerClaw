@@ -1,0 +1,46 @@
+adr_number: '0277'
+title: Typesense As The Full-Text Search Engine For Internal Structured Data
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0277'
+  location: git:a173a90be
+  evidence: a173a90be [typesense] Finalize ADR 0277 mainline promotion
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.006838'
+- marker_type: git-commit
+  adr_number: '0277'
+  location: git:410d21dec
+  evidence: 410d21dec [merge] Refresh ws-0277 onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.006894'
+- marker_type: git-commit
+  adr_number: '0277'
+  location: git:4b881560d
+  evidence: 4b881560d [typesense] Reapply ADR 0277 on latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.006925'
+- marker_type: git-commit
+  adr_number: '0277'
+  location: git:db8062ff3
+  evidence: db8062ff3 [typesense] Complete ADR 0277 automation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.007065'
+- marker_type: playbook
+  adr_number: '0277'
+  location: playbooks/typesense.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:05.071312'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=4, playbook=1
+
+  Implemented On: 2026-03-31'

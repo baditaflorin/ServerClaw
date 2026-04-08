@@ -1,0 +1,112 @@
+adr_number: '0226'
+title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:522c818ab
+  evidence: 522c818ab [docs] Refresh generated artifacts for ADR 0226 release recut
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795496'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:cc34dc8dc
+  evidence: cc34dc8dc [release] Record ADR 0226 exact-main evidence in 0.177.55
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795525'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:ca501fa8b
+  evidence: ca501fa8b [docs] Finalize ADR 0226 exact-main evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795533'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:14143f58d
+  evidence: 14143f58d [release] Recut ADR 0224 and ADR 0226 on top of 0.177.51
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795600'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:c2c8ab594
+  evidence: c2c8ab594 [meta] Refresh ADR index for 0224 and 0226
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:41.795619'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:c11de34d3
+  evidence: c11de34d3 [release] Recut ADR 0224 and ADR 0226 on top of 0.177.49
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795663'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:385566381
+  evidence: 385566381 [release] Cut ADR 0224 and ADR 0226 integration candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795759'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:f4c120b40
+  evidence: f4c120b40 [host] Record ADR 0226 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795853'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:77d076c61
+  evidence: 77d076c61 [host] Reset failed ADR 0226 service state on replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795864'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:e6cc93a34
+  evidence: e6cc93a34 [host] Finalize ADR 0226 workflow contract
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795871'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:19c4b0b22
+  evidence: 19c4b0b22 [host] Scaffold ADR 0226 control-loop automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.795874'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:fe6c8f2cd
+  evidence: fe6c8f2cd [host] Record ADR 0226 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.796121'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:b56e6dee1
+  evidence: b56e6dee1 [host] Reset failed ADR 0226 service state on replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.796132'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:57fc12afe
+  evidence: 57fc12afe [host] Finalize ADR 0226 workflow contract
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.796139'
+- marker_type: git-commit
+  adr_number: '0226'
+  location: git:f8e03fdf9
+  evidence: f8e03fdf9 [host] Scaffold ADR 0226 control-loop automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.796144'
+- marker_type: playbook
+  adr_number: '0226'
+  location: playbooks/proxmox-install.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:41.811212'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 16
+
+  Breakdown: git-commit=15, playbook=1
+
+  Implemented On: 2026-03-28'

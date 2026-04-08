@@ -1,0 +1,46 @@
+adr_number: '0212'
+title: Replaceability Scorecards And Vendor Exit Plans
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0212'
+  location: git:2997154fc
+  evidence: 2997154fc [merge] Absorb latest origin/main after ADR 0212 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.891356'
+- marker_type: git-commit
+  adr_number: '0212'
+  location: git:ac904117e
+  evidence: ac904117e [release] Cut 0.177.34 for ADR 0212 mainline integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.891561'
+- marker_type: git-commit
+  adr_number: '0212'
+  location: git:77b3086bb
+  evidence: 77b3086bb [docs] Reconcile ADR 0212 validation artifacts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.891578'
+- marker_type: git-commit
+  adr_number: '0212'
+  location: git:7a4e8ff73
+  evidence: 7a4e8ff73 [docs] Record ADR 0212 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.891641'
+- marker_type: git-commit
+  adr_number: '0212'
+  location: git:9d1e75f26
+  evidence: 9d1e75f26 [docs] Implement ADR 0212 replaceability governance
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:35.891653'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 5
+
+  Breakdown: git-commit=5
+
+  Implemented On: 2026-03-28'

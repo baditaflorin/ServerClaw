@@ -74,5 +74,39 @@ else
   echo "validation gate: certificate validator not found (skipping local check)"
 fi
 
+echo "validation gate: validating ADR status transitions"
+if [[ "${SKIP_ADR_VALIDATION:-0}" == "1" ]]; then
+  echo "validation gate: skipping ADR validation because SKIP_ADR_VALIDATION=1"
+  bypass_args=(
+    --bypass skip_adr_validation
+    --source pre-push-hook
+    --reason-code "${GATE_BYPASS_REASON_CODE:-}"
+    --detail "${GATE_BYPASS_DETAIL:-${GATE_BYPASS_REASON:-}}"
+    --substitute-evidence "${GATE_BYPASS_SUBSTITUTE_EVIDENCE:-}"
+    --remediation-ref "${GATE_BYPASS_REMEDIATION_REF:-}"
+  )
+  if [[ -n "${GATE_BYPASS_IMPACTED_LANES:-}" ]]; then
+    bypass_args+=( --impacted-lane "${GATE_BYPASS_IMPACTED_LANES}" )
+  else
+    bypass_args+=( --impacted-lane adr-validation )
+  fi
+  if [[ -n "${GATE_BYPASS_OWNER:-}" ]]; then
+    bypass_args+=( --owner "${GATE_BYPASS_OWNER}" )
+  fi
+  if [[ -n "${GATE_BYPASS_EXPIRES_ON:-}" ]]; then
+    bypass_args+=( --expires-on "${GATE_BYPASS_EXPIRES_ON}" )
+  fi
+  python3 scripts/log_gate_bypass.py "${bypass_args[@]}"
+else
+  if uv run python scripts/validate_adr_status_transitions.py; then
+    :  # ADR validation passed
+  else
+    echo "validation gate: ADR status transition validation FAILED"
+    echo "Fix: Update ADR status with proper evidence or add ADR-STATUS-CHANGE-REASON to commit message"
+    echo "Bypass: SKIP_ADR_VALIDATION=1 GATE_BYPASS_REASON_CODE=<code> git push origin <branch>"
+    exit 1
+  fi
+fi
+
 echo "validation gate: running remote pre-push gate"
 scripts/remote_exec.sh pre-push-gate --local-fallback

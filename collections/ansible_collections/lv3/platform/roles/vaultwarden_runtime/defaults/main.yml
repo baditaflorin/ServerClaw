@@ -1,11 +1,9 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 vaultwarden_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('vaultwarden') }}"
-vaultwarden_image: "{{ container_image_catalog.images.vaultwarden_runtime.ref }}"
-vaultwarden_container_name: vaultwarden
-vaultwarden_site_dir: /opt/vaultwarden
-vaultwarden_data_dir: "{{ vaultwarden_site_dir }}/data"
 vaultwarden_tls_dir: "{{ vaultwarden_site_dir }}/tls"
-vaultwarden_compose_file: "{{ vaultwarden_site_dir }}/docker-compose.yml"
 vaultwarden_https_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('vaultwarden', 'internal') }}"
 vaultwarden_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('vaultwarden', 'internal') }}"
 vaultwarden_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('vaultwarden', 'controller') }}"
@@ -16,7 +14,6 @@ vaultwarden_database_inventory_host: >-
   {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
 vaultwarden_database_host: "{{ hostvars[vaultwarden_database_inventory_host].ansible_host }}"
 vaultwarden_database_port: 5432
-vaultwarden_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vaultwarden
 vaultwarden_database_password_local_file: "{{ vaultwarden_local_artifact_dir }}/database-password.txt"
 vaultwarden_admin_token_local_file: "{{ vaultwarden_local_artifact_dir }}/admin-token.txt"
 vaultwarden_admin_token_hash_local_file: "{{ vaultwarden_local_artifact_dir }}/admin-token-argon2.txt"

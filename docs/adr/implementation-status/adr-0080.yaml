@@ -1,0 +1,28 @@
+adr_number: 0080
+title: Maintenance Window And Change Suppression Protocol
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0080
+  location: git:7c981ee29
+  evidence: 7c981ee29 Implement ADR 0080 maintenance windows
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:39.074639'
+- marker_type: config-file
+  adr_number: 0080
+  location: config/event-taxonomy.yaml
+  evidence: ADR reference found in config file
+  confidence: 0.8
+  detected_on: '2026-04-07T07:53:39.219053'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=1, config-file=1
+
+  Implemented On: 2026-03-23'

@@ -344,6 +344,19 @@ playbooks:
       - vm:120
       - vm:120/service:livekit
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/neko.yml:
+    playbook_id: neko
+    mutation_scope: platform
+    shared_surfaces:
+      - service:neko
+      - host:proxmox_florin
+      - host:proxmox_florin/service:proxmox_network
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - vm:121
+      - vm:121/service:neko
+      - config/subdomain-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/serverclaw.yml:
     playbook_id: serverclaw
     mutation_scope: platform
@@ -392,6 +405,20 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:one-api
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/litellm.yml:
+    playbook_id: litellm
+    canonical_service_id: litellm
+    mutation_scope: platform
+    shared_surfaces:
+      - service:litellm
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/librechat.yml:
+    playbook_id: librechat
+    canonical_service_id: librechat
+    mutation_scope: platform
+    shared_surfaces:
+      - service:librechat
       - inventory/host_vars/proxmox_florin.yml
   playbooks/glitchtip.yml:
     playbook_id: glitchtip
@@ -479,6 +506,11 @@ playbooks:
     shared_surfaces:
       - service:step-ca
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/identity-core-watchdog.yml:
+    playbook_id: identity-core-watchdog
+    mutation_scope: host
+    shared_surfaces:
+      - roles/identity_core_watchdog
   playbooks/superset.yml:
     playbook_id: superset
     mutation_scope: platform

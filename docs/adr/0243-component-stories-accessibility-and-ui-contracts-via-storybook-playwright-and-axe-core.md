@@ -1,8 +1,8 @@
 # ADR 0243: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Partial
+- Implemented In Repo Version: detected
 - Implemented In Platform Version: N/A
 - Date: 2026-03-28
 

@@ -1,17 +1,14 @@
 ---
 # Purpose: Verify the deployed LiveKit signal and media listeners plus the repo-managed room lifecycle contract.
-# Use case: Run after LiveKit converges or during validation to prove local room management succeeds from the managed API credentials.
-# Inputs: Running LiveKit container, runtime env file, guest-local helper script, and the expected signal plus media ports.
-# Outputs: Read-only listener checks and a create/list/delete room probe against the local Twirp API.
-# Idempotency: Fully idempotent because the synthetic room is created and deleted within the same verification pass.
-# Dependencies: ADR 0165 and ADR 0293.
-- name: Verify the LiveKit signal listener is reachable locally
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ livekit_signal_port }}"
-    timeout: 10
-    state: started
-  changed_when: false
+# Dependencies: ADR 0165, ADR 0293, ADR 0371.
+- name: Verify the LiveKit runtime signal port
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: livekit
+    common_verify_port: "{{ livekit_signal_port }}"
+    common_verify_port_timeout: 10
 
 - name: Verify the LiveKit TCP media listener is reachable locally
   ansible.builtin.wait_for:

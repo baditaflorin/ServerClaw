@@ -1,7 +1,7 @@
 # ADR 0087: Repository Validation Gate (Pre-Push and CI)
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.93.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-23

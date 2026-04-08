@@ -1,0 +1,37 @@
+id: ws-0400-adr-status-updates
+adr:
+  - '0058'
+  - '0061'
+title: "Mark ADR 0058 and 0061 as Superseded"
+description: |
+  ADR 0058 (NATS JetStream) and ADR 0061 (GlitchTip) are marked as "Not Implemented" in the ADR index,
+  but both are actually deployed in production via successor ADRs 0276 and 0281 respectively.
+  This workstream updates their status to "Superseded" and links to the correct implemented ADRs.
+status: planned
+owner: claude
+branch: claude/ws-0400-adr-status
+worktree_path: .claude/worktrees/ws-0400-adr-status
+doc: docs/workstreams/ws-0400-adr-status-updates.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+  - docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/by-status/
+ownership_manifest:
+  owned_surfaces:
+    - id: adr_0058_0061_frontmatter
+      paths:
+        - docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+        - docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+      mode: exclusive
+notes: |
+  - Update ADR 0058 frontmatter: Status → "Superseded"
+  - Update ADR 0061 frontmatter: Status → "Superseded"
+  - Add superseded_by reference to ADR 0276 in 0058
+  - Add superseded_by reference to ADR 0281 in 0061
+  - Regenerate docs/adr/.index.yaml and all status shards
+  - Commit and push to claude/ws-0400-adr-status
+ready_to_merge: false
+live_applied: false

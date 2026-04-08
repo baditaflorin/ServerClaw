@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
 from typing import Any
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_list, require_mapping, require_str, require_string_list
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
@@ -15,30 +22,6 @@ ALLOWED_CLASSES = {"secret", "confidential", "internal", "public"}
 ALLOWED_PII_RISKS = {"none", "low", "medium", "high"}
 
 
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
 def require_identifier(value: Any, path: str) -> str:
     value = require_str(value, path)
     allowed = set("abcdefghijklmnopqrstuvwxyz0123456789_-")
@@ -47,14 +30,6 @@ def require_identifier(value: Any, path: str) -> str:
     if any(char not in allowed for char in value):
         raise ValueError(f"{path} must use lowercase letters, numbers, hyphens, or underscores")
     return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    items = require_list(value, path)
-    result: list[str] = []
-    for index, item in enumerate(items):
-        result.append(require_str(item, f"{path}[{index}]"))
-    return result
 
 
 def load_data_catalog(path=DATA_CATALOG_PATH) -> dict[str, Any]:

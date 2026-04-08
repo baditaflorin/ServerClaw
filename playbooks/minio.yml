@@ -13,7 +13,6 @@
 #   - MinIO DNS records, runtime configuration, bucket policies, and edge publication are reconciled to the declared platform state.
 #
 # Idempotency: Partially idempotent
-#              Reruns reconcile the same runtime, bucket policies, and public publication without mutating protected release truth on this branch.
 #
 # Dependencies:
 #   - ADR 0274: Defines MinIO as the shared S3-compatible object-storage layer.
@@ -24,8 +23,12 @@
 # Related ADRs: 0077, 0165, 0274
 # Related Runbooks: docs/runbooks/minio-object-storage.md
 #
+# Invocation: ansible-playbook playbooks/minio.yml -e @playbooks/vars/minio.yml -e env=production
+#
 # Author: LV3 Platform
-# Last Updated: 2026-03-30
+# Last Updated: 2026-04-06
+
+# --- MinIO-specific DNS play (uses hetzner_dns_records role, not catalog-based) ---
 
 - name: Ensure Hetzner DNS publication for MinIO
   hosts: proxmox_hosts
@@ -41,44 +44,12 @@
           become: false
       run_once: true
 
-- name: Converge MinIO on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
-  become: true
-  gather_facts: true
+- import_playbook: _includes/docker_runtime_converge.yml
 
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_audit_action: playbook.start.minio
-        playbook_execution_audit_target: minio
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+- import_playbook: _includes/nginx_edge_publication.yml
+  when: service_needs_nginx_edge | default(false)
 
-  roles:
-    - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.docker_runtime
-    - role: lv3.platform.minio_runtime
-
-- name: Publish MinIO through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
-  become: true
-  gather_facts: true
-  vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.nginx_edge_publication
+# --- MinIO-specific verify play ---
 
 - name: Verify MinIO public publication after edge convergence
   hosts: localhost

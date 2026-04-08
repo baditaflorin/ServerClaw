@@ -1,0 +1,92 @@
+adr_number: '0264'
+title: Failure-Domain-Isolated Validation Lanes
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:8e4b1c4ec
+  evidence: 8e4b1c4ec [validation] Merge latest origin/main ADR 0264 status update
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218028'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:430e364e2
+  evidence: 430e364e2 [validation] Mark ADR 0264 merged on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218053'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:db072ae86
+  evidence: db072ae86 [validation] Finalize ADR 0264 exact-main verification readiness
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218082'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:5ce5deae5
+  evidence: '5ce5deae5 [validation] Harden generated portal fallback\n\nPurpose: Keep
+    ADR 0264 validation lanes runnable when uv is absent in remote or local fallback
+    environments\nScope: Use the package bootstrap helper for docs portal generation
+    and align cache coverage\nStatus: Branch verification ready for latest mainline
+    rebase\nNext: Rebase onto origin/main and rerun remote validation\nSee also: ADR
+    0264'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218264'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:89f8d8160
+  evidence: 89f8d8160 [validation] Finish ADR 0264 live-apply runtime hardening
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218267'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:402106a90
+  evidence: 402106a90 [validation] Harden ADR 0264 remote lane execution
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218270'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:d9e4fe540
+  evidence: d9e4fe540 [validation] Implement ADR 0264 lane-aware gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218273'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:08300e284
+  evidence: '08300e284 [validation] Harden generated portal fallback\n\nPurpose: Keep
+    ADR 0264 validation lanes runnable when uv is absent in remote or local fallback
+    environments\nScope: Use the package bootstrap helper for docs portal generation
+    and align cache coverage\nStatus: Branch verification ready for latest mainline
+    rebase\nNext: Rebase onto origin/main and rerun remote validation\nSee also: ADR
+    0264'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218585'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:8ef1fa07d
+  evidence: 8ef1fa07d [validation] Finish ADR 0264 live-apply runtime hardening
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218589'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:2406ad47c
+  evidence: 2406ad47c [validation] Harden ADR 0264 remote lane execution
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218592'
+- marker_type: git-commit
+  adr_number: '0264'
+  location: git:0fccc68fe
+  evidence: 0fccc68fe [validation] Implement ADR 0264 lane-aware gate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:59.218595'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=11
+
+  Implemented On: 2026-03-29'

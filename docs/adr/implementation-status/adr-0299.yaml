@@ -1,0 +1,70 @@
+adr_number: 0299
+title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:da7f1d878
+  evidence: da7f1d878 [manifest] Refresh platform manifest after ADR 0299 closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:15.132259'
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:8033a9681
+  evidence: 8033a9681 [live-apply] Finalize ADR 0299 ntfy mainline replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:15.132290'
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:08576b337
+  evidence: 08576b337 [ws-0299] Fix latest-main ntfy helper closeout
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:15.132300'
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:9f33c9703
+  evidence: 9f33c9703 [ws-0299] Finalize ntfy edge replay fixes and receipts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:15.132306'
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:ebf51e50d
+  evidence: ebf51e50d [ws-0299] Migrate governed ntfy automation contracts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:15.132312'
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:28de706b7
+  evidence: 28de706b7 [ws-0299] Wire governed ntfy catalogs and failure receipts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:15.132318'
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:7843e6f4e
+  evidence: 7843e6f4e [ws-0299] Checkpoint public ntfy registry alignment
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:15.132323'
+- marker_type: git-commit
+  adr_number: 0299
+  location: git:b9d86c136
+  evidence: b9d86c136 [ws-0299] Checkpoint ntfy live-apply implementation
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:15.132328'
+- marker_type: playbook
+  adr_number: 0299
+  location: playbooks/ntfy.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:15.187669'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 9
+
+  Breakdown: git-commit=8, playbook=1
+
+  Implemented On: 2026-04-03'

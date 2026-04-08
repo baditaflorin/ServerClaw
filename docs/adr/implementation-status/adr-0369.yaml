@@ -1,0 +1,116 @@
+adr_number: 0369
+title: Python Validation Toolkit
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:095055c9a
+  evidence: "095055c9a refactor(scripts): migrate batch 6 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439215'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:b7d3263de
+  evidence: "b7d3263de refactor(scripts): migrate batch 5 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439253'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:c44373ce6
+  evidence: "c44373ce6 refactor(scripts): migrate batch 4 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439258'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:f6581595b
+  evidence: "f6581595b refactor(scripts): migrate batch 3 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439262'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:b33fd80c0
+  evidence: "b33fd80c0 refactor(scripts): migrate batch 2 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439266'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:1da6a0e69
+  evidence: "1da6a0e69 refactor(scripts): migrate batch 1 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439270'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:067feaad6
+  evidence: "067feaad6 feat(scripts): add shared validation_toolkit \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439273'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:cd6dc1749
+  evidence: "cd6dc1749 refactor(scripts): migrate batch 6 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439874'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:714c83a40
+  evidence: "714c83a40 refactor(scripts): migrate batch 5 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439890'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:71f0e61f1
+  evidence: "71f0e61f1 refactor(scripts): migrate batch 4 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439907'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:73a08ca28
+  evidence: "73a08ca28 refactor(scripts): migrate batch 3 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439911'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:78c0b8cac
+  evidence: "78c0b8cac refactor(scripts): migrate batch 2 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439928'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:f0f2f6e51
+  evidence: "f0f2f6e51 refactor(scripts): migrate batch 1 to shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.439943'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:2d0518010
+  evidence: "2d0518010 feat(scripts): add shared validation_toolkit \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.440190'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:b46904d68
+  evidence: b46904d68 [workstreams] Register ADR 0369 validation toolkit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:42.440263'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Status: Proposed
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=15'

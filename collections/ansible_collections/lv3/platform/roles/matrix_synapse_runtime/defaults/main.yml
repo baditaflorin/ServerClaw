@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the default runtime inputs for the Matrix Synapse service role.
 # Use case: Used when converging Matrix Synapse on docker-runtime-lv3 with repo-managed bootstrap secrets, config, and publication contracts.
 #
@@ -26,19 +29,10 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-29
-matrix_synapse_site_dir: /opt/matrix-synapse
-matrix_synapse_data_dir: "{{ matrix_synapse_site_dir }}/data"
 matrix_synapse_container_data_dir: /data
-matrix_synapse_secret_dir: /etc/lv3/matrix-synapse
-matrix_synapse_compose_file: "{{ matrix_synapse_site_dir }}/docker-compose.yml"
 matrix_synapse_homeserver_config_file: "{{ matrix_synapse_data_dir }}/homeserver.yaml"
 matrix_synapse_log_config_file: "{{ matrix_synapse_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
 matrix_synapse_log_config_container_file: "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
-matrix_synapse_env_file: "{{ compose_runtime_secret_root }}/matrix-synapse/runtime.env"
-matrix_synapse_legacy_env_file: "{{ matrix_synapse_site_dir }}/matrix-synapse.env"
-matrix_synapse_openbao_agent_dir: "{{ matrix_synapse_site_dir }}/openbao"
-matrix_synapse_openbao_agent_image: "{{ openbao_agent_image }}"
-matrix_synapse_openbao_agent_container_name: matrix-synapse-openbao-agent
 matrix_synapse_mautrix_discord_dir: "{{ matrix_synapse_site_dir }}/mautrix-discord"
 matrix_synapse_mautrix_discord_config_file: "{{ matrix_synapse_mautrix_discord_dir }}/config.yaml"
 matrix_synapse_mautrix_discord_registration_file: "{{ matrix_synapse_mautrix_discord_dir }}/registration.yaml"
@@ -47,11 +41,6 @@ matrix_synapse_mautrix_whatsapp_dir: "{{ matrix_synapse_site_dir }}/mautrix-what
 matrix_synapse_mautrix_whatsapp_config_file: "{{ matrix_synapse_mautrix_whatsapp_dir }}/config.yaml"
 matrix_synapse_mautrix_whatsapp_registration_file: "{{ matrix_synapse_mautrix_whatsapp_dir }}/registration.yaml"
 matrix_synapse_mautrix_whatsapp_container_name: matrix-mautrix-whatsapp
-matrix_synapse_openbao_secret_path: services/matrix-synapse/runtime-env
-matrix_synapse_openbao_policy_name: lv3-service-matrix-synapse-runtime
-matrix_synapse_openbao_approle_name: matrix-synapse-runtime
-matrix_synapse_container_name: matrix-synapse
-matrix_synapse_image: "{{ container_image_catalog.images.matrix_synapse_runtime.ref }}"
 matrix_synapse_mautrix_discord_image: "{{ container_image_catalog.images.matrix_mautrix_discord_runtime.ref }}"
 matrix_synapse_mautrix_whatsapp_image: "{{ container_image_catalog.images.matrix_mautrix_whatsapp_runtime.ref }}"
 matrix_synapse_server_name: matrix.lv3.org
@@ -72,7 +61,6 @@ matrix_synapse_mautrix_discord_database_host: "{{ matrix_synapse_database_host }
 matrix_synapse_mautrix_whatsapp_database_name: mautrix_whatsapp
 matrix_synapse_mautrix_whatsapp_database_user: mautrix_whatsapp
 matrix_synapse_mautrix_whatsapp_database_host: "{{ matrix_synapse_database_host }}"
-matrix_synapse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse
 matrix_synapse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/database-password.txt
 matrix_synapse_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt
 matrix_synapse_ops_access_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-access-token.txt

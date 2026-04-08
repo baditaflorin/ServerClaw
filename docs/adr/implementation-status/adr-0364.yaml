@@ -1,0 +1,100 @@
+adr_number: '0364'
+title: "Outline Agent Tools \u2014 Programmatic Wiki Access for Agents"
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:1b6cf758a
+  evidence: 1b6cf758a [adr-0364] Fix integration-tests import-mode and add repowise
+    uptime-kuma monitor
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.646948'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:875a6ae81
+  evidence: '875a6ae81 [adr-0364] Fix gate: repowise service catalog completeness,
+    workstream surfaces'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.646994'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:4232de083
+  evidence: '4232de083 [adr-0364] Fix gate: health-probe-catalog, trivy .local skip,
+    httpx dep'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.647165'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:44b54fda4
+  evidence: '44b54fda4 [adr-0364] Fix gate validation: workstream surfaces, redundancy
+    catalog, tool versions'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.647652'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:15ab89ed3
+  evidence: '15ab89ed3 [adr-0364] Post-rebase fixups: canonical truth, workstream
+    metadata'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.647700'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:73ee42727
+  evidence: '73ee42727 [adr-0364] Fix gate validation issues: native_commands, workstream
+    registry'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.647717'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:816f94bad
+  evidence: "816f94bad [adr-0364] Native build server gate execution \u2014 eliminate\
+    \ Docker overhead and arm64 emulation"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.647723'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:355b40485
+  evidence: '355b40485 [adr-0364] Fix gate validation issues: native_commands, workstream
+    registry'
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.647764'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:8fe16db1c
+  evidence: "8fe16db1c [adr-0364] Native build server gate execution \u2014 eliminate\
+    \ Docker overhead and arm64 emulation"
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:41.647981'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:493b1f1e3
+  evidence: '493b1f1e3 [agents] AW-22 + AW-23: generic service auth helper + Outline
+    agent tools (ADR 0364)'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:41.648031'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:bc3028f97
+  evidence: 'bc3028f97 [agents] AW-22 + AW-23: generic service auth helper + Outline
+    agent tools (ADR 0364)'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:41.648049'
+- marker_type: git-commit
+  adr_number: '0364'
+  location: git:917fc6b2e
+  evidence: '917fc6b2e [workstreams] Add ws-0364: service API agent tools (Outline,
+    Netbox, Dify + auth helper)'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:41.648141'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=12
+
+  Implemented On: 2026-04-06'

@@ -221,8 +221,13 @@ public_edge_security_headers_overrides:
       font-src 'self' data: https://unpkg.com;
       connect-src 'self'; manifest-src 'self'
   sso.lv3.org:
+    # Keycloak uses same-origin iframes for session management (authChecker.js
+    # and the admin-console 3rd-party-cookie probe).  frame-ancestors must be
+    # 'self', and X-Frame-Options must be SAMEORIGIN, or the iframe times out
+    # and the Sign-In button on the login page becomes unresponsive.
+    x_frame_options: SAMEORIGIN
     content_security_policy: >-
-      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.lv3.org;
       frame-src 'self'; manifest-src 'self'

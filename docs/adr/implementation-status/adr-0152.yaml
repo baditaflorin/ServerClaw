@@ -1,0 +1,109 @@
+adr_number: '0152'
+title: Homepage for Unified Service Dashboard
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:3fcef6ce6
+  evidence: 3fcef6ce6 Record ADR 0152 homepage live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.848879'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:499ab6669
+  evidence: 499ab6669 Prepare ADR 0152 homepage mainline release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849000'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:2c8e9b508
+  evidence: 2c8e9b508 Implement ADR 0152 homepage dashboard
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849019'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:a8a5f2913
+  evidence: a8a5f2913 Prepare ADR 0152 homepage mainline release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849028'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:0b93a9a4a
+  evidence: 0b93a9a4a Implement ADR 0152 homepage dashboard
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849089'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:e49de917b
+  evidence: e49de917b Implement ADR 0152 homepage dashboard
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849150'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:5047eb636
+  evidence: 5047eb636 Refresh generated integration artifacts for ADR 0152
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849445'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:e46d87e68
+  evidence: e46d87e68 Cut 0.165.0 for ADR 0152
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849468'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:1802e320a
+  evidence: 1802e320a Implement ADR 0152 homepage dashboard
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849490'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:19cde69a7
+  evidence: 19cde69a7 Implement ADR 0152 homepage dashboard
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.849895'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:b7d77cf59
+  evidence: b7d77cf59 Implement ADR 0152 homepage dashboard
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:09.850411'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:916598953
+  evidence: "916598953 Add ADRs 0133\u20130152: security hardening and new service\
+    \ integrations"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:09.850492'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:1a5d2cb11
+  evidence: "1a5d2cb11 Add ADRs 0133\u20130152: security hardening and new service\
+    \ integrations"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:09.850937'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:7229a24b0
+  evidence: "7229a24b0 Merge ADRs 0133\u20130152: security hardening and new services"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:09.850963'
+- marker_type: git-commit
+  adr_number: '0152'
+  location: git:6041dfc17
+  evidence: "6041dfc17 Add ADRs 0133\u20130152: security hardening and new service\
+    \ integrations"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:09.850970'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=15
+
+  Implemented On: 2026-03-26'

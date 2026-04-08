@@ -1,0 +1,77 @@
+adr_number: '0171'
+title: Controlled Fault Injection for Resilience Validation
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:58b6465de
+  evidence: 58b6465de Add fault-injection command contract to satisfy ADR 0171 catalog
+    requirement
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.629929'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:e150a60c2
+  evidence: e150a60c2 Record gate bypass for ADR 0171 main push
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630083'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:a110c409e
+  evidence: a110c409e Record ADR 0171 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630091'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:fd622b193
+  evidence: fd622b193 Harden ADR 0171 fault injection workflows
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630095'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:a9d9050f4
+  evidence: a9d9050f4 Implement ADR 0171 fault injection workflow
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630105'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:a869eb0f0
+  evidence: a869eb0f0 Harden ADR 0171 fault injection workflows
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630190'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:aaeef66ef
+  evidence: aaeef66ef Implement ADR 0171 fault injection workflow
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630337'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:cd6d4611e
+  evidence: cd6d4611e Implement ADR 0171 fault injection workflow
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630382'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:dc68ac396
+  evidence: dc68ac396 Implement ADR 0171 fault injection workflow
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630881'
+- marker_type: git-commit
+  adr_number: '0171'
+  location: git:f1b289327
+  evidence: f1b289327 Implement ADR 0171 fault injection workflow
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:18.630897'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=10
+
+  Implemented On: 2026-03-26'

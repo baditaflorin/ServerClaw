@@ -1,4 +1,11 @@
 ---
+- name: Derive N8n conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: n8n
+
 - name: Validate n8n runtime inputs
   ansible.builtin.assert:
     that:
@@ -24,19 +31,15 @@
       n8n_runtime requires compose paths, image, service URLs, PostgreSQL credentials,
       and owner bootstrap settings.
 
-- name: Ensure the n8n database password exists on the control machine
-  ansible.builtin.stat:
-    path: "{{ n8n_database_password_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: n8n_database_password_local
-
-- name: Fail if the n8n database password is missing locally
-  ansible.builtin.fail:
-    msg: >-
-      {{ n8n_database_password_local_file }} is missing on the control machine.
-      Run the n8n PostgreSQL converge first so the runtime can connect to postgres-lv3.
-  when: not n8n_database_password_local.stat.exists
+- name: Check n8n prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ n8n_database_password_local_file }}"
+        description: "n8n database password"
+        prerequisite: "Converge n8n_postgres before deploying n8n"
 
 - name: Ensure the n8n runtime packages are present
   ansible.builtin.apt:
@@ -67,75 +70,37 @@
       group: root
       mode: "0700"
 
-- name: Generate the n8n owner password
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ n8n_owner_password_remote_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ n8n_owner_password_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: n8n_owner_password_generation
-  changed_when: "'changed' in n8n_owner_password_generation.stdout"
-  no_log: true
-
-- name: Generate the n8n encryption key
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ n8n_encryption_key_remote_file }}" ]; then
-      umask 077
-      openssl rand -hex 32 > "{{ n8n_encryption_key_remote_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: n8n_encryption_key_generation
-  changed_when: "'changed' in n8n_encryption_key_generation.stdout"
-  no_log: true
-
-- name: Read the n8n owner password
-  ansible.builtin.slurp:
-    src: "{{ n8n_owner_password_remote_file }}"
-  register: n8n_owner_password_raw
-  no_log: true
-
-- name: Read the n8n encryption key
-  ansible.builtin.slurp:
-    src: "{{ n8n_encryption_key_remote_file }}"
-  register: n8n_encryption_key_raw
+- name: Manage n8n runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ n8n_owner_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "n8n-owner-password"
+      - path: "{{ n8n_encryption_key_remote_file }}"
+        command: "openssl rand -hex 32"
+        label: "n8n-encryption-key"
+    common_manage_service_secrets_read:
+      - "{{ n8n_owner_password_remote_file }}"
+      - "{{ n8n_encryption_key_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ n8n_owner_password_local_file }}"
+        content_index: 0
+      - dest: "{{ n8n_encryption_key_local_file }}"
+        content_index: 1
+    common_manage_service_secrets_local_artifact_dir: "{{ n8n_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "n8n_decoded_secrets"
   no_log: true
 
 - name: Record the n8n runtime secrets
   ansible.builtin.set_fact:
-    n8n_owner_password: "{{ n8n_owner_password_raw.content | b64decode | trim }}"
-    n8n_encryption_key: "{{ n8n_encryption_key_raw.content | b64decode | trim }}"
+    n8n_owner_password: "{{ n8n_decoded_secrets[0] }}"
+    n8n_encryption_key: "{{ n8n_decoded_secrets[1] }}"
     n8n_runtime_secret_payload:
       DB_POSTGRESDB_PASSWORD: "{{ lookup('ansible.builtin.file', n8n_database_password_local_file) | trim }}"
-      N8N_ENCRYPTION_KEY: "{{ n8n_encryption_key_raw.content | b64decode | trim }}"
-  no_log: true
-
-- name: Ensure the local n8n artifact directory exists
-  ansible.builtin.file:
-    path: "{{ n8n_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-
-- name: Mirror the n8n bootstrap secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ n8n_owner_password_local_file }}"
-      content: "{{ n8n_owner_password }}"
-    - dest: "{{ n8n_encryption_key_local_file }}"
-      content: "{{ n8n_encryption_key }}"
+      N8N_ENCRYPTION_KEY: "{{ n8n_decoded_secrets[1] }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for n8n
@@ -189,6 +154,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
 
 - name: Pull the n8n image
   ansible.builtin.command:

@@ -1,7 +1,7 @@
 # ADR 0080: Maintenance Window And Change Suppression Protocol
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.86.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-23

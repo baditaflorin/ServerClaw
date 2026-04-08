@@ -1,16 +1,16 @@
 ---
-- name: Verify the local ntopng HTTP endpoint responds
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ ntopng_http_port }}/"
-    method: GET
-    status_code:
-      - 200
-      - 302
-  register: ntopng_verify_local_http
-  retries: 20
-  delay: 3
-  until: ntopng_verify_local_http.status in [200, 302]
-  changed_when: false
+# Dependencies: ADR 0371.
+- name: Verify the ntopng runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: ntopng
+    common_verify_port: "{{ ntopng_http_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ ntopng_http_port }}/"
+    common_verify_health_retries: 20
+    common_verify_health_delay: 3
+    common_verify_health_status_code: 302
 
 - name: Query ntopng interfaces over the operator access path
   ansible.builtin.uri:

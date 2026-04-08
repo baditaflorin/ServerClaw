@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-07T22:39:12Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/happy-johnson",
+  "commit": "e4873654e11706d1df9b0bf39ab2a5aac6aba620",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "registry.lv3.org not reachable locally",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "pre-commit hooks passed"
+    ],
+    "owner": "Florin Badita-Nistor",
+    "expires_on": "2026-04-09",
+    "remediation_ref": "docs/adr/0382-convergence-speed-and-incremental-apply.md"
+  }
+}

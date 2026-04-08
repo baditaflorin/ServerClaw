@@ -1,0 +1,22 @@
+adr_number: '0334'
+title: Example-First Inventory And Service Identity Catalogs
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0334'
+  location: git:3103d2f74
+  evidence: 3103d2f74 [merge] Record ws-0334 final gate evidence and waiver
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:30.044213'
+inferred_implementation_status: Partial Evidence
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Partial Evidence
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-04-04'

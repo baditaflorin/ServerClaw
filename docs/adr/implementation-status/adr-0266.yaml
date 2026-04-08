@@ -1,0 +1,346 @@
+adr_number: '0266'
+title: Validation Runner Capability Contracts And Environment Attestation
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:00d87de08
+  evidence: 00d87de08 [fix] Remove remaining ws-0269/ws-0266 exclusive ownership conflicts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:00.138686'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:9102f1c6a
+  evidence: 9102f1c6a [adr-0266] Refresh rebased validation evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:00.155907'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:8f37baa84
+  evidence: 8f37baa84 [adr-0266] Close out latest-main live apply metadata
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:00.155929'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:020c5f5ad
+  evidence: 020c5f5ad [receipts] Refresh ADR 0266 branch-head verification evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156097'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:42fcf4c04
+  evidence: 42fcf4c04 [manifest] Refresh platform manifest for ADR 0266 branch head
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156117'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:d6a184606
+  evidence: 'd6a184606 [docs] Align ADR 0266 ownership with 0.177.88\n\nPurpose: Keep
+    the release-commit validation surfaces accurate after cutting 0.177.88 so exact-main
+    proof runs do not fail on stale release-note ownership\nScope: ADR 0266 workstream
+    ownership surfaces and expected release-note paths\nStatus: Ownership manifest
+    updated; rerunning exact-main validation now\nNext: Re-run build-server validation,
+    refresh canonical truth, and continue the final live proof wave\nSee also: ADR
+    0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156153'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:9277f1d87
+  evidence: '9277f1d87 [release] Cut 0.177.88 for ADR 0266\n\nPurpose: Prepare the
+    latest-main ADR 0266 integration as repository release 0.177.88 before the final
+    exact-main proof wave\nScope: Version, changelog, release notes, manifest, stack
+    version metadata, README release truth, and workstream release inclusion\nStatus:
+    Release surfaces committed; exact-main build-server and live Windmill verification
+    reruns follow\nNext: Re-run the final validation and live-apply proofs from this
+    release commit, then record ADR metadata and receipts\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156164'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:133411979
+  evidence: '133411979 [automation] Harden ADR 0266 exact-main replay\n\nPurpose:
+    Unblock the latest-main ADR 0266 proof by hardening OpenBao restart verification
+    and keeping the Windmill gate wrapper compatible across worker checkouts\nScope:
+    OpenBao runtime retries, Windmill gate-status wrapper/test alignment, and workstream/runbook
+    ownership updates\nStatus: Code and docs committed; durable release cut and exact-main
+    proof reruns follow\nNext: Cut the next mainline release, rerun build-server and
+    Windmill proofs from the committed tree, and record final live-apply receipts\nSee
+    also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156170'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:48a3155b4
+  evidence: 48a3155b4 Merge remote-tracking branch 'origin/main' into codex/ws-0266-main-integration-r3
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:00.156275'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:fcbde4cb8
+  evidence: fcbde4cb8 [merge] Refresh ADR 0266 branch onto latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156325'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:1025c4c41
+  evidence: 1025c4c41 [merge] Sync ADR 0255 mainline finalization into ADR 0266 candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156518'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:a75c434ab
+  evidence: a75c434ab [release] Cut 0.177.86 for ADR 0266
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.156522'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:fb2c9340f
+  evidence: fb2c9340f [receipts] Record ADR 0266 exact-main verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.157938'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:478917c8e
+  evidence: 478917c8e [live-apply] Prepare ADR 0266 mainline canonical truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158043'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:a92ffbcea
+  evidence: a92ffbcea [validation] Fix ADR 0266 exact-main validation blockers
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158101'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:f02ea4984
+  evidence: f02ea4984 [validation] Merge ADR 0266 onto current main baseline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158109'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:80913e37c
+  evidence: '80913e37c [release] Refresh generated truth after 0.177.85 candidate\n\nPurpose:
+    keep the protected release path self-consistent by refreshing the platform manifest
+    and diagrams after canonical truth changes\nScope: wire release_manager to regenerate
+    manifest and diagram artifacts, update the generated outputs on the 0.177.85 candidate
+    tree, and cover the helper in focused tests\nStatus: release automation hardened
+    after the exact-main replay exposed generated-artifact drift\nNext: integrate
+    the latest origin/main validation-lane changes, rerun exact-main proofs, and finalize
+    ADR 0266 live-apply metadata\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158128'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:823eb6302
+  evidence: '823eb6302 [release] Cut 0.177.85 for ADR 0266\n\nPurpose: advance mainline
+    repo truth for ADR 0266 and fix the canonical-truth release marker bug exposed
+    during the protected release cut\nScope: bump VERSION to 0.177.85, publish release
+    notes and generated truth, and harden canonical_truth mark_pending_workstreams_released
+    with a regression test\nStatus: exact-main release candidate committed and ready
+    for final live replay plus worker verification\nNext: rerun the exact-main validation
+    and Windmill paths, record the mainline receipt, and update ADR 0266 live-applied
+    metadata\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158144'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:44b3c31c5
+  evidence: '44b3c31c5 [windmill] Use durable runtime token for verification\n\nPurpose:
+    keep exact-main Windmill health and verification tasks stable during ADR 0266
+    replay by using the durable runtime API token and bounded retries\nScope: switch
+    delegated runtime calls to the rendered runtime token, harden healthcheck retries,
+    refresh the generated coordination map, and extend focused role tests\nStatus:
+    exact-main replay patch committed and ready to cherry-pick onto the latest mainline
+    integration branch\nNext: replay ADR 0266 onto current origin/main, rerun live
+    verification, and record the final mainline receipt\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158157'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:f588856ee
+  evidence: 'f588856ee [validation] Fix ADR 0266 runner-unavailable gate assembly\n\nPurpose:
+    keep run_gate from crashing when some requested checks are ruled runner_unavailable
+    before execution\nScope: switch to explicit result selection in run_gate and add
+    a regression test that mixes runner_unavailable and passed checks\nStatus: branch
+    patched after the real git-push hook exposed the bug\nNext: rerun the pre-push
+    path, refresh branch receipts, and continue mainline integration\nSee also: ADR
+    0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158163'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:86837b692
+  evidence: '86837b692 [receipts] Record ADR 0266 branch-local live apply\n\nPurpose:
+    persist the rebased branch verification evidence and mark the workstream ready
+    for exact-main integration\nScope: add the ADR 0266 branch live-apply receipt
+    and update workstream status/documentation with the verified build-server and
+    pre-push results\nStatus: branch proof complete and ready to merge onto latest
+    main\nNext: push the workstream branch, merge to main, cut the release, and record
+    exact-main + worker post-merge verification\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158168'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:e644b0dac
+  evidence: 'e644b0dac [validation] Reconcile ADR 0266 with latest main\n\nPurpose:
+    fold latest-main validation drift into the runner-contract implementation and
+    capture the rebased branch verification evidence\nScope: fix mypy typing for validation
+    runner contracts, refresh generated architecture diagrams, extend workstream ownership,
+    and record branch-local gate evidence\nStatus: rebased branch validated and ready
+    for receipt + mainline integration\nNext: add the branch live-apply receipt, push
+    the workstream branch, merge to main, and replay exact-main verification\nSee
+    also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158174'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:b6d20ae2c
+  evidence: 'b6d20ae2c [validation] Implement ADR 0266 runner contracts\n\nPurpose:
+    declare validation-runner capability contracts and record runner attestation across
+    controller, remote build, and windmill gate paths\nScope: add runner contract
+    schema/catalog, wire run_gate/remote_exec/post-merge status, update policy and
+    tests, and register the active workstream\nStatus: branch-local implementation
+    complete and awaiting latest-main rebase plus live-apply evidence\nNext: rebase
+    onto latest origin/main, rerun automation, record receipts, and merge to main\nSee
+    also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158179'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:f2b31bac4
+  evidence: 'f2b31bac4 [windmill] Use durable runtime token for verification\n\nPurpose:
+    keep exact-main Windmill health and verification tasks stable during ADR 0266
+    replay by using the durable runtime API token and bounded retries\nScope: switch
+    delegated runtime calls to the rendered runtime token, harden healthcheck retries,
+    refresh the generated coordination map, and extend focused role tests\nStatus:
+    exact-main replay patch committed and ready to cherry-pick onto the latest mainline
+    integration branch\nNext: replay ADR 0266 onto current origin/main, rerun live
+    verification, and record the final mainline receipt\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158186'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:d682de140
+  evidence: d682de140 [release] Cut 0.177.84 for ADR 0266
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158333'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:8b864beb7
+  evidence: 8b864beb7 [merge] Bring ADR 0266 integration to latest origin/main again
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158373'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:072a18c89
+  evidence: 072a18c89 [release] Cut 0.177.83 for ADR 0266
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158409'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:6303c14b1
+  evidence: 6303c14b1 [merge] Bring ADR 0266 integration to latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158421'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:230a675c6
+  evidence: 230a675c6 [release] Cut 0.177.82 for ADR 0266
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158492'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:a6d3747b2
+  evidence: a6d3747b2 Merge remote-tracking branch 'origin/codex/ws-0266-validation-runner-capability-contracts'
+    into codex/ws-0266-main-integration-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:00.158508'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:682088660
+  evidence: '682088660 [release] Cut 0.177.81 for ADR 0266\n\nPurpose: publish the
+    ADR 0266 runner-contract integration on main so exact-main live verification targets
+    a released repository state\nScope: bump VERSION to 0.177.81, write release notes
+    and changelog truth, update canonical stack metadata, and mark the workstream
+    as first included in this repo version\nStatus: release prepared on the integration
+    branch; exact-main live apply is next\nNext: replay remote validation and the
+    worker post-merge gate on this exact release, then record platform-version truth
+    and push origin/main\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158634'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:c3aea4b29
+  evidence: 'c3aea4b29 [merge] Integrate ADR 0266 onto latest main\n\nPurpose: bring
+    the validation-runner capability contract work onto the newest origin/main so
+    release and exact-main verification target one merged codebase\nScope: merge the
+    ADR 0266 workstream branch, keep the latest mainline generated diagram state,
+    and carry the branch-local evidence forward for mainline replay\nStatus: merged
+    on the integration branch and awaiting release plus exact-main live apply\nNext:
+    cut the next release, replay remote validation and worker post-merge checks on
+    this exact merge, then push origin/main\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158640'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:18ddd1954
+  evidence: '18ddd1954 [validation] Fix ADR 0266 runner-unavailable gate assembly\n\nPurpose:
+    keep run_gate from crashing when some requested checks are ruled runner_unavailable
+    before execution\nScope: switch to explicit result selection in run_gate and add
+    a regression test that mixes runner_unavailable and passed checks\nStatus: branch
+    patched after the real git-push hook exposed the bug\nNext: rerun the pre-push
+    path, refresh branch receipts, and continue mainline integration\nSee also: ADR
+    0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158645'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:30ab83718
+  evidence: '30ab83718 [receipts] Record ADR 0266 branch-local live apply\n\nPurpose:
+    persist the rebased branch verification evidence and mark the workstream ready
+    for exact-main integration\nScope: add the ADR 0266 branch live-apply receipt
+    and update workstream status/documentation with the verified build-server and
+    pre-push results\nStatus: branch proof complete and ready to merge onto latest
+    main\nNext: push the workstream branch, merge to main, cut the release, and record
+    exact-main + worker post-merge verification\nSee also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158659'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:d9a173974
+  evidence: 'd9a173974 [validation] Reconcile ADR 0266 with latest main\n\nPurpose:
+    fold latest-main validation drift into the runner-contract implementation and
+    capture the rebased branch verification evidence\nScope: fix mypy typing for validation
+    runner contracts, refresh generated architecture diagrams, extend workstream ownership,
+    and record branch-local gate evidence\nStatus: rebased branch validated and ready
+    for receipt + mainline integration\nNext: add the branch live-apply receipt, push
+    the workstream branch, merge to main, and replay exact-main verification\nSee
+    also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158665'
+- marker_type: git-commit
+  adr_number: '0266'
+  location: git:ff0bc2f18
+  evidence: 'ff0bc2f18 [validation] Implement ADR 0266 runner contracts\n\nPurpose:
+    declare validation-runner capability contracts and record runner attestation across
+    controller, remote build, and windmill gate paths\nScope: add runner contract
+    schema/catalog, wire run_gate/remote_exec/post-merge status, update policy and
+    tests, and register the active workstream\nStatus: branch-local implementation
+    complete and awaiting latest-main rebase plus live-apply evidence\nNext: rebase
+    onto latest origin/main, rerun automation, record receipts, and merge to main\nSee
+    also: ADR 0266'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:00.158808'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 36
+
+  Breakdown: git-commit=36
+
+  Implemented On: 2026-03-30'

@@ -1,0 +1,107 @@
+adr_number: 0278
+title: Gotenberg As The Document-To-PDF Rendering Service
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:2b0787aea
+  evidence: 2b0787aea [truth] Refresh 0.177.93 candidate after ADR 0278 proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421756'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:6bbe13b66
+  evidence: 6bbe13b66 [merge] Carry ADR 0278 merged-main receipt onto ADR 0270 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421821'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:bbb0f66b8
+  evidence: bbb0f66b8 [adr-0278] Record merged-main Gotenberg live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:05.421851'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:e1b0ceb64
+  evidence: e1b0ceb64 [docker-runtime] Avoid full nftables reload during ADR 0278
+    replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421878'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:8704a9798
+  evidence: 8704a9798 [docs] Refresh platform manifest for ADR 0278 integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421895'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:0fb442e7a
+  evidence: 0fb442e7a [docs] Refresh canonical truth after ADR 0278 integration registration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421903'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:7092fa51d
+  evidence: 7092fa51d [workstreams] Register ADR 0278 main integration ownership
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421911'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:72df8085c
+  evidence: 72df8085c [docs] Refresh generated artifacts after ADR 0278 merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421924'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:d8fe2a13a
+  evidence: d8fe2a13a [merge] Refresh ADR 0278 integration onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.421927'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:068cb6fe7
+  evidence: 068cb6fe7 [release] Cut 0.177.92 for ADR 0278
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.422108'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:4250af45e
+  evidence: 4250af45e Merge remote-tracking branch 'origin/main' into codex/ws-0278-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:05.422124'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:7cac7a8b0
+  evidence: 7cac7a8b0 [release] Cut 0.177.91 for ADR 0278
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.422195'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:fa242cd21
+  evidence: fa242cd21 [gotenberg] Implement ADR 0278 repo surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.422220'
+- marker_type: git-commit
+  adr_number: 0278
+  location: git:795d89289
+  evidence: 795d89289 [gotenberg] Implement ADR 0278 repo surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:05.422398'
+- marker_type: playbook
+  adr_number: 0278
+  location: playbooks/gotenberg.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:05.436869'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 15
+
+  Breakdown: git-commit=14, playbook=1
+
+  Implemented On: 2026-03-30'

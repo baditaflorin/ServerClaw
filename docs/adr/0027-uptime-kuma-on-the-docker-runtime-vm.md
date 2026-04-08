@@ -1,8 +1,8 @@
 # ADR 0027: Uptime Kuma On The Docker Runtime VM
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.28.0
+- Implementation Status: Accepted
+- Implemented In Repo Version: N/A
 - Implemented In Platform Version: 0.19.0
 - Implemented On: 2026-03-22
 - Date: 2026-03-22

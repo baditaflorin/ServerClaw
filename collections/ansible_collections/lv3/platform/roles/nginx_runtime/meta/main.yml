@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: "LV3 Platform Team"
+  description: "Initialize nginx runtime with fragment-based atomic configuration (ADR 0350)"
+  company: "LV3"
+  license: "MIT"
+  min_ansible_version: "2.9"
+  galaxy_tags:
+    - nginx
+    - configuration
+    - atomic
+    - fragments
+    - adr-0350
+
+dependencies: []

@@ -5,34 +5,22 @@
 # Idempotency: Fully idempotent because this file only declares defaults.
 # Dependencies: ADR 0165, ADR 0060, ADR 0145, and ADR 0148.
 ---
-open_webui_site_dir: /opt/open-webui
-open_webui_data_dir: "{{ open_webui_site_dir }}/data"
-open_webui_secret_dir: /etc/lv3/open-webui
-open_webui_compose_file: "{{ open_webui_site_dir }}/docker-compose.yml"
-open_webui_env_file: "{{ compose_runtime_secret_root }}/open-webui/runtime.env"
-open_webui_legacy_env_file: "{{ open_webui_site_dir }}/open-webui.env"
-open_webui_openbao_agent_dir: "{{ open_webui_site_dir }}/openbao"
-open_webui_openbao_agent_image: "{{ openbao_agent_image }}"
-open_webui_openbao_agent_container_name: open-webui-openbao-agent
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 open_webui_enable_openbao_agent: true
-open_webui_openbao_secret_path: services/open-webui/runtime-env
-open_webui_openbao_policy_name: lv3-service-open-webui-runtime
-open_webui_openbao_approle_name: open-webui-runtime
-open_webui_container_name: open-webui
 open_webui_port: "{{ platform_service_topology | platform_service_port('open_webui', 'internal') }}"
 open_webui_host_proxy_port: "{{ platform_service_topology | platform_service_port('open_webui', 'controller') }}"
-open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_name: Florin Badita
 open_webui_admin_email: ops@lv3.org
 open_webui_internal_base_url: "{{ platform_service_topology | platform_service_url('open_webui', 'internal') }}"
 open_webui_controller_url: "{{ platform_service_topology | platform_service_url('open_webui', 'controller') }}"
 open_webui_webui_url: "{{ open_webui_controller_url }}"
 open_webui_webui_name: Open WebUI
-open_webui_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui
 open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt
 open_webui_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/webui-secret-key.txt
 open_webui_provider_env_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/provider.env
-open_webui_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/open-webui-client-secret.txt
+open_webui_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/open-webui-client-secret.txt"
 open_webui_admin_password_remote_file: "{{ open_webui_secret_dir }}/admin-password.txt"
 open_webui_secret_key_remote_file: "{{ open_webui_secret_dir }}/webui-secret-key.txt"
 open_webui_enable_oidc: true
@@ -48,14 +36,15 @@ open_webui_default_user_role: pending
 open_webui_enable_openai_api: false
 open_webui_enable_ollama_api: true
 open_webui_ollama_base_url: http://host.docker.internal:11434
+open_webui_ollama_api_url: "http://{{ ansible_host }}:11434"
 open_webui_enable_web_search: true
 open_webui_web_search_engine: searxng
 open_webui_searxng_query_url: "http://host.docker.internal:{{ platform_service_topology | platform_service_port('searxng', 'internal') }}/search?q=<query>&format=json"
 open_webui_web_search_result_count: 3
 open_webui_web_search_concurrent_requests: 1
 open_webui_bypass_web_search_web_loader: true
-open_webui_default_models: ""
-open_webui_default_pinned_models: ""
+open_webui_default_models: "serverclaw:latest"
+open_webui_default_pinned_models: "serverclaw:latest"
 open_webui_user_permissions_workspace_models_access: true
 open_webui_user_permissions_workspace_knowledge_access: false
 open_webui_user_permissions_workspace_prompts_access: false
@@ -78,6 +67,8 @@ open_webui_rag_embedding_model: nomic-embed-text
 open_webui_rag_top_k: 5
 open_webui_rag_relevance_threshold: "0.2"
 open_webui_rag_hybrid_search: true
-# System prompt for ServerClaw identity (ADR 0376)
+# System prompt for ServerClaw identity (ADR 0377)
 open_webui_enable_system_prompt_injection: true
 open_webui_system_prompt_template: system-prompt.md.j2
+# Base model for the serverclaw Ollama model (must be pre-pulled)
+open_webui_serverclaw_base_model: "gemma4:e4b"

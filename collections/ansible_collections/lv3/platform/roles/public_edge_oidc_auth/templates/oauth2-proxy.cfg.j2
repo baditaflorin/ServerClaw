@@ -30,3 +30,8 @@ pass_access_token = true
 pass_authorization_header = true
 set_authorization_header = true
 code_challenge_method = "S256"
+# NOTE: oauth2-proxy defaults approval_prompt to "force" and always sends it
+# as a query parameter.  Keycloak ignores approval_prompt (non-standard);
+# SSO auto-login works because Keycloak only inspects the OIDC `prompt` param.
+# Setting approval_prompt="" here is a no-op (oauth2-proxy still sends "force"),
+# but we keep the comment for future maintainers investigating login behaviour.

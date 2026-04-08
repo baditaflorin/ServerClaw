@@ -1,0 +1,76 @@
+adr_number: '0111'
+title: End-to-End Integration Test Suite
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:369767949
+  evidence: 369767949 Fix ADR 0111 receipt schema status
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.486425'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:61c09e4f9
+  evidence: 61c09e4f9 Record ADR 0111 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.486457'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:8dc0571c6
+  evidence: 8dc0571c6 Harden ADR 0111 Windmill runtime live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.486461'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:0783b9e0b
+  evidence: 0783b9e0b Add ADR 0111 runtime integration test automation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.486505'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:c81fa2dd6
+  evidence: c81fa2dd6 Merge origin/main and re-cut ADR 0111 as 0.100.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.488631'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:894b75ff6
+  evidence: 894b75ff6 Merge origin/main and re-cut ADR 0111 as 0.99.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.488635'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:e4a3b28bf
+  evidence: e4a3b28bf Merge origin/main into ADR 0111 release branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.488657'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:d7a710ebb
+  evidence: d7a710ebb Merge ADR 0111 integration suite and cut 0.98.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.488664'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:b39c61e7e
+  evidence: b39c61e7e Implement ADR 0111 integration suite
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:51.488709'
+- marker_type: git-commit
+  adr_number: '0111'
+  location: git:aa7ec2c02
+  evidence: 'aa7ec2c02 Propose ADRs 0092-0111: platform product completion roadmap'
+  confidence: 0.6
+  detected_on: '2026-04-07T07:53:51.488730'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 10
+
+  Breakdown: git-commit=10
+
+  Implemented On: 2026-03-23'

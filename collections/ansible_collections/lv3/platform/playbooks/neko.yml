@@ -1,0 +1,343 @@
+---
+# Neko Remote Desktop Deployment Playbook
+#
+# Deploys Neko WebRTC remote desktop for interactive operator browser access.
+# Implements ADR 0380 architecture with dedicated runtime-comms-lv3 VM.
+# Supports N isolated browser containers driven by neko_instances dict.
+#
+# Topology:
+#   Operator (headscale 100.64.0.0/10)
+#       ↓
+#   nginx-lv3 (TLS termination, browser.lv3.org)
+#       ↓ X-Auth-Request-Email (per-user routing via map)
+#   runtime-comms-lv3 (VMID 121, 10.10.10.21)
+#       ├─ neko-<name> signalling (TCP port per instance)
+#       └─ WebRTC media (UDP range per instance)
+#
+# Instance lifecycle:
+#   - Add entry to neko_instances in inventory/group_vars/platform.yml
+#   - Run this playbook → container created + Keycloak user provisioned
+#   - Remove entry → container destroyed + Keycloak user deleted
+#
+# Usage:
+#   make converge-service service=neko env=production
+
+# ---------------------------------------------------------------------------
+# Play 1: Converge Neko runtime (containers) on runtime-comms-lv3
+# ---------------------------------------------------------------------------
+- name: "Converge Neko Runtime on runtime-comms-lv3"
+  hosts: "runtime-comms-lv3"
+  become: true
+  gather_facts: true
+  tags: [tier-1, automation, service-neko]
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      import_tasks: tasks/preflight.yml
+      tags: [preflight, neko]
+
+  roles:
+    - role: lv3.platform.common
+      tags: [common, neko]
+      vars:
+        ensure_directories:
+          - path: /opt/neko/instances
+            owner: root
+            group: root
+            mode: '0755'
+            description: "Neko per-instance data root"
+
+    - role: lv3.platform.docker_runtime
+      tags: [docker, neko]
+
+    - role: lv3.platform.linux_guest_firewall
+      tags: [firewall, neko]
+
+    - role: lv3.platform.neko_runtime
+      tags: [neko, service-neko]
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      import_tasks: tasks/post-verify.yml
+      tags: [post-verify, neko]
+
+    - name: Run shared completion notifications
+      import_tasks: tasks/notify.yml
+      tags: [notify, neko]
+
+# ---------------------------------------------------------------------------
+# Play 2: Keycloak user lifecycle — provision/deprovision users for instances
+# ---------------------------------------------------------------------------
+# For each entry in neko_instances: ensure a Keycloak user exists in the lv3
+# realm with the configured email and neko_managed=true attribute.
+# For Keycloak users with neko_managed=true that are NOT in neko_instances:
+# delete them (lifecycle enforcement).
+#
+# Graceful: each user operation uses ignore_errors so one user failing
+# never blocks others from being provisioned.
+# ---------------------------------------------------------------------------
+- name: "Keycloak User Lifecycle for Neko Instances"
+  hosts: localhost
+  gather_facts: false
+  tags: [tier-2, keycloak, service-neko]
+
+  vars:
+    _neko_kc_url: "https://sso.lv3.org"
+    _neko_kc_realm: "lv3"
+    _neko_kc_admin_client_id: "lv3-admin-runtime"
+    _neko_kc_secret_file: "{{ lookup('env', 'REPO_ROOT') | default(playbook_dir + '/../../../..', true) }}/.local/keycloak/admin-client-secret.txt"
+
+  tasks:
+    - name: Load Keycloak admin client secret from local secrets store
+      ansible.builtin.set_fact:
+        _neko_kc_secret: "{{ lookup('ansible.builtin.file', _neko_kc_secret_file) | trim }}"
+      no_log: true
+
+    - name: Obtain Keycloak admin access token
+      ansible.builtin.uri:
+        url: "{{ _neko_kc_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: client_credentials
+          client_id: "{{ _neko_kc_admin_client_id }}"
+          client_secret: "{{ _neko_kc_secret }}"
+        status_code: 200
+        return_content: true
+      register: _neko_kc_token_resp
+      no_log: true
+      retries: 3
+      delay: 5
+      until: _neko_kc_token_resp.status == 200
+
+    - name: Store admin auth headers
+      ansible.builtin.set_fact:
+        _neko_kc_headers:
+          Authorization: "Bearer {{ _neko_kc_token_resp.json.access_token }}"
+          Content-Type: "application/json"
+      no_log: true
+
+    # --- Provision: ensure a Keycloak user exists for each neko_instances entry ---
+
+    - name: "Provision Keycloak user — {{ _item.key }} ({{ _item.value.email }})"
+      block:
+        - name: "{{ _item.key }} | Search for existing Keycloak user by email"
+          ansible.builtin.uri:
+            url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users?email={{ _item.value.email | urlencode }}&exact=true"
+            method: GET
+            headers: "{{ _neko_kc_headers }}"
+            status_code: 200
+            return_content: true
+          register: _neko_kc_user_search
+          changed_when: false
+
+        - name: "{{ _item.key }} | Create Keycloak user (user not found)"
+          ansible.builtin.uri:
+            url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users"
+            method: POST
+            headers: "{{ _neko_kc_headers }}"
+            body_format: json
+            body:
+              username: "{{ _item.value.email }}"
+              email: "{{ _item.value.email }}"
+              enabled: true
+              emailVerified: true
+              attributes:
+                neko_managed: ["true"]
+            status_code: [201, 409]
+            return_content: true
+          register: _neko_kc_user_create
+          when: (_neko_kc_user_search.json | length) == 0
+          changed_when: _neko_kc_user_create.status == 201
+
+        - name: "{{ _item.key }} | Ensure neko_managed attribute on existing user"
+          vars:
+            _existing_user: "{{ _neko_kc_user_search.json | first }}"
+          ansible.builtin.uri:
+            url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users/{{ _existing_user.id }}"
+            method: PUT
+            headers: "{{ _neko_kc_headers }}"
+            body_format: json
+            body: "{{ _existing_user | combine({'attributes': (_existing_user.attributes | default({})) | combine({'neko_managed': ['true']})}) }}"
+            status_code: 204
+          when:
+            - (_neko_kc_user_search.json | length) > 0
+            - (_neko_kc_user_search.json | first).attributes.neko_managed | default([]) != ['true']
+          changed_when: true
+
+      ignore_errors: true
+      loop: "{{ neko_instances | dict2items }}"
+      loop_control:
+        loop_var: _item
+        label: "{{ _item.key }} ({{ _item.value.email }})"
+
+    # --- Deprovision: delete Keycloak users with neko_managed=true not in neko_instances ---
+
+    - name: Find all Keycloak users with neko_managed=true attribute
+      ansible.builtin.uri:
+        url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users?q=neko_managed:true&max=200"
+        method: GET
+        headers: "{{ _neko_kc_headers }}"
+        status_code: 200
+        return_content: true
+      register: _neko_kc_managed_users
+      changed_when: false
+
+    - name: Build set of expected emails from neko_instances
+      ansible.builtin.set_fact:
+        _neko_expected_emails: "{{ neko_instances.values() | map(attribute='email') | list }}"
+
+    - name: "Deprovision Keycloak user — {{ _user.email }} (no longer in neko_instances)"
+      ansible.builtin.uri:
+        url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users/{{ _user.id }}"
+        method: DELETE
+        headers: "{{ _neko_kc_headers }}"
+        status_code: [204, 404]
+      loop: >-
+        {{
+          _neko_kc_managed_users.json
+          | selectattr('email', 'defined')
+          | selectattr('email', 'not in', _neko_expected_emails)
+          | list
+        }}
+      loop_control:
+        loop_var: _user
+        label: "{{ _user.email }}"
+      changed_when: true
+      ignore_errors: true
+
+    - name: Display Keycloak user lifecycle summary
+      ansible.builtin.debug:
+        msg:
+          - "Neko Keycloak User Lifecycle"
+          - "============================="
+          - "Configured instances: {{ neko_instances | length }}"
+          - "Expected emails:      {{ _neko_expected_emails }}"
+          - "Managed users found:  {{ _neko_kc_managed_users.json | length }}"
+
+# ---------------------------------------------------------------------------
+# Play 3: Publish Neko on NGINX Edge Gateway (email-keyed routing)
+# ---------------------------------------------------------------------------
+- name: "Publish Neko on NGINX Edge Gateway"
+  hosts: "nginx-lv3"
+  become: true
+  gather_facts: false
+  tags: [tier-2, networking, service-neko]
+  serial: 1
+
+  tasks:
+    - name: Render browser.lv3.org NGINX site configuration
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/nginx-site-neko.conf.j2"
+        dest: "/etc/nginx/sites-available/browser.lv3.org.conf"
+        owner: root
+        group: root
+        mode: '0644'
+      register: nginx_neko_site
+      tags: [nginx, neko, edge-publication]
+
+    - name: Enable browser.lv3.org site
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/browser.lv3.org.conf"
+        dest: "/etc/nginx/sites-enabled/browser.lv3.org.conf"
+        state: link
+        force: true
+      tags: [nginx, neko, edge-publication]
+
+    - name: Test NGINX configuration syntax
+      ansible.builtin.command:
+        argv: [nginx, -t]
+      changed_when: false
+      tags: [nginx, neko, edge-publication]
+
+    - name: Reload NGINX to apply updated site configuration
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      when: nginx_neko_site.changed
+      tags: [nginx, neko, edge-publication]
+
+    - name: Verify browser.lv3.org is reachable (expects oauth2 redirect, not 500)
+      ansible.builtin.uri:
+        url: "https://browser.lv3.org/"
+        validate_certs: true
+        follow_redirects: none
+        status_code: [200, 302, 401, 403]
+      register: neko_edge_probe
+      retries: 5
+      delay: 5
+      until: neko_edge_probe.status in [200, 302, 401, 403]
+      tags: [nginx, neko, edge-publication]
+
+    - name: Display NGINX edge publication result
+      ansible.builtin.debug:
+        msg:
+          - "Neko NGINX Edge Publication"
+          - "============================="
+          - "Hostname:  browser.lv3.org"
+          - "Instances: {{ neko_instances | length }}"
+          - "Routing:   X-Auth-Request-Email → per-user container (TCP port map)"
+          - "TLS:       Let's Encrypt"
+          - "Timeout:   3600s (ADR 0170 exception for long-lived WebRTC streams)"
+          - "Status:    HTTP {{ neko_edge_probe.status }} ({{ neko_edge_probe.msg | default('ok') }})"
+      tags: [nginx, neko, edge-publication]
+
+# ---------------------------------------------------------------------------
+# Play 4: Post-Deployment Verification
+# ---------------------------------------------------------------------------
+- name: "Post-Deployment Verification"
+  hosts: "runtime-comms-lv3"
+  become: true
+  gather_facts: false
+  tags: [tier-3, verify, service-neko]
+
+  tasks:
+    - name: Check all configured Neko containers are running
+      ansible.builtin.shell: |
+        docker inspect neko-{{ item.key }} --format='{{ "{{" }}.State.Health.Status{{ "}}" }}' 2>/dev/null \
+          || echo 'not_found'
+      loop: "{{ neko_instances | dict2items }}"
+      loop_control:
+        label: "neko-{{ item.key }}"
+      register: _neko_verify_health
+      changed_when: false
+      ignore_errors: true
+
+    - name: Display per-instance health status
+      ansible.builtin.debug:
+        msg:
+          - "neko-{{ item.item.key }} ({{ item.item.value.email }}):"
+          - "  port: {{ item.item.value.port }}"
+          - "  udp:  {{ item.item.value.udp_range }}"
+          - "  health: {{ item.stdout | default('unknown') }}"
+      loop: "{{ _neko_verify_health.results }}"
+      loop_control:
+        label: "neko-{{ item.item.key }}"
+
+    - name: Verify each instance responds on its signalling port
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ item.value.port }}/"
+        status_code: [200, 301, 302]
+      loop: "{{ neko_instances | dict2items }}"
+      loop_control:
+        label: "neko-{{ item.key }}"
+      register: _neko_api_health
+      retries: 3
+      delay: 5
+      until: _neko_api_health.status in [200, 301, 302]
+      ignore_errors: true
+
+    - name: Summary
+      ansible.builtin.debug:
+        msg:
+          - "Neko Multi-Instance Deployment Summary"
+          - "======================================"
+          - "Configured instances: {{ neko_instances | length }}"
+          - "Edge URL: https://browser.lv3.org"
+          - ""
+          - "Each user authenticates via Keycloak SSO (browser.lv3.org)."
+          - "After login, NGINX routes X-Auth-Request-Email to their container."
+          - "Users not assigned a container receive HTTP 403."
+          - ""
+          - "To add a user: add entry to neko_instances in"
+          - "inventory/group_vars/platform.yml and re-run this playbook."

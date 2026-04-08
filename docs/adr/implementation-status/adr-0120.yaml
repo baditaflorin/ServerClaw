@@ -1,0 +1,28 @@
+adr_number: '0120'
+title: Dry-Run Semantic Diff Engine
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0120'
+  location: git:82ce18794
+  evidence: 82ce18794 Implement ADR 0120 dry-run semantic diff engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.085245'
+- marker_type: git-commit
+  adr_number: '0120'
+  location: git:e36235a42
+  evidence: e36235a42 Implement ADR 0120 dry-run semantic diff engine
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:55.085281'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 2
+
+  Breakdown: git-commit=2
+
+  Implemented On: 2026-03-24'

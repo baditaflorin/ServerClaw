@@ -1,0 +1,150 @@
+adr_number: '0254'
+title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:c5b1e4ae2
+  evidence: c5b1e4ae2 [validation] Register ws-0254-serverclaw-runtime-fix and regenerate
+    artifacts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:54.236361'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:86423688c
+  evidence: 86423688c [workstream] Record ADR 0254 merged-main live proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248560'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:72ee92ef7
+  evidence: 72ee92ef7 [workstream] Cover shared mainline gate repairs for ADR 0254
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248703'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:12998dc05
+  evidence: 12998dc05 [merge] Refresh ADR 0254 integration onto latest origin/main
+    metadata
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248730'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:24736689e
+  evidence: 24736689e [release] Cut 0.177.91 for ADR 0254
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248773'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:e42b63c85
+  evidence: e42b63c85 [merge] Refresh ADR 0254 integration onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248785'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:7856dc348
+  evidence: 7856dc348 [validation] Repair ADR 0254 push gate surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248793'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:7a033c92e
+  evidence: 7a033c92e [release] Cut 0.177.90 for ADR 0254
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248804'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:daed1ce19
+  evidence: daed1ce19 Merge remote-tracking branch 'origin/main' into codex/ws-0254-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:54.248906'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:d3ab1accb
+  evidence: d3ab1accb [workstream] Reopen ADR 0254 release inclusion on latest mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248914'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:956760759
+  evidence: 956760759 [merge] Refresh ADR 0254 integration onto origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248925'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:33aa295c0
+  evidence: 33aa295c0 [workstream] Cover ADR 0254 evidence ownership
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248933'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:6b2ed67b2
+  evidence: 6b2ed67b2 [release] Prepare 0.177.88 for ADR 0254 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.248975'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:dc1db990c
+  evidence: dc1db990c Merge origin/main into codex/ws-0254-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:54.249178'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:785cce2dd
+  evidence: 785cce2dd [validation] Finalize ADR 0254 gate-ready evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.249185'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:39a7bd063
+  evidence: 39a7bd063 Merge origin/main into codex/ws-0254-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:54.249591'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:111ca472b
+  evidence: 111ca472b [validation] Capture ADR 0254 mainline surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.249598'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:54622948a
+  evidence: 54622948a [release] Prepare ADR 0254 refreshed mainline surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.250071'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:b3a5767e6
+  evidence: b3a5767e6 Merge branch 'codex/ws-0254-live-apply' into codex/ws-0254-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:54.250078'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:3f9d99f1d
+  evidence: 3f9d99f1d [serverclaw] Record ADR 0254 branch-local live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.250090'
+- marker_type: git-commit
+  adr_number: '0254'
+  location: git:ada338239
+  evidence: ada338239 [serverclaw] Scaffold ADR 0254 live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:54.250165'
+- marker_type: playbook
+  adr_number: '0254'
+  location: playbooks/serverclaw.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:54.271937'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 22
+
+  Breakdown: git-commit=21, playbook=1
+
+  Implemented On: 2026-03-30'

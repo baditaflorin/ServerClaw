@@ -1,0 +1,34 @@
+adr_number: '0054'
+title: NetBox For Topology, IPAM, And Inventory
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0054'
+  location: git:d81e88c77
+  evidence: d81e88c77 Merge origin/main and release ADR 0054 NetBox on 0.58.0
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.566564'
+- marker_type: git-commit
+  adr_number: '0054'
+  location: git:95bce3900
+  evidence: 95bce3900 Merge origin/main and release ADR 0054 NetBox
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.566601'
+- marker_type: git-commit
+  adr_number: '0054'
+  location: git:2c9fe5d83
+  evidence: 2c9fe5d83 Merge origin/main and release ADR 0054 NetBox
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:28.566619'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 3
+
+  Breakdown: git-commit=3
+
+  Implemented On: 2026-03-22'

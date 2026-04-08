@@ -1,0 +1,58 @@
+adr_number: '0246'
+title: Startup, Readiness, Liveness, And Degraded State Semantics
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0246'
+  location: git:e45da1e3b
+  evidence: e45da1e3b [release] Integrate ADR 0246 runtime-state semantics into mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.558418'
+- marker_type: git-commit
+  adr_number: '0246'
+  location: git:2ce53f00d
+  evidence: 2ce53f00d Merge branch 'codex/ws-0246-live-apply' into codex/ws-0246-main-merge-v2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.558463'
+- marker_type: git-commit
+  adr_number: '0246'
+  location: git:6710065ef
+  evidence: 6710065ef [release] Integrate ADR 0246 runtime-state semantics into mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.558476'
+- marker_type: git-commit
+  adr_number: '0246'
+  location: git:d03676cd3
+  evidence: d03676cd3 Merge branch 'codex/ws-0246-live-apply' into codex/ws-0246-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:50.558502'
+- marker_type: git-commit
+  adr_number: '0246'
+  location: git:23f1c8a0d
+  evidence: 23f1c8a0d [docs] Record ADR 0246 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.558515'
+- marker_type: git-commit
+  adr_number: '0246'
+  location: git:f2a28adc3
+  evidence: f2a28adc3 [runtime] Implement ADR 0246 repo semantics
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:50.558530'
+- marker_type: playbook
+  adr_number: '0246'
+  location: playbooks/docker-publication-assurance.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:50.578219'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=6, playbook=1
+
+  Implemented On: 2026-03-28'

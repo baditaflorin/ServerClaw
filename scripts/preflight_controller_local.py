@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from controller_automation_toolkit import (
@@ -184,11 +185,17 @@ def run_bootstrap_preflight(bootstrap_catalog: dict, workflow: dict) -> bool:
         manifest = bootstrap_catalog["manifests"][manifest_id]
         print(f"Bootstrap manifest: {manifest_id}")
         print(f"Bootstrap description: {manifest['description']}")
-        for entry in manifest.get("generated_artifacts", []):
-            ok, message = ensure_generated_artifact(entry)
-            print(message)
-            if not ok:
-                failed = True
+
+        generated = manifest.get("generated_artifacts", [])
+        if generated:
+            with ThreadPoolExecutor(max_workers=min(len(generated), 8)) as pool:
+                futures = {pool.submit(ensure_generated_artifact, entry): entry for entry in generated}
+                for future in as_completed(futures):
+                    ok, message = future.result()
+                    print(message)
+                    if not ok:
+                        failed = True
+
         for entry in manifest.get("required_local_inputs", []):
             ok, message = check_bootstrap_input(entry)
             print(message)
@@ -226,11 +233,15 @@ def run_workflow(secret_manifest: dict, catalog: dict, bootstrap_catalog: dict, 
         if not ok:
             failed = True
 
-    for check in preflight.get("health_checks", []):
-        ok, message = run_health_check(check)
-        print(message)
-        if not ok:
-            failed = True
+    health_checks = preflight.get("health_checks", [])
+    if health_checks:
+        with ThreadPoolExecutor(max_workers=min(len(health_checks), 8)) as pool:
+            futures = {pool.submit(run_health_check, check): check for check in health_checks}
+            for future in as_completed(futures):
+                ok, message = future.result()
+                print(message)
+                if not ok:
+                    failed = True
 
     report_generated(secret_manifest, workflow)
 

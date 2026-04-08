@@ -10,6 +10,11 @@ from urllib.parse import urlparse
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
+_SCRIPTS_DIR = str(Path(__file__).resolve().parent)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
+from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -27,38 +32,6 @@ IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 ENV_VAR_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
 HEADER_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9-]*$")
 AUTH_SCHEMES = {"bearer", "raw"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 1) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_identifier(value: Any, path: str) -> str:
@@ -144,7 +117,7 @@ def validate_api_gateway_catalog(
             "gateway_prefix": gateway_prefix,
             "required_role": require_str(service.get("required_role"), f"{path}.required_role"),
             "strip_prefix": require_bool(service.get("strip_prefix"), f"{path}.strip_prefix"),
-            "timeout_seconds": require_int(service.get("timeout_seconds"), f"{path}.timeout_seconds"),
+            "timeout_seconds": require_int(service.get("timeout_seconds"), f"{path}.timeout_seconds", minimum=1),
             "auth": auth,
             "forward_authorization": require_bool(
                 service.get("forward_authorization", False),

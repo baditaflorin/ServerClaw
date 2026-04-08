@@ -1,23 +1,18 @@
 ---
-- name: Verify the runtime-pool Traefik ping endpoint responds locally
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ runtime_pool_substrate_traefik_port }}{{ runtime_pool_substrate_traefik_ping_path }}"
-    method: GET
-    status_code:
-      - 200
-    return_content: true
-    timeout: 15
-  register: runtime_pool_substrate_verify_traefik_ping
-  retries: 12
-  delay: 5
-  until: runtime_pool_substrate_verify_traefik_ping.status == 200
-  changed_when: false
-
-- name: Assert the Traefik ping payload is healthy
-  ansible.builtin.assert:
-    that:
-      - runtime_pool_substrate_verify_traefik_ping.content | trim == 'OK'
-    fail_msg: "Traefik ping did not return the expected OK payload."
+# Dependencies: ADR 0371.
+- name: Verify the runtime-pool Traefik runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: traefik
+    common_verify_port: "{{ runtime_pool_substrate_traefik_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ runtime_pool_substrate_traefik_port }}{{ runtime_pool_substrate_traefik_ping_path }}"
+    common_verify_health_retries: 12
+    common_verify_health_delay: 5
+    common_verify_health_assertions:
+      - "common_verify_health_response.content | trim == 'OK'"
+    common_verify_health_assertion_msg: "Traefik ping did not return the expected OK payload."
 
 - name: Verify the runtime-pool Dapr metadata endpoint responds locally
   ansible.builtin.uri:

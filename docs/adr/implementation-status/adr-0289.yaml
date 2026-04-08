@@ -1,0 +1,175 @@
+adr_number: 0289
+title: Label Studio As The Human-In-The-Loop Data Annotation Platform
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:070843341
+  evidence: 070843341 [adr-0289] Record final validation gates on latest mainline
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365739'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:c4ec1e518
+  evidence: c4ec1e518 [adr-0289] Merge latest mainline and repair validation drift
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365775'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:023e0574f
+  evidence: 023e0574f [adr-0289] Record latest-main live apply evidence and release
+    truth
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365780'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:cb7a375c7
+  evidence: cb7a375c7 Merge remote-tracking branch 'origin/main' into codex/ws-0289-label-studio-live-apply-r2
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:10.365796'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:c3e734348
+  evidence: c3e734348 [adr-0289] Record rebased exact-main replay and shared truth
+    fixes
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365801'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:3946b93a1
+  evidence: 3946b93a1 [adr-0289] Harden exact-main Label Studio verification
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365811'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:a876b615d
+  evidence: a876b615d [adr-0289] Record pre-rebase live apply evidence
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365815'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:64e994a33
+  evidence: 64e994a33 [adr-0289] Align exact-main validation contracts
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365819'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:a3e036396
+  evidence: a3e036396 [adr-0289] Harden Label Studio live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365823'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:3227d83b7
+  evidence: 3227d83b7 [adr-0289] Record current validation and lock status
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365828'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:0134eda85
+  evidence: 0134eda85 [adr-0289] Align validation surfaces on rebased Label Studio
+    branch
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365832'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:a35a28ad5
+  evidence: a35a28ad5 [adr-0289] Add Label Studio exact-main automation
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365836'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:661a81f32
+  evidence: 661a81f32 [adr-0289] Record Label Studio branch-local live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365949'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:cae19c7dc
+  evidence: cae19c7dc [adr-0289] Harden Label Studio live apply
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.365977'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:a14d94615
+  evidence: a14d94615 [adr-0289] Record current validation and lock status
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.366991'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:1f964e88c
+  evidence: 1f964e88c [adr-0289] Align validation surfaces on rebased Label Studio
+    branch
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.367082'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:629b40b55
+  evidence: 629b40b55 [adr-0289] Add Label Studio live-apply automation
+  confidence: 0.8
+  detected_on: '2026-04-07T07:55:10.367216'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:b5cf2312c
+  evidence: b5cf2312c [merge] Integrate latest origin/main into ADR 0289 release candidate
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:10.370154'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:537d42871
+  evidence: 537d42871 [directus] Record ADR 0289 canonical mainline receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:10.370177'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:368cc0b8b
+  evidence: 368cc0b8b [directus] Cut ADR 0289 mainline source release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:10.370207'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:4ccc4ae5b
+  evidence: '4ccc4ae5b [validation-gate] Regenerate mainline docs for ADR 0289\n\nPurpose:
+    Keep generated status and architecture docs aligned with the exact-main Directus
+    integration state\nScope: Refresh README and generated dependency graph metadata
+    after exact-main validation\nStatus: Ready for mainline merge and release-state
+    updates\nNext: Merge onto main, replay the live apply from main, and record final
+    repo/platform versions\nSee also: ADR 0289'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:10.370307'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:f120a0c1d
+  evidence: f120a0c1d [directus] Live-apply ADR 0289 on the workstream branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:10.370311'
+- marker_type: git-commit
+  adr_number: 0289
+  location: git:9e2fd8646
+  evidence: 9e2fd8646 [directus] Live-apply ADR 0289 on the workstream branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:10.370319'
+- marker_type: playbook
+  adr_number: 0289
+  location: playbooks/label-studio.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:10.397296'
+- marker_type: playbook
+  adr_number: 0289
+  location: playbooks/directus.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:10.405142'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 25
+
+  Breakdown: git-commit=23, playbook=2
+
+  Implemented On: 2026-04-03'

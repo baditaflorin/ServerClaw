@@ -3,7 +3,13 @@
 import argparse
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any, Final
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_catalog import configured_environment_ids
@@ -179,38 +185,6 @@ def require_environment_bindings(
     return normalized
 
 
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be an object")
-    return value
-
-
-def require_list(value: Any, path: str) -> list[Any]:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 1) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
 def require_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     result = []
@@ -373,7 +347,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
         vm = require_str(service.get("vm"), f"services[{index}].vm")
         vmid = service.get("vmid")
         if vmid is not None:
-            vmid = require_int(vmid, f"services[{index}].vmid")
+            vmid = require_int(vmid, f"services[{index}].vmid", minimum=1)
             if vm in guest_vmids and guest_vmids[vm] != vmid:
                 raise ValueError(
                     f"services[{index}].vmid must match inventory vmid {guest_vmids[vm]} for {vm}"

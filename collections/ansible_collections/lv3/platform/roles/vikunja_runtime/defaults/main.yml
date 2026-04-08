@@ -1,4 +1,7 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Declare the shared defaults for converging the Vikunja runtime, bootstrap artifacts, and controller access paths.
 # Use case: Used whenever the vikunja_runtime role renders the Vikunja stack, secrets, and validation commands.
 #
@@ -23,41 +26,25 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 vikunja_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('vikunja') }}"
-vikunja_site_dir: /opt/vikunja
-vikunja_data_dir: "{{ vikunja_site_dir }}/data"
 vikunja_files_dir: "{{ vikunja_data_dir }}/files"
-vikunja_secret_dir: /etc/lv3/vikunja
-vikunja_compose_file: "{{ vikunja_site_dir }}/docker-compose.yml"
-vikunja_env_file: "{{ compose_runtime_secret_root }}/vikunja/runtime.env"
-vikunja_legacy_env_file: "{{ vikunja_site_dir }}/vikunja.env"
-vikunja_openbao_agent_dir: "{{ vikunja_site_dir }}/openbao"
-vikunja_openbao_agent_image: "{{ openbao_agent_image }}"
-vikunja_openbao_agent_container_name: vikunja-openbao-agent
-vikunja_openbao_secret_path: services/vikunja/runtime-env
-vikunja_openbao_policy_name: lv3-service-vikunja-runtime
-vikunja_openbao_approle_name: vikunja-runtime
-vikunja_internal_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('vikunja', 'internal') }}"
 vikunja_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('vikunja', 'internal') }}"
 vikunja_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('vikunja', 'controller') }}"
 vikunja_public_base_url: "https://{{ vikunja_service_topology.public_hostname }}"
 vikunja_container_port: 3456
-vikunja_container_name: vikunja
 vikunja_bridge_container_name: vikunja-webhook-bridge
 vikunja_bridge_port: 8081
-vikunja_image: "{{ container_image_catalog.images.vikunja_runtime.ref }}"
 vikunja_bridge_image: "{{ container_image_catalog.images.vikunja_webhook_bridge_runtime.ref }}"
 vikunja_database_name: vikunja
 vikunja_database_user: vikunja_admin
 vikunja_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-vikunja_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/database-password.txt
-vikunja_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja
-vikunja_service_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/service-secret.txt
-vikunja_webhook_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/webhook-secret.txt
-vikunja_automation_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/automation-password.txt
-vikunja_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/api-token.txt
-vikunja_admin_auth_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/admin-auth.json
-vikunja_desired_state_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/desired-state.json
-vikunja_sync_summary_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja/sync-summary.json
+vikunja_database_password_local_file: "{{ vikunja_local_artifact_dir }}/database-password.txt"
+vikunja_service_secret_local_file: "{{ vikunja_local_artifact_dir }}/service-secret.txt"
+vikunja_webhook_secret_local_file: "{{ vikunja_local_artifact_dir }}/webhook-secret.txt"
+vikunja_automation_password_local_file: "{{ vikunja_local_artifact_dir }}/automation-password.txt"
+vikunja_api_token_local_file: "{{ vikunja_local_artifact_dir }}/api-token.txt"
+vikunja_admin_auth_local_file: "{{ vikunja_local_artifact_dir }}/admin-auth.json"
+vikunja_desired_state_local_file: "{{ vikunja_local_artifact_dir }}/desired-state.json"
+vikunja_sync_summary_local_file: "{{ vikunja_local_artifact_dir }}/sync-summary.json"
 vikunja_service_secret_remote_file: "{{ vikunja_secret_dir }}/service-secret.txt"
 vikunja_webhook_secret_remote_file: "{{ vikunja_secret_dir }}/webhook-secret.txt"
 vikunja_automation_password_remote_file: "{{ vikunja_secret_dir }}/vikunja.automation-password.txt"
@@ -65,7 +52,7 @@ vikunja_operator_shadow_password_remote_file: "{{ vikunja_secret_dir }}/florin.b
 vikunja_keycloak_client_id: vikunja
 vikunja_keycloak_provider_id: lv3
 vikunja_keycloak_provider_name: LV3 SSO
-vikunja_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/vikunja-client-secret.txt
+vikunja_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/vikunja-client-secret.txt"
 vikunja_keycloak_issuer: https://sso.lv3.org/realms/lv3
 vikunja_keycloak_logout_uri: >-
   {{ platform_session_authority.keycloak_logout_url }}?client_id={{ vikunja_keycloak_client_id }}&post_logout_redirect_uri={{ vikunja_public_base_url | urlencode }}

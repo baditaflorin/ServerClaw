@@ -5,32 +5,41 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0165, ADR 0046, ADR 0197, and ADR 0262.
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
+# local_artifact_dir is provided as a stable default below so partial task files
+# (open_webui_client.yml, serverclaw_client.yml) can run on guest hosts without
+# platform_service_registry in scope. derive_service_defaults overrides this when available.
 # Purpose: Default runtime inputs for Keycloak and its repo-managed identity integrations.
-
-keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
-keycloak_session_authority: "{{ platform_session_authority }}"
-keycloak_image: quay.io/keycloak/keycloak:26.5.4
-keycloak_image_pull_retries: 5
-keycloak_image_pull_delay_seconds: 5
-keycloak_realm_name: lv3
-keycloak_realm_display_name: LV3 Control Plane
 keycloak_site_dir: /opt/keycloak
-keycloak_secret_dir: /etc/lv3/keycloak
+keycloak_secret_dir: "{{ keycloak_site_dir }}/secrets"
 keycloak_compose_file: "{{ keycloak_site_dir }}/docker-compose.yml"
-keycloak_compose_project_name: keycloak
-keycloak_compose_network_name: "{{ keycloak_compose_project_name }}_default"
-keycloak_env_file: "{{ compose_runtime_secret_root }}/keycloak/runtime.env"
+keycloak_env_file: "{{ keycloak_site_dir }}/runtime.env"
+keycloak_image: "quay.io/keycloak/keycloak:26.5.4"
+keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
 keycloak_legacy_env_file: "{{ keycloak_site_dir }}/keycloak.env"
+
+# OpenBao agent configuration (from ADR 0373)
 keycloak_openbao_agent_dir: "{{ keycloak_site_dir }}/openbao"
 keycloak_openbao_agent_image: "{{ openbao_agent_image }}"
 keycloak_openbao_agent_container_name: keycloak-openbao-agent
 keycloak_openbao_secret_path: services/keycloak/runtime-env
 keycloak_openbao_policy_name: lv3-service-keycloak-runtime
 keycloak_openbao_approle_name: keycloak-runtime
+
+keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
+keycloak_session_authority: "{{ platform_session_authority }}"
+keycloak_image_pull_retries: 5
+keycloak_image_pull_delay_seconds: 5
+keycloak_realm_name: lv3
+keycloak_realm_display_name: LV3 Control Plane
+keycloak_compose_project_name: keycloak
+keycloak_compose_network_name: "{{ keycloak_compose_project_name }}_default"
 keycloak_database_name: keycloak
 keycloak_database_user: keycloak
 keycloak_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-keycloak_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/database-password.txt
+keycloak_database_password_local_file: "{{ keycloak_local_artifact_dir }}/database-password.txt"
 keycloak_internal_http_port: "{{ platform_service_topology | platform_service_port('keycloak', 'internal') }}"
 keycloak_local_http_port: 18080
 keycloak_local_management_port: 19000
@@ -50,11 +59,10 @@ keycloak_outline_automation_first_name: Outline
 keycloak_outline_automation_last_name: Automation
 keycloak_outline_automation_email: outline.automation@lv3.org
 keycloak_outline_automation_password_remote_file: "{{ keycloak_secret_dir }}/outline.automation-password"
-keycloak_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak
-keycloak_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
-keycloak_admin_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/admin-client-secret.txt
-keycloak_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
-keycloak_outline_automation_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
+keycloak_bootstrap_admin_password_local_file: "{{ keycloak_local_artifact_dir }}/bootstrap-admin-password.txt"
+keycloak_admin_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/admin-client-secret.txt"
+keycloak_operator_password_local_file: "{{ keycloak_local_artifact_dir }}/florin.badita-password.txt"
+keycloak_outline_automation_password_local_file: "{{ keycloak_local_artifact_dir }}/outline.automation-password.txt"
 keycloak_mail_platform_submission_username: "{{ smtp_username }}"
 keycloak_mail_platform_submission_password_local_file: "{{ smtp_password_local_file }}"
 keycloak_mail_platform_submission_host: "{{ smtp_host }}"
@@ -84,37 +92,37 @@ keycloak_realm_smtp_server:
   starttls: "{{ keycloak_mail_platform_submission_starttls }}"
   ssl: false
 keycloak_grafana_client_id: grafana-oauth
-keycloak_grafana_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt
+keycloak_grafana_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/grafana-client-secret.txt"
 keycloak_ops_portal_client_id: ops-portal-oauth
-keycloak_ops_portal_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/ops-portal-client-secret.txt
+keycloak_ops_portal_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/ops-portal-client-secret.txt"
 keycloak_open_webui_client_id: open-webui
-keycloak_open_webui_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/open-webui-client-secret.txt
+keycloak_open_webui_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/open-webui-client-secret.txt"
 keycloak_gitea_client_id: gitea-oauth
-keycloak_gitea_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/gitea-client-secret.txt
+keycloak_gitea_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/gitea-client-secret.txt"
 keycloak_agent_client_id: lv3-agent-hub
-keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
+keycloak_agent_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/lv3-agent-hub-client-secret.txt"
 keycloak_api_gateway_client_id: api-gateway
-keycloak_api_gateway_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/api-gateway-client-secret.txt
+keycloak_api_gateway_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/api-gateway-client-secret.txt"
 keycloak_serverclaw_runtime_client_id: serverclaw-runtime
-keycloak_serverclaw_runtime_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt
+keycloak_serverclaw_runtime_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/serverclaw-runtime-client-secret.txt"
 keycloak_langfuse_client_id: langfuse
-keycloak_langfuse_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/langfuse-client-secret.txt
+keycloak_langfuse_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/langfuse-client-secret.txt"
 keycloak_grist_client_id: grist
-keycloak_grist_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grist-client-secret.txt
+keycloak_grist_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/grist-client-secret.txt"
 keycloak_directus_client_id: directus
-keycloak_directus_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/directus-client-secret.txt
+keycloak_directus_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/directus-client-secret.txt"
 keycloak_jupyterhub_client_id: jupyterhub
-keycloak_jupyterhub_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/jupyterhub-client-secret.txt
+keycloak_jupyterhub_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/jupyterhub-client-secret.txt"
 keycloak_superset_client_id: superset
-keycloak_superset_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/superset-client-secret.txt
+keycloak_superset_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/superset-client-secret.txt"
 keycloak_glitchtip_client_id: glitchtip
-keycloak_glitchtip_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/glitchtip-client-secret.txt
+keycloak_glitchtip_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/glitchtip-client-secret.txt"
 keycloak_outline_client_id: outline
-keycloak_outline_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline-client-secret.txt
+keycloak_outline_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/outline-client-secret.txt"
 keycloak_paperless_client_id: paperless
-keycloak_paperless_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/paperless-client-secret.txt
+keycloak_paperless_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/paperless-client-secret.txt"
 keycloak_serverclaw_client_id: serverclaw
-keycloak_serverclaw_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-client-secret.txt
+keycloak_serverclaw_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/serverclaw-client-secret.txt"
 keycloak_grafana_groups:
   admins: grafana-admins
   viewers: grafana-viewers
@@ -164,6 +172,7 @@ keycloak_startup_probe_retries: 60
 keycloak_startup_probe_delay: 5
 keycloak_repo_user_reconciliation_retries: 24
 keycloak_repo_user_reconciliation_delay: 5
+keycloak_reconcile_outline_users: true
 keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"
 keycloak_langfuse_root_url: https://langfuse.lv3.org
 keycloak_grist_root_url: https://grist.lv3.org
@@ -214,14 +223,21 @@ keycloak_serverclaw_post_logout_redirect_uris:
   - "{{ keycloak_serverclaw_root_url }}"
   - "{{ keycloak_serverclaw_root_url }}/"
 keycloak_dify_client_id: dify
-keycloak_dify_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/dify-client-secret.txt
+keycloak_dify_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/dify-client-secret.txt"
 keycloak_dify_root_url: https://agents.lv3.org
 keycloak_dify_post_logout_redirect_uris:
   - "{{ keycloak_dify_root_url }}"
   - "{{ keycloak_dify_root_url }}/"
 keycloak_nomad_client_id: nomad
-keycloak_nomad_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/nomad-client-secret.txt
+keycloak_nomad_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/nomad-client-secret.txt"
 keycloak_nomad_root_url: https://scheduler.lv3.org
 keycloak_nomad_post_logout_redirect_uris:
   - "{{ keycloak_nomad_root_url }}/ui"
   - "{{ keycloak_nomad_root_url }}"
+keycloak_plane_client_id: lv3-plane-oidc
+keycloak_plane_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/plane-client-secret.txt"
+keycloak_plane_root_url: https://tasks.lv3.org
+keycloak_plane_post_logout_redirect_uris:
+  - "{{ keycloak_plane_root_url }}"
+  - "{{ keycloak_plane_root_url }}/"
+plane_oidc_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/plane-oidc-client-secret.txt"

@@ -1,0 +1,22 @@
+adr_number: '0033'
+title: Declarative Service Topology Catalog
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0033'
+  location: git:05aba1933
+  evidence: 05aba1933 Implement ADR 0033 service topology catalog
+  confidence: 1.0
+  detected_on: '2026-04-07T07:53:18.274394'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 1
+
+  Breakdown: git-commit=1
+
+  Implemented On: 2026-03-22'

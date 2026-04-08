@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-08'
 facet: concern
 concern: documentation
 total_adrs: 21
@@ -50,7 +50,7 @@ adrs:
   - adr: 0094
     title: Developer Portal and Service Documentation Site
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: documentation
     keywords:
@@ -87,7 +87,7 @@ adrs:
   - adr: 0097
     title: Alerting Routing and On-Call Runbook Model
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-23'
     concern: documentation
     keywords:
@@ -105,7 +105,7 @@ adrs:
   - adr: '0121'
     title: Local Search and Indexing Fabric
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-24'
     concern: documentation
     keywords:

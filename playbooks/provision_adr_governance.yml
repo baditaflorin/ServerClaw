@@ -1,0 +1,78 @@
+---
+# Provision ADR Governance Infrastructure
+#
+# This playbook automates the setup of ADR governance components:
+# 1. Creates Plane adr-index project
+# 2. Generates API token for ADR sync
+# 3. Provisions credentials for pre-commit hook and quarterly audit
+#
+# Usage:
+#   # Test with dry-run
+#   ansible-playbook playbooks/provision_adr_governance.yml \
+#     -i inventory/hosts.yml \
+#     -e "plane_admin_bootstrap_token=YOUR_ADMIN_TOKEN" \
+#     --check
+#
+#   # Execute provisioning
+#   ansible-playbook playbooks/provision_adr_governance.yml \
+#     -i inventory/hosts.yml \
+#     -e "plane_admin_bootstrap_token=YOUR_ADMIN_TOKEN"
+
+- name: Provision ADR Governance Infrastructure
+  hosts: runtime_control_lv3
+  gather_facts: true
+  vars:
+    plane_admin_bootstrap_token: "{{ plane_admin_bootstrap_token | default('', true) }}"
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - plane_admin_bootstrap_token != ''
+        fail_msg: >-
+          plane_admin_bootstrap_token is required.
+          Provide via: -e "plane_admin_bootstrap_token=YOUR_TOKEN"
+
+    - name: Display provisioning parameters
+      ansible.builtin.debug:
+        msg: |
+          ADR Governance Provisioning
+          ===========================
+          Plane URL: {{ plane_private_base_url }}
+          Workspace: {{ plane_workspace_slug | default('default') }}
+          Output: {{ provisioned_plane_env_path }}
+          Token: (admin bootstrap token provided)
+
+  roles:
+    - role: plane_adr_provisioner
+      tags:
+        - adr_governance
+
+  post_tasks:
+    - name: Display next steps
+      ansible.builtin.debug:
+        msg: |
+          ✓ ADR Governance Infrastructure Provisioned
+          ============================================
+
+          Next steps:
+
+          1. Source the credentials:
+             source {{ provisioned_plane_env_path }}
+
+          2. Sync ADRs to Plane:
+             make sync-adrs-to-plane
+
+          3. Verify in Plane:
+             - Open http://10.10.10.20:8093
+             - Check project "Architecture Decisions" (adr-index)
+             - Confirm 406 ADR issues created
+
+          4. Test pre-commit hook:
+             - Try upgrading an ADR without evidence → should FAIL
+             - Upgrade with evidence → should PASS
+             - Downgrade without reason → should FAIL
+             - Downgrade with reason → should PASS
+
+          Documentation:
+             - CONTRIBUTING.md - Developer guide
+             - docs/workstreams/ws-0408-adr-governance-implementation.md

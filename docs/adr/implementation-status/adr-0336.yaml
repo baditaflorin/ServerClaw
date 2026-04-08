@@ -1,0 +1,52 @@
+adr_number: '0336'
+title: Public Entrypoint Leakage Validation
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0336'
+  location: git:972e3da17
+  evidence: 972e3da17 [validation] Advance ADR 0336 evidence to latest mainline base
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:31.142486'
+- marker_type: git-commit
+  adr_number: '0336'
+  location: git:1da65d42e
+  evidence: 1da65d42e [validation] Refresh ADR 0336 evidence on ADR 0346 mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:31.142521'
+- marker_type: git-commit
+  adr_number: '0336'
+  location: git:e1af6d79a
+  evidence: e1af6d79a [validation] Refresh ADR 0336 latest-main evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:31.142525'
+- marker_type: git-commit
+  adr_number: '0336'
+  location: git:f34316d2c
+  evidence: f34316d2c [build] Refresh manifest for ADR 0336 closeout
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:31.142531'
+- marker_type: git-commit
+  adr_number: '0336'
+  location: git:b096b410f
+  evidence: b096b410f [validation] Close out ADR 0336 on exact main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:31.142534'
+- marker_type: git-commit
+  adr_number: '0336'
+  location: git:7636d69f0
+  evidence: 7636d69f0 [validation] Record ADR 0336 exact-main verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:31.142538'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=6
+
+  Implemented On: 2026-04-02'

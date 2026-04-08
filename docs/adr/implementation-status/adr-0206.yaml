@@ -1,0 +1,64 @@
+adr_number: '0206'
+title: Ports And Adapters For External Integrations
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:ebf380e32
+  evidence: ebf380e32 [release] Cut 0.177.34 for ADR 0206 mainline merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.209641'
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:a5b2f650b
+  evidence: a5b2f650b Merge remote-tracking branch 'origin/main' into codex/ws-0206-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:33.209673'
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:bb1a07305
+  evidence: bb1a07305 [docs] Refresh ADR 0206 gate artifacts
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.209726'
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:fbab6b4a8
+  evidence: fbab6b4a8 [release] Cut 0.177.33 for ADR 0206 mainline merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.209746'
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:0c65c3607
+  evidence: 0c65c3607 Merge branch 'codex/ws-0206-live-apply' into codex/ws-0206-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:33.209765'
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:a03da9d00
+  evidence: a03da9d00 [operator-access] Harden ADR 0206 verification paths
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.209773'
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:b9d8f68ed
+  evidence: b9d8f68ed Merge remote-tracking branch 'origin/main' into codex/ws-0206-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:33.209780'
+- marker_type: git-commit
+  adr_number: '0206'
+  location: git:66b86f3e7
+  evidence: 66b86f3e7 [operator-access] Record ADR 0206 live apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:33.209787'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 8
+
+  Breakdown: git-commit=8
+
+  Implemented On: 2026-03-28'

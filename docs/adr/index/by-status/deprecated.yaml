@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-08'
 facet: status
 implementation_status: Deprecated
 slug: deprecated

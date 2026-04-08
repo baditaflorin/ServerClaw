@@ -1,7 +1,7 @@
 # ADR 0116: Change Risk Scoring Without LLMs
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Partial Implemented
 - Implemented In Repo Version: 0.112.0
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-24

@@ -1,31 +1,19 @@
 ---
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived
+# from platform_service_registry — ADR 0373.
 # Purpose: Define default runtime inputs for the SFTPGo managed file-transfer surface.
 
 sftpgo_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | service_topology_get('sftpgo') }}"
 sftpgo_session_authority: "{{ platform_session_authority }}"
-sftpgo_image: "{{ container_image_catalog.images.sftpgo_runtime.ref }}"
-sftpgo_container_name: sftpgo
-sftpgo_site_dir: /opt/sftpgo
 sftpgo_config_dir: "{{ sftpgo_site_dir }}/config"
 sftpgo_plugin_dir: "{{ sftpgo_site_dir }}/plugins"
 sftpgo_state_dir: "{{ sftpgo_site_dir }}/state"
-sftpgo_data_dir: /srv/sftpgo/data
-sftpgo_secret_dir: /etc/lv3/sftpgo
-sftpgo_compose_file: "{{ sftpgo_site_dir }}/docker-compose.yml"
 sftpgo_config_file: "{{ sftpgo_config_dir }}/sftpgo.json"
-sftpgo_env_file: "{{ compose_runtime_secret_root }}/sftpgo/runtime.env"
-sftpgo_legacy_env_file: "{{ sftpgo_site_dir }}/sftpgo.env"
-sftpgo_openbao_agent_dir: "{{ sftpgo_site_dir }}/openbao"
-sftpgo_openbao_agent_image: "{{ openbao_agent_image }}"
-sftpgo_openbao_agent_container_name: sftpgo-openbao-agent
-sftpgo_openbao_secret_path: services/sftpgo/runtime-env
-sftpgo_openbao_policy_name: lv3-service-sftpgo-runtime
-sftpgo_openbao_approle_name: sftpgo-runtime
 sftpgo_database_name: sftpgo
 sftpgo_database_user: sftpgo
 sftpgo_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-sftpgo_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/sftpgo/database-password.txt
-sftpgo_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/sftpgo
+sftpgo_database_password_local_file: "{{ sftpgo_local_artifact_dir }}/database-password.txt"
 sftpgo_bootstrap_admin_username: lv3-sftpgo-admin
 sftpgo_bootstrap_admin_password_local_file: "{{ sftpgo_local_artifact_dir }}/bootstrap-admin-password.txt"
 sftpgo_oidc_admin_username: florin.badita
@@ -42,7 +30,7 @@ sftpgo_smoke_user_home_dir: "/srv/sftpgo/data/{{ sftpgo_smoke_user_username }}"
 sftpgo_smoke_user_quota_bytes: 104857600
 sftpgo_smoke_user_quota_files: 100
 sftpgo_keycloak_client_id: sftpgo
-sftpgo_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/sftpgo-client-secret.txt
+sftpgo_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/sftpgo-client-secret.txt"
 sftpgo_keycloak_config_url: >-
   https://{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}/realms/lv3/.well-known/openid-configuration
 sftpgo_keycloak_username_field: preferred_username

@@ -1,0 +1,31 @@
+id: ws-0402-assess-0243-branch
+adr: '0243'
+title: "Assess ADR 0243 Branch for Mainline Merge"
+description: |
+  Evaluate origin/codex/ws-0243-live-apply branch (Storybook/Playwright/axe-core UI testing framework).
+  Determine merge readiness, identify blockers, assess scope, and recommend next steps.
+  Currently 1086 commits ahead of main with complete UI contract testing implementation.
+status: planned
+owner: claude
+branch: claude/ws-0402-assess-0243
+worktree_path: .claude/worktrees/ws-0402-assess-0243
+doc: docs/workstreams/ws-0402-assess-0243-branch.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - docs/workstreams/ws-0402-assess-0243-branch.md
+ownership_manifest:
+  owned_surfaces:
+    - id: assessment_doc
+      paths:
+        - docs/workstreams/ws-0402-assess-0243-branch.md
+      mode: exclusive
+notes: |
+  - Fetch and analyze origin/codex/ws-0243-live-apply
+  - Document scope: Storybook config, Playwright tests, Axe-core a11y
+  - Identify blockers: Windmill CE render issue noted in agents' findings
+  - Assessment should include: file count, test coverage, dependencies, conflicts with main
+  - Recommend merge strategy or fixes required before merge
+  - Commit assessment doc and push to claude/ws-0402-assess-0243
+ready_to_merge: false
+live_applied: false

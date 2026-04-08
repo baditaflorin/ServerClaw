@@ -1,0 +1,706 @@
+adr_number: 0269
+title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:00d87de08
+  evidence: 00d87de08 [fix] Remove remaining ws-0269/ws-0266 exclusive ownership conflicts
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:01.516557'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:d823e8d1e
+  evidence: d823e8d1e [fix] Fix remaining gate failures from ADR 0269 rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.516599'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:b000b25e0
+  evidence: b000b25e0 [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.516616'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:ee595950f
+  evidence: ee595950f [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.516619'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:c3a427f25
+  evidence: c3a427f25 [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.516623'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:da034ef76
+  evidence: da034ef76 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.516626'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:4db2d1f4d
+  evidence: 4db2d1f4d [receipts] Record ADR 0269 mainline gate results
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519315'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:b55f407fb
+  evidence: b55f407fb [release] Integrate ADR 0269 on main as 0.177.106
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519318'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:73e04886b
+  evidence: 73e04886b [manifest] Refresh platform manifest for ADR 0269 branch
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519443'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:8b615b899
+  evidence: 8b615b899 [windmill] Refresh ADR 0269 exact-main live proof
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519459'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:51c9fbc70
+  evidence: 51c9fbc70 [windmill] Refresh ADR 0269 validation surfaces after rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519466'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:733235db5
+  evidence: 733235db5 [windmill] Refresh ADR 0269 replay evidence and repo gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519470'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:75094c5c5
+  evidence: 75094c5c5 [windmill] Refresh ADR 0269 latest-main replay baseline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519473'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:96bb51d33
+  evidence: 96bb51d33 [windmill] Stabilize ADR 0269 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519476'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:5897a9cdd
+  evidence: 5897a9cdd [windmill] Harden exact-main ADR 0269 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519531'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:45a9f3b3a
+  evidence: 45a9f3b3a [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519539'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:0a9d3bf6d
+  evidence: 0a9d3bf6d [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519546'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:31f593871
+  evidence: 31f593871 [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519549'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:75e822aff
+  evidence: 75e822aff [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519552'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:4ffb42e30
+  evidence: 4ffb42e30 [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519555'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:a4dbabd56
+  evidence: a4dbabd56 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519558'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:d5c786c2d
+  evidence: d5c786c2d [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519560'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:d70eb2e7d
+  evidence: d70eb2e7d [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519563'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:3f082dae1
+  evidence: 3f082dae1 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519566'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:5659cf0d2
+  evidence: 5659cf0d2 [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519569'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:c65d5b7d7
+  evidence: c65d5b7d7 [windmill] Refresh ADR 0269 latest-main replay baseline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519758'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:180714b7a
+  evidence: 180714b7a [windmill] Stabilize ADR 0269 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519761'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:5b567245c
+  evidence: 5b567245c [windmill] Harden exact-main ADR 0269 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519764'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:5535dcfdb
+  evidence: 5535dcfdb [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519767'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:c536357fc
+  evidence: c536357fc [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519774'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:a3edacd62
+  evidence: a3edacd62 [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519777'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:1371d95a0
+  evidence: 1371d95a0 [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519780'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:1e60359b5
+  evidence: 1e60359b5 [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519783'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:f77c9ba16
+  evidence: f77c9ba16 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519786'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:49c18753f
+  evidence: 49c18753f [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519789'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:77a079598
+  evidence: 77a079598 [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519792'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:3dc1623dd
+  evidence: 3dc1623dd [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519795'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:2956e5f54
+  evidence: 2956e5f54 [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519798'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:5dafba4a1
+  evidence: 5dafba4a1 [release] Cut 0.177.101 for ADR 0269
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519881'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:263bb1ffb
+  evidence: 263bb1ffb [windmill] Stabilize ADR 0269 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519912'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:8293cbb9b
+  evidence: 8293cbb9b [windmill] Harden exact-main ADR 0269 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519956'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:cbc81cb2e
+  evidence: cbc81cb2e [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519960'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:a86a14414
+  evidence: a86a14414 [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519967'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:b7e6a7c6a
+  evidence: b7e6a7c6a [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519970'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:373d4dfe3
+  evidence: 373d4dfe3 [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519973'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:6c2aed8d7
+  evidence: 6c2aed8d7 [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519976'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:d9b514679
+  evidence: d9b514679 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519979'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:aa9d96c67
+  evidence: aa9d96c67 [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519982'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:550704eca
+  evidence: 550704eca [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519985'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:ec903da57
+  evidence: ec903da57 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519988'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:c75b845a2
+  evidence: c75b845a2 [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.519991'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:fbed6530b
+  evidence: fbed6530b [release] Cut 0.177.98 for ADR 0269
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520202'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:93ddb8eb8
+  evidence: 93ddb8eb8 [windmill] Stabilize ADR 0269 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520226'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:97e33aa86
+  evidence: 97e33aa86 [windmill] Harden exact-main ADR 0269 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520230'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:b762db85f
+  evidence: b762db85f [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520233'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:cb2bbfae3
+  evidence: cb2bbfae3 [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520240'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:72f1d2b25
+  evidence: 72f1d2b25 [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520243'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:b572a6060
+  evidence: b572a6060 [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520246'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:05f606119
+  evidence: 05f606119 [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520249'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:ed6f4d4f4
+  evidence: ed6f4d4f4 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520252'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:ecc8c433d
+  evidence: ecc8c433d [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520255'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:8f6b917b9
+  evidence: 8f6b917b9 [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520257'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:aa068ec86
+  evidence: aa068ec86 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520260'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:6dbcc6f33
+  evidence: 6dbcc6f33 [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520263'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:cb4c32560
+  evidence: cb4c32560 [windmill] Harden exact-main ADR 0269 replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520327'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:665b69f89
+  evidence: 665b69f89 [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520424'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:c3c980caa
+  evidence: c3c980caa [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520430'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:7a8b6da4c
+  evidence: 7a8b6da4c [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520433'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:d3e64f9ec
+  evidence: d3e64f9ec [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520436'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:a89d287ed
+  evidence: a89d287ed [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520439'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:5c8e97432
+  evidence: 5c8e97432 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520442'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:7f4ba1690
+  evidence: 7f4ba1690 [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520445'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:aca1ef0e3
+  evidence: aca1ef0e3 [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520448'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:75e6f8df5
+  evidence: 75e6f8df5 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520451'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:8e0371b6e
+  evidence: 8e0371b6e [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.520454'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:13bc1c5ea
+  evidence: 13bc1c5ea [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521021'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:1ab352762
+  evidence: 1ab352762 [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521029'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:b1a041c39
+  evidence: b1a041c39 [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521033'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:a5ad8ca94
+  evidence: a5ad8ca94 [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521047'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:6c6767ed7
+  evidence: 6c6767ed7 [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521050'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:9a3f822a1
+  evidence: 9a3f822a1 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521053'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:ef4c1efe4
+  evidence: ef4c1efe4 [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521060'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:2cfae13a8
+  evidence: 2cfae13a8 [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521068'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:1fa6b89fe
+  evidence: 1fa6b89fe [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521071'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:7bb64221f
+  evidence: 7bb64221f [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521082'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:488bb151d
+  evidence: 488bb151d [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521323'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:d48b1b15b
+  evidence: d48b1b15b [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521330'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:7ab7f7fd7
+  evidence: 7ab7f7fd7 [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521333'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:01e6d0196
+  evidence: 01e6d0196 [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521336'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:88e75eb4c
+  evidence: 88e75eb4c [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521339'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:13419b220
+  evidence: 13419b220 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521342'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:acce61453
+  evidence: acce61453 [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521345'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:3e41707f4
+  evidence: 3e41707f4 [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521347'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:87afac045
+  evidence: 87afac045 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521351'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:1c89882e8
+  evidence: 1c89882e8 [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521354'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:703da5097
+  evidence: 703da5097 [registry] Track ADR 0269 idempotency registry edit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521403'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:755f4f50d
+  evidence: 755f4f50d [registry] Cover ADR 0269 shared runtime surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521419'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:e4096f605
+  evidence: e4096f605 [compat] Normalize ADR 0269 latest-main validation surfaces
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521422'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:1b5455d28
+  evidence: 1b5455d28 [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521425'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:216bf1cb0
+  evidence: 216bf1cb0 [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521428'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:d97635d9f
+  evidence: d97635d9f [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521431'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:9f6ab1711
+  evidence: 9f6ab1711 [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521434'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:0f9ea4937
+  evidence: 0f9ea4937 [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521436'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:ada8ddd88
+  evidence: ada8ddd88 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521439'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:28e3fc1f9
+  evidence: 28e3fc1f9 [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521442'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:57e3a13bc
+  evidence: 57e3a13bc [docs] Keep ADR 0269 branch off protected mainline truth
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521545'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:7bcc8a18b
+  evidence: 7bcc8a18b [windmill] Harden ADR 0269 isolated worker checkout replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521548'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:5f28f2404
+  evidence: 5f28f2404 [docs] Reopen ADR 0269 workstream for merge validation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.521912'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:bf3e50b05
+  evidence: bf3e50b05 [fix] Repair ADR 0269 Windmill gate-status replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.522053'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:a415af541
+  evidence: a415af541 [release] Prepare ADR 0269 final mainline cut
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.522086'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:57886b4e1
+  evidence: 57886b4e1 [docs] Record ADR 0269 exact-main revalidation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.522089'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:9cd06e017
+  evidence: 9cd06e017 [tests] Align ADR 0269 windmill assertions after rebase
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.522092'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:3eeba1327
+  evidence: 3eeba1327 [docs] Record ADR 0269 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.522095'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:f8df526e3
+  evidence: f8df526e3 [security] Harden ADR 0269 live-apply verification
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.522098'
+- marker_type: git-commit
+  adr_number: 0269
+  location: git:8f0a8f61f
+  evidence: 8f0a8f61f [security] Implement ADR 0269 vulnerability budget gates
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:01.522101'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 115
+
+  Breakdown: git-commit=115
+
+  Implemented On: 2026-03-29'

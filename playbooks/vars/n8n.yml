@@ -1,0 +1,10 @@
+---
+service_audit_name: n8n
+service_dns_fqdn: n8n.lv3.org
+service_postgres_role: lv3.platform.n8n_postgres
+service_runtime_roles:
+  - lv3.platform.docker_runtime
+  - lv3.platform.n8n_runtime
+service_needs_dns: true
+service_needs_postgres: true
+service_needs_nginx_edge: true

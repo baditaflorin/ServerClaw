@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+# oauth2-proxy health watchdog for {{ public_edge_oidc_auth_probe_hostname }}
+# Probes every {{ public_edge_oidc_auth_watchdog_interval_sec }}s; restarts on {{ public_edge_oidc_auth_watchdog_failure_threshold }} consecutive failures.
+
+set -euo pipefail
+
+STATE_DIR="/run/lv3-oauth2-proxy-watchdog"
+FAILURE_FILE="${STATE_DIR}/failures"
+SERVICE="{{ public_edge_oidc_auth_service_name }}.service"
+PROBE_URL="http://{{ public_edge_oidc_auth_http_address }}/oauth2/auth"
+PROBE_HOST="{{ public_edge_oidc_auth_probe_hostname }}"
+FAILURE_THRESHOLD="{{ public_edge_oidc_auth_watchdog_failure_threshold }}"
+NTFY_URL="{{ public_edge_oidc_auth_watchdog_ntfy_url }}/{{ public_edge_oidc_auth_watchdog_ntfy_topic }}"
+NTFY_TITLE="{{ public_edge_oidc_auth_watchdog_ntfy_title }}"
+
+mkdir -p "${STATE_DIR}"
+
+get_failures() { if [[ -f "${FAILURE_FILE}" ]]; then cat "${FAILURE_FILE}"; else echo 0; fi; }
+set_failures() { echo "$1" > "${FAILURE_FILE}"; }
+
+send_ntfy() {
+    local msg="$1" tags="$2" priority="${3:-high}"
+    curl -sf -o /dev/null \
+        -H "Title: ${NTFY_TITLE}" \
+        -H "Priority: ${priority}" \
+        -H "Tags: ${tags}" \
+        -d "${msg}" \
+        "${NTFY_URL}" 2>/dev/null || true
+}
+
+# Probe: GET /oauth2/auth must return 401 (unauthenticated but alive)
+status_code=$(curl -s -o /dev/null -w "%{http_code}" -m 5 \
+    -H "Host: ${PROBE_HOST}" \
+    -H "X-Forwarded-Proto: https" \
+    "${PROBE_URL}" 2>/dev/null) || status_code="000"
+
+failures=$(get_failures)
+
+if [[ "${status_code}" == "401" ]]; then
+    if [[ "${failures}" -gt 0 ]]; then
+        echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) INFO  oauth2-proxy recovered (was ${failures} failures)"
+        send_ntfy "oauth2-proxy recovered after ${failures} failures" "white_check_mark,unlock" "default"
+        set_failures 0
+    fi
+else
+    failures=$((failures + 1))
+    set_failures "${failures}"
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) WARN  oauth2-proxy probe failed (status=${status_code}, failures=${failures}/${FAILURE_THRESHOLD})"
+    if [[ "${failures}" -ge "${FAILURE_THRESHOLD}" ]]; then
+        echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) ERROR Restarting ${SERVICE}"
+        send_ntfy "oauth2-proxy unhealthy (status=${status_code}) — restarting" "rotating_light,lock" "urgent"
+        systemctl restart "${SERVICE}" || true
+        set_failures 0
+    fi
+fi

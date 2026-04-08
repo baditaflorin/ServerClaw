@@ -1,0 +1,52 @@
+adr_number: '0315'
+title: Canonical Page States And Next-Best-Action Guidance For Human Surfaces
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0315'
+  location: git:cf255eeca
+  evidence: cf255eeca [windmill] Promote ADR 0315 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.440665'
+- marker_type: git-commit
+  adr_number: '0315'
+  location: git:f3f564884
+  evidence: f3f564884 [windmill] Live apply ADR 0315 branch checkpoint
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:22.440693'
+- marker_type: git-commit
+  adr_number: '0315'
+  location: git:ef62d910c
+  evidence: ef62d910c [mainline] Merge ws-0315 gitea followups
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.441423'
+- marker_type: git-commit
+  adr_number: '0315'
+  location: git:4c84d576e
+  evidence: 4c84d576e [receipts] Capture ws-0315 Gitea rerun evidence
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.441429'
+- marker_type: git-commit
+  adr_number: '0315'
+  location: git:46140d45f
+  evidence: 46140d45f [meta] Align ws-0315 generated surfaces
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.441442'
+- marker_type: git-commit
+  adr_number: '0315'
+  location: git:b0720b4b4
+  evidence: b0720b4b4 [docs] Refresh canonical truth after ws-0315 updates
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:22.441448'
+inferred_implementation_status: Possibly Implemented
+status_match: false
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Possibly Implemented
+
+  Markers Found: 6
+
+  Breakdown: git-commit=6
+
+  Implemented On: 2026-04-02'

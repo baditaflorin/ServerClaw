@@ -3,7 +3,7 @@
 # Inputs: ops_portal_verify_* variables plus the rendered ops portal runtime and HTTP listener.
 # Outputs: Assertion-only verification state for the local ops portal runtime.
 # Idempotency: Fully idempotent; verification tasks only read local runtime state and assert expected content.
-# Dependencies: ADR 0165, ADR 0310, ops_portal_runtime defaults, and a running local Docker runtime.
+# Dependencies: ADR 0165, ADR 0310, ADR 0371, ops_portal_runtime defaults, and a running local Docker runtime.
 ---
 # Purpose: Verify the live ops portal runtime serves the expected dashboard, contextual help, and return-to-task surfaces after deployment.
 - name: Verify the ops portal container is running
@@ -29,23 +29,18 @@
       - ops_portal_verify_running.stdout_lines | select('equalto', ops_portal_container_name) | list | length == 1
     fail_msg: "Ops portal container is not running."
 
-- name: Wait for the ops portal listener
-  ansible.builtin.wait_for:
-    host: "{{ ops_portal_verify_address }}"
-    port: "{{ ops_portal_internal_port }}"
-    delay: 0
-    timeout: 180
-
-- name: Verify the ops portal health endpoint responds locally
-  ansible.builtin.uri:
-    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/health"
-    method: GET
-    status_code: 200
-  register: ops_portal_verify_health
-  changed_when: false
-  retries: 20
-  delay: 3
-  until: ops_portal_verify_health.status == 200
+- name: Verify the ops portal runtime health
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: ops-portal
+    common_verify_port: "{{ ops_portal_internal_port }}"
+    common_verify_port_host: "{{ ops_portal_verify_address }}"
+    common_verify_port_timeout: 180
+    common_verify_health_url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/health"
+    common_verify_health_retries: 20
+    common_verify_health_delay: 3
 
 - name: Verify the ops portal root page renders locally
   ansible.builtin.uri:

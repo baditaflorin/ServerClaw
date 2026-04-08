@@ -1,0 +1,17 @@
+---
+# Plane ADR Provisioner defaults
+
+# Plane connection details (from platform variables)
+plane_private_base_url: "{{ plane_private_base_url | default('http://10.10.10.20:8093') }}"
+plane_workspace_slug: default
+
+# Admin token for bootstrapping project/tokens
+# Must be provided by caller (from Plane admin setup)
+plane_admin_bootstrap_token: ""
+
+# Output path for provisioned credentials
+# Will contain PLANE_API_KEY, PLANE_URL, PLANE_PROJECT_ID
+provisioned_plane_env_path: "/root/.local/plane.env"
+
+# Repository root (for finding provision script)
+repo_root: /srv/proxmox_florin_server

@@ -106,6 +106,42 @@ operators:
       onboarded_at: "2026-04-03T15:52:45Z"
       onboarded_by: codex/ws-0318-live-apply
 
+  - id: florin-tmp-003
+    name: Florin Badita (Temporary)
+    email: baditaflorin+tmp003@gmail.com
+    role: admin
+    status: active
+    notes: |
+      Temporary 3-day admin account. Expires 2026-04-11T00:00:00Z.
+      Created per ADR 0318. Full service login access (Keycloak SSO, Grafana, OpenBao, Tailscale, SSH).
+      MUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.
+    keycloak:
+      username: florin.badita-tmp-003
+      realm_roles:
+        - platform-admin
+      groups:
+        - lv3-platform-admins
+        - grafana-admins
+      enabled: true
+    ssh:
+      principal: florin.badita-tmp-003
+      certificate_ttl_hours: 24
+      public_keys:
+        - name: bootstrap-placeholder
+          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
+          fingerprint: SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ
+    openbao:
+      entity_name: florin.badita-tmp-003
+      policies:
+        - platform-admin
+    tailscale:
+      login_email: baditaflorin@gmail.com
+      tags:
+        - tag:platform-operator
+    audit:
+      onboarded_at: "2026-04-08T00:00:00Z"
+      onboarded_by: claude-agent
+
   - id: matei-busui-tmp-001
     name: Matei Busui
     email: busui.matei1994@gmail.com

@@ -1,0 +1,93 @@
+adr_number: 0282
+title: Mailpit As The SMTP Development Mail Interceptor
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:f775b5299
+  evidence: f775b5299 [workstream] Close ws-0282 main integration
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:07.183133'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:80e4d1576
+  evidence: 80e4d1576 [workstream] Refresh ws-0282 mainline Mailpit evidence
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:07.183171'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:41653f0bf
+  evidence: 41653f0bf Merge remote-tracking branch 'origin/main' into codex/ws-0282-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:07.183255'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:ca96da38a
+  evidence: ca96da38a Merge remote-tracking branch 'origin/main' into codex/ws-0282-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:07.183278'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:6e3155b43
+  evidence: 6e3155b43 [mailpit] Finalize ADR 0282 refreshed mainline integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:07.183284'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:3546e845d
+  evidence: 3546e845d Merge remote-tracking branch 'origin/main' into codex/ws-0282-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:07.183306'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:d90e2f086
+  evidence: d90e2f086 [mailpit] Finalize ADR 0282 exact-main integration
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:07.183309'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:b83b2d53e
+  evidence: b83b2d53e Merge remote-tracking branch 'origin/main' into codex/ws-0282-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:07.183367'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:9b3ddb6a5
+  evidence: 9b3ddb6a5 Merge remote-tracking branch 'origin/main' into codex/ws-0282-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:07.183448'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:5db88cb07
+  evidence: 5db88cb07 [merge] Refresh ADR 0282 integration onto latest origin/main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:07.183456'
+- marker_type: git-commit
+  adr_number: 0282
+  location: git:c70973105
+  evidence: 'c70973105 [mailpit] Refresh rebased live-apply proof\n\nPurpose: Anchor
+    ADR 0282 evidence to the surviving rebased commit and clear generated-docs drift\nScope:
+    Update Mailpit receipts, workstream notes, dependency graph docs, and generated
+    diagrams\nStatus: Workstream branch is ready for protected mainline integration\nNext:
+    Create the exact-main integration step, refresh release surfaces, and push origin/main\nSee
+    also: ADR 0282'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:07.183561'
+- marker_type: playbook
+  adr_number: 0282
+  location: playbooks/mailpit.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:07.234505'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 12
+
+  Breakdown: git-commit=11, playbook=1
+
+  Implemented On: 2026-03-30'

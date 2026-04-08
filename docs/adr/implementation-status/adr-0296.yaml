@@ -1,0 +1,82 @@
+adr_number: 0296
+title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:a01ea4ec6
+  evidence: a01ea4ec6 [artifact-cache] Refresh ADR 0296 generated docs
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.754685'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:99566b622
+  evidence: 99566b622 [artifact-cache] Finalize ADR 0296 exact-main live apply
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.754741'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:e95d5d9a0
+  evidence: e95d5d9a0 [artifact-cache] Prepare ADR 0296 exact-main release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.754757'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:965420b85
+  evidence: 965420b85 [artifact-cache] Live apply ADR 0296 branch state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:13.754761'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:92c56a075
+  evidence: 92c56a075 [merge] Cut 0.177.89 for ws-0296 education refresh
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.758270'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:c38e223c3
+  evidence: c38e223c3 [merge] Bring ws-0296 onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.758285'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:d2f01f98b
+  evidence: d2f01f98b Revert "[merge] Cut 0.177.88 for ws-0296 education refresh"
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.758306'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:dd997771c
+  evidence: dd997771c [merge] Cut 0.177.88 for ws-0296 education refresh
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.758312'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:d69be5c39
+  evidence: d69be5c39 [validation] Record ws-0296 remote gate bypass
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.758327'
+- marker_type: git-commit
+  adr_number: 0296
+  location: git:3df431e13
+  evidence: 3df431e13 [workstream] Keep ws-0296 merge-ready after live apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:13.758341'
+- marker_type: playbook
+  adr_number: 0296
+  location: playbooks/artifact-cache-vm.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:13.784543'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=10, playbook=1
+
+  Implemented On: 2026-03-30'

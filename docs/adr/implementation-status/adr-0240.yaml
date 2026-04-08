@@ -1,0 +1,82 @@
+adr_number: '0240'
+title: Operator Visualization Panels Via Apache ECharts
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:a5cd3141c
+  evidence: a5cd3141c [receipts] Pin ADR 0240 mainline source commit
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:48.045134'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:8a57fffa9
+  evidence: 8a57fffa9 [release] Recut ADR 0240 on top of Harbor mainline
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:48.045168'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:fe75e1985
+  evidence: fe75e1985 [merge] Refresh ADR 0240 integration on latest main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:48.045181'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:abd3a4192
+  evidence: abd3a4192 [ops-portal] Integrate ADR 0240 on main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:48.045194'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:6d31baa6d
+  evidence: 6d31baa6d Merge remote-tracking branch 'origin/main' into codex/ws-0240-main-merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:48.045221'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:e72e3d425
+  evidence: e72e3d425 [merge] Refresh ws-0240 mainline prep from origin/main 0.177.62
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:48.045266'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:48ac236eb
+  evidence: 48ac236eb [merge] Refresh ws-0240 mainline prep from latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:48.045299'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:7875a24f2
+  evidence: 7875a24f2 [merge] Refresh ws-0240 mainline prep from origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:54:48.045338'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:0d6e61648
+  evidence: 0d6e61648 [merge] Integrate ADR 0240 live-apply branch into mainline prep
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:48.045445'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:a6f124068
+  evidence: a6f124068 [ops-portal] Finalize ADR 0240 live-apply state
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:48.045449'
+- marker_type: git-commit
+  adr_number: '0240'
+  location: git:bdf1149bb
+  evidence: bdf1149bb [ops-portal] Record ADR 0240 live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:48.045513'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 11
+
+  Breakdown: git-commit=11
+
+  Implemented On: 2026-03-28'

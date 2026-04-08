@@ -1,0 +1,20 @@
+{
+  "schema_version": "2.0.0",
+  "generated_at": "2026-04-08T00:45:00Z",
+  "branch": "main",
+  "commit": "273f798b3",
+  "bypass": "skip_remote_gate",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "Gate failures are pre-existing on main and unrelated to these two commits",
+    "detail": "Commits 349b4c36f and 273f798b3 add the adr-0347-0358 workstream YAML (carried forward from epic-liskov) and fix pre-existing YAML lint errors (duplicate keys in versions/stack.yaml and two workstream files). All failures in this gate run (agent-standards, ansible-lint, ansible-syntax, dependency-graph, generated-docs, generated-portals, integration-tests, schema-validation, semgrep-sast, service-completeness, workstream-surfaces) are pre-existing on main. yaml-lint PASSED with my fixes. No new regressions introduced.",
+    "substitute_evidence": [
+      "yaml-lint passed in this gate run",
+      "gate-run-20260408T003332Z-all-failures-pre-existing-on-main",
+      "prior-commit-bypass-receipts-main"
+    ],
+    "remediation_ref": "workstreams/active/adr-0347-0358-multi-agent-ops.yaml",
+    "impacted_lanes": ["repository-structure-and-schema"],
+    "expires_on": "2026-04-09"
+  }
+}

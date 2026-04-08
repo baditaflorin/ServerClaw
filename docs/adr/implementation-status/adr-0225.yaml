@@ -1,0 +1,58 @@
+adr_number: '0225'
+title: Server-Resident Reconciliation Via Ansible Pull
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: '0225'
+  location: git:3634a5fb4
+  evidence: 3634a5fb4 [receipts] Finalize ADR 0225 exact-main replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.383379'
+- marker_type: git-commit
+  adr_number: '0225'
+  location: git:aacd8443b
+  evidence: aacd8443b [release] Recut ADR 0225 on top of 0.177.42
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.383420'
+- marker_type: git-commit
+  adr_number: '0225'
+  location: git:d80c138b3
+  evidence: d80c138b3 [receipts] Refresh ADR 0225 latest-main replay evidence
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.383424'
+- marker_type: git-commit
+  adr_number: '0225'
+  location: git:026541561
+  evidence: 026541561 [host] Fix ADR 0225 ansible-pull runtime inventory
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.383428'
+- marker_type: git-commit
+  adr_number: '0225'
+  location: git:88434eede
+  evidence: 88434eede [release] Integrate ADR 0225 live apply into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.383431'
+- marker_type: git-commit
+  adr_number: '0225'
+  location: git:a03d6bd3d
+  evidence: a03d6bd3d [host] Bootstrap ADR 0225 ansible-pull runtime
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:41.383434'
+- marker_type: playbook
+  adr_number: '0225'
+  location: playbooks/server-resident-reconciliation.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:41.408841'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=6, playbook=1
+
+  Implemented On: 2026-03-28'

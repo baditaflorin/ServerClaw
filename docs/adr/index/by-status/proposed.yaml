@@ -6,12 +6,40 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-06'
+generated: '2026-04-08'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 9
+total_adrs: 17
 adrs:
+  - adr: '0025'
+    title: Gap Analysis Matrix
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - gap
+      - analysis
+      - matrix
+    summary: Gap Analysis Matrix
+    filename: 0025-gap-analysis-matrix.md
+    path: docs/adr/0025-gap-analysis-matrix.md
+  - adr: '0025'
+    title: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - implementation
+      - roadmap
+      - compose-managed
+      - runtime
+      - stacks
+    summary: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
+    filename: 0025-implementation-roadmap.md
+    path: docs/adr/0025-implementation-roadmap.md
   - adr: '0346'
     title: '— Repowise: local semantic code search over the git repo'
     status: Proposed
@@ -45,6 +73,36 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
+  - adr: '0361'
+    title: Semaphore Keycloak OIDC Integration
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - semaphore
+      - keycloak
+      - oidc
+      - integration
+    summary: 'Extend Semaphore runtime configuration to support Keycloak OpenID Connect (OIDC) authentication while maintaining
+      fallback username/password login for recovery '
+    filename: 0361-semaphore-keycloak-oidc-integration.md
+    path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
+  - adr: '0364'
+    title: Native Build Server Gate Execution
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - native
+      - build
+      - server
+      - gate
+      - execution
+    summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
+    filename: 0364-native-build-server-gate-execution.md
+    path: docs/adr/0364-native-build-server-gate-execution.md
   - adr: 0368
     title: Docker Compose Jinja2 Macro Library
     status: Proposed
@@ -148,3 +206,69 @@ adrs:
       what it needs from DNS, nginx, TLS, and SSO — in '
     filename: 0374-cross-cutting-service-manifest.md
     path: docs/adr/0374-cross-cutting-service-manifest.md
+  - adr: 0380
+    title: Neko Remote Desktop for Interactive Operator Browser Access
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: identity
+    keywords:
+      - neko
+      - remote
+      - desktop
+      - interactive
+      - operator
+      - browser
+      - access
+    summary: Neko Remote Desktop for Interactive Operator Browser Access
+    filename: 0380-neko-for-operator-remote-browser-access.md
+    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+  - adr: 0381
+    title: Login Service Contracts and Session Recovery Automation
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: automation
+    keywords:
+      - login
+      - service
+      - contracts
+      - session
+      - recovery
+      - automation
+    summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
+      .lv3.org.
+    filename: 0381-login-service-contracts-and-session-recovery-automation.md
+    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+  - adr: 0382
+    title: Convergence Speed and Incremental Apply
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - convergence
+      - speed
+      - incremental
+      - apply
+    summary: 'Plays that only delegate to localhost (DNS, preflight) do not need remote facts. Change from:'
+    filename: 0382-convergence-speed-and-incremental-apply.md
+    path: docs/adr/0382-convergence-speed-and-incremental-apply.md
+  - adr: 0382
+    title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - adr-0382
+      - keycloak
+      - sign-in
+      - button
+      - stuck
+      - active
+      - incident
+      - postmortem
+    summary: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    filename: 0382-keycloak-sign-in-button-stuck-postmortem.md
+    path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md

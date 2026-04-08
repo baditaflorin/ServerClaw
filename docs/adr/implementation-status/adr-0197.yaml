@@ -1,0 +1,58 @@
+adr_number: 0197
+title: Dify - Visual LLM Workflow and Agent Canvas
+canonical_status: Implemented
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0197
+  location: git:cc80b12d8
+  evidence: cc80b12d8 [release] Integrate ADR 0197 live apply into main
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.186144'
+- marker_type: git-commit
+  adr_number: 0197
+  location: git:3a81fc28e
+  evidence: 3a81fc28e [release] Cut 0.177.47 for ADR 0197 current-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.186189'
+- marker_type: git-commit
+  adr_number: 0197
+  location: git:35fc63897
+  evidence: 35fc63897 [release] Cut 0.177.29 for ADR 0197 mainline merge
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.186943'
+- marker_type: git-commit
+  adr_number: 0197
+  location: git:3a7fefd71
+  evidence: 3a7fefd71 [dify] Integrate ADR 0197 into mainline release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.186958'
+- marker_type: git-commit
+  adr_number: 0197
+  location: git:3ad7b105b
+  evidence: 3ad7b105b [dify] Integrate ADR 0197 into mainline release
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.186973'
+- marker_type: git-commit
+  adr_number: 0197
+  location: git:dbb32b758
+  evidence: dbb32b758 [dify] Live apply ADR 0197
+  confidence: 1.0
+  detected_on: '2026-04-07T07:54:30.187290'
+- marker_type: playbook
+  adr_number: 0197
+  location: playbooks/dify.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:54:30.207434'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=6, playbook=1
+
+  Implemented On: 2026-03-28'

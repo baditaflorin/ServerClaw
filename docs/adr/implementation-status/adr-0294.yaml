@@ -1,0 +1,166 @@
+adr_number: 0294
+title: One-API As The Unified LLM API Proxy And Router
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:cbb0c99f3
+  evidence: cbb0c99f3 [one-api] Cut ADR 0294 mainline release and receipt
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.591944'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:c8e80ea88
+  evidence: 'c8e80ea88 [one-api] Fix bootstrap retry import for direct script execution\n\nPurpose:
+    Make the One-API bootstrap use the repo retry module when Ansible invokes the
+    script directly from the exact-main worktree.\nScope: script bootstrap import
+    order, direct-entry regression coverage, and focused validation evidence.\nStatus:
+    Exact-main candidate repaired and revalidated locally.\nNext: Replay the ADR 0294
+    live apply and downstream converges from this new committed 0.177.118 source.\nSee
+    also: ADR 0294'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.592124'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:d2edae340
+  evidence: d2edae340 [one-api] Record ADR 0294 live-apply checkpoint
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.592146'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:0d758e2e3
+  evidence: 0d758e2e3 [one-api] Checkpoint ADR 0294 branch implementation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.592155'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:a64dd161e
+  evidence: a64dd161e [openbao] Align ws-0294 validation surfaces after latest-main
+    merge
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.593923'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:97cd22574
+  evidence: 97cd22574 [merge] Bring ws-0294 onto origin/main 0.177.120
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.593946'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:71213f1a6
+  evidence: 71213f1a6 [merge] Bring ws-0294 onto origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.593980'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:1133e6201
+  evidence: 1133e6201 [openbao] Fix ws-0294 repo gates before exact-main replay
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.594044'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:c548a4271
+  evidence: c548a4271 [release] Cut 0.177.119 for ADR 0294 exact-main replay
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.594076'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:54b73d6dd
+  evidence: 54b73d6dd Merge remote-tracking branch 'origin/main' into codex/ws-0294-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.594087'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:41889dab9
+  evidence: '41889dab9 [one-api] Fix bootstrap retry import for direct script execution\n\nPurpose:
+    Make the One-API bootstrap use the repo retry module when Ansible invokes the
+    script directly from the exact-main worktree.\nScope: script bootstrap import
+    order, direct-entry regression coverage, and focused validation evidence.\nStatus:
+    Exact-main candidate repaired and revalidated locally.\nNext: Replay the ADR 0294
+    live apply and downstream converges from this new committed 0.177.118 source.\nSee
+    also: ADR 0294'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.599009'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:39c43d815
+  evidence: '39c43d815 [one-api] Recut exact-main release candidate as 0.177.118\n\nPurpose:
+    Move ADR 0294 onto the newest origin/main release baseline and prepare a committed
+    exact-main source for the final One-API replay.\nScope: VERSION, release notes,
+    changelog, canonical truth, build manifest, stack metadata, and release evidence
+    for 0.177.118.\nStatus: Exact-main release candidate committed on top of origin/main
+    0.177.117 / platform 0.130.76.\nNext: Replay the ADR 0294 live apply and downstream
+    converges from this committed source, then finalize mainline merge state.\nSee
+    also: ADR 0294'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.599888'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:7b6881d65
+  evidence: '7b6881d65 [merge] Bring ws-0294 onto latest origin/main after ADR 0257\n\nPurpose:
+    Reconcile the validated ADR 0294 branch with the current origin/main head so the
+    final release bump and live replay start from the real latest mainline state.\nScope:
+    Merge ADR 0257 runtime, OpenBao, docker recovery, Windmill, release metadata,
+    and workstream registry updates into the ADR 0294 worktree.\nStatus: Latest mainline
+    merged; next re-run the ADR 0294 exact-main integration on top of repo version
+    0.177.117 and recut the final release.\nNext: Recompute the next release version,
+    refresh protected surfaces, replay the One-API live apply and downstream converges,
+    then push origin/main.\nSee also: ADR 0294, ADR 0257'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.599909'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:1b5890995
+  evidence: '1b5890995 [one-api] Record validated 0.177.117 exact-main replay\n\nPurpose:
+    Preserve the latest validated ADR 0294 exact-main replay, receipts, and repo gate
+    results before reconciling onto the newer origin/main head.\nScope: One-API retry
+    hardening, workstream/ADR metadata, canonical mainline receipt, generated docs,
+    and validation evidence.\nStatus: Branch checkpoint committed; next rebase/merge
+    onto latest origin/main and re-run final integration from the new mainline base.\nNext:
+    Merge latest origin/main, recut the release from the current mainline version,
+    replay ADR 0294 on that merged tree, and push origin/main.\nSee also: ADR 0294'
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.599927'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:502ea66c5
+  evidence: 502ea66c5 [merge] Bring ws-0294 onto latest origin/main
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.600166'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:ac67e3a39
+  evidence: ac67e3a39 [one-api] Record ADR 0294 live-apply checkpoint
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.600461'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:f61e20284
+  evidence: f61e20284 [one-api] Checkpoint ADR 0294 branch implementation
+  confidence: 1.0
+  detected_on: '2026-04-07T07:55:12.600465'
+- marker_type: git-commit
+  adr_number: 0294
+  location: git:73fb0ec13
+  evidence: 73fb0ec13 [adr] Supersede LiteLLM (0287) with One-API (0294) due to supply-chain
+    attack
+  confidence: 0.6
+  detected_on: '2026-04-07T07:55:12.626813'
+- marker_type: playbook
+  adr_number: 0294
+  location: playbooks/one-api.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-07T07:55:12.718198'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 19
+
+  Breakdown: git-commit=18, playbook=1
+
+  Implemented On: 2026-04-01'
