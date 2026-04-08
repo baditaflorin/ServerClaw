@@ -1,7 +1,7 @@
 # ADR 0112: Deterministic Goal Compiler
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.117.1
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-24

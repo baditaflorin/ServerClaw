@@ -1,7 +1,7 @@
 # ADR 0166: Canonical Error Response Format and Error Code Registry
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.162.0
 - Implemented In Platform Version: 0.130.13
 - Implemented On: 2026-03-26

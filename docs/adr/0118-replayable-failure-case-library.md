@@ -1,10 +1,10 @@
 # ADR 0118: Replayable Failure Case Library
 
-- Status: Proposed
-- Implementation Status: Partial
-- Implemented In Repo Version: detected
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: current
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-04-08
 - Date: 2026-03-24
 
 ## Context

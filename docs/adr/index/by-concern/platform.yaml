@@ -515,7 +515,7 @@ adrs:
   - adr: '0112'
     title: Deterministic Goal Compiler
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -601,8 +601,8 @@ adrs:
     implemented_on: '2026-03-26'
   - adr: 0118
     title: Replayable Failure Case Library
-    status: Proposed
-    implementation_status: Partial
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -614,6 +614,7 @@ adrs:
       the platform API gateway and surfaced in Matterm
     filename: 0118-replayable-failure-case-library.md
     path: docs/adr/0118-replayable-failure-case-library.md
+    implemented_on: '2026-04-08'
   - adr: '0123'
     title: Service Uptime Contracts And Monitor-Backed Health
     status: Accepted
@@ -769,7 +770,7 @@ adrs:
   - adr: '0166'
     title: Canonical Error Response Format and Error Code Registry
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: platform
     keywords:

@@ -1,7 +1,7 @@
 # ADR 0005: Single-Node First Topology
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: N/A
 - Implemented In Platform Version: 0.2.0
 - Implemented On: 2026-03-21

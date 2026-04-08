@@ -1,0 +1,13 @@
+# ADR 0118 — Controlled vocabulary for failure case root_cause_category.
+# Every resolved case must select one of these values.
+# See docs/adr/0118-replayable-failure-case-library.md for rationale.
+- deployment_regression    # a deployment introduced the failure
+- resource_exhaustion      # CPU, memory, disk, or connection pool saturation
+- certificate_expiry       # TLS certificate expired or near-expired
+- configuration_drift      # live config diverged from repo state
+- dependency_failure       # upstream service failed first
+- network_partition        # connectivity loss between components
+- data_corruption          # database or file state corruption
+- operator_error           # manual action caused the failure
+- external_dependency      # failure in a service outside the platform
+- unknown                  # root cause could not be determined
