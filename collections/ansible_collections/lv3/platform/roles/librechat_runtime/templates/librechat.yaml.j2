@@ -14,6 +14,16 @@ endpoints:
     titleConvo: true
     titleModel: gemma4:e4b
 
+  openAI:
+    models:
+      default:
+        - gpt-4o
+        - gpt-4o-mini
+        - o3-mini
+      fetch: true
+    titleConvo: true
+    titleModel: gpt-4o-mini
+
   anthropic:
     # Direct Anthropic API — key injected via env
     models:
