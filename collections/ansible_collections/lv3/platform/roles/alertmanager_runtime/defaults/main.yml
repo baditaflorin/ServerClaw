@@ -1,12 +1,14 @@
 ---
-alertmanager_runtime_package: prometheus-alertmanager
-alertmanager_runtime_service_name: prometheus-alertmanager
-alertmanager_runtime_env_file: /etc/default/prometheus-alertmanager
+# Purpose: Define Alertmanager runtime defaults (ADR 0373 — conventional variables are derived).
+# Use case: Loaded whenever the Alertmanager runtime converges or verifies.
+# Inputs: Platform topology, OpenBao settings.
+# Outputs: Supplies stable defaults for the Alertmanager runtime role.
+# Idempotency: Fully idempotent because this file only declares defaults.
+# Dependencies: ADR 0165, ADR 0060, ADR 0373.
+# NOTE: Conventional variables (config_file, data_dir, env_file, port, url, package, service_name)
+# are derived from platform_service_registry — ADR 0373.
+
 alertmanager_runtime_config_template: "{{ inventory_dir | dirname }}/config/alertmanager/alertmanager.yml"
-alertmanager_runtime_config_file: /etc/alertmanager/alertmanager.yml
-alertmanager_runtime_data_dir: /var/lib/prometheus/alertmanager
-alertmanager_runtime_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.alertmanager_port }}"
-alertmanager_runtime_url: "http://127.0.0.1:{{ alertmanager_runtime_port }}"
 alertmanager_runtime_rules_dir: /etc/prometheus/rules
 alertmanager_runtime_platform_rules_source: "{{ inventory_dir | dirname }}/config/alertmanager/rules/platform.yml"
 alertmanager_runtime_ntfy_username: alertmanager

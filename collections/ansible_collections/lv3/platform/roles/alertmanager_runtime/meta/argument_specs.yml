@@ -1,83 +1,115 @@
 ---
 argument_specs:
   main:
-    short_description: Converge Alertmanager routing and Prometheus rule files on monitoring-lv3.
+    short_description: Converge Alertmanager on the monitoring stack.
+    description: >-
+      Converges the Alertmanager system package on monitoring-lv3.
+      Conventional variables (package, service_name, env_file, config_file, data_dir)
+      are automatically derived from the platform_service_registry via ADR 0373.
+      Only service-specific variables are documented here.
     options:
-      alertmanager_runtime_package:
-        type: str
-        required: true
-      alertmanager_runtime_service_name:
-        type: str
-        required: true
-      alertmanager_runtime_env_file:
-        type: path
-        required: true
       alertmanager_runtime_config_template:
         type: path
         required: true
-      alertmanager_runtime_config_file:
-        type: path
-        required: true
-      alertmanager_runtime_data_dir:
-        type: path
-        required: true
+        description:
+          - Source template for alertmanager.yml configuration.
       alertmanager_runtime_rules_dir:
         type: path
         required: true
+        description:
+          - Directory where Prometheus alert rules are stored.
       alertmanager_runtime_platform_rules_source:
         type: path
         required: true
+        description:
+          - Source file for platform-specific alert rules.
       alertmanager_runtime_ntfy_password_local_file:
         type: path
         required: true
+        description:
+          - Controller-local path to Ntfy notification password.
       alertmanager_runtime_mattermost_webhook_manifest_local_file:
         type: path
         required: true
+        description:
+          - Controller-local path to Mattermost incoming webhooks manifest.
       alertmanager_runtime_pgaudit_relay_enabled:
         type: bool
         required: false
+        description:
+          - Whether to enable PostgreSQL audit event relay (default false).
       alertmanager_runtime_pgaudit_relay_service_name:
         type: str
         required: false
+        description:
+          - Systemd service name for pgaudit relay daemon.
       alertmanager_runtime_pgaudit_relay_service_file:
         type: path
         required: false
+        description:
+          - Path to systemd service file for pgaudit relay.
       alertmanager_runtime_pgaudit_relay_script_file:
         type: path
         required: false
+        description:
+          - Path to pgaudit relay Python script.
       alertmanager_runtime_pgaudit_relay_env_file:
         type: path
         required: false
+        description:
+          - Path to pgaudit relay environment file.
       alertmanager_runtime_pgaudit_relay_webhook_url:
         type: str
         required: false
+        description:
+          - HTTP endpoint for pgaudit relay to receive alerts.
       alertmanager_runtime_pgaudit_relay_health_url:
         type: str
         required: false
+        description:
+          - Health check endpoint for pgaudit relay.
       alertmanager_runtime_pgaudit_relay_listen_host:
         type: str
         required: false
+        description:
+          - Host pgaudit relay listens on (default 127.0.0.1).
       alertmanager_runtime_pgaudit_relay_listen_port:
         type: int
         required: false
+        description:
+          - Port pgaudit relay listens on (default 19094).
       alertmanager_runtime_pgaudit_relay_webhook_path:
         type: str
         required: false
+        description:
+          - URL path for pgaudit relay webhook endpoint.
       alertmanager_runtime_pgaudit_relay_nats_url:
         type: str
         required: false
+        description:
+          - NATS/JetStream server URL for pgaudit event publishing.
       alertmanager_runtime_pgaudit_relay_nats_subject:
         type: str
         required: false
+        description:
+          - NATS subject for pgaudit event stream.
       alertmanager_runtime_pgaudit_relay_nats_username:
         type: str
         required: false
+        description:
+          - NATS authentication username.
       alertmanager_runtime_pgaudit_relay_nats_password_local_file:
         type: path
         required: false
+        description:
+          - Controller-local path to NATS password.
       alertmanager_runtime_pgaudit_relay_actor_id:
         type: str
         required: false
+        description:
+          - Event actor ID for pgaudit relay (for audit trail).
       alertmanager_runtime_pgaudit_relay_event_schema_version:
         type: str
         required: false
+        description:
+          - Version of pgaudit event schema being used.

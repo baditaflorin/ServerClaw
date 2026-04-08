@@ -1,4 +1,9 @@
 ---
+- name: Derive conventional service variables from platform_service_registry
+  ansible.builtin.import_tasks: ../common/tasks/derive_service_defaults.yml
+  vars:
+    common_derive_service_name: alertmanager
+
 - name: Validate Alertmanager runtime inputs
   ansible.builtin.assert:
     that:

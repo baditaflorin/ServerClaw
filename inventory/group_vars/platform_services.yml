@@ -1683,6 +1683,14 @@ platform_service_registry:
       data: /var/lib/prometheus/alertmanager
       secrets: /etc/alertmanager
 
+    extra_defaults:
+      alertmanager_runtime_config_file: /etc/alertmanager/alertmanager.yml
+      alertmanager_runtime_env_file: /etc/default/prometheus-alertmanager
+      alertmanager_runtime_package: prometheus-alertmanager
+      alertmanager_runtime_service_name: prometheus-alertmanager
+      alertmanager_runtime_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.alertmanager_port }}"
+      alertmanager_runtime_url: "http://127.0.0.1:{{ alertmanager_runtime_port }}"
+
   docker_runtime:
     service_type: infrastructure
     image_catalog_key: docker_runtime
