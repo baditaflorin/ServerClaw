@@ -112,7 +112,7 @@ plane_workspace_members: []
 
 # Keycloak OIDC Integration (ADR 0353)
 plane_oidc_enabled: true
-plane_oidc_server_url: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') | default({}) | map_attribute('public_base_url') | first | default('https://keycloak.lv3.org') }}"
+plane_oidc_server_url: "https://sso.lv3.org"
 plane_oidc_realm: "lv3"
 plane_oidc_client_id: "lv3-plane-oidc"
 plane_oidc_client_secret_local_file: "{{ plane_local_artifact_dir }}/oidc-client-secret.txt"
