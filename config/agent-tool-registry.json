@@ -2082,6 +2082,228 @@
         "kind": "handler",
         "handler": "delete_outline_document"
       }
+    },
+    {
+      "name": "mempalace-search",
+      "title": "Search MemPalace",
+      "description": "Search cross-session memory for past decisions, patterns, and operational context. Returns memories indexed from ADRs, runbooks, and prior agent sessions.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "handler://mempalace_search",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query (e.g., 'Keycloak timeout', 'ADR 0373 scope')"
+          },
+          "wing": {
+            "type": "string",
+            "description": "Memory wing to search (default: 'proxmox_florin')"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Maximum results to return (default: 10)"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status", "query", "count", "results"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["success", "error", "timeout"]
+          },
+          "query": {
+            "type": "string"
+          },
+          "wing": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "mempalace_search"
+      }
+    },
+    {
+      "name": "mempalace-add-drawer",
+      "title": "Add MemPalace Drawer",
+      "description": "Save a discovery, insight, or pattern to MemPalace for retrieval in future sessions. Enables cross-session memory capture.",
+      "category": "execute",
+      "transport": "controller_local",
+      "endpoint": "handler://mempalace_add_drawer",
+      "auth": "repo-write",
+      "approval_required": false,
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["content"],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Memory content to save (discovery, pattern, insight, solution)"
+          },
+          "wing": {
+            "type": "string",
+            "description": "Memory wing (default: 'proxmox_florin')"
+          },
+          "room": {
+            "type": "string",
+            "description": "Memory room category (default: 'discoveries')"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status", "message"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["success", "error", "timeout"]
+          },
+          "message": {
+            "type": "string"
+          },
+          "wing": {
+            "type": "string"
+          },
+          "room": {
+            "type": "string"
+          },
+          "content_preview": {
+            "type": "string"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "mempalace_add_drawer"
+      }
+    },
+    {
+      "name": "mempalace-wake-up",
+      "title": "MemPalace Wake Up",
+      "description": "Load critical facts from MemPalace at session start. Retrieves essential context from prior agent sessions.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "handler://mempalace_wake_up",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "wing": {
+            "type": "string",
+            "description": "Memory wing to wake up (default: 'proxmox_florin')"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status", "wing", "facts"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["success", "error", "timeout"]
+          },
+          "wing": {
+            "type": "string"
+          },
+          "facts": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "mempalace_wake_up"
+      }
+    },
+    {
+      "name": "mempalace-status",
+      "title": "MemPalace Status",
+      "description": "Get MemPalace palace status and memory counts. Shows total indexed memories and room breakdown.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "handler://mempalace_status",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": false,
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["success", "error", "timeout"]
+          },
+          "total_drawers": {
+            "type": "integer"
+          },
+          "rooms": {
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "mempalace_status"
+      }
     }
   ]
 }

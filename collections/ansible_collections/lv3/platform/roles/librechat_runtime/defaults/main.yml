@@ -55,6 +55,7 @@ librechat_tool_packs:
   - tasks
   - docs
   - admin
+  - memory
   - all
 # Anthropic
 librechat_anthropic_api_key_remote_file: "{{ librechat_secret_dir }}/anthropic-api-key"

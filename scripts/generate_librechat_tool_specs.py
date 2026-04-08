@@ -73,6 +73,16 @@ TOOL_PACKS = {
             "get-api-publication-surface",
         ],
     },
+    "memory": {
+        "title": "ServerClaw Memory — Cross-Session Knowledge",
+        "description": "Search and save memories from prior agent sessions. 4,681+ indexed memories from ADRs, runbooks, and operational insights.",
+        "tools": [
+            "mempalace-search",
+            "mempalace-add-drawer",
+            "mempalace-wake-up",
+            "mempalace-status",
+        ],
+    },
 }
 
 GATEWAY_BASE_URL = "http://10.10.10.92:8083"

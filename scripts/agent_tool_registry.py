@@ -1117,6 +1117,201 @@ def tool_provision_outline_api_token(
     }
 
 
+# MemPalace Memory Tools
+def tool_mempalace_search(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Search MemPalace for memories matching a query."""
+    import subprocess
+
+    query = require_str(args.get("query"), "arguments.query")
+    wing = args.get("wing", "proxmox_florin")
+    limit = args.get("limit", 10)
+
+    try:
+        result = subprocess.run(
+            ["python3", "-m", "mempalace", "search", query, "--limit", str(limit)],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "message": f"MemPalace search failed: {result.stderr}",
+                "query": query,
+                "results": [],
+            }
+
+        # Parse search results from output
+        import json as _json
+        try:
+            output_lines = result.stdout.strip().split("\n")
+            results = []
+            for line in output_lines:
+                if line.startswith("{"):
+                    results.append(_json.loads(line))
+        except Exception:
+            results = []
+
+        return {
+            "status": "success",
+            "query": query,
+            "wing": wing,
+            "count": len(results),
+            "results": results[:limit],
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "timeout",
+            "message": "MemPalace search timed out",
+            "query": query,
+            "results": [],
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "query": query,
+            "results": [],
+        }
+
+
+def tool_mempalace_add_drawer(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Save a discovery or insight to MemPalace."""
+    import subprocess
+
+    content = require_str(args.get("content"), "arguments.content")
+    wing = args.get("wing", "proxmox_florin")
+    room = args.get("room", "discoveries")
+
+    try:
+        result = subprocess.run(
+            ["python3", "-m", "mempalace", "add-drawer", content],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "message": f"Failed to save to MemPalace: {result.stderr}",
+                "content": content[:100],
+            }
+
+        return {
+            "status": "success",
+            "message": "Memory saved to MemPalace",
+            "wing": wing,
+            "room": room,
+            "content_preview": content[:150],
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "timeout",
+            "message": "MemPalace save operation timed out",
+            "content": content[:100],
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "content": content[:100],
+        }
+
+
+def tool_mempalace_wake_up(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Load critical facts from MemPalace at session start."""
+    import subprocess
+
+    wing = args.get("wing", "proxmox_florin")
+
+    try:
+        result = subprocess.run(
+            ["python3", "-m", "mempalace", "wake-up", "--wing", wing],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "message": f"Failed to load critical facts: {result.stderr}",
+                "wing": wing,
+                "facts": "",
+            }
+
+        return {
+            "status": "success",
+            "wing": wing,
+            "facts": result.stdout.strip(),
+            "message": "Critical facts loaded from MemPalace",
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "timeout",
+            "message": "MemPalace wake-up timed out",
+            "wing": wing,
+            "facts": "",
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "wing": wing,
+            "facts": "",
+        }
+
+
+def tool_mempalace_status(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Get MemPalace palace status and memory counts."""
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["python3", "-m", "mempalace", "status"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "message": f"Failed to get MemPalace status: {result.stderr}",
+            }
+
+        # Parse status output to extract key metrics
+        import re
+        output = result.stdout
+        drawers = 0
+        rooms = {}
+
+        for line in output.split("\n"):
+            if "drawers" in line.lower():
+                match = re.search(r"(\d+)\s+drawers", line)
+                if match:
+                    drawers = int(match.group(1))
+            if "room:" in line.lower():
+                match = re.search(r"room:\s+(\w+)\s+(\d+)", line)
+                if match:
+                    rooms[match.group(1)] = int(match.group(2))
+
+        return {
+            "status": "success",
+            "total_drawers": drawers,
+            "rooms": rooms,
+            "message": f"MemPalace palace has {drawers} indexed memories",
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "timeout",
+            "message": "MemPalace status check timed out",
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+        }
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -1150,6 +1345,10 @@ HANDLERS: Final[dict[str, Any]] = {
     "upsert_outline_document": tool_upsert_outline_document,
     "delete_outline_document": tool_delete_outline_document,
     "provision_outline_api_token": tool_provision_outline_api_token,
+    "mempalace_search": tool_mempalace_search,
+    "mempalace_add_drawer": tool_mempalace_add_drawer,
+    "mempalace_wake_up": tool_mempalace_wake_up,
+    "mempalace_status": tool_mempalace_status,
 }
 
 

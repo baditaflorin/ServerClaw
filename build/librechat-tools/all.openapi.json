@@ -2233,6 +2233,276 @@
           }
         }
       }
+    },
+    "/v1/dify-tools/mempalace-search": {
+      "post": {
+        "operationId": "mempalace-search",
+        "summary": "Search MemPalace",
+        "description": "Search cross-session memory for past decisions, patterns, and operational context. Returns memories indexed from ADRs, runbooks, and prior agent sessions.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "query"
+                ],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search query (e.g., 'Keycloak timeout', 'ADR 0373 scope')"
+                  },
+                  "wing": {
+                    "type": "string",
+                    "description": "Memory wing to search (default: 'proxmox_florin')"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Maximum results to return (default: 10)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "query",
+                    "count",
+                    "results"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error",
+                        "timeout"
+                      ]
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "wing": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/mempalace-add-drawer": {
+      "post": {
+        "operationId": "mempalace-add-drawer",
+        "summary": "Add MemPalace Drawer",
+        "description": "Save a discovery, insight, or pattern to MemPalace for retrieval in future sessions. Enables cross-session memory capture.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "content"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "Memory content to save (discovery, pattern, insight, solution)"
+                  },
+                  "wing": {
+                    "type": "string",
+                    "description": "Memory wing (default: 'proxmox_florin')"
+                  },
+                  "room": {
+                    "type": "string",
+                    "description": "Memory room category (default: 'discoveries')"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "message"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error",
+                        "timeout"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "wing": {
+                      "type": "string"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "content_preview": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/mempalace-wake-up": {
+      "post": {
+        "operationId": "mempalace-wake-up",
+        "summary": "MemPalace Wake Up",
+        "description": "Load critical facts from MemPalace at session start. Retrieves essential context from prior agent sessions.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "wing": {
+                    "type": "string",
+                    "description": "Memory wing to wake up (default: 'proxmox_florin')"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "wing",
+                    "facts"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error",
+                        "timeout"
+                      ]
+                    },
+                    "wing": {
+                      "type": "string"
+                    },
+                    "facts": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/mempalace-status": {
+      "post": {
+        "operationId": "mempalace-status",
+        "summary": "MemPalace Status",
+        "description": "Get MemPalace palace status and memory counts. Shows total indexed memories and room breakdown.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error",
+                        "timeout"
+                      ]
+                    },
+                    "total_drawers": {
+                      "type": "integer"
+                    },
+                    "rooms": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

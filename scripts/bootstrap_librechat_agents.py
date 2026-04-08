@@ -94,6 +94,21 @@ AGENT_PACKS = [
             "What workflows are available?",
         ],
     },
+    {
+        "id": "agent_serverclaw_memory",
+        "name": "ServerClaw Memory",
+        "description": "Cross-session knowledge — search 4,681+ indexed memories from prior agent sessions, ADRs, runbooks, and operational insights.",
+        "specialty": "You specialize in retrieving and saving institutional memory. You can search 4,681+ indexed memories from prior agent sessions to find past decisions, patterns, and operational context. You can save discoveries and insights for future sessions. You have tools to access MemPalace, a persistent cross-session memory system.",
+        "model": "claude-sonnet-4-6-20250725",
+        "provider": "anthropic",
+        "tool_pack": "memory",
+        "conversation_starters": [
+            "What was the Keycloak timeout fix?",
+            "Find decisions about database architecture",
+            "Search for convergence timeout patterns",
+            "What have we learned about deployment?",
+        ],
+    },
 ]
 
 
