@@ -197,7 +197,9 @@ def build_mongosh_script(
     }}
   }}""")
 
-        # Agent document
+        # Agent document — must match LibreChat v0.8.4 Mongoose schema exactly.
+        # Missing fields (versions, model_parameters, category, etc.) cause agents
+        # to be invisible in the UI even though they exist in MongoDB.
         agents_js_parts.append(f"""  {{
     id: "{pack['id']}",
     author: userId,
@@ -206,10 +208,39 @@ def build_mongosh_script(
     instructions: systemPrompt + "\\n\\n## Your Specialty\\n\\n{pack['specialty']}",
     model: "{pack['model']}",
     provider: "{pack['provider']}",
+    model_parameters: {{}},
+    artifacts: "",
     tools: {tool_names_js},
+    tool_kwargs: [],
     actions: ["{action_id}"],
+    agent_ids: [],
+    edges: [],
     conversation_starters: {starters},
-    isCollaborative: true,
+    projectIds: [],
+    category: "general",
+    support_contact: {{name: "", email: ""}},
+    is_promoted: false,
+    isCollaborative: false,
+    isPublic: true,
+    mcpServerNames: [],
+    tool_options: {{}},
+    version: 1,
+    versions: [{{
+      name: "{pack['name']}",
+      description: "{pack['description']}",
+      model_parameters: {{}},
+      agent_ids: [],
+      edges: [],
+      artifacts: "",
+      support_contact: {{name: "", email: ""}},
+      category: "general",
+      provider: "{pack['provider']}",
+      model: "{pack['model']}",
+      id: "{pack['id']}",
+      tools: {tool_names_js},
+      createdAt: now,
+      updatedAt: now
+    }}],
     createdAt: now,
     updatedAt: now
   }}""")
@@ -280,10 +311,26 @@ agents.forEach(function(agent) {{
     db.agents.updateOne(
       {{id: agent.id}},
       {{$set: {{
+        author: agent.author,
         tools: agent.tools,
         actions: agent.actions,
         instructions: agent.instructions,
         conversation_starters: agent.conversation_starters,
+        model_parameters: agent.model_parameters,
+        artifacts: agent.artifacts,
+        tool_kwargs: agent.tool_kwargs,
+        agent_ids: agent.agent_ids,
+        edges: agent.edges,
+        projectIds: agent.projectIds,
+        category: agent.category,
+        support_contact: agent.support_contact,
+        is_promoted: agent.is_promoted,
+        isCollaborative: agent.isCollaborative,
+        isPublic: agent.isPublic,
+        mcpServerNames: agent.mcpServerNames,
+        tool_options: agent.tool_options,
+        version: agent.version,
+        versions: agent.versions,
         updatedAt: now
       }}}}
     );
@@ -293,8 +340,14 @@ agents.forEach(function(agent) {{
 }});
 
 // Enable SHARED_GLOBAL permissions so all users see agents
-db.roles.updateOne({{name: "ADMIN"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true}}}});
-db.roles.updateOne({{name: "USER"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true}}}});
+db.roles.updateOne({{name: "ADMIN"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true, "permissions.AGENTS.USE": true, "permissions.AGENTS.CREATE": true}}}});
+db.roles.updateOne({{name: "USER"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true, "permissions.AGENTS.USE": true}}}});
+
+// Register agents in the instance project for global visibility
+db.projects.updateOne(
+  {{name: "instance"}},
+  {{$addToSet: {{agentIds: {{$each: agents.map(function(a) {{ return a.id; }})}}}}}}
+);
 
 print("Done. Actions: " + actionsCreated + " created, " + actionsUpdated + " updated. Agents: " + agentsCreated + " created, " + agentsUpdated + " updated.");
 """
