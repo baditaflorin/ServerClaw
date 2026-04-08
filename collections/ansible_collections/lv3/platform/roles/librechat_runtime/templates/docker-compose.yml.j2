@@ -77,6 +77,7 @@ services:
     volumes:
       - {{ librechat_config_file }}:/app/librechat.yaml:ro
       - {{ librechat_system_prompt_file }}:/app/system-prompt.md:ro
+      - {{ librechat_tools_openapi_remote_dir }}:/app/client/public/tools-openapi:ro
       - {{ librechat_data_dir }}/images:/app/client/public/images
       - {{ librechat_data_dir }}/logs:/app/api/logs
 {% if librechat_extra_hosts | length > 0 %}
