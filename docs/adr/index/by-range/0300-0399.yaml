@@ -164,7 +164,7 @@ adrs:
   - adr: '0307'
     title: Platform Workbench As The Cohesive First-Party App Frame
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -178,6 +178,9 @@ adrs:
     summary: We will treat the platform's human-facing experience as one cohesive
     filename: 0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
     path: docs/adr/0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+    implemented_in_repo_version: 0.178.49
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-04-08'
   - adr: '0307'
     title: Temporary Guest Operator Accounts With 72-Hour Expiry
     status: Accepted

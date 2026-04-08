@@ -563,6 +563,115 @@
       ],
       "next_success_lane": "change",
       "next_failure_lane": "learn"
+    },
+    {
+      "id": "ops_portal_repo_intake",
+      "title": "Repository Intake",
+      "surface": "ops_portal",
+      "route": "/partials/repo-intake",
+      "section_id": "repo-intake",
+      "fragment": "repo-intake",
+      "nav_label": "Repo Deploy",
+      "nav_visible": true,
+      "nav_order": 25,
+      "primary_lane": "change",
+      "secondary_lanes": [
+        "observe"
+      ],
+      "next_success_lane": "observe",
+      "next_failure_lane": "recover"
+    }
+  ],
+  "workbench_surfaces": [
+    {
+      "id": "ops_portal",
+      "title": "Interactive Ops Portal",
+      "url": "https://ops.lv3.org",
+      "role": "task",
+      "role_description": "Governed actions, runbooks, deployments, and live drift visibility.",
+      "primary_lane": "change",
+      "audience": ["operator", "admin"]
+    },
+    {
+      "id": "homepage",
+      "title": "Platform Homepage",
+      "url": "https://home.lv3.org",
+      "role": "home",
+      "role_description": "Service discovery, status overview, and orientation for new users.",
+      "primary_lane": "start",
+      "audience": ["viewer", "operator", "admin"]
+    },
+    {
+      "id": "docs_portal",
+      "title": "Documentation Portal",
+      "url": "https://docs.lv3.org",
+      "role": "reference",
+      "role_description": "Platform runbooks, ADRs, architecture references, and onboarding guides.",
+      "primary_lane": "learn",
+      "audience": ["viewer", "operator", "admin"]
+    },
+    {
+      "id": "outline",
+      "title": "Outline Wiki",
+      "url": "https://outline.lv3.org",
+      "role": "reference",
+      "role_description": "Living knowledge base — automation run summaries, changelogs, and team notes.",
+      "primary_lane": "learn",
+      "audience": ["viewer", "operator", "admin"]
+    },
+    {
+      "id": "plane",
+      "title": "Plane",
+      "url": "https://plane.lv3.org",
+      "role": "task",
+      "role_description": "Project planning, issue tracking, and agent task coordination.",
+      "primary_lane": "change",
+      "audience": ["operator", "admin"]
+    },
+    {
+      "id": "grafana",
+      "title": "Grafana",
+      "url": "https://grafana.lv3.org",
+      "role": "product_native",
+      "role_description": "Metrics dashboards, log exploration, and alert management.",
+      "primary_lane": "observe",
+      "audience": ["viewer", "operator", "admin"]
+    },
+    {
+      "id": "gitea",
+      "title": "Gitea",
+      "url": "https://git.lv3.org",
+      "role": "product_native",
+      "role_description": "Source code hosting, CI pipelines, and repository management.",
+      "primary_lane": "change",
+      "audience": ["operator", "admin"]
+    },
+    {
+      "id": "paperless",
+      "title": "Paperless-ngx",
+      "url": "https://paperless.lv3.org",
+      "role": "product_native",
+      "role_description": "Document management and OCR search.",
+      "primary_lane": "learn",
+      "audience": ["viewer", "operator", "admin"]
+    },
+    {
+      "id": "jupyterhub",
+      "title": "JupyterHub",
+      "url": "https://jupyter.lv3.org",
+      "role": "product_native",
+      "role_description": "Interactive data analysis and agent notebook sessions.",
+      "primary_lane": "change",
+      "audience": ["operator", "admin"]
+    },
+    {
+      "id": "windmill",
+      "title": "Windmill",
+      "url": "https://windmill.lv3.org",
+      "role": "product_native",
+      "role_description": "Workflow automation, scheduled tasks, and script runners.",
+      "primary_lane": "change",
+      "audience": ["operator", "admin"]
     }
   ]
 }

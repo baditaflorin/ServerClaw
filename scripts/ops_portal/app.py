@@ -3995,6 +3995,327 @@ def create_app(
         query = httpx.QueryParams({"notice": notice, "notice_tone": notice_tone})
         return RedirectResponse(url=f"/tasks/runbooks/{run_id}?{query}", status_code=303)
 
+    # ---------------------------------------------------------------------------
+    # ADR 0224: Self-service repo intake — GUI + secure JSON API
+    # ---------------------------------------------------------------------------
+
+    def _load_repo_deploy_catalog() -> list[dict[str, Any]]:
+        catalog_path = Path(os.getenv("OPS_PORTAL_REPO_DEPLOY_CATALOG", "")).expanduser()
+        if not catalog_path.is_file():
+            # Fall back to repo-relative path when running from source
+            candidates = [
+                Path(__file__).resolve().parents[2] / "config" / "repo-deploy-catalog.json",
+                Path("/srv/ops-portal/data/config/repo-deploy-catalog.json"),
+            ]
+            catalog_path = next((p for p in candidates if p.is_file()), Path(""))
+        if not catalog_path.is_file():
+            return []
+        try:
+            data = json.loads(catalog_path.read_text())
+            return data.get("profiles", []) if isinstance(data, dict) else []
+        except Exception:  # noqa: BLE001
+            return []
+
+    @app.get("/partials/repo-intake", response_class=HTMLResponse)
+    async def repo_intake_partial(request: Request) -> HTMLResponse:
+        context = await build_dashboard_context(request)
+        context["catalog_profiles"] = _load_repo_deploy_catalog()
+        context["intake_error"] = ""
+        context["page_lane"] = context["page_sections"].get("repo-intake")
+        return templates.TemplateResponse(request=request, name="partials/repo_intake.html", context=context)
+
+    @app.post("/actions/repo-intake/profile/{profile_id}", response_class=HTMLResponse)
+    async def deploy_catalog_profile_action(request: Request, profile_id: str) -> HTMLResponse:
+        session = await ensure_session(request)
+        broker: EventBroker = request.app.state.event_broker
+        activation_context = (await build_activation_panel_context(request))["activation"]
+        if action_locked("deploy", activation_context):
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"Repo deploy: {profile_id}",
+                    "status": "blocked",
+                    "detail": "Complete the activation checklist or reveal advanced tools before triggering repo deployments.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+        profiles = _load_repo_deploy_catalog()
+        profile = next((p for p in profiles if str(p.get("id", "")) == profile_id), None)
+        if profile is None:
+            context = {
+                "request": request,
+                "result": {
+                    "title": f"Repo deploy: {profile_id}",
+                    "status": "failed",
+                    "detail": f"Profile '{profile_id}' not found in the repo-deploy catalog.",
+                    "tone": "danger",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+        try:
+            import subprocess  # noqa: PLC0415 - lazy import
+            compose_domain_args: list[str] = []
+            for cd in profile.get("compose_domains") or []:
+                compose_domain_args.extend(["--compose-domain", f"{cd['service']}:{cd['domain']}"])
+            args = [
+                "python3", "-m", "scripts.lv3_cli", "deploy-repo-profile",
+                "--profile-id", profile_id,
+            ]
+            result = subprocess.run(  # noqa: S603
+                args,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=str(Path(__file__).resolve().parents[2]),
+            )
+            if result.returncode == 0:
+                status = "queued"
+                detail = result.stdout.strip() or f"Profile '{profile_id}' deploy queued via Coolify."
+                tone = "ok"
+            else:
+                status = "failed"
+                detail = result.stderr.strip() or result.stdout.strip() or "Deploy command exited non-zero."
+                tone = "danger"
+        except Exception as exc:  # noqa: BLE001
+            status = "failed"
+            detail = str(exc)
+            tone = "danger"
+        await broker.publish(
+            f"repo-intake profile {profile_id}: {detail}",
+            event_type="deploy",
+            metadata={"profile_id": profile_id, "status": status},
+        )
+        context = {
+            "request": request,
+            "result": {
+                "title": f"Repo deploy: {profile.get('app_name', profile_id)}",
+                "status": status,
+                "detail": detail,
+                "tone": tone,
+                "timestamp": isoformat(utc_now()),
+            },
+        }
+        return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+
+    @app.post("/actions/repo-intake/custom", response_class=HTMLResponse)
+    async def deploy_custom_repo_action(
+        request: Request,
+        repo: str = Form(default=""),
+        branch: str = Form(default="main"),
+        app_name: str = Form(default=""),
+        project: str = Form(default="LV3 Apps"),
+        environment: str = Form(default="production"),
+        build_pack: str = Form(default="dockercompose"),
+        source: str = Form(default="auto"),
+        domain: str = Form(default=""),
+        ports: str = Form(default="80"),
+        llm_assistance: str = Form(default="prohibited"),
+        docker_compose_location: str = Form(default=""),
+    ) -> HTMLResponse:
+        session = await ensure_session(request)
+        broker: EventBroker = request.app.state.event_broker
+        activation_context = (await build_activation_panel_context(request))["activation"]
+        if action_locked("deploy", activation_context):
+            context = {
+                "request": request,
+                "result": {
+                    "title": "Custom repo intake",
+                    "status": "blocked",
+                    "detail": "Complete the activation checklist or reveal advanced tools before triggering repo deployments.",
+                    "tone": "warn",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+        # Validate required fields
+        repo = repo.strip()
+        app_name = app_name.strip()
+        valid_sources = {"auto", "public", "private-deploy-key"}
+        valid_build_packs = {"nixpacks", "static", "dockerfile", "dockercompose"}
+        valid_llm = {"allowed", "required", "prohibited"}
+        errors = []
+        if not repo:
+            errors.append("Repository URL is required.")
+        if not app_name:
+            errors.append("Application name is required.")
+        if source not in valid_sources:
+            errors.append(f"Source must be one of: {', '.join(sorted(valid_sources))}.")
+        if build_pack not in valid_build_packs:
+            errors.append(f"Build pack must be one of: {', '.join(sorted(valid_build_packs))}.")
+        if llm_assistance not in valid_llm:
+            errors.append(f"LLM assistance must be one of: {', '.join(sorted(valid_llm))}.")
+        if errors:
+            context = {
+                "request": request,
+                "result": {
+                    "title": "Custom repo intake",
+                    "status": "failed",
+                    "detail": " ".join(errors),
+                    "tone": "danger",
+                    "timestamp": isoformat(utc_now()),
+                },
+            }
+            return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+        try:
+            import subprocess  # noqa: PLC0415
+            args = [
+                "python3", "-m", "scripts.lv3_cli", "deploy-repo",
+                "--repo", repo,
+                "--branch", branch.strip() or "main",
+                "--source", source,
+                "--app-name", app_name,
+                "--project", project.strip() or "LV3 Apps",
+                "--environment", environment.strip() or "production",
+                "--build-pack", build_pack,
+                "--ports", ports.strip() or "80",
+            ]
+            if domain.strip():
+                args.extend(["--domain", domain.strip()])
+            if docker_compose_location.strip():
+                args.extend(["--docker-compose-location", docker_compose_location.strip()])
+            result = subprocess.run(  # noqa: S603
+                args,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=str(Path(__file__).resolve().parents[2]),
+            )
+            if result.returncode == 0:
+                status = "queued"
+                detail = result.stdout.strip() or f"Custom repo '{app_name}' deploy queued via Coolify."
+                tone = "ok"
+            else:
+                status = "failed"
+                detail = result.stderr.strip() or result.stdout.strip() or "Deploy command exited non-zero."
+                tone = "danger"
+        except Exception as exc:  # noqa: BLE001
+            status = "failed"
+            detail = str(exc)
+            tone = "danger"
+        await broker.publish(
+            f"repo-intake custom {app_name}: {detail}",
+            event_type="deploy",
+            metadata={"app_name": app_name, "repo": repo, "status": status},
+        )
+        context = {
+            "request": request,
+            "result": {
+                "title": f"Custom repo intake: {app_name}",
+                "status": status,
+                "detail": detail,
+                "tone": tone,
+                "timestamp": isoformat(utc_now()),
+            },
+        }
+        return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+
+    @app.post("/api/v1/repo-intake", response_class=JSONResponse)
+    async def api_repo_intake(request: Request) -> JSONResponse:
+        """Secure JSON API endpoint for programmatic self-service repo intake (ADR 0224).
+
+        Accepts Bearer token or OPS_PORTAL_STATIC_API_TOKEN.
+        Request body: JSON with same fields as the custom intake form.
+        Returns: {"ok": true/false, "status": "...", "detail": "..."}
+        """
+        # Token auth — accept Bearer header or static token
+        auth_header = request.headers.get("Authorization", "")
+        bearer_token: str | None = None
+        if auth_header.lower().startswith("bearer "):
+            bearer_token = auth_header[7:].strip()
+        static_token = request.app.state.settings.static_api_token
+        if not bearer_token and not static_token:
+            return JSONResponse({"ok": False, "error": "Authentication required."}, status_code=401)
+        if bearer_token and static_token and bearer_token != static_token:
+            # If both present, require match; if only static configured, allow unauthenticated internal callers
+            session_dict: dict[str, str] = {}
+            session = request.session
+            session_token = session.get("api_token", "")
+            if bearer_token != session_token:
+                return JSONResponse({"ok": False, "error": "Invalid token."}, status_code=403)
+        try:
+            body = await request.json()
+        except Exception:  # noqa: BLE001
+            return JSONResponse({"ok": False, "error": "Request body must be valid JSON."}, status_code=400)
+        if not isinstance(body, dict):
+            return JSONResponse({"ok": False, "error": "Request body must be a JSON object."}, status_code=400)
+        repo = str(body.get("repo", "")).strip()
+        app_name = str(body.get("app_name", "")).strip()
+        branch = str(body.get("branch", "main")).strip() or "main"
+        project = str(body.get("project", "LV3 Apps")).strip() or "LV3 Apps"
+        environment = str(body.get("environment", "production")).strip() or "production"
+        build_pack = str(body.get("build_pack", "dockercompose")).strip()
+        source = str(body.get("source", "auto")).strip()
+        domain = str(body.get("domain", "")).strip()
+        ports = str(body.get("ports", "80")).strip() or "80"
+        llm_assistance = str(body.get("llm_assistance", "prohibited")).strip()
+        docker_compose_location = str(body.get("docker_compose_location", "")).strip()
+        profile_id = str(body.get("profile_id", "")).strip()
+
+        # Profile-based shortcut
+        if profile_id:
+            profiles = _load_repo_deploy_catalog()
+            profile = next((p for p in profiles if str(p.get("id", "")) == profile_id), None)
+            if profile is None:
+                return JSONResponse({"ok": False, "error": f"Profile '{profile_id}' not found."}, status_code=404)
+            try:
+                import subprocess  # noqa: PLC0415
+                args = [
+                    "python3", "-m", "scripts.lv3_cli", "deploy-repo-profile",
+                    "--profile-id", profile_id,
+                ]
+                result = subprocess.run(  # noqa: S603
+                    args, capture_output=True, text=True, timeout=30,
+                    cwd=str(Path(__file__).resolve().parents[2]),
+                )
+                if result.returncode == 0:
+                    return JSONResponse({"ok": True, "status": "queued", "detail": result.stdout.strip() or "Deploy queued."})
+                return JSONResponse({"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."}, status_code=502)
+            except Exception as exc:  # noqa: BLE001
+                return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
+
+        valid_sources = {"auto", "public", "private-deploy-key"}
+        valid_build_packs = {"nixpacks", "static", "dockerfile", "dockercompose"}
+        errors = []
+        if not repo:
+            errors.append("'repo' is required.")
+        if not app_name:
+            errors.append("'app_name' is required.")
+        if source not in valid_sources:
+            errors.append(f"'source' must be one of {sorted(valid_sources)}.")
+        if build_pack not in valid_build_packs:
+            errors.append(f"'build_pack' must be one of {sorted(valid_build_packs)}.")
+        if errors:
+            return JSONResponse({"ok": False, "error": " ".join(errors)}, status_code=422)
+        try:
+            import subprocess  # noqa: PLC0415
+            args = [
+                "python3", "-m", "scripts.lv3_cli", "deploy-repo",
+                "--repo", repo, "--branch", branch,
+                "--source", source, "--app-name", app_name,
+                "--project", project, "--environment", environment,
+                "--build-pack", build_pack, "--ports", ports,
+            ]
+            if domain:
+                args.extend(["--domain", domain])
+            if docker_compose_location:
+                args.extend(["--docker-compose-location", docker_compose_location])
+            result = subprocess.run(  # noqa: S603
+                args, capture_output=True, text=True, timeout=30,
+                cwd=str(Path(__file__).resolve().parents[2]),
+            )
+            if result.returncode == 0:
+                return JSONResponse({"ok": True, "status": "queued", "detail": result.stdout.strip() or "Deploy queued."})
+            return JSONResponse({"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."}, status_code=502)
+        except Exception as exc:  # noqa: BLE001
+            return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
+
+    # ---------------------------------------------------------------------------
+    # End ADR 0224
+    # ---------------------------------------------------------------------------
+
     @app.post("/actions/search", response_class=HTMLResponse)
     async def search_action(
         request: Request,

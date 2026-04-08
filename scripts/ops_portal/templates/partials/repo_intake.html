@@ -1,0 +1,192 @@
+{% from "macros/states.html" import empty_state, state_message %}
+{% from "macros/lane_context.html" import lane_banner %}
+
+<div id="repo-intake-panel">
+  <div class="section-head">
+    <div>
+      <p class="section-kicker">Change lane — Repo Intake</p>
+      <h2>Self-Service Repository Deployment</h2>
+      <p class="muted">Deploy a governed repository through the Coolify lane. Select an existing profile for one-click deploy or submit a custom intake request below.</p>
+      {% if page_lane %}{{ lane_banner(page_lane) }}{% endif %}
+    </div>
+  </div>
+
+  {% if intake_error %}
+  {{ state_message("Intake validation failed", intake_error, "danger") }}
+  {% endif %}
+
+  {% if catalog_profiles %}
+  <section class="intake-catalog-section">
+    <div class="section-head section-head--compact">
+      <div>
+        <p class="section-kicker">Catalog Profiles</p>
+        <h3>Governed deployment profiles</h3>
+        <p class="muted">These profiles are declared in the repo-deploy-catalog and validated before every deploy.</p>
+      </div>
+      <span class="pill">{{ catalog_profiles|length }}</span>
+    </div>
+    <div class="service-card-grid">
+      {% for profile in catalog_profiles %}
+      <article class="panel service-card">
+        <div class="service-card-head">
+          <strong>{{ profile.app_name }}</strong>
+          <span class="pill">{{ profile.environment }}</span>
+        </div>
+        <p class="muted">{{ profile.description }}</p>
+        <dl class="service-meta-list">
+          <div>
+            <dt>Repo</dt>
+            <dd class="truncate">{{ profile.repo }}</dd>
+          </div>
+          <div>
+            <dt>Branch</dt>
+            <dd>{{ profile.branch }}</dd>
+          </div>
+          <div>
+            <dt>Build pack</dt>
+            <dd>{{ profile.build_pack }}</dd>
+          </div>
+          <div>
+            <dt>LLM assistance</dt>
+            <dd>{{ profile.llm_assistance }}</dd>
+          </div>
+          {% if profile.compose_domains %}
+          <div>
+            <dt>Domain</dt>
+            <dd>
+              {% for cd in profile.compose_domains %}
+              <a href="https://{{ cd.domain }}" target="_blank" rel="noopener">{{ cd.domain }}</a>{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          </div>
+          {% endif %}
+        </dl>
+        <div class="service-card-actions">
+          <form
+            hx-post="/actions/repo-intake/profile/{{ profile.id }}"
+            hx-target="#repo-intake-result"
+            hx-swap="innerHTML"
+            hx-indicator="#repo-intake-spinner">
+            <button class="action-button action-button--primary" type="submit">Deploy {{ profile.app_name }}</button>
+          </form>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% else %}
+  {{ empty_state("No catalog profiles found", "Add a profile to config/repo-deploy-catalog.json to enable one-click deployment.") }}
+  {% endif %}
+
+  <section class="intake-custom-section">
+    <div class="section-head section-head--compact">
+      <div>
+        <p class="section-kicker">Custom Intake</p>
+        <h3>Deploy from repository URL</h3>
+        <p class="muted">Submit a repository URL and deployment parameters. The request is validated against the catalog schema before triggering.</p>
+      </div>
+    </div>
+
+    <form
+      class="intake-form"
+      hx-post="/actions/repo-intake/custom"
+      hx-target="#repo-intake-result"
+      hx-swap="innerHTML"
+      hx-indicator="#repo-intake-spinner">
+
+      <div class="form-row form-row--wide">
+        <label class="form-label" for="intake-repo">Repository URL <span class="required">*</span></label>
+        <input
+          id="intake-repo"
+          name="repo"
+          type="text"
+          placeholder="git@github.com:org/repo.git or https://github.com/org/repo"
+          required
+          class="form-input">
+        <p class="form-hint">SSH or HTTPS URL. Private repos require <code>private-deploy-key</code> source.</p>
+      </div>
+
+      <div class="form-row-group">
+        <div class="form-row">
+          <label class="form-label" for="intake-branch">Branch</label>
+          <input id="intake-branch" name="branch" type="text" placeholder="main" value="main" class="form-input">
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="intake-app-name">Application Name <span class="required">*</span></label>
+          <input id="intake-app-name" name="app_name" type="text" placeholder="my-app" required class="form-input">
+          <p class="form-hint">Kebab-case slug used in Coolify and for the default subdomain.</p>
+        </div>
+      </div>
+
+      <div class="form-row-group">
+        <div class="form-row">
+          <label class="form-label" for="intake-project">Coolify Project</label>
+          <input id="intake-project" name="project" type="text" placeholder="LV3 Apps" value="LV3 Apps" class="form-input">
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="intake-environment">Environment</label>
+          <select id="intake-environment" name="environment" class="form-select">
+            <option value="production">production</option>
+            <option value="staging">staging</option>
+            <option value="preview">preview</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row-group">
+        <div class="form-row">
+          <label class="form-label" for="intake-build-pack">Build Pack</label>
+          <select id="intake-build-pack" name="build_pack" class="form-select">
+            <option value="dockercompose">dockercompose</option>
+            <option value="dockerfile">dockerfile</option>
+            <option value="nixpacks">nixpacks</option>
+            <option value="static">static</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="intake-source">Repository Source</label>
+          <select id="intake-source" name="source" class="form-select">
+            <option value="auto">auto</option>
+            <option value="public">public</option>
+            <option value="private-deploy-key">private-deploy-key</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row-group">
+        <div class="form-row">
+          <label class="form-label" for="intake-domain">Public Domain (optional)</label>
+          <input id="intake-domain" name="domain" type="text" placeholder="my-app.apps.lv3.org" class="form-input">
+          <p class="form-hint">Full domain. Leave blank to use app name as subdomain.</p>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="intake-ports">Exposed Ports</label>
+          <input id="intake-ports" name="ports" type="text" placeholder="80" value="80" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-row-group">
+        <div class="form-row">
+          <label class="form-label" for="intake-llm">LLM Assistance</label>
+          <select id="intake-llm" name="llm_assistance" class="form-select">
+            <option value="prohibited">prohibited</option>
+            <option value="allowed">allowed</option>
+            <option value="required">required</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="intake-compose-location">Docker Compose Location</label>
+          <input id="intake-compose-location" name="docker_compose_location" type="text" placeholder="/compose.yaml" class="form-input">
+          <p class="form-hint">Leave blank for Dockerfile builds.</p>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="action-button action-button--primary" type="submit">Submit Intake Request</button>
+        <span id="repo-intake-spinner" class="htmx-indicator muted">Triggering deployment&hellip;</span>
+      </div>
+    </form>
+  </section>
+
+  <div id="repo-intake-result" class="intake-result-area" aria-live="polite"></div>
+</div>

@@ -269,9 +269,9 @@ adrs:
     summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
     filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
     path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
-    implemented_in_repo_version: 0.177.31
+    implemented_in_repo_version: 0.178.49
     implemented_in_platform_version: 0.130.35
-    implemented_on: '2026-03-28'
+    implemented_on: '2026-04-08'
   - adr: '0254'
     title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
     status: Accepted

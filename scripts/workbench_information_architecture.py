@@ -58,3 +58,27 @@ def task_lane_label(lane: str) -> str:
 
 def default_personas_for_task_lane(lane: str) -> list[str]:
     return list(DEFAULT_PERSONAS_BY_TASK_LANE.get(normalize_task_lane(lane), ["operator"]))
+
+
+# ADR 0307: Platform Workbench — cohesive surface class declarations
+# Every human-facing surface must declare one of these roles:
+#   "home"          — orients the user, shows attention items, routes to next task
+#   "task"          — lets the user complete a governed action or operational job
+#   "reference"     — explains how the platform works, hosts runbooks and ADRs
+#   "product_native" — third-party product with best-in-class UX, enters/exits via workbench
+
+WORKBENCH_SURFACE_ROLES = ("home", "task", "reference", "product_native")
+
+WORKBENCH_SURFACE_ROLE_LABELS = {
+    "home": "Home",
+    "task": "Task",
+    "reference": "Reference",
+    "product_native": "Product",
+}
+
+
+def normalize_surface_role(value: Any, *, default: str = "product_native") -> str:
+    if not isinstance(value, str) or not value.strip():
+        return default
+    role = value.strip().lower()
+    return role if role in WORKBENCH_SURFACE_ROLES else default

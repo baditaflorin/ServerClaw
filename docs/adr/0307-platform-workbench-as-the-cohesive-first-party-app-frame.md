@@ -1,9 +1,10 @@
 # ADR 0307: Platform Workbench As The Cohesive First-Party App Frame
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.49
+- Implemented In Platform Version: 0.130.35
+- Implemented On: 2026-04-08
 - Date: 2026-03-31
 
 ## Context

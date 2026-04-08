@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 331
+total_adrs: 332
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -3484,9 +3484,9 @@ adrs:
     summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
     filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
     path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
-    implemented_in_repo_version: 0.177.31
+    implemented_in_repo_version: 0.178.49
     implemented_in_platform_version: 0.130.35
-    implemented_on: '2026-03-28'
+    implemented_on: '2026-04-08'
   - adr: '0224'
     title: Server-Resident Operations As The Default Control Model
     status: Accepted
@@ -5144,6 +5144,26 @@ adrs:
     implemented_in_repo_version: 0.177.119
     implemented_in_platform_version: 0.130.75
     implemented_on: '2026-03-31'
+  - adr: '0307'
+    title: Platform Workbench As The Cohesive First-Party App Frame
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-31'
+    concern: platform
+    keywords:
+      - platform
+      - workbench
+      - as
+      - cohesive
+      - first-party
+      - app
+      - frame
+    summary: We will treat the platform's human-facing experience as one cohesive
+    filename: 0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+    path: docs/adr/0307-platform-workbench-as-the-cohesive-first-party-app-frame.md
+    implemented_in_repo_version: 0.178.49
+    implemented_in_platform_version: 0.130.35
+    implemented_on: '2026-04-08'
   - adr: '0307'
     title: Temporary Guest Operator Accounts With 72-Hour Expiry
     status: Accepted
