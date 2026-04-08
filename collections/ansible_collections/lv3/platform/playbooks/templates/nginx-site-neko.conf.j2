@@ -97,6 +97,15 @@ server {
         proxy_send_timeout    3600s;
         proxy_connect_timeout   60s;
         proxy_buffering off;
+
+        # Step 4: Auto-login to Neko.
+        # Keycloak already authenticated the user — inject a script that reads the
+        # X-Neko-User header (set via sub_filter) and auto-fills the Neko login form
+        # using URL query params (?usr=NAME&pwd=PASSWORD).  Neko v3 JS reads these
+        # params from location.href and connects automatically.
+        sub_filter_once on;
+        sub_filter_types text/html;
+        sub_filter '</head>' '<script>if(!new URLSearchParams(location.search).has("pwd")){location.replace("/?usr="+encodeURIComponent("$auth_email")+"&pwd=neko")}</script></head>';
     }
 
     location @oauth2_sign_in {
