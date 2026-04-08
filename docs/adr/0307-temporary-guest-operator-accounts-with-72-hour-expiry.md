@@ -1,7 +1,7 @@
 # ADR 0307: Temporary Guest Operator Accounts With 72-Hour Expiry
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.0.0
 - Implemented In Platform Version: 0.0.0
 - Implemented On: 2026-03-31

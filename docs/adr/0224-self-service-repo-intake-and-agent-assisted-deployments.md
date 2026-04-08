@@ -1,7 +1,7 @@
 # ADR 0224: Self-Service Repo Intake And Agent-Assisted Deployments
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.31
 - Implemented In Platform Version: 0.130.35
 - Implemented On: 2026-03-28

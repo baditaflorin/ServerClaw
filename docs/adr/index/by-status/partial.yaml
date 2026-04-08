@@ -10,26 +10,8 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 5
+total_adrs: 2
 adrs:
-  - adr: '0224'
-    title: Self-Service Repo Intake And Agent-Assisted Deployments
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-28'
-    concern: agent-discovery
-    keywords:
-      - self-service
-      - repo
-      - intake
-      - agent-assisted
-      - deployments
-    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
-    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
-    path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
-    implemented_in_repo_version: 0.177.31
-    implemented_in_platform_version: 0.130.35
-    implemented_on: '2026-03-28'
   - adr: '0243'
     title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
     status: Accepted
@@ -64,42 +46,3 @@ adrs:
     summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
     filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
     path: docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md
-  - adr: '0307'
-    title: Temporary Guest Operator Accounts With 72-Hour Expiry
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-31'
-    concern: vm-topology
-    keywords:
-      - temporary
-      - guest
-      - operator
-      - accounts
-      - hour
-      - expiry
-    summary: 'Temporary operators are full participants in the ADR 0108 onboarding model — same Keycloak SSO, step-ca SSH
-      certificates, OpenBao secrets access, and Tailscale '
-    filename: 0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
-    path: docs/adr/0307-temporary-guest-operator-accounts-with-72-hour-expiry.md
-    implemented_in_repo_version: 0.0.0
-    implemented_in_platform_version: 0.0.0
-    implemented_on: '2026-03-31'
-  - adr: '0346'
-    title: Outline Programmatic Wiki API and Automation Hooks
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-04-05'
-    concern: automation
-    keywords:
-      - outline
-      - programmatic
-      - wiki
-      - api
-      - automation
-      - hooks
-    summary: 'Extract the OutlineClient, OutlineError, and API helper functions (collectionsbyname, documentsincollection,
-      ensuredocument, loadapitoken) into a shared module '
-    filename: 0346-outline-programmatic-wiki-api-and-automation-hooks.md
-    path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
-    implemented_in_platform_version: 0.178.4
-    implemented_on: '2026-04-05'

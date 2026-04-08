@@ -1,7 +1,7 @@
 # ADR 0346: Outline Programmatic Wiki API and Automation Hooks
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: detected
 - Implemented In Platform Version: 0.178.4
 - Implemented On: 2026-04-05

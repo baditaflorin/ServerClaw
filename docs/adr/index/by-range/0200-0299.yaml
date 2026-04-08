@@ -397,7 +397,7 @@ adrs:
   - adr: '0224'
     title: Self-Service Repo Intake And Agent-Assisted Deployments
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: agent-discovery
     keywords:

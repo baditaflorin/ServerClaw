@@ -450,7 +450,7 @@ adrs:
   - adr: '0307'
     title: Temporary Guest Operator Accounts With 72-Hour Expiry
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-31'
     concern: vm-topology
     keywords:
