@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 279
+total_adrs: 287
 adrs:
   - adr: '0011'
     title: Monitoring VM With Grafana And Proxmox Metrics
@@ -65,6 +65,21 @@ adrs:
     path: docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md
     implemented_in_repo_version: 0.25.0
     implemented_in_platform_version: 0.16.0
+    implemented_on: '2026-03-22'
+  - adr: '0025'
+    title: Compose-Managed Runtime Stacks
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - compose-managed
+      - runtime
+      - stacks
+    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
+    filename: 0025-compose-managed-runtime-stacks.md
+    path: docs/adr/0025-compose-managed-runtime-stacks.md
+    implemented_in_platform_version: 0.23.0
     implemented_on: '2026-03-22'
   - adr: '0026'
     title: Dedicated PostgreSQL VM Baseline
@@ -121,6 +136,40 @@ adrs:
     path: docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
     implemented_in_repo_version: 0.30.0
     implemented_in_platform_version: 0.19.0
+    implemented_on: '2026-03-22'
+  - adr: '0030'
+    title: Role Interface Contracts And Defaults Boundaries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - role
+      - interface
+      - contracts
+      - defaults
+      - boundaries
+    summary: We will make each role own an explicit interface contract.
+    filename: 0030-role-interface-contracts-and-defaults-boundaries.md
+    path: docs/adr/0030-role-interface-contracts-and-defaults-boundaries.md
+    implemented_in_repo_version: 0.31.0
+    implemented_on: '2026-03-22'
+  - adr: '0031'
+    title: Repository Validation Pipeline For Automation Changes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - pipeline
+      - automation
+      - changes
+    summary: We will define one repository validation pipeline and make it the standard integration gate.
+    filename: 0031-repository-validation-pipeline-for-automation-changes.md
+    path: docs/adr/0031-repository-validation-pipeline-for-automation-changes.md
+    implemented_in_repo_version: 0.32.0
     implemented_on: '2026-03-22'
   - adr: '0036'
     title: Live Apply Receipts And Verification Evidence
@@ -250,6 +299,23 @@ adrs:
     path: docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
     implemented_in_repo_version: 0.48.0
     implemented_in_platform_version: 0.24.0
+    implemented_on: '2026-03-22'
+  - adr: '0044'
+    title: Windmill For Agent And Operator Workflows
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - windmill
+      - agent
+      - operator
+      - workflows
+    summary: We will use Windmill as the first on-platform workflow runtime for agents and operators.
+    filename: 0044-windmill-for-agent-and-operator-workflows.md
+    path: docs/adr/0044-windmill-for-agent-and-operator-workflows.md
+    implemented_in_repo_version: 0.47.0
+    implemented_in_platform_version: 0.23.0
     implemented_on: '2026-03-22'
   - adr: 0048
     title: Command Catalog And Approval Gates
@@ -825,6 +891,24 @@ adrs:
     path: docs/adr/0086-ansible-collection-packaging.md
     implemented_in_repo_version: 0.88.0
     implemented_on: '2026-03-23'
+  - adr: 0087
+    title: Repository Validation Gate (Pre-Push and CI)
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - gate
+      - pre-push
+      - ci
+    summary: We will implement a two-layer validation gate — local pre-commit hooks and a remote build server check — enforced
+      on every git push to any branch.
+    filename: 0087-repository-validation-gate.md
+    path: docs/adr/0087-repository-validation-gate.md
+    implemented_in_repo_version: 0.93.0
+    implemented_on: '2026-03-23'
   - adr: 0090
     title: Unified Platform CLI (`lv3`)
     status: Accepted
@@ -916,6 +1000,26 @@ adrs:
     implemented_in_repo_version: 0.177.6
     implemented_in_platform_version: 0.130.27
     implemented_on: '2026-03-27'
+  - adr: '0104'
+    title: Service Dependency Graph and Failure Propagation Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - service
+      - dependency
+      - graph
+      - failure
+      - propagation
+      - model
+    summary: We will define a machine-readable service dependency graph in config/dependency-graph.json, generate a visual
+      dependency diagram for the docs site (ADR 0094), a
+    filename: 0104-service-dependency-graph.md
+    path: docs/adr/0104-service-dependency-graph.md
+    implemented_in_repo_version: 0.108.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-24'
   - adr: '0105'
     title: Platform Capacity Model and Resource Quota Enforcement
     status: Implemented
@@ -954,6 +1058,26 @@ adrs:
     implemented_in_repo_version: 0.177.8
     implemented_in_platform_version: 0.130.29
     implemented_on: '2026-03-27'
+  - adr: '0117'
+    title: Service Dependency Graph As First-Class Runtime
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - service
+      - dependency
+      - graph
+      - as
+      - first-class
+      - runtime
+    summary: We will persist a machine-usable dependency graph for services, hosts, networks, DNS names, certificates, and
+      data flows as a directed acyclic graph (DAG) store
+    filename: 0117-service-dependency-graph-runtime.md
+    path: docs/adr/0117-service-dependency-graph-runtime.md
+    implemented_in_repo_version: 0.117.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
   - adr: '0120'
     title: Dry-Run Semantic Diff Engine
     status: Accepted
@@ -970,6 +1094,24 @@ adrs:
     filename: 0120-dry-run-semantic-diff-engine.md
     path: docs/adr/0120-dry-run-semantic-diff-engine.md
     implemented_in_repo_version: 0.116.0
+    implemented_on: '2026-03-24'
+  - adr: '0122'
+    title: Windmill Operator Access Admin Surface
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - windmill
+      - operator
+      - access
+      - admin
+      - surface
+    summary: We will add a repo-managed Windmill raw app that acts as the operator access admin console for ADR 0108.
+    filename: 0122-windmill-operator-access-admin.md
+    path: docs/adr/0122-windmill-operator-access-admin.md
+    implemented_in_repo_version: 0.120.0
+    implemented_in_platform_version: 0.114.4
     implemented_on: '2026-03-24'
   - adr: '0123'
     title: Service Uptime Contracts And Monitor-Backed Health

@@ -416,7 +416,7 @@ adrs:
   - adr: '0025'
     title: Compose-Managed Runtime Stacks
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -426,6 +426,8 @@ adrs:
     summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
+    implemented_in_platform_version: 0.23.0
+    implemented_on: '2026-03-22'
   - adr: '0025'
     title: Gap Analysis Matrix
     status: Proposed
@@ -530,7 +532,7 @@ adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -547,7 +549,7 @@ adrs:
   - adr: '0031'
     title: Repository Validation Pipeline For Automation Changes
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -772,7 +774,7 @@ adrs:
   - adr: '0044'
     title: Windmill For Agent And Operator Workflows
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -1067,7 +1069,7 @@ adrs:
   - adr: '0061'
     title: GlitchTip For Application Exceptions And Task Failures
     status: Deprecated
-    implementation_status: Partial
+    implementation_status: Deprecated
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -1080,6 +1082,7 @@ adrs:
       visibility.
     filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
     path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+    implemented_on: '2026-03-22'
   - adr: '0062'
     title: Ansible Role Composability And DRY Defaults
     status: Accepted
@@ -1514,7 +1517,7 @@ adrs:
   - adr: 0087
     title: Repository Validation Gate (Pre-Push and CI)
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: ci-cd
     keywords:

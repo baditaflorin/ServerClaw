@@ -1,11 +1,11 @@
 # ADR 0061: GlitchTip For Application Exceptions And Task Failures
 
-- Status: Superseded
+- Status: Deprecated
 - Superseded By: 0281
-- Implementation Status: Partial
+- Implementation Status: Deprecated
 - Implemented In Repo Version: detected
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context

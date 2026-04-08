@@ -1,7 +1,7 @@
 # ADR 0122: Windmill Operator Access Admin Surface
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.120.0
 - Implemented In Platform Version: 0.114.4
 - Implemented On: 2026-03-24

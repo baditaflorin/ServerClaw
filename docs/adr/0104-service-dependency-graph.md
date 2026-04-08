@@ -1,9 +1,9 @@
 # ADR 0104: Service Dependency Graph and Failure Propagation Model
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.108.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-24
 - Date: 2026-03-23
 

@@ -29,7 +29,7 @@ adrs:
   - adr: '0025'
     title: Compose-Managed Runtime Stacks
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -39,6 +39,8 @@ adrs:
     summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
+    implemented_in_platform_version: 0.23.0
+    implemented_on: '2026-03-22'
   - adr: '0025'
     title: Gap Analysis Matrix
     status: Proposed
@@ -192,7 +194,7 @@ adrs:
   - adr: '0061'
     title: GlitchTip For Application Exceptions And Task Failures
     status: Deprecated
-    implementation_status: Partial
+    implementation_status: Deprecated
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -205,6 +207,7 @@ adrs:
       visibility.
     filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
     path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+    implemented_on: '2026-03-22'
   - adr: '0063'
     title: Centralised Vars And Computed Facts Library
     status: Accepted
@@ -431,7 +434,7 @@ adrs:
   - adr: '0104'
     title: Service Dependency Graph and Failure Propagation Model
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -446,6 +449,7 @@ adrs:
     filename: 0104-service-dependency-graph.md
     path: docs/adr/0104-service-dependency-graph.md
     implemented_in_repo_version: 0.108.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-24'
   - adr: '0106'
     title: Ephemeral Environment Lifecycle and Teardown Policy
@@ -571,7 +575,7 @@ adrs:
   - adr: '0117'
     title: Service Dependency Graph As First-Class Runtime
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: platform
     keywords:

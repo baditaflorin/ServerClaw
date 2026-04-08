@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 55
+total_adrs: 46
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -80,53 +80,6 @@ adrs:
     implemented_in_repo_version: 0.25.0
     implemented_in_platform_version: 0.17.0
     implemented_on: '2026-03-22'
-  - adr: '0025'
-    title: Compose-Managed Runtime Stacks
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - compose-managed
-      - runtime
-      - stacks
-    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
-    filename: 0025-compose-managed-runtime-stacks.md
-    path: docs/adr/0025-compose-managed-runtime-stacks.md
-  - adr: '0030'
-    title: Role Interface Contracts And Defaults Boundaries
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: automation
-    keywords:
-      - role
-      - interface
-      - contracts
-      - defaults
-      - boundaries
-    summary: We will make each role own an explicit interface contract.
-    filename: 0030-role-interface-contracts-and-defaults-boundaries.md
-    path: docs/adr/0030-role-interface-contracts-and-defaults-boundaries.md
-    implemented_in_repo_version: 0.31.0
-    implemented_on: '2026-03-22'
-  - adr: '0031'
-    title: Repository Validation Pipeline For Automation Changes
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: ci-cd
-    keywords:
-      - repository
-      - validation
-      - pipeline
-      - automation
-      - changes
-    summary: We will define one repository validation pipeline and make it the standard integration gate.
-    filename: 0031-repository-validation-pipeline-for-automation-changes.md
-    path: docs/adr/0031-repository-validation-pipeline-for-automation-changes.md
-    implemented_in_repo_version: 0.32.0
-    implemented_on: '2026-03-22'
   - adr: '0033'
     title: Declarative Service Topology Catalog
     status: Accepted
@@ -158,23 +111,6 @@ adrs:
     filename: 0034-controller-local-secret-manifest-and-preflight.md
     path: docs/adr/0034-controller-local-secret-manifest-and-preflight.md
     implemented_in_repo_version: 0.35.0
-    implemented_on: '2026-03-22'
-  - adr: '0044'
-    title: Windmill For Agent And Operator Workflows
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: automation
-    keywords:
-      - windmill
-      - agent
-      - operator
-      - workflows
-    summary: We will use Windmill as the first on-platform workflow runtime for agents and operators.
-    filename: 0044-windmill-for-agent-and-operator-workflows.md
-    path: docs/adr/0044-windmill-for-agent-and-operator-workflows.md
-    implemented_in_repo_version: 0.47.0
-    implemented_in_platform_version: 0.23.0
     implemented_on: '2026-03-22'
   - adr: '0045'
     title: Control-Plane Communication Lanes
@@ -260,22 +196,6 @@ adrs:
     summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
     filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
     path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
-  - adr: '0061'
-    title: GlitchTip For Application Exceptions And Task Failures
-    status: Deprecated
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - glitchtip
-      - application
-      - exceptions
-      - task
-      - failures
-    summary: We will use GlitchTip or an equivalent self-hosted Sentry-compatible platform for application exception and task-failure
-      visibility.
-    filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
-    path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
   - adr: 0080
     title: Maintenance Window And Change Suppression Protocol
     status: Accepted
@@ -326,24 +246,6 @@ adrs:
     path: docs/adr/0085-opentofu-vm-lifecycle.md
     implemented_in_repo_version: 0.92.0
     implemented_in_platform_version: 0.39.0
-    implemented_on: '2026-03-23'
-  - adr: 0087
-    title: Repository Validation Gate (Pre-Push and CI)
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: ci-cd
-    keywords:
-      - repository
-      - validation
-      - gate
-      - pre-push
-      - ci
-    summary: We will implement a two-layer validation gate — local pre-commit hooks and a remote build server check — enforced
-      on every git push to any branch.
-    filename: 0087-repository-validation-gate.md
-    path: docs/adr/0087-repository-validation-gate.md
-    implemented_in_repo_version: 0.93.0
     implemented_on: '2026-03-23'
   - adr: 0088
     title: Ephemeral Infrastructure Fixtures
@@ -521,25 +423,6 @@ adrs:
     path: docs/adr/0103-data-classification-and-retention-policy.md
     implemented_in_repo_version: 0.102.0
     implemented_on: '2026-03-23'
-  - adr: '0104'
-    title: Service Dependency Graph and Failure Propagation Model
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-23'
-    concern: platform
-    keywords:
-      - service
-      - dependency
-      - graph
-      - failure
-      - propagation
-      - model
-    summary: We will define a machine-readable service dependency graph in config/dependency-graph.json, generate a visual
-      dependency diagram for the docs site (ADR 0094), a
-    filename: 0104-service-dependency-graph.md
-    path: docs/adr/0104-service-dependency-graph.md
-    implemented_in_repo_version: 0.108.0
-    implemented_on: '2026-03-24'
   - adr: '0106'
     title: Ephemeral Environment Lifecycle and Teardown Policy
     status: Accepted
@@ -714,26 +597,6 @@ adrs:
     path: docs/adr/0116-change-risk-scoring.md
     implemented_in_repo_version: 0.112.0
     implemented_on: '2026-03-24'
-  - adr: '0117'
-    title: Service Dependency Graph As First-Class Runtime
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-24'
-    concern: platform
-    keywords:
-      - service
-      - dependency
-      - graph
-      - as
-      - first-class
-      - runtime
-    summary: We will persist a machine-usable dependency graph for services, hosts, networks, DNS names, certificates, and
-      data flows as a directed acyclic graph (DAG) store
-    filename: 0117-service-dependency-graph-runtime.md
-    path: docs/adr/0117-service-dependency-graph-runtime.md
-    implemented_in_repo_version: 0.117.0
-    implemented_in_platform_version: 0.130.20
-    implemented_on: '2026-03-26'
   - adr: 0118
     title: Replayable Failure Case Library
     status: Proposed
@@ -784,24 +647,6 @@ adrs:
     implemented_in_repo_version: 0.119.0
     implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-26'
-  - adr: '0122'
-    title: Windmill Operator Access Admin Surface
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-24'
-    concern: automation
-    keywords:
-      - windmill
-      - operator
-      - access
-      - admin
-      - surface
-    summary: We will add a repo-managed Windmill raw app that acts as the operator access admin console for ADR 0108.
-    filename: 0122-windmill-operator-access-admin.md
-    path: docs/adr/0122-windmill-operator-access-admin.md
-    implemented_in_repo_version: 0.120.0
-    implemented_in_platform_version: 0.114.4
-    implemented_on: '2026-03-24'
   - adr: '0166'
     title: Canonical Error Response Format and Error Code Registry
     status: Accepted

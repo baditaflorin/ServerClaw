@@ -10,8 +10,25 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Deprecated
 slug: deprecated
-total_adrs: 4
+total_adrs: 5
 adrs:
+  - adr: '0061'
+    title: GlitchTip For Application Exceptions And Task Failures
+    status: Deprecated
+    implementation_status: Deprecated
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - glitchtip
+      - application
+      - exceptions
+      - task
+      - failures
+    summary: We will use GlitchTip or an equivalent self-hosted Sentry-compatible platform for application exception and task-failure
+      visibility.
+    filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
+    path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+    implemented_on: '2026-03-22'
   - adr: 0095
     title: Unified Search Across Platform Services
     status: Deprecated

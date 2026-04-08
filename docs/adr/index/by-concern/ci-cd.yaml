@@ -29,7 +29,7 @@ adrs:
   - adr: '0031'
     title: Repository Validation Pipeline For Automation Changes
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -97,7 +97,7 @@ adrs:
   - adr: 0087
     title: Repository Validation Gate (Pre-Push and CI)
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: ci-cd
     keywords:
