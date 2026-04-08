@@ -1,8 +1,9 @@
-# Release 0.178.59
+# Release 0.178.60
 
 - Date: 2026-04-08
 
 ## Summary
+- ws-0377 LibreChat OIDC SSO integration with Keycloak; adds OpenAI and Anthropic API endpoint support; enables session token management and dynamic model fetching for serverless LLM integration
 - fix: docker_compose_v2 module in repowise_runtime (community.docker v4.0.0 removed docker_compose v1); Keycloak protocolMapper field name correction; Ansible user group variable in Plane secret tasks; missing Semaphore OpenBao compose_macros template; workstreams cleanup (move completed ADR 0346, 0254, 0375, and ops items to done)
 - adds ADR 0364 native build server gate execution — LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions
 - ADR 0376 identity-core watchdog: 15s OIDC discovery probes + auto-restart on 2 failures (6/hr rate limit); KC_CACHE=local prevents stale JGroups TCP loops; oauth2-proxy watchdog on nginx-lv3 restarts proxy on unresponsive state

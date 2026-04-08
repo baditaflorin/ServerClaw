@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.59",
+  "repo_version": "0.178.60",
   "platform_version": "0.131.3",
-  "generated_at": "2026-04-07T23:54:00Z",
-  "next_refresh_at": "2026-04-08T00:54:00Z",
+  "generated_at": "2026-04-08T00:21:18Z",
+  "next_refresh_at": "2026-04-08T01:21:18Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6321,10 +6321,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.58",
-    "deployed_at": "2026-04-07",
-    "summary": "fix: docker_compose_v2 module in repowise_runtime (community.docker v4.0.0 removed docker_compose v1); Keycloak protocolMapper field name correction; Ansible user group variable in Plane secret tasks; missing Semaphore OpenBao compose_macros template; workstreams cleanup (move completed ADR 0346, 0254, 0375, and ops items to done) adds ADR 0364 native build server gate execution \u2014 LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions",
-    "release_notes_url": "docs/release-notes/0.178.59.md"
+    "last_version": "0.178.59",
+    "deployed_at": "2026-04-08",
+    "summary": "ws-0377 LibreChat OIDC SSO integration with Keycloak; adds OpenAI and Anthropic API endpoint support; enables session token management and dynamic model fetching for serverless LLM integration fix: docker_compose_v2 module in repowise_runtime (community.docker v4.0.0 removed docker_compose v1); Keycloak protocolMapper field name correction; Ansible user group variable in Plane secret tasks; missing Semaphore OpenBao compose_macros template; workstreams cleanup (move completed ADR 0346, 0254, 0375, and ops items to done)",
+    "release_notes_url": "docs/release-notes/0.178.60.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
