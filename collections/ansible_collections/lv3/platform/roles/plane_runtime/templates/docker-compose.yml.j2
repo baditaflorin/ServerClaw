@@ -1,4 +1,4 @@
-{% from 'compose_macros.j2' import openbao_sidecar %}
+{% from 'compose_macros.j2' import openbao_sidecar with context %}
 services:
 {{ openbao_sidecar("plane") }}
 

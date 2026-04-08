@@ -70,7 +70,7 @@ plane_legacy_env_file: "{{ plane_site_dir }}/plane.env"
 plane_internal_port: 8000
 # OpenBao agent configuration (from ADR 0373)
 plane_openbao_agent_dir: "{{ plane_site_dir }}/openbao"
-plane_openbao_agent_image: "{{ openbao_agent_image }}"
+plane_openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 plane_openbao_agent_container_name: plane-openbao-agent
 plane_openbao_secret_path: services/plane/runtime-env
 plane_openbao_policy_name: lv3-service-plane-runtime
