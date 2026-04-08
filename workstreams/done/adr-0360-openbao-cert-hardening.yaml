@@ -1,0 +1,63 @@
+id: adr-0360-openbao-cert-hardening
+adr: '0360'
+title: Harden OpenBao TLS cert renewal — 72h lifetime and expiry alert
+status: merged
+owner: claude
+branch: claude/nice-buck
+worktree_path: .claude/worktrees/nice-buck
+doc: docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
+depends_on:
+- adr-0043-openbao-secrets-backend
+- adr-0101-step-ca-internal-ca
+- adr-0165-openbao-tls-mtls-endpoint-design
+conflicts_with: []
+shared_surfaces:
+- collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+ownership_manifest:
+  owned_surfaces:
+  - id: alertmanager_cert_rules
+    paths:
+    - config/alertmanager/rules/platform.yml
+    mode: exclusive
+  - id: openbao_defaults
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+    mode: shared_contract
+    contract: platform-topology-v1
+  - id: adr_0360_doc
+    paths:
+    - docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
+    mode: exclusive
+  - id: workstream_source
+    paths:
+    - workstreams/active/adr-0360-openbao-cert-hardening.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: release_integration
+    paths:
+    - workstreams.yaml
+    - build/platform-manifest.json
+    - changelog.md
+    - docs/adr/.index.yaml
+    - docs/adr/index/*
+    - docs/diagrams/*
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - build/onboarding/*
+    - receipts/sbom/*
+    - VERSION
+    - RELEASE.md
+    - README.md
+    - versions/stack.yaml
+    - docs/release-notes/*
+    - docs/release-notes/index/*
+    - docs/site-generated/architecture/dependency-graph.md
+    - docs/status/history/*
+    mode: shared_contract
+    contract: mainline-release-integration-v1
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: hardened OpenBao TLS certificate lifetime from 24h to 72h with Alertmanager monitoring; adds critical 4h expiry alert for immediate operator intervention if renewal fails
+  release_bump: patch
+  included_in_repo_version: 0.178.59
