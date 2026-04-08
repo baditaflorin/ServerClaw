@@ -1,0 +1,353 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ServerClaw Tasks \u2014 Project Management",
+    "version": "1.0.0",
+    "description": "Create, view, update Plane tasks and comments for project tracking."
+  },
+  "servers": [
+    {
+      "url": "http://10.10.10.92:8083"
+    }
+  ],
+  "paths": {
+    "/v1/dify-tools/list-plane-tasks": {
+      "post": {
+        "operationId": "list-plane-tasks",
+        "summary": "List Plane Tasks",
+        "description": "List issues in a Plane project with optional state filter. Defaults to the Agent Work (AW) project.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW). Use ADR for architecture decisions."
+                  },
+                  "state_name": {
+                    "type": "string",
+                    "description": "Filter tasks by state name (e.g. Todo, In Progress, Done)."
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "project": {
+                      "type": "string"
+                    },
+                    "tasks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "state_name": {
+                            "type": "string"
+                          },
+                          "priority": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-plane-task": {
+      "post": {
+        "operationId": "get-plane-task",
+        "summary": "Get Plane Task Details",
+        "description": "Get full details of a single Plane issue by its UUID.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issue_id": {
+                    "type": "string",
+                    "description": "UUID of the Plane issue to retrieve."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  }
+                },
+                "required": [
+                  "issue_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "state_name": {
+                      "type": "string"
+                    },
+                    "description_html": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/create-plane-task": {
+      "post": {
+        "operationId": "create-plane-task",
+        "summary": "Create Plane Task",
+        "description": "Create a new issue in a Plane project. Use this to track blockers, follow-up tasks, and operational findings.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Issue title."
+                  },
+                  "description_html": {
+                    "type": "string",
+                    "description": "HTML description body."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  },
+                  "state_name": {
+                    "type": "string",
+                    "description": "Initial state name (default: Todo)."
+                  },
+                  "label_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Label names to apply. Missing labels are auto-created."
+                  },
+                  "priority": {
+                    "type": "string",
+                    "description": "Priority: none, low, medium, high, urgent."
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "state_name": {
+                      "type": "string"
+                    },
+                    "project_identifier": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/update-plane-task": {
+      "post": {
+        "operationId": "update-plane-task",
+        "summary": "Update Plane Task",
+        "description": "Update the status, title, description, or priority of an existing Plane issue.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issue_id": {
+                    "type": "string",
+                    "description": "UUID of the Plane issue to update."
+                  },
+                  "state_name": {
+                    "type": "string",
+                    "description": "New state name (e.g. In Progress, Done, Blocked)."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "New issue title."
+                  },
+                  "description_html": {
+                    "type": "string",
+                    "description": "New HTML description body."
+                  },
+                  "priority": {
+                    "type": "string",
+                    "description": "New priority: none, low, medium, high, urgent."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  }
+                },
+                "required": [
+                  "issue_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/add-plane-comment": {
+      "post": {
+        "operationId": "add-plane-comment",
+        "summary": "Add Plane Comment",
+        "description": "Add a comment to an existing Plane issue. Use for milestone updates, status notes, or blockers.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issue_id": {
+                    "type": "string",
+                    "description": "UUID of the Plane issue to comment on."
+                  },
+                  "comment_html": {
+                    "type": "string",
+                    "description": "HTML comment body."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  }
+                },
+                "required": [
+                  "issue_id",
+                  "comment_html"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-LV3-Dify-Api-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
+}

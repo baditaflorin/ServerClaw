@@ -1,0 +1,563 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ServerClaw Admin \u2014 Governed Operations",
+    "version": "1.0.0",
+    "description": "Execute governed commands, manage Nomad jobs, approval workflows. Requires elevated access."
+  },
+  "servers": [
+    {
+      "url": "http://10.10.10.92:8083"
+    }
+  ],
+  "paths": {
+    "/v1/dify-tools/run-governed-command": {
+      "post": {
+        "operationId": "run-governed-command",
+        "summary": "Run Governed Command",
+        "description": "Evaluate approval requirements and optionally execute one named mutating command contract.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "command_id",
+                  "requester_class"
+                ],
+                "properties": {
+                  "command_id": {
+                    "type": "string"
+                  },
+                  "requester_class": {
+                    "type": "string",
+                    "enum": [
+                      "human_operator",
+                      "service_identity",
+                      "agent",
+                      "break_glass"
+                    ]
+                  },
+                  "approver_classes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "preflight_passed": {
+                    "type": "boolean"
+                  },
+                  "validation_passed": {
+                    "type": "boolean"
+                  },
+                  "receipt_planned": {
+                    "type": "boolean"
+                  },
+                  "self_approve": {
+                    "type": "boolean"
+                  },
+                  "break_glass": {
+                    "type": "boolean"
+                  },
+                  "parameters": {
+                    "type": "object"
+                  },
+                  "dry_run": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "approved",
+                    "executed",
+                    "command_id",
+                    "workflow_id",
+                    "reasons"
+                  ],
+                  "properties": {
+                    "approved": {
+                      "type": "boolean"
+                    },
+                    "executed": {
+                      "type": "boolean"
+                    },
+                    "command_id": {
+                      "type": "string"
+                    },
+                    "workflow_id": {
+                      "type": "string"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "entrypoint": {
+                      "type": "string"
+                    },
+                    "runtime_host": {
+                      "type": "string"
+                    },
+                    "unit_name": {
+                      "type": "string"
+                    },
+                    "stdout_log": {
+                      "type": "string"
+                    },
+                    "stderr_log": {
+                      "type": "string"
+                    },
+                    "receipt_path": {
+                      "type": "string"
+                    },
+                    "parameters": {
+                      "type": "object"
+                    },
+                    "returncode": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/check-command-approval": {
+      "post": {
+        "operationId": "check-command-approval",
+        "summary": "Check Command Approval",
+        "description": "Evaluate the approval gate for one mutating command contract without executing it.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "command_id",
+                  "requester_class"
+                ],
+                "properties": {
+                  "command_id": {
+                    "type": "string"
+                  },
+                  "requester_class": {
+                    "type": "string",
+                    "enum": [
+                      "human_operator",
+                      "service_identity",
+                      "agent",
+                      "break_glass"
+                    ]
+                  },
+                  "approver_classes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "preflight_passed": {
+                    "type": "boolean"
+                  },
+                  "validation_passed": {
+                    "type": "boolean"
+                  },
+                  "receipt_planned": {
+                    "type": "boolean"
+                  },
+                  "self_approve": {
+                    "type": "boolean"
+                  },
+                  "break_glass": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "approved",
+                    "command_id",
+                    "workflow_id",
+                    "reasons"
+                  ],
+                  "properties": {
+                    "approved": {
+                      "type": "boolean"
+                    },
+                    "command_id": {
+                      "type": "string"
+                    },
+                    "workflow_id": {
+                      "type": "string"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "entrypoint": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-workflow-contract": {
+      "post": {
+        "operationId": "get-workflow-contract",
+        "summary": "Get Workflow Contract",
+        "description": "Return one workflow execution contract from the canonical workflow catalog.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "workflow_id"
+                ],
+                "properties": {
+                  "workflow_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-command-contract": {
+      "post": {
+        "operationId": "get-command-contract",
+        "summary": "Get Command Contract",
+        "description": "Return one mutating command contract from the canonical command catalog.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "command_id"
+                ],
+                "properties": {
+                  "command_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-nomad-jobs": {
+      "post": {
+        "operationId": "list-nomad-jobs",
+        "summary": "List Nomad Jobs",
+        "description": "List all jobs in the Nomad cluster with their current status, type, and allocation summary.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "namespace": {
+                    "type": "string",
+                    "description": "Filter jobs by namespace. Use '*' for all namespaces.",
+                    "default": "*"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "jobs"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "namespace": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-nomad-job-status": {
+      "post": {
+        "operationId": "get-nomad-job-status",
+        "summary": "Get Nomad Job Status",
+        "description": "Get detailed status of a specific Nomad job including allocations and deployment state.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "description": "The Nomad job ID to query."
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "description": "Namespace of the job.",
+                    "default": "default"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/dispatch-nomad-job": {
+      "post": {
+        "operationId": "dispatch-nomad-job",
+        "summary": "Dispatch Nomad Batch Job",
+        "description": "Dispatch a parameterized Nomad batch job with the given metadata. Only works for jobs with a parameterized stanza.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "description": "The parameterized Nomad job ID to dispatch."
+                  },
+                  "meta": {
+                    "type": "object",
+                    "description": "Key-value metadata to pass to the dispatched job."
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "description": "Namespace of the job.",
+                    "default": "default"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "dispatch_id",
+                    "eval_id"
+                  ],
+                  "properties": {
+                    "dispatch_id": {
+                      "type": "string"
+                    },
+                    "eval_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-api-publication-surface": {
+      "post": {
+        "operationId": "get-api-publication-surface",
+        "summary": "Get API Publication Surface",
+        "description": "Return one classified API or webhook surface from the private-first publication catalog.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "surface_id"
+                ],
+                "properties": {
+                  "surface_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-LV3-Dify-Api-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
+}

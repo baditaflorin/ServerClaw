@@ -1,0 +1,2252 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LV3 Platform Tools (All)",
+    "version": "1.0.0",
+    "description": "All governed LV3 platform tools. Use deferred_tools for context-efficient discovery."
+  },
+  "servers": [
+    {
+      "url": "http://10.10.10.92:8083"
+    }
+  ],
+  "paths": {
+    "/v1/dify-tools/get-platform-status": {
+      "post": {
+        "operationId": "get-platform-status",
+        "summary": "Get Platform Status",
+        "description": "Return the current repo-grounded platform status snapshot from versions/stack.yaml.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "repo_version",
+                    "platform_version",
+                    "observed_check_date",
+                    "os",
+                    "proxmox",
+                    "guest_count",
+                    "public_services",
+                    "latest_receipt_ids"
+                  ],
+                  "properties": {
+                    "repo_version": {
+                      "type": "string"
+                    },
+                    "platform_version": {
+                      "type": "string"
+                    },
+                    "observed_check_date": {
+                      "type": "string"
+                    },
+                    "os": {
+                      "type": "object"
+                    },
+                    "proxmox": {
+                      "type": "object"
+                    },
+                    "guest_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "public_services": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "latest_receipt_ids": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-recent-receipts": {
+      "post": {
+        "operationId": "list-recent-receipts",
+        "summary": "List Recent Receipts",
+        "description": "List the most recent structured live-apply receipts from the repository evidence set.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "receipts"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "receipts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-deployment-history": {
+      "post": {
+        "operationId": "get-deployment-history",
+        "summary": "Get Deployment History",
+        "description": "Return recent platform deployments filtered by service, environment, or date range.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "service_id": {
+                    "type": "string"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "enum": [
+                      "production",
+                      "staging"
+                    ]
+                  },
+                  "days": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "service_id",
+                    "environment",
+                    "days",
+                    "count",
+                    "warnings",
+                    "entries"
+                  ],
+                  "properties": {
+                    "service_id": {
+                      "type": "string"
+                    },
+                    "environment": {
+                      "type": "string"
+                    },
+                    "days": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "id",
+                          "change_type",
+                          "timestamp",
+                          "timestamp_precision",
+                          "date_label",
+                          "actor",
+                          "actor_class",
+                          "environment",
+                          "outcome",
+                          "service_ids",
+                          "service_names",
+                          "vm_names",
+                          "targets",
+                          "summary",
+                          "link_path",
+                          "source",
+                          "metadata"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "change_type": {
+                            "type": "string"
+                          },
+                          "timestamp": {
+                            "type": "string"
+                          },
+                          "timestamp_precision": {
+                            "type": "string"
+                          },
+                          "date_label": {
+                            "type": "string"
+                          },
+                          "actor": {
+                            "type": "string"
+                          },
+                          "actor_class": {
+                            "type": "string"
+                          },
+                          "environment": {
+                            "type": "string"
+                          },
+                          "outcome": {
+                            "type": "string"
+                          },
+                          "service_ids": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "service_names": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "vm_names": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "targets": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "link_path": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "workflow_id": {
+                            "type": "string"
+                          },
+                          "adr": {
+                            "type": "string"
+                          },
+                          "metadata": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-workflow-contract": {
+      "post": {
+        "operationId": "get-workflow-contract",
+        "summary": "Get Workflow Contract",
+        "description": "Return one workflow execution contract from the canonical workflow catalog.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "workflow_id"
+                ],
+                "properties": {
+                  "workflow_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-command-contract": {
+      "post": {
+        "operationId": "get-command-contract",
+        "summary": "Get Command Contract",
+        "description": "Return one mutating command contract from the canonical command catalog.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "command_id"
+                ],
+                "properties": {
+                  "command_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-api-publication-surface": {
+      "post": {
+        "operationId": "get-api-publication-surface",
+        "summary": "Get API Publication Surface",
+        "description": "Return one classified API or webhook surface from the private-first publication catalog.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "surface_id"
+                ],
+                "properties": {
+                  "surface_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/query-platform-context": {
+      "post": {
+        "operationId": "query-platform-context",
+        "summary": "Query Platform Context",
+        "description": "Query the private platform-context API for cited RAG matches grounded in ADRs, runbooks, receipts, and platform catalogs.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string"
+                  },
+                  "top_k": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "question",
+                    "matches"
+                  ],
+                  "properties": {
+                    "question": {
+                      "type": "string"
+                    },
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-maintenance-windows": {
+      "post": {
+        "operationId": "get-maintenance-windows",
+        "summary": "Get Maintenance Windows",
+        "description": "Return the currently active ADR 0080 maintenance windows from the private NATS KV bucket through the governed controller query surface.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "service_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "windows"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "windows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-serverclaw-skills": {
+      "post": {
+        "operationId": "list-serverclaw-skills",
+        "summary": "List ServerClaw Skills",
+        "description": "Resolve the repo-managed ServerClaw SKILL.md packs with bundled, shared, and workspace-local precedence plus mirrored third-party review state.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "workspace_id": {
+                    "type": "string"
+                  },
+                  "skill_id": {
+                    "type": "string"
+                  },
+                  "include_imported": {
+                    "type": "boolean"
+                  },
+                  "include_prompt_manifest": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "workspace_id",
+                    "default_workspace_id",
+                    "active_skill_count",
+                    "active_skills",
+                    "shadowed_skills",
+                    "imported_skills",
+                    "prompt_manifest"
+                  ],
+                  "properties": {
+                    "workspace_id": {
+                      "type": "string"
+                    },
+                    "default_workspace_id": {
+                      "type": "string"
+                    },
+                    "active_skill_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "active_skills": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "shadowed_skills": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "imported_skills": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "prompt_manifest": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/export-mcp-tools": {
+      "post": {
+        "operationId": "export-mcp-tools",
+        "summary": "Export MCP Tools",
+        "description": "Export the governed tool registry as MCP-compatible tool definitions.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "output_path": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "tools"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "tools": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/browser-run-session": {
+      "post": {
+        "operationId": "browser-run-session",
+        "summary": "Browser Run Session",
+        "description": "Execute one bounded Playwright browser session through the private ADR 0261 browser-runner runtime and return structured outputs plus artifact metadata.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string"
+                  },
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "selectors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "capture_screenshot": {
+                    "type": "boolean"
+                  },
+                  "capture_pdf": {
+                    "type": "boolean"
+                  },
+                  "timeout_seconds": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "wait_until": {
+                    "type": "string",
+                    "enum": [
+                      "load",
+                      "domcontentloaded",
+                      "networkidle",
+                      "commit"
+                    ]
+                  },
+                  "viewport_width": {
+                    "type": "integer",
+                    "minimum": 320
+                  },
+                  "viewport_height": {
+                    "type": "integer",
+                    "minimum": 200
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "run_id",
+                    "requested_url",
+                    "final_url",
+                    "title",
+                    "navigation_status",
+                    "text_excerpt",
+                    "selector_results",
+                    "artifacts",
+                    "action_log",
+                    "warnings"
+                  ],
+                  "properties": {
+                    "run_id": {
+                      "type": "string"
+                    },
+                    "requested_url": {
+                      "type": "string"
+                    },
+                    "final_url": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "navigation_status": {
+                      "type": "string"
+                    },
+                    "text_excerpt": {
+                      "type": "string"
+                    },
+                    "selector_results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "artifacts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "action_log": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/run-governed-command": {
+      "post": {
+        "operationId": "run-governed-command",
+        "summary": "Run Governed Command",
+        "description": "Evaluate approval requirements and optionally execute one named mutating command contract.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "command_id",
+                  "requester_class"
+                ],
+                "properties": {
+                  "command_id": {
+                    "type": "string"
+                  },
+                  "requester_class": {
+                    "type": "string",
+                    "enum": [
+                      "human_operator",
+                      "service_identity",
+                      "agent",
+                      "break_glass"
+                    ]
+                  },
+                  "approver_classes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "preflight_passed": {
+                    "type": "boolean"
+                  },
+                  "validation_passed": {
+                    "type": "boolean"
+                  },
+                  "receipt_planned": {
+                    "type": "boolean"
+                  },
+                  "self_approve": {
+                    "type": "boolean"
+                  },
+                  "break_glass": {
+                    "type": "boolean"
+                  },
+                  "parameters": {
+                    "type": "object"
+                  },
+                  "dry_run": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "approved",
+                    "executed",
+                    "command_id",
+                    "workflow_id",
+                    "reasons"
+                  ],
+                  "properties": {
+                    "approved": {
+                      "type": "boolean"
+                    },
+                    "executed": {
+                      "type": "boolean"
+                    },
+                    "command_id": {
+                      "type": "string"
+                    },
+                    "workflow_id": {
+                      "type": "string"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "entrypoint": {
+                      "type": "string"
+                    },
+                    "runtime_host": {
+                      "type": "string"
+                    },
+                    "unit_name": {
+                      "type": "string"
+                    },
+                    "stdout_log": {
+                      "type": "string"
+                    },
+                    "stderr_log": {
+                      "type": "string"
+                    },
+                    "receipt_path": {
+                      "type": "string"
+                    },
+                    "parameters": {
+                      "type": "object"
+                    },
+                    "returncode": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/check-command-approval": {
+      "post": {
+        "operationId": "check-command-approval",
+        "summary": "Check Command Approval",
+        "description": "Evaluate the approval gate for one mutating command contract without executing it.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "command_id",
+                  "requester_class"
+                ],
+                "properties": {
+                  "command_id": {
+                    "type": "string"
+                  },
+                  "requester_class": {
+                    "type": "string",
+                    "enum": [
+                      "human_operator",
+                      "service_identity",
+                      "agent",
+                      "break_glass"
+                    ]
+                  },
+                  "approver_classes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "preflight_passed": {
+                    "type": "boolean"
+                  },
+                  "validation_passed": {
+                    "type": "boolean"
+                  },
+                  "receipt_planned": {
+                    "type": "boolean"
+                  },
+                  "self_approve": {
+                    "type": "boolean"
+                  },
+                  "break_glass": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "approved",
+                    "command_id",
+                    "workflow_id",
+                    "reasons"
+                  ],
+                  "properties": {
+                    "approved": {
+                      "type": "boolean"
+                    },
+                    "command_id": {
+                      "type": "string"
+                    },
+                    "workflow_id": {
+                      "type": "string"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "entrypoint": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-containers": {
+      "post": {
+        "operationId": "list-containers",
+        "summary": "List Containers",
+        "description": "List all Docker containers across the managed Portainer endpoint. Returns name, image, state, and status for each container.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "include_stopped": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "containers"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "containers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-container-logs": {
+      "post": {
+        "operationId": "get-container-logs",
+        "summary": "Get Container Logs",
+        "description": "Retrieve recent stdout and stderr log lines for a named Docker container via Portainer. Accepts a container name, ID, or ID prefix.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "container"
+                ],
+                "properties": {
+                  "container": {
+                    "type": "string"
+                  },
+                  "tail": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "container",
+                    "tail",
+                    "logs"
+                  ],
+                  "properties": {
+                    "container": {
+                      "type": "string"
+                    },
+                    "tail": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "logs": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-nomad-jobs": {
+      "post": {
+        "operationId": "list-nomad-jobs",
+        "summary": "List Nomad Jobs",
+        "description": "List all jobs in the Nomad cluster with their current status, type, and allocation summary.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "namespace": {
+                    "type": "string",
+                    "description": "Filter jobs by namespace. Use '*' for all namespaces.",
+                    "default": "*"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "jobs"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "namespace": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-nomad-job-status": {
+      "post": {
+        "operationId": "get-nomad-job-status",
+        "summary": "Get Nomad Job Status",
+        "description": "Get detailed status of a specific Nomad job including allocations and deployment state.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "description": "The Nomad job ID to query."
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "description": "Namespace of the job.",
+                    "default": "default"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/dispatch-nomad-job": {
+      "post": {
+        "operationId": "dispatch-nomad-job",
+        "summary": "Dispatch Nomad Batch Job",
+        "description": "Dispatch a parameterized Nomad batch job with the given metadata. Only works for jobs with a parameterized stanza.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "description": "The parameterized Nomad job ID to dispatch."
+                  },
+                  "meta": {
+                    "type": "object",
+                    "description": "Key-value metadata to pass to the dispatched job."
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "description": "Namespace of the job.",
+                    "default": "default"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "dispatch_id",
+                    "eval_id"
+                  ],
+                  "properties": {
+                    "dispatch_id": {
+                      "type": "string"
+                    },
+                    "eval_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-plane-tasks": {
+      "post": {
+        "operationId": "list-plane-tasks",
+        "summary": "List Plane Tasks",
+        "description": "List issues in a Plane project with optional state filter. Defaults to the Agent Work (AW) project.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW). Use ADR for architecture decisions."
+                  },
+                  "state_name": {
+                    "type": "string",
+                    "description": "Filter tasks by state name (e.g. Todo, In Progress, Done)."
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "project": {
+                      "type": "string"
+                    },
+                    "tasks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "state_name": {
+                            "type": "string"
+                          },
+                          "priority": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-plane-task": {
+      "post": {
+        "operationId": "get-plane-task",
+        "summary": "Get Plane Task Details",
+        "description": "Get full details of a single Plane issue by its UUID.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issue_id": {
+                    "type": "string",
+                    "description": "UUID of the Plane issue to retrieve."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  }
+                },
+                "required": [
+                  "issue_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "state_name": {
+                      "type": "string"
+                    },
+                    "description_html": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/create-plane-task": {
+      "post": {
+        "operationId": "create-plane-task",
+        "summary": "Create Plane Task",
+        "description": "Create a new issue in a Plane project. Use this to track blockers, follow-up tasks, and operational findings.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Issue title."
+                  },
+                  "description_html": {
+                    "type": "string",
+                    "description": "HTML description body."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  },
+                  "state_name": {
+                    "type": "string",
+                    "description": "Initial state name (default: Todo)."
+                  },
+                  "label_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Label names to apply. Missing labels are auto-created."
+                  },
+                  "priority": {
+                    "type": "string",
+                    "description": "Priority: none, low, medium, high, urgent."
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "state_name": {
+                      "type": "string"
+                    },
+                    "project_identifier": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/update-plane-task": {
+      "post": {
+        "operationId": "update-plane-task",
+        "summary": "Update Plane Task",
+        "description": "Update the status, title, description, or priority of an existing Plane issue.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issue_id": {
+                    "type": "string",
+                    "description": "UUID of the Plane issue to update."
+                  },
+                  "state_name": {
+                    "type": "string",
+                    "description": "New state name (e.g. In Progress, Done, Blocked)."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "New issue title."
+                  },
+                  "description_html": {
+                    "type": "string",
+                    "description": "New HTML description body."
+                  },
+                  "priority": {
+                    "type": "string",
+                    "description": "New priority: none, low, medium, high, urgent."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  }
+                },
+                "required": [
+                  "issue_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/add-plane-comment": {
+      "post": {
+        "operationId": "add-plane-comment",
+        "summary": "Add Plane Comment",
+        "description": "Add a comment to an existing Plane issue. Use for milestone updates, status notes, or blockers.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issue_id": {
+                    "type": "string",
+                    "description": "UUID of the Plane issue to comment on."
+                  },
+                  "comment_html": {
+                    "type": "string",
+                    "description": "HTML comment body."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Plane project identifier (default: AW)."
+                  }
+                },
+                "required": [
+                  "issue_id",
+                  "comment_html"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-outline-collections": {
+      "post": {
+        "operationId": "list-outline-collections",
+        "summary": "List Outline Collections",
+        "description": "List all document collections in the Outline wiki (wiki.lv3.org).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "collections": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "documents_count": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/search-outline-documents": {
+      "post": {
+        "operationId": "search-outline-documents",
+        "summary": "Search Outline Documents",
+        "description": "Full-text search across Outline wiki documents. Optionally scope to a collection.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search query string."
+                  },
+                  "collection_id": {
+                    "type": "string",
+                    "description": "Optional collection UUID to scope the search."
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default: 25).",
+                    "default": 25
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "collection_id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "ranking": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-outline-document": {
+      "post": {
+        "operationId": "get-outline-document",
+        "summary": "Get Outline Document",
+        "description": "Retrieve the full content (title, markdown text, metadata) of an Outline wiki document by its UUID.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "document_id": {
+                    "type": "string",
+                    "description": "UUID of the document to retrieve."
+                  }
+                },
+                "required": [
+                  "document_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/create-outline-document": {
+      "post": {
+        "operationId": "create-outline-document",
+        "summary": "Create Outline Document",
+        "description": "Create a new document in an Outline wiki collection. Published immediately unless publish=false.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Document title."
+                  },
+                  "collection_id": {
+                    "type": "string",
+                    "description": "UUID of the collection to create the document in."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Document body in Markdown format."
+                  },
+                  "parent_document_id": {
+                    "type": "string",
+                    "description": "Optional UUID of a parent document (creates a nested document)."
+                  },
+                  "publish": {
+                    "type": "boolean",
+                    "description": "Publish immediately (default: true).",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "title",
+                  "collection_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/provision-outline-api-token": {
+      "post": {
+        "operationId": "provision-outline-api-token",
+        "summary": "Provision Outline API Token",
+        "description": "Provision a new Outline API token by inserting it into the Outline PostgreSQL database via the bootstrap SSH key. Writes the token to .local/outline/admin-auth.json so all Outline agent tools pick it up automatically. Call this when Outline tools return 401 errors or when .local/outline/admin-auth.json is missing. Uses the outline.automation@lv3.org service account.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Human-readable name for the API key in Outline (default: agent-automation)",
+                    "default": "agent-automation"
+                  },
+                  "dry_run": {
+                    "type": "boolean",
+                    "description": "If true, print what would happen without making changes",
+                    "default": false
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token_preview": {
+                      "type": "string",
+                      "description": "First 20 chars + last 4 chars of the provisioned token (never the full token)"
+                    },
+                    "auth_file": {
+                      "type": "string",
+                      "description": "Path to the written admin-auth.json file"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-outline-documents": {
+      "post": {
+        "operationId": "list-outline-documents",
+        "summary": "List Outline Documents",
+        "description": "List all documents in an Outline collection by collection ID. Returns id, title, url, parent_document_id, and updated_at for each document. Paginates automatically.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "collection_id": {
+                    "type": "string",
+                    "description": "UUID of the collection to list documents from"
+                  }
+                },
+                "required": [
+                  "collection_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "documents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/update-outline-document": {
+      "post": {
+        "operationId": "update-outline-document",
+        "summary": "Update Outline Document",
+        "description": "Update an existing Outline document by document ID. Accepts title and/or text. At least one must be provided. Marks the document as done and published.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "document_id": {
+                    "type": "string",
+                    "description": "UUID of the document to update"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "New title for the document (optional)"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "New Markdown content for the document (optional)"
+                  }
+                },
+                "required": [
+                  "document_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/upsert-outline-document": {
+      "post": {
+        "operationId": "upsert-outline-document",
+        "summary": "Upsert Outline Document",
+        "description": "Create or update an Outline document by title within a collection (idempotent). If a document with the given title already exists in the collection it is updated; otherwise a new document is created. Returns outcome: 'created' or 'updated'.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Document title (used as the unique key within the collection)"
+                  },
+                  "collection_id": {
+                    "type": "string",
+                    "description": "UUID of the collection"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Markdown content for the document"
+                  },
+                  "parent_document_id": {
+                    "type": "string",
+                    "description": "UUID of parent document for nesting (optional, create-only)"
+                  }
+                },
+                "required": [
+                  "title",
+                  "collection_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": [
+                        "created",
+                        "updated"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/delete-outline-document": {
+      "post": {
+        "operationId": "delete-outline-document",
+        "summary": "Delete Outline Document",
+        "description": "Permanently delete an Outline document by document ID. This action is irreversible. Requires human approval.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "document_id": {
+                    "type": "string",
+                    "description": "UUID of the document to delete"
+                  }
+                },
+                "required": [
+                  "document_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deleted": {
+                      "type": "boolean"
+                    },
+                    "document_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-LV3-Dify-Api-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
+}

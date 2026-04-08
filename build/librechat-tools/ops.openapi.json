@@ -1,0 +1,550 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ServerClaw Ops \u2014 Infrastructure Observability",
+    "version": "1.0.0",
+    "description": "Platform status, container listing, logs, deployment history, and maintenance windows."
+  },
+  "servers": [
+    {
+      "url": "http://10.10.10.92:8083"
+    }
+  ],
+  "paths": {
+    "/v1/dify-tools/get-platform-status": {
+      "post": {
+        "operationId": "get-platform-status",
+        "summary": "Get Platform Status",
+        "description": "Return the current repo-grounded platform status snapshot from versions/stack.yaml.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "repo_version",
+                    "platform_version",
+                    "observed_check_date",
+                    "os",
+                    "proxmox",
+                    "guest_count",
+                    "public_services",
+                    "latest_receipt_ids"
+                  ],
+                  "properties": {
+                    "repo_version": {
+                      "type": "string"
+                    },
+                    "platform_version": {
+                      "type": "string"
+                    },
+                    "observed_check_date": {
+                      "type": "string"
+                    },
+                    "os": {
+                      "type": "object"
+                    },
+                    "proxmox": {
+                      "type": "object"
+                    },
+                    "guest_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "public_services": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "latest_receipt_ids": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-containers": {
+      "post": {
+        "operationId": "list-containers",
+        "summary": "List Containers",
+        "description": "List all Docker containers across the managed Portainer endpoint. Returns name, image, state, and status for each container.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "include_stopped": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "containers"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "containers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-container-logs": {
+      "post": {
+        "operationId": "get-container-logs",
+        "summary": "Get Container Logs",
+        "description": "Retrieve recent stdout and stderr log lines for a named Docker container via Portainer. Accepts a container name, ID, or ID prefix.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "container"
+                ],
+                "properties": {
+                  "container": {
+                    "type": "string"
+                  },
+                  "tail": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "container",
+                    "tail",
+                    "logs"
+                  ],
+                  "properties": {
+                    "container": {
+                      "type": "string"
+                    },
+                    "tail": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "logs": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-recent-receipts": {
+      "post": {
+        "operationId": "list-recent-receipts",
+        "summary": "List Recent Receipts",
+        "description": "List the most recent structured live-apply receipts from the repository evidence set.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "receipts"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "receipts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-deployment-history": {
+      "post": {
+        "operationId": "get-deployment-history",
+        "summary": "Get Deployment History",
+        "description": "Return recent platform deployments filtered by service, environment, or date range.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "service_id": {
+                    "type": "string"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "enum": [
+                      "production",
+                      "staging"
+                    ]
+                  },
+                  "days": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "service_id",
+                    "environment",
+                    "days",
+                    "count",
+                    "warnings",
+                    "entries"
+                  ],
+                  "properties": {
+                    "service_id": {
+                      "type": "string"
+                    },
+                    "environment": {
+                      "type": "string"
+                    },
+                    "days": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "id",
+                          "change_type",
+                          "timestamp",
+                          "timestamp_precision",
+                          "date_label",
+                          "actor",
+                          "actor_class",
+                          "environment",
+                          "outcome",
+                          "service_ids",
+                          "service_names",
+                          "vm_names",
+                          "targets",
+                          "summary",
+                          "link_path",
+                          "source",
+                          "metadata"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "change_type": {
+                            "type": "string"
+                          },
+                          "timestamp": {
+                            "type": "string"
+                          },
+                          "timestamp_precision": {
+                            "type": "string"
+                          },
+                          "date_label": {
+                            "type": "string"
+                          },
+                          "actor": {
+                            "type": "string"
+                          },
+                          "actor_class": {
+                            "type": "string"
+                          },
+                          "environment": {
+                            "type": "string"
+                          },
+                          "outcome": {
+                            "type": "string"
+                          },
+                          "service_ids": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "service_names": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "vm_names": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "targets": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "link_path": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "workflow_id": {
+                            "type": "string"
+                          },
+                          "adr": {
+                            "type": "string"
+                          },
+                          "metadata": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-maintenance-windows": {
+      "post": {
+        "operationId": "get-maintenance-windows",
+        "summary": "Get Maintenance Windows",
+        "description": "Return the currently active ADR 0080 maintenance windows from the private NATS KV bucket through the governed controller query surface.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "service_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "count",
+                    "windows"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "windows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/query-platform-context": {
+      "post": {
+        "operationId": "query-platform-context",
+        "summary": "Query Platform Context",
+        "description": "Query the private platform-context API for cited RAG matches grounded in ADRs, runbooks, receipts, and platform catalogs.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string"
+                  },
+                  "top_k": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "question",
+                    "matches"
+                  ],
+                  "properties": {
+                    "question": {
+                      "type": "string"
+                    },
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-LV3-Dify-Api-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
+}

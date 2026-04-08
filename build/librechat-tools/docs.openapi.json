@@ -1,0 +1,499 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ServerClaw Docs \u2014 Knowledge Base",
+    "version": "1.0.0",
+    "description": "Search, read, and manage Outline wiki documents and collections."
+  },
+  "servers": [
+    {
+      "url": "http://10.10.10.92:8083"
+    }
+  ],
+  "paths": {
+    "/v1/dify-tools/list-outline-collections": {
+      "post": {
+        "operationId": "list-outline-collections",
+        "summary": "List Outline Collections",
+        "description": "List all document collections in the Outline wiki (wiki.lv3.org).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "collections": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "documents_count": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/list-outline-documents": {
+      "post": {
+        "operationId": "list-outline-documents",
+        "summary": "List Outline Documents",
+        "description": "List all documents in an Outline collection by collection ID. Returns id, title, url, parent_document_id, and updated_at for each document. Paginates automatically.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "collection_id": {
+                    "type": "string",
+                    "description": "UUID of the collection to list documents from"
+                  }
+                },
+                "required": [
+                  "collection_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "documents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/search-outline-documents": {
+      "post": {
+        "operationId": "search-outline-documents",
+        "summary": "Search Outline Documents",
+        "description": "Full-text search across Outline wiki documents. Optionally scope to a collection.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search query string."
+                  },
+                  "collection_id": {
+                    "type": "string",
+                    "description": "Optional collection UUID to scope the search."
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default: 25).",
+                    "default": 25
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "collection_id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "ranking": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/get-outline-document": {
+      "post": {
+        "operationId": "get-outline-document",
+        "summary": "Get Outline Document",
+        "description": "Retrieve the full content (title, markdown text, metadata) of an Outline wiki document by its UUID.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "document_id": {
+                    "type": "string",
+                    "description": "UUID of the document to retrieve."
+                  }
+                },
+                "required": [
+                  "document_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/create-outline-document": {
+      "post": {
+        "operationId": "create-outline-document",
+        "summary": "Create Outline Document",
+        "description": "Create a new document in an Outline wiki collection. Published immediately unless publish=false.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Document title."
+                  },
+                  "collection_id": {
+                    "type": "string",
+                    "description": "UUID of the collection to create the document in."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Document body in Markdown format."
+                  },
+                  "parent_document_id": {
+                    "type": "string",
+                    "description": "Optional UUID of a parent document (creates a nested document)."
+                  },
+                  "publish": {
+                    "type": "boolean",
+                    "description": "Publish immediately (default: true).",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "title",
+                  "collection_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/update-outline-document": {
+      "post": {
+        "operationId": "update-outline-document",
+        "summary": "Update Outline Document",
+        "description": "Update an existing Outline document by document ID. Accepts title and/or text. At least one must be provided. Marks the document as done and published.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "document_id": {
+                    "type": "string",
+                    "description": "UUID of the document to update"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "New title for the document (optional)"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "New Markdown content for the document (optional)"
+                  }
+                },
+                "required": [
+                  "document_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/upsert-outline-document": {
+      "post": {
+        "operationId": "upsert-outline-document",
+        "summary": "Upsert Outline Document",
+        "description": "Create or update an Outline document by title within a collection (idempotent). If a document with the given title already exists in the collection it is updated; otherwise a new document is created. Returns outcome: 'created' or 'updated'.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Document title (used as the unique key within the collection)"
+                  },
+                  "collection_id": {
+                    "type": "string",
+                    "description": "UUID of the collection"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Markdown content for the document"
+                  },
+                  "parent_document_id": {
+                    "type": "string",
+                    "description": "UUID of parent document for nesting (optional, create-only)"
+                  }
+                },
+                "required": [
+                  "title",
+                  "collection_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "collection_id": {
+                      "type": "string"
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": [
+                        "created",
+                        "updated"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-LV3-Dify-Api-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
+}
