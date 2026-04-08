@@ -74,7 +74,6 @@ live_apply_evidence:
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     security_posture_reporting: 2026-03-26-adr-0102-security-posture-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
-    semaphore: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     ops_portal: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     ollama: 2026-04-07-ollama-0.20.2-gemma4-e4b-upgrade-live-apply

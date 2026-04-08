@@ -66,6 +66,10 @@ related_adrs:
   - ADR 0273: Public endpoint admission control
   - ADR 0021: Public subdomain publication at NGINX edge
 
+doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+branch: claude/nervous-feistel
+worktree: nervous-feistel
+worktree_path: .claude/worktrees/nervous-feistel
 ownership_manifest:
   owned_surfaces:
   - id: certificate_validator_scripts
@@ -74,14 +78,6 @@ ownership_manifest:
     - playbooks/certificate-validation.yml
     - playbooks/fix-edge-certificate.yml
     mode: exclusive
-
-doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
-branch: claude/nervous-feistel
-worktree: nervous-feistel
-worktree_path: .claude/worktrees/nervous-feistel
-doc: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
-ownership_manifest:
-  owned_surfaces:
   - id: ws_0375_cert_validation_codification_workstream
     paths:
     - workstreams/active/ws-0375-certificate-validation-codification.yaml
