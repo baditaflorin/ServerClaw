@@ -13,15 +13,10 @@ This script:
 This matches the exact schema that LibreChat's UI-based action creator uses,
 so agents appear with fully functional tool calling.
 
-Usage (from Ansible):
-    python3 scripts/bootstrap_librechat_agents.py \
-        --ssh-target root@10.10.10.70 \
-        --ssh-key .local/ssh/bootstrap.id_ed25519 \
-        --ssh-proxy root@10.10.10.1 \
-        --admin-email ops@lv3.org \
-        --system-prompt-file config/serverclaw/system-prompt.md \
-        --specs-dir build/librechat-tools \
-        --gateway-base-url http://10.10.10.92:8083
+All connection details, paths, and addresses are passed as CLI arguments
+by the Ansible task in librechat_runtime/tasks/main.yml. This script has
+NO hardcoded IPs or paths — the Ansible role defaults are the single
+source of truth.
 
 Idempotent: updates agents and actions that already exist.
 """
@@ -334,40 +329,33 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
+    # All values supplied by the Ansible task — no hardcoded defaults for
+    # IPs, paths, or credentials.  The role defaults in
+    # librechat_runtime/defaults/main.yml are the single source of truth.
     parser.add_argument(
-        "--ssh-target", required=True, help="SSH target (e.g., root@10.10.10.70)"
+        "--ssh-target", required=True, help="SSH target, e.g. root@<host>"
     )
-    parser.add_argument("--ssh-key", default="", help="SSH private key path")
+    parser.add_argument("--ssh-key", required=True, help="SSH private key path")
     parser.add_argument(
-        "--ssh-proxy", default="", help="SSH proxy jump (e.g., root@10.10.10.1)"
-    )
-    parser.add_argument(
-        "--admin-email", default="ops@lv3.org", help="Admin email in LibreChat"
-    )
-    parser.add_argument(
-        "--system-prompt-file",
-        default="config/serverclaw/system-prompt.md",
-        help="System prompt file",
+        "--ssh-proxy", default="", help="SSH proxy jump host"
     )
     parser.add_argument(
-        "--specs-dir",
-        default="build/librechat-tools",
-        help="Directory with tool pack OpenAPI spec files",
+        "--admin-email", required=True, help="Admin email in LibreChat"
     )
     parser.add_argument(
-        "--gateway-base-url",
-        default="http://10.10.10.92:8083",
-        help="API gateway base URL for tool calls",
+        "--system-prompt-file", required=True, help="System prompt markdown file"
     )
     parser.add_argument(
-        "--tools-api-key-file",
-        default="",
-        help="Path to tools API key file for authenticating tool calls",
+        "--specs-dir", required=True, help="Directory with tool pack OpenAPI spec files"
     )
     parser.add_argument(
-        "--mongo-container",
-        default="librechat-mongodb",
-        help="MongoDB container name",
+        "--gateway-base-url", required=True, help="API gateway base URL for tool calls"
+    )
+    parser.add_argument(
+        "--tools-api-key-file", required=True, help="Path to tools API key file"
+    )
+    parser.add_argument(
+        "--mongo-container", required=True, help="MongoDB container name"
     )
     parser.add_argument(
         "--dry-run",
