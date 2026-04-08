@@ -278,7 +278,7 @@
 
 - name: Read the system prompt source file
   ansible.builtin.set_fact:
-    librechat_system_prompt_content: "{{ lookup('file', librechat_system_prompt_src) }}"
+    librechat_system_prompt_content: "{{ lookup('file', librechat_system_prompt_src_absolute) }}"
 
 - name: Deploy the system prompt preset file
   ansible.builtin.copy:
