@@ -1,0 +1,26 @@
+{
+  "name": "lv3-ui-tests",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Storybook component stories, Playwright browser tests, and axe-core accessibility checks for the LV3 Ops Portal (ADR 0243).",
+  "scripts": {
+    "storybook": "storybook dev --port 6006",
+    "build-storybook": "storybook build --output-dir storybook-static",
+    "test": "playwright test",
+    "test:a11y": "playwright test playwright/accessibility.spec.ts",
+    "test:portal": "playwright test playwright/portal.spec.ts",
+    "test:ci": "playwright test --reporter=html",
+    "storybook:a11y": "npx axe storybook-static --stdout"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.44.0",
+    "@storybook/addon-a11y": "^8.1.3",
+    "@storybook/addon-essentials": "^8.1.3",
+    "@storybook/html": "^8.1.3",
+    "@storybook/html-vite": "^8.1.3",
+    "axe-core": "^4.9.1",
+    "storybook": "^8.1.3",
+    "vite": "^5.2.11"
+  }
+}

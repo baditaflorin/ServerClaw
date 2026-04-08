@@ -1,0 +1,97 @@
+name: ui-tests
+
+on:
+  push:
+    branches:
+      - main
+      - "claude/**"
+      - "codex/**"
+    paths:
+      - "scripts/ops_portal/**"
+      - "ui-tests/**"
+  pull_request:
+    paths:
+      - "scripts/ops_portal/**"
+      - "ui-tests/**"
+
+jobs:
+  storybook-build:
+    name: Build Storybook
+    runs-on: self-hosted
+    container:
+      image: node:20-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: ui-tests
+        run: npm ci
+
+      - name: Build Storybook
+        working-directory: ui-tests
+        run: npm run build-storybook
+
+      - name: Upload Storybook artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: ui-tests/storybook-static/
+          retention-days: 7
+
+  playwright-tests:
+    name: Playwright + axe-core (${{ matrix.browser }})
+    runs-on: self-hosted
+    needs: []
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    container:
+      image: mcr.microsoft.com/playwright:v1.44.0-jammy
+    services:
+      portal:
+        image: registry.lv3.org/ops-portal/app:latest
+        env:
+          OPS_PORTAL_SESSION_SECRET: ci-test-secret
+          GATEWAY_URL: http://mock-gateway:8080
+        ports:
+          - "8000:8000"
+        options: >-
+          --health-cmd "curl -f http://localhost:8000/health || exit 1"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install test dependencies
+        working-directory: ui-tests
+        run: npm ci
+
+      - name: Run portal tests (${{ matrix.browser }})
+        working-directory: ui-tests
+        env:
+          PORTAL_URL: http://portal:8000
+        run: |
+          npx playwright test playwright/portal.spec.ts \
+            --project=${{ matrix.browser }} \
+            --reporter=github
+
+      - name: Run accessibility tests (${{ matrix.browser }})
+        working-directory: ui-tests
+        env:
+          PORTAL_URL: http://portal:8000
+        run: |
+          npx playwright test playwright/accessibility.spec.ts \
+            --project=${{ matrix.browser }} \
+            --reporter=github
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: ui-tests/playwright-report/
+          retention-days: 14

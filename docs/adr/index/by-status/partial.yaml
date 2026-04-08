@@ -10,26 +10,8 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 2
+total_adrs: 1
 adrs:
-  - adr: '0243'
-    title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-28'
-    concern: identity
-    keywords:
-      - component
-      - stories
-      - accessibility
-      - ui
-      - contracts
-      - storybook
-      - playwright
-      - axe-core
-    summary: We will use Storybook for component stories and docs, Playwright for
-    filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
-    path: docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted

@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 332
+total_adrs: 333
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -3843,6 +3843,26 @@ adrs:
     implemented_in_repo_version: 0.177.58
     implemented_in_platform_version: 0.130.43
     implemented_on: '2026-03-28'
+  - adr: '0243'
+    title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: identity
+    keywords:
+      - component
+      - stories
+      - accessibility
+      - ui
+      - contracts
+      - storybook
+      - playwright
+      - axe-core
+    summary: We will use Storybook for component stories and docs, Playwright for
+    filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+    path: docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+    implemented_in_repo_version: 0.178.49
+    implemented_on: '2026-04-08'
   - adr: '0244'
     title: Runtime Assurance Matrix Per Service And Environment
     status: Accepted
