@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-08T14:03:17Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "verify",
+  "commit": "65f1cddca6bc8d70d1d643f358e914fa79ea98db",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "nftables uses dash for ranges, Proxmox uses colon; added Jinja2 replace filter",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "template filter fix only - replace colon with dash in port range rendering"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "docs/adr/0380-neko-for-operator-remote-browser-access.md"
+  }
+}

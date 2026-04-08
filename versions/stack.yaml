@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.178.37
-platform_version: 0.131.3
+platform_version: 0.131.4
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -75,7 +75,7 @@ live_apply_evidence:
     security_posture_reporting: 2026-03-26-adr-0102-security-posture-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
-    ops_portal: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
+    ops_portal: 2026-04-08-adr-0224-self-service-repo-intake-gui-api-live-apply
     ollama: 2026-04-07-ollama-0.20.2-gemma4-e4b-upgrade-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z

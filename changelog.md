@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0224 self-service repo intake GUI + JSON API deployed to ops.lv3.org; ADR 0307 platform workbench surface catalog published; ADR 0243 Storybook/Playwright/axe-core UI testing framework added; ops-portal role fixed for derive_service_defaults env_file directory creation
 - LibreChat Agents Phase 3: MongoDB-based agent bootstrap script seeds 4 ServerClaw agents (Ops/Tasks/Docs/Admin) idempotently via SSH+mongosh; Ansible task auto-bootstraps agents on convergence with zero manual setup; gate bypass catalog extended with gate_timeout, schema_migration_in_progress, network_partition reason codes
 - LibreChat Agents Phase 2: enabled agents endpoint with tool calling via Actions; 32 platform tools split into 4 packs (ops/tasks/docs/admin) with OpenAPI specs; tools API key deployed for authenticated calls to API gateway
 - LiteLLM + LibreChat Phase 1 complete: LiteLLM virtual keys bootstrapped for 5 consumers; LibreChat system prompt injection working via modelSpecs with label field fix; GPT-5.4 family added; One API decommissioned; disk resized 160→256GB on docker-runtime-lv3
@@ -50,10 +51,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.63 release notes](docs/release-notes/0.178.63.md)
+- [0.178.64 release notes](docs/release-notes/0.178.64.md)
 
 ## Previous Releases
 
+- [0.178.63 release notes](docs/release-notes/0.178.63.md)
 - [0.178.62 release notes](docs/release-notes/0.178.62.md)
 - [0.178.61 release notes](docs/release-notes/0.178.61.md)
 - [0.178.60 release notes](docs/release-notes/0.178.60.md)
@@ -65,9 +67,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.54 release notes](docs/release-notes/0.178.54.md)
 - [0.178.53 release notes](docs/release-notes/0.178.53.md)
 - [0.178.52 release notes](docs/release-notes/0.178.52.md)
-- [0.178.51 release notes](docs/release-notes/0.178.51.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (399 releases)](docs/release-notes/index/2026.md)
+- [2026 (400 releases)](docs/release-notes/index/2026.md)
