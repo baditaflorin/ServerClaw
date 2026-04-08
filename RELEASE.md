@@ -1,8 +1,9 @@
-# Release 0.178.62
+# Release 0.178.63
 
 - Date: 2026-04-08
 
 ## Summary
+- LibreChat Agents Phase 3: MongoDB-based agent bootstrap script seeds 4 ServerClaw agents (Ops/Tasks/Docs/Admin) idempotently via SSH+mongosh; Ansible task auto-bootstraps agents on convergence with zero manual setup; gate bypass catalog extended with gate_timeout, schema_migration_in_progress, network_partition reason codes
 - LibreChat Agents Phase 2: enabled agents endpoint with tool calling via Actions; 32 platform tools split into 4 packs (ops/tasks/docs/admin) with OpenAPI specs; tools API key deployed for authenticated calls to API gateway
 - LiteLLM + LibreChat Phase 1 complete: LiteLLM virtual keys bootstrapped for 5 consumers; LibreChat system prompt injection working via modelSpecs with label field fix; GPT-5.4 family added; One API decommissioned; disk resized 160→256GB on docker-runtime-lv3
 - ws-0377 LibreChat OIDC SSO integration with Keycloak; adds OpenAI and Anthropic API endpoint support; enables session token management and dynamic model fetching for serverless LLM integration

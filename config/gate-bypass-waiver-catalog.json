@@ -41,6 +41,27 @@
       "allowed_bypasses": [
         "skip_remote_gate"
       ]
+    },
+    "gate_timeout": {
+      "summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+      "max_expiry_days": 1,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
+    },
+    "schema_migration_in_progress": {
+      "summary": "A structural schema change (new check, renamed lane, catalog format bump) is mid-flight and temporarily breaks the gate contract.",
+      "max_expiry_days": 3,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
+    },
+    "network_partition": {
+      "summary": "Internal network connectivity between controller and build server or registry is disrupted, preventing gate execution.",
+      "max_expiry_days": 2,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
     }
   }
 }

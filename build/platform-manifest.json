@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.62",
+  "repo_version": "0.178.63",
   "platform_version": "0.131.3",
-  "generated_at": "2026-04-08T14:01:28Z",
-  "next_refresh_at": "2026-04-08T15:01:28Z",
+  "generated_at": "2026-04-08T14:44:19Z",
+  "next_refresh_at": "2026-04-08T15:44:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6321,10 +6321,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.61",
+    "last_version": "0.178.62",
     "deployed_at": "2026-04-08",
-    "summary": "LibreChat Agents Phase 2: enabled agents endpoint with tool calling via Actions; 32 platform tools split into 4 packs (ops/tasks/docs/admin) with OpenAPI specs; tools API key deployed for authenticated calls to API gateway LiteLLM + LibreChat Phase 1 complete: LiteLLM virtual keys bootstrapped for 5 consumers; LibreChat system prompt injection working via modelSpecs with label field fix; GPT-5.4 family added; One API decommissioned; disk resized 160\u2192256GB on docker-runtime-lv3",
-    "release_notes_url": "docs/release-notes/0.178.62.md"
+    "summary": "LibreChat Agents Phase 3: MongoDB-based agent bootstrap script seeds 4 ServerClaw agents (Ops/Tasks/Docs/Admin) idempotently via SSH+mongosh; Ansible task auto-bootstraps agents on convergence with zero manual setup; gate bypass catalog extended with gate_timeout, schema_migration_in_progress, network_partition reason codes LibreChat Agents Phase 2: enabled agents endpoint with tool calling via Actions; 32 platform tools split into 4 packs (ops/tasks/docs/admin) with OpenAPI specs; tools API key deployed for authenticated calls to API gateway",
+    "release_notes_url": "docs/release-notes/0.178.63.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
