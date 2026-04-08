@@ -437,6 +437,7 @@
       - pyyaml
       - python
       - "{{ playbook_dir }}/../scripts/sync_adrs_to_plane.py"
+    chdir: "{{ playbook_dir }}/.."
   delegate_to: localhost
   become: false
   register: plane_sync
@@ -444,6 +445,7 @@
   delay: 30
   until: plane_sync.rc == 0
   changed_when: false
+  failed_when: false
 
 - name: Enforce Plane workspace members via Django ORM (plane_workspace_members)
   ansible.builtin.command:
