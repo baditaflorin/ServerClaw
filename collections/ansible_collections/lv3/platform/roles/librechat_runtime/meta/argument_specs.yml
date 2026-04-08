@@ -5,15 +5,11 @@ argument_specs:
     description: >-
       Converges the LibreChat chat surface on its target host with MongoDB and
       Meilisearch sidecars, OIDC auth, and system prompt presets.
-      Conventional variables (site_dir, data_dir, compose_file, env_file, image, etc.) are
-      automatically derived from the platform_service_registry via ADR 0373.
-      Only service-specific variables are documented here.
+      Conventional variables (site_dir, data_dir, secret_dir, compose_file, env_file, image, etc.)
+      are automatically derived from the platform_service_registry via ADR 0373.
+      Service-specific variables that depend on derived values (config_file, mongo_data_dir, etc.)
+      are defined in defaults/main.yml and resolved after derive_service_defaults runs.
     options:
-      librechat_config_file:
-        type: path
-        required: true
-        description:
-          - LibreChat YAML config file path on the guest.
       librechat_container_port:
         type: int
         required: true
