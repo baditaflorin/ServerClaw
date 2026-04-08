@@ -42,7 +42,7 @@ AGENT_PACKS = [
         "name": "ServerClaw Ops",
         "description": "Infrastructure observability — platform status, containers, logs, deployments, maintenance windows.",
         "specialty": "You specialize in infrastructure observability — checking platform status, listing containers, reading logs, and reviewing deployment history. You have tools that let you check real system state.",
-        "model": "claude-sonnet-4-6-20250725",
+        "model": "claude-sonnet-4-20250514",
         "provider": "anthropic",
         "tool_pack": "ops",
         "conversation_starters": [
@@ -57,7 +57,7 @@ AGENT_PACKS = [
         "name": "ServerClaw Tasks",
         "description": "Project management — create, view, update Plane tasks and comments.",
         "specialty": "You specialize in project management using Plane. You can list, create, update tasks and add comments. You have tools to interact with the Plane API directly.",
-        "model": "claude-sonnet-4-6-20250725",
+        "model": "claude-sonnet-4-20250514",
         "provider": "anthropic",
         "tool_pack": "tasks",
         "conversation_starters": [
@@ -71,7 +71,7 @@ AGENT_PACKS = [
         "name": "ServerClaw Docs",
         "description": "Knowledge base — search, read, and manage Outline wiki documents and collections.",
         "specialty": "You specialize in knowledge management using Outline wiki. You can search, read, create, and update documents and collections. You have tools for direct wiki API access.",
-        "model": "claude-sonnet-4-6-20250725",
+        "model": "claude-sonnet-4-20250514",
         "provider": "anthropic",
         "tool_pack": "docs",
         "conversation_starters": [
@@ -85,7 +85,7 @@ AGENT_PACKS = [
         "name": "ServerClaw Admin",
         "description": "Governed operations — execute commands, manage Nomad jobs, approval workflows. Elevated access required.",
         "specialty": "You specialize in governed operations and platform administration. You can execute governed commands, manage Nomad jobs, and check approval workflows. You have tools with direct API access.",
-        "model": "claude-sonnet-4-6-20250725",
+        "model": "claude-sonnet-4-20250514",
         "provider": "anthropic",
         "tool_pack": "admin",
         "conversation_starters": [
@@ -146,11 +146,17 @@ def build_mongosh_script(
     # Compute encoded domain for tool name references
     encoded_domain = encode_domain(gateway_base_url)
     # Raw domain without protocol for Action.metadata.domain
+    # IMPORTANT: must be hostname only (no port), because LibreChat's
+    # validateActionDomain compares metadata.domain against
+    # new URL(specServerUrl).hostname, which strips the port.
     raw_domain = gateway_base_url
     for prefix in ("https://", "http://"):
         if raw_domain.startswith(prefix):
             raw_domain = raw_domain[len(prefix) :]
             break
+    # Strip port — LibreChat's URL parser removes it during validation
+    if ":" in raw_domain:
+        raw_domain = raw_domain.rsplit(":", 1)[0]
 
     # Build actions and agents JS
     actions_js_parts = []
