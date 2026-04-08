@@ -325,6 +325,65 @@
   become: false
   no_log: true
 
+- name: Diagnostic — check Plane container status
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plane_compose_file }}"
+      - ps
+  args:
+    chdir: "{{ plane_site_dir }}"
+  register: plane_diag_ps
+  changed_when: false
+
+- name: Show Plane container status
+  ansible.builtin.debug:
+    var: plane_diag_ps.stdout_lines
+
+- name: Diagnostic — check Plane API container logs
+  ansible.builtin.command:
+    argv:
+      - docker
+      - logs
+      - "{{ plane_api_container_name }}"
+      - --tail
+      - "50"
+  register: plane_diag_api_logs
+  changed_when: false
+  failed_when: false
+
+- name: Show Plane API logs
+  ansible.builtin.debug:
+    var: plane_diag_api_logs.stdout_lines
+
+- name: Show Plane API stderr
+  ansible.builtin.debug:
+    var: plane_diag_api_logs.stderr_lines
+  when: plane_diag_api_logs.stderr_lines | default([]) | length > 0
+
+- name: Diagnostic — check Plane migrator logs
+  ansible.builtin.command:
+    argv:
+      - docker
+      - logs
+      - "{{ plane_migrator_container_name }}"
+      - --tail
+      - "30"
+  register: plane_diag_migrator_logs
+  changed_when: false
+  failed_when: false
+
+- name: Show Plane migrator logs
+  ansible.builtin.debug:
+    var: plane_diag_migrator_logs.stdout_lines
+
+- name: Show Plane migrator stderr
+  ansible.builtin.debug:
+    var: plane_diag_migrator_logs.stderr_lines
+  when: plane_diag_migrator_logs.stderr_lines | default([]) | length > 0
+
 - name: Wait for the controller-facing Plane API to answer
   ansible.builtin.uri:
     url: "{{ plane_controller_url }}{{ plane_healthcheck_path }}"
