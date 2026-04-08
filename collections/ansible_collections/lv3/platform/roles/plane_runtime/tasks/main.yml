@@ -437,12 +437,6 @@
       - pyyaml
       - python
       - "{{ playbook_dir }}/../scripts/sync_adrs_to_plane.py"
-      - --auth-file
-      - "{{ plane_admin_auth_local_file }}"
-      - --adr-dir
-      - "{{ plane_sync_adr_dir }}"
-      - --summary-output
-      - "{{ plane_sync_summary_local_file }}"
   delegate_to: localhost
   become: false
   register: plane_sync
