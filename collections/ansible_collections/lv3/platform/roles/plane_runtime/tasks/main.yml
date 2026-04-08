@@ -237,10 +237,6 @@
     owner: root
     group: root
     mode: "0644"
-  vars:
-    ansible_search_path:
-      - "{{ role_path }}/../common/templates"
-      - "{{ role_path }}/templates"
   register: plane_compose_render
 
 - name: Check if Plane stack is already running
