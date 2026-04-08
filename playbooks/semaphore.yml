@@ -22,6 +22,8 @@
     - tier-2
     - automation
     - service-semaphore
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
 
   pre_tasks:
     - name: Run shared preflight checks
@@ -45,6 +47,8 @@
     - tier-2
     - automation
     - service-semaphore
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
 
   pre_tasks:
     - name: Run shared preflight checks
