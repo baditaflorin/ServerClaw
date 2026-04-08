@@ -15,11 +15,23 @@ endpoints:
       titleConvo: true
       titleModel: gemma4:e4b
 
+  openAI:
+    models:
+      default:
+        - gpt-4o
+        - gpt-4o-mini
+        - o3-mini
+      fetch: true
+    titleConvo: true
+    titleModel: gpt-4o-mini
+
   anthropic:
     models:
-      - claude-sonnet-4-20250514
-      - claude-haiku-4-5-20251001
-      - claude-opus-4-20250115
+      default:
+        - claude-sonnet-4-20250514
+        - claude-haiku-4-5-20251001
+        - claude-opus-4-20250115
+      fetch: true
     titleConvo: true
     titleModel: claude-sonnet-4-20250514
 

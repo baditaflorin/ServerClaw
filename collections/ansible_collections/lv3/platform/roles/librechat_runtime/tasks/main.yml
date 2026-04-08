@@ -58,6 +58,20 @@
   changed_when: "'changed' in librechat_jwt_gen.stdout"
   no_log: true
 
+- name: Generate the LibreChat JWT refresh secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ librechat_jwt_refresh_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ librechat_jwt_refresh_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_jwt_refresh_gen
+  changed_when: "'changed' in librechat_jwt_refresh_gen.stdout"
+  no_log: true
+
 - name: Generate the LibreChat credentials encryption key
   ansible.builtin.shell: |
     set -euo pipefail
@@ -86,21 +100,46 @@
   changed_when: "'changed' in librechat_creds_iv_gen.stdout"
   no_log: true
 
+- name: Generate the OIDC session secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ librechat_secret_dir }}/oidc-session-secret" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ librechat_secret_dir }}/oidc-session-secret"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: librechat_oidc_session_gen
+  changed_when: "'changed' in librechat_oidc_session_gen.stdout"
+  no_log: true
+  when: librechat_enable_oidc | bool
+
 - name: Read the LibreChat secrets
   ansible.builtin.slurp:
     src: "{{ item }}"
   loop:
     - "{{ librechat_jwt_secret_remote_file }}"
+    - "{{ librechat_jwt_refresh_secret_remote_file }}"
     - "{{ librechat_creds_key_remote_file }}"
     - "{{ librechat_creds_iv_remote_file }}"
   register: librechat_secrets_raw
   no_log: true
 
+- name: Read the OIDC session secret
+  ansible.builtin.slurp:
+    src: "{{ librechat_secret_dir }}/oidc-session-secret"
+  register: librechat_oidc_session_raw
+  no_log: true
+  when: librechat_enable_oidc | bool
+
 - name: Record the LibreChat runtime secrets
   ansible.builtin.set_fact:
     librechat_jwt_secret: "{{ librechat_secrets_raw.results[0].content | b64decode | trim }}"
-    librechat_creds_key: "{{ librechat_secrets_raw.results[1].content | b64decode | trim }}"
-    librechat_creds_iv: "{{ librechat_secrets_raw.results[2].content | b64decode | trim }}"
+    librechat_jwt_refresh_secret: "{{ librechat_secrets_raw.results[1].content | b64decode | trim }}"
+    librechat_creds_key: "{{ librechat_secrets_raw.results[2].content | b64decode | trim }}"
+    librechat_creds_iv: "{{ librechat_secrets_raw.results[3].content | b64decode | trim }}"
+    librechat_oidc_session_secret: "{{ librechat_oidc_session_raw.content | b64decode | trim if librechat_enable_oidc | bool else '' }}"
   no_log: true
 
 - name: Read the OIDC client secret
@@ -187,7 +226,7 @@
   no_log: true
   when: librechat_enable_openbao_agent | bool
 
-- name: Copy the system prompt preset file
+- name: Deploy the system prompt preset file
   ansible.builtin.copy:
     content: "You are ServerClaw, the LV3 platform assistant.\n"
     dest: "{{ librechat_system_prompt_file }}"
