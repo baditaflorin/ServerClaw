@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 46
+total_adrs: 40
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -63,23 +63,6 @@ adrs:
     implemented_in_repo_version: 0.8.0
     implemented_in_platform_version: 0.6.0
     implemented_on: '2026-03-21'
-  - adr: '0023'
-    title: Docker Runtime VM Baseline
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: vm-topology
-    keywords:
-      - docker
-      - runtime
-      - vm
-      - baseline
-    summary: We will manage the Docker runtime VM with a dedicated runtime baseline role and playbook.
-    filename: 0023-docker-runtime-vm-baseline.md
-    path: docs/adr/0023-docker-runtime-vm-baseline.md
-    implemented_in_repo_version: 0.25.0
-    implemented_in_platform_version: 0.17.0
-    implemented_on: '2026-03-22'
   - adr: '0033'
     title: Declarative Service Topology Catalog
     status: Accepted
@@ -212,22 +195,6 @@ adrs:
     filename: 0080-maintenance-window-and-change-suppression-protocol.md
     path: docs/adr/0080-maintenance-window-and-change-suppression-protocol.md
     implemented_in_repo_version: 0.86.0
-    implemented_on: '2026-03-23'
-  - adr: 0084
-    title: Packer VM Template Pipeline
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: vm-topology
-    keywords:
-      - packer
-      - vm
-      - template
-      - pipeline
-    summary: We will maintain a Packer VM Template Pipeline defined under packer/ and executed on the build server.
-    filename: 0084-packer-vm-template-pipeline.md
-    path: docs/adr/0084-packer-vm-template-pipeline.md
-    implemented_in_repo_version: 0.91.0
     implemented_on: '2026-03-23'
   - adr: 0085
     title: OpenTofu IaC for VM Lifecycle Management
@@ -370,23 +337,6 @@ adrs:
     path: docs/adr/0098-postgres-high-availability.md
     implemented_in_repo_version: 0.103.0
     implemented_on: '2026-03-23'
-  - adr: 0099
-    title: Automated Backup Restore Verification
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-23'
-    concern: storage
-    keywords:
-      - automated
-      - backup
-      - restore
-      - verification
-    summary: 'We will implement a weekly automated restore verification workflow that restores the three most critical VM
-      backups into ephemeral infrastructure fixtures (ADR '
-    filename: 0099-automated-backup-restore-verification.md
-    path: docs/adr/0099-automated-backup-restore-verification.md
-    implemented_in_repo_version: 0.99.0
-    implemented_on: '2026-03-23'
   - adr: '0102'
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
@@ -423,25 +373,6 @@ adrs:
     path: docs/adr/0103-data-classification-and-retention-policy.md
     implemented_in_repo_version: 0.102.0
     implemented_on: '2026-03-23'
-  - adr: '0106'
-    title: Ephemeral Environment Lifecycle and Teardown Policy
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-23'
-    concern: platform
-    keywords:
-      - ephemeral
-      - environment
-      - lifecycle
-      - teardown
-      - policy
-    summary: We will establish a formal ephemeral environment lifecycle policy with a defined VMID range, a maximum lifetime
-      enforced by an automated reaper, a mandatory own
-    filename: 0106-ephemeral-environment-lifecycle-policy.md
-    path: docs/adr/0106-ephemeral-environment-lifecycle-policy.md
-    implemented_in_repo_version: 0.97.0
-    implemented_in_platform_version: 0.130.20
-    implemented_on: '2026-03-26'
   - adr: '0107'
     title: Platform Extension Model for Adding New Services
     status: Accepted
@@ -579,24 +510,6 @@ adrs:
     implemented_in_repo_version: 0.110.0
     implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-26'
-  - adr: '0116'
-    title: Change Risk Scoring Without LLMs
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-24'
-    concern: platform
-    keywords:
-      - change
-      - risk
-      - scoring
-      - without
-      - llms
-    summary: 'We will implement a deterministic change risk scoring engine as a Python module at scripts/riskscorer/ that
-      computes a numeric risk score (0–100) and a derived '
-    filename: 0116-change-risk-scoring.md
-    path: docs/adr/0116-change-risk-scoring.md
-    implemented_in_repo_version: 0.112.0
-    implemented_on: '2026-03-24'
   - adr: 0118
     title: Replayable Failure Case Library
     status: Proposed
@@ -739,26 +652,6 @@ adrs:
     implemented_in_repo_version: 0.0.0
     implemented_in_platform_version: 0.0.0
     implemented_on: '2026-03-31'
-  - adr: 0329
-    title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-04-01'
-    concern: networking
-    keywords:
-      - docker
-      - runtime
-      - uptime
-      - automation
-      - safety
-      - shared
-      - bridge-chain
-      - checks
-      - must
-      - fail
-    summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
-    filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
-    path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
   - adr: '0346'
     title: Outline Programmatic Wiki API and Automation Hooks
     status: Accepted

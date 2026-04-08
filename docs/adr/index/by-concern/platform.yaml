@@ -454,7 +454,7 @@ adrs:
   - adr: '0106'
     title: Ephemeral Environment Lifecycle and Teardown Policy
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -557,7 +557,7 @@ adrs:
   - adr: '0116'
     title: Change Risk Scoring Without LLMs
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: platform
     keywords:

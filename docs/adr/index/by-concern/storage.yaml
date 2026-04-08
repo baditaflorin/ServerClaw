@@ -45,7 +45,7 @@ adrs:
   - adr: 0099
     title: Automated Backup Restore Verification
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: storage
     keywords:
@@ -58,6 +58,7 @@ adrs:
     filename: 0099-automated-backup-restore-verification.md
     path: docs/adr/0099-automated-backup-restore-verification.md
     implemented_in_repo_version: 0.99.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: '0271'
     title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy

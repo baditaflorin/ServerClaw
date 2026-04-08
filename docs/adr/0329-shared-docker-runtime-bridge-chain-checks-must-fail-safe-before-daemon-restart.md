@@ -1,10 +1,10 @@
 # ADR 0329: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
-- Implemented On: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: detected
+- Implemented In Platform Version: 0.130.20
+- Implemented On: 2026-04-01
 - Date: 2026-04-01
 - Tags: docker, runtime, uptime, automation, safety
 

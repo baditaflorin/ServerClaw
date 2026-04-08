@@ -656,7 +656,7 @@ adrs:
   - adr: 0329
     title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: networking
     keywords:
@@ -673,6 +673,8 @@ adrs:
     summary: Shared Docker bridge-chain preflight checks on a shared runtime pool must
     filename: 0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
     path: docs/adr/0329-shared-docker-runtime-bridge-chain-checks-must-fail-safe-before-daemon-restart.md
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-04-01'
   - adr: '0330'
     title: Public GitHub Readiness As A First-Class Repository Lifecycle
     status: Accepted

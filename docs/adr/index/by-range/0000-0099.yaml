@@ -384,7 +384,7 @@ adrs:
   - adr: '0023'
     title: Docker Runtime VM Baseline
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -1464,7 +1464,7 @@ adrs:
   - adr: 0084
     title: Packer VM Template Pipeline
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -1476,6 +1476,7 @@ adrs:
     filename: 0084-packer-vm-template-pipeline.md
     path: docs/adr/0084-packer-vm-template-pipeline.md
     implemented_in_repo_version: 0.91.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: 0085
     title: OpenTofu IaC for VM Lifecycle Management
@@ -1729,7 +1730,7 @@ adrs:
   - adr: 0099
     title: Automated Backup Restore Verification
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: storage
     keywords:
@@ -1742,4 +1743,5 @@ adrs:
     filename: 0099-automated-backup-restore-verification.md
     path: docs/adr/0099-automated-backup-restore-verification.md
     implemented_in_repo_version: 0.99.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
