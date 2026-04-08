@@ -104,6 +104,10 @@ librechat_openai_models:
 librechat_ollama_default_model: gemma4:e4b
 # Admin
 librechat_admin_email: ops@lv3.org
+librechat_admin_password_local_file: "{{ librechat_local_artifact_dir }}/admin-password.txt"
+# Bootstrap script and system prompt absolute path for delegate_to: localhost
+librechat_bootstrap_script: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/bootstrap_librechat_agents.py
+librechat_system_prompt_src_absolute: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw/system-prompt.md
 # Web search
 librechat_enable_web_search: true
 librechat_searxng_query_url: "http://host.docker.internal:8888/search?q=%s&format=json"
