@@ -92,6 +92,15 @@ def build_mongosh_script(admin_email: str, system_prompt: str) -> str:
     agents_js = []
     for pack in AGENT_PACKS:
         starters = json.dumps(pack["conversation_starters"])
+        # Build actions array with tool specs from /tools-openapi/
+        tool_pack_id = pack["id"].replace("agent_serverclaw_", "")  # e.g., "ops" from "agent_serverclaw_ops"
+        actions_js = json.dumps([
+            {
+                "name": f"{tool_pack_id}_tools",
+                "url": f"/tools-openapi/{tool_pack_id}.openapi.json",
+                "auth_required": False
+            }
+        ])
         agents_js.append(f"""  {{
     id: "{pack['id']}",
     author: userId,
@@ -100,7 +109,7 @@ def build_mongosh_script(admin_email: str, system_prompt: str) -> str:
     instructions: systemPrompt + "\\n\\n## Your Specialty\\n\\n{pack['specialty']}",
     model: "{pack['model']}",
     provider: "{pack['provider']}",
-    tools: [],
+    actions: {actions_js},
     conversation_starters: {starters},
     isCollaborative: true,
     createdAt: now,
@@ -125,15 +134,29 @@ var agents = [
 ];
 
 var inserted = 0;
+var updated = 0;
 var skipped = 0;
 agents.forEach(function(agent) {{
-  if (!db.agents.findOne({{id: agent.id}})) {{
+  var existing = db.agents.findOne({{id: agent.id}});
+  if (!existing) {{
     db.agents.insertOne(agent);
     inserted++;
     print("Creating " + agent.name);
   }} else {{
-    skipped++;
-    print("SKIP " + agent.name + " (already exists)");
+    // Update actions and instructions in case they changed
+    db.agents.updateOne(
+      {{id: agent.id}},
+      {{
+        $set: {{
+          actions: agent.actions,
+          instructions: agent.instructions,
+          conversation_starters: agent.conversation_starters,
+          updatedAt: now
+        }}
+      }}
+    );
+    updated++;
+    print("Updated " + agent.name);
   }}
 }});
 
@@ -141,7 +164,7 @@ agents.forEach(function(agent) {{
 db.roles.updateOne({{name: "ADMIN"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true}}}});
 db.roles.updateOne({{name: "USER"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true}}}});
 
-print("Done. Created " + inserted + ", skipped " + skipped + ".");
+print("Done. Created " + inserted + ", updated " + updated + ", skipped " + skipped + ".");
 """
 
 
