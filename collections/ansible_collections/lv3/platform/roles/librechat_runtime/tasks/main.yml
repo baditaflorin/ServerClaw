@@ -41,6 +41,10 @@
       mode: "0755"
     - path: "{{ librechat_meilisearch_data_dir }}"
       mode: "0755"
+    - path: "{{ librechat_data_dir }}/logs"
+      mode: "0777"
+    - path: "{{ librechat_data_dir }}/images"
+      mode: "0777"
     - path: "{{ librechat_env_file | dirname }}"
       mode: "0700"
 
