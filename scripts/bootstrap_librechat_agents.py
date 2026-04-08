@@ -181,9 +181,11 @@ def build_mongosh_script(
 
         starters = json.dumps(pack["conversation_starters"])
 
-        # Action document — LibreChat queries by assistant_id, NOT agent_id
+        # Action document — LibreChat queries by agent_id for agents endpoint,
+        # and by assistant_id for assistants endpoint. Set both for compatibility.
         actions_js_parts.append(f"""  {{
     action_id: "{action_id}",
+    agent_id: "{pack['id']}",
     assistant_id: "{pack['id']}",
     type: "action_prototype",
     metadata: {{
@@ -268,10 +270,15 @@ var actionDefs = [
 {actions_array}
 ];
 
-// Migrate legacy agent_id field to assistant_id (LibreChat queries by assistant_id)
+// Ensure both agent_id and assistant_id exist on all actions.
+// Agents endpoint queries by agent_id; assistants endpoint by assistant_id.
 db.actions.updateMany(
   {{agent_id: {{$exists: true}}, assistant_id: {{$exists: false}}}},
-  [{{$set: {{assistant_id: "$agent_id"}}}}, {{$unset: "agent_id"}}]
+  [{{$set: {{assistant_id: "$agent_id"}}}}]
+);
+db.actions.updateMany(
+  {{assistant_id: {{$exists: true}}, agent_id: {{$exists: false}}}},
+  [{{$set: {{agent_id: "$assistant_id"}}}}]
 );
 
 var actionsCreated = 0;
@@ -291,6 +298,7 @@ actionDefs.forEach(function(actionDef) {{
       {{action_id: actionDef.action_id}},
       {{$set: {{
         metadata: actionDef.metadata,
+        agent_id: actionDef.agent_id,
         assistant_id: actionDef.assistant_id,
         user: userId
       }}}}
