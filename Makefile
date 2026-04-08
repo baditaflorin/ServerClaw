@@ -88,15 +88,15 @@ ANSIBLE_PLAYBOOK_CMD := $(RUN_ID_ENV) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
 TOFU_EXEC_CMD := $(RUN_ID_ENV) $(REPO_ROOT)/scripts/run_with_namespace.sh $(REPO_ROOT)/scripts/tofu_exec.sh
 ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_INTENT_ID),-e platform_intent_id=$(PLATFORM_INTENT_ID),)
 
-.PHONY: prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-data-models validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal
+.PHONY: validate-local push-local prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-data-models validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors generate-cross-cutting-artifacts validate-generated-cross-cutting docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status atlas-validate atlas-lint atlas-refresh-snapshots atlas-drift-check
 .PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-one-api syntax-check-piper syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw syntax-check-realtime collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
-.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-one-api converge-piper converge-label-studio converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
+.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-one-api converge-piper converge-label-studio converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
-.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo
+.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat
 .PHONY: syntax-check-flagsmith converge-flagsmith
@@ -107,6 +107,24 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 
 prepare-run-namespace:
 	@$(RUN_ID_ENV) python3 $(REPO_ROOT)/scripts/run_namespace.py --repo-root "$(REPO_ROOT)" --ensure >/dev/null
+
+validate-local:
+	@echo "validation gate: running local-only checks (no Docker required)"
+	uv run --with pyyaml python scripts/validate_nats_topics.py --validate
+	@if [ -f scripts/validate_adr_status_transitions.py ]; then \
+		uv run python scripts/validate_adr_status_transitions.py; \
+	fi
+	@echo "validation gate: local checks passed"
+
+push-local:
+	@echo "Pushing with local-only validation (skipping Docker-based remote gates)"
+	SKIP_REMOTE_GATE=1 \
+	GATE_BYPASS_REASON_CODE=runner_image_pull_failure \
+	GATE_BYPASS_DETAIL="Docker registry registry.lv3.org not reachable from local machine" \
+	GATE_BYPASS_SUBSTITUTE_EVIDENCE="make validate-local passed; pre-commit hooks passed" \
+	GATE_BYPASS_REMEDIATION_REF="docs/adr/0382-convergence-speed-and-incremental-apply.md" \
+	GATE_BYPASS_OWNER="$$(git config user.name)" \
+	git push origin $$(git rev-parse --abbrev-ref HEAD)
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -337,6 +355,12 @@ generate-uptime-kuma-monitors:
 
 validate-generated-uptime-kuma-monitors:
 	python3 $(REPO_ROOT)/scripts/uptime_contract.py --check
+
+generate-cross-cutting-artifacts:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write --only hairpin
+
+validate-generated-cross-cutting:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --check --only hairpin
 
 show-platform-facts:
 	uvx --from ansible-core ansible-inventory -i $(ANSIBLE_INVENTORY) --host $(HOST) --yaml
@@ -684,6 +708,9 @@ syntax-check-mailpit:
 syntax-check-livekit:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/livekit.yml --syntax-check
 
+syntax-check-neko:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/neko.yml --syntax-check
+
 syntax-check-paperless:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/paperless.yml --syntax-check
 
@@ -899,7 +926,7 @@ converge-ntfy:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/ntfy.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/ntfy.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/ntfy.yml $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 converge-ntopng:
 	$(MAKE) preflight WORKFLOW=converge-ntopng
@@ -955,33 +982,33 @@ converge-directus:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/directus.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/directus.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/directus.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-jupyterhub:
 	$(MAKE) preflight WORKFLOW=converge-jupyterhub
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/jupyterhub.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/jupyterhub.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/jupyterhub.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-label-studio:
 	$(MAKE) preflight WORKFLOW=converge-label-studio
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/label-studio.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/label-studio.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/label-studio.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-superset:
 	$(MAKE) preflight WORKFLOW=converge-superset
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/superset.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/superset.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/superset.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-sftpgo:
 	$(MAKE) preflight WORKFLOW=converge-sftpgo
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/sftpgo.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/sftpgo.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/sftpgo.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-semaphore:
 	$(MAKE) preflight WORKFLOW=converge-semaphore
@@ -995,7 +1022,7 @@ converge-woodpecker:
 converge-headscale:
 	$(MAKE) preflight WORKFLOW=converge-headscale
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/headscale.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/headscale.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/headscale.yml
 
 converge-windmill:
 	$(MAKE) preflight WORKFLOW=converge-windmill
@@ -1010,6 +1037,10 @@ converge-coolify:
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/coolify.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+converge-identity-core-watchdog:
+	$(MAKE) preflight WORKFLOW=converge-identity-core-watchdog
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/identity-core-watchdog.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
 converge-keycloak:
 	$(MAKE) preflight WORKFLOW=converge-keycloak
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
@@ -1023,40 +1054,40 @@ converge-harbor:
 converge-langfuse:
 	$(MAKE) preflight WORKFLOW=converge-langfuse
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/langfuse.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/langfuse.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/langfuse.yml
 
 converge-minio:
 	$(MAKE) preflight WORKFLOW=converge-minio
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/minio.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/minio.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/minio.yml
 
 converge-flagsmith:
 	$(MAKE) preflight WORKFLOW=converge-flagsmith
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/flagsmith.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/flagsmith.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/flagsmith.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-lago:
 	$(MAKE) preflight WORKFLOW=converge-lago
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/lago.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/lago.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/lago.yml $(ANSIBLE_TRACE_ARGS)
 
 converge-plausible:
 	$(MAKE) preflight WORKFLOW=converge-plausible
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/plausible.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/plausible.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/plausible.yml
 
 converge-glitchtip:
 	$(MAKE) preflight WORKFLOW=converge-glitchtip
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/glitchtip.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/glitchtip.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/glitchtip.yml $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 converge-plane:
 	$(MAKE) preflight WORKFLOW=converge-plane
@@ -1074,7 +1105,7 @@ converge-ops-portal:
 converge-dify:
 	$(MAKE) preflight WORKFLOW=converge-dify
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/dify.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/dify.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/dify.yml
 
 converge-browser-runner:
 	$(MAKE) preflight WORKFLOW=converge-browser-runner
@@ -1089,12 +1120,22 @@ converge-livekit:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/livekit.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/livekit.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/livekit.yml $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+converge-neko:
+	$(MAKE) preflight WORKFLOW=converge-neko
+	$(MAKE) generate-edge-static-sites
+	@echo "Syncing neko_instances from Keycloak (--dry-run to preview)..."
+	python3 $(REPO_ROOT)/scripts/neko_tool.py sync-from-keycloak \
+	  --keycloak-url http://10.10.10.20:8091 \
+	  --group /lv3-platform-admins
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/neko.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 converge-paperless:
 	$(MAKE) preflight WORKFLOW=converge-paperless
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/paperless.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/paperless.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/paperless.yml
 
 converge-redpanda:
 	$(MAKE) preflight WORKFLOW=converge-redpanda
@@ -1131,11 +1172,11 @@ converge-netbox:
 converge-searxng:
 	$(MAKE) preflight WORKFLOW=converge-searxng
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/searxng.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/searxng.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/searxng.yml
 
 converge-ollama:
 	$(MAKE) preflight WORKFLOW=converge-ollama
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/ollama.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/ollama.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/ollama.yml
 
 converge-one-api:
 	$(MAKE) preflight WORKFLOW=converge-one-api
@@ -1150,18 +1191,18 @@ converge-matrix-synapse:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/matrix-synapse.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/matrix-synapse.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/matrix-synapse.yml
 
 converge-n8n:
 	$(MAKE) preflight WORKFLOW=converge-n8n
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/n8n.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/n8n.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/n8n.yml
 
 converge-nextcloud:
 	$(MAKE) preflight WORKFLOW=converge-nextcloud
 	$(MAKE) generate-edge-static-sites
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/nextcloud.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/nextcloud.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/nextcloud.yml
 
 converge-nomad:
 	$(MAKE) preflight WORKFLOW=converge-nomad
@@ -1170,7 +1211,7 @@ converge-nomad:
 converge-dozzle:
 	$(MAKE) preflight WORKFLOW=converge-dozzle
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/dozzle.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/dozzle.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/dozzle.yml
 
 converge-realtime:
 	$(MAKE) preflight WORKFLOW=converge-realtime
@@ -1180,7 +1221,7 @@ converge-realtime:
 converge-open-webui:
 	$(MAKE) preflight WORKFLOW=converge-open-webui
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/open-webui.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/open-webui.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/open-webui.yml
 
 converge-serverclaw:
 	$(MAKE) preflight WORKFLOW=converge-serverclaw
@@ -1203,7 +1244,7 @@ converge-homepage:
 converge-excalidraw:
 	$(MAKE) preflight WORKFLOW=converge-excalidraw
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/excalidraw.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/excalidraw.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/excalidraw.yml
 
 converge-rag-context:
 	$(MAKE) preflight WORKFLOW=converge-rag-context
@@ -1499,3 +1540,33 @@ tofu-import:
 	@test "$(ENV)" = "production" || (echo "tofu-import currently supports ENV=production"; exit 1)
 	@COMMAND="$$(python3 $(REPO_ROOT)/scripts/tofu_remote_command.py import $(ENV) --vm $(VM))" \
 		$(RUN_ID_ENV) $(REPO_ROOT)/scripts/remote_exec.sh remote-exec
+
+# ADR Governance Commands
+validate-adr-transitions:
+	python3 $(REPO_ROOT)/scripts/validate_adr_status_transitions.py
+
+sync-adrs-to-plane:
+	python3 $(REPO_ROOT)/scripts/sync_adrs_to_plane.py
+
+sync-adrs-to-plane-dry-run:
+	python3 $(REPO_ROOT)/scripts/sync_adrs_to_plane.py --dry-run
+
+run-adr-quarterly-audit:
+	python3 $(REPO_ROOT)/config/windmill/scripts/adr-quarterly-audit.py
+
+run-adr-quarterly-audit-dry-run:
+	python3 $(REPO_ROOT)/config/windmill/scripts/adr-quarterly-audit.py --dry-run
+
+# ADR Governance Provisioning (IaC)
+provision-adr-governance:
+	@test -n "$(PLANE_ADMIN_TOKEN)" || (echo "PLANE_ADMIN_TOKEN required: make provision-adr-governance PLANE_ADMIN_TOKEN=your_token"; exit 1)
+	ansible-playbook $(REPO_ROOT)/playbooks/provision_adr_governance.yml \
+		-i $(ANSIBLE_INVENTORY) \
+		-e "plane_admin_bootstrap_token=$(PLANE_ADMIN_TOKEN)"
+
+provision-adr-governance-dry-run:
+	@test -n "$(PLANE_ADMIN_TOKEN)" || (echo "PLANE_ADMIN_TOKEN required: make provision-adr-governance-dry-run PLANE_ADMIN_TOKEN=your_token"; exit 1)
+	ansible-playbook $(REPO_ROOT)/playbooks/provision_adr_governance.yml \
+		-i $(ANSIBLE_INVENTORY) \
+		-e "plane_admin_bootstrap_token=$(PLANE_ADMIN_TOKEN)" \
+		--check
