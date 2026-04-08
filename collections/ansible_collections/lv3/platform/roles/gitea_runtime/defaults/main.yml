@@ -22,23 +22,10 @@
 #   - ADR 0165: Requires metadata headers on managed playbook and role surfaces.
 #   - ADR 0233: Adds the release-bundle bootstrap contract.
 #   - ADR 0274: Moves Gitea LFS storage to the shared MinIO object layer.
-gitea_site_dir: /opt/gitea
-gitea_data_dir: "{{ gitea_site_dir }}/data"
-gitea_secret_dir: /etc/lv3/gitea
-gitea_compose_file: "{{ gitea_site_dir }}/docker-compose.yml"
-gitea_env_file: "{{ compose_runtime_secret_root }}/gitea/runtime.env"
-gitea_image: docker.io/gitea/gitea:latest
-gitea_local_artifact_dir: "{{ repo_shared_local_root }}/gitea"
-gitea_legacy_env_file: "{{ gitea_site_dir }}/gitea.env"
-gitea_container_name: gitea
 
-# OpenBao agent configuration (from ADR 0373)
-gitea_openbao_agent_dir: "{{ gitea_site_dir }}/openbao"
-gitea_openbao_agent_image: "{{ openbao_agent_image }}"
-gitea_openbao_agent_container_name: gitea-openbao-agent
-gitea_openbao_secret_path: services/gitea/runtime-env
-gitea_openbao_policy_name: lv3-service-gitea-runtime
-gitea_openbao_approle_name: gitea-runtime
+# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are DERIVED
+# from platform_service_registry via derive_service_defaults task. Do not redefine here.
 
 gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
 gitea_keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"

@@ -7,6 +7,11 @@
 ---
 # Purpose: Deploy Keycloak with repo-managed runtime secrets, realms, and client registrations.
 
+- name: Derive conventional service variables from platform_service_registry
+  ansible.builtin.import_tasks: ../common/tasks/derive_service_defaults.yml
+  vars:
+    common_derive_service_name: keycloak
+
 - name: Validate Keycloak runtime inputs
   ansible.builtin.assert:
     that:

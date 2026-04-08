@@ -31,6 +31,12 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
+
+- name: Derive conventional service variables from platform_service_registry
+  ansible.builtin.import_tasks: ../common/tasks/derive_service_defaults.yml
+  vars:
+    common_derive_service_name: woodpecker
+
 - name: Validate Woodpecker runtime inputs
   ansible.builtin.assert:
     that:

@@ -22,23 +22,9 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-06
 
-# Conventional variables derived from platform_service_registry (ADR 0373)
-# These follow the standard naming pattern for all services
-woodpecker_site_dir: /opt/woodpecker
-woodpecker_data_dir: /opt/woodpecker/data
-woodpecker_secret_dir: /etc/lv3/woodpecker
-woodpecker_compose_file: "{{ woodpecker_site_dir }}/docker-compose.yml"
-woodpecker_env_file: "{{ compose_runtime_secret_root }}/woodpecker/runtime.env"
-woodpecker_legacy_env_file: "{{ woodpecker_site_dir }}/woodpecker.env"
-woodpecker_http_port: "{{ woodpecker_service_topology.ports.internal }}"
-woodpecker_internal_base_url: "http://127.0.0.1:{{ woodpecker_http_port }}"
-woodpecker_local_artifact_dir: "{{ repo_shared_local_root }}/woodpecker"
-woodpecker_openbao_agent_dir: "{{ woodpecker_site_dir }}/openbao"
-woodpecker_openbao_agent_image: "{{ openbao_agent_image }}"
-woodpecker_openbao_agent_container_name: woodpecker-openbao-agent
-woodpecker_openbao_secret_path: services/woodpecker/runtime-env
-woodpecker_openbao_policy_name: lv3-service-woodpecker-runtime
-woodpecker_openbao_approle_name: woodpecker-runtime
+# NOTE: Conventional variables (site_dir, data_dir, secret_dir, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir) are derived from
+# platform_service_registry via derive_service_defaults task — ADR 0373.
 
 # Service-specific Woodpecker runtime defaults
 woodpecker_server_container_name: woodpecker-server

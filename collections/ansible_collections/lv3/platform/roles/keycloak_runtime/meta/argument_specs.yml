@@ -10,17 +10,17 @@
 argument_specs:
   main:
     short_description: Converge the Keycloak runtime, realm bootstrap, and brokered identities.
+    description: >-
+      Converges the Keycloak identity service on docker-runtime-lv3.
+      Conventional variables (site_dir, secret_dir, compose_file, env_file, image, etc.) are
+      automatically derived from the platform_service_registry via ADR 0373.
+      Only service-specific variables are documented here.
     options:
       keycloak_service_topology:
         type: dict
         required: true
         description:
           - Service topology entry for the Keycloak publication surface.
-      keycloak_image:
-        type: str
-        required: true
-        description:
-          - Container image reference for Keycloak.
       keycloak_realm_name:
         type: str
         required: true
@@ -31,21 +31,6 @@ argument_specs:
         required: true
         description:
           - Human-readable display name for the managed realm.
-      keycloak_site_dir:
-        type: path
-        required: true
-        description:
-          - Base directory for the Keycloak runtime stack.
-      keycloak_secret_dir:
-        type: path
-        required: true
-        description:
-          - Guest-local directory that stores Keycloak bootstrap secrets.
-      keycloak_compose_file:
-        type: path
-        required: true
-        description:
-          - Compose file path for the runtime stack.
       keycloak_compose_project_name:
         type: str
         required: true
@@ -56,11 +41,6 @@ argument_specs:
         required: true
         description:
           - Managed compose network name removed before forced Keycloak recovery replays.
-      keycloak_env_file:
-        type: path
-        required: true
-        description:
-          - Environment file rendered for Keycloak.
       keycloak_database_name:
         type: str
         required: true

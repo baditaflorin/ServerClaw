@@ -2,31 +2,12 @@
 argument_specs:
   main:
     short_description: Converge the private Gitea runtime, bootstrap admin access, and prepare CI artifacts.
+    description: >-
+      Converges the private Gitea service on docker-runtime-lv3.
+      Conventional variables (site_dir, data_dir, compose_file, env_file, image, etc.) are
+      automatically derived from the platform_service_registry via ADR 0373.
+      Only service-specific variables are documented here.
     options:
-      gitea_site_dir:
-        type: path
-        required: true
-      gitea_data_dir:
-        type: path
-        required: true
-      gitea_secret_dir:
-        type: path
-        required: true
-      gitea_compose_file:
-        type: path
-        required: true
-      gitea_env_file:
-        type: path
-        required: true
-      gitea_bootstrap_script:
-        type: path
-        required: true
-      gitea_image:
-        type: str
-        required: true
-      gitea_http_port:
-        type: int
-        required: true
       gitea_public_hostname:
         type: str
         required: true
@@ -121,8 +102,5 @@ argument_specs:
         type: path
         required: true
       gitea_webhook_secret_local_file:
-        type: path
-        required: true
-      gitea_local_artifact_dir:
         type: path
         required: true
