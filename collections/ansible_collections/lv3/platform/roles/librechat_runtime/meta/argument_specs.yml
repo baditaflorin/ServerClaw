@@ -2,47 +2,18 @@
 argument_specs:
   main:
     short_description: Converge the LibreChat runtime.
+    description: >-
+      Converges the LibreChat chat surface on its target host with MongoDB and
+      Meilisearch sidecars, OIDC auth, and system prompt presets.
+      Conventional variables (site_dir, data_dir, compose_file, env_file, image, etc.) are
+      automatically derived from the platform_service_registry via ADR 0373.
+      Only service-specific variables are documented here.
     options:
-      librechat_site_dir:
-        type: path
-        required: true
-        description:
-          - Base directory for the LibreChat compose stack.
-      librechat_secret_dir:
-        type: path
-        required: true
-        description:
-          - Guest-local directory that stores secret material.
-      librechat_compose_file:
-        type: path
-        required: true
-        description:
-          - Compose file path for the LibreChat runtime.
       librechat_config_file:
         type: path
         required: true
         description:
           - LibreChat YAML config file path on the guest.
-      librechat_env_file:
-        type: path
-        required: true
-        description:
-          - Runtime env file rendered for the LibreChat container.
-      librechat_image:
-        type: str
-        required: true
-        description:
-          - Container image reference for LibreChat.
-      librechat_container_name:
-        type: str
-        required: true
-        description:
-          - Docker container name for LibreChat.
-      librechat_internal_port:
-        type: int
-        required: true
-        description:
-          - Host port exposed by the LibreChat runtime.
       librechat_container_port:
         type: int
         required: true
