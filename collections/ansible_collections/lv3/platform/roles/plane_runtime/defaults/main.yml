@@ -120,7 +120,7 @@ plane_healthcheck_path: /api/instances/
 plane_workspace_members: []
 
 # Keycloak OIDC Integration (ADR 0353)
-plane_oidc_enabled: false
+plane_oidc_enabled: true
 plane_oidc_server_url: "https://sso.lv3.org"
 plane_oidc_realm: "lv3"
 plane_oidc_client_id: "lv3-plane-oidc"
