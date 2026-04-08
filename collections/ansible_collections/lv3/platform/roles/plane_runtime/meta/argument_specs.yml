@@ -39,28 +39,30 @@ argument_specs:
     options:
       plane_site_dir:
         type: path
-        required: true
+        required: false
+        default: /opt/plane
       plane_secret_dir:
         type: path
-        required: true
+        required: false
       plane_compose_file:
         type: path
-        required: true
+        required: false
       plane_env_file:
         type: path
-        required: true
+        required: false
       plane_internal_port:
         type: int
-        required: true
+        required: false
+        default: 8000
       plane_internal_base_url:
         type: str
-        required: true
+        required: false
       plane_controller_url:
         type: str
-        required: true
+        required: false
       plane_public_base_url:
         type: str
-        required: true
+        required: false
       plane_database_password_local_file:
         type: path
         required: true

@@ -61,6 +61,11 @@ plane_valkey_container_name: plane-valkey
 plane_rabbitmq_container_name: plane-rabbitmq
 plane_minio_container_name: plane-minio
 plane_local_artifact_dir: "{{ repo_shared_local_root }}/plane"
+plane_site_dir: /opt/plane
+plane_secret_dir: "{{ plane_site_dir }}/secrets"
+plane_compose_file: "{{ plane_site_dir }}/docker-compose.yml"
+plane_env_file: "{{ plane_site_dir }}/runtime.env"
+plane_internal_port: 8000
 plane_database_name: plane
 plane_database_user: plane_admin
 plane_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
