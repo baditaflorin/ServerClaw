@@ -60,6 +60,7 @@ plane_proxy_container_name: plane-proxy
 plane_valkey_container_name: plane-valkey
 plane_rabbitmq_container_name: plane-rabbitmq
 plane_minio_container_name: plane-minio
+plane_local_artifact_dir: "{{ repo_shared_local_root }}/plane"
 plane_database_name: plane
 plane_database_user: plane_admin
 plane_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
