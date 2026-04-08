@@ -11,7 +11,7 @@ flush ruleset
 {% if rule.protocol == 'vrrp' -%}
 ip protocol vrrp
 {%- else -%}
-{{ rule.protocol }} dport { {{ rule.ports | join(', ') }} }
+{{ rule.protocol }} dport { {{ rule.ports | map('string') | map('replace', ':', '-') | join(', ') }} }
 {%- endif %}
 {%- endmacro %}
 {% macro render_rule(rule) -%}
