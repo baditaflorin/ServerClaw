@@ -157,6 +157,39 @@
   no_log: true
   when: librechat_enable_oidc | bool
 
+- name: Deploy the Anthropic API key
+  ansible.builtin.copy:
+    src: "{{ librechat_anthropic_api_key_local_file }}"
+    dest: "{{ librechat_anthropic_api_key_remote_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Deploy the OpenAI API key
+  ansible.builtin.copy:
+    src: "{{ librechat_openai_api_key_local_file }}"
+    dest: "{{ librechat_openai_api_key_remote_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Read the API keys
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ librechat_anthropic_api_key_remote_file }}"
+    - "{{ librechat_openai_api_key_remote_file }}"
+  register: librechat_api_keys_raw
+  no_log: true
+
+- name: Record the API keys
+  ansible.builtin.set_fact:
+    librechat_anthropic_api_key: "{{ librechat_api_keys_raw.results[0].content | b64decode | trim }}"
+    librechat_openai_api_key: "{{ librechat_api_keys_raw.results[1].content | b64decode | trim }}"
+  no_log: true
+
 - name: Build the LibreChat runtime secret payload
   ansible.builtin.set_fact:
     librechat_runtime_secret_payload:
@@ -239,39 +272,6 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Deploy the Anthropic API key
-  ansible.builtin.copy:
-    src: "{{ librechat_anthropic_api_key_local_file }}"
-    dest: "{{ librechat_anthropic_api_key_remote_file }}"
-    owner: root
-    group: root
-    mode: "0600"
-  no_log: true
-
-- name: Deploy the OpenAI API key
-  ansible.builtin.copy:
-    src: "{{ librechat_openai_api_key_local_file }}"
-    dest: "{{ librechat_openai_api_key_remote_file }}"
-    owner: root
-    group: root
-    mode: "0600"
-  no_log: true
-
-- name: Read the API keys
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  loop:
-    - "{{ librechat_anthropic_api_key_remote_file }}"
-    - "{{ librechat_openai_api_key_remote_file }}"
-  register: librechat_api_keys_raw
-  no_log: true
-
-- name: Record the API keys
-  ansible.builtin.set_fact:
-    librechat_anthropic_api_key: "{{ librechat_api_keys_raw.results[0].content | b64decode | trim }}"
-    librechat_openai_api_key: "{{ librechat_api_keys_raw.results[1].content | b64decode | trim }}"
-  no_log: true
 
 - name: Render the LibreChat config file
   ansible.builtin.template:
