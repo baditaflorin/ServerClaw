@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 293
+total_adrs: 297
 adrs:
   - adr: '0011'
     title: Monitoring VM With Grafana And Proxmox Metrics
@@ -835,6 +835,24 @@ adrs:
     path: docs/adr/0079-playbook-decomposition-and-shared-execution-model.md
     implemented_in_repo_version: 0.77.0
     implemented_on: '2026-03-23'
+  - adr: 0080
+    title: Maintenance Window And Change Suppression Protocol
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - maintenance
+      - window
+      - change
+      - suppression
+      - protocol
+    summary: We will implement a maintenance window protocol based on a NATS KV flag and a governed open/close workflow.
+    filename: 0080-maintenance-window-and-change-suppression-protocol.md
+    path: docs/adr/0080-maintenance-window-and-change-suppression-protocol.md
+    implemented_in_repo_version: 0.86.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
   - adr: 0081
     title: Platform Changelog And Deployment History Portal
     status: Accepted
@@ -943,6 +961,41 @@ adrs:
     path: docs/adr/0087-repository-validation-gate.md
     implemented_in_repo_version: 0.93.0
     implemented_on: '2026-03-23'
+  - adr: 0088
+    title: Ephemeral Infrastructure Fixtures
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - ephemeral
+      - infrastructure
+      - fixtures
+    summary: We will implement ephemeral infrastructure fixtures — on-demand VMs provisioned from Packer templates, used for
+      tests, and destroyed automatically.
+    filename: 0088-ephemeral-infrastructure-fixtures.md
+    path: docs/adr/0088-ephemeral-infrastructure-fixtures.md
+    implemented_in_repo_version: 0.95.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
+  - adr: 0089
+    title: Build Artifact Cache and Layer Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - build
+      - artifact
+      - cache
+      - layer
+      - registry
+    summary: We will maintain a multi-layer build artifact cache on the build server, consisting of four components.
+    filename: 0089-build-artifact-cache.md
+    path: docs/adr/0089-build-artifact-cache.md
+    implemented_in_repo_version: 0.87.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
   - adr: 0090
     title: Unified Platform CLI (`lv3`)
     status: Accepted
@@ -996,6 +1049,25 @@ adrs:
     implemented_in_repo_version: 0.106.0
     implemented_in_platform_version: 0.130.3
     implemented_on: '2026-03-25'
+  - adr: 0098
+    title: Postgres High Availability and Automated Failover
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - postgres
+      - high
+      - availability
+      - automated
+      - failover
+    summary: We will provision a second PostgreSQL VM (postgres-replica-lv3, VMID 151) and implement Patroni-managed streaming
+      replication with automatic failover, keeping p
+    filename: 0098-postgres-high-availability.md
+    path: docs/adr/0098-postgres-high-availability.md
+    implemented_in_repo_version: 0.103.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
   - adr: 0099
     title: Automated Backup Restore Verification
     status: Accepted

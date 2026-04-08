@@ -296,7 +296,7 @@ adrs:
   - adr: 0080
     title: Maintenance Window And Change Suppression Protocol
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -309,6 +309,7 @@ adrs:
     filename: 0080-maintenance-window-and-change-suppression-protocol.md
     path: docs/adr/0080-maintenance-window-and-change-suppression-protocol.md
     implemented_in_repo_version: 0.86.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: 0083
     title: Docker-Based Check Runner on Build Server
@@ -331,7 +332,7 @@ adrs:
   - adr: 0088
     title: Ephemeral Infrastructure Fixtures
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -343,11 +344,12 @@ adrs:
     filename: 0088-ephemeral-infrastructure-fixtures.md
     path: docs/adr/0088-ephemeral-infrastructure-fixtures.md
     implemented_in_repo_version: 0.95.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: 0089
     title: Build Artifact Cache and Layer Registry
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -360,6 +362,7 @@ adrs:
     filename: 0089-build-artifact-cache.md
     path: docs/adr/0089-build-artifact-cache.md
     implemented_in_repo_version: 0.87.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: 0090
     title: Unified Platform CLI (`lv3`)
@@ -399,7 +402,7 @@ adrs:
   - adr: 0098
     title: Postgres High Availability and Automated Failover
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -413,6 +416,7 @@ adrs:
     filename: 0098-postgres-high-availability.md
     path: docs/adr/0098-postgres-high-availability.md
     implemented_in_repo_version: 0.103.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: '0103'
     title: Data Classification and Retention Policy

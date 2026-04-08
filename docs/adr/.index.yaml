@@ -14,8 +14,8 @@ adr_number_range:
   last: 0382
   next_available: 0383
 implementation_status_summary:
-  Implemented: 293
-  Partial: 40
+  Implemented: 297
+  Partial: 36
   Not Implemented: 32
   Deprecated: 5
   Accepted: 24
@@ -106,11 +106,11 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 293
+      count: 297
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 40
+      count: 36
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
