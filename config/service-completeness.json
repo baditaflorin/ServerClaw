@@ -325,6 +325,26 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "librechat": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/librechat.json",
+      "alert_rule_file": "config/alertmanager/rules/librechat.yml",
+      "suppressed_checks": {}
+    },
+    "litellm": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/litellm.json",
+      "alert_rule_file": "config/alertmanager/rules/litellm.yml",
+      "suppressed_checks": {}
+    },
     "livekit": {
       "service_type": "compose",
       "requires_subdomain": true,
