@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- LiteLLM + LibreChat Phase 1 complete: LiteLLM virtual keys bootstrapped for 5 consumers; LibreChat system prompt injection working via modelSpecs with label field fix; GPT-5.4 family added; One API decommissioned; disk resized 160→256GB on docker-runtime-lv3
 - ws-0377 LibreChat OIDC SSO integration with Keycloak; adds OpenAI and Anthropic API endpoint support; enables session token management and dynamic model fetching for serverless LLM integration
 - fix: docker_compose_v2 module in repowise_runtime (community.docker v4.0.0 removed docker_compose v1); Keycloak protocolMapper field name correction; Ansible user group variable in Plane secret tasks; missing Semaphore OpenBao compose_macros template; workstreams cleanup (move completed ADR 0346, 0254, 0375, and ops items to done)
 - adds ADR 0364 native build server gate execution — LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions
@@ -47,10 +48,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.60 release notes](docs/release-notes/0.178.60.md)
+- [0.178.61 release notes](docs/release-notes/0.178.61.md)
 
 ## Previous Releases
 
+- [0.178.60 release notes](docs/release-notes/0.178.60.md)
 - [0.178.59 release notes](docs/release-notes/0.178.59.md)
 - [0.178.58 release notes](docs/release-notes/0.178.58.md)
 - [0.178.57 release notes](docs/release-notes/0.178.57.md)
@@ -62,9 +64,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.51 release notes](docs/release-notes/0.178.51.md)
 - [0.178.50 release notes](docs/release-notes/0.178.50.md)
 - [0.178.49 release notes](docs/release-notes/0.178.49.md)
-- [0.178.48 release notes](docs/release-notes/0.178.48.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (396 releases)](docs/release-notes/index/2026.md)
+- [2026 (397 releases)](docs/release-notes/index/2026.md)
