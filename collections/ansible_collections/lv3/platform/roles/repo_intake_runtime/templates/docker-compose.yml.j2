@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  repo-intake:
+    image: {{ repo_intake_image }}
+    container_name: {{ repo_intake_container_name }}
+    restart: unless-stopped
+    ports:
+      - "{{ repo_intake_port }}:8096"
+    environment:
+      PORT: "8096"
+      SESSION_SECRET: "{{ repo_intake_session_secret }}"
+      REPO_INTAKE_STATIC_API_TOKEN: "{{ repo_intake_static_api_token }}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

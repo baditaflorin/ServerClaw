@@ -1033,6 +1033,48 @@ platform_service_registry:
       extra_fqdns:
         - ops.staging.lv3.org
 
+  repo_intake:
+    image_catalog_key: ""            # repo-intake is a bespoke container built locally
+    internal_port: 8096
+    host_group: docker-runtime-lv3
+    site_dir: /opt/repo-intake
+    container_name: repo-intake
+    needs_openbao: false
+    dns:
+      records:
+        - fqdn: repo-intake.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - repo-intake.lv3.org
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: repo-intake-oauth
+      client_secret_local_file: .local/keycloak/repo-intake-client-secret.txt
+      redirect_uris:
+        - https://repo-intake.lv3.org/oauth2/callback
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
+    proxy:
+      enabled: true
+      upstream_port: 8096
+      upstream_host: docker-runtime-lv3
+      public_fqdn: repo-intake.lv3.org
+      auth_proxy: true              # gated behind shared oauth2-proxy
+      unauthenticated_prefix_paths:
+        - /static/                   # CSS, JS, and static assets bypass OAuth2
+      extra_fqdns:
+        - repo-intake.staging.lv3.org
+
   outline:
     image_catalog_key: outline_runtime
     internal_port: 3006
@@ -1516,3 +1558,127 @@ platform_service_registry:
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
+
+  # ---------------------------------------------------------------------------
+  # Infrastructure & Foundation Services (Added for ADR 0373 completion)
+  # ---------------------------------------------------------------------------
+
+  alertmanager:
+    image_catalog_key: alertmanager_runtime
+    internal_port: 9093
+    host_group: monitoring-lv3
+    container_name: alertmanager
+    needs_openbao: false
+    needs_postgres: false
+
+  docker_runtime:
+    image_catalog_key: docker_runtime
+    internal_port: null
+    host_group: all
+    container_name: docker
+    needs_openbao: false
+    needs_postgres: false
+    extra_defaults:
+      docker_runtime_is_host_level: true
+
+  docker_runtime_observability:
+    image_catalog_key: docker_runtime_observability
+    internal_port: null
+    host_group: docker-runtime-lv3
+    container_name: docker-observability
+    needs_openbao: false
+    needs_postgres: false
+
+  falco:
+    image_catalog_key: falco_runtime
+    internal_port: null
+    host_group: all
+    container_name: falco
+    needs_openbao: false
+    needs_postgres: false
+    extra_defaults:
+      falco_is_daemonset: true
+
+  falco_event_bridge:
+    image_catalog_key: falco_event_bridge_runtime
+    internal_port: null
+    host_group: docker-runtime-lv3
+    container_name: falco-event-bridge
+    needs_openbao: false
+    needs_postgres: false
+
+  librechat:
+    image_catalog_key: librechat_runtime
+    internal_port: 8096
+    host_group: docker-runtime-lv3
+    container_name: librechat
+    needs_openbao: true
+    needs_postgres: true
+    proxy:
+      enabled: true
+      upstream_port: 8096
+      upstream_host: docker-runtime-lv3
+      public_fqdn: agents.lv3.org
+      auth_proxy: true
+      websocket: true
+    dns:
+      records:
+        - fqdn: agents.lv3.org
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
+    tls:
+      domains:
+        - agents.lv3.org
+      cert_source: letsencrypt
+
+  litellm:
+    image_catalog_key: litellm_runtime
+    internal_port: 8000
+    host_group: docker-runtime-lv3
+    container_name: litellm
+    needs_openbao: true
+    needs_postgres: false
+
+  neko:
+    image_catalog_key: neko_runtime
+    internal_port: 8080
+    host_group: runtime-comms-lv3
+    container_name: neko
+    needs_openbao: false
+    needs_postgres: false
+    extra_defaults:
+      neko_multi_instance: true
+      neko_instances: {}
+
+  netdata:
+    image_catalog_key: netdata_runtime
+    internal_port: 19999
+    host_group: monitoring-lv3
+    container_name: netdata
+    needs_openbao: false
+    needs_postgres: false
+    extra_defaults:
+      netdata_parent_child_streaming: true
+
+  nginx_runtime:
+    image_catalog_key: nginx_runtime
+    internal_port: null
+    host_group: all
+    container_name: nginx
+    needs_openbao: false
+    needs_postgres: false
+    extra_defaults:
+      nginx_is_edge_infrastructure: true
+      nginx_fragment_based_config: true
+
+  runtime_pool_substrate:
+    image_catalog_key: runtime_pool_substrate
+    internal_port: null
+    host_group: all
+    container_name: runtime-pool-substrate
+    needs_openbao: false
+    needs_postgres: false
+    extra_defaults:
+      runtime_pool_provides_traefik: true
+      runtime_pool_provides_dapr: true

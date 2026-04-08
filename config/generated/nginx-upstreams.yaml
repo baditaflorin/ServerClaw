@@ -255,6 +255,18 @@ platform_nginx_upstreams:
   websocket: false
   max_body_size: 10m
   path_prefix: /
+- name: repo_intake_upstream
+  service_name: repo_intake
+  fqdn: repo-intake.lv3.org
+  extra_fqdns:
+  - repo-intake.staging.lv3.org
+  port: 8096
+  host: docker-runtime-lv3
+  ip: 10.10.10.20
+  auth_proxy: true
+  websocket: false
+  max_body_size: 10m
+  path_prefix: /
 - name: outline_upstream
   service_name: outline
   fqdn: wiki.lv3.org

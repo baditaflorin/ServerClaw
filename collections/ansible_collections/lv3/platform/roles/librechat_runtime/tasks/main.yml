@@ -5,6 +5,11 @@
 # Outputs: Running LibreChat container with OIDC auth, Ollama + Anthropic backends, system prompt preset.
 # Idempotency: Yes.
 
+- name: Derive conventional service variables from platform_service_registry
+  ansible.builtin.import_tasks: ../common/tasks/derive_service_defaults.yml
+  vars:
+    common_derive_service_name: librechat
+
 - name: Validate LibreChat runtime inputs
   ansible.builtin.assert:
     that:

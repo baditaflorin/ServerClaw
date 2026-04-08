@@ -4,26 +4,15 @@
 # Outputs: Supplies stable defaults for the LibreChat runtime role.
 # Idempotency: Fully idempotent because this file only declares defaults.
 # Dependencies: ADR 0165, ADR 0060.
+# NOTE: Conventional variables (site_dir, data_dir, secret_dir, compose_file, env_file,
+# openbao_*, container_name, internal_port, local_artifact_dir, image) are derived
+# from platform_service_registry — ADR 0373.
 ---
-librechat_site_dir: /opt/librechat
-librechat_data_dir: "{{ librechat_site_dir }}/data"
-librechat_secret_dir: /etc/lv3/librechat
-librechat_compose_file: "{{ librechat_site_dir }}/docker-compose.yml"
+# Service-specific LibreChat configuration
 librechat_config_file: "{{ librechat_site_dir }}/librechat.yaml"
-librechat_env_file: "{{ compose_runtime_secret_root }}/librechat/runtime.env"
-librechat_legacy_env_file: "{{ librechat_site_dir }}/librechat.env"
-librechat_openbao_agent_dir: "{{ librechat_site_dir }}/openbao"
-librechat_openbao_agent_image: "{{ openbao_agent_image }}"
-librechat_openbao_agent_container_name: librechat-openbao-agent
 librechat_enable_openbao_agent: false
-librechat_openbao_secret_path: services/librechat/runtime-env
-librechat_openbao_policy_name: lv3-service-librechat-runtime
-librechat_openbao_approle_name: librechat-runtime
-librechat_container_name: librechat
-librechat_internal_port: 8096
 librechat_container_port: 3080
 librechat_healthcheck_path: /
-librechat_image: "{{ container_image_catalog.images.librechat_runtime.ref }}"
 librechat_mongo_container_name: librechat-mongodb
 librechat_mongo_image: mongo:7
 librechat_mongo_data_dir: "{{ librechat_data_dir }}/mongodb"

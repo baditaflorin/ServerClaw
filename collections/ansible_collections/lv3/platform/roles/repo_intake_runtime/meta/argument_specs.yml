@@ -1,0 +1,36 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy repo-intake runtime (ADR 0224)
+    description: |
+      Deploy the self-service repository intake application on docker-runtime-lv3.
+      Provides web form and JSON API for programmatic repository deployment requests.
+    options:
+      repo_intake_container_name:
+        type: str
+        default: repo-intake
+        description: Docker container name
+      repo_intake_image:
+        type: str
+        default: repo-intake:latest
+        description: Container image tag
+      repo_intake_data_dir:
+        type: str
+        default: /opt/repo-intake
+        description: Host directory for data persistence
+      repo_intake_port:
+        type: int
+        default: 8096
+        description: Local listener port
+      repo_intake_gateway_url:
+        type: str
+        default: https://api.lv3.org
+        description: API gateway URL
+      repo_intake_session_secret:
+        type: str
+        required: true
+        description: Session encryption secret
+      repo_intake_static_api_token:
+        type: str
+        required: true
+        description: Static API token for authentication

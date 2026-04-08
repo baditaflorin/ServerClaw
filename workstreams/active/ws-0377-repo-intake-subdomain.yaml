@@ -1,0 +1,35 @@
+id: ws-0377-repo-intake-subdomain
+adr: ""
+title: Repo Intake as First-Class Subdomain
+status: ready
+ready_to_merge: false
+live_applied: false
+owner: platform-infrastructure
+branch: claude/zen-agnesi
+worktree_path: .claude/worktrees/zen-agnesi
+doc: docs/workstreams/ws-0377-repo-intake-subdomain.md
+depends_on:
+  - adr-0224-self-service-repo-intake-and-agent-assisted-deployments
+conflicts_with: []
+shared_surfaces:
+  - scripts/repo_intake
+  - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime
+  - playbooks/repo-intake.yml
+  - playbooks/services/repo_intake.yml
+  - config/generated/nginx-upstreams.yaml
+  - inventory/group_vars/platform_services.yml
+ownership_manifest:
+  owned_surfaces:
+    - id: repo_intake_service
+      paths:
+        - scripts/repo_intake
+        - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime
+        - playbooks/repo-intake.yml
+        - playbooks/services/repo_intake.yml
+        - inventory/group_vars/platform_services.yml
+      mode: exclusive
+description: |
+  Extract repo-intake from ops_portal as a first-class service with its own
+  subdomain (repo-intake.lv3.org). Mirrors the ops_portal architectural pattern
+  but focuses on self-service repo deployment workflows. Updates navigation in
+  homepage and ops_portal to link to the new surface.

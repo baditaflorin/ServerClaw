@@ -1,0 +1,9 @@
+# Service Playbook: repo_intake.yml
+# Included by: playbooks/repo-intake.yml
+# Purpose: Focused convergence of just the repo-intake runtime role.
+
+---
+- name: Deploy repo-intake service
+  hosts: "{{ ansible_host | default('localhost') }}"
+  tasks:
+    - role: lv3.platform.repo_intake_runtime

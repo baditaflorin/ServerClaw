@@ -1,0 +1,44 @@
+---
+- name: Ensure repo-intake data directory exists
+  ansible.builtin.file:
+    path: "{{ repo_intake_data_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Create repo-intake Docker Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ repo_intake_data_dir }}/docker-compose.yml"
+    mode: '0644'
+  register: compose_file
+
+- name: Create repo-intake environment file
+  ansible.builtin.template:
+    src: repo-intake.env.j2
+    dest: "{{ repo_intake_data_dir }}/repo-intake.env"
+    mode: '0600'
+
+- name: Pull repo-intake image
+  community.docker.docker_image:
+    name: "{{ repo_intake_image }}"
+    source: pull
+    state: present
+  ignore_errors: true  # May fail if image not in registry yet
+
+- name: Deploy repo-intake container via Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ repo_intake_data_dir }}"
+    state: present
+    restarted: "{{ compose_file.changed }}"
+  environment:
+    DOCKER_HOST: "unix:///var/run/docker.sock"
+
+- name: Wait for repo-intake to be ready
+  ansible.builtin.uri:
+    url: "http://localhost:{{ repo_intake_port }}/health"
+    status_code: 200
+    connect_timeout: 5
+  retries: 30
+  delay: 1
+  register: result
+  until: result.status == 200

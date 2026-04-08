@@ -128,6 +128,16 @@ sso_clients:
     - profile
     - email
     service: paperless
+  repo-intake-oauth:
+    provider: keycloak
+    public_client: false
+    redirect_uris:
+    - https://repo-intake.lv3.org/oauth2/callback
+    scopes:
+    - openid
+    - profile
+    - email
+    service: repo_intake
   sftpgo:
     provider: keycloak
     public_client: false
