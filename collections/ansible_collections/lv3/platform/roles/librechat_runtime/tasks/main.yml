@@ -281,9 +281,13 @@
   no_log: true
   when: librechat_enable_openbao_agent | bool
 
-- name: Read the system prompt source file
+- name: Read the full system prompt (for agent bootstrap instructions)
   ansible.builtin.set_fact:
     librechat_system_prompt_content: "{{ lookup('file', librechat_system_prompt_src_absolute) }}"
+
+- name: Read the chat-only system prompt (for regular model promptPrefix — no tools)
+  ansible.builtin.set_fact:
+    librechat_chat_prompt_content: "{{ lookup('file', librechat_chat_prompt_src_absolute) }}"
 
 - name: Deploy the system prompt preset file
   ansible.builtin.copy:

@@ -30,7 +30,7 @@ endpoints:
       titleConvo: true
       titleModel: {{ librechat_ollama_default_model }}
       promptPrefix: |
-        {{ librechat_system_prompt_content | indent(8) }}
+        {{ librechat_chat_prompt_content | indent(8) }}
 
   openAI:
     models:
@@ -59,7 +59,7 @@ modelSpecs:
         endpoint: "anthropic"
         model: "{{ model }}"
         promptPrefix: |
-          {{ librechat_system_prompt_content | indent(10) }}
+          {{ librechat_chat_prompt_content | indent(10) }}
 {% endfor %}
 {% for model in librechat_openai_models %}
     - name: "{{ model }}"
@@ -68,7 +68,7 @@ modelSpecs:
         endpoint: "openAI"
         model: "{{ model }}"
         promptPrefix: |
-          {{ librechat_system_prompt_content | indent(10) }}
+          {{ librechat_chat_prompt_content | indent(10) }}
 {% endfor %}
     - name: "{{ librechat_ollama_default_model }}"
       label: "{{ librechat_ollama_default_model }}"
@@ -76,7 +76,7 @@ modelSpecs:
         endpoint: "Ollama"
         model: "{{ librechat_ollama_default_model }}"
         promptPrefix: |
-          {{ librechat_system_prompt_content | indent(10) }}
+          {{ librechat_chat_prompt_content | indent(10) }}
 
 actions:
   allowedDomains:
