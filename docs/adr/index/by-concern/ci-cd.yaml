@@ -115,7 +115,7 @@ adrs:
   - adr: 0091
     title: Continuous Drift Detection and Reconciliation
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -127,6 +127,7 @@ adrs:
     filename: 0091-continuous-drift-detection.md
     path: docs/adr/0091-continuous-drift-detection.md
     implemented_in_repo_version: 0.94.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: 0092
     title: Unified Platform API Gateway
@@ -149,7 +150,7 @@ adrs:
   - adr: 0093
     title: Interactive Ops Portal with Live Actions
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -188,7 +189,7 @@ adrs:
   - adr: '0114'
     title: Rule-Based Incident Triage Engine
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -201,6 +202,7 @@ adrs:
     filename: 0114-rule-based-incident-triage-engine.md
     path: docs/adr/0114-rule-based-incident-triage-engine.md
     implemented_in_repo_version: 0.111.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-24'
   - adr: '0143'
     title: Gitea for Self-Hosted Git and Webhook-Driven Automation

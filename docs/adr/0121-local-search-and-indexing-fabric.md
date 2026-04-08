@@ -1,7 +1,7 @@
 # ADR 0121: Local Search and Indexing Fabric
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.119.0
 - Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-26

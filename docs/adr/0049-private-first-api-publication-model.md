@@ -1,7 +1,7 @@
 # ADR 0049: Private-First API Publication Model
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.50.0
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-22

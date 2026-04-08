@@ -1,7 +1,7 @@
 # ADR 0014: Operator Access To Private Guest Network
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.8.0
 - Implemented In Platform Version: 0.6.0
 - Implemented On: 2026-03-21

@@ -14,7 +14,7 @@ adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: security
     keywords:
@@ -65,7 +65,7 @@ adrs:
   - adr: '0047'
     title: Short-Lived Credentials And Internal mTLS
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: security
     keywords:
@@ -154,7 +154,7 @@ adrs:
   - adr: '0102'
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: security
     keywords:
@@ -537,7 +537,7 @@ adrs:
   - adr: '0361'
     title: Nomad OIDC Auth and Edge Publication
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-05'
     concern: security
     keywords:

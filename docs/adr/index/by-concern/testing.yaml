@@ -14,7 +14,7 @@ adrs:
   - adr: '0111'
     title: End-to-End Integration Test Suite
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: testing
     keywords:
@@ -27,6 +27,7 @@ adrs:
     filename: 0111-end-to-end-integration-test-suite.md
     path: docs/adr/0111-end-to-end-integration-test-suite.md
     implemented_in_repo_version: 0.100.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: 0187
     title: Anonymized Seed Data Snapshots for Repeatable Tests

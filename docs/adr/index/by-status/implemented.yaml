@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 297
+total_adrs: 323
 adrs:
   - adr: '0011'
     title: Monitoring VM With Grafana And Proxmox Metrics
@@ -30,6 +30,24 @@ adrs:
     implemented_in_repo_version: 0.23.0
     implemented_in_platform_version: 0.15.0
     implemented_on: '2026-03-22'
+  - adr: '0014'
+    title: Operator Access To Private Guest Network
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - operator
+      - access
+      - private
+      - guest
+      - network
+    summary: We will use a two-stage operator access model.
+    filename: 0014-operator-access-to-private-guest-network.md
+    path: docs/adr/0014-operator-access-to-private-guest-network.md
+    implemented_in_repo_version: 0.8.0
+    implemented_in_platform_version: 0.6.0
+    implemented_on: '2026-03-21'
   - adr: 0018
     title: Non-Root Operations For Host And Guests
     status: Accepted
@@ -188,6 +206,38 @@ adrs:
     path: docs/adr/0031-repository-validation-pipeline-for-automation-changes.md
     implemented_in_repo_version: 0.32.0
     implemented_on: '2026-03-22'
+  - adr: '0033'
+    title: Declarative Service Topology Catalog
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - declarative
+      - service
+      - topology
+      - catalog
+    summary: We will introduce one declarative service-topology catalog as the canonical source for workload metadata.
+    filename: 0033-declarative-service-topology-catalog.md
+    path: docs/adr/0033-declarative-service-topology-catalog.md
+    implemented_in_repo_version: 0.34.0
+    implemented_on: '2026-03-22'
+  - adr: '0034'
+    title: Controller-Local Secret Manifest And Preflight
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - controller-local
+      - secret
+      - manifest
+      - preflight
+    summary: We will define a controller-local secret manifest and a standard preflight check.
+    filename: 0034-controller-local-secret-manifest-and-preflight.md
+    path: docs/adr/0034-controller-local-secret-manifest-and-preflight.md
+    implemented_in_repo_version: 0.35.0
+    implemented_on: '2026-03-22'
   - adr: '0036'
     title: Live Apply Receipts And Verification Evidence
     status: Accepted
@@ -334,6 +384,57 @@ adrs:
     implemented_in_repo_version: 0.47.0
     implemented_in_platform_version: 0.23.0
     implemented_on: '2026-03-22'
+  - adr: '0045'
+    title: Control-Plane Communication Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - control-plane
+      - communication
+      - lanes
+    summary: We will standardize on four control-plane communication lanes.
+    filename: 0045-control-plane-communication-lanes.md
+    path: docs/adr/0045-control-plane-communication-lanes.md
+    implemented_in_repo_version: 0.45.0
+    implemented_in_platform_version: 0.26.0
+    implemented_on: '2026-03-22'
+  - adr: '0046'
+    title: Identity Classes For Humans, Services, And Agents
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: identity
+    keywords:
+      - identity
+      - classes
+      - humans
+      - services
+      - agents
+    summary: All platform identities must belong to one of four classes.
+    filename: 0046-identity-classes-for-humans-services-and-agents.md
+    path: docs/adr/0046-identity-classes-for-humans-services-and-agents.md
+    implemented_in_repo_version: 0.45.0
+    implemented_in_platform_version: 0.26.0
+    implemented_on: '2026-03-22'
+  - adr: '0047'
+    title: Short-Lived Credentials And Internal mTLS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - short-lived
+      - credentials
+      - internal
+      - mtls
+    summary: We will prefer short-lived credentials and mutual TLS for new internal access paths.
+    filename: 0047-short-lived-credentials-and-internal-mtls.md
+    path: docs/adr/0047-short-lived-credentials-and-internal-mtls.md
+    implemented_in_repo_version: 0.49.0
+    implemented_in_platform_version: 0.25.0
+    implemented_on: '2026-03-22'
   - adr: 0048
     title: Command Catalog And Approval Gates
     status: Accepted
@@ -350,6 +451,22 @@ adrs:
     path: docs/adr/0048-command-catalog-and-approval-gates.md
     implemented_in_repo_version: 0.45.0
     implemented_in_platform_version: 0.26.0
+    implemented_on: '2026-03-22'
+  - adr: 0049
+    title: Private-First API Publication Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: api
+    keywords:
+      - private-first
+      - api
+      - publication
+      - model
+    summary: Every API must be classified into one of three publication tiers.
+    filename: 0049-private-first-api-publication-model.md
+    path: docs/adr/0049-private-first-api-publication-model.md
+    implemented_in_repo_version: 0.50.0
     implemented_on: '2026-03-22'
   - adr: '0050'
     title: Transactional Email And Notification Profiles
@@ -492,6 +609,24 @@ adrs:
     implemented_in_repo_version: 0.59.0
     implemented_in_platform_version: 0.33.0
     implemented_on: '2026-03-22'
+  - adr: 0058
+    title: NATS JetStream For Internal Event Bus And Agent Coordination
+    status: Deprecated
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - nats
+      - jetstream
+      - internal
+      - event
+      - bus
+      - agent
+      - coordination
+    summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
+    filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+    path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+    implemented_in_platform_version: 0.130.20
   - adr: 0059
     title: ntopng For Private Network Flow Visibility
     status: Accepted
@@ -924,6 +1059,24 @@ adrs:
     implemented_in_repo_version: 0.91.0
     implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
+  - adr: 0085
+    title: OpenTofu IaC for VM Lifecycle Management
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - opentofu
+      - iac
+      - vm
+      - lifecycle
+      - management
+    summary: We will introduce OpenTofu (tofu) for all Proxmox resource management and move VM lifecycle out of Ansible.
+    filename: 0085-opentofu-vm-lifecycle.md
+    path: docs/adr/0085-opentofu-vm-lifecycle.md
+    implemented_in_repo_version: 0.92.0
+    implemented_in_platform_version: 0.39.0
+    implemented_on: '2026-03-23'
   - adr: 0086
     title: Ansible Collection Packaging and Versioned Role Distribution
     status: Accepted
@@ -1012,6 +1165,23 @@ adrs:
     path: docs/adr/0090-unified-platform-cli.md
     implemented_in_repo_version: 0.91.0
     implemented_on: '2026-03-23'
+  - adr: 0091
+    title: Continuous Drift Detection and Reconciliation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - continuous
+      - drift
+      - detection
+      - reconciliation
+    summary: 'We will implement continuous drift detection as a scheduled Windmill workflow that:'
+    filename: 0091-continuous-drift-detection.md
+    path: docs/adr/0091-continuous-drift-detection.md
+    implemented_in_repo_version: 0.94.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
   - adr: 0092
     title: Unified Platform API Gateway
     status: Implemented
@@ -1030,6 +1200,44 @@ adrs:
     implemented_in_repo_version: 0.101.0
     implemented_in_platform_version: 0.114.2
     implemented_on: '2026-03-24'
+  - adr: 0093
+    title: Interactive Ops Portal with Live Actions
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - interactive
+      - ops
+      - portal
+      - live
+      - actions
+    summary: 'We will replace the static generated ops portal with a server-side-rendered interactive portal built with FastHTML
+      (Python) or HTMX-augmented Jinja2 templates, '
+    filename: 0093-interactive-ops-portal.md
+    path: docs/adr/0093-interactive-ops-portal.md
+    implemented_in_repo_version: 0.97.0
+    implemented_in_platform_version: 0.105.0
+    implemented_on: '2026-03-24'
+  - adr: 0094
+    title: Developer Portal and Service Documentation Site
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - developer
+      - portal
+      - service
+      - documentation
+      - site
+    summary: We will generate a static documentation site using MkDocs with the Material theme, auto-populated from the canonical
+      platform data sources, and published at doc
+    filename: 0094-developer-portal-and-documentation-site.md
+    path: docs/adr/0094-developer-portal-and-documentation-site.md
+    implemented_in_repo_version: 0.97.0
+    implemented_in_platform_version: 0.105.0
+    implemented_on: '2026-03-23'
   - adr: 0096
     title: SLO Definitions and Error Budget Tracking
     status: Implemented
@@ -1049,6 +1257,25 @@ adrs:
     implemented_in_repo_version: 0.106.0
     implemented_in_platform_version: 0.130.3
     implemented_on: '2026-03-25'
+  - adr: 0097
+    title: Alerting Routing and On-Call Runbook Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - alerting
+      - routing
+      - on-call
+      - runbook
+      - model
+    summary: We will implement a two-tier alert routing model with Alertmanager as the routing engine, severity-based destination
+      mapping, mandatory runbook links on every a
+    filename: 0097-alerting-routing-and-oncall-runbook-model.md
+    path: docs/adr/0097-alerting-routing-and-oncall-runbook-model.md
+    implemented_in_repo_version: 0.114.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-24'
   - adr: 0098
     title: Postgres High Availability and Automated Failover
     status: Accepted
@@ -1124,6 +1351,43 @@ adrs:
     implemented_in_repo_version: 0.177.6
     implemented_in_platform_version: 0.130.27
     implemented_on: '2026-03-27'
+  - adr: '0102'
+    title: Security Posture Reporting and Benchmark Drift
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: security
+    keywords:
+      - security
+      - posture
+      - reporting
+      - benchmark
+      - drift
+    summary: We will implement a weekly automated security posture report using two complementary tools — Lynis for host or
+      guest OS-level hardening checks and Trivy for con
+    filename: 0102-security-posture-reporting.md
+    path: docs/adr/0102-security-posture-reporting.md
+    implemented_in_repo_version: 0.109.0
+    implemented_in_platform_version: 0.130.21
+    implemented_on: '2026-03-26'
+  - adr: '0103'
+    title: Data Classification and Retention Policy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - data
+      - classification
+      - retention
+      - policy
+    summary: 'We will define a platform data classification model with four classes, assign every data store in the platform
+      to a class, and enforce class-specific retention '
+    filename: 0103-data-classification-and-retention-policy.md
+    path: docs/adr/0103-data-classification-and-retention-policy.md
+    implemented_in_repo_version: 0.102.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
   - adr: '0104'
     title: Service Dependency Graph and Failure Propagation Model
     status: Accepted
@@ -1183,6 +1447,26 @@ adrs:
     implemented_in_repo_version: 0.97.0
     implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-26'
+  - adr: '0107'
+    title: Platform Extension Model for Adding New Services
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - platform
+      - extension
+      - model
+      - adding
+      - new
+      - services
+    summary: We will define a platform extension checklist as a machine-readable schema, enhance the scaffold generator (ADR
+      0078) to generate all required artifacts, and ad
+    filename: 0107-platform-extension-model.md
+    path: docs/adr/0107-platform-extension-model.md
+    implemented_in_repo_version: 0.107.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-24'
   - adr: 0108
     title: Operator Onboarding and Off-boarding Workflow
     status: Accepted
@@ -1201,6 +1485,111 @@ adrs:
     implemented_in_repo_version: 0.177.8
     implemented_in_platform_version: 0.130.29
     implemented_on: '2026-03-27'
+  - adr: 0109
+    title: Public Status Page
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - public
+      - status
+      - page
+    summary: We will publish a repo-managed public status page at status.lv3.org, backed by Uptime Kuma and supplemented by
+      an independent Uptime Robot probe set.
+    filename: 0109-public-status-page.md
+    path: docs/adr/0109-public-status-page.md
+    implemented_in_repo_version: 0.104.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
+  - adr: '0110'
+    title: Platform Versioning, Release Notes, and Upgrade Path
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: release
+    keywords:
+      - platform
+      - versioning
+      - release
+      - notes
+      - upgrade
+      - path
+    summary: We will define platform-level semantic versioning semantics, a structured release process, machine-readable release
+      notes, and an upgrade path document that spe
+    filename: 0110-platform-versioning-and-upgrade-path.md
+    path: docs/adr/0110-platform-versioning-and-upgrade-path.md
+    implemented_in_repo_version: 0.104.0
+    implemented_on: '2026-03-23'
+  - adr: '0111'
+    title: End-to-End Integration Test Suite
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: testing
+    keywords:
+      - end-to-end
+      - integration
+      - test
+      - suite
+    summary: We will build an end-to-end integration test suite (tests/integration/) written in Python using pytest with httpx
+      for HTTP interactions, targeting the live plat
+    filename: 0111-end-to-end-integration-test-suite.md
+    path: docs/adr/0111-end-to-end-integration-test-suite.md
+    implemented_in_repo_version: 0.100.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-23'
+  - adr: '0113'
+    title: World-State Materializer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - world-state
+      - materializer
+    summary: We will build a world-state materializer that continuously refreshes a canonical materialized view of platform
+      state into a dedicated Postgres schema (worldstat
+    filename: 0113-world-state-materializer.md
+    path: docs/adr/0113-world-state-materializer.md
+    implemented_in_repo_version: 0.113.0
+    implemented_in_platform_version: 0.130.28
+    implemented_on: '2026-03-27'
+  - adr: '0114'
+    title: Rule-Based Incident Triage Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - rule-based
+      - incident
+      - triage
+      - engine
+    summary: We will implement a rule-based incident triage engine as a Windmill workflow triggered on every firing alert
+      from the alerting router (ADR 0097).
+    filename: 0114-rule-based-incident-triage-engine.md
+    path: docs/adr/0114-rule-based-incident-triage-engine.md
+    implemented_in_repo_version: 0.111.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-24'
+  - adr: '0115'
+    title: Event-Sourced Mutation Ledger
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - event-sourced
+      - mutation
+      - ledger
+    summary: 'We will promote the mutation audit log into a full event-sourced mutation ledger by replacing the flat audit
+      log table with a structured event stream schema in '
+    filename: 0115-event-sourced-mutation-ledger.md
+    path: docs/adr/0115-event-sourced-mutation-ledger.md
+    implemented_in_repo_version: 0.110.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
   - adr: '0116'
     title: Change Risk Scoring Without LLMs
     status: Accepted
@@ -1239,6 +1628,23 @@ adrs:
     implemented_in_repo_version: 0.117.0
     implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-26'
+  - adr: 0119
+    title: Budgeted Workflow Scheduler
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - budgeted
+      - workflow
+      - scheduler
+    summary: We will implement a budgeted workflow scheduler as a thin orchestration layer between the goal compiler (ADR
+      0112) and Windmill (ADR 0044). The scheduler receiv
+    filename: 0119-budgeted-workflow-scheduler.md
+    path: docs/adr/0119-budgeted-workflow-scheduler.md
+    implemented_in_repo_version: 0.118.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
   - adr: '0120'
     title: Dry-Run Semantic Diff Engine
     status: Accepted
@@ -1256,6 +1662,24 @@ adrs:
     path: docs/adr/0120-dry-run-semantic-diff-engine.md
     implemented_in_repo_version: 0.116.0
     implemented_on: '2026-03-24'
+  - adr: '0121'
+    title: Local Search and Indexing Fabric
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - local
+      - search
+      - indexing
+      - fabric
+    summary: We will build a local search and indexing fabric entirely within Postgres, using pgtrgm (trigram matching) and
+      the built-in tsvector/tsquery (BM25 full-text sea
+    filename: 0121-local-search-and-indexing-fabric.md
+    path: docs/adr/0121-local-search-and-indexing-fabric.md
+    implemented_in_repo_version: 0.119.0
+    implemented_in_platform_version: 0.130.20
+    implemented_on: '2026-03-26'
   - adr: '0122'
     title: Windmill Operator Access Admin Surface
     status: Accepted
@@ -5447,6 +5871,24 @@ adrs:
     filename: 0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
     path: docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
     implemented_on: '2026-04-05'
+  - adr: '0361'
+    title: Nomad OIDC Auth and Edge Publication
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: security
+    keywords:
+      - nomad
+      - oidc
+      - keycloak
+      - edge
+      - sso
+      - scheduler
+      - auth
+      - publication
+    summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
+    filename: 0361-nomad-oidc-edge-publication.md
+    path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted
@@ -5543,3 +5985,18 @@ adrs:
     filename: 0376-credential-isolation-and-agent-safety.md
     path: docs/adr/0376-credential-isolation-and-agent-safety.md
     implemented_on: '2026-04-06'
+  - adr: 0378
+    title: ServerClaw Tool Surface In Open WebUI
+    status: Proposed
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: platform
+    keywords:
+      - serverclaw
+      - tool
+      - surface
+      - open
+      - webui
+    summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
+    filename: 0378-serverclaw-tool-surface-in-open-webui.md
+    path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md

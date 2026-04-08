@@ -233,7 +233,7 @@ adrs:
   - adr: '0014'
     title: Operator Access To Private Guest Network
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -581,7 +581,7 @@ adrs:
   - adr: '0033'
     title: Declarative Service Topology Catalog
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -597,7 +597,7 @@ adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: security
     keywords:
@@ -791,7 +791,7 @@ adrs:
   - adr: '0045'
     title: Control-Plane Communication Lanes
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -807,7 +807,7 @@ adrs:
   - adr: '0046'
     title: Identity Classes For Humans, Services, And Agents
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: identity
     keywords:
@@ -825,7 +825,7 @@ adrs:
   - adr: '0047'
     title: Short-Lived Credentials And Internal mTLS
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: security
     keywords:
@@ -859,7 +859,7 @@ adrs:
   - adr: 0049
     title: Private-First API Publication Model
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: api
     keywords:
@@ -1016,7 +1016,7 @@ adrs:
   - adr: 0058
     title: NATS JetStream For Internal Event Bus And Agent Coordination
     status: Deprecated
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -1030,6 +1030,7 @@ adrs:
     summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
     filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
     path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+    implemented_in_platform_version: 0.130.20
   - adr: 0059
     title: ntopng For Private Network Flow Visibility
     status: Accepted
@@ -1482,7 +1483,7 @@ adrs:
   - adr: 0085
     title: OpenTofu IaC for VM Lifecycle Management
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -1588,7 +1589,7 @@ adrs:
   - adr: 0091
     title: Continuous Drift Detection and Reconciliation
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -1600,6 +1601,7 @@ adrs:
     filename: 0091-continuous-drift-detection.md
     path: docs/adr/0091-continuous-drift-detection.md
     implemented_in_repo_version: 0.94.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: 0092
     title: Unified Platform API Gateway
@@ -1622,7 +1624,7 @@ adrs:
   - adr: 0093
     title: Interactive Ops Portal with Live Actions
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -1641,7 +1643,7 @@ adrs:
   - adr: 0094
     title: Developer Portal and Service Documentation Site
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: documentation
     keywords:
@@ -1697,7 +1699,7 @@ adrs:
   - adr: 0097
     title: Alerting Routing and On-Call Runbook Model
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: documentation
     keywords:
@@ -1711,6 +1713,7 @@ adrs:
     filename: 0097-alerting-routing-and-oncall-runbook-model.md
     path: docs/adr/0097-alerting-routing-and-oncall-runbook-model.md
     implemented_in_repo_version: 0.114.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-24'
   - adr: 0098
     title: Postgres High Availability and Automated Failover

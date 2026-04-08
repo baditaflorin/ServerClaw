@@ -1,7 +1,7 @@
 # ADR 0085: OpenTofu IaC for VM Lifecycle Management
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.92.0
 - Implemented In Platform Version: 0.39.0
 - Implemented On: 2026-03-23

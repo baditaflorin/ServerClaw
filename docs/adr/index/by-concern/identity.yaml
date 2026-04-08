@@ -29,7 +29,7 @@ adrs:
   - adr: '0046'
     title: Identity Classes For Humans, Services, And Agents
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: identity
     keywords:

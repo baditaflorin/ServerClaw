@@ -1,7 +1,7 @@
 # ADR 0045: Control-Plane Communication Lanes
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.45.0
 - Implemented In Platform Version: 0.26.0
 - Implemented On: 2026-03-22

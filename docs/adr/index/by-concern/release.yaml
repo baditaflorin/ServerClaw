@@ -29,7 +29,7 @@ adrs:
   - adr: '0110'
     title: Platform Versioning, Release Notes, and Upgrade Path
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: release
     keywords:

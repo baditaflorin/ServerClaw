@@ -14,7 +14,7 @@ adrs:
   - adr: 0049
     title: Private-First API Publication Model
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: api
     keywords:

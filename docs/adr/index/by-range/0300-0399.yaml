@@ -1410,7 +1410,7 @@ adrs:
   - adr: '0361'
     title: Nomad OIDC Auth and Edge Publication
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1692,7 +1692,7 @@ adrs:
   - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
     status: Proposed
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-06'
     concern: platform
     keywords:

@@ -1,9 +1,9 @@
 # ADR 0107: Platform Extension Model for Adding New Services
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.107.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-24
 - Date: 2026-03-23
 

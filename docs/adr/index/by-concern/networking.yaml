@@ -49,7 +49,7 @@ adrs:
   - adr: 0058
     title: NATS JetStream For Internal Event Bus And Agent Coordination
     status: Deprecated
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -63,6 +63,7 @@ adrs:
     summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
     filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
     path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+    implemented_in_platform_version: 0.130.20
   - adr: 0059
     title: ntopng For Private Network Flow Visibility
     status: Accepted

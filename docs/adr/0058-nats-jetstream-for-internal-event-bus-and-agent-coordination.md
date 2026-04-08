@@ -2,9 +2,9 @@
 
 - Status: Superseded
 - Superseded By: 0276
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: detected
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.20
 - Implemented On: not yet
 - Date: 2026-03-22
 

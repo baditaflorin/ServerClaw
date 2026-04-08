@@ -1,7 +1,7 @@
 # ADR 0285: Paperless-ngx As The Document Management And Archive API
 
 - Status: Accepted
-- Implementation Status: Live applied
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.121
 - Implemented In Platform Version: 0.130.75
 - Implemented On: 2026-03-31

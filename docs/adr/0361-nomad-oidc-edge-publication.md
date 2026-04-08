@@ -1,7 +1,7 @@
 # ADR 0368: Nomad OIDC Auth and Edge Publication
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: not applicable
 - Implemented In Platform Version: not applicable
 - Implemented On: not applicable

@@ -47,7 +47,7 @@ adrs:
   - adr: '0014'
     title: Operator Access To Private Guest Network
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -221,7 +221,7 @@ adrs:
   - adr: '0033'
     title: Declarative Service Topology Catalog
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -304,7 +304,7 @@ adrs:
   - adr: 0085
     title: OpenTofu IaC for VM Lifecycle Management
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: vm-topology
     keywords:

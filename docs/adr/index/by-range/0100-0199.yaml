@@ -55,7 +55,7 @@ adrs:
   - adr: '0102'
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: security
     keywords:
@@ -74,7 +74,7 @@ adrs:
   - adr: '0103'
     title: Data Classification and Retention Policy
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -87,6 +87,7 @@ adrs:
     filename: 0103-data-classification-and-retention-policy.md
     path: docs/adr/0103-data-classification-and-retention-policy.md
     implemented_in_repo_version: 0.102.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: '0104'
     title: Service Dependency Graph and Failure Propagation Model
@@ -150,7 +151,7 @@ adrs:
   - adr: '0107'
     title: Platform Extension Model for Adding New Services
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -165,6 +166,7 @@ adrs:
     filename: 0107-platform-extension-model.md
     path: docs/adr/0107-platform-extension-model.md
     implemented_in_repo_version: 0.107.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-24'
   - adr: 0108
     title: Operator Onboarding and Off-boarding Workflow
@@ -187,7 +189,7 @@ adrs:
   - adr: 0109
     title: Public Status Page
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -199,11 +201,12 @@ adrs:
     filename: 0109-public-status-page.md
     path: docs/adr/0109-public-status-page.md
     implemented_in_repo_version: 0.104.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: '0110'
     title: Platform Versioning, Release Notes, and Upgrade Path
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: release
     keywords:
@@ -222,7 +225,7 @@ adrs:
   - adr: '0111'
     title: End-to-End Integration Test Suite
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-23'
     concern: testing
     keywords:
@@ -235,6 +238,7 @@ adrs:
     filename: 0111-end-to-end-integration-test-suite.md
     path: docs/adr/0111-end-to-end-integration-test-suite.md
     implemented_in_repo_version: 0.100.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-23'
   - adr: '0112'
     title: Deterministic Goal Compiler
@@ -255,7 +259,7 @@ adrs:
   - adr: '0113'
     title: World-State Materializer
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -271,7 +275,7 @@ adrs:
   - adr: '0114'
     title: Rule-Based Incident Triage Engine
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -284,11 +288,12 @@ adrs:
     filename: 0114-rule-based-incident-triage-engine.md
     path: docs/adr/0114-rule-based-incident-triage-engine.md
     implemented_in_repo_version: 0.111.0
+    implemented_in_platform_version: 0.130.20
     implemented_on: '2026-03-24'
   - adr: '0115'
     title: Event-Sourced Mutation Ledger
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -358,7 +363,7 @@ adrs:
   - adr: 0119
     title: Budgeted Workflow Scheduler
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -392,7 +397,7 @@ adrs:
   - adr: '0121'
     title: Local Search and Indexing Fabric
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-24'
     concern: documentation
     keywords:
