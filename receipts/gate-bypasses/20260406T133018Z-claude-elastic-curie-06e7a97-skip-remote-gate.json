@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-06T13:30:18Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/elastic-curie",
+  "commit": "06e7a979f3737cd65b34902cc2925e8c1eebe999",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "Docker registry 502. Fixes: open-webui system prompt API endpoint and proxmox_security ACME ignore_errors",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Endpoint verified against live Open WebUI v0.8.9 API routes. ACME plugin confirmed configured correctly on host."
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-08",
+    "remediation_ref": "06e7a979f"
+  }
+}

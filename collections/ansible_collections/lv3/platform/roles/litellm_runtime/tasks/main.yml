@@ -61,10 +61,12 @@
   register: litellm_key_raw
   no_log: true
 
-- name: Read the LiteLLM database password
+- name: Read the LiteLLM database password from the controller
   ansible.builtin.slurp:
-    src: "{{ litellm_postgres_password_file }}"
+    src: "{{ litellm_database_password_local_file }}"
   register: litellm_db_password_raw
+  delegate_to: localhost
+  become: false
   no_log: true
 
 - name: Deploy the Anthropic API key for LiteLLM
@@ -93,7 +95,7 @@
   ansible.builtin.set_fact:
     litellm_runtime_secret_payload:
       LITELLM_MASTER_KEY: "{{ litellm_master_key }}"
-      DATABASE_URL: "postgresql://{{ litellm_database_user }}:{{ litellm_database_password }}@{{ platform_service_topology.postgres.hosts.internal }}:5432/{{ litellm_database_name }}"
+      DATABASE_URL: "postgresql://{{ litellm_database_user }}:{{ litellm_database_password }}@{{ litellm_database_host }}:5432/{{ litellm_database_name }}"
       ANTHROPIC_API_KEY: "{{ litellm_anthropic_api_key }}"
   no_log: true
 
