@@ -211,7 +211,7 @@ adrs:
   - adr: '0213'
     title: Architecture Fitness Functions In The Validation Gate
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:

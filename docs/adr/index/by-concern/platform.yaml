@@ -70,7 +70,7 @@ adrs:
   - adr: '0036'
     title: Live Apply Receipts And Verification Evidence
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -103,7 +103,7 @@ adrs:
   - adr: 0038
     title: Generated Status Documents From Canonical State
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -225,7 +225,7 @@ adrs:
   - adr: '0064'
     title: Health Probe Contracts For All Services
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -742,8 +742,8 @@ adrs:
     implemented_on: '2026-03-26'
   - adr: '0166'
     title: Canonical Configuration Locations Registry
-    status: Implemented
-    implementation_status: Partial
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-26'
     concern: platform
     keywords:

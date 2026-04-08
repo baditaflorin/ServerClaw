@@ -1,7 +1,7 @@
 # ADR 0029: Dedicated Backup VM With Local PBS
 
 - Status: Accepted
-- Implementation Status: Partial Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.30.0
 - Implemented In Platform Version: 0.19.0
 - Implemented On: 2026-03-22

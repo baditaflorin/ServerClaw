@@ -512,7 +512,7 @@ adrs:
   - adr: 0029
     title: Dedicated Backup VM With Local PBS
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -627,7 +627,7 @@ adrs:
   - adr: '0036'
     title: Live Apply Receipts And Verification Evidence
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -660,7 +660,7 @@ adrs:
   - adr: 0038
     title: Generated Status Documents From Canonical State
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -1117,7 +1117,7 @@ adrs:
   - adr: '0064'
     title: Health Probe Contracts For All Services
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-22'
     concern: platform
     keywords:

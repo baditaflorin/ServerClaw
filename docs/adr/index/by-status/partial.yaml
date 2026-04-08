@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 61
+total_adrs: 55
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -93,24 +93,6 @@ adrs:
     summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
-  - adr: 0029
-    title: Dedicated Backup VM With Local PBS
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: vm-topology
-    keywords:
-      - dedicated
-      - backup
-      - vm
-      - local
-      - pbs
-    summary: We will create a dedicated internal backup VM and run Proxmox Backup Server inside it.
-    filename: 0029-dedicated-backup-vm-with-local-pbs.md
-    path: docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
-    implemented_in_repo_version: 0.30.0
-    implemented_in_platform_version: 0.19.0
-    implemented_on: '2026-03-22'
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
     status: Accepted
@@ -176,41 +158,6 @@ adrs:
     filename: 0034-controller-local-secret-manifest-and-preflight.md
     path: docs/adr/0034-controller-local-secret-manifest-and-preflight.md
     implemented_in_repo_version: 0.35.0
-    implemented_on: '2026-03-22'
-  - adr: '0036'
-    title: Live Apply Receipts And Verification Evidence
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - live
-      - apply
-      - receipts
-      - verification
-      - evidence
-    summary: We will record structured live-apply receipts and verification evidence in the repository.
-    filename: 0036-live-apply-receipts-and-verification-evidence.md
-    path: docs/adr/0036-live-apply-receipts-and-verification-evidence.md
-    implemented_in_repo_version: 0.37.0
-    implemented_on: '2026-03-22'
-  - adr: 0038
-    title: Generated Status Documents From Canonical State
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - generated
-      - status
-      - documents
-      - from
-      - canonical
-      - state
-    summary: We will generate selected status-facing documentation fragments from canonical repository state.
-    filename: 0038-generated-status-documents-from-canonical-state.md
-    path: docs/adr/0038-generated-status-documents-from-canonical-state.md
-    implemented_in_repo_version: 0.41.0
     implemented_on: '2026-03-22'
   - adr: '0044'
     title: Windmill For Agent And Operator Workflows
@@ -329,24 +276,6 @@ adrs:
       visibility.
     filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
     path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
-  - adr: '0064'
-    title: Health Probe Contracts For All Services
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-22'
-    concern: platform
-    keywords:
-      - health
-      - probe
-      - contracts
-      - all
-      - services
-    summary: We will define a health probe contract for every managed service and enforce it in the Ansible role for that
-      service.
-    filename: 0064-health-probe-contracts-for-all-services.md
-    path: docs/adr/0064-health-probe-contracts-for-all-services.md
-    implemented_in_repo_version: 0.61.0
-    implemented_on: '2026-03-22'
   - adr: 0080
     title: Maintenance Window And Change Suppression Protocol
     status: Accepted
@@ -874,21 +803,6 @@ adrs:
     implemented_in_platform_version: 0.114.4
     implemented_on: '2026-03-24'
   - adr: '0166'
-    title: Canonical Configuration Locations Registry
-    status: Implemented
-    implementation_status: Partial
-    date: '2026-03-26'
-    concern: platform
-    keywords:
-      - canonical
-      - configuration
-      - locations
-      - registry
-    summary: 'We will maintain a canonical configuration locations registry at .config-locations.yaml documenting:'
-    filename: 0166-canonical-configuration-locations.md
-    path: docs/adr/0166-canonical-configuration-locations.md
-    implemented_on: '2026-03-26'
-  - adr: '0166'
     title: Canonical Error Response Format and Error Code Registry
     status: Accepted
     implementation_status: Partial
@@ -908,24 +822,6 @@ adrs:
     implemented_in_repo_version: 0.162.0
     implemented_in_platform_version: 0.130.13
     implemented_on: '2026-03-26'
-  - adr: '0213'
-    title: Architecture Fitness Functions In The Validation Gate
-    status: Accepted
-    implementation_status: Partial
-    date: '2026-03-28'
-    concern: ci-cd
-    keywords:
-      - architecture
-      - fitness
-      - functions
-      - validation
-      - gate
-    summary: We will add architecture fitness functions to the repository validation gate.
-    filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
-    path: docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
-    implemented_in_repo_version: 0.177.36
-    implemented_in_platform_version: 0.130.36
-    implemented_on: '2026-03-28'
   - adr: '0224'
     title: Self-Service Repo Intake And Agent-Assisted Deployments
     status: Accepted

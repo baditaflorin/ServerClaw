@@ -1257,8 +1257,8 @@ adrs:
     implemented_on: '2026-03-25'
   - adr: '0166'
     title: Canonical Configuration Locations Registry
-    status: Implemented
-    implementation_status: Partial
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-26'
     concern: platform
     keywords:

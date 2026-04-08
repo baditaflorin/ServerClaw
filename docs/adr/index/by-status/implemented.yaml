@@ -10,7 +10,7 @@ generated: '2026-04-08'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 273
+total_adrs: 279
 adrs:
   - adr: '0011'
     title: Monitoring VM With Grafana And Proxmox Metrics
@@ -103,6 +103,59 @@ adrs:
       telemetry path.
     filename: 0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
     path: docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
+    implemented_on: '2026-03-22'
+  - adr: 0029
+    title: Dedicated Backup VM With Local PBS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - backup
+      - vm
+      - local
+      - pbs
+    summary: We will create a dedicated internal backup VM and run Proxmox Backup Server inside it.
+    filename: 0029-dedicated-backup-vm-with-local-pbs.md
+    path: docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+    implemented_in_repo_version: 0.30.0
+    implemented_in_platform_version: 0.19.0
+    implemented_on: '2026-03-22'
+  - adr: '0036'
+    title: Live Apply Receipts And Verification Evidence
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - live
+      - apply
+      - receipts
+      - verification
+      - evidence
+    summary: We will record structured live-apply receipts and verification evidence in the repository.
+    filename: 0036-live-apply-receipts-and-verification-evidence.md
+    path: docs/adr/0036-live-apply-receipts-and-verification-evidence.md
+    implemented_in_repo_version: 0.37.0
+    implemented_on: '2026-03-22'
+  - adr: 0038
+    title: Generated Status Documents From Canonical State
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - generated
+      - status
+      - documents
+      - from
+      - canonical
+      - state
+    summary: We will generate selected status-facing documentation fragments from canonical repository state.
+    filename: 0038-generated-status-documents-from-canonical-state.md
+    path: docs/adr/0038-generated-status-documents-from-canonical-state.md
+    implemented_in_repo_version: 0.41.0
     implemented_on: '2026-03-22'
   - adr: 0039
     title: Shared Controller Automation Toolkit
@@ -426,6 +479,24 @@ adrs:
     path: docs/adr/0063-centralised-vars-and-computed-facts-library.md
     implemented_in_repo_version: 0.68.0
     implemented_on: '2026-03-23'
+  - adr: '0064'
+    title: Health Probe Contracts For All Services
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - health
+      - probe
+      - contracts
+      - all
+      - services
+    summary: We will define a health probe contract for every managed service and enforce it in the Ansible role for that
+      service.
+    filename: 0064-health-probe-contracts-for-all-services.md
+    path: docs/adr/0064-health-probe-contracts-for-all-services.md
+    implemented_in_repo_version: 0.61.0
+    implemented_on: '2026-03-22'
   - adr: '0065'
     title: Secret Rotation Automation With OpenBao
     status: Accepted
@@ -1731,6 +1802,21 @@ adrs:
     implemented_in_repo_version: 0.153.0
     implemented_in_platform_version: 0.130.6
     implemented_on: '2026-03-25'
+  - adr: '0166'
+    title: Canonical Configuration Locations Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - canonical
+      - configuration
+      - locations
+      - registry
+    summary: 'We will maintain a canonical configuration locations registry at .config-locations.yaml documenting:'
+    filename: 0166-canonical-configuration-locations.md
+    path: docs/adr/0166-canonical-configuration-locations.md
+    implemented_on: '2026-03-26'
   - adr: '0167'
     title: Agent Handoff and Context Preservation Protocol
     status: Implemented
@@ -2550,6 +2636,24 @@ adrs:
     summary: Every critical product ADR must include a replaceability scorecard and a vendor
     filename: 0212-replaceability-scorecards-and-vendor-exit-plans.md
     path: docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+    implemented_in_repo_version: 0.177.36
+    implemented_in_platform_version: 0.130.36
+    implemented_on: '2026-03-28'
+  - adr: '0213'
+    title: Architecture Fitness Functions In The Validation Gate
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - architecture
+      - fitness
+      - functions
+      - validation
+      - gate
+    summary: We will add architecture fitness functions to the repository validation gate.
+    filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
+    path: docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
     implemented_in_repo_version: 0.177.36
     implemented_in_platform_version: 0.130.36
     implemented_on: '2026-03-28'
