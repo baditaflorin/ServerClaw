@@ -382,6 +382,12 @@
       - "{{ librechat_admin_email }}"
       - --system-prompt-file
       - "{{ librechat_system_prompt_src_absolute }}"
+      - --specs-dir
+      - "{{ librechat_tools_openapi_local_dir }}"
+      - --gateway-base-url
+      - "{{ librechat_api_gateway_base_url }}"
+      - --tools-api-key-file
+      - "{{ librechat_tools_api_key_local_file }}"
       - --mongo-container
       - "{{ librechat_mongo_container_name }}"
   delegate_to: localhost
