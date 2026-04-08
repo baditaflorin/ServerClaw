@@ -6697,3 +6697,7 @@ neko_instances:
     email: test@lv3.org
     port: 8087
     udp_range: "57000-57999"
+  baditaflorin_tmp003:
+    email: baditaflorin+tmp003@gmail.com
+    port: 8088
+    udp_range: "58000-58999"
