@@ -23,6 +23,11 @@ services:
       # UDP ephemeral port range assigned to this instance (avoids conflicts)
       NEKO_EPR: "{{ _inst_udp_range }}"
       NEKO_LOG_LEVEL: "info"
+      # Each instance needs a unique X display number — with network_mode:host all
+      # containers share the same abstract Unix socket namespace, so display :99
+      # in container A conflicts with :99 in container B.
+      # Formula: port 8080 -> :99, port 8081 -> :100, etc.
+      DISPLAY: ":{{ (_inst_port | int) - 8080 + 99 }}"
 
     volumes:
       - "{{ _inst_data_dir }}/cache:/root/.cache"
