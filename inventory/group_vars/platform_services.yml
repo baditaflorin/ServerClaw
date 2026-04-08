@@ -8,14 +8,23 @@
 # defaults/main.yml — those are computed here.
 #
 # Required fields per entry:
-#   image_catalog_key  — key in container_image_catalog.images (config/image-catalog.json)
-#   internal_port      — port the container listens on inside the host
+#   service_type       — 'docker_compose' | 'system_package' | 'infrastructure' | 'multi_instance'
+#   internal_port      — port the service listens on (null for non-networked services)
 #   host_group         — Ansible host/group this service deploys to (production host name)
 #
-# Optional fields:
-#   site_dir           — override /opt/<service_name>
-#   secret_dir         — override /etc/lv3/<service_name>
-#   container_name     — override <service_name>
+# Conditional fields (based on service_type):
+#   Docker services (docker_compose):
+#     image_catalog_key  — key in container_image_catalog.images (config/image-catalog.json)
+#     site_dir           — base directory (default: /opt/<service_name>)
+#     container_name     — override <service_name>
+#   System packages (system_package):
+#     state_dirs         — map of directory paths { config, data, secrets } for the package
+#     package_name       — system package name (for package managers)
+#   Infrastructure (infrastructure):
+#     Extra metadata as needed (varies by service type: kernel module, daemon, etc.)
+#
+# Optional fields (all service types):
+#   secret_dir         — override /etc/lv3/<service_name> (docker_compose only)
 #   needs_openbao      — default true; set false to skip OpenBao variable derivation
 #   needs_redis        — informational, default false
 #   needs_postgres     — informational, default false
@@ -46,6 +55,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   api_gateway:
+    service_type: docker_compose
     image_catalog_key: ""            # api-gateway is a bespoke binary, no catalog entry
     internal_port: 8080
     host_group: runtime-control-lv3
@@ -83,6 +93,7 @@ platform_service_registry:
       auth_proxy: false             # upstream handles its own auth
 
   artifact_cache:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/library/registry — no catalog key
     internal_port: 5001
     host_group: artifact-cache-lv3
@@ -94,6 +105,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   browser_runner:
+    service_type: docker_compose
     image_catalog_key: ""            # built locally from Dockerfile.j2
     internal_port: 8096
     host_group: docker-runtime-lv3
@@ -106,6 +118,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   changedetection:
+    service_type: docker_compose
     image_catalog_key: changedetection_runtime
     internal_port: 5000
     host_group: docker-runtime-lv3
@@ -114,6 +127,7 @@ platform_service_registry:
     needs_openbao: false
 
   coolify:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream ghcr.io/coollabsio/coolify
     internal_port: 8000
     host_group: coolify-lv3
@@ -127,6 +141,7 @@ platform_service_registry:
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   crawl4ai:
+    service_type: docker_compose
     image_catalog_key: crawl4ai_runtime
     internal_port: 11235
     host_group: docker-runtime-lv3
@@ -139,6 +154,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   dify:
+    service_type: docker_compose
     image_catalog_key: dify_api_runtime
     internal_port: 8094
     host_group: docker-runtime-lv3
@@ -183,6 +199,7 @@ platform_service_registry:
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   directus:
+    service_type: docker_compose
     image_catalog_key: directus_runtime
     internal_port: 8055
     host_group: docker-runtime-lv3
@@ -234,6 +251,7 @@ platform_service_registry:
       auth_proxy: false             # upstream Keycloak OIDC handles auth
 
   dozzle:
+    service_type: docker_compose
     image_catalog_key: dozzle_runtime
     internal_port: 8089
     host_group: docker-runtime-lv3
@@ -264,6 +282,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   excalidraw:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/excalidraw/excalidraw
     internal_port: 3095
     host_group: docker-runtime-lv3
@@ -294,6 +313,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   flagsmith:
+    service_type: docker_compose
     image_catalog_key: flagsmith_runtime
     internal_port: 8017
     host_group: docker-runtime-lv3
@@ -327,6 +347,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   gitea:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/gitea/gitea — pinned by digest in defaults
     internal_port: 3003
     host_group: docker-runtime-lv3
@@ -354,6 +375,7 @@ platform_service_registry:
       public_client: false
 
   glitchtip:
+    service_type: docker_compose
     image_catalog_key: glitchtip_runtime
     internal_port: 3005
     host_group: docker-runtime-lv3
@@ -393,6 +415,7 @@ platform_service_registry:
       auth_proxy: false             # upstream Keycloak OIDC handles auth
 
   gotenberg:
+    service_type: docker_compose
     image_catalog_key: gotenberg_runtime
     internal_port: 3007
     host_group: docker-runtime-lv3
@@ -401,6 +424,7 @@ platform_service_registry:
     needs_openbao: false
 
   grist:
+    service_type: docker_compose
     image_catalog_key: grist_runtime
     internal_port: 8484
     host_group: docker-runtime-lv3
@@ -450,6 +474,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   harbor:
+    service_type: docker_compose
     image_catalog_key: ""            # harbor is multi-component, no single catalog key
     internal_port: 8095
     host_group: runtime-control-lv3
@@ -488,6 +513,7 @@ platform_service_registry:
       auth_proxy: false             # harbor has its own auth; OCI clients authenticate directly
 
   homepage:
+    service_type: docker_compose
     image_catalog_key: homepage_runtime
     internal_port: 3090
     host_group: runtime-general-lv3
@@ -506,6 +532,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   jupyterhub:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream quay.io/jupyterhub/jupyterhub — pinned in defaults
     internal_port: 8097
     host_group: docker-runtime-lv3
@@ -555,6 +582,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   keycloak:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream quay.io/keycloak/keycloak — pinned in defaults
     internal_port: 8091
     host_group: docker-runtime-lv3
@@ -591,6 +619,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   label_studio:
+    service_type: docker_compose
     image_catalog_key: label_studio_runtime
     internal_port: 8110
     host_group: docker-runtime-lv3
@@ -618,6 +647,7 @@ platform_service_registry:
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   lago:
+    service_type: docker_compose
     image_catalog_key: lago_api_runtime
     internal_port: 8099
     host_group: docker-runtime-lv3
@@ -645,6 +675,7 @@ platform_service_registry:
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   langfuse:
+    service_type: docker_compose
     image_catalog_key: langfuse_runtime
     internal_port: 3002
     host_group: docker-runtime-lv3
@@ -690,6 +721,7 @@ platform_service_registry:
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   livekit:
+    service_type: docker_compose
     image_catalog_key: livekit_runtime
     internal_port: 7880
     host_group: docker-runtime-lv3
@@ -721,6 +753,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   mail_platform:
+    service_type: docker_compose
     image_catalog_key: mail_platform_stalwart_runtime
     internal_port: 8081
     host_group: docker-runtime-lv3
@@ -741,6 +774,7 @@ platform_service_registry:
       cert_validity_days: 90
 
   mailpit:
+    service_type: docker_compose
     image_catalog_key: mailpit_runtime
     internal_port: 8025
     host_group: runtime-general-lv3
@@ -749,6 +783,7 @@ platform_service_registry:
     needs_openbao: false
 
   matrix_synapse:
+    service_type: docker_compose
     image_catalog_key: matrix_synapse_runtime
     internal_port: 8008
     host_group: docker-runtime-lv3
@@ -777,6 +812,7 @@ platform_service_registry:
       websocket: true               # Matrix client-server API uses WebSockets
 
   mattermost:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream mattermost/mattermost-team-edition — pinned in defaults
     internal_port: 8065
     host_group: docker-runtime-lv3
@@ -786,6 +822,7 @@ platform_service_registry:
     needs_postgres: true
 
   minio:
+    service_type: docker_compose
     image_catalog_key: minio_runtime
     internal_port: 9010
     host_group: docker-runtime-lv3
@@ -824,6 +861,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   n8n:
+    service_type: docker_compose
     image_catalog_key: n8n_runtime
     internal_port: 5678
     host_group: docker-runtime-lv3
@@ -852,6 +890,7 @@ platform_service_registry:
       websocket: true               # n8n uses WebSockets for workflow execution events
 
   nats_jetstream:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream nats:2.11-alpine
     internal_port: 4222
     host_group: runtime-control-lv3
@@ -860,6 +899,7 @@ platform_service_registry:
     needs_openbao: false
 
   netbox:
+    service_type: docker_compose
     image_catalog_key: netbox_runtime
     internal_port: 8082
     host_group: docker-runtime-lv3
@@ -870,6 +910,7 @@ platform_service_registry:
     # NOTE: netbox.lv3.org is not in subdomain-catalog.json; no dns section until it is registered.
 
   nextcloud:
+    service_type: docker_compose
     image_catalog_key: nextcloud_runtime
     internal_port: 8084
     host_group: docker-runtime-lv3
@@ -898,6 +939,7 @@ platform_service_registry:
       max_body_size: 4096m          # large file uploads
 
   ntfy:
+    service_type: docker_compose
     image_catalog_key: ntfy_runtime
     internal_port: 2586
     host_group: docker-runtime-lv3
@@ -928,6 +970,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   ollama:
+    service_type: docker_compose
     image_catalog_key: ollama_runtime
     internal_port: 11434
     host_group: runtime-ai-lv3
@@ -936,6 +979,7 @@ platform_service_registry:
     needs_openbao: false
 
   one_api:
+    service_type: docker_compose
     image_catalog_key: one_api_runtime
     internal_port: 8101
     host_group: docker-runtime-lv3
@@ -944,6 +988,7 @@ platform_service_registry:
     needs_openbao: true
 
   open_webui:
+    service_type: docker_compose
     image_catalog_key: open_webui_runtime
     internal_port: 8088
     host_group: docker-runtime-lv3
@@ -976,6 +1021,7 @@ platform_service_registry:
       public_client: false
 
   openbao:
+    service_type: docker_compose
     image_catalog_key: openbao_runtime
     internal_port: 8201
     host_group: docker-runtime-lv3
@@ -984,6 +1030,7 @@ platform_service_registry:
     needs_openbao: false
 
   openfga:
+    service_type: docker_compose
     image_catalog_key: openfga_runtime
     internal_port: 8098
     host_group: docker-runtime-lv3
@@ -992,6 +1039,7 @@ platform_service_registry:
     needs_openbao: true
 
   ops_portal:
+    service_type: docker_compose
     image_catalog_key: ""            # ops-portal is a bespoke container built locally
     internal_port: 8092
     host_group: docker-runtime-lv3
@@ -1034,6 +1082,7 @@ platform_service_registry:
         - ops.staging.lv3.org
 
   repo_intake:
+    service_type: docker_compose
     image_catalog_key: ""            # repo-intake is a bespoke container built locally
     internal_port: 8096
     host_group: docker-runtime-lv3
@@ -1076,6 +1125,7 @@ platform_service_registry:
         - repo-intake.staging.lv3.org
 
   outline:
+    service_type: docker_compose
     image_catalog_key: outline_runtime
     internal_port: 3006
     host_group: docker-runtime-lv3
@@ -1126,6 +1176,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   paperless:
+    service_type: docker_compose
     image_catalog_key: paperless_runtime
     internal_port: 8018
     host_group: docker-runtime-lv3
@@ -1172,6 +1223,7 @@ platform_service_registry:
       max_body_size: 256m           # large document uploads
 
   piper:
+    service_type: docker_compose
     image_catalog_key: ""            # built locally from python base image
     internal_port: 8106
     host_group: runtime-ai-lv3
@@ -1180,6 +1232,7 @@ platform_service_registry:
     needs_openbao: false
 
   plane:
+    service_type: docker_compose
     image_catalog_key: plane_frontend_runtime
     internal_port: 8093
     host_group: docker-runtime-lv3
@@ -1208,6 +1261,7 @@ platform_service_registry:
       websocket: true               # Plane uses WebSockets for real-time updates
 
   plausible:
+    service_type: docker_compose
     image_catalog_key: plausible_runtime
     internal_port: 8016
     host_group: docker-runtime-lv3
@@ -1234,6 +1288,7 @@ platform_service_registry:
       auth_proxy: true              # dashboard gated; /js/ and /api/event are unauthenticated paths
 
   portainer:
+    service_type: docker_compose
     image_catalog_key: portainer_runtime
     internal_port: 9443
     host_group: docker-runtime-lv3
@@ -1246,6 +1301,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   rag_context:
+    service_type: docker_compose
     image_catalog_key: ""            # rag-context uses qdrant/qdrant — no catalog key for main service
     internal_port: 8010
     host_group: docker-runtime-lv3
@@ -1289,6 +1345,7 @@ platform_service_registry:
       auth_proxy: true
 
   redpanda:
+    service_type: docker_compose
     image_catalog_key: redpanda_runtime
     internal_port: 9092
     host_group: runtime-control-lv3
@@ -1297,6 +1354,7 @@ platform_service_registry:
     needs_openbao: true
 
   repowise:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream python:3.12-slim
     internal_port: 7070
     host_group: docker-runtime-lv3
@@ -1327,6 +1385,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   searxng:
+    service_type: docker_compose
     image_catalog_key: searxng_runtime
     internal_port: 8881
     host_group: docker-runtime-lv3
@@ -1341,6 +1400,7 @@ platform_service_registry:
           ttl: 3600
 
   semaphore:
+    service_type: docker_compose
     image_catalog_key: semaphore_runtime
     internal_port: 3004
     host_group: docker-runtime-lv3
@@ -1349,6 +1409,7 @@ platform_service_registry:
     needs_openbao: true
 
   sftpgo:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream drakkan/sftpgo — no catalog key
     internal_port: 8080
     host_group: docker-runtime-lv3
@@ -1387,6 +1448,7 @@ platform_service_registry:
       public_client: false
 
   step_ca:
+    service_type: docker_compose
     image_catalog_key: step_ca_runtime
     internal_port: 9000
     host_group: runtime-control-lv3
@@ -1395,6 +1457,7 @@ platform_service_registry:
     needs_openbao: false
 
   superset:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/apache/superset — pinned in defaults
     internal_port: 8105
     host_group: docker-runtime-lv3
@@ -1444,6 +1507,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   temporal:
+    service_type: docker_compose
     image_catalog_key: temporal_server_runtime
     internal_port: 7243
     host_group: docker-runtime-lv3
@@ -1453,6 +1517,7 @@ platform_service_registry:
     needs_postgres: true
 
   tesseract_ocr:
+    service_type: docker_compose
     image_catalog_key: ""            # built locally from python base image
     internal_port: 3008
     host_group: runtime-ai-lv3
@@ -1461,6 +1526,7 @@ platform_service_registry:
     needs_openbao: false
 
   tika:
+    service_type: docker_compose
     image_catalog_key: tika_runtime
     internal_port: 9998
     host_group: runtime-ai-lv3
@@ -1469,6 +1535,7 @@ platform_service_registry:
     needs_openbao: false
 
   typesense:
+    service_type: docker_compose
     image_catalog_key: typesense_runtime
     internal_port: 8108
     host_group: docker-runtime-lv3
@@ -1481,6 +1548,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   uptime_kuma:
+    service_type: docker_compose
     image_catalog_key: uptime_kuma_runtime
     internal_port: 3001
     host_group: docker-runtime-lv3
@@ -1514,6 +1582,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   vaultwarden:
+    service_type: docker_compose
     image_catalog_key: vaultwarden_runtime
     internal_port: 8222
     host_group: docker-runtime-lv3
@@ -1534,6 +1603,7 @@ platform_service_registry:
       cert_validity_days: 90
 
   vikunja:
+    service_type: docker_compose
     image_catalog_key: ""            # uses upstream vikunja/api — no catalog key
     internal_port: 3456
     host_group: docker-runtime-lv3
@@ -1559,6 +1629,7 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   windmill:
+    service_type: docker_compose
     image_catalog_key: windmill_runtime
     internal_port: 8000
     host_group: docker-runtime-lv3
@@ -1568,6 +1639,7 @@ platform_service_registry:
     needs_postgres: true
 
   woodpecker:
+    service_type: docker_compose
     image_catalog_key: woodpecker_server_runtime
     internal_port: 8102
     host_group: docker-runtime-lv3
@@ -1599,14 +1671,20 @@ platform_service_registry:
   # ---------------------------------------------------------------------------
 
   alertmanager:
+    service_type: system_package
     image_catalog_key: alertmanager_runtime
     internal_port: 9093
     host_group: monitoring-lv3
     container_name: alertmanager
     needs_openbao: false
     needs_postgres: false
+    state_dirs:
+      config: /etc/alertmanager
+      data: /var/lib/prometheus/alertmanager
+      secrets: /etc/alertmanager
 
   docker_runtime:
+    service_type: infrastructure
     image_catalog_key: docker_runtime
     internal_port: null
     host_group: all
@@ -1617,6 +1695,7 @@ platform_service_registry:
       docker_runtime_is_host_level: true
 
   docker_runtime_observability:
+    service_type: infrastructure
     image_catalog_key: docker_runtime_observability
     internal_port: null
     host_group: docker-runtime-lv3
@@ -1625,6 +1704,7 @@ platform_service_registry:
     needs_postgres: false
 
   falco:
+    service_type: infrastructure
     image_catalog_key: falco_runtime
     internal_port: null
     host_group: all
@@ -1635,6 +1715,7 @@ platform_service_registry:
       falco_is_daemonset: true
 
   falco_event_bridge:
+    service_type: infrastructure
     image_catalog_key: falco_event_bridge_runtime
     internal_port: null
     host_group: docker-runtime-lv3
@@ -1643,6 +1724,7 @@ platform_service_registry:
     needs_postgres: false
 
   librechat:
+    service_type: docker_compose
     image_catalog_key: librechat_runtime
     internal_port: 8096
     host_group: docker-runtime-lv3
@@ -1668,6 +1750,7 @@ platform_service_registry:
       cert_source: letsencrypt
 
   litellm:
+    service_type: docker_compose
     image_catalog_key: litellm_runtime
     internal_port: 8000
     host_group: docker-runtime-lv3
@@ -1676,6 +1759,7 @@ platform_service_registry:
     needs_postgres: false
 
   neko:
+    service_type: multi_instance
     image_catalog_key: neko_runtime
     internal_port: 8080
     host_group: runtime-comms-lv3
@@ -1687,6 +1771,7 @@ platform_service_registry:
       neko_instances: {}
 
   netdata:
+    service_type: system_package
     image_catalog_key: netdata_runtime
     internal_port: 19999
     host_group: monitoring-lv3
@@ -1695,8 +1780,13 @@ platform_service_registry:
     needs_postgres: false
     extra_defaults:
       netdata_parent_child_streaming: true
+    state_dirs:
+      config: /etc/netdata
+      data: /var/lib/netdata
+      secrets: /etc/lv3/netdata
 
   nginx_runtime:
+    service_type: system_package
     image_catalog_key: nginx_runtime
     internal_port: null
     host_group: all
@@ -1706,8 +1796,13 @@ platform_service_registry:
     extra_defaults:
       nginx_is_edge_infrastructure: true
       nginx_fragment_based_config: true
+    state_dirs:
+      config: /etc/nginx
+      data: /var/cache/nginx
+      secrets: /etc/lv3/nginx
 
   runtime_pool_substrate:
+    service_type: infrastructure
     image_catalog_key: runtime_pool_substrate
     internal_port: null
     host_group: all
