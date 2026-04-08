@@ -1241,6 +1241,27 @@ converge-homepage:
 	$(MAKE) preflight WORKFLOW=converge-homepage
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/homepage.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+# Refresh all discovery surfaces (home.lv3.org, ops.lv3.org, wiki.lv3.org).
+# Run after any service deployment to eliminate drift between the service
+# catalog and operator-facing portals.  See ADR 0383.
+# Usage:
+#   make refresh-discovery-surfaces env=production
+#   make refresh-discovery-surfaces env=production trigger_service=neko
+#   make refresh-discovery-surfaces env=production refresh_homepage=false
+refresh-discovery-surfaces:
+	$(MAKE) preflight WORKFLOW=refresh-discovery-surfaces
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook \
+		-i $(REPO_ROOT)/inventory/ \
+		$(REPO_ROOT)/playbooks/refresh-discovery-surfaces.yml \
+		-e env=$(env) \
+		--private-key $(BOOTSTRAP_KEY) \
+		-e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+		-e ops_portal_repo_root=$(REPO_ROOT) \
+		$(if $(trigger_service),-e trigger_service=$(trigger_service)) \
+		$(if $(refresh_homepage),-e refresh_homepage=$(refresh_homepage)) \
+		$(if $(refresh_ops_portal),-e refresh_ops_portal=$(refresh_ops_portal)) \
+		$(if $(refresh_outline),-e refresh_outline=$(refresh_outline))
+
 converge-excalidraw:
 	$(MAKE) preflight WORKFLOW=converge-excalidraw
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \

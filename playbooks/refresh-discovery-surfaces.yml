@@ -1,0 +1,209 @@
+---
+# Playbook: refresh-discovery-surfaces.yml
+# Purpose: Regenerate and deploy all discovery surfaces that consume the service catalog.
+#
+# Use case: Run after any service deployment to propagate changes to home.lv3.org,
+#           ops.lv3.org, and wiki.lv3.org (Outline).  Designed as the single cascade
+#           entry point that eliminates drift between the canonical service catalog
+#           and the operator-facing portals.
+#
+# Inputs (optional):
+#   - env (str, default=production): Deployment environment selector.
+#   - refresh_homepage (bool, default=true): Refresh home.lv3.org.
+#   - refresh_ops_portal (bool, default=true): Refresh ops.lv3.org.
+#   - refresh_outline (bool, default=true): Sync ADRs + docs to wiki.lv3.org.
+#   - refresh_platform_manifest (bool, default=true): Regenerate build/platform-manifest.json.
+#   - refresh_discovery_artifacts (bool, default=true): Regenerate build/onboarding/ artifacts.
+#   - refresh_trigger_service (str, default=unknown): Name of the service that triggered this refresh.
+#
+# Outputs:
+#   - Platform manifest regenerated.
+#   - Discovery artifacts regenerated.
+#   - home.lv3.org updated with current service catalog.
+#   - ops.lv3.org updated with current service catalog.
+#   - wiki.lv3.org ADR collection synced.
+#
+# Idempotency: Fully idempotent. Safe to run repeatedly.
+#
+# Dependencies:
+#   - ADR 0383: Discovery Surface Refresh Cascade
+#   - config/service-capability-catalog.json (source of truth)
+#   - docs/adr/*.md (ADR corpus)
+#   - Requires: homepage, ops-portal, and outline playbooks + their role dependencies.
+#
+# Related ADRs: 0074, 0093, 0152, 0199, 0383
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-08
+
+# --- Phase 1: Local artifact regeneration (runs on controller) ---
+
+- name: Regenerate local platform artifacts
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - tier-0
+    - discovery
+    - artifacts
+
+  vars:
+    repo_root: "{{ playbook_dir }}/.."
+    refresh_platform_manifest: true
+    refresh_discovery_artifacts: true
+    refresh_trigger_service: "{{ trigger_service | default('manual') }}"
+
+  tasks:
+    - name: Log discovery surface refresh trigger
+      ansible.builtin.debug:
+        msg: >-
+          Discovery surface refresh triggered by service={{ refresh_trigger_service }},
+          env={{ env | default('production') }}.
+
+    - name: Regenerate platform manifest
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ repo_root }}/scripts/platform_manifest.py"
+          - --write
+        chdir: "{{ repo_root }}"
+      changed_when: true
+      when: refresh_platform_manifest | default(true) | bool
+
+    - name: Regenerate discovery artifacts
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ repo_root }}/scripts/generate_discovery_artifacts.py"
+          - --write
+        chdir: "{{ repo_root }}"
+      changed_when: true
+      when: refresh_discovery_artifacts | default(true) | bool
+
+# --- Phase 2: Sync docs to Outline wiki (runs on controller, calls Outline API) ---
+
+- name: Sync documentation to Outline wiki
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - tier-1
+    - discovery
+    - outline
+
+  vars:
+    repo_root: "{{ playbook_dir }}/.."
+    refresh_outline: true
+    outline_token_file: "{{ repo_root }}/.local/outline/api-token.txt"
+
+  tasks:
+    - name: Check Outline API token exists
+      ansible.builtin.stat:
+        path: "{{ outline_token_file }}"
+      register: outline_token_stat
+
+    - name: Sync ADRs and docs to Outline
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ repo_root }}/scripts/sync_docs_to_outline.py"
+          - sync
+        chdir: "{{ repo_root }}"
+      changed_when: true
+      when:
+        - refresh_outline | default(true) | bool
+        - outline_token_stat.stat.exists
+
+    - name: Warn if Outline token is missing
+      ansible.builtin.debug:
+        msg: >-
+          Skipping Outline sync — API token not found at {{ outline_token_file }}.
+          Run 'python3 scripts/sync_docs_to_outline.py bootstrap-token' first.
+      when: not outline_token_stat.stat.exists
+
+# --- Phase 3: Converge homepage (runs on runtime-general-lv3) ---
+
+- name: Refresh home.lv3.org service listing
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - discovery
+    - homepage
+
+  vars:
+    refresh_homepage: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
+      when: refresh_homepage | default(true) | bool
+
+  roles:
+    - role: lv3.platform.homepage_runtime
+      when: refresh_homepage | default(true) | bool
+
+# --- Phase 4: Converge ops portal (runs on docker-runtime-lv3) ---
+
+- name: Refresh ops.lv3.org service listing
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - discovery
+    - ops-portal
+
+  vars:
+    refresh_ops_portal: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+      when: refresh_ops_portal | default(true) | bool
+
+  roles:
+    - role: lv3.platform.ops_portal_runtime
+      when: refresh_ops_portal | default(true) | bool
+
+# --- Phase 5: Publish updated NGINX edge configs ---
+
+- name: Refresh NGINX edge for updated discovery surfaces
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - discovery
+    - networking
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+  post_tasks:
+    - name: Log discovery surface refresh complete
+      ansible.builtin.debug:
+        msg: >-
+          Discovery surface refresh complete.
+          home.lv3.org, ops.lv3.org, and wiki.lv3.org are now in sync
+          with the current service catalog and ADR corpus.
