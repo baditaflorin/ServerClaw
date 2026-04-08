@@ -23,6 +23,8 @@
     name:
       - openssl
     state: present
+    update_cache: true
+    force_apt_get: true
 
 - name: Ensure the LiteLLM runtime directories exist
   ansible.builtin.file:
@@ -67,17 +69,34 @@
   become: false
   no_log: true
 
+- name: Deploy the Anthropic API key for LiteLLM
+  ansible.builtin.copy:
+    src: "{{ litellm_anthropic_api_key_local_file }}"
+    dest: "{{ litellm_anthropic_api_key_remote_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Read the Anthropic API key
+  ansible.builtin.slurp:
+    src: "{{ litellm_anthropic_api_key_remote_file }}"
+  register: litellm_anthropic_key_raw
+  no_log: true
+
 - name: Record the LiteLLM runtime secrets
   ansible.builtin.set_fact:
     litellm_master_key: "{{ litellm_key_raw.content | b64decode | trim }}"
     litellm_database_password: "{{ litellm_db_password_raw.content | b64decode | trim }}"
+    litellm_anthropic_api_key: "{{ litellm_anthropic_key_raw.content | b64decode | trim }}"
   no_log: true
 
 - name: Build the LiteLLM runtime secret payload
   ansible.builtin.set_fact:
     litellm_runtime_secret_payload:
       LITELLM_MASTER_KEY: "{{ litellm_master_key }}"
-      DATABASE_URL: "postgresql://{{ litellm_database_user }}:{{ litellm_database_password }}@{{ litellm_database_host }}:5432/{{ litellm_database_name }}"
+      DATABASE_URL: "postgresql://{{ litellm_database_user }}:{{ litellm_database_password | urlencode | replace('/', '%2F') }}@{{ litellm_database_host }}:5432/{{ litellm_database_name }}"
+      ANTHROPIC_API_KEY: "{{ litellm_anthropic_api_key }}"
   no_log: true
 
 - name: Ensure the local LiteLLM artifact directory exists
