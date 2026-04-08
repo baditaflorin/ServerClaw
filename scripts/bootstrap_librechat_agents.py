@@ -181,10 +181,10 @@ def build_mongosh_script(
 
         starters = json.dumps(pack["conversation_starters"])
 
-        # Action document
+        # Action document — LibreChat queries by assistant_id, NOT agent_id
         actions_js_parts.append(f"""  {{
     action_id: "{action_id}",
-    agent_id: "{pack['id']}",
+    assistant_id: "{pack['id']}",
     type: "action_prototype",
     metadata: {{
       domain: "{raw_domain}",
@@ -268,6 +268,12 @@ var actionDefs = [
 {actions_array}
 ];
 
+// Migrate legacy agent_id field to assistant_id (LibreChat queries by assistant_id)
+db.actions.updateMany(
+  {{agent_id: {{$exists: true}}, assistant_id: {{$exists: false}}}},
+  [{{$set: {{assistant_id: "$agent_id"}}}}, {{$unset: "agent_id"}}]
+);
+
 var actionsCreated = 0;
 var actionsUpdated = 0;
 actionDefs.forEach(function(actionDef) {{
@@ -285,7 +291,7 @@ actionDefs.forEach(function(actionDef) {{
       {{action_id: actionDef.action_id}},
       {{$set: {{
         metadata: actionDef.metadata,
-        agent_id: actionDef.agent_id,
+        assistant_id: actionDef.assistant_id,
         user: userId
       }}}}
     );
