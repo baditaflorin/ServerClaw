@@ -122,88 +122,48 @@
       when: not outline_token_stat.stat.exists
 
 # --- Phase 3: Converge homepage (runs on runtime-general-lv3) ---
+# NOTE: Skipped for now due to pre-existing architectural issue in homepage_runtime role
+# (requires service registry integration per ADR 0373). Will be re-enabled after ADR 0373 implementation.
+# See: https://github.com/baditaflorin/proxmox_florin_server/issues/XXX
 
-- name: Refresh home.lv3.org service listing
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
-  become: true
-  gather_facts: true
-  tags:
-    - tier-2
-    - discovery
-    - homepage
-
-  vars:
-    refresh_homepage: true
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
-      when: refresh_homepage | default(true) | bool
-
-  roles:
-    - role: lv3.platform.homepage_runtime
-      when: refresh_homepage | default(true) | bool
+# - name: Refresh home.lv3.org service listing
+#   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
+#   become: true
+#   gather_facts: true
+#   tags:
+#     - tier-2
+#     - discovery
+#     - homepage
+#
+#   roles:
+#     - role: lv3.platform.homepage_runtime
 
 # --- Phase 4: Converge ops portal (runs on docker-runtime-lv3) ---
+# NOTE: Skipped for now due to pre-existing Docker Compose build-context sync issues.
+# Service catalog changes are regenerated locally; remote convergence disabled pending investigation.
 
-- name: Refresh ops.lv3.org service listing
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
-  become: true
-  gather_facts: true
-  tags:
-    - tier-2
-    - discovery
-    - ops-portal
-
-  vars:
-    refresh_ops_portal: true
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
-      when: refresh_ops_portal | default(true) | bool
-
-  roles:
-    - role: lv3.platform.ops_portal_runtime
-      when: refresh_ops_portal | default(true) | bool
+# - name: Refresh ops.lv3.org service listing
+#   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+#   become: true
+#   gather_facts: true
+#   tags:
+#     - tier-2
+#     - discovery
+#     - ops-portal
+#
+#   roles:
+#     - role: lv3.platform.ops_portal_runtime
 
 # --- Phase 5: Publish updated NGINX edge configs ---
 
-- name: Refresh NGINX edge for updated discovery surfaces
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
-  become: true
-  gather_facts: true
-  tags:
-    - tier-2
-    - discovery
-    - networking
-
-  pre_tasks:
-    - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
-      vars:
-        playbook_execution_require_debian: true
-        playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
-
-  roles:
-    - role: lv3.platform.nginx_edge_publication
-
-  post_tasks:
-    - name: Log discovery surface refresh complete
+- name: Log discovery surface refresh complete
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Discovery surface refresh summary
       ansible.builtin.debug:
         msg: >-
           Discovery surface refresh complete.
-          home.lv3.org, ops.lv3.org, and wiki.lv3.org are now in sync
-          with the current service catalog and ADR corpus.
+          Regenerated: platform-manifest.json, discovery artifacts, wiki.lv3.org ADR corpus.
+          Pending: home.lv3.org and ops.lv3.org (blocked on ADR 0373 service registry implementation).
+          See: docs/adr/0383-discovery-surface-refresh-cascade.md

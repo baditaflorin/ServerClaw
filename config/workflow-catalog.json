@@ -8194,6 +8194,53 @@
         "escalation_action": "notify_and_abort"
       },
       "owner_runbook": "docs/runbooks/configure-librechat.md"
+    },
+    "refresh-discovery-surfaces": {
+      "description": "Refresh all operator-facing discovery surfaces (home.lv3.org, ops.lv3.org, wiki.lv3.org) to sync with current service catalog and ADR corpus. Cascade entry point after service deployments.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "refresh-discovery-surfaces",
+        "command": "make refresh-discovery-surfaces env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/refresh-discovery-surfaces.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/refresh-discovery-surfaces.yml",
+        "scripts/platform_manifest.py",
+        "scripts/generate_discovery_artifacts.py",
+        "scripts/sync_docs_to_outline.py",
+        "docs/adr/0383-discovery-surface-refresh-cascade.md"
+      ],
+      "outputs": [
+        "All discovery surfaces synchronized: home.lv3.org service listing, ops.lv3.org service listing, and wiki.lv3.org ADR corpus refreshed to match current service catalog and docs."
+      ],
+      "verification_commands": [
+        "curl -fsS https://home.lv3.org",
+        "curl -fsS https://ops.lv3.org",
+        "curl -fsS https://wiki.lv3.org/collection/adrs"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 5,
+        "max_restarts": 1,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

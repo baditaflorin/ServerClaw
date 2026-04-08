@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.64",
   "platform_version": "0.131.4",
-  "generated_at": "2026-04-08T16:26:21Z",
-  "next_refresh_at": "2026-04-08T17:26:21Z",
+  "generated_at": "2026-04-08T18:44:48Z",
+  "next_refresh_at": "2026-04-08T19:44:48Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4201,6 +4201,32 @@
         "runbook": "docs/runbooks/operator-offboarding.md"
       },
       {
+        "id": "refresh-discovery-surfaces",
+        "description": "Refresh all operator-facing discovery surfaces (home.lv3.org, ops.lv3.org, wiki.lv3.org) to sync with current service catalog and ADR corpus. Cascade entry point after service deployments.",
+        "tags": [
+          "guest-live",
+          "mutation",
+          "preflight",
+          "refresh-discovery-surfaces",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 5,
+          "max_restarts": 1,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/refresh-discovery-surfaces.md"
+      },
+      {
         "id": "restic-config-backup",
         "description": "Run the ADR 0302 Restic file-level backup workflow on docker-runtime-lv3, write one backup receipt, refresh the latest-snapshot ledger, and emit stale-source signals when needed.",
         "tags": [
@@ -6029,6 +6055,16 @@
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
+        ]
+      },
+      {
+        "id": "refresh-discovery-surfaces",
+        "title": "Refresh Discovery Surfaces",
+        "agent_trust_required": "T3",
+        "steps": 8,
+        "path": "docs/runbooks/refresh-discovery-surfaces.md",
+        "workflow_ids": [
+          "refresh-discovery-surfaces"
         ]
       },
       {

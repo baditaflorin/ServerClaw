@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional, Union
 
 from script_bootstrap import ensure_repo_root_on_path
 
@@ -86,7 +86,7 @@ def require_string(value: object, path: str) -> str:
 
 
 
-def state_file_path() -> Path | None:
+def state_file_path() -> Optional[Path]:
     candidate = os.environ.get(MAINTENANCE_STATE_FILE_ENV, "").strip()
     if not candidate:
         return None
@@ -112,7 +112,7 @@ def load_controller_context() -> dict[str, Any]:
     }
 
 
-def resolve_nats_credentials(context: dict[str, Any] | None = None) -> dict[str, str]:
+def resolve_nats_credentials(context: Optional[dict[str, Any]] = None) -> dict[str, str]:
     env_user = os.environ.get("LV3_NATS_USERNAME", "").strip()
     env_password = os.environ.get("LV3_NATS_PASSWORD", "").strip()
     env_password_file = os.environ.get("LV3_NATS_PASSWORD_FILE", "").strip()
@@ -182,7 +182,7 @@ def reserve_local_port() -> int:
 
 def wait_for_tunnel(process: subprocess.Popen[str], port: int) -> None:
     deadline = time.time() + 10
-    last_error: Exception | None = None
+    last_error: Optional[Exception] = None
     while time.time() < deadline:
         if process.poll() is not None:
             stdout, stderr = process.communicate(timeout=1)
@@ -223,7 +223,7 @@ def nats_tunnel(context: dict[str, Any]) -> int:
 
 
 @contextmanager
-def maintenance_nats_connection(context: dict[str, Any] | None = None):
+def maintenance_nats_connection(context: Optional[dict[str, Any]] = None):
     credentials = resolve_nats_credentials(context)
     direct_url = direct_nats_url()
     if direct_url:
@@ -317,8 +317,8 @@ def build_maintenance_window(
     duration_minutes: int,
     opened_by_class: str,
     opened_by_id: str,
-    correlation_id: str | None = None,
-    now: datetime | None = None,
+    correlation_id: Optional[str] = None,
+    now: Optional[datetime] = None,
 ) -> dict[str, Any]:
     service_id = validate_service_id(service_id)
     reason = require_string(reason, "reason")
@@ -372,7 +372,7 @@ def save_local_state(state: dict[str, dict[str, Any]]) -> None:
     write_json(path, state, indent=2, sort_keys=True)
 
 
-async def connect_jetstream(nats_url: str, credentials: dict[str, str] | None = None):
+async def connect_jetstream(nats_url: str, credentials: Optional[dict[str, str]] = None):
     from nats.aio.client import Client as NATS
 
     async def error_cb(error: Exception) -> None:
@@ -402,7 +402,7 @@ def raise_recorded_nats_error(nc: Any, fallback: Exception) -> None:
     raise fallback
 
 
-async def get_bucket(js: Any, *, create: bool) -> Any | None:
+async def get_bucket(js: Any, *, create: bool) -> Optional[Any]:
     import nats.js.errors
 
     try:
@@ -427,7 +427,7 @@ async def publish_event(nc: Any, subject: str, payload: dict[str, Any]) -> None:
     await nc.flush(timeout=5)
 
 
-async def ensure_bucket_async(nats_url: str, credentials: dict[str, str] | None = None) -> dict[str, Any]:
+async def ensure_bucket_async(nats_url: str, credentials: Optional[dict[str, str]] = None) -> dict[str, Any]:
     nc, js = await connect_jetstream(nats_url, credentials)
     try:
         await get_bucket(js, create=True)
@@ -438,7 +438,7 @@ async def ensure_bucket_async(nats_url: str, credentials: dict[str, str] | None 
 
 async def list_windows_async(
     nats_url: str,
-    credentials: dict[str, str] | None = None,
+    credentials: Optional[dict[str, str]] = None,
 ) -> dict[str, dict[str, Any]]:
     import nats.js.errors
 
@@ -472,7 +472,7 @@ async def list_windows_async(
 async def open_window_async(
     nats_url: str,
     window: dict[str, Any],
-    credentials: dict[str, str] | None = None,
+    credentials: Optional[dict[str, str]] = None,
 ) -> dict[str, Any]:
     import nats.js.errors
 
@@ -522,7 +522,7 @@ async def close_window_async(
     force: bool,
     closed_by_class: str,
     closed_by_id: str,
-    credentials: dict[str, str] | None = None,
+    credentials: Optional[dict[str, str]] = None,
 ) -> dict[str, Any]:
     import nats.js.errors
 
@@ -703,7 +703,7 @@ def build_alertmanager_silence(window: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def create_alertmanager_silence(window: dict[str, Any], context: dict[str, Any] | None = None) -> str | None:
+def create_alertmanager_silence(window: dict[str, Any], context: Optional[dict[str, Any]] = None) -> Optional[str]:
     if state_file_path() is not None and not alertmanager_silence_enabled():
         return None
     context = context or load_controller_context()
@@ -723,7 +723,7 @@ def create_alertmanager_silence(window: dict[str, Any], context: dict[str, Any] 
     return str(silence_id)
 
 
-def delete_alertmanager_silence(silence_id: str, context: dict[str, Any] | None = None) -> None:
+def delete_alertmanager_silence(silence_id: str, context: Optional[dict[str, Any]] = None) -> None:
     if state_file_path() is not None and not alertmanager_silence_enabled():
         return
     context = context or load_controller_context()
@@ -741,7 +741,7 @@ def delete_alertmanager_silence(silence_id: str, context: dict[str, Any] | None 
             raise
 
 
-def list_active_windows(context: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
+def list_active_windows(context: Optional[dict[str, Any]] = None) -> dict[str, dict[str, Any]]:
     if state_file_path() is not None:
         return load_local_state()
     with maintenance_nats_connection(context) as (nats_url, credentials):
@@ -749,7 +749,7 @@ def list_active_windows(context: dict[str, Any] | None = None) -> dict[str, dict
 
 
 def list_active_windows_best_effort(
-    context: dict[str, Any] | None = None,
+    context: Optional[dict[str, Any]] = None,
     *,
     stderr: Any = sys.stderr,
 ) -> dict[str, dict[str, Any]]:
@@ -767,8 +767,8 @@ def open_window(
     duration_minutes: int,
     opened_by_class: str = DEFAULT_OPENED_BY_CLASS,
     opened_by_id: str = DEFAULT_OPENED_BY_ID,
-    correlation_id: str | None = None,
-    context: dict[str, Any] | None = None,
+    correlation_id: Optional[str] = None,
+    context: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     window = build_maintenance_window(
         service_id=service_id,
@@ -804,7 +804,7 @@ def close_window(
     force: bool = False,
     closed_by_class: str = DEFAULT_CLOSED_BY_CLASS,
     closed_by_id: str = DEFAULT_CLOSED_BY_ID,
-    context: dict[str, Any] | None = None,
+    context: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     service_id = validate_service_id(service_id)
     closed_by_class = validate_opened_by_class(closed_by_class, "closed_by_class")
@@ -853,7 +853,7 @@ def close_window(
     return result
 
 
-def ensure_bucket(context: dict[str, Any] | None = None) -> dict[str, Any]:
+def ensure_bucket(context: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     if state_file_path() is not None:
         if not state_file_path().exists():
             save_local_state({})

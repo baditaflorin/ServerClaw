@@ -1028,6 +1028,8 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: ops.lv3.org
       auth_proxy: true              # gated behind shared oauth2-proxy
+      unauthenticated_prefix_paths:
+        - /static/                   # CSS, JS, and static assets bypass OAuth2
       extra_fqdns:
         - ops.staging.lv3.org
 
