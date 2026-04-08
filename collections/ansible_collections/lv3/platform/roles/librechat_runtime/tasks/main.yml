@@ -366,3 +366,32 @@
 
 - name: Verify the LibreChat runtime
   ansible.builtin.import_tasks: verify.yml
+
+- name: Bootstrap the LibreChat ServerClaw agents
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ librechat_bootstrap_script }}"
+      - --ssh-target
+      - "root@{{ ansible_host }}"
+      - --ssh-key
+      - "{{ proxmox_guest_ssh_bootstrap_key_path }}"
+      - --ssh-proxy
+      - "{{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }}"
+      - --admin-email
+      - "{{ librechat_admin_email }}"
+      - --system-prompt-file
+      - "{{ librechat_system_prompt_src_absolute }}"
+      - --specs-dir
+      - "{{ librechat_tools_openapi_local_dir }}"
+      - --gateway-base-url
+      - "{{ librechat_api_gateway_base_url }}"
+      - --tools-api-key-file
+      - "{{ librechat_tools_api_key_local_file }}"
+      - --mongo-container
+      - "{{ librechat_mongo_container_name }}"
+  delegate_to: localhost
+  become: false
+  register: librechat_bootstrap
+  changed_when: "'Creating' in librechat_bootstrap.stdout"
+  failed_when: false

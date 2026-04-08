@@ -1299,10 +1299,11 @@ network_policy:
             - 1587
             - 4222
             - 8081
+            - 8083
             - 8091
             - 8098
             - 9080
-          description: Private guest-to-guest access to the control-plane mail relay, event bus, identity, authz, and runtime-control router
+          description: Private guest-to-guest access to the control-plane mail relay, event bus, identity, authz, API gateway, and runtime-control router
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
