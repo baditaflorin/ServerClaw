@@ -173,7 +173,7 @@
     plane_bootstrap_admin_password: "{{ plane_decoded_secrets[4] }}"
     plane_database_password: "{{ lookup('ansible.builtin.file', plane_database_password_local_file) | trim }}"
     plane_database_url: >-
-      postgresql://{{ plane_database_user }}:{{ (lookup('ansible.builtin.file', plane_database_password_local_file) | trim) | urlencode }}@{{ plane_database_host }}:5432/{{ plane_database_name }}
+      postgresql://{{ plane_database_user }}:{{ (lookup('ansible.builtin.file', plane_database_password_local_file) | trim) | urlencode | regex_replace('/', '%2F') }}@{{ plane_database_host }}:5432/{{ plane_database_name }}
     plane_runtime_secret_payload:
       SECRET_KEY: "{{ plane_decoded_secrets[0] }}"
       LIVE_SERVER_SECRET_KEY: "{{ plane_decoded_secrets[1] }}"
@@ -182,7 +182,7 @@
       PLANE_ADMIN_PASSWORD: "{{ plane_decoded_secrets[4] }}"
       DATABASE_PASSWORD: "{{ lookup('ansible.builtin.file', plane_database_password_local_file) | trim }}"
       DATABASE_URL: >-
-        postgresql://{{ plane_database_user }}:{{ (lookup('ansible.builtin.file', plane_database_password_local_file) | trim) | urlencode }}@{{ plane_database_host }}:5432/{{ plane_database_name }}
+        postgresql://{{ plane_database_user }}:{{ (lookup('ansible.builtin.file', plane_database_password_local_file) | trim) | urlencode | regex_replace('/', '%2F') }}@{{ plane_database_host }}:5432/{{ plane_database_name }}
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Plane
