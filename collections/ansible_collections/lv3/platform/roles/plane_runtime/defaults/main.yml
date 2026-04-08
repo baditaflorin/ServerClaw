@@ -124,7 +124,7 @@ plane_oidc_enabled: true
 plane_oidc_server_url: "https://sso.lv3.org"
 plane_oidc_realm: "lv3"
 plane_oidc_client_id: "lv3-plane-oidc"
-plane_oidc_client_secret_local_file: "{{ plane_local_artifact_dir }}/oidc-client-secret.txt"
+plane_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/plane-oidc-client-secret.txt"
 plane_oidc_client_secret_remote_file: "{{ plane_secret_dir }}/oidc-client-secret.txt"
 plane_oidc_discovery_url: "{{ plane_oidc_server_url }}/realms/{{ plane_oidc_realm }}/.well-known/openid-configuration"
 plane_oidc_callback_url: "{{ plane_public_base_url }}/auth/callback/keycloak"
