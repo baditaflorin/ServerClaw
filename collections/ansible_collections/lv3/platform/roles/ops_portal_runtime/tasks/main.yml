@@ -74,6 +74,8 @@
         mode: "0755"
       - path: "{{ ops_portal_secret_dir }}"
         mode: "0700"
+      - path: "{{ ops_portal_env_file | dirname }}"
+        mode: "0700"
 
 - name: Generate the ops portal session secret when missing
   ansible.builtin.shell: |
