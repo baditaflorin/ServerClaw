@@ -3,6 +3,7 @@
 - Date: 2026-04-08
 
 ## Summary
+- LibreChat upgraded v0.7.8 → v0.8.4: 30+ security fixes, working Agents REST API, MCP support with lazy tool loading and circuit breakers, agent handoffs (routing between specialist agents), local document extraction (PDF/DOCX/XLS), modelSpecs improvements, OIDC hardening
 - ADR 0224 self-service repo intake GUI + JSON API deployed to ops.lv3.org; ADR 0307 platform workbench surface catalog published; ADR 0243 Storybook/Playwright/axe-core UI testing framework added; ops-portal role fixed for derive_service_defaults env_file directory creation
 - LibreChat Agents Phase 3: MongoDB-based agent bootstrap script seeds 4 ServerClaw agents (Ops/Tasks/Docs/Admin) idempotently via SSH+mongosh; Ansible task auto-bootstraps agents on convergence with zero manual setup; gate bypass catalog extended with gate_timeout, schema_migration_in_progress, network_partition reason codes
 - LibreChat Agents Phase 2: enabled agents endpoint with tool calling via Actions; 32 platform tools split into 4 packs (ops/tasks/docs/admin) with OpenAPI specs; tools API key deployed for authenticated calls to API gateway

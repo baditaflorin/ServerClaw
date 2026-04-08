@@ -1592,6 +1592,206 @@ select {
   }
 }
 
+/* Repo Intake Section Styling */
+.intake-catalog-section,
+.intake-custom-section {
+  display: grid;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.service-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.95) 0%, rgba(248, 244, 234, 0.9) 100%);
+}
+
+.service-card:hover {
+  border-color: rgba(20, 33, 61, 0.2);
+  box-shadow: 0 12px 40px rgba(20, 33, 61, 0.1);
+  transform: translateY(-2px);
+}
+
+.service-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.service-card-head strong {
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.service-meta-list {
+  display: grid;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.service-meta-list > div {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.service-meta-list dt {
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.service-meta-list dd {
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.service-meta-list a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+}
+
+.service-meta-list a:hover {
+  opacity: 0.8;
+}
+
+.service-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.intake-form {
+  display: grid;
+  gap: 2rem;
+  background: rgba(255, 253, 248, 0.5);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.form-row {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.form-row-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.form-label .required {
+  color: #d32f2f;
+  margin-left: 0.2rem;
+}
+
+.form-input,
+.form-select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(49, 68, 103, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--ink-soft);
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0.25rem 0 0;
+}
+
+.form-hint code {
+  background: rgba(49, 68, 103, 0.08);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.action-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.action-button--primary {
+  background: linear-gradient(135deg, #314467 0%, #2d3d5c 100%);
+  color: white;
+}
+
+.action-button--primary:hover {
+  background: linear-gradient(135deg, #2d3d5c 0%, #263451 100%);
+  box-shadow: 0 8px 20px rgba(49, 68, 103, 0.2);
+}
+
+.htmx-indicator {
+  display: none;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.htmx-request .htmx-indicator {
+  display: inline;
+}
+
+.intake-result-area {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.5);
+  min-height: 60px;
+}
+
 @media (max-width: 720px) {
   .portal-masthead {
     padding: 1rem;
@@ -1599,5 +1799,26 @@ select {
 
   .portal-brand-copy h1 {
     font-size: 1.35rem;
+  }
+
+  .service-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row-group {
+    grid-template-columns: 1fr;
+  }
+
+  .intake-form {
+    padding: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-button {
+    width: 100%;
   }
 }
