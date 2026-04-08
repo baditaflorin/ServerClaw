@@ -10,27 +10,49 @@ endpoints:
       baseURL: "{{ librechat_ollama_base_url }}/v1"
       models:
         default:
-          - gemma4:e4b
+          - {{ librechat_ollama_default_model }}
         fetch: true
       titleConvo: true
-      titleModel: gemma4:e4b
+      titleModel: {{ librechat_ollama_default_model }}
+      promptPrefix: |
+        {{ librechat_system_prompt_content | indent(8) }}
 
   openAI:
     models:
-      - gpt-4o
-      - gpt-4o-mini
-      - o3-mini
-      - o4-mini
+{% for model in librechat_openai_models %}
+      - {{ model }}
+{% endfor %}
     titleConvo: true
-    titleModel: gpt-4o-mini
+    titleModel: {{ librechat_openai_models[1] | default(librechat_openai_models[0]) }}
 
   anthropic:
     models:
-      - claude-sonnet-4-20250514
-      - claude-haiku-4-5-20251001
-      - claude-opus-4-20250115
+{% for model in librechat_anthropic_models %}
+      - {{ model }}
+{% endfor %}
     titleConvo: true
-    titleModel: claude-sonnet-4-20250514
+    titleModel: {{ librechat_anthropic_models[0] }}
+
+modelSpecs:
+  enforce: false
+  prioritize: true
+  list:
+{% for model in librechat_anthropic_models %}
+    - name: "{{ model }}"
+      preset:
+        endpoint: anthropic
+        model: "{{ model }}"
+        promptPrefix: |
+          {{ librechat_system_prompt_content | indent(10) }}
+{% endfor %}
+{% for model in librechat_openai_models %}
+    - name: "{{ model }}"
+      preset:
+        endpoint: openAI
+        model: "{{ model }}"
+        promptPrefix: |
+          {{ librechat_system_prompt_content | indent(10) }}
+{% endfor %}
 
 registration:
   socialLogins:

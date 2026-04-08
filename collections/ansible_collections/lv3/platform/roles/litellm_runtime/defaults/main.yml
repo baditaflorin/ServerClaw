@@ -29,4 +29,7 @@ litellm_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
 litellm_master_key_local_file: "{{ litellm_local_artifact_dir }}/master-key.txt"
 litellm_database_url: "postgresql://{{ litellm_database_user }}:{{ litellm_database_password }}@{{ platform_service_topology.postgres.hosts.internal }}:5432/{{ litellm_database_name }}"
 litellm_ollama_base_url: http://10.10.10.20:11434
+# Anthropic API key — shared with LibreChat; stored in .local/litellm/
+litellm_anthropic_api_key_local_file: "{{ litellm_local_artifact_dir }}/anthropic-api-key.txt"
+litellm_anthropic_api_key_remote_file: "{{ litellm_secret_dir }}/anthropic-api-key"
 litellm_log_level: INFO

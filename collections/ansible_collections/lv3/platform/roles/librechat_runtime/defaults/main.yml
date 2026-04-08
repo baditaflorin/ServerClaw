@@ -53,9 +53,26 @@ librechat_oidc_session_secret_local_file: "{{ librechat_local_artifact_dir }}/oi
 librechat_ollama_base_url: http://10.10.10.20:11434
 # Anthropic
 librechat_anthropic_api_key_remote_file: "{{ librechat_secret_dir }}/anthropic-api-key"
+librechat_anthropic_api_key_local_file: "{{ librechat_local_artifact_dir }}/anthropic-api-key.txt"
+# OpenAI
+librechat_openai_api_key_remote_file: "{{ librechat_secret_dir }}/openai-api-key"
+librechat_openai_api_key_local_file: "{{ librechat_local_artifact_dir }}/openai-api-key.txt"
 # System prompt preset
 librechat_system_prompt_file: "{{ librechat_site_dir }}/system-prompt.md"
 librechat_system_prompt_src: ../../../../config/serverclaw/system-prompt.md
+# Model lists for built-in endpoints (fetch: true not supported in v0.8.4)
+# Update these when providers add or remove models.
+librechat_anthropic_models:
+  - claude-sonnet-4-20250514
+  - claude-haiku-4-5-20251001
+  - claude-opus-4-20250115
+librechat_openai_models:
+  - gpt-4o
+  - gpt-4o-mini
+  - o3-mini
+  - o4-mini
+# Ollama models (auto-discovered via fetch: true on custom endpoint)
+librechat_ollama_default_model: gemma4:e4b
 # Admin
 librechat_admin_email: ops@lv3.org
 # Web search
