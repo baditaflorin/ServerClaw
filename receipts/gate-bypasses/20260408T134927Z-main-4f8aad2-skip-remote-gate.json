@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-08T13:49:27Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "4f8aad27ed184a916a889cd2b7bbc1248142d441",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Build server gate script did not return after 5+ minutes",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "remote gate hung indefinitely on build server 10.10.10.30 during ADR-0383/0384 push"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "ADR-0364"
+  }
+}
