@@ -112,6 +112,7 @@ def build_mongosh_script(admin_email: str, system_prompt: str) -> str:
     actions: {actions_js},
     conversation_starters: {starters},
     isCollaborative: true,
+    enableActions: true,
     createdAt: now,
     updatedAt: now
   }}""")
@@ -151,6 +152,7 @@ agents.forEach(function(agent) {{
           actions: agent.actions,
           instructions: agent.instructions,
           conversation_starters: agent.conversation_starters,
+          enableActions: agent.enableActions,
           updatedAt: now
         }}
       }}
