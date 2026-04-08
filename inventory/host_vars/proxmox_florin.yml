@@ -1770,13 +1770,20 @@ network_policy:
           protocol: tcp
           ports:
             - 8080
-          description: Neko signalling proxy from NGINX edge (browser.lv3.org)
+            - 8081
+            - 8082
+            - 8083
+            - 8084
+            - 8085
+            - 8086
+            - 8087
+            - 8088
+          description: Neko signalling proxies from NGINX edge (browser.lv3.org) — one port per instance
         - source: public
           protocol: udp
           ports:
-            - 50000
-            - 60000
-          description: Neko WebRTC media streams (UDP RTP/STUN) from public internet
+            - "50000:58999"
+          description: Neko WebRTC media streams (UDP EPR ranges for all instances)
     runtime-apps-lv3:
       allowed_inbound:
         - source: management
