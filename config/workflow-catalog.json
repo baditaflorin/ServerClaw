@@ -1877,6 +1877,69 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-neko": {
+      "description": "Converge Neko remote desktop on dedicated runtime-comms-lv3 VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-neko",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-neko env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-neko"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/neko.yml",
+        "playbooks/services/neko.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/neko.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/neko.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2",
+        "collections/ansible_collections/lv3/platform/roles/neko_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/verify_neko_webrtc_session.py",
+        "tests/test_neko_firewall_concurrency.py",
+        "tests/test_neko_timeout_hierarchy.py",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-completeness.json",
+        "docs/adr/0380-neko-for-operator-remote-browser-access.md"
+      ],
+      "outputs": [
+        "A repo-managed Neko remote desktop runtime on dedicated runtime-comms-lv3 VM with WebRTC signalling at browser.lv3.org, public TCP and UDP media forwarding through the Proxmox host, and firewall concurrency locking to prevent past RTC failures."
+      ],
+      "verification_commands": [
+        "make syntax-check-neko",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/verify_neko_webrtc_session.py --url browser.lv3.org --timeout 30",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_neko_firewall_concurrency.py",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_neko_timeout_hierarchy.py",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml runtime-comms-lv3 -m shell -a \"ss -lnt | grep -E ':(8080) ' && ss -lun | grep -E ':(50000|60000) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-redpanda": {
       "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime-lv3 and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
       "lifecycle_status": "active",
@@ -2041,6 +2104,49 @@
         "max_steps": 300,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-identity-core-watchdog": {
+      "description": "Deploy the identity-core health watchdog on runtime-control-lv3: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-identity-core-watchdog",
+        "command": "make converge-identity-core-watchdog"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/adr/0376-identity-core-vm-isolation-and-watchdog.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/identity-core-watchdog.yml",
+        "roles/identity_core_watchdog"
+      ],
+      "outputs": [
+        "A systemd timer lv3-identity-watchdog.timer active on runtime-control-lv3, probing identity-core services every 15 seconds and auto-restarting on failure."
+      ],
+      "verification_commands": [
+        "ssh -i .local/ssh/bootstrap.id_ed25519 -J ops@100.64.0.1 ops@10.10.10.92 'systemctl is-active lv3-identity-watchdog.timer'",
+        "ssh -i .local/ssh/bootstrap.id_ed25519 -J ops@100.64.0.1 ops@10.10.10.92 'cat /var/lib/lv3-identity-watchdog/status.json'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 300,
+        "max_steps": 50,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -7989,6 +8095,105 @@
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "converge-litellm": {
+      "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend, replacing One API as the programmatic LLM gateway.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-litellm",
+        "command": "make converge-litellm"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "litellm_database_password",
+          "litellm_master_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/litellm.yml",
+        "collections/ansible_collections/lv3/platform/roles/litellm_postgres",
+        "collections/ansible_collections/lv3/platform/roles/litellm_runtime",
+        "config/llm-gateway/model-catalog.yaml",
+        "config/llm-gateway/consumer-keys.yaml",
+        "scripts/litellm_bootstrap.py"
+      ],
+      "outputs": [
+        "A private LiteLLM Proxy on docker-runtime-lv3:4000 with PostgreSQL backend, YAML-driven model routing, fallback chains, and OpenBao secret injection."
+      ],
+      "verification_commands": [
+        "curl -fsS http://100.64.0.1:4000/health/liveliness",
+        "curl -fsS http://100.64.0.1:4000/v1/models"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      },
+      "owner_runbook": "docs/runbooks/configure-litellm.md"
+    },
+    "converge-librechat": {
+      "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge, replacing Open WebUI.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-librechat",
+        "command": "make converge-librechat"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "librechat_jwt_secret",
+          "librechat_creds_key",
+          "librechat_creds_iv"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/librechat.yml",
+        "collections/ansible_collections/lv3/platform/roles/librechat_runtime",
+        "config/llm-gateway/auth.yaml",
+        "config/serverclaw/system-prompt.md"
+      ],
+      "outputs": [
+        "LibreChat deployed on coolify-lv3:8096 with OIDC auth, Ollama + Anthropic backends, ServerClaw system prompt preset, and edge publication at chat.lv3.org."
+      ],
+      "verification_commands": [
+        "curl -fsS https://chat.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      },
+      "owner_runbook": "docs/runbooks/configure-librechat.md"
     }
   }
 }
