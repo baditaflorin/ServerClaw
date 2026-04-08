@@ -62,10 +62,19 @@ plane_rabbitmq_container_name: plane-rabbitmq
 plane_minio_container_name: plane-minio
 plane_local_artifact_dir: "{{ repo_shared_local_root }}/plane"
 plane_site_dir: /opt/plane
+plane_data_dir: "{{ plane_site_dir }}/data"
 plane_secret_dir: "{{ plane_site_dir }}/secrets"
 plane_compose_file: "{{ plane_site_dir }}/docker-compose.yml"
 plane_env_file: "{{ plane_site_dir }}/runtime.env"
+plane_legacy_env_file: "{{ plane_site_dir }}/plane.env"
 plane_internal_port: 8000
+# OpenBao agent configuration (from ADR 0373)
+plane_openbao_agent_dir: "{{ plane_site_dir }}/openbao"
+plane_openbao_agent_image: "{{ openbao_agent_image }}"
+plane_openbao_agent_container_name: plane-openbao-agent
+plane_openbao_secret_path: services/plane/runtime-env
+plane_openbao_policy_name: lv3-service-plane-runtime
+plane_openbao_approle_name: plane-runtime
 plane_database_name: plane
 plane_database_user: plane_admin
 plane_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
