@@ -1,7 +1,7 @@
 id: ws-0377-open-webui-serverclaw-integration
 adr: '0377'
 title: Open WebUI platform knowledge and ServerClaw tool integration
-status: planned
+status: ready_for_merge
 owner: claude
 branch: claude/elastic-curie
 worktree_path: .claude/worktrees/elastic-curie
@@ -15,6 +15,7 @@ conflicts_with: []
 shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/open_webui_runtime/templates/open-webui.env.j2
+- collections/ansible_collections/lv3/platform/roles/librechat_runtime/
 ownership_manifest:
   owned_surfaces:
   - id: adr_0377_0378_docs
@@ -23,10 +24,20 @@ ownership_manifest:
     - docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
     - docs/workstreams/ws-0377-open-webui-serverclaw-integration.md
     mode: exclusive
+  - id: librechat_integration
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/librechat.yaml.j2
+    - collections/ansible_collections/lv3/platform/roles/librechat_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/runtime.env.j2
+    mode: exclusive
   - id: workstream_source
     paths:
     - workstreams/active/ws-0377-open-webui-serverclaw-integration.yaml
     mode: shared_contract
     contract: workstream-registry-v1
-ready_to_merge: false
+ready_to_merge: true
 live_applied: false
+canonical_truth:
+  changelog_entry: LibreChat OIDC SSO integration with Keycloak; adds OpenAI and Anthropic API endpoint support; enables session token management and dynamic model fetching
+  release_bump: minor
