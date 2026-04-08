@@ -92,12 +92,13 @@ def build_mongosh_script(admin_email: str, system_prompt: str) -> str:
     agents_js = []
     for pack in AGENT_PACKS:
         starters = json.dumps(pack["conversation_starters"])
-        # Build actions array with tool specs from /tools-openapi/
+        # Build actions array with tool specs
+        # Tools are served by LibreChat's web server at /tools-openapi/
         tool_pack_id = pack["id"].replace("agent_serverclaw_", "")  # e.g., "ops" from "agent_serverclaw_ops"
         actions_js = json.dumps([
             {
                 "name": f"{tool_pack_id}_tools",
-                "url": f"/tools-openapi/{tool_pack_id}.openapi.json",
+                "url": f"http://localhost:3080/tools-openapi/{tool_pack_id}.openapi.json",
                 "auth_required": False
             }
         ])
