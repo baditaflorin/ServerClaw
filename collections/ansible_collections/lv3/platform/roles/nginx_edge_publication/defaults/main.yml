@@ -343,6 +343,8 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
       - /health
+    unauthenticated_prefix_paths:
+      - /static/                   # CSS, JS, and static assets bypass OAuth2
 public_edge_certificate_domains: >-
   {{
     (
