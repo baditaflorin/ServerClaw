@@ -146,11 +146,17 @@ def build_mongosh_script(
     # Compute encoded domain for tool name references
     encoded_domain = encode_domain(gateway_base_url)
     # Raw domain without protocol for Action.metadata.domain
+    # IMPORTANT: must be hostname only (no port), because LibreChat's
+    # validateActionDomain compares metadata.domain against
+    # new URL(specServerUrl).hostname, which strips the port.
     raw_domain = gateway_base_url
     for prefix in ("https://", "http://"):
         if raw_domain.startswith(prefix):
             raw_domain = raw_domain[len(prefix) :]
             break
+    # Strip port — LibreChat's URL parser removes it during validation
+    if ":" in raw_domain:
+        raw_domain = raw_domain.rsplit(":", 1)[0]
 
     # Build actions and agents JS
     actions_js_parts = []
@@ -181,10 +187,12 @@ def build_mongosh_script(
 
         starters = json.dumps(pack["conversation_starters"])
 
-        # Action document
+        # Action document — LibreChat queries by agent_id for agents endpoint,
+        # and by assistant_id for assistants endpoint. Set both for compatibility.
         actions_js_parts.append(f"""  {{
     action_id: "{action_id}",
     agent_id: "{pack['id']}",
+    assistant_id: "{pack['id']}",
     type: "action_prototype",
     metadata: {{
       domain: "{raw_domain}",
@@ -197,7 +205,9 @@ def build_mongosh_script(
     }}
   }}""")
 
-        # Agent document
+        # Agent document — must match LibreChat v0.8.4 Mongoose schema exactly.
+        # Missing fields (versions, model_parameters, category, etc.) cause agents
+        # to be invisible in the UI even though they exist in MongoDB.
         agents_js_parts.append(f"""  {{
     id: "{pack['id']}",
     author: userId,
@@ -206,10 +216,39 @@ def build_mongosh_script(
     instructions: systemPrompt + "\\n\\n## Your Specialty\\n\\n{pack['specialty']}",
     model: "{pack['model']}",
     provider: "{pack['provider']}",
+    model_parameters: {{}},
+    artifacts: "",
     tools: {tool_names_js},
+    tool_kwargs: [],
     actions: ["{action_id}"],
+    agent_ids: [],
+    edges: [],
     conversation_starters: {starters},
-    isCollaborative: true,
+    projectIds: [],
+    category: "general",
+    support_contact: {{name: "", email: ""}},
+    is_promoted: false,
+    isCollaborative: false,
+    isPublic: true,
+    mcpServerNames: [],
+    tool_options: {{}},
+    version: 1,
+    versions: [{{
+      name: "{pack['name']}",
+      description: "{pack['description']}",
+      model_parameters: {{}},
+      agent_ids: [],
+      edges: [],
+      artifacts: "",
+      support_contact: {{name: "", email: ""}},
+      category: "general",
+      provider: "{pack['provider']}",
+      model: "{pack['model']}",
+      id: "{pack['id']}",
+      tools: {tool_names_js},
+      createdAt: now,
+      updatedAt: now
+    }}],
     createdAt: now,
     updatedAt: now
   }}""")
@@ -237,6 +276,17 @@ var actionDefs = [
 {actions_array}
 ];
 
+// Ensure both agent_id and assistant_id exist on all actions.
+// Agents endpoint queries by agent_id; assistants endpoint by assistant_id.
+db.actions.updateMany(
+  {{agent_id: {{$exists: true}}, assistant_id: {{$exists: false}}}},
+  [{{$set: {{assistant_id: "$agent_id"}}}}]
+);
+db.actions.updateMany(
+  {{assistant_id: {{$exists: true}}, agent_id: {{$exists: false}}}},
+  [{{$set: {{agent_id: "$assistant_id"}}}}]
+);
+
 var actionsCreated = 0;
 var actionsUpdated = 0;
 actionDefs.forEach(function(actionDef) {{
@@ -255,6 +305,7 @@ actionDefs.forEach(function(actionDef) {{
       {{$set: {{
         metadata: actionDef.metadata,
         agent_id: actionDef.agent_id,
+        assistant_id: actionDef.assistant_id,
         user: userId
       }}}}
     );
@@ -280,10 +331,26 @@ agents.forEach(function(agent) {{
     db.agents.updateOne(
       {{id: agent.id}},
       {{$set: {{
+        author: agent.author,
         tools: agent.tools,
         actions: agent.actions,
         instructions: agent.instructions,
         conversation_starters: agent.conversation_starters,
+        model_parameters: agent.model_parameters,
+        artifacts: agent.artifacts,
+        tool_kwargs: agent.tool_kwargs,
+        agent_ids: agent.agent_ids,
+        edges: agent.edges,
+        projectIds: agent.projectIds,
+        category: agent.category,
+        support_contact: agent.support_contact,
+        is_promoted: agent.is_promoted,
+        isCollaborative: agent.isCollaborative,
+        isPublic: agent.isPublic,
+        mcpServerNames: agent.mcpServerNames,
+        tool_options: agent.tool_options,
+        version: agent.version,
+        versions: agent.versions,
         updatedAt: now
       }}}}
     );
@@ -293,8 +360,80 @@ agents.forEach(function(agent) {{
 }});
 
 // Enable SHARED_GLOBAL permissions so all users see agents
-db.roles.updateOne({{name: "ADMIN"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true}}}});
-db.roles.updateOne({{name: "USER"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true}}}});
+db.roles.updateOne({{name: "ADMIN"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true, "permissions.AGENTS.USE": true, "permissions.AGENTS.CREATE": true}}}});
+db.roles.updateOne({{name: "USER"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL": true, "permissions.AGENTS.USE": true}}}});
+
+// Register agents in the instance project for global visibility
+db.projects.updateOne(
+  {{name: "instance"}},
+  {{$addToSet: {{agentIds: {{$each: agents.map(function(a) {{ return a.id; }})}}}}}}
+);
+
+// --- ACL Entries ---
+// LibreChat v0.8.4 uses an ACL system for agent visibility.
+// Without ACL entries, agents exist in MongoDB but are invisible via the API.
+// Create PUBLIC view entries (all users can see) and OWNER entries (author can edit).
+var viewerRole = db.accessroles.findOne({{name: "com_ui_role_viewer", resourceType: "agent"}});
+var ownerRole = db.accessroles.findOne({{name: "com_ui_role_owner", resourceType: "agent"}});
+
+if (viewerRole && ownerRole) {{
+  var aclCreated = 0;
+  agents.forEach(function(agent) {{
+    var agentDoc = db.agents.findOne({{id: agent.id}});
+    if (!agentDoc) return;
+
+    // PUBLIC view access — so all users can see the agent
+    var pubResult = db.aclentries.updateOne(
+      {{resourceId: agentDoc._id, resourceType: "agent", principalType: "public"}},
+      {{$set: {{
+        resourceId: agentDoc._id,
+        resourceType: "agent",
+        principalType: "public",
+        principalId: "public",
+        principalModel: "Public",
+        permBits: viewerRole.permBits,
+        roleId: viewerRole._id,
+        grantedBy: userId,
+        grantedAt: now,
+        __v: 0,
+        createdAt: now,
+        updatedAt: now
+      }}}},
+      {{upsert: true}}
+    );
+    if (pubResult.upsertedCount > 0) aclCreated++;
+
+    // OWNER access for the admin user
+    var ownResult = db.aclentries.updateOne(
+      {{resourceId: agentDoc._id, resourceType: "agent", principalType: "user", principalId: userId}},
+      {{$set: {{
+        resourceId: agentDoc._id,
+        resourceType: "agent",
+        principalType: "user",
+        principalId: userId,
+        principalModel: "User",
+        permBits: ownerRole.permBits,
+        roleId: ownerRole._id,
+        grantedBy: userId,
+        grantedAt: now,
+        __v: 0,
+        createdAt: now,
+        updatedAt: now
+      }}}},
+      {{upsert: true}}
+    );
+    if (ownResult.upsertedCount > 0) aclCreated++;
+  }});
+  print("ACL entries: " + aclCreated + " created");
+}} else {{
+  print("WARNING: access roles not found, skipping ACL entries");
+}}
+
+// Ensure all agents have Mongoose __v field (required for API queries)
+db.agents.updateMany(
+  {{__v: {{$exists: false}}}},
+  {{$set: {{__v: 0}}}}
+);
 
 print("Done. Actions: " + actionsCreated + " created, " + actionsUpdated + " updated. Agents: " + agentsCreated + " created, " + agentsUpdated + " updated.");
 """
