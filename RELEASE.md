@@ -1,8 +1,9 @@
-# Release 0.178.66
+# Release 0.178.67
 
 - Date: 2026-04-09
 
 ## Summary
+- API gateway tool resilience: Docker socket fallback for list-containers and get-container-logs (no Portainer dependency); internal URL override for platform-context queries (bypasses JWT auth layer); mempalace tool metadata fixes (runbook refs, audit_on_call); command-catalog execution profile fix for refresh-discovery-surfaces
 - ADR 0373 Phase 4 complete: unified service registry pattern for all 74 platform services; each service registered with service_type (docker_compose, system_package, infrastructure, multi_instance); derive_service_defaults extended with conditional branching for all types; alertmanager_runtime migrated as reference implementation; comprehensive runbook created for future service additions (docs/runbooks/add-new-service-to-platform.md); pattern enables programmatic, DRY, IoC-based infrastructure configuration across entire platform
 - ADR 0224: repo-intake promoted to first-class subdomain (repo-intake.lv3.org) with dedicated Ansible role, standalone FastAPI app, and nginx publication; extracted from ops-portal with catalog profile support and programmatic JSON API
 - LibreChat upgraded v0.7.8 → v0.8.4: 30+ security fixes, working Agents REST API, MCP support with lazy tool loading and circuit breakers, agent handoffs (routing between specialist agents), local document extraction (PDF/DOCX/XLS), modelSpecs improvements, OIDC hardening
