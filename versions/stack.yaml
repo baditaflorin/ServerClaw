@@ -1,11 +1,11 @@
 schema_version: 1.0.0
-repo_version: 0.178.37
-platform_version: 0.131.4
+repo_version: 0.178.66
+platform_version: 0.178.66
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+    monitoring: 2026-04-09-adr-0373-phase-4-alertmanager-runtime-migration-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
