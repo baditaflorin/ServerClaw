@@ -4862,7 +4862,7 @@
     "refresh-discovery-surfaces": {
       "description": "Regenerate platform manifest, discovery artifacts, and sync ADR documentation to Outline wiki.",
       "workflow_id": "refresh-discovery-surfaces",
-      "scope": "controller_local",
+      "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
       "inputs": [],
       "expected_preconditions": [
