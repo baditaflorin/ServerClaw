@@ -1,4 +1,12 @@
 ---
+- name: Derive Repo Intake conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: repo_intake
+  when: repo_intake_site_dir is not defined
+
 - name: Ensure repo-intake data directory exists
   ansible.builtin.file:
     path: "{{ repo_intake_data_dir }}"

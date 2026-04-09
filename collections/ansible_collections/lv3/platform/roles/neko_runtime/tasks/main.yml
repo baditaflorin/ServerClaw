@@ -3,6 +3,14 @@
 # Manages N isolated browser containers driven by neko_instances dict.
 # Graceful: each instance deploys independently; one failing never blocks others.
 
+- name: Derive Neko conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: neko
+  when: neko_site_dir is not defined
+
 - name: Assert neko_instances is defined
   ansible.builtin.assert:
     that:

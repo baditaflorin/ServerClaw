@@ -1,9 +1,17 @@
 ---
 # Purpose: Converge the LibreChat runtime on the target host.
 # Use case: Deploys or updates the LibreChat container stack with MongoDB and Meilisearch sidecars.
-# Inputs: librechat_* variables from defaults/main.yml.
+# Inputs: Derived from platform_services.yml + service-specific variables.
 # Outputs: Running LibreChat container with OIDC auth, Ollama + Anthropic backends, system prompt preset.
 # Idempotency: Yes.
+
+- name: Derive LibreChat conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: librechat
+  when: librechat_site_dir is not defined
 
 - name: Validate LibreChat runtime inputs
   ansible.builtin.assert:
