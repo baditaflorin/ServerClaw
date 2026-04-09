@@ -30,7 +30,7 @@ sftpgo_smoke_user_quota_files: 100
 sftpgo_keycloak_client_id: sftpgo
 sftpgo_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/sftpgo-client-secret.txt"
 sftpgo_keycloak_config_url: >-
-  https://{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}/realms/lv3/.well-known/openid-configuration
+  https://{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration
 sftpgo_keycloak_username_field: preferred_username
 sftpgo_admin_port: "{{ hostvars[platform_topology_host].platform_port_assignments.sftpgo_admin_port }}"
 sftpgo_webdav_port: "{{ hostvars[platform_topology_host].platform_port_assignments.sftpgo_webdav_port }}"

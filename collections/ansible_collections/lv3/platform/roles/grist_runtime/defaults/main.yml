@@ -21,7 +21,7 @@ grist_session_secret_local_file: "{{ grist_local_artifact_dir }}/session-secret.
 grist_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/grist-client-secret.txt"
 grist_session_secret_remote_file: "{{ grist_secret_dir }}/session-secret.txt"
 grist_keycloak_client_id: grist
-grist_keycloak_issuer: https://sso.{{ platform_domain }}/realms/lv3
+grist_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
 grist_keycloak_scopes: openid profile email
 grist_keycloak_sp_host: "{{ grist_public_base_url }}"
 grist_single_org: lv3

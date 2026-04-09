@@ -52,7 +52,7 @@ identity_watchdog_services:
     compose_dir: /opt/keycloak
     compose_service: keycloak
     restart_args: ""
-    health_url: "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration"
+    health_url: "http://127.0.0.1:18080/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
     health_method: ""
     expected_status: "200"
   - name: step-ca

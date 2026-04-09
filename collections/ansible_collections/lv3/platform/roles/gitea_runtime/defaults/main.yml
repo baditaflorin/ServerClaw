@@ -45,8 +45,8 @@ gitea_database_port: 5432
 gitea_database_password_local_file: "{{ gitea_local_artifact_dir }}/database-password.txt"
 gitea_oidc_client_id: gitea-oauth
 gitea_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/gitea-client-secret.txt"
-gitea_oidc_discovery_url: "{{ gitea_keycloak_service_topology.urls.public }}/realms/lv3/.well-known/openid-configuration"
-gitea_oidc_internal_discovery_url: "{{ gitea_keycloak_service_topology.urls.internal }}/realms/lv3/.well-known/openid-configuration"
+gitea_oidc_discovery_url: "{{ gitea_keycloak_service_topology.urls.public }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
+gitea_oidc_internal_discovery_url: "{{ gitea_keycloak_service_topology.urls.internal }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
 gitea_oidc_required_claim_name: groups
 gitea_oidc_required_claim_value: /lv3-platform-admins
 gitea_oidc_group_team_map:

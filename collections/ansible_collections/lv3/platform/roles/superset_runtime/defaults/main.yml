@@ -67,7 +67,7 @@ superset_admin_first_name: LV3
 superset_admin_last_name: Admin
 superset_admin_email: superset.admin@{{ platform_domain }}
 superset_keycloak_client_id: superset
-superset_keycloak_issuer: https://sso.{{ platform_domain }}/realms/lv3
+superset_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
 superset_keycloak_server_metadata_url: "{{ superset_keycloak_issuer }}/.well-known/openid-configuration"
 superset_keycloak_authorize_url: "{{ superset_keycloak_issuer }}/protocol/openid-connect/auth"
 superset_keycloak_token_url: "{{ superset_keycloak_issuer }}/protocol/openid-connect/token"

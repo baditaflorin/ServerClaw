@@ -34,7 +34,7 @@ glitchtip_valkey_password_remote_file: "{{ glitchtip_secret_dir }}/valkey-passwo
 glitchtip_keycloak_client_id: glitchtip
 glitchtip_keycloak_provider: openid_connect
 glitchtip_keycloak_provider_id: keycloak
-glitchtip_keycloak_server_url: https://sso.{{ platform_domain }}/realms/lv3
+glitchtip_keycloak_server_url: "{{ keycloak_oidc_issuer_url }}"
 glitchtip_bootstrap_admin_email: glitchtip-admin@{{ platform_domain }}
 glitchtip_bootstrap_admin_name: LV3 GlitchTip Admin
 glitchtip_api_token_label: lv3-platform-automation

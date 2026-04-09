@@ -28,10 +28,10 @@ jupyterhub_service_api_token_remote_file: "{{ jupyterhub_secret_dir }}/service-a
 jupyterhub_proxy_auth_token_remote_file: "{{ jupyterhub_secret_dir }}/proxy-auth-token.txt"
 jupyterhub_minio_root_password_remote_file: "{{ jupyterhub_secret_dir }}/minio-root-password.txt"
 jupyterhub_keycloak_client_id: jupyterhub
-jupyterhub_keycloak_issuer: https://sso.{{ platform_domain }}/realms/lv3
-jupyterhub_keycloak_authorize_url: https://sso.{{ platform_domain }}/realms/lv3/protocol/openid-connect/auth
-jupyterhub_keycloak_token_url: https://sso.{{ platform_domain }}/realms/lv3/protocol/openid-connect/token
-jupyterhub_keycloak_userdata_url: https://sso.{{ platform_domain }}/realms/lv3/protocol/openid-connect/userinfo
+jupyterhub_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
+jupyterhub_keycloak_authorize_url: "{{ keycloak_oidc_auth_url }}"
+jupyterhub_keycloak_token_url: "{{ keycloak_oidc_token_url }}"
+jupyterhub_keycloak_userdata_url: "{{ keycloak_oidc_userinfo_url }}"
 jupyterhub_keycloak_logout_url: >-
   {{ jupyterhub_session_authority.keycloak_logout_url }}?client_id={{ jupyterhub_keycloak_client_id }}&post_logout_redirect_uri={{ jupyterhub_public_base_url | urlencode }}
 jupyterhub_keycloak_scopes:

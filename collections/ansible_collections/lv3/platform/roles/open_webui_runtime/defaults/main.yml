@@ -25,7 +25,7 @@ open_webui_admin_password_remote_file: "{{ open_webui_secret_dir }}/admin-passwo
 open_webui_secret_key_remote_file: "{{ open_webui_secret_dir }}/webui-secret-key.txt"
 open_webui_enable_oidc: true
 open_webui_oidc_client_id: open-webui
-open_webui_oidc_provider_url: "{{ platform_service_topology.keycloak.urls.internal }}/realms/lv3/.well-known/openid-configuration"
+open_webui_oidc_provider_url: "{{ platform_service_topology.keycloak.urls.internal }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
 open_webui_oidc_provider_name: Keycloak
 open_webui_oidc_scopes: openid email profile
 open_webui_oidc_redirect_uri: "{{ open_webui_webui_url }}/oauth/oidc/callback"

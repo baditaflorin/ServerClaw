@@ -33,7 +33,7 @@ semaphore_oidc_provider: keycloak
 semaphore_oidc_client_id: semaphore
 semaphore_oidc_client_secret_local_file: "{{ semaphore_local_artifact_dir }}/oidc-client-secret.txt"
 semaphore_oidc_client_secret_guest_file: "{{ semaphore_secret_dir }}/oidc-client-secret"
-semaphore_oidc_issuer_url: "https://auth.{{ platform_domain }}/realms/lv3"
+semaphore_oidc_issuer_url: "{{ keycloak_oidc_issuer_url }}"
 semaphore_oidc_callback_url: "{{ semaphore_controller_url }}/auth/oidc/callback"
 semaphore_oidc_scopes: "openid profile email"
 semaphore_oidc_auto_provision_user: true
