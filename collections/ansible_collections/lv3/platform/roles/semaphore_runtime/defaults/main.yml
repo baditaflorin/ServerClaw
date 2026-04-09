@@ -4,20 +4,8 @@
 # platform_service_registry — ADR 0373.
 semaphore_server_port: "{{ platform_service_topology | platform_service_port('semaphore', 'internal') }}"
 semaphore_host_proxy_port: "{{ platform_service_topology | platform_service_port('semaphore', 'controller') }}"
-semaphore_site_dir: /opt/semaphore
-semaphore_data_dir: "{{ semaphore_site_dir }}/data"
-semaphore_env_file: "{{ semaphore_site_dir }}/semaphore.env"
-semaphore_compose_file: "{{ semaphore_site_dir }}/docker-compose.yml"
-semaphore_image: docker.io/semaphoreui/semaphore:latest
-semaphore_container_name: semaphore
-semaphore_local_artifact_dir: "{{ playbook_dir }}/../.local/semaphore"
-semaphore_secret_dir: /etc/lv3/semaphore
 
 # OpenBao agent configuration (from ADR 0373)
-semaphore_openbao_agent_dir: "{{ semaphore_site_dir }}/openbao"
-semaphore_openbao_agent_image: "{{ openbao_agent_image }}"
-semaphore_openbao_agent_container_name: semaphore-openbao-agent
-semaphore_openbao_secret_path: services/semaphore/runtime-env
 semaphore_openbao_policy_name: lv3-service-semaphore-runtime
 semaphore_openbao_approle_name: semaphore-runtime
 

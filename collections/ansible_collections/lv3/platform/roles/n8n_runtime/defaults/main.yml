@@ -1,18 +1,6 @@
 ---
-n8n_site_dir: /opt/n8n
-n8n_data_dir: "{{ n8n_site_dir }}/data"
-n8n_secret_dir: /etc/lv3/n8n
-n8n_compose_file: "{{ n8n_site_dir }}/docker-compose.yml"
-n8n_env_file: "{{ compose_runtime_secret_root }}/n8n/runtime.env"
-n8n_legacy_env_file: "{{ n8n_site_dir }}/n8n.env"
-n8n_openbao_agent_dir: "{{ n8n_site_dir }}/openbao"
-n8n_openbao_agent_image: "{{ openbao_agent_image }}"
-n8n_openbao_agent_container_name: n8n-openbao-agent
-n8n_openbao_secret_path: services/n8n/runtime-env
 n8n_openbao_policy_name: lv3-service-n8n-runtime
 n8n_openbao_approle_name: n8n-runtime
-n8n_container_name: n8n
-n8n_image: "{{ container_image_catalog.images.n8n_runtime.ref }}"
 n8n_network_mode: host
 n8n_requires_docker_nat: "{{ n8n_network_mode != 'host' }}"
 n8n_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('n8n', 'internal') }}"
@@ -23,7 +11,6 @@ n8n_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.ini
 n8n_database_port: 5432
 n8n_database_name: n8n
 n8n_database_user: n8n
-n8n_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n
 n8n_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/database-password.txt
 n8n_owner_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/owner-password.txt
 n8n_encryption_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/encryption-key.txt

@@ -6,10 +6,8 @@
 
 sftpgo_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('sftpgo') }}"
 sftpgo_session_authority: "{{ platform_session_authority }}"
-sftpgo_config_dir: "{{ sftpgo_site_dir }}/config"
 sftpgo_plugin_dir: "{{ sftpgo_site_dir }}/plugins"
 sftpgo_state_dir: "{{ sftpgo_site_dir }}/state"
-sftpgo_config_file: "{{ sftpgo_config_dir }}/sftpgo.json"
 sftpgo_database_name: sftpgo
 sftpgo_database_user: sftpgo
 sftpgo_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

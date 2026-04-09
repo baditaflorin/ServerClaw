@@ -8,10 +8,6 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-tika_runtime_site_dir: /opt/tika
-tika_runtime_compose_file: "{{ tika_runtime_site_dir }}/docker-compose.yml"
-tika_runtime_container_name: tika
-tika_runtime_image: "{{ container_image_catalog.images.tika_runtime.ref }}"
 tika_runtime_port: "{{ platform_port_assignments.tika_port }}"
 tika_runtime_base_url: "http://127.0.0.1:{{ tika_runtime_port }}"
 tika_runtime_container_port: 9998

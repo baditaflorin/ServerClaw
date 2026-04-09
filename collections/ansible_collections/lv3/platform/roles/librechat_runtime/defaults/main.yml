@@ -5,32 +5,11 @@
 # Idempotency: Fully idempotent because this file only declares defaults.
 # Dependencies: ADR 0165, ADR 0060.
 ---
-librechat_site_dir: /opt/librechat
-librechat_data_dir: "{{ librechat_site_dir }}/data"
-librechat_secret_dir: /etc/lv3/librechat
-librechat_compose_file: "{{ librechat_site_dir }}/docker-compose.yml"
-librechat_config_file: "{{ librechat_site_dir }}/librechat.yaml"
-librechat_env_file: "{{ compose_runtime_secret_root }}/librechat/runtime.env"
-librechat_legacy_env_file: "{{ librechat_site_dir }}/librechat.env"
-librechat_openbao_agent_dir: "{{ librechat_site_dir }}/openbao"
-librechat_openbao_agent_image: "{{ openbao_agent_image }}"
-librechat_openbao_agent_container_name: librechat-openbao-agent
 librechat_enable_openbao_agent: false
-librechat_openbao_secret_path: services/librechat/runtime-env
 librechat_openbao_policy_name: lv3-service-librechat-runtime
 librechat_openbao_approle_name: librechat-runtime
-librechat_container_name: librechat
-librechat_internal_port: 8096
 librechat_container_port: 3080
 librechat_healthcheck_path: /
-librechat_image: "{{ container_image_catalog.images.librechat_runtime.ref }}"
-librechat_mongo_container_name: librechat-mongodb
-librechat_mongo_image: mongo:7
-librechat_mongo_data_dir: "{{ librechat_data_dir }}/mongodb"
-librechat_meilisearch_container_name: librechat-meilisearch
-librechat_meilisearch_image: getmeili/meilisearch:v1.7
-librechat_meilisearch_data_dir: "{{ librechat_data_dir }}/meilisearch"
-librechat_local_artifact_dir: "{{ repo_shared_local_root }}/librechat"
 librechat_jwt_secret_local_file: "{{ librechat_local_artifact_dir }}/jwt-secret.txt"
 librechat_jwt_secret_remote_file: "{{ librechat_secret_dir }}/jwt-secret"
 librechat_jwt_refresh_secret_remote_file: "{{ librechat_secret_dir }}/jwt-refresh-secret"

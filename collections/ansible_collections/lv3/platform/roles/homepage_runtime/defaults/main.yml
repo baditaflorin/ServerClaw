@@ -2,7 +2,6 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-homepage_config_dir: "{{ homepage_site_dir }}/config"
 homepage_bind_host: "{{ ansible_host }}"
 homepage_loopback_bind_host: 127.0.0.1
 homepage_port: "{{ platform_service_topology | platform_service_port('homepage', 'internal') }}"

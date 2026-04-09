@@ -27,11 +27,6 @@
 # platform_service_registry via derive_service_defaults task — ADR 0373.
 
 # Service-specific Woodpecker runtime defaults
-woodpecker_server_container_name: woodpecker-server
-woodpecker_agent_container_name: woodpecker-agent
-woodpecker_agent_image: "{{ container_image_catalog.images.woodpecker_agent_runtime.ref }}"
-woodpecker_image: "{{ container_image_catalog.images.woodpecker_server_runtime.ref }}"
-woodpecker_server_image: "{{ container_image_catalog.images.woodpecker_server_runtime.ref }}"
 
 # Database configuration (shared PostgreSQL) — service-specific
 woodpecker_database_name: woodpecker
@@ -43,8 +38,6 @@ woodpecker_database_password_local_file: "{{ repo_shared_local_root }}/woodpecke
 # Service topology derived from platform facts
 woodpecker_service_topology: "{{ platform_service_topology | service_topology_get('woodpecker') }}"
 woodpecker_gitea_service_topology: "{{ platform_service_topology | service_topology_get('gitea') }}"
-woodpecker_server_data_dir: "{{ woodpecker_data_dir }}/server"
-woodpecker_agent_data_dir: "{{ woodpecker_data_dir }}/agent"
 woodpecker_internal_url: "{{ woodpecker_service_topology.urls.internal }}"
 woodpecker_controller_url: "{{ woodpecker_service_topology.urls.controller }}"
 woodpecker_public_url: "{{ woodpecker_service_topology.urls.public }}"

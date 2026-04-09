@@ -2,7 +2,5 @@
 vaultwarden_database_name: vaultwarden
 vaultwarden_database_user: vaultwarden_admin
 vaultwarden_database_support_role: vaultwarden_support
-vaultwarden_postgres_secret_dir: /etc/lv3/vaultwarden
 vaultwarden_postgres_password_file: "{{ vaultwarden_postgres_secret_dir }}/database-password.txt"
-vaultwarden_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vaultwarden
 vaultwarden_database_password_local_file: "{{ vaultwarden_local_artifact_dir }}/database-password.txt"

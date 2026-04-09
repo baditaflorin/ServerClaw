@@ -3,7 +3,5 @@
 
 flagsmith_database_name: flagsmith
 flagsmith_database_user: flagsmith
-flagsmith_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith
 flagsmith_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/database-password.txt
-flagsmith_postgres_secret_dir: /etc/lv3/flagsmith
 flagsmith_postgres_password_file: "{{ flagsmith_postgres_secret_dir }}/database-password.txt"

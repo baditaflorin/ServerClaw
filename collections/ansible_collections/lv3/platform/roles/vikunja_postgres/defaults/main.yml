@@ -29,7 +29,5 @@
 vikunja_database_name: vikunja
 vikunja_database_user: vikunja_admin
 vikunja_database_support_role: vikunja_user
-vikunja_postgres_secret_dir: /etc/lv3/vikunja
 vikunja_postgres_password_file: "{{ vikunja_postgres_secret_dir }}/database-password"
-vikunja_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vikunja
 vikunja_database_password_local_file: "{{ vikunja_local_artifact_dir }}/database-password.txt"

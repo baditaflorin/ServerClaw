@@ -32,7 +32,6 @@ neko_default_memory_limit: "4g"
 neko_default_restart_policy: "unless-stopped"
 
 # --- Storage ---
-neko_data_dir: "/opt/neko/instances"
 
 # --- Health check ---
 neko_healthcheck_interval: "30s"

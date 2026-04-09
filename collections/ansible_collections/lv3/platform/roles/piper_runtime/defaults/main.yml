@@ -9,16 +9,12 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 piper_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('piper') }}"
-piper_runtime_site_dir: /opt/piper
 piper_runtime_service_dir: "{{ piper_runtime_site_dir }}/service"
-piper_runtime_compose_file: "{{ piper_runtime_site_dir }}/docker-compose.yml"
 piper_runtime_compose_project_name: "{{ piper_runtime_site_dir | basename }}"
 piper_runtime_dockerfile: "{{ piper_runtime_service_dir }}/Dockerfile"
 piper_runtime_requirements_file: "{{ piper_runtime_service_dir }}/requirements.txt"
 piper_runtime_service_script: "{{ piper_runtime_service_dir }}/piper_service.py"
-piper_runtime_container_name: piper
 piper_runtime_image_name: lv3-piper
-piper_runtime_base_image: docker.io/library/python:3.12-slim-bookworm@sha256:38f794ff7afccc577d6b4beb6ab5fae2dff155e5a6f038aa7f13d6dd8487ce82
 piper_runtime_port: "{{ piper_service_topology.ports.internal }}"
 piper_runtime_base_url: "{{ piper_service_topology.urls.internal }}"
 piper_runtime_health_url: "{{ piper_runtime_base_url }}/healthz"

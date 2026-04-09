@@ -30,7 +30,6 @@ repowise_collection: repowise
 repowise_api_token: ""
 
 # Docker image for the service
-repowise_python_image: python:3.12-slim
 
 # Index rebuild schedule (cron, runs on the server)
 repowise_rebuild_cron_hour: "3"

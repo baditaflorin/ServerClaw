@@ -3,19 +3,13 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 # Purpose: Define the repo-synced sources, local image build inputs, and runtime paths for the private Playwright browser runner.
-browser_runner_runtime_site_dir: /opt/browser-runner
 browser_runner_runtime_service_dir: "{{ browser_runner_runtime_site_dir }}/app"
-browser_runner_runtime_data_dir: "{{ browser_runner_runtime_site_dir }}/data"
 browser_runner_runtime_artifact_dir: "{{ browser_runner_runtime_data_dir }}/artifacts"
-browser_runner_runtime_compose_file: "{{ browser_runner_runtime_site_dir }}/docker-compose.yml"
 browser_runner_runtime_dockerfile: "{{ browser_runner_runtime_service_dir }}/Dockerfile"
 browser_runner_runtime_requirements_file: "{{ browser_runner_runtime_service_dir }}/requirements.txt"
 browser_runner_runtime_service_script: "{{ browser_runner_runtime_service_dir }}/browser_runner_service.py"
 browser_runner_runtime_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
-browser_runner_runtime_container_name: browser-runner
 browser_runner_runtime_image_name: lv3/browser-runner
-browser_runner_runtime_base_image: python:3.12-slim-bookworm
-browser_runner_runtime_internal_port: "{{ browser_runner_port }}"
 browser_runner_runtime_bind_host: 0.0.0.0
 browser_runner_runtime_network_mode: host
 browser_runner_runtime_default_timeout_seconds: 45

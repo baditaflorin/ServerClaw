@@ -7,7 +7,6 @@
 # Dependencies: ADR 0165 and ADR 0302.
 
 restic_config_backup_runtime_root: /opt/restic-config-backup
-restic_config_backup_runtime_config_dir: /etc/lv3/restic-config-backup
 restic_config_backup_runtime_catalog_path: "{{ restic_config_backup_runtime_config_dir }}/restic-file-backup-catalog.json"
 restic_config_backup_runtime_state_dir: /var/lib/lv3/restic-config-backup
 restic_config_backup_runtime_cache_dir: "{{ restic_config_backup_runtime_state_dir }}/cache"
@@ -34,7 +33,6 @@ restic_config_backup_latest_snapshot_receipt: "{{ restic_config_backup_repo_chec
 restic_config_backup_restore_verification_dir: "{{ restic_config_backup_repo_checkout_host_path }}/receipts/restic-restore-verifications"
 restic_config_backup_repository_password_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/restic-config-backup/repository-password.txt
-restic_config_backup_minio_container_name: minio
 restic_config_backup_minio_access_key: minio-root
 restic_config_backup_minio_secret_key_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/minio/root-password.txt
@@ -45,15 +43,11 @@ restic_config_backup_ntfy_token_local_file: >-
 restic_config_backup_openbao_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('openbao') }}"
 restic_config_backup_runtime_openbao_address: "http://{{ restic_config_backup_openbao_service_topology.private_ip }}:{{ hostvars[platform_topology_host].platform_port_assignments.openbao_http_port }}"
 restic_config_backup_runtime_openbao_local_address: "http://127.0.0.1:{{ openbao_http_port }}"
-restic_config_backup_runtime_openbao_secret_path: services/restic-config-backup/runtime-config
 restic_config_backup_runtime_openbao_policy_name: lv3-restic-config-backup-runtime
 restic_config_backup_runtime_openbao_approle_name: restic-config-backup
-restic_config_backup_runtime_openbao_agent_dir: "{{ restic_config_backup_runtime_config_dir }}/openbao-agent"
 restic_config_backup_runtime_openbao_agent_service_name: lv3-restic-config-backup-openbao-agent
-restic_config_backup_runtime_openbao_agent_container_name: lv3-restic-config-backup-openbao-agent
 restic_config_backup_runtime_credential_dir: /run/lv3-systemd-credentials/restic-config-backup
 restic_config_backup_runtime_credential_file: "{{ restic_config_backup_runtime_credential_dir }}/runtime-config.json"
-restic_config_backup_runtime_openbao_agent_config_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/agent.hcl"
 restic_config_backup_runtime_openbao_agent_template_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/runtime-config.ctmpl"
 restic_config_backup_runtime_openbao_role_id_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/role_id"
 restic_config_backup_runtime_openbao_secret_id_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/secret_id"

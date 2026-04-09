@@ -40,24 +40,6 @@ dify_sandbox_api_key_remote_file: "{{ dify_secret_dir }}/sandbox-api-key.txt"
 dify_plugin_daemon_key_remote_file: "{{ dify_secret_dir }}/plugin-daemon-key.txt"
 dify_plugin_inner_api_key_remote_file: "{{ dify_secret_dir }}/plugin-inner-api-key.txt"
 dify_tools_api_key_remote_file: "{{ dify_secret_dir }}/tools-api-key.txt"
-dify_api_container_name: dify-api
-dify_worker_container_name: dify-worker
-dify_worker_beat_container_name: dify-worker-beat
-dify_web_container_name: dify-web
-dify_redis_container_name: dify-redis
-dify_qdrant_container_name: dify-qdrant
-dify_sandbox_container_name: dify-sandbox
-dify_plugin_daemon_container_name: dify-plugin-daemon
-dify_nginx_container_name: dify-nginx
-dify_ssrf_proxy_container_name: dify-ssrf-proxy
-dify_api_image: "{{ container_image_catalog.images.dify_api_runtime.ref }}"
-dify_web_image: "{{ container_image_catalog.images.dify_web_runtime.ref }}"
-dify_redis_image: "{{ container_image_catalog.images.dify_redis_runtime.ref }}"
-dify_qdrant_image: "{{ container_image_catalog.images.dify_qdrant_runtime.ref }}"
-dify_sandbox_image: "{{ container_image_catalog.images.dify_sandbox_runtime.ref }}"
-dify_plugin_daemon_image: "{{ container_image_catalog.images.dify_plugin_daemon_runtime.ref }}"
-dify_nginx_image: "{{ container_image_catalog.images.dify_nginx_runtime.ref }}"
-dify_ssrf_proxy_image: "{{ container_image_catalog.images.dify_ssrf_proxy_runtime.ref }}"
 dify_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('dify', 'internal') }}"
 dify_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('dify', 'internal') }}"
 dify_public_base_url: "https://{{ dify_service_topology.public_hostname }}"

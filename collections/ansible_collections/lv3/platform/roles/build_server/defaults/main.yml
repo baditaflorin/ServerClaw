@@ -13,11 +13,7 @@ build_server_apt_cacher_port: 3142
 build_server_apt_cacher_report_url: http://127.0.0.1:3142/acng-report.html
 build_server_apt_proxy_url: http://10.10.10.30:3142
 build_server_buildkit_service_name: lv3-buildkitd
-build_server_buildkit_container_name: lv3-buildkitd
-build_server_buildkit_image: moby/buildkit:buildx-stable-1
 build_server_buildkit_builder_name: lv3-cache
-build_server_buildkit_config_dir: /etc/buildkit
-build_server_buildkit_config_file: /etc/buildkit/buildkitd.toml
 build_server_buildkit_socket_dir: /run/buildkit
 build_server_buildkit_socket_file: /run/buildkit/buildkitd.sock
 build_server_buildkit_cache_dir: /opt/builds/.buildkit-cache

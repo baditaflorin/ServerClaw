@@ -1,9 +1,7 @@
 ---
 docker_build_observability_state_dir: /etc/lv3/build-observability
-docker_build_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-docker-build.conf
 docker_build_observability_hostname: docker-build-lv3
 docker_build_observability_role: docker-build
-docker_build_observability_docker_daemon_config_file: /etc/docker/daemon.json
 docker_build_observability_docker_wrapper_path: /usr/local/bin/docker
 docker_build_observability_docker_real_binary: /usr/bin/docker
 docker_build_observability_socket_listener_address: udp://127.0.0.1:8094

@@ -10,8 +10,6 @@ loki_log_agent_keyring_dir: /etc/apt/keyrings
 loki_log_agent_repo_key_url: "{{ monitoring_grafana_repo_key_url }}"
 loki_log_agent_repo_keyring: "{{ monitoring_grafana_repo_keyring }}"
 loki_log_agent_repo_file: "{{ monitoring_grafana_repo_file }}"
-loki_log_agent_config_file: /etc/alloy/config.alloy
-loki_log_agent_env_file: /etc/default/alloy
 loki_log_agent_service_name: alloy
 loki_log_agent_hostname: "{{ inventory_hostname }}"
 loki_log_agent_role: "{{ inventory_hostname }}"

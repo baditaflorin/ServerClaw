@@ -7,7 +7,6 @@ ntopng_packages:
 ntopng_state_dir: /etc/lv3/ntopng
 ntopng_admin_password_file: /etc/lv3/ntopng/admin-password
 ntopng_local_networks_file: /etc/lv3/ntopng/local-networks.txt
-ntopng_config_file: /etc/ntopng/ntopng.conf.d/90-lv3.conf
 ntopng_http_port: "{{ platform_service_topology | platform_service_port('ntopng', 'internal') }}"
 ntopng_https_port: 0
 ntopng_interfaces:

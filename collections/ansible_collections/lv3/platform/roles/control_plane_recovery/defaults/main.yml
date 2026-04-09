@@ -6,7 +6,6 @@
 # Dependencies: ADR 0165 and ADR 0231.
 ---
 control_plane_recovery_runtime_root: /opt/control-plane-recovery
-control_plane_recovery_runtime_config_dir: /etc/lv3/control-plane-recovery
 control_plane_recovery_runtime_state_dir: /var/lib/control-plane-recovery
 control_plane_recovery_runtime_bin_dir: "{{ control_plane_recovery_runtime_root }}/bin"
 control_plane_recovery_runtime_backup_script: "{{ control_plane_recovery_runtime_bin_dir }}/lv3-control-plane-backup.sh"
@@ -17,15 +16,11 @@ control_plane_recovery_backup_retention_count: 28
 control_plane_recovery_runtime_ssh_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519
 control_plane_recovery_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
 control_plane_recovery_runtime_openbao_policy_name: lv3-control-plane-backup
-control_plane_recovery_runtime_openbao_secret_path: services/control-plane-recovery/runtime
 control_plane_recovery_runtime_openbao_approle_name: control-plane-backup
-control_plane_recovery_runtime_openbao_agent_dir: "{{ control_plane_recovery_runtime_config_dir }}/openbao-agent"
 control_plane_recovery_runtime_openbao_agent_service_name: lv3-control-plane-backup-openbao-agent
-control_plane_recovery_runtime_openbao_agent_container_name: lv3-control-plane-backup-openbao-agent
 control_plane_recovery_runtime_credential_dir: /run/lv3-systemd-credentials/control-plane-backup
 control_plane_recovery_runtime_openbao_token_file: "{{ control_plane_recovery_runtime_credential_dir }}/openbao-token"
 control_plane_recovery_runtime_windmill_db_dsn_file: "{{ control_plane_recovery_runtime_credential_dir }}/windmill-db-dsn"
-control_plane_recovery_runtime_openbao_agent_config_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/agent.hcl"
 control_plane_recovery_runtime_openbao_agent_template_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/windmill-db-dsn.ctmpl"
 control_plane_recovery_runtime_openbao_role_id_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/role_id"
 control_plane_recovery_runtime_openbao_secret_id_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/secret_id"

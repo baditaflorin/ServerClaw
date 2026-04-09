@@ -3,7 +3,5 @@
 
 paperless_database_name: paperless
 paperless_database_user: paperless
-paperless_postgres_secret_dir: /etc/lv3/paperless
 paperless_postgres_password_file: "{{ paperless_postgres_secret_dir }}/database-password"
-paperless_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless
 paperless_database_password_local_file: "{{ paperless_local_artifact_dir }}/database-password.txt"

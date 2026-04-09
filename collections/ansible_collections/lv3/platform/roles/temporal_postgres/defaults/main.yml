@@ -8,7 +8,5 @@
 temporal_database_name: temporal
 temporal_visibility_database_name: temporal_visibility
 temporal_database_user: temporal
-temporal_postgres_secret_dir: /etc/lv3/temporal
 temporal_postgres_password_file: "{{ temporal_postgres_secret_dir }}/database-password"
-temporal_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal
 temporal_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal/database-password.txt

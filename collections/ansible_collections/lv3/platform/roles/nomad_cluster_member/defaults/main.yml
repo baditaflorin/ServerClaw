@@ -8,12 +8,9 @@ nomad_cluster_packages:
   - unzip
 nomad_cluster_user: nomad
 nomad_cluster_group: nomad
-nomad_cluster_config_dir: /etc/lv3/nomad
 nomad_cluster_tls_dir: "{{ nomad_cluster_config_dir }}/tls"
-nomad_cluster_data_dir: /var/lib/nomad
 nomad_cluster_plugin_dir: "{{ nomad_cluster_data_dir }}/plugins"
 nomad_cluster_log_dir: /var/log/nomad
-nomad_cluster_config_file: "{{ nomad_cluster_config_dir }}/nomad.hcl"
 nomad_cluster_service_name: lv3-nomad
 nomad_cluster_service_file: /etc/systemd/system/lv3-nomad.service
 nomad_cluster_service_user: root

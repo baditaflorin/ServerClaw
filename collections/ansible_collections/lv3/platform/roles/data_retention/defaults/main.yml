@@ -2,7 +2,6 @@
 data_retention_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
 data_retention_runtime_root: /opt/lv3/data-retention
 data_retention_bin_dir: "{{ data_retention_runtime_root }}/bin"
-data_retention_config_dir: /etc/lv3/data-retention
 data_retention_receipts_root: /var/lib/lv3/receipts
 data_retention_purge_script_path: "{{ data_retention_bin_dir }}/purge-old-receipts.py"
 data_retention_catalog_path: "{{ data_retention_config_dir }}/data-catalog.json"

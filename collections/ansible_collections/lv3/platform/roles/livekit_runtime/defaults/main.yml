@@ -29,7 +29,6 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 livekit_service_topology: "{{ platform_service_topology | service_topology_get('livekit') }}"
-livekit_config_file: "{{ livekit_site_dir }}/livekit.yaml"
 livekit_repo_root: "{{ inventory_dir | dirname }}"
 livekit_shared_local_root: >-
   {{

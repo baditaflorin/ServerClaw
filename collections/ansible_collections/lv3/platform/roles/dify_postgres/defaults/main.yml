@@ -7,6 +7,5 @@
 ---
 dify_database_name: dify
 dify_database_user: dify
-dify_postgres_secret_dir: /etc/lv3/dify
 dify_postgres_password_file: "{{ dify_postgres_secret_dir }}/database-password"
 dify_database_password_local_file: "{{ repo_shared_root }}/.local/dify/database-password.txt"

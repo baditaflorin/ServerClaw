@@ -1,7 +1,5 @@
 ---
 gitea_database_name: gitea
 gitea_database_user: gitea
-gitea_postgres_secret_dir: /etc/lv3/gitea
 gitea_postgres_password_file: "{{ gitea_postgres_secret_dir }}/database-password"
-gitea_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea
 gitea_database_password_local_file: "{{ gitea_local_artifact_dir }}/database-password.txt"

@@ -1,6 +1,5 @@
 ---
 cert_renewer_sidecar_name: cert-renewer
-cert_renewer_sidecar_image: smallstep/step-cli:latest
 cert_renewer_sidecar_cert_mount_path: /certs
 cert_renewer_sidecar_restart: unless-stopped
 cert_renewer_sidecar_exec_command: ""

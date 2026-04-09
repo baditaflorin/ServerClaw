@@ -3,7 +3,5 @@
 
 outline_database_name: outline
 outline_database_user: outline
-outline_postgres_secret_dir: /etc/lv3/outline
 outline_postgres_password_file: "{{ outline_postgres_secret_dir }}/database-password"
-outline_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline
 outline_database_password_local_file: "{{ outline_local_artifact_dir }}/database-password.txt"

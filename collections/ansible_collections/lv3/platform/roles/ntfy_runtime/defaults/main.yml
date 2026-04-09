@@ -3,18 +3,11 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 ntfy_runtime_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('ntfy') }}"
-ntfy_runtime_image: "{{ container_image_catalog.images.ntfy_runtime.ref }}"
-ntfy_runtime_container_name: ntfy
-ntfy_runtime_site_dir: /opt/ntfy
-ntfy_runtime_data_dir: /var/lib/ntfy
 ntfy_runtime_attachment_dir: "{{ ntfy_runtime_data_dir }}/attachments"
 ntfy_runtime_cache_file: "{{ ntfy_runtime_data_dir }}/cache.db"
-ntfy_runtime_compose_file: "{{ ntfy_runtime_site_dir }}/docker-compose.yml"
 ntfy_runtime_config_template: "{{ inventory_dir | dirname }}/config/ntfy/server.yml"
-ntfy_runtime_config_file: "{{ ntfy_runtime_site_dir }}/server.yml"
 ntfy_runtime_topic_registry_file: "{{ inventory_dir | dirname }}/config/ntfy/topics.yaml"
 ntfy_runtime_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
-ntfy_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy
 ntfy_runtime_remote_auth_dir: "{{ ntfy_runtime_site_dir }}/auth"
 ntfy_runtime_auth_file: "{{ ntfy_runtime_data_dir }}/user.db"
 ntfy_runtime_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('ntfy', 'internal') }}"

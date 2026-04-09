@@ -6,33 +6,17 @@
 # Dependencies: ADR 0165 metadata standard, ADR 0281, and the glitchtip_runtime role tasks.
 ---
 glitchtip_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('glitchtip') }}"
-glitchtip_site_dir: /opt/glitchtip
-glitchtip_data_dir: "{{ glitchtip_site_dir }}/data"
 glitchtip_uploads_dir: "{{ glitchtip_data_dir }}/uploads"
-glitchtip_secret_dir: /etc/lv3/glitchtip
-glitchtip_compose_file: "{{ glitchtip_site_dir }}/docker-compose.yml"
-glitchtip_env_file: "{{ compose_runtime_secret_root }}/glitchtip/runtime.env"
-glitchtip_legacy_env_file: "{{ glitchtip_site_dir }}/glitchtip.env"
 glitchtip_bootstrap_script_file: "{{ glitchtip_site_dir }}/bootstrap-glitchtip.py"
-glitchtip_openbao_agent_dir: "{{ glitchtip_site_dir }}/openbao"
-glitchtip_openbao_agent_image: "{{ openbao_agent_image }}"
-glitchtip_openbao_agent_container_name: glitchtip-openbao-agent
-glitchtip_openbao_secret_path: services/glitchtip/runtime-env
 glitchtip_openbao_policy_name: lv3-service-glitchtip-runtime
 glitchtip_openbao_approle_name: glitchtip-runtime
-glitchtip_internal_port: "{{ platform_service_topology | platform_service_port('glitchtip', 'internal') }}"
 glitchtip_internal_base_url: "{{ platform_service_topology | platform_service_url('glitchtip', 'internal') }}"
 glitchtip_public_base_url: "https://{{ glitchtip_service_topology.public_hostname }}"
-glitchtip_container_name: glitchtip
-glitchtip_valkey_container_name: glitchtip-valkey
 glitchtip_compose_network_name: glitchtip_default
-glitchtip_image: "{{ container_image_catalog.images.glitchtip_runtime.ref }}"
-glitchtip_valkey_image: "{{ container_image_catalog.images.glitchtip_valkey_runtime.ref }}"
 glitchtip_database_name: glitchtip
 glitchtip_database_user: glitchtip
 glitchtip_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 glitchtip_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/database-password.txt
-glitchtip_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip
 glitchtip_secret_key_local_file: "{{ glitchtip_local_artifact_dir }}/secret-key.txt"
 glitchtip_valkey_password_local_file: "{{ glitchtip_local_artifact_dir }}/valkey-password.txt"
 glitchtip_admin_password_local_file: "{{ glitchtip_local_artifact_dir }}/admin-password.txt"

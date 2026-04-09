@@ -8,9 +8,6 @@ jupyterhub_service_topology: "{{ hostvars[platform_topology_host].lv3_service_to
 jupyterhub_session_authority: "{{ platform_session_authority }}"
 jupyterhub_hub_build_dir: "{{ jupyterhub_site_dir }}/hub"
 jupyterhub_singleuser_build_dir: "{{ jupyterhub_site_dir }}/singleuser"
-jupyterhub_hub_data_dir: "{{ jupyterhub_data_dir }}/hub"
-jupyterhub_minio_data_dir: "{{ jupyterhub_data_dir }}/minio"
-jupyterhub_config_file: "{{ jupyterhub_site_dir }}/jupyterhub_config.py"
 jupyterhub_internal_base_url: "http://127.0.0.1:{{ jupyterhub_internal_port }}"
 jupyterhub_public_base_url: "https://{{ jupyterhub_service_topology.public_hostname }}"
 jupyterhub_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
@@ -19,14 +16,10 @@ jupyterhub_public_hostname_overrides:
     address: "{{ jupyterhub_public_edge_private_ip }}"
   - hostname: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ jupyterhub_public_edge_private_ip }}"
-jupyterhub_minio_container_name: jupyterhub-minio
 jupyterhub_compose_network_name: jupyterhub_default
 jupyterhub_hub_image_name: lv3/jupyterhub-hub
 jupyterhub_singleuser_image_name: lv3/jupyterhub-singleuser
-jupyterhub_hub_base_image: quay.io/jupyterhub/jupyterhub:5.4.4@sha256:a4860afa5c3a99762006e42ec0c068e24b5a73a29c9145b3f8c19d49cd014f7d
-jupyterhub_singleuser_base_image: quay.io/jupyter/scipy-notebook:python-3.12@sha256:d0a76193887ed48cdc9adcc2cf042ae189901187226bf0466793acac1822ea78
 jupyterhub_base_image_pull_timeout_seconds: 180
-jupyterhub_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtime.ref }}"
 jupyterhub_service_api_token_local_file: "{{ jupyterhub_local_artifact_dir }}/service-api-token.txt"
 jupyterhub_minio_root_password_local_file: "{{ jupyterhub_local_artifact_dir }}/minio-root-password.txt"
 jupyterhub_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/jupyterhub-client-secret.txt"

@@ -1,6 +1,5 @@
 ---
 docker_runtime_observability_state_dir: /etc/lv3/runtime-observability
-docker_runtime_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-docker-runtime.conf
 docker_runtime_observability_hostname: docker-runtime-lv3
 docker_runtime_observability_role: docker-runtime
 docker_runtime_observability_docker_socket_endpoint: unix:///var/run/docker.sock

@@ -90,7 +90,6 @@ docker_runtime_openbao_recovery_delay_seconds: 5
 docker_runtime_nonpersistent_restart_policies:
   - ""
   - "no"
-docker_runtime_nftables_config_file: /etc/nftables.conf
 docker_runtime_container_forward_compat_enabled: true
 docker_runtime_kernel_modules:
   - iptable_nat

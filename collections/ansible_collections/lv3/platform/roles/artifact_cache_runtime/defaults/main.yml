@@ -8,7 +8,6 @@ artifact_cache_data_root: "{{ artifact_cache_site_dir }}/data"
 artifact_cache_seed_plan_file: "{{ artifact_cache_site_dir }}/seed-plan.json"
 artifact_cache_bind_host: "{{ ansible_host }}"
 artifact_cache_network_mode: host
-artifact_cache_registry_image: docker.io/library/registry:2.8.3
 artifact_cache_seed_enabled: true
 artifact_cache_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
 artifact_cache_seed_script: "{{ artifact_cache_repo_root }}/scripts/artifact_cache_seed.py"

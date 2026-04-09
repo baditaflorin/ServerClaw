@@ -5,7 +5,6 @@
 # Idempotency: N/A for defaults file because it only declares variables that downstream tasks consume.
 # Dependencies: ADR 0165, ADR 0167, ADR 0268, and ADR 0333.
 ---
-control_plane_recovery_local_artifact_dir: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/control-plane-recovery"
 control_plane_recovery_local_controller_dir: "{{ control_plane_recovery_local_artifact_dir }}/controller"
 control_plane_recovery_local_controller_bundle_file: "{{ control_plane_recovery_local_controller_dir }}/controller-recovery-bundle.tar.zst"
 control_plane_recovery_local_controller_manifest_file: "{{ control_plane_recovery_local_controller_dir }}/control-plane-recovery-manifest.json"

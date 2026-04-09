@@ -5,31 +5,15 @@
 # Idempotency: Fully idempotent because this file only declares defaults.
 # Dependencies: ADR 0165, ADR 0060.
 ---
-litellm_site_dir: /opt/litellm
-litellm_data_dir: "{{ litellm_site_dir }}/data"
-litellm_secret_dir: /etc/lv3/litellm
-litellm_compose_file: "{{ litellm_site_dir }}/docker-compose.yml"
-litellm_config_file: "{{ litellm_site_dir }}/litellm-config.yaml"
-litellm_env_file: "{{ compose_runtime_secret_root }}/litellm/runtime.env"
-litellm_legacy_env_file: "{{ litellm_site_dir }}/litellm.env"
-litellm_openbao_agent_dir: "{{ litellm_site_dir }}/openbao"
-litellm_openbao_agent_image: "{{ openbao_agent_image }}"
-litellm_openbao_agent_container_name: litellm-openbao-agent
 litellm_enable_openbao_agent: false
-litellm_openbao_secret_path: services/litellm/runtime-env
 litellm_openbao_policy_name: lv3-service-litellm-runtime
 litellm_openbao_approle_name: litellm-runtime
-litellm_container_name: litellm
-litellm_internal_port: 4000
 litellm_container_port: 4000
 litellm_healthcheck_path: /health/liveliness
-litellm_image: "{{ container_image_catalog.images.litellm_runtime.ref }}"
 litellm_master_key_remote_file: "{{ litellm_secret_dir }}/master-key"
-litellm_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/litellm
 litellm_master_key_local_file: "{{ litellm_local_artifact_dir }}/master-key.txt"
 litellm_database_name: litellm
 litellm_database_user: litellm
-litellm_postgres_secret_dir: /etc/lv3/litellm
 litellm_postgres_password_file: "{{ litellm_postgres_secret_dir }}/database-password"
 litellm_database_password_local_file: "{{ litellm_local_artifact_dir }}/database-password.txt"
 litellm_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

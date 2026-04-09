@@ -3,7 +3,6 @@ linux_keepalived_packages:
   - curl
   - keepalived
 linux_keepalived_service_name: keepalived
-linux_keepalived_config_file: /etc/keepalived/keepalived.conf
 linux_keepalived_track_script: /usr/local/bin/check-patroni-leader.sh
 linux_keepalived_track_url: http://127.0.0.1:8008/leader
 linux_keepalived_state: BACKUP

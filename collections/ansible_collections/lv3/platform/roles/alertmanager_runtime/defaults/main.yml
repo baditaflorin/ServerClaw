@@ -20,7 +20,6 @@ alertmanager_runtime_pgaudit_relay_enabled: true
 alertmanager_runtime_pgaudit_relay_service_name: pgaudit-alert-relay
 alertmanager_runtime_pgaudit_relay_service_file: /etc/systemd/system/pgaudit-alert-relay.service
 alertmanager_runtime_pgaudit_relay_script_file: /usr/local/libexec/pgaudit-alert-relay.py
-alertmanager_runtime_pgaudit_relay_env_file: /etc/alertmanager/pgaudit-alert-relay.env
 alertmanager_runtime_pgaudit_relay_listen_host: 127.0.0.1
 alertmanager_runtime_pgaudit_relay_listen_port: 19094
 alertmanager_runtime_pgaudit_relay_webhook_path: /alerts/pgaudit-unknown-role

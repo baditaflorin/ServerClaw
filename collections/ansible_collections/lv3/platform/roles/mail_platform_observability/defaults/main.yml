@@ -1,6 +1,5 @@
 ---
 mail_platform_observability_state_dir: /etc/lv3/mail-platform-observability
-mail_platform_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-mail-platform.conf
 mail_platform_observability_metrics_script: /usr/local/libexec/lv3-mail-platform-metrics.py
 mail_platform_observability_hostname: docker-runtime-lv3
 mail_platform_observability_role: docker-runtime

@@ -50,17 +50,14 @@ common_openbao_systemd_credentials_secret_payload: {}
 common_openbao_systemd_credentials_policy_name: ""
 common_openbao_systemd_credentials_policy_rules: ""
 common_openbao_systemd_credentials_approle_name: ""
-common_openbao_systemd_credentials_agent_config_file: ""
 common_openbao_systemd_credentials_agent_template_file: ""
 common_openbao_systemd_credentials_agent_template_local_file: ""
 common_openbao_systemd_credentials_agent_template_src: ""
 common_openbao_systemd_credentials_agent_template_content: ""
 common_openbao_systemd_credentials_role_id_file: ""
 common_openbao_systemd_credentials_secret_id_file: ""
-common_openbao_systemd_credentials_image: ""
 common_openbao_systemd_credentials_container_entrypoint: /bin/vault
 common_openbao_systemd_credentials_agent_service_name: ""
-common_openbao_systemd_credentials_container_name: ""
 common_openbao_systemd_credentials_openbao_address: ""
 common_openbao_systemd_credentials_manage_local_openbao_runtime: true
 common_openbao_api_operation_retries: 36
@@ -73,12 +70,9 @@ common_check_local_secrets_files: []
 common_manage_service_secrets_generate: []
 common_manage_service_secrets_read: []
 common_manage_service_secrets_mirror: []
-common_manage_service_secrets_local_artifact_dir: ""
 common_manage_service_secrets_fact_name: "common_managed_secrets"
 
 # docker_compose_converge task defaults (ADR 0370)
-common_docker_compose_converge_compose_file: ""
-common_docker_compose_converge_site_dir: ""
 common_docker_compose_converge_service_name: ""
 common_docker_compose_converge_template_results: []
 common_docker_compose_converge_health_port: 0
