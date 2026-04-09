@@ -8241,6 +8241,34 @@
         "max_rollback_depth": 0,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "disk-space-monitor": {
+      "description": "Query disk space usage across all platform VMs via InfluxDB, compare against capacity-model.json budgets, and alert when usage exceeds threshold.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "windmill_script",
+        "path": "config/windmill/scripts/disk-space-monitor.py"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/capacity-model.md",
+      "implementation_refs": [
+        "config/windmill/scripts/disk-space-monitor.py",
+        "scripts/disk_metrics.py",
+        "config/capacity-model.json",
+        "config/workflow-catalog.json"
+      ],
+      "outputs": [
+        "A JSON payload containing per-VM disk usage, budget comparisons, alert list, and markdown summary for Mattermost notification."
+      ],
+      "verification_commands": [
+        "python scripts/disk_metrics.py --json"
+      ]
     }
   }
 }

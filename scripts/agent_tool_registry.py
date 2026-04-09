@@ -1687,6 +1687,17 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
     }
 
 
+def tool_get_disk_usage(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Query disk usage across platform VMs via the shared disk_metrics module."""
+    from disk_metrics import query_disk_usage
+
+    report = query_disk_usage(
+        repo_root=REPO_ROOT,
+        vm_filter=args.get("vm_filter"),
+    )
+    return report.to_dict()
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -1725,6 +1736,7 @@ HANDLERS: Final[dict[str, Any]] = {
     "mempalace_wake_up": tool_mempalace_wake_up,
     "mempalace_status": tool_mempalace_status,
     "execute_host_command": tool_execute_host_command,
+    "get_disk_usage": tool_get_disk_usage,
 }
 
 

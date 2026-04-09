@@ -13,25 +13,6 @@
   organization = "{{ monitoring_influxdb_org }}"
   bucket = "{{ monitoring_influxdb_bucket }}"
 
-[[inputs.cpu]]
-  percpu = true
-  totalcpu = true
-  collect_cpu_time = false
-  report_active = true
-
-[[inputs.mem]]
-
-[[inputs.disk]]
-  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "overlay", "squashfs"]
-
-[[inputs.diskio]]
-
-[[inputs.net]]
-
-[[inputs.system]]
-
-[[inputs.processes]]
-
 [[inputs.nginx]]
   urls = ["{{ nginx_observability_stub_status_url }}"]
   response_timeout = "5s"

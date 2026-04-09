@@ -2386,6 +2386,123 @@
         "kind": "handler",
         "handler": "execute_host_command"
       }
+    },
+    {
+      "name": "get-disk-usage",
+      "title": "Get Disk Usage",
+      "description": "Query disk space usage across all platform VMs with budget comparison from capacity-model.json. Returns per-VM, per-mount metrics (used, total, available, percent) compared against allocated and budget thresholds.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "influxdb://proxmox/disk",
+      "auth": "none",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "vm_filter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of VM names to query. Omit for all active VMs."
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "timestamp",
+          "source",
+          "vms"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "vms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "vmid": {
+                  "type": "integer"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "mounts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string"
+                      },
+                      "total_gb": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "used_gb": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "available_gb": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "used_percent": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "over_budget": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "budget_disk_gb": {
+                  "type": "number"
+                },
+                "allocated_disk_gb": {
+                  "type": "number"
+                },
+                "total_used_gb": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_disk_usage"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/capacity-model.md"
     }
   ]
 }
