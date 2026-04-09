@@ -35,7 +35,7 @@ map $http_upgrade $connection_upgrade {
     '' close;
 }
 
-map $lv3_logout_authorization $lv3_logout_id_token {
+map $http_authorization $lv3_logout_id_token {
     default "";
     "~^Bearer (.+)$" $1;
 }
@@ -339,7 +339,6 @@ server {
         auth_request /oauth2/auth;
         error_page 401 = @lv3_shared_logout_without_session;
         error_page 403 = @lv3_shared_logout_without_session;
-        auth_request_set $lv3_logout_authorization $upstream_http_authorization;
 
         if ($lv3_logout_id_token = "") {
             return 302 {{ oauth2_proxy_sign_out_url(public_edge_session_authority.shared_proxy_cleanup_url) }};

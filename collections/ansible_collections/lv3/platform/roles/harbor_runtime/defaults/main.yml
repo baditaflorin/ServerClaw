@@ -54,7 +54,7 @@ harbor_trivy_security_check: vuln
 harbor_trivy_ignore_unfixed: false
 harbor_keycloak_local_admin_url: http://127.0.0.1:18080
 harbor_keycloak_public_base_url: https://sso.{{ platform_domain }}
-harbor_keycloak_realm_name: "{{ keycloak_realm_name }}"
+harbor_keycloak_realm_name: lv3
 harbor_keycloak_bootstrap_admin_username: lv3-bootstrap-admin
 harbor_keycloak_bootstrap_admin_password_remote_file: /etc/lv3/keycloak/bootstrap-admin-password
 harbor_keycloak_admin_group: harbor-admins
