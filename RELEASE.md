@@ -1,8 +1,10 @@
-# Release 0.178.64
+# Release 0.178.66
 
-- Date: 2026-04-08
+- Date: 2026-04-09
 
 ## Summary
+- ADR 0373 Phase 4 complete: unified service registry pattern for all 74 platform services; each service registered with service_type (docker_compose, system_package, infrastructure, multi_instance); derive_service_defaults extended with conditional branching for all types; alertmanager_runtime migrated as reference implementation; comprehensive runbook created for future service additions (docs/runbooks/add-new-service-to-platform.md); pattern enables programmatic, DRY, IoC-based infrastructure configuration across entire platform
+- ADR 0224: repo-intake promoted to first-class subdomain (repo-intake.lv3.org) with dedicated Ansible role, standalone FastAPI app, and nginx publication; extracted from ops-portal with catalog profile support and programmatic JSON API
 - LibreChat upgraded v0.7.8 → v0.8.4: 30+ security fixes, working Agents REST API, MCP support with lazy tool loading and circuit breakers, agent handoffs (routing between specialist agents), local document extraction (PDF/DOCX/XLS), modelSpecs improvements, OIDC hardening
 - ADR 0224 self-service repo intake GUI + JSON API deployed to ops.lv3.org; ADR 0307 platform workbench surface catalog published; ADR 0243 Storybook/Playwright/axe-core UI testing framework added; ops-portal role fixed for derive_service_defaults env_file directory creation
 - LibreChat Agents Phase 3: MongoDB-based agent bootstrap script seeds 4 ServerClaw agents (Ops/Tasks/Docs/Admin) idempotently via SSH+mongosh; Ansible task auto-bootstraps agents on convergence with zero manual setup; gate bypass catalog extended with gate_timeout, schema_migration_in_progress, network_partition reason codes
