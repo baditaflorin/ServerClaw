@@ -2,7 +2,13 @@
 gitea_runner_openbao_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('openbao') }}"
 gitea_runner_gitea_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('gitea') }}"
 gitea_runner_platform_gitea_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology.gitea }}"
+gitea_runner_site_dir: /opt/gitea-runner
+gitea_runner_data_dir: "{{ gitea_runner_site_dir }}/data"
+gitea_runner_compose_file: "{{ gitea_runner_site_dir }}/docker-compose.yml"
+gitea_runner_config_file: "{{ gitea_runner_site_dir }}/config.yaml"
 gitea_runner_compose_bin: docker
+gitea_runner_image: docker.io/gitea/act_runner:0.2.12@sha256:55f9fcb59ac6159b4015549afa96712a8dde0b1017ffee5551b9c34173c87171
+gitea_runner_container_name: lv3-gitea-runner
 gitea_runner_network_name: gitea_runner_default
 gitea_runner_network_subnet: 172.16.241.0/24
 gitea_runner_instance_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('gitea', 'internal') }}"
@@ -23,11 +29,14 @@ gitea_runner_renovate_openbao_address: "http://{{ gitea_runner_openbao_service_t
 gitea_runner_renovate_secret_path: services/gitea-runner/renovate-runtime
 gitea_runner_renovate_policy_name: lv3-service-gitea-runner-renovate
 gitea_runner_renovate_approle_name: gitea-runner-renovate
+gitea_runner_renovate_openbao_agent_dir: "{{ gitea_runner_site_dir }}/openbao/renovate"
 gitea_runner_renovate_credential_dir: "{{ gitea_runner_site_dir }}/credentials/renovate"
 gitea_runner_renovate_credential_dir_in_container: /var/run/lv3/renovate
 gitea_runner_renovate_credential_file: "{{ gitea_runner_renovate_credential_dir }}/renovate.env"
 gitea_runner_renovate_credential_file_in_container: "{{ gitea_runner_renovate_credential_dir_in_container }}/renovate.env"
+gitea_runner_renovate_agent_config_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/agent.hcl"
 gitea_runner_renovate_agent_template_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/renovate.env.ctmpl"
 gitea_runner_renovate_role_id_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/role_id"
 gitea_runner_renovate_secret_id_file: "{{ gitea_runner_renovate_openbao_agent_dir }}/secret_id"
 gitea_runner_renovate_agent_service_name: lv3-gitea-runner-renovate-openbao
+gitea_runner_renovate_agent_container_name: gitea-runner-renovate-openbao-agent

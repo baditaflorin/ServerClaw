@@ -28,9 +28,21 @@
 # Last Updated: 2026-03-30
 lago_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('lago') }}"
 lago_storage_dir: "{{ lago_data_dir }}/storage"
+lago_redis_data_dir: "{{ lago_data_dir }}/redis"
 lago_redis_data_owner: "999"
 lago_redis_data_group: "1000"
 lago_redis_data_mode: "0770"
+lago_api_container_name: lago-api
+lago_front_container_name: lago-front
+lago_worker_container_name: lago-worker
+lago_clock_container_name: lago-clock
+lago_migrate_container_name: lago-migrate
+lago_pdf_container_name: lago-pdf
+lago_redis_container_name: lago-redis
+lago_api_image: "{{ container_image_catalog.images.lago_api_runtime.ref }}"
+lago_front_image: "{{ container_image_catalog.images.lago_front_runtime.ref }}"
+lago_pdf_image: "{{ container_image_catalog.images.lago_pdf_runtime.ref }}"
+lago_redis_image: "{{ container_image_catalog.images.lago_redis_runtime.ref }}"
 lago_redis_host: redis
 lago_redis_port: 6379
 lago_redis_sidekiq_db: 0

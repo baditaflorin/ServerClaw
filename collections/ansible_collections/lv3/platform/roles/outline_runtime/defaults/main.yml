@@ -6,6 +6,7 @@
 
 outline_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('outline') }}"
 outline_session_authority: "{{ platform_session_authority }}"
+outline_minio_data_dir: "{{ outline_data_dir }}/minio"
 outline_internal_base_url: "http://127.0.0.1:{{ outline_internal_port }}"
 outline_public_base_url: "https://{{ outline_service_topology.public_hostname }}"
 outline_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
@@ -14,6 +15,10 @@ outline_public_hostname_overrides:
     address: "{{ outline_public_edge_private_ip }}"
   - hostname: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ outline_public_edge_private_ip }}"
+outline_redis_container_name: outline-redis
+outline_minio_container_name: outline-minio
+outline_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
+outline_minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
 outline_database_name: outline
 outline_database_user: outline
 outline_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

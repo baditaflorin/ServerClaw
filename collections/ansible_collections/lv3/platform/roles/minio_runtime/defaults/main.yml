@@ -21,6 +21,7 @@ minio_root_password_remote_file: "{{ minio_secret_dir }}/root-password.txt"
 minio_mc_url: https://dl.min.io/client/mc/release/linux-amd64/mc
 minio_mc_checksum: sha256:01f866e9c5f9b87c2b09116fa5d7c06695b106242d829a8bb32990c00312e891
 minio_mc_bin: /usr/local/bin/mc
+minio_mc_config_dir: "{{ minio_site_dir }}/mc"
 minio_langfuse_access_key_id: langfuseapp
 minio_langfuse_secret_key_remote_file: "{{ minio_secret_dir }}/langfuse-secret-key.txt"
 minio_langfuse_secret_key_local_file: "{{ repo_shared_local_root }}/langfuse/minio-secret-key.txt"

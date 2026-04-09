@@ -6,9 +6,13 @@ postgres_ha_packages:
   - postgresql-contrib
   - python3
 postgres_ha_state_dir: /etc/lv3/postgres-ha
+postgres_ha_patroni_config_dir: /etc/patroni
+postgres_ha_patroni_config_file: "{{ postgres_ha_patroni_config_dir }}/patroni.yml"
 postgres_ha_patroni_service_name: lv3-patroni
 postgres_ha_patroni_service_file: /etc/systemd/system/lv3-patroni.service
+postgres_ha_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-postgres-ha.conf
 postgres_ha_metrics_script: /usr/local/bin/lv3-postgres-ha-metrics.py
+postgres_ha_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/postgres-ha
 postgres_ha_superuser_password_local_file: "{{ postgres_ha_local_artifact_dir }}/patroni-superuser-password.txt"
 postgres_ha_replicator_password_local_file: "{{ postgres_ha_local_artifact_dir }}/replicator-password.txt"
 postgres_ha_superuser_password_file: "{{ postgres_ha_state_dir }}/patroni-superuser-password"

@@ -14,6 +14,7 @@ server_resident_reconciliation_runtime_root: /var/lib/lv3/server-resident-reconc
 server_resident_reconciliation_inventory_path: "{{ server_resident_reconciliation_runtime_root }}/ansible-pull-inventory.yml"
 server_resident_reconciliation_receipts_dir: "{{ server_resident_reconciliation_runtime_root }}/receipts"
 server_resident_reconciliation_lock_file: "{{ server_resident_reconciliation_runtime_root }}/reconcile.lock"
+server_resident_reconciliation_secret_dir: /etc/lv3/server-resident-reconciliation
 server_resident_reconciliation_http_token_remote_file: "{{ server_resident_reconciliation_secret_dir }}/gitea-read-token"
 server_resident_reconciliation_gitea_admin_token_local_file: >-
   {{ lookup('ansible.builtin.env', 'LV3_GITEA_ADMIN_TOKEN_FILE') | default('/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt', true) }}

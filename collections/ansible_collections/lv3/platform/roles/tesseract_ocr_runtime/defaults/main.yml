@@ -9,12 +9,16 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 tesseract_ocr_runtime_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('tesseract_ocr') }}"
+tesseract_ocr_runtime_site_dir: /opt/tesseract-ocr
 tesseract_ocr_runtime_service_dir: "{{ tesseract_ocr_runtime_site_dir }}/app"
+tesseract_ocr_runtime_compose_file: "{{ tesseract_ocr_runtime_site_dir }}/docker-compose.yml"
 tesseract_ocr_runtime_dockerfile: "{{ tesseract_ocr_runtime_service_dir }}/Dockerfile"
 tesseract_ocr_runtime_requirements_file: "{{ tesseract_ocr_runtime_service_dir }}/requirements.txt"
 tesseract_ocr_runtime_service_script: "{{ tesseract_ocr_runtime_service_dir }}/tesseract_ocr_service.py"
 tesseract_ocr_runtime_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+tesseract_ocr_runtime_container_name: tesseract-ocr
 tesseract_ocr_runtime_image_name: lv3/tesseract-ocr
+tesseract_ocr_runtime_base_image: python:3.12-slim-bookworm
 tesseract_ocr_runtime_container_port: 8000
 tesseract_ocr_runtime_port: "{{ tesseract_ocr_runtime_service_topology.ports.internal }}"
 tesseract_ocr_runtime_internal_base_url: "{{ tesseract_ocr_runtime_service_topology.urls.internal }}"

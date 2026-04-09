@@ -6,6 +6,9 @@ etcd_cluster_member_host: "{{ ansible_host }}"
 etcd_cluster_member_client_port: 2379
 etcd_cluster_member_peer_port: 2380
 etcd_cluster_member_initial_cluster_token: lv3-etcd
+etcd_cluster_member_config_dir: /etc/lv3/etcd
+etcd_cluster_member_config_file: "{{ etcd_cluster_member_config_dir }}/etcd.yml"
+etcd_cluster_member_data_dir: /var/lib/etcd/lv3
 etcd_cluster_member_service_name: lv3-etcd
 etcd_cluster_member_service_file: /etc/systemd/system/lv3-etcd.service
 etcd_cluster_member_cluster: []

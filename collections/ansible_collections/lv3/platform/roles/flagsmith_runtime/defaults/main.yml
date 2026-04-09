@@ -2,11 +2,24 @@
 # Purpose: Default runtime inputs for the Flagsmith feature flag and remote configuration deployment.
 
 flagsmith_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('flagsmith') }}"
+flagsmith_site_dir: /opt/flagsmith
+flagsmith_compose_file: "{{ flagsmith_site_dir }}/docker-compose.yml"
+flagsmith_env_file: "{{ compose_runtime_secret_root }}/flagsmith/runtime.env"
+flagsmith_legacy_env_file: "{{ flagsmith_site_dir }}/flagsmith.env"
+flagsmith_secret_dir: /etc/lv3/flagsmith
+flagsmith_openbao_agent_dir: "{{ flagsmith_site_dir }}/openbao"
+flagsmith_openbao_agent_image: "{{ openbao_agent_image }}"
+flagsmith_openbao_agent_container_name: flagsmith-openbao-agent
+flagsmith_openbao_secret_path: services/flagsmith/runtime-env
 flagsmith_openbao_policy_name: lv3-service-flagsmith-runtime
 flagsmith_openbao_approle_name: flagsmith-runtime
 flagsmith_openbao_environment_keys_path: services/flagsmith/environment-keys
+flagsmith_internal_port: "{{ platform_service_topology | platform_service_port('flagsmith', 'internal') }}"
 flagsmith_internal_base_url: "{{ platform_service_topology | platform_service_url('flagsmith', 'internal') }}"
 flagsmith_public_base_url: "https://{{ flagsmith_service_topology.public_hostname }}"
+flagsmith_container_name: flagsmith
+flagsmith_task_processor_container_name: flagsmith-task-processor
+flagsmith_runtime_image: "{{ container_image_catalog.images.flagsmith_runtime.ref }}"
 flagsmith_access_log_file: /dev/null
 flagsmith_access_log_format: >-
   %(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
@@ -24,6 +37,7 @@ flagsmith_task_processor_queue_pop_size: 10
 flagsmith_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 flagsmith_database_name: flagsmith
 flagsmith_database_user: flagsmith
+flagsmith_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith
 flagsmith_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/database-password.txt
 flagsmith_django_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/django-secret-key.txt
 flagsmith_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/admin-password.txt

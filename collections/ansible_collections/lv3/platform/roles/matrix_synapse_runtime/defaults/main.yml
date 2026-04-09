@@ -29,11 +29,20 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-29
+matrix_synapse_container_data_dir: /data
+matrix_synapse_homeserver_config_file: "{{ matrix_synapse_data_dir }}/homeserver.yaml"
+matrix_synapse_log_config_file: "{{ matrix_synapse_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
 matrix_synapse_log_config_container_file: "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
 matrix_synapse_mautrix_discord_dir: "{{ matrix_synapse_site_dir }}/mautrix-discord"
+matrix_synapse_mautrix_discord_config_file: "{{ matrix_synapse_mautrix_discord_dir }}/config.yaml"
 matrix_synapse_mautrix_discord_registration_file: "{{ matrix_synapse_mautrix_discord_dir }}/registration.yaml"
+matrix_synapse_mautrix_discord_container_name: matrix-mautrix-discord
 matrix_synapse_mautrix_whatsapp_dir: "{{ matrix_synapse_site_dir }}/mautrix-whatsapp"
+matrix_synapse_mautrix_whatsapp_config_file: "{{ matrix_synapse_mautrix_whatsapp_dir }}/config.yaml"
 matrix_synapse_mautrix_whatsapp_registration_file: "{{ matrix_synapse_mautrix_whatsapp_dir }}/registration.yaml"
+matrix_synapse_mautrix_whatsapp_container_name: matrix-mautrix-whatsapp
+matrix_synapse_mautrix_discord_image: "{{ container_image_catalog.images.matrix_mautrix_discord_runtime.ref }}"
+matrix_synapse_mautrix_whatsapp_image: "{{ container_image_catalog.images.matrix_mautrix_whatsapp_runtime.ref }}"
 matrix_synapse_server_name: matrix.{{ platform_domain }}
 matrix_synapse_public_hostname: "{{ hostvars[platform_topology_host].platform_service_topology.matrix_synapse.public_hostname }}"
 matrix_synapse_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"

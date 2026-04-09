@@ -6,10 +6,17 @@
 # Idempotency: Fully idempotent; defaults describe the desired runtime-pool substrate only.
 # Dependencies: ADR 0319, ADR 0320, and the runtime_pool_substrate role templates.
 runtime_pool_substrate_root_dir: /opt/runtime-pool-substrate
+runtime_pool_substrate_compose_file: "{{ runtime_pool_substrate_root_dir }}/docker-compose.yml"
+runtime_pool_substrate_dynamic_config_dir: "{{ runtime_pool_substrate_root_dir }}/dynamic"
 runtime_pool_substrate_pool_id: runtime-ai
 runtime_pool_substrate_entrypoint_name: "{{ runtime_pool_substrate_pool_id }}"
+runtime_pool_substrate_router_config_file: "{{ runtime_pool_substrate_dynamic_config_dir }}/{{ runtime_pool_substrate_pool_id }}-router.yml"
+runtime_pool_substrate_traefik_image: traefik:v3.6
+runtime_pool_substrate_traefik_container_name: "{{ runtime_pool_substrate_pool_id }}-traefik"
 runtime_pool_substrate_traefik_port: 9080
 runtime_pool_substrate_traefik_ping_path: /ping
+runtime_pool_substrate_dapr_image: daprio/daprd:1.16.0
+runtime_pool_substrate_dapr_container_name: "{{ runtime_pool_substrate_pool_id }}-dapr-router"
 runtime_pool_substrate_dapr_app_id: "{{ runtime_pool_substrate_pool_id }}-router"
 runtime_pool_substrate_dapr_http_port: 3500
 runtime_pool_substrate_dapr_grpc_port: 50001

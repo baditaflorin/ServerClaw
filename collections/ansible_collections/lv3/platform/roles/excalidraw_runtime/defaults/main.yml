@@ -7,7 +7,13 @@
 # Outputs: Role defaults consumed by the Excalidraw runtime converge and verification tasks.
 # Idempotency: Fully idempotent; this file only declares defaults.
 # Dependencies: ADR 0202, ADR 0165; used by the excalidraw_runtime role.
+excalidraw_runtime_site_dir: /opt/excalidraw
+excalidraw_runtime_compose_file: "{{ excalidraw_runtime_site_dir }}/docker-compose.yml"
 excalidraw_runtime_bootstrap_script: "{{ excalidraw_runtime_site_dir }}/bootstrap-app.sh"
+excalidraw_runtime_app_container_name: excalidraw-app
+excalidraw_runtime_room_container_name: excalidraw-room
+excalidraw_runtime_app_image: "docker.io/excalidraw/excalidraw:latest@sha256:9a92beb30c9bc18585bfd9adbb5cf7120b756b781363a66333b31cc8a0783e51"
+excalidraw_runtime_room_image: "docker.io/excalidraw/excalidraw-room:sha-03ff435@sha256:2fe999f9be4379e3ee282fc45d75d84a691a6383dde33544514cc395287c7a70"
 excalidraw_runtime_app_port: "{{ platform_service_topology | platform_service_port('excalidraw', 'internal') }}"
 excalidraw_runtime_room_port: "{{ platform_port_assignments.excalidraw_room_port }}"
 excalidraw_runtime_app_container_port: 80

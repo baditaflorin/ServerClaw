@@ -8,6 +8,11 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+temporal_server_image: "{{ container_image_catalog.images.temporal_server_runtime.ref }}"
+temporal_admin_tools_image: "{{ container_image_catalog.images.temporal_admin_tools_runtime.ref }}"
+temporal_ui_image: "{{ container_image_catalog.images.temporal_ui_runtime.ref }}"
+temporal_config_dir: "{{ temporal_site_dir }}/config"
+temporal_dynamic_config_file: "{{ temporal_config_dir }}/dynamicconfig.yml"
 temporal_database_name: temporal
 temporal_visibility_database_name: temporal_visibility
 temporal_database_user: temporal

@@ -1,6 +1,9 @@
 ---
 # Repo Intake Runtime Defaults
 
+repo_intake_container_name: repo-intake
+repo_intake_image: repo-intake:latest
+repo_intake_data_dir: /opt/repo-intake
 repo_intake_port: 8096
 repo_intake_gateway_url: "https://api.{{ platform_domain }}"
 repo_intake_session_secret: "{{ lookup('password', '.local/repo-intake/session.secret chars=ascii_letters,digits length=32') }}"

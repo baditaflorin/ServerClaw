@@ -33,6 +33,8 @@ harbor_installer_dir: "{{ harbor_installer_root }}/harbor"
 harbor_installer_version: 2.15.0
 harbor_installer_archive: "{{ harbor_site_dir }}/harbor-online-installer-v{{ harbor_installer_version }}.tgz"
 harbor_installer_url: "https://github.com/goharbor/harbor/releases/download/v{{ harbor_installer_version }}/harbor-online-installer-v{{ harbor_installer_version }}.tgz"
+harbor_config_file: "{{ harbor_installer_dir }}/harbor.yml"
+harbor_generated_compose_file: "{{ harbor_installer_dir }}/docker-compose.yml"
 harbor_compose_project_name: harbor
 harbor_compose_network_name: "{{ harbor_compose_project_name }}_harbor"
 harbor_log_dir: /var/log/harbor

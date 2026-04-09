@@ -53,6 +53,7 @@ keycloak_mail_platform_submission_port: "{{ smtp_port }}"
 keycloak_mail_platform_submission_starttls: "{{ smtp_starttls }}"
 keycloak_mail_platform_submission_auth_enabled: "{{ smtp_auth_enabled }}"
 keycloak_mail_platform_docker_network_name: "{{ smtp_docker_network_name }}"
+keycloak_mail_platform_compose_file: "{{ mail_platform_compose_file | default('/opt/mail-platform/docker-compose.yml') }}"
 keycloak_mail_platform_submission_service_name: stalwart
 keycloak_mail_platform_submission_recovery_enabled: >-
   {{

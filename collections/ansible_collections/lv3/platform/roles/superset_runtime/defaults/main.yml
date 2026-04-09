@@ -13,6 +13,7 @@ superset_session_authority: "{{ platform_session_authority }}"
 superset_build_dir: "{{ superset_site_dir }}/build"
 superset_pythonpath_dir: "{{ superset_site_dir }}/pythonpath"
 superset_asset_dir: "{{ superset_site_dir }}/assets"
+superset_static_env_file: "{{ superset_site_dir }}/runtime.env"
 superset_internal_base_url: "http://127.0.0.1:{{ superset_internal_port }}"
 superset_public_base_url: "https://{{ superset_service_topology.public_hostname }}"
 superset_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
@@ -25,6 +26,7 @@ superset_compose_project_name: superset
 superset_compose_network_name: "{{ superset_compose_project_name }}_default"
 superset_container_port: 8088
 superset_image_name: lv3/superset
+superset_base_image: docker.io/apache/superset:6.0.0@sha256:f2b551dda3c6b53167760aaeda3fe4252fd3777486a6ab264a1ff06b2e9d72d1
 superset_base_image_pull_timeout_seconds: 180
 superset_python_dependencies:
   - authlib==1.6.9

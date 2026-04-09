@@ -22,11 +22,21 @@
 #   - ADR 0165: Requires metadata headers on managed playbook and role surfaces.
 #   - ADR 0274: Moves Langfuse uploads to the shared MinIO object layer.
 langfuse_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('langfuse') }}"
+langfuse_clickhouse_data_dir: "{{ langfuse_data_dir }}/clickhouse"
 langfuse_clickhouse_log_dir: "{{ langfuse_data_dir }}/clickhouse-logs"
+langfuse_redis_data_dir: "{{ langfuse_data_dir }}/redis"
 langfuse_internal_base_url: "{{ platform_service_topology | platform_service_url('langfuse', 'internal') }}"
 langfuse_public_base_url: "https://{{ langfuse_service_topology.public_hostname }}"
+langfuse_web_container_name: langfuse-web
+langfuse_worker_container_name: langfuse-worker
+langfuse_clickhouse_container_name: langfuse-clickhouse
+langfuse_redis_container_name: langfuse-redis
 langfuse_redis_uid: "999"
 langfuse_redis_gid: "999"
+langfuse_web_image: "{{ container_image_catalog.images.langfuse_runtime.ref }}"
+langfuse_worker_image: "{{ container_image_catalog.images.langfuse_worker_runtime.ref }}"
+langfuse_clickhouse_image: "{{ container_image_catalog.images.langfuse_clickhouse_runtime.ref }}"
+langfuse_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
 langfuse_database_name: langfuse
 langfuse_database_user: langfuse
 langfuse_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

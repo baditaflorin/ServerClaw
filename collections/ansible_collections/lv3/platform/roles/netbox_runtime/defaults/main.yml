@@ -3,6 +3,7 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 netbox_image_tag: v4.5.4
+netbox_redis_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref }}"
 netbox_server_port: "{{ platform_service_topology | platform_service_port('netbox', 'internal') }}"
 netbox_host_proxy_port: "{{ platform_service_topology | platform_service_port('netbox', 'controller') }}"
 netbox_controller_url: "{{ platform_service_topology | platform_service_url('netbox', 'controller') }}"

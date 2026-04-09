@@ -8,12 +8,17 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+coolify_app_image: ghcr.io/coollabsio/coolify:latest
+coolify_realtime_image: ghcr.io/coollabsio/coolify-realtime:1.0.11
+coolify_postgres_image: postgres:15-alpine
+coolify_redis_image: redis:7-alpine
 
 coolify_service_name: coolify
 coolify_proxy_service_name: coolify-proxy
 coolify_realtime_service_name: coolify-realtime
 coolify_postgres_service_name: coolify-db
 coolify_redis_service_name: coolify-redis
+coolify_proxy_image: traefik:v3.6
 coolify_container_uid: "9999"
 coolify_container_gid: "9999"
 

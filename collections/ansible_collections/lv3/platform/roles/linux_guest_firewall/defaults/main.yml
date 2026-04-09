@@ -1,4 +1,5 @@
 ---
+linux_guest_firewall_config_file: /etc/nftables.conf
 linux_guest_firewall_host_id: proxmox_florin
 linux_guest_firewall_config_file: /etc/nftables.conf
 linux_guest_firewall_docker_bridge_chain_service_name: docker

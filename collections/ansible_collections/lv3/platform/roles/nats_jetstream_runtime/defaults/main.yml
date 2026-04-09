@@ -3,6 +3,8 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 nats_jetstream_server_name: lv3-nats-jetstream
+nats_jetstream_config_dir: "{{ nats_jetstream_site_dir }}/config"
+nats_jetstream_config_file: "{{ nats_jetstream_config_dir }}/nats-server.conf"
 nats_jetstream_admin_password_local_file: "{{ nats_jetstream_local_artifact_dir }}/jetstream-admin-password.txt"
 nats_jetstream_admin_user: jetstream-admin
 nats_jetstream_listen_host: 0.0.0.0

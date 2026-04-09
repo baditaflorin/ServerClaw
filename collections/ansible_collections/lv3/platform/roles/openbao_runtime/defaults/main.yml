@@ -9,10 +9,12 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 openbao_version: 2.5.1
+openbao_config_dir: "{{ openbao_site_dir }}/config"
 openbao_log_dir: "{{ openbao_site_dir }}/logs"
 openbao_policy_dir: "{{ openbao_site_dir }}/policies"
 openbao_tls_dir: "{{ openbao_site_dir }}/tls"
 openbao_default_network_name: "{{ openbao_site_dir | basename }}_default"
+openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
 openbao_tls_enabled: true
 openbao_http_bind_address: 127.0.0.1
 openbao_http_extra_bind_addresses: []

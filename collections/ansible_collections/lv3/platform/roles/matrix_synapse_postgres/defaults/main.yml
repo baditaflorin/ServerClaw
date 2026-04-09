@@ -30,7 +30,9 @@ matrix_synapse_database_user: matrix_synapse
 matrix_synapse_database_collation: C
 matrix_synapse_database_ctype: C
 matrix_synapse_database_template: template0
+matrix_synapse_postgres_secret_dir: /etc/lv3/matrix-synapse
 matrix_synapse_postgres_password_file: "{{ matrix_synapse_postgres_secret_dir }}/database-password.txt"
+matrix_synapse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse
 matrix_synapse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/database-password.txt
 matrix_synapse_bridge_databases:
   - id: mautrix_discord

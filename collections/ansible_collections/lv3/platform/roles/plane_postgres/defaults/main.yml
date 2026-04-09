@@ -29,5 +29,7 @@
 plane_database_name: plane
 plane_database_user: plane_admin
 plane_database_support_role: plane_user
+plane_postgres_secret_dir: /etc/lv3/plane
 plane_postgres_password_file: "{{ plane_postgres_secret_dir }}/database-password"
+plane_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane
 plane_database_password_local_file: "{{ plane_local_artifact_dir }}/database-password.txt"

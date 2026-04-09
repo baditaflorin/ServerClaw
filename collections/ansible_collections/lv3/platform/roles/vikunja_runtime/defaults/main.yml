@@ -31,7 +31,9 @@ vikunja_internal_base_url: "{{ hostvars[platform_topology_host].platform_service
 vikunja_controller_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('vikunja', 'controller') }}"
 vikunja_public_base_url: "https://{{ vikunja_service_topology.public_hostname }}"
 vikunja_container_port: 3456
+vikunja_bridge_container_name: vikunja-webhook-bridge
 vikunja_bridge_port: 8081
+vikunja_bridge_image: "{{ container_image_catalog.images.vikunja_webhook_bridge_runtime.ref }}"
 vikunja_database_name: vikunja
 vikunja_database_user: vikunja_admin
 vikunja_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

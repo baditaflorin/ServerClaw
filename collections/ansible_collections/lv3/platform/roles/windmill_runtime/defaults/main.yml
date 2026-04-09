@@ -21,6 +21,7 @@ windmill_server_port: "{{ hostvars[platform_topology_host].platform_port_assignm
 windmill_host_proxy_port: "{{ hostvars[platform_topology_host].platform_port_assignments.windmill_host_proxy_port }}"
 windmill_server_network_mode: host
 windmill_server_requires_docker_nat: "{{ windmill_server_network_mode != 'host' }}"
+windmill_extra_image: "{{ container_image_catalog.images.windmill_extra_runtime.ref }}"
 windmill_uv_version: "0.9.21"
 windmill_uv_download_url: >-
   https://github.com/astral-sh/uv/releases/download/{{ windmill_uv_version }}/uv-x86_64-unknown-linux-gnu.tar.gz
@@ -168,6 +169,7 @@ windmill_worker_secret_mirror_ids:
   - ntfy_windmill_token
 windmill_worker_proxmox_api_token_payload_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/proxmox-api"
 windmill_worker_proxmox_api_token_payload_file: "{{ windmill_worker_proxmox_api_token_payload_dir }}/lv3-automation-primary.json"
+windmill_worker_superadmin_secret_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
 windmill_worker_superadmin_secret_file: "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
 windmill_worker_seed_job_secret_root: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill-job-secrets"
 windmill_openbao_runtime_network: openbao_default

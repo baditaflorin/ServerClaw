@@ -3,5 +3,7 @@
 
 sftpgo_database_name: sftpgo
 sftpgo_database_user: sftpgo
+sftpgo_postgres_secret_dir: /etc/lv3/sftpgo
 sftpgo_postgres_password_file: "{{ sftpgo_postgres_secret_dir }}/database-password"
+sftpgo_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/sftpgo
 sftpgo_database_password_local_file: "{{ sftpgo_local_artifact_dir }}/database-password.txt"

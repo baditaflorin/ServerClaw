@@ -7,5 +7,7 @@
 ---
 one_api_database_name: oneapi
 one_api_database_user: oneapi
+one_api_postgres_secret_dir: /etc/lv3/one-api
 one_api_postgres_password_file: "{{ one_api_postgres_secret_dir }}/database-password"
+one_api_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api
 one_api_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/database-password.txt

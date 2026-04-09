@@ -2,6 +2,11 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+dozzle_runtime_site_dir: /opt/dozzle
+dozzle_runtime_compose_file: "{{ dozzle_runtime_site_dir }}/docker-compose.yml"
+dozzle_runtime_image: "{{ container_image_catalog.images.dozzle_runtime.ref }}"
+dozzle_runtime_hub_container_name: dozzle
+dozzle_runtime_agent_container_name: dozzle-agent
 dozzle_runtime_hub_port: "{{ platform_service_topology | platform_service_port('dozzle', 'internal') }}"
 dozzle_runtime_agent_port: "{{ hostvars[platform_topology_host].platform_port_assignments.dozzle_agent_port }}"
 dozzle_runtime_hub_inventory_host: docker-runtime-lv3

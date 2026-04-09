@@ -4,6 +4,8 @@ headscale_deb_url: "https://github.com/juanfont/headscale/releases/download/v{{ 
 headscale_deb_file: "/tmp/headscale_{{ headscale_version }}_linux_amd64.deb"
 headscale_linux_user: headscale
 headscale_linux_group: headscale
+headscale_config_dir: /etc/headscale
+headscale_config_file: /etc/headscale/config.yaml
 headscale_policy_file: /etc/headscale/acl.hujson
 headscale_policy_source_file: "{{ lookup('env', 'PWD') }}/config/headscale-acl.hujson"
 headscale_state_dir: /var/lib/headscale

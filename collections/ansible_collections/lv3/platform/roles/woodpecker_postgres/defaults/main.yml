@@ -25,5 +25,7 @@
 # Last Updated: 2026-03-30
 woodpecker_database_name: woodpecker
 woodpecker_database_user: woodpecker
+woodpecker_postgres_secret_dir: /etc/lv3/woodpecker
 woodpecker_postgres_password_file: "{{ woodpecker_postgres_secret_dir }}/database-password"
+woodpecker_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker
 woodpecker_database_password_local_file: "{{ woodpecker_local_artifact_dir }}/database-password.txt"

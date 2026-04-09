@@ -25,8 +25,24 @@
 # Related ADRs: 0093, 0205, 0210
 # Related Runbooks: docs/runbooks/ops-portal-down.md
 
-# NOTE: Conventional variables (site_dir, secret_dir, container_name, internal_port,
-# compose_file, env_file, data_dir) are derived from platform_service_registry — ADR 0373.
+# Derived from platform_service_registry (ADR 0373). The explicit default here
+# allows validate_argument_spec (which fires before role tasks) to pass before
+# the derive_service_defaults tasks_from overrides this with the registry value.
+ops_portal_site_dir: >-
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].site_dir
+     | default('/opt/ops-portal') }}
+ops_portal_secret_dir: >-
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].secret_dir
+     | default('/etc/lv3/ops_portal') }}
+ops_portal_data_dir: "{{ ops_portal_site_dir }}/data"
+ops_portal_compose_file: "{{ ops_portal_site_dir }}/docker-compose.yml"
+ops_portal_env_file: "{{ ops_portal_site_dir }}/ops-portal.env"
+ops_portal_container_name: >-
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].container_name
+     | default('ops-portal') }}
+ops_portal_internal_port: >-
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].internal_port
+     | default(8092) }}
 ops_portal_gateway_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('api_gateway') }}"
 ops_portal_service_dir: "{{ ops_portal_site_dir }}/service"
 ops_portal_build_context_dir: "{{ ops_portal_site_dir }}/build-context"

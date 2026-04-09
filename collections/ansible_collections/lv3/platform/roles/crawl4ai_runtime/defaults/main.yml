@@ -8,7 +8,13 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+crawl4ai_runtime_site_dir: /opt/crawl4ai
+crawl4ai_runtime_config_dir: /etc/lv3/crawl4ai
+crawl4ai_runtime_compose_file: "{{ crawl4ai_runtime_site_dir }}/docker-compose.yml"
+crawl4ai_runtime_config_file: "{{ crawl4ai_runtime_config_dir }}/config.yml"
+crawl4ai_runtime_container_name: crawl4ai
 crawl4ai_runtime_container_port: 11235
+crawl4ai_runtime_image: "{{ container_image_catalog.images.crawl4ai_runtime.ref }}"
 crawl4ai_runtime_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('crawl4ai', 'internal') }}"
 crawl4ai_runtime_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('crawl4ai', 'internal') }}"
 crawl4ai_runtime_local_base_url: "http://127.0.0.1:{{ crawl4ai_runtime_port }}"

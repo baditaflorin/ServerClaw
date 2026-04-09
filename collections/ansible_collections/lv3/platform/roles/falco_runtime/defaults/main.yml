@@ -18,6 +18,7 @@ falco_runtime_disabled_services:
   - falcoctl-artifact-follow.service
 falco_runtime_systemd_override_dir: "/etc/systemd/system/{{ falco_runtime_service_name }}.service.d"
 falco_runtime_systemd_override_file: "{{ falco_runtime_systemd_override_dir }}/lv3-journald.conf"
+falco_runtime_config_dir: /etc/falco/config.d
 falco_runtime_config_override_file: "{{ falco_runtime_config_dir }}/lv3-runtime.yaml"
 falco_runtime_rules_dir: /etc/falco/rules.d
 falco_runtime_rule_sources:

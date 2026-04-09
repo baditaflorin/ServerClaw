@@ -25,6 +25,7 @@ api_gateway_lago_service_topology: >-
   }}
 api_gateway_repo_root: "{{ inventory_dir | dirname }}"
 api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
+api_gateway_config_dir: "{{ api_gateway_site_dir }}/config"
 api_gateway_image_name: lv3-platform-api-gateway
 api_gateway_network_mode: host
 api_gateway_shared_local_root: >-

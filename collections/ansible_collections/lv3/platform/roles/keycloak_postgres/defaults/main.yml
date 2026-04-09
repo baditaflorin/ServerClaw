@@ -1,5 +1,7 @@
 ---
 keycloak_database_name: keycloak
 keycloak_database_user: keycloak
+keycloak_postgres_secret_dir: /etc/lv3/keycloak
 keycloak_postgres_password_file: "{{ keycloak_postgres_secret_dir }}/database-password"
+keycloak_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak
 keycloak_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/database-password.txt

@@ -1,5 +1,7 @@
 ---
 netbox_database_name: netbox
 netbox_database_user: netbox
+netbox_postgres_secret_dir: /etc/lv3/netbox
 netbox_postgres_password_file: "{{ netbox_postgres_secret_dir }}/database-password"
+netbox_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox
 netbox_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/database-password.txt
