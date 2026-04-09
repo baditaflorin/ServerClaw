@@ -2099,6 +2099,7 @@
       "transport": "controller_local",
       "endpoint": "handler://mempalace_search",
       "auth": "repo-read",
+      "runbook": "docs/runbooks/agent-tool-registry.md",
       "approval_required": false,
       "audit_on_call": true,
       "mcp_annotations": {
@@ -2165,6 +2166,7 @@
       "transport": "controller_local",
       "endpoint": "handler://mempalace_add_drawer",
       "auth": "repo-write",
+      "runbook": "docs/runbooks/agent-tool-registry.md",
       "approval_required": false,
       "audit_on_call": true,
       "mcp_annotations": {
@@ -2228,6 +2230,7 @@
       "transport": "controller_local",
       "endpoint": "handler://mempalace_wake_up",
       "auth": "repo-read",
+      "runbook": "docs/runbooks/agent-tool-registry.md",
       "approval_required": false,
       "audit_on_call": true,
       "mcp_annotations": {
@@ -2277,8 +2280,9 @@
       "transport": "controller_local",
       "endpoint": "handler://mempalace_status",
       "auth": "repo-read",
+      "runbook": "docs/runbooks/agent-tool-registry.md",
       "approval_required": false,
-      "audit_on_call": false,
+      "audit_on_call": true,
       "mcp_annotations": {
         "readOnlyHint": true,
         "idempotentHint": true
