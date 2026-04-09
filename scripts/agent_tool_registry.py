@@ -47,6 +47,7 @@ SERVICE_CATALOG_PATH: Final[Path] = repo_path("config", "service-capability-cata
 AUDIT_LOG_ENV: Final[str] = "LV3_AGENT_TOOL_AUDIT_LOG_PATH"
 PLATFORM_CONTEXT_TOKEN_ENV: Final[str] = "LV3_PLATFORM_CONTEXT_API_TOKEN_FILE"
 PLATFORM_CONTEXT_TOKEN_VALUE_ENV: Final[str] = "LV3_GATEWAY_PLATFORM_CONTEXT_LEGACY_TOKEN"
+PLATFORM_CONTEXT_API_URL_ENV: Final[str] = "LV3_PLATFORM_CONTEXT_API_URL"
 BROWSER_RUNNER_BASE_URL_ENV: Final[str] = "LV3_BROWSER_RUNNER_BASE_URL"
 DEFAULT_PLATFORM_CONTEXT_TOKEN_PATH: Final[Path] = REPO_ROOT / ".local" / "platform-context" / "api-token.txt"
 PORTAINER_BASE_URL_ENV: Final[str] = "LV3_PORTAINER_BASE_URL"
@@ -483,8 +484,12 @@ def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> d
     question = require_str(args.get("question"), "arguments.question")
     top_k = require_int(args.get("top_k", 5), "arguments.top_k", minimum=1)
     token = resolve_platform_context_token()
+    endpoint_override = os.environ.get(PLATFORM_CONTEXT_API_URL_ENV, "").strip()
+    endpoint = endpoint_override if endpoint_override else require_str(
+        tool.get("endpoint"), f"{tool['name']}.endpoint"
+    )
     request = urllib.request.Request(
-        require_str(tool.get("endpoint"), f"{tool['name']}.endpoint"),
+        endpoint,
         method="POST",
         data=json.dumps({"question": question, "top_k": top_k}).encode("utf-8"),
         headers={

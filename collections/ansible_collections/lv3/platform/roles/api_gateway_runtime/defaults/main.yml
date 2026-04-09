@@ -365,6 +365,7 @@ api_gateway_windmill_token: >-
     | default('', true)
     | trim
   }}
+api_gateway_platform_context_internal_url: "http://10.10.10.20:8010/v1/context/query"
 api_gateway_portainer_base_url: https://10.10.10.20:9443
 api_gateway_portainer_username: ops-portainer
 api_gateway_portainer_endpoint_id: "1"

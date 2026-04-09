@@ -448,6 +448,10 @@
             "items": {
               "type": "object"
             }
+          },
+          "retrieval_backend": {
+            "type": "string",
+            "description": "The retrieval backend used (e.g. vector, keyword)."
           }
         }
       },
