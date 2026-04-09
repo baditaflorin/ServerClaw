@@ -1509,16 +1509,26 @@ def _strip_docker_log_header(raw: bytes) -> str:
 
 _HOST_COMMAND_LOCAL_HOST: Final[str] = "runtime-control-lv3"
 
-# Mapping of friendly host names → SSH targets (IP or FQDN reachable from
-# runtime-control-lv3).  "local" is a sentinel meaning "run on this host".
-_HOST_COMMAND_TARGETS: Final[dict[str, str]] = {
-    "runtime-control-lv3": "local",
-    "proxmox": "10.10.10.1",
-    "postgres-lv3": "10.10.10.60",
-    "docker-runtime-lv3": "10.10.10.20",
-    "build-server": "10.10.10.30",
-    "coolify-lv3": "10.10.10.70",
-    "runtime-comms-lv3": "10.10.10.21",
+
+def _shell_quote(s: str) -> str:
+    """Shell-quote a string for safe embedding in a bash -c argument."""
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
+# Mapping of friendly host names → (transport, detail).
+# transport "local"    → nsenter into host PID 1.
+# transport "ssh"      → SSH directly (only Proxmox host allows this from LAN).
+# transport "qm"       → SSH to Proxmox, then `qm guest exec <vmid>` (VMs block
+#                         inter-VM SSH via nftables; Proxmox API is the only path).
+_HOST_COMMAND_PROXMOX_IP: Final[str] = "10.10.10.1"
+
+_HOST_COMMAND_TARGETS: Final[dict[str, tuple[str, str]]] = {
+    "runtime-control-lv3": ("local", ""),
+    "proxmox":             ("ssh", "10.10.10.1"),
+    "postgres-lv3":        ("qm", "150"),
+    "docker-runtime-lv3":  ("qm", "120"),
+    "build-server":        ("qm", "130"),
+    "coolify-lv3":         ("qm", "170"),
+    "runtime-comms-lv3":   ("qm", "121"),
 }
 
 
@@ -1568,27 +1578,59 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
             f"{DOCKER_SOCKET_PATH}. Mount the Docker socket to enable this tool."
         )
 
-    target = _HOST_COMMAND_TARGETS[host]
-    if target == "local":
+    transport, detail = _HOST_COMMAND_TARGETS[host]
+
+    _nsenter_prefix = [
+        "nsenter", "--target", "1",
+        "--mount", "--uts", "--ipc", "--net", "--pid", "--",
+    ]
+
+    if transport == "local":
         # nsenter into host PID 1 namespaces — gives true host shell access
-        container_cmd = [
-            "nsenter", "--target", "1",
-            "--mount", "--uts", "--ipc", "--net", "--pid", "--",
-            "bash", "-c", command,
-        ]
-        binds = []
-    else:
-        # SSH to remote host via host's SSH agent / keys
-        container_cmd = [
-            "nsenter", "--target", "1",
-            "--mount", "--uts", "--ipc", "--net", "--pid", "--",
+        container_cmd = _nsenter_prefix + ["bash", "-c", command]
+
+    elif transport == "ssh":
+        # Direct SSH (only works for Proxmox host, which accepts SSH from LAN)
+        container_cmd = _nsenter_prefix + [
             "ssh", "-o", "StrictHostKeyChecking=no",
             "-o", "UserKnownHostsFile=/dev/null",
             "-o", f"ConnectTimeout={min(timeout_secs, 10)}",
-            f"root@{target}",
+            f"root@{detail}",
             command,
         ]
-        binds = []
+
+    elif transport == "qm":
+        # SSH to Proxmox, then qm guest exec <vmid> to reach VMs.
+        # qm guest exec returns JSON — pipe through python3 on Proxmox to
+        # extract out-data/err-data and forward the exit code.
+        vmid = detail
+        # Build a shell command that runs on the Proxmox host:
+        #   qm guest exec <vmid> -- bash -c '<command>' | python3 -c '...'
+        qm_cmd = (
+            f"qm guest exec {vmid} -- bash -c {_shell_quote(command)}"
+            f" | python3 -c '"
+            f"import json,sys; d=json.load(sys.stdin);"
+            f" sys.stdout.write(d.get(\"out-data\",\"\"));"
+            f" sys.stderr.write(d.get(\"err-data\",\"\"));"
+            f" sys.exit(d.get(\"exitcode\",1))'"
+        )
+        container_cmd = _nsenter_prefix + [
+            "ssh", "-o", "StrictHostKeyChecking=no",
+            "-o", "UserKnownHostsFile=/dev/null",
+            "-o", f"ConnectTimeout={min(timeout_secs, 10)}",
+            f"root@{_HOST_COMMAND_PROXMOX_IP}",
+            qm_cmd,
+        ]
+
+    else:
+        return {
+            "status": "error",
+            "command": command,
+            "exit_code": -1,
+            "stdout": "(error)",
+            "stderr": f"Unknown transport '{transport}' for host '{host}'",
+            "host": host,
+        }
 
     # Create a privileged temporary container with host PID namespace
     create_resp = _docker_socket_json("POST", "/containers/create", body={
@@ -1599,7 +1641,6 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
             "Privileged": True,
             "NetworkMode": "host",
             "PidMode": "host",
-            "Binds": binds,
         },
         "Env": [
             "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
