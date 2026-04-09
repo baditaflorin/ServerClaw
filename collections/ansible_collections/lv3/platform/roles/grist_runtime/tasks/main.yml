@@ -769,7 +769,7 @@
     discovery_json="$(curl --fail --silent --show-error \
       --connect-timeout 5 \
       --max-time 10 \
-      --resolve '{{ hostvars["proxmox_florin"].lv3_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
+      --resolve '{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
       '{{ grist_keycloak_issuer }}/.well-known/openid-configuration')"
     DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<'PY'
     import json
@@ -1062,7 +1062,7 @@
     discovery_json="$(curl --fail --silent --show-error \
       --connect-timeout 5 \
       --max-time 10 \
-      --resolve '{{ hostvars["proxmox_florin"].lv3_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
+      --resolve '{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
       '{{ grist_keycloak_issuer }}/.well-known/openid-configuration')"
     DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<'PY'
     import json

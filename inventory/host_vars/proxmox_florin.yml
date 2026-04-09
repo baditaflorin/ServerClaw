@@ -2134,7 +2134,7 @@ lv3_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
-    private_ip: "{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}"
+    private_ip: "{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}"
     public_hostname: headscale.{{ platform_domain }}
     exposure_model: edge-published
     observability:
@@ -2151,7 +2151,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}:{{ hostvars['proxmox_florin'].platform_port_assignments.headscale_http_port }}"
+      upstream: "http://{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}:{{ hostvars[platform_topology_host].platform_port_assignments.headscale_http_port }}"
   alertmanager:
     service_name: alertmanager
     owning_vm: monitoring-lv3
