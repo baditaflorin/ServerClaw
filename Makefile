@@ -71,6 +71,8 @@ COLLECTION_SERVER ?= internal_galaxy
 COLLECTION_INSTALL_PATH ?= $(REPO_ROOT)/build/collection-install
 COLLECTION_INSTALL_SOURCE ?= tarball
 CHECKS ?=
+# Fork operators: override this to point to your own container registry.
+# The check-runner images are built by `make build-check-runners`.
 CHECK_RUNNER_REGISTRY ?= registry.lv3.org/check-runner
 CHECK_RUNNER_ANSIBLE_TAG ?= 2.17.10
 CHECK_RUNNER_PYTHON_TAG ?= 3.12.10

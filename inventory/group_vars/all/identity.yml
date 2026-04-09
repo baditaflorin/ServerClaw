@@ -85,3 +85,8 @@ proxmox_management_allowed_sources:
   - 100.64.0.0/10
   - 10.10.10.0/24
   - 90.95.35.115/32
+
+# ---------------------------------------------------------------------------
+# Container registry (used by CI gate check runners)
+# ---------------------------------------------------------------------------
+platform_container_registry: "registry.{{ platform_domain }}"
