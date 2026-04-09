@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [ADR 0373] Phase 5-6 Live-Apply Complete: Final 7 services migrated to derive_service_defaults (librechat, litellm, neko, netdata, repo_intake, falco, falco_event_bridge); 100% platform adoption achieved; cosmetic cleanup removing 2583 redundant variable definitions from role defaults/specs; all 73 services now use unified IoC pattern with zero duplication
 - [ADR 0386/0387] Zero-to-platform bootstrap and Docker development environment: init_local_overlay.py generates .local/ from secret manifest with SSH keys and 237 auto-generated secrets; local-overlay-template/ provides 63-dir scaffold; Docker dev environment (vm-base container, Tier 1 minimal 4-container / Tier 2 full 7-container compose); inventory templates for forks and Docker dev; provider bootstrap profiles (Hetzner, generic Debian, homelab); verification playbooks for Proxmox, guests, and platform health; unified bootstrap-from-scratch runbook; Makefile targets: init-local, bootstrap, bootstrap-minimal, docker-dev-up/down/converge/verify/reset
 
 - [ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox_florin'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain
