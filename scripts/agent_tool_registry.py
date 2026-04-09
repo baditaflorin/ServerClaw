@@ -1485,7 +1485,7 @@ _HOST_COMMAND_BLOCKED_PATTERNS: Final[list[str]] = [
     "userdel",
 ]
 
-_HOST_COMMAND_EXEC_IMAGE: Final[str] = "debian:bookworm-slim"
+_HOST_COMMAND_EXEC_IMAGE: Final[str] = "alpine:3.20"
 
 
 def _strip_docker_log_header(raw: bytes) -> str:
@@ -1507,15 +1507,47 @@ def _strip_docker_log_header(raw: bytes) -> str:
     return "".join(lines)
 
 
-def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
-    """Execute a shell command on the Docker host via a temporary container.
+_HOST_COMMAND_LOCAL_HOST: Final[str] = "runtime-control-lv3"
 
-    Uses the Docker Engine API to create a one-shot container with read-only
-    access to the host root filesystem (mounted at /host).  The container is
-    automatically removed after execution.
+# Mapping of friendly host names → SSH targets (IP or FQDN reachable from
+# runtime-control-lv3).  "local" is a sentinel meaning "run on this host".
+_HOST_COMMAND_TARGETS: Final[dict[str, str]] = {
+    "runtime-control-lv3": "local",
+    "proxmox": "10.10.10.1",
+    "postgres-lv3": "10.10.10.60",
+    "docker-runtime-lv3": "10.10.10.20",
+    "build-server": "10.10.10.30",
+    "coolify-lv3": "10.10.10.70",
+    "runtime-comms-lv3": "10.10.10.21",
+}
+
+
+def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Execute a shell command directly on a platform host.
+
+    For local execution (runtime-control-lv3): uses nsenter via a privileged
+    temporary Docker container to run commands in the host's own namespaces —
+    full access to the host's binaries, systemctl, docker, journalctl, etc.
+
+    For remote hosts: SSH from the local host to the target via a privileged
+    container with the host's SSH keys mounted.
     """
     command = require_str(args.get("command"), "arguments.command")
     timeout_secs = require_int(args.get("timeout", 30), "arguments.timeout", minimum=1)
+    host = args.get("host", _HOST_COMMAND_LOCAL_HOST)
+    if not isinstance(host, str) or not host.strip():
+        host = _HOST_COMMAND_LOCAL_HOST
+
+    # Resolve host name
+    if host not in _HOST_COMMAND_TARGETS:
+        return {
+            "status": "error",
+            "command": command,
+            "exit_code": -1,
+            "stdout": "(error)",
+            "stderr": f"Unknown host '{host}'. Available: {', '.join(sorted(_HOST_COMMAND_TARGETS))}",
+            "host": host,
+        }
 
     # Safety filter — block obviously destructive patterns
     cmd_lower = command.lower()
@@ -1527,7 +1559,7 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
                 "exit_code": -1,
                 "stdout": "(blocked)",
                 "stderr": f"Command blocked by safety filter: contains '{pattern}'",
-                "host": "runtime-control-lv3",
+                "host": host,
             }
 
     if not _docker_socket_available():
@@ -1536,18 +1568,39 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
             f"{DOCKER_SOCKET_PATH}. Mount the Docker socket to enable this tool."
         )
 
-    # Create a temporary container with host root mounted read-only
+    target = _HOST_COMMAND_TARGETS[host]
+    if target == "local":
+        # nsenter into host PID 1 namespaces — gives true host shell access
+        container_cmd = [
+            "nsenter", "--target", "1",
+            "--mount", "--uts", "--ipc", "--net", "--pid", "--",
+            "bash", "-c", command,
+        ]
+        binds = []
+    else:
+        # SSH to remote host via host's SSH agent / keys
+        container_cmd = [
+            "nsenter", "--target", "1",
+            "--mount", "--uts", "--ipc", "--net", "--pid", "--",
+            "ssh", "-o", "StrictHostKeyChecking=no",
+            "-o", "UserKnownHostsFile=/dev/null",
+            "-o", f"ConnectTimeout={min(timeout_secs, 10)}",
+            f"root@{target}",
+            command,
+        ]
+        binds = []
+
+    # Create a privileged temporary container with host PID namespace
     create_resp = _docker_socket_json("POST", "/containers/create", body={
         "Image": _HOST_COMMAND_EXEC_IMAGE,
-        "Cmd": ["bash", "-c", command],
+        "Cmd": container_cmd,
         "HostConfig": {
             "AutoRemove": False,
+            "Privileged": True,
             "NetworkMode": "host",
             "PidMode": "host",
-            "ReadonlyRootfs": False,
-            "Binds": ["/:/host:ro"],
+            "Binds": binds,
         },
-        "WorkingDir": "/host",
         "Env": [
             "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
             "TERM=xterm",
@@ -1589,7 +1642,7 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
         "exit_code": exit_code,
         "stdout": output or "(empty)",
         "stderr": "(none)",
-        "host": "runtime-control-lv3",
+        "host": host,
     }
 
 
