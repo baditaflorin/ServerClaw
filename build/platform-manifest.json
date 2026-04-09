@@ -2,9 +2,9 @@
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
   "repo_version": "0.178.70",
-  "platform_version": "0.178.66",
-  "generated_at": "2026-04-09T13:59:56Z",
-  "next_refresh_at": "2026-04-09T14:59:56Z",
+  "platform_version": "0.178.70",
+  "generated_at": "2026-04-09T14:11:41Z",
+  "next_refresh_at": "2026-04-09T15:11:41Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6359,7 +6359,7 @@
   "recent_changes": {
     "last_version": "0.178.69",
     "deployed_at": "2026-04-09",
-    "summary": "[ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox_florin'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain API gateway execute-host-command tool: ServerClaw agents can now run bash commands on the host via temporary Docker containers with read-only root mount, safety-filtered blocked patterns (rm -rf, mkfs, shutdown, etc.), and Docker multiplexed log parsing; mempalace>=0.3.0 added to container image so all 4 mempalace tools work (search, add-drawer, wake-up, status)",
+    "summary": "[ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox_florin'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain API gateway execute-host-command tool: ServerClaw agents run bash commands directly on any platform host via nsenter (true host shell \u2014 systemctl, journalctl, docker, free all work); multi-host targeting via SSH (proxmox, postgres-lv3, docker-runtime-lv3, build-server, coolify-lv3, runtime-comms-lv3); safety-filtered blocked patterns; mempalace>=0.3.0 added to container image",
     "release_notes_url": "docs/release-notes/0.178.70.md"
   },
   "agentic_architecture": {
