@@ -57,7 +57,7 @@ platform_service_registry:
   api_gateway:
     service_type: docker_compose
     image_catalog_key: ""            # api-gateway is a bespoke binary, no catalog entry
-    internal_port: 8080
+    internal_port: 8083
     host_group: runtime-control-lv3
     site_dir: /opt/api-gateway
     container_name: api-gateway
