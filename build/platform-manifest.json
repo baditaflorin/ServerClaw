@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.69",
+  "repo_version": "0.178.70",
   "platform_version": "0.178.66",
-  "generated_at": "2026-04-09T13:33:25Z",
-  "next_refresh_at": "2026-04-09T14:33:25Z",
+  "generated_at": "2026-04-09T13:59:56Z",
+  "next_refresh_at": "2026-04-09T14:59:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6357,10 +6357,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.68",
+    "last_version": "0.178.69",
     "deployed_at": "2026-04-09",
-    "summary": "API gateway execute-host-command tool: ServerClaw agents can now run bash commands on the host via temporary Docker containers with read-only root mount, safety-filtered blocked patterns (rm -rf, mkfs, shutdown, etc.), and Docker multiplexed log parsing; mempalace>=0.3.0 added to container image so all 4 mempalace tools work (search, add-drawer, wake-up, status) [ADR 0385] IoC refactor: single identity.yml replaces all hardcoded operator values; fork operators edit one file to rebrand; 281 files converted from hardcoded lv3.org/proxmox_florin to template expressions; generators and validators updated to resolve identity vars; IoC regression test added",
-    "release_notes_url": "docs/release-notes/0.178.69.md"
+    "summary": "[ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox_florin'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain API gateway execute-host-command tool: ServerClaw agents can now run bash commands on the host via temporary Docker containers with read-only root mount, safety-filtered blocked patterns (rm -rf, mkfs, shutdown, etc.), and Docker multiplexed log parsing; mempalace>=0.3.0 added to container image so all 4 mempalace tools work (search, add-drawer, wake-up, status)",
+    "release_notes_url": "docs/release-notes/0.178.70.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
