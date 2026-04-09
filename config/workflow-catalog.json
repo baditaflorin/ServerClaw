@@ -32,8 +32,8 @@
       "owner_runbook": "docs/runbooks/configure-plausible.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/plausible.yml",
-        "playbooks/services/plausible.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/plausible.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/plausible.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/plausible.yml",
         "collections/ansible_collections/lv3/platform/roles/plausible_runtime",
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
@@ -96,8 +96,8 @@
       "owner_runbook": "docs/runbooks/configure-flagsmith.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/flagsmith.yml",
-        "playbooks/services/flagsmith.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/flagsmith.yml",
         "collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/flagsmith.yml",
         "collections/ansible_collections/lv3/platform/roles/flagsmith_postgres",
@@ -140,7 +140,7 @@
         "command": "make converge-crawl4ai"
       },
       "preflight": {
-        "required": true,
+        "required": false,
         "required_secret_ids": [
           "bootstrap_ssh_private_key"
         ],
@@ -154,9 +154,9 @@
       "owner_runbook": "docs/runbooks/configure-crawl4ai.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/crawl4ai.yml",
-        "playbooks/services/crawl4ai.yml",
-        "roles/crawl4ai_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/crawl4ai.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/crawl4ai.yml",
+        "collections/ansible_collections/lv3/platform/roles/crawl4ai_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json",
@@ -883,9 +883,9 @@
       "owner_runbook": "docs/runbooks/install-proxmox.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_repository/tasks/main.yml",
-        "roles/proxmox_platform/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_repository/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_platform/tasks/main.yml"
       ],
       "outputs": [
         "Proxmox package repositories and core platform packages converged on the host."
@@ -935,8 +935,8 @@
       "owner_runbook": "docs/runbooks/configure-proxmox-network.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_network/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml"
       ],
       "outputs": [
         "vmbr0, vmbr10, IPv4 forwarding, and guest NAT policy converged on the host."
@@ -995,9 +995,9 @@
       "implementation_refs": [
         "Makefile",
         "inventory/host_vars/proxmox_florin.yml",
-        "playbooks/guest-network-policy.yml",
-        "roles/proxmox_network/tasks/main.yml",
-        "roles/linux_guest_firewall/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/guest-network-policy.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml"
       ],
       "outputs": [
         "Per-VM Proxmox firewall rules, NIC firewall enablement, and guest nftables policies converged from the canonical network policy matrix."
@@ -1044,8 +1044,8 @@
       "owner_runbook": "docs/runbooks/configure-public-ingress.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_network/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml"
       ],
       "outputs": [
         "TCP 80 and 443 forwarding from the public host IP to nginx-lv3."
@@ -1089,8 +1089,8 @@
       "owner_runbook": "docs/runbooks/configure-edge-publication.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/public-edge.yml",
-        "roles/nginx_edge_publication/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/public-edge.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml"
       ],
       "outputs": [
         "NGINX virtual hosts, proxy routes, and edge certificate domains updated on nginx-lv3."
@@ -1138,8 +1138,8 @@
       "owner_runbook": "docs/runbooks/configure-tailscale-access.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_tailscale/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale/tasks/main.yml"
       ],
       "outputs": [
         "Tailscale package, auth state helpers, and advertised guest subnet routing on the host."
@@ -1180,8 +1180,8 @@
       "owner_runbook": "docs/runbooks/configure-host-control-loops.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/proxmox-install.yml",
-        "roles/proxmox_host_control_loops/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/proxmox-install.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/tasks/main.yml"
       ],
       "outputs": [
         "The canonical host control-loop script plus matching systemd service, timer, path unit, and status files on proxmox_florin."
@@ -1234,10 +1234,10 @@
       "owner_runbook": "docs/runbooks/configure-headscale.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/headscale.yml",
-        "playbooks/services/headscale.yml",
-        "roles/proxmox_headscale/tasks/main.yml",
-        "roles/nginx_edge_publication/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/headscale.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/headscale.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_headscale/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
         "config/headscale-acl.hujson",
         "inventory/host_vars/proxmox_florin.yml"
       ],
@@ -1281,8 +1281,8 @@
       "owner_runbook": "docs/runbooks/provision-guests.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_guests/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml"
       ],
       "outputs": [
         "Template VM 9000 and declared guest instances created or updated on the Proxmox host."
@@ -1323,8 +1323,8 @@
       "owner_runbook": "docs/runbooks/harden-access.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_access/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_access/tasks/main.yml"
       ],
       "outputs": [
         "Host-side SSH, sudo, and Proxmox access baseline enforced for routine operations."
@@ -1364,8 +1364,8 @@
       "owner_runbook": "docs/runbooks/harden-access.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/guest-access.yml",
-        "roles/linux_access/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/guest-access.yml",
+        "collections/ansible_collections/lv3/platform/roles/linux_access/tasks/main.yml"
       ],
       "outputs": [
         "Guest SSH and sudo baseline enforced across the managed Linux VMs."
@@ -1410,8 +1410,8 @@
       "owner_runbook": "docs/runbooks/complete-security-baseline.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_security/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml"
       ],
       "outputs": [
         "Firewall, ACME certificate, notifications, and TOTP state converged on the Proxmox host."
@@ -1455,8 +1455,8 @@
       "owner_runbook": "docs/runbooks/proxmox-api-automation.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_api_access/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_api_access/tasks/main.yml"
       ],
       "outputs": [
         "Durable Proxmox API automation user and locally mirrored token payload."
@@ -1501,12 +1501,12 @@
       "owner_runbook": "docs/runbooks/monitoring-stack.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/monitoring-stack.yml",
-        "roles/monitoring_vm/tasks/main.yml",
-        "roles/loki_log_agent/tasks/main.yml",
-        "roles/nginx_observability/tasks/main.yml",
-        "roles/docker_build_observability/tasks/main.yml",
-        "roles/docker_runtime_observability/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/monitoring-stack.yml",
+        "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/loki_log_agent/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_observability/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/docker_build_observability/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/docker_runtime_observability/tasks/main.yml"
       ],
       "outputs": [
         "Monitoring VM services converged, dashboards imported, guest telemetry wired into InfluxDB, Tempo tracing plus Prometheus service-graph metrics exposed through Grafana, and centralized Loki log shipping active for the host and managed guests."
@@ -1556,10 +1556,10 @@
       "owner_runbook": "docs/runbooks/configure-ntopng.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/ntopng.yml",
-        "roles/proxmox_ntopng",
-        "roles/proxmox_tailscale_proxy",
-        "roles/proxmox_security",
+        "collections/ansible_collections/lv3/platform/playbooks/ntopng.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_ntopng",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -1605,8 +1605,8 @@
       "owner_runbook": "docs/runbooks/configure-docker-runtime.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/docker-runtime.yml",
-        "roles/docker_runtime/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/docker-runtime.yml",
+        "collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml"
       ],
       "outputs": [
         "Docker Engine, Compose plugin, daemon baseline, and ops group access on docker-runtime-lv3."
@@ -1647,8 +1647,8 @@
       "owner_runbook": "docs/runbooks/docker-publication-assurance.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/docker-publication-assurance.yml",
-        "playbooks/tasks/docker-publication-assert.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/docker-publication-assurance.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml",
         "collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml",
         "scripts/docker_publication_assurance.py",
         "config/health-probe-catalog.json"
@@ -1692,8 +1692,8 @@
       "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/postgres-vm.yml",
-        "roles/postgres_vm/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/postgres-vm.yml",
+        "collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml"
       ],
       "outputs": [
         "PostgreSQL runtime, guest firewall policy, and local admin baseline converged on postgres-lv3."
@@ -1736,11 +1736,11 @@
       "owner_runbook": "docs/runbooks/configure-mail-platform.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/mail-platform.yml",
-        "roles/mail_platform_runtime",
-        "roles/mail_platform_observability",
-        "roles/proxmox_network",
-        "roles/monitoring_vm",
+        "collections/ansible_collections/lv3/platform/playbooks/mail-platform.yml",
+        "collections/ansible_collections/lv3/platform/roles/mail_platform_runtime",
+        "collections/ansible_collections/lv3/platform/roles/mail_platform_observability",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_network",
+        "collections/ansible_collections/lv3/platform/roles/monitoring_vm",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -1789,10 +1789,10 @@
       "owner_runbook": "docs/runbooks/configure-mailpit.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/mailpit.yml",
-        "playbooks/services/mailpit.yml",
-        "roles/mailpit_runtime",
-        "playbooks/mail-platform-verify.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/mailpit.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/mailpit.yml",
+        "collections/ansible_collections/lv3/platform/roles/mailpit_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/group_vars/staging.yml",
@@ -1847,8 +1847,8 @@
       "owner_runbook": "docs/runbooks/configure-livekit.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/livekit.yml",
-        "playbooks/services/livekit.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/livekit.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml",
         "collections/ansible_collections/lv3/platform/playbooks/livekit.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml",
         "collections/ansible_collections/lv3/platform/roles/livekit_runtime",
@@ -1906,8 +1906,8 @@
       "owner_runbook": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/neko.yml",
-        "playbooks/services/neko.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/neko.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/neko.yml",
         "collections/ansible_collections/lv3/platform/playbooks/neko.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/neko.yml",
         "collections/ansible_collections/lv3/platform/roles/neko_runtime",
@@ -1968,9 +1968,9 @@
       "owner_runbook": "docs/runbooks/configure-redpanda.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/redpanda.yml",
-        "playbooks/services/redpanda.yml",
-        "roles/redpanda_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/redpanda.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/redpanda.yml",
+        "collections/ansible_collections/lv3/platform/roles/redpanda_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json"
@@ -2030,10 +2030,10 @@
       "owner_runbook": "docs/runbooks/configure-openbao.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/openbao.yml",
-        "roles/openbao_runtime",
-        "roles/openbao_postgres_backend",
-        "roles/postgres_vm",
+        "collections/ansible_collections/lv3/platform/playbooks/openbao.yml",
+        "collections/ansible_collections/lv3/platform/roles/openbao_runtime",
+        "collections/ansible_collections/lv3/platform/roles/openbao_postgres_backend",
+        "collections/ansible_collections/lv3/platform/roles/postgres_vm",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml"
       ],
@@ -2085,11 +2085,11 @@
       "owner_runbook": "docs/runbooks/configure-step-ca.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/step-ca.yml",
-        "roles/step_ca_runtime",
-        "roles/step_ca_ssh_trust",
-        "roles/proxmox_security",
-        "roles/proxmox_tailscale_proxy",
+        "collections/ansible_collections/lv3/platform/playbooks/step-ca.yml",
+        "collections/ansible_collections/lv3/platform/roles/step_ca_runtime",
+        "collections/ansible_collections/lv3/platform/roles/step_ca_ssh_trust",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -2135,8 +2135,8 @@
       "owner_runbook": "docs/adr/0376-identity-core-vm-isolation-and-watchdog.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/identity-core-watchdog.yml",
-        "roles/identity_core_watchdog"
+        "collections/ansible_collections/lv3/platform/playbooks/identity-core-watchdog.yml",
+        "collections/ansible_collections/lv3/platform/roles/identity_core_watchdog"
       ],
       "outputs": [
         "A systemd timer lv3-identity-watchdog.timer active on runtime-control-lv3, probing identity-core services every 15 seconds and auto-restarting on failure."
@@ -2189,12 +2189,12 @@
       "owner_runbook": "docs/runbooks/configure-superset.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/superset.yml",
-        "playbooks/services/superset.yml",
-        "roles/superset_postgres",
-        "roles/superset_runtime",
-        "roles/keycloak_runtime",
-        "roles/nginx_edge_publication",
+        "collections/ansible_collections/lv3/platform/playbooks/superset.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/superset.yml",
+        "collections/ansible_collections/lv3/platform/roles/superset_postgres",
+        "collections/ansible_collections/lv3/platform/roles/superset_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
         "scripts/superset_bootstrap.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
@@ -2254,10 +2254,10 @@
       "owner_runbook": "docs/runbooks/configure-tika.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/tika.yml",
-        "playbooks/services/tika.yml",
-        "playbooks/runtime-ai-pool.yml",
-        "roles/tika_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/tika.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/tika.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/runtime-ai-pool.yml",
+        "collections/ansible_collections/lv3/platform/roles/tika_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "config/ansible-execution-scopes.yaml",
         "config/service-capability-catalog.json",
@@ -2313,9 +2313,9 @@
       "owner_runbook": "docs/runbooks/configure-nomad.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/groups/automation.yml",
-        "playbooks/nomad.yml",
-        "playbooks/services/nomad.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/groups/automation.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/nomad.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/nomad.yml",
         "collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/tasks/main.yml",
         "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl",
@@ -2369,8 +2369,8 @@
       "owner_runbook": "docs/runbooks/configure-openfga.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/openfga.yml",
-        "playbooks/services/openfga.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/openfga.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/openfga.yml",
         "collections/ansible_collections/lv3/platform/roles/openfga_postgres",
         "collections/ansible_collections/lv3/platform/roles/openfga_runtime",
         "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
@@ -2424,8 +2424,8 @@
       "owner_runbook": "docs/runbooks/configure-temporal.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/temporal.yml",
-        "playbooks/services/temporal.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/temporal.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/temporal.yml",
         "collections/ansible_collections/lv3/platform/roles/temporal_postgres",
         "collections/ansible_collections/lv3/platform/roles/temporal_runtime",
         "scripts/temporal_smoke.py",
@@ -2481,12 +2481,12 @@
         "Makefile",
         "migrations/0016_config_merge_schema.sql",
         "config/windmill/scripts/merge-config-changes.py",
-        "playbooks/windmill.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/windmill.yml",
         "config/windmill/scripts/lv3-healthcheck.py",
         "config/windmill/scripts/lv3-mutation-audit.py",
-        "roles/windmill_postgres/tasks/main.yml",
-        "roles/windmill_runtime/tasks/main.yml",
-        "roles/proxmox_tailscale_proxy/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml"
       ],
       "outputs": [
         "Windmill runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, an operator-only Tailscale proxy on the Proxmox host, and the repo-managed config-merge worker plus schedule seeded into the workspace."
@@ -2547,11 +2547,11 @@
       "owner_runbook": "docs/runbooks/configure-woodpecker.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/woodpecker.yml",
-        "playbooks/services/woodpecker.yml",
         "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
-        "roles/woodpecker_postgres/tasks/main.yml",
-        "roles/woodpecker_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/woodpecker.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
+        "collections/ansible_collections/lv3/platform/roles/woodpecker_postgres/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/tasks/main.yml",
         "platform/ansible/woodpecker.py",
         "scripts/woodpecker_bootstrap.py",
         "scripts/woodpecker_tool.py",
@@ -2616,10 +2616,10 @@
       "owner_runbook": "docs/runbooks/configure-coolify.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/coolify.yml",
-        "playbooks/services/coolify.yml",
-        "roles/coolify_runtime/tasks/main.yml",
-        "roles/coolify_runtime/tasks/verify.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/coolify.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/coolify.yml",
+        "collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/verify.yml",
         "scripts/coolify_tool.py",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
@@ -2850,7 +2850,7 @@
         "config/windmill/scripts/subdomain-exposure-audit.py",
         "scripts/subdomain_catalog.py",
         "scripts/subdomain_exposure_audit.py",
-        "roles/nginx_edge_publication/defaults/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml",
         "receipts/subdomain-exposure-audit",
         "docs/runbooks/subdomain-exposure-audit.md"
       ],
@@ -3023,7 +3023,7 @@
       "owner_runbook": "docs/runbooks/restic-config-backups.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/restic-config-backup.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/restic-config-backup.yml",
         "collections/ansible_collections/lv3/platform/roles/restic_config_backup",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
         "config/restic-file-backup-catalog.json",
@@ -3178,7 +3178,7 @@
       "owner_runbook": "docs/runbooks/security-posture-reporting.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/tasks/security-scan.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml",
         "config/control-plane-lanes.json",
         "config/api-publication.json",
         "config/workflow-catalog.json",
@@ -3238,10 +3238,10 @@
         "config/workflow-catalog.json",
         "config/windmill/scripts/sbom-refresh.py",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
-        "playbooks/tasks/generate-host-sbom.yml",
-        "playbooks/tasks/post-verify.yml",
-        "playbooks/tasks/security-scan.yml",
-        "playbooks/gitea.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/tasks/generate-host-sbom.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/gitea.yml",
         "docs/runbooks/sbom-cve-scanning.md",
         "receipts/sbom",
         "receipts/cve",
@@ -3659,12 +3659,12 @@
         "Makefile",
         "config/secret-catalog.json",
         "config/controller-local-secrets.json",
-        "playbooks/secret-rotation.yml",
-        "roles/openbao_runtime/tasks/main.yml",
-        "roles/windmill_postgres/tasks/rotate.yml",
-        "roles/windmill_runtime/tasks/rotate.yml",
-        "roles/mail_platform_runtime/tasks/rotate.yml",
-        "roles/windmill_runtime/templates/lv3-secret-rotation.py.j2",
+        "collections/ansible_collections/lv3/platform/playbooks/secret-rotation.yml",
+        "collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/rotate.yml",
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/rotate.yml",
+        "collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/tasks/rotate.yml",
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/lv3-secret-rotation.py.j2",
         "scripts/secret_rotation.py",
         "tests/test_secret_rotation.py"
       ],
@@ -3736,12 +3736,12 @@
         "docs/adr/0077-compose-runtime-secrets-injection.md",
         "docs/workstreams/adr-0077-compose-secrets-injection.md",
         "docs/runbooks/compose-secrets-injection.md",
-        "playbooks/mail-platform.yml",
-        "playbooks/windmill.yml",
-        "playbooks/keycloak.yml",
-        "playbooks/netbox.yml",
-        "playbooks/open-webui.yml",
-        "playbooks/mattermost.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/mail-platform.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/windmill.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/keycloak.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/netbox.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/open-webui.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/mattermost.yml"
       ],
       "outputs": [
         "Migrated platform applications on docker-runtime-lv3 consume repo-managed runtime secret files rendered by OpenBao Agent sidecars instead of legacy compose-directory `.env` files."
@@ -3795,10 +3795,10 @@
       "owner_runbook": "docs/runbooks/configure-control-plane-recovery.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/control-plane-recovery.yml",
-        "roles/control_plane_recovery",
-        "roles/control_plane_recovery_store",
-        "roles/control_plane_recovery_controller",
+        "collections/ansible_collections/lv3/platform/playbooks/control-plane-recovery.yml",
+        "collections/ansible_collections/lv3/platform/roles/control_plane_recovery",
+        "collections/ansible_collections/lv3/platform/roles/control_plane_recovery_store",
+        "collections/ansible_collections/lv3/platform/roles/control_plane_recovery_controller",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml"
       ],
@@ -3853,11 +3853,11 @@
       "owner_runbook": "docs/runbooks/configure-jupyterhub.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/jupyterhub.yml",
-        "playbooks/services/jupyterhub.yml",
-        "roles/jupyterhub_runtime",
-        "roles/keycloak_runtime",
-        "roles/nginx_edge_publication",
+        "collections/ansible_collections/lv3/platform/playbooks/jupyterhub.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/jupyterhub.yml",
+        "collections/ansible_collections/lv3/platform/roles/jupyterhub_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json",
@@ -3913,8 +3913,8 @@
       "owner_runbook": "docs/runbooks/configure-label-studio.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/label-studio.yml",
-        "playbooks/services/label-studio.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/label-studio.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml",
         "collections/ansible_collections/lv3/platform/playbooks/label-studio.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml",
         "collections/ansible_collections/lv3/platform/roles/label_studio_postgres",
@@ -3988,8 +3988,8 @@
       "owner_runbook": "docs/runbooks/configure-lago.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/lago.yml",
-        "playbooks/services/lago.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/lago.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/lago.yml",
         "collections/ansible_collections/lv3/platform/playbooks/lago.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/lago.yml",
         "collections/ansible_collections/lv3/platform/roles/lago_postgres",
@@ -4061,11 +4061,11 @@
       "owner_runbook": "docs/runbooks/configure-keycloak.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/keycloak.yml",
-        "roles/keycloak_postgres/tasks/main.yml",
-        "roles/keycloak_runtime/tasks/main.yml",
-        "roles/grafana_sso/tasks/main.yml",
-        "roles/nginx_edge_publication/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/keycloak.yml",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_postgres/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/grafana_sso/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
         "inventory/host_vars/proxmox_florin.yml",
         "config/uptime-kuma/monitors.json"
       ],
@@ -4117,8 +4117,8 @@
       "owner_runbook": "docs/runbooks/configure-harbor.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/harbor.yml",
-        "playbooks/services/harbor.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/harbor.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/harbor.yml",
         "collections/ansible_collections/lv3/platform/roles/harbor_runtime",
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
         "inventory/host_vars/proxmox_florin.yml",
@@ -4169,11 +4169,11 @@
       "owner_runbook": "docs/runbooks/configure-api-gateway.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/api-gateway.yml",
-        "playbooks/public-edge.yml",
-        "roles/api_gateway_runtime/tasks/main.yml",
-        "roles/linux_guest_firewall/templates/nftables.conf.j2",
-        "roles/nginx_edge_publication/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/public-edge.yml",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml",
@@ -4238,13 +4238,13 @@
       "owner_runbook": "docs/runbooks/configure-matrix-synapse.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/matrix-synapse.yml",
-        "playbooks/services/matrix-synapse.yml",
-        "roles/matrix_synapse_postgres",
-        "roles/matrix_synapse_runtime",
-        "roles/proxmox_tailscale_proxy",
-        "roles/proxmox_security",
-        "roles/nginx_edge_publication",
+        "collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/matrix-synapse.yml",
+        "collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres",
+        "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
         "scripts/matrix_admin_register.py",
         "scripts/matrix_bridge_smoke.py",
         "inventory/host_vars/proxmox_florin.yml",
@@ -4296,7 +4296,7 @@
       "owner_runbook": "docs/runbooks/platform-operations-portal.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/ops-portal.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/ops-portal.yml",
         "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml",
         "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2",
@@ -4371,8 +4371,8 @@
       "owner_runbook": "docs/runbooks/configure-dify.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/dify.yml",
-        "playbooks/services/dify.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/dify.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/dify.yml",
         "collections/ansible_collections/lv3/platform/roles/dify_postgres",
         "collections/ansible_collections/lv3/platform/roles/dify_runtime",
         "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
@@ -4430,10 +4430,10 @@
       "owner_runbook": "docs/runbooks/configure-n8n.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/n8n.yml",
-        "roles/n8n_postgres/tasks/main.yml",
-        "roles/n8n_runtime/tasks/main.yml",
-        "roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+        "collections/ansible_collections/lv3/platform/playbooks/n8n.yml",
+        "collections/ansible_collections/lv3/platform/roles/n8n_postgres/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/n8n_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
         "inventory/host_vars/proxmox_florin.yml",
         "config/uptime-kuma/monitors.json"
       ],
@@ -4486,8 +4486,8 @@
       "owner_runbook": "docs/runbooks/configure-nextcloud.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/nextcloud.yml",
-        "playbooks/services/nextcloud.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml",
         "collections/ansible_collections/lv3/platform/roles/nextcloud_postgres",
         "collections/ansible_collections/lv3/platform/roles/nextcloud_runtime",
@@ -4543,11 +4543,11 @@
       "owner_runbook": "docs/runbooks/configure-netbox.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/netbox.yml",
-        "roles/netbox_postgres",
-        "roles/netbox_runtime",
-        "roles/netbox_sync",
-        "roles/proxmox_tailscale_proxy",
+        "collections/ansible_collections/lv3/platform/playbooks/netbox.yml",
+        "collections/ansible_collections/lv3/platform/roles/netbox_postgres",
+        "collections/ansible_collections/lv3/platform/roles/netbox_runtime",
+        "collections/ansible_collections/lv3/platform/roles/netbox_sync",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml",
@@ -4623,8 +4623,8 @@
       "owner_runbook": "docs/runbooks/configure-homepage.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/homepage.yml",
-        "roles/homepage_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/homepage.yml",
+        "collections/ansible_collections/lv3/platform/roles/homepage_runtime",
         "scripts/generate_homepage_config.py",
         "config/service-capability-catalog.json",
         "config/subdomain-catalog.json",
@@ -4673,9 +4673,9 @@
       "owner_runbook": "docs/runbooks/configure-excalidraw.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/excalidraw.yml",
-        "roles/excalidraw_runtime",
-        "roles/nginx_edge_publication",
+        "collections/ansible_collections/lv3/platform/playbooks/excalidraw.yml",
+        "collections/ansible_collections/lv3/platform/roles/excalidraw_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
         "scripts/generate_diagrams.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json"
@@ -4735,10 +4735,10 @@
       "owner_runbook": "docs/runbooks/configure-langfuse.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/langfuse.yml",
-        "roles/langfuse_postgres",
-        "roles/langfuse_runtime",
-        "roles/keycloak_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/langfuse.yml",
+        "collections/ansible_collections/lv3/platform/roles/langfuse_postgres",
+        "collections/ansible_collections/lv3/platform/roles/langfuse_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
         "inventory/host_vars/proxmox_florin.yml",
         "scripts/langfuse_trace_smoke.py",
         "platform/llm/observability.py"
@@ -4792,10 +4792,10 @@
       "owner_runbook": "docs/runbooks/minio-object-storage.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/minio.yml",
-        "playbooks/services/minio.yml",
-        "roles/minio_runtime",
-        "roles/nginx_edge_publication",
+        "collections/ansible_collections/lv3/platform/playbooks/minio.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/minio.yml",
+        "collections/ansible_collections/lv3/platform/roles/minio_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
         "inventory/host_vars/proxmox_florin.yml",
         "scripts/generate_platform_vars.py",
         "config/service-capability-catalog.json",
@@ -4852,8 +4852,8 @@
       "owner_runbook": "docs/runbooks/configure-one-api.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/one-api.yml",
-        "playbooks/services/one-api.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/one-api.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/one-api.yml",
         "collections/ansible_collections/lv3/platform/roles/one_api_postgres",
         "collections/ansible_collections/lv3/platform/roles/one_api_runtime",
         "inventory/group_vars/all/identity.yml",
@@ -4909,11 +4909,11 @@
       "owner_runbook": "docs/runbooks/configure-open-webui.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/open-webui.yml",
-        "roles/keycloak_runtime/tasks/open_webui_client.yml",
-        "roles/open_webui_runtime",
-        "roles/proxmox_tailscale_proxy/tasks/main.yml",
-        "roles/proxmox_security/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/open-webui.yml",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml",
+        "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -4965,7 +4965,7 @@
       "owner_runbook": "docs/runbooks/configure-serverclaw.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/serverclaw.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/serverclaw.yml",
         "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
         "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
         "inventory/group_vars/all/identity.yml",
@@ -5018,12 +5018,12 @@
       "owner_runbook": "docs/runbooks/configure-searxng.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/searxng.yml",
-        "roles/searxng_runtime",
-        "roles/open_webui_runtime",
-        "roles/proxmox_tailscale_proxy/tasks/main.yml",
-        "roles/proxmox_security/tasks/main.yml",
-        "roles/hetzner_dns_record",
+        "collections/ansible_collections/lv3/platform/playbooks/searxng.yml",
+        "collections/ansible_collections/lv3/platform/roles/searxng_runtime",
+        "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_record",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -5070,8 +5070,8 @@
       "owner_runbook": "docs/runbooks/configure-ollama.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/ollama.yml",
-        "roles/ollama_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/ollama.yml",
+        "collections/ansible_collections/lv3/platform/roles/ollama_runtime",
         "config/ollama-models.yaml",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
@@ -5120,9 +5120,9 @@
       "owner_runbook": "docs/runbooks/configure-piper.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/piper.yml",
-        "playbooks/services/piper.yml",
-        "roles/piper_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/piper.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/piper.yml",
+        "collections/ansible_collections/lv3/platform/roles/piper_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json",
@@ -5173,10 +5173,10 @@
       "owner_runbook": "docs/runbooks/configure-dozzle.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/dozzle.yml",
-        "roles/dozzle_runtime",
-        "roles/nginx_edge_publication",
-        "roles/public_edge_oidc_auth",
+        "collections/ansible_collections/lv3/platform/playbooks/dozzle.yml",
+        "collections/ansible_collections/lv3/platform/roles/dozzle_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth",
         "inventory/host_vars/proxmox_florin.yml",
         "config/api-gateway-catalog.json"
       ],
@@ -5224,8 +5224,8 @@
       "owner_runbook": "docs/runbooks/configure-netdata.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/realtime.yml",
-        "playbooks/services/realtime.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/realtime.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/realtime.yml",
         "collections/ansible_collections/lv3/platform/playbooks/realtime.yml",
         "collections/ansible_collections/lv3/platform/roles/netdata_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
@@ -5287,11 +5287,11 @@
       "owner_runbook": "docs/runbooks/configure-ntfy.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/ntfy.yml",
-        "playbooks/services/ntfy.yml",
         "collections/ansible_collections/lv3/platform/playbooks/ntfy.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/ntfy.yml",
-        "roles/ntfy_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/ntfy.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/ntfy.yml",
+        "collections/ansible_collections/lv3/platform/roles/ntfy_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "inventory/group_vars/platform.yml",
         "scripts/generate_platform_vars.py",
@@ -5345,8 +5345,8 @@
       "owner_runbook": "docs/runbooks/configure-falco-runtime.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/falco.yml",
-        "playbooks/services/falco.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/falco.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/falco.yml",
         "collections/ansible_collections/lv3/platform/roles/falco_runtime",
         "collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime",
         "collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2",
@@ -5408,7 +5408,7 @@
       "owner_runbook": "docs/runbooks/configure-gitea.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/gitea.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/gitea.yml",
         "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
         "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
         "collections/ansible_collections/lv3/platform/roles/gitea_runner",
@@ -5462,10 +5462,10 @@
       "owner_runbook": "docs/runbooks/configure-gotenberg.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/gotenberg.yml",
-        "playbooks/services/gotenberg.yml",
-        "playbooks/runtime-ai-pool.yml",
-        "roles/gotenberg_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/gotenberg.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/gotenberg.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/runtime-ai-pool.yml",
+        "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "config/ansible-execution-scopes.yaml",
         "config/api-gateway-catalog.json",
@@ -5519,10 +5519,10 @@
       "owner_runbook": "docs/runbooks/configure-typesense.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/typesense.yml",
-        "playbooks/services/typesense.yml",
-        "roles/typesense_runtime",
-        "roles/api_gateway_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/typesense.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/typesense.yml",
+        "collections/ansible_collections/lv3/platform/roles/typesense_runtime",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
         "scripts/typesense_catalog_sync.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/api-gateway-catalog.json",
@@ -5574,8 +5574,8 @@
       "owner_runbook": "docs/runbooks/rag-platform-context.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/rag-context.yml",
-        "roles/rag_context_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/rag-context.yml",
+        "collections/ansible_collections/lv3/platform/roles/rag_context_runtime",
         "scripts/build_rag_index.py",
         "scripts/query_platform_context.py",
         "scripts/platform_context_corpus.py",
@@ -5632,10 +5632,10 @@
       "owner_runbook": "docs/runbooks/configure-portainer.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/portainer.yml",
-        "roles/portainer_runtime",
-        "roles/proxmox_tailscale_proxy/tasks/main.yml",
-        "roles/proxmox_security/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/portainer.yml",
+        "collections/ansible_collections/lv3/platform/roles/portainer_runtime",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -5686,11 +5686,11 @@
       "owner_runbook": "docs/runbooks/configure-vaultwarden.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/vaultwarden.yml",
-        "roles/vaultwarden_postgres",
-        "roles/vaultwarden_runtime",
-        "roles/proxmox_tailscale_proxy",
-        "roles/proxmox_security",
+        "collections/ansible_collections/lv3/platform/playbooks/vaultwarden.yml",
+        "collections/ansible_collections/lv3/platform/roles/vaultwarden_postgres",
+        "collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json"
       ],
@@ -5740,12 +5740,12 @@
       "owner_runbook": "docs/runbooks/configure-mattermost.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/mattermost.yml",
-        "roles/mattermost_postgres",
-        "roles/mattermost_runtime",
-        "roles/monitoring_mattermost_notifications",
-        "roles/proxmox_tailscale_proxy",
-        "roles/proxmox_security",
+        "collections/ansible_collections/lv3/platform/playbooks/mattermost.yml",
+        "collections/ansible_collections/lv3/platform/roles/mattermost_postgres",
+        "collections/ansible_collections/lv3/platform/roles/mattermost_runtime",
+        "collections/ansible_collections/lv3/platform/roles/monitoring_mattermost_notifications",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_security",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -5793,10 +5793,10 @@
       "owner_runbook": "docs/runbooks/deploy-uptime-kuma.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/uptime-kuma.yml",
-        "roles/uptime_kuma_runtime/tasks/main.yml",
-        "roles/hetzner_dns_records/tasks/main.yml",
-        "roles/nginx_edge_publication/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/uptime-kuma.yml",
+        "collections/ansible_collections/lv3/platform/roles/uptime_kuma_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml"
       ],
       "outputs": [
         "Uptime Kuma runtime on runtime-general-lv3, public DNS publication, and edge proxy configuration for uptime.lv3.org."
@@ -6056,9 +6056,9 @@
       "owner_runbook": "docs/runbooks/configure-backup-vm.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/backup-vm.yml",
-        "roles/backup_vm/tasks/main.yml",
-        "roles/proxmox_backups/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/backup-vm.yml",
+        "collections/ansible_collections/lv3/platform/roles/backup_vm/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_backups/tasks/main.yml"
       ],
       "outputs": [
         "backup-lv3 guest, PBS datastore, local API credentials, Proxmox host PBS target configuration, and an optional off-site backup of VM 160 when PROXMOX_DR_OFFSITE_* inputs are supplied."
@@ -6099,10 +6099,10 @@
       "owner_runbook": "docs/runbooks/configure-artifact-cache-vm.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/artifact-cache-vm.yml",
-        "playbooks/services/build-artifact-cache.yml",
-        "roles/artifact_cache_runtime/tasks/main.yml",
-        "roles/proxmox_guests/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/artifact-cache-vm.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/build-artifact-cache.yml",
+        "collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml"
       ],
       "outputs": [
         "artifact-cache-lv3 provisioned as VM 180 on 10.10.10.80 with Docker, guest firewall policy, named ops access, and the managed cache-plane runtime listening privately on ports 5001-5004."
@@ -6194,8 +6194,8 @@
       "owner_runbook": "docs/runbooks/configure-storage-and-backups.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
-        "roles/proxmox_backups/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_backups/tasks/main.yml"
       ],
       "outputs": [
         "Legacy CIFS backup configuration path retained only as a documented blocked workflow."
@@ -6235,8 +6235,8 @@
       "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/database-dns.yml",
-        "roles/hetzner_dns_record/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/playbooks/database-dns.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml"
       ],
       "outputs": [
         "database.lv3.org DNS record updated to the private Proxmox Tailscale PostgreSQL proxy."
@@ -6278,7 +6278,7 @@
       "owner_runbook": "docs/runbooks/subdomain-exposure-audit.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/route-dns-assertion-ledger.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/route-dns-assertion-ledger.yml",
         "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml",
         "inventory/host_vars/proxmox_florin.yml"
@@ -6325,10 +6325,10 @@
       "owner_runbook": "docs/runbooks/subdomain-governance.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/provision-subdomain.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/provision-subdomain.yml",
         "scripts/subdomain_catalog.py",
-        "roles/hetzner_dns_record/tasks/main.yml",
-        "roles/nginx_edge_publication/tasks/main.yml"
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml"
       ],
       "outputs": [
         "The selected DNS record is converged through the Hetzner API.",
@@ -6715,7 +6715,7 @@
       "owner_runbook": "docs/runbooks/playbook-execution-model.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
         "config/workflow-catalog.json",
         "config/worktree-bootstrap-manifests.json",
         "docs/runbooks/controller-local-secrets-and-preflight.md",
@@ -7518,11 +7518,11 @@
       "owner_runbook": "docs/runbooks/configure-semaphore.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/semaphore.yml",
-        "playbooks/semaphore-self.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/semaphore.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/semaphore-self.yml",
         "inventory/semaphore-localhost.yml",
-        "roles/semaphore_postgres",
-        "roles/semaphore_runtime",
+        "collections/ansible_collections/lv3/platform/roles/semaphore_postgres",
+        "collections/ansible_collections/lv3/platform/roles/semaphore_runtime",
         "platform/ansible/semaphore.py",
         "scripts/semaphore_bootstrap.py",
         "scripts/semaphore_tool.py",
@@ -7666,9 +7666,9 @@
       "owner_runbook": "docs/runbooks/configure-plane.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/plane.yml",
-        "roles/plane_postgres",
-        "roles/plane_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/plane.yml",
+        "collections/ansible_collections/lv3/platform/roles/plane_postgres",
+        "collections/ansible_collections/lv3/platform/roles/plane_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "scripts/plane_bootstrap.py",
         "scripts/plane_tool.py",
@@ -7765,8 +7765,8 @@
       "owner_runbook": "docs/runbooks/configure-browser-runner.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/browser-runner.yml",
-        "playbooks/services/browser-runner.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/browser-runner.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/browser-runner.yml",
         "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/verify.yml",
         "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/templates/docker-compose.yml.j2",
@@ -7821,10 +7821,10 @@
       "owner_runbook": "docs/runbooks/configure-changedetection.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/changedetection.yml",
-        "playbooks/services/changedetection.yml",
-        "roles/changedetection_runtime",
-        "roles/api_gateway_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/changedetection.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/changedetection.yml",
+        "collections/ansible_collections/lv3/platform/roles/changedetection_runtime",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
         "scripts/changedetection_sync.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/api-gateway-catalog.json",
@@ -7877,10 +7877,10 @@
       "owner_runbook": "docs/runbooks/configure-tesseract-ocr.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/tesseract-ocr.yml",
-        "playbooks/services/tesseract-ocr.yml",
-        "playbooks/runtime-ai-pool.yml",
-        "roles/tesseract_ocr_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/tesseract-ocr.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/runtime-ai-pool.yml",
+        "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime",
         "scripts/tesseract_ocr_service.py",
         "scripts/document_extraction.py",
         "requirements/tesseract-ocr.txt",
@@ -7946,11 +7946,11 @@
       "owner_runbook": "docs/runbooks/configure-directus.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/directus.yml",
-        "playbooks/services/directus.yml",
-        "roles/directus_postgres",
-        "roles/directus_runtime",
-        "roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/directus.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/directus.yml",
+        "collections/ansible_collections/lv3/platform/roles/directus_postgres",
+        "collections/ansible_collections/lv3/platform/roles/directus_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
         "scripts/directus_bootstrap.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
@@ -8004,12 +8004,12 @@
       "owner_runbook": "docs/runbooks/configure-paperless.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/paperless.yml",
-        "playbooks/services/paperless.yml",
-        "roles/paperless_postgres",
-        "roles/paperless_runtime",
-        "roles/keycloak_runtime",
-        "roles/api_gateway_runtime",
+        "collections/ansible_collections/lv3/platform/playbooks/paperless.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/paperless.yml",
+        "collections/ansible_collections/lv3/platform/roles/paperless_postgres",
+        "collections/ansible_collections/lv3/platform/roles/paperless_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
         "scripts/paperless_sync.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/api-gateway-catalog.json",
@@ -8076,8 +8076,8 @@
       "owner_runbook": "docs/runbooks/configure-glitchtip.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/glitchtip.yml",
-        "playbooks/services/glitchtip.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/glitchtip.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/glitchtip.yml",
         "collections/ansible_collections/lv3/platform/playbooks/glitchtip.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/glitchtip.yml",
         "collections/ansible_collections/lv3/platform/roles/glitchtip_postgres",
@@ -8136,7 +8136,7 @@
       "live_impact": "host_and_guest_live",
       "implementation_refs": [
         "Makefile",
-        "playbooks/litellm.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/litellm.yml",
         "collections/ansible_collections/lv3/platform/roles/litellm_postgres",
         "collections/ansible_collections/lv3/platform/roles/litellm_runtime",
         "config/llm-gateway/model-catalog.yaml",
@@ -8188,7 +8188,7 @@
       "live_impact": "host_and_guest_live",
       "implementation_refs": [
         "Makefile",
-        "playbooks/librechat.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/librechat.yml",
         "collections/ansible_collections/lv3/platform/roles/librechat_runtime",
         "config/llm-gateway/auth.yaml",
         "config/serverclaw/system-prompt.md"
@@ -8233,7 +8233,7 @@
       "owner_runbook": "docs/runbooks/refresh-discovery-surfaces.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/refresh-discovery-surfaces.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/refresh-discovery-surfaces.yml",
         "scripts/platform_manifest.py",
         "scripts/generate_discovery_artifacts.py",
         "scripts/sync_docs_to_outline.py",
