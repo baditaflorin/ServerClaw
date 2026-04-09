@@ -1,7 +1,7 @@
 # ADR 0371: Parameterized Service Verification Tasks
 
 - **Date**: 2026-04-06
-- **Status**: Proposed
+- **Status**: Accepted
 - **Deciders**: platform team
 - **Concern**: platform, dry
 - **Tags**: ansible, verification, healthcheck, dry

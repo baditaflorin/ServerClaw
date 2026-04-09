@@ -1,7 +1,7 @@
 # ADR 0370: Service Lifecycle Task Includes
 
 - **Date**: 2026-04-06
-- **Status**: Proposed
+- **Status**: Accepted
 - **Deciders**: platform team
 - **Concern**: platform, dry
 - **Tags**: ansible, roles, dry, lifecycle, tasks

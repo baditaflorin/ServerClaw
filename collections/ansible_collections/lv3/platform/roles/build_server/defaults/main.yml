@@ -11,7 +11,7 @@ build_server_ansible_requirements_sha_file: /opt/builds/.ansible/requirements.sh
 build_server_pip_cache_volume: pip-cache
 build_server_apt_cacher_port: 3142
 build_server_apt_cacher_report_url: http://127.0.0.1:3142/acng-report.html
-build_server_apt_proxy_url: http://10.10.10.30:3142
+build_server_apt_proxy_url: "http://{{ hostvars[playbook_execution_host_patterns.docker_build[playbook_execution_env]].ansible_host }}:3142"
 build_server_buildkit_service_name: lv3-buildkitd
 build_server_buildkit_builder_name: lv3-cache
 build_server_buildkit_socket_dir: /run/buildkit

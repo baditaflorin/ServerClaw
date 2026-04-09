@@ -1,6 +1,6 @@
 # ADR 0385: Decouple Platform from Operator Identity
 
-**Status:** Proposed
+**Status:** Accepted
 **Decision Date:** 2026-04-09
 **Concern:** Fork Portability, DRY, Public Release Readiness
 

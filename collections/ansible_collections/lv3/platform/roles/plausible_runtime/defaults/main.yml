@@ -40,7 +40,7 @@ plausible_database_password_remote_file: "{{ plausible_secret_dir }}/database-pa
 plausible_secret_key_base_remote_file: "{{ plausible_secret_dir }}/secret-key-base.txt"
 plausible_bootstrap_user_password_remote_file: "{{ plausible_secret_dir }}/bootstrap-user-password.txt"
 plausible_mailbox_password_local_file: "{{ mail_platform_mailbox_password_local_file }}"
-plausible_smtp_host: 10.10.10.20
+plausible_smtp_host: "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}"
 plausible_smtp_port: "{{ hostvars[platform_topology_host].platform_port_assignments.mail_platform_internal_submission_port }}"
 plausible_smtp_username: server
 plausible_mailer_email: server@{{ platform_domain }}

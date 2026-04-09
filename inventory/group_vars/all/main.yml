@@ -169,7 +169,7 @@ monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
 monitoring_influxdb_url: http://127.0.0.1:8086
 monitoring_influxdb_bucket: proxmox
 monitoring_loki_push_api_url: >-
-  http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:3100/loki/api/v1/push
+  http://{{ hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].ansible_host }}:3100/loki/api/v1/push
 platform_log_dir: /var/log/platform
 mutation_audit_log_file: "{{ platform_log_dir }}/mutation-audit.jsonl"
 openbao_host_audit_log_file: /opt/openbao/logs/audit.log
@@ -230,7 +230,7 @@ one_api_session_secret_local_file: "{{ one_api_local_artifact_dir }}/session-sec
 one_api_root_access_token_local_file: "{{ one_api_local_artifact_dir }}/root-access-token.txt"
 one_api_root_password_local_file: "{{ one_api_local_artifact_dir }}/root-password.txt"
 one_api_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ one_api_host_proxy_port }}"
-one_api_internal_url: "http://{{ hostvars['docker-runtime-lv3'].ansible_host }}:{{ one_api_port }}"
+one_api_internal_url: "http://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:{{ one_api_port }}"
 one_api_openai_base_url: "{{ one_api_internal_url }}/v1"
 one_api_controller_openai_base_url: "{{ one_api_controller_url }}/v1"
 one_api_default_chat_model_alias: gpt-4o-mini
@@ -255,9 +255,9 @@ serverclaw_enable_password_auth: true
 serverclaw_oidc_client_id: serverclaw
 serverclaw_enable_openai_api: false
 serverclaw_enable_ollama_api: true
-serverclaw_ollama_base_url: http://10.10.10.20:11434
+serverclaw_ollama_base_url: "http://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:11434"
 serverclaw_enable_web_search: true
-serverclaw_searxng_query_url: http://10.10.10.20:8881/search?q=<query>&format=json
+serverclaw_searxng_query_url: "http://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:8881/search?q=<query>&format=json"
 serverclaw_default_models: "serverclaw:latest"
 serverclaw_default_pinned_models: "serverclaw:latest"
 serverclaw_default_user_role: user

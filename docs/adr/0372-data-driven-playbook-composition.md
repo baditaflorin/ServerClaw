@@ -1,7 +1,7 @@
 # ADR 0372: Data-Driven Playbook Composition
 
 - **Date**: 2026-04-06
-- **Status**: Proposed
+- **Status**: Accepted
 - **Deciders**: platform team
 - **Concern**: platform, dry
 - **Tags**: ansible, playbooks, dry, composition, dns

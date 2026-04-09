@@ -17,7 +17,7 @@ litellm_database_user: litellm
 litellm_postgres_password_file: "{{ litellm_postgres_secret_dir }}/database-password"
 litellm_database_password_local_file: "{{ litellm_local_artifact_dir }}/database-password.txt"
 litellm_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
-litellm_ollama_base_url: http://10.10.10.20:11434
+litellm_ollama_base_url: "http://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:11434"
 # Anthropic API key — shared with LibreChat; stored in .local/litellm/
 litellm_anthropic_api_key_local_file: "{{ litellm_local_artifact_dir }}/anthropic-api-key.txt"
 litellm_anthropic_api_key_remote_file: "{{ litellm_secret_dir }}/anthropic-api-key"

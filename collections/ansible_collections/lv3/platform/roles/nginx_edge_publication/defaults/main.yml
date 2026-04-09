@@ -267,7 +267,7 @@ public_edge_security_headers_overrides:
 public_edge_extra_sites:
   - hostname: minio-console.{{ platform_domain }}
     kind: proxy
-    upstream: "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}"
+    upstream: "http://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:{{ platform_port_assignments.minio_console_port }}"
     client_max_body_size: 0
     chunked_transfer_encoding: true
     proxy_request_buffering: false
