@@ -1910,7 +1910,6 @@
         "playbooks/services/neko.yml",
         "collections/ansible_collections/lv3/platform/playbooks/neko.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/neko.yml",
-        "collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2",
         "collections/ansible_collections/lv3/platform/roles/neko_runtime",
         "inventory/host_vars/proxmox_florin.yml",
         "scripts/verify_neko_webrtc_session.py",
