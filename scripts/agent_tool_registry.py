@@ -1525,7 +1525,7 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
                 "status": "blocked",
                 "command": command,
                 "exit_code": -1,
-                "stdout": "",
+                "stdout": "(blocked)",
                 "stderr": f"Command blocked by safety filter: contains '{pattern}'",
                 "host": "runtime-control-lv3",
             }
@@ -1587,8 +1587,8 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
         "status": "success" if exit_code == 0 else "error",
         "command": command,
         "exit_code": exit_code,
-        "stdout": output,
-        "stderr": "",
+        "stdout": output or "(empty)",
+        "stderr": "(none)",
         "host": "runtime-control-lv3",
     }
 
