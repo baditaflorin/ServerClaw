@@ -4,15 +4,26 @@
 # Outputs: Supplies stable defaults for the LibreChat runtime role.
 # Idempotency: Fully idempotent because this file only declares defaults.
 # Dependencies: ADR 0165, ADR 0060.
-# NOTE: Conventional variables (site_dir, data_dir, secret_dir, compose_file, env_file,
-# openbao_*, container_name, internal_port, local_artifact_dir, image) are derived
-# from platform_service_registry — ADR 0373.
 ---
-# Service-specific LibreChat configuration
+librechat_site_dir: /opt/librechat
+librechat_data_dir: "{{ librechat_site_dir }}/data"
+librechat_secret_dir: /etc/lv3/librechat
+librechat_compose_file: "{{ librechat_site_dir }}/docker-compose.yml"
 librechat_config_file: "{{ librechat_site_dir }}/librechat.yaml"
+librechat_env_file: "{{ compose_runtime_secret_root }}/librechat/runtime.env"
+librechat_legacy_env_file: "{{ librechat_site_dir }}/librechat.env"
+librechat_openbao_agent_dir: "{{ librechat_site_dir }}/openbao"
+librechat_openbao_agent_image: "{{ openbao_agent_image }}"
+librechat_openbao_agent_container_name: librechat-openbao-agent
 librechat_enable_openbao_agent: false
+librechat_openbao_secret_path: services/librechat/runtime-env
+librechat_openbao_policy_name: lv3-service-librechat-runtime
+librechat_openbao_approle_name: librechat-runtime
+librechat_container_name: librechat
+librechat_internal_port: 8096
 librechat_container_port: 3080
 librechat_healthcheck_path: /
+librechat_image: "{{ container_image_catalog.images.librechat_runtime.ref }}"
 librechat_mongo_container_name: librechat-mongodb
 librechat_mongo_image: mongo:7
 librechat_mongo_data_dir: "{{ librechat_data_dir }}/mongodb"
@@ -55,7 +66,6 @@ librechat_tool_packs:
   - tasks
   - docs
   - admin
-  - memory
   - all
 # Anthropic
 librechat_anthropic_api_key_remote_file: "{{ librechat_secret_dir }}/anthropic-api-key"
@@ -65,7 +75,9 @@ librechat_openai_api_key_remote_file: "{{ librechat_secret_dir }}/openai-api-key
 librechat_openai_api_key_local_file: "{{ librechat_local_artifact_dir }}/openai-api-key.txt"
 # System prompt preset
 librechat_system_prompt_file: "{{ librechat_site_dir }}/system-prompt.md"
-librechat_system_prompt_src: ../../../../config/serverclaw/system-prompt.md
+# System prompt source files — absolute paths resolved by repo_shared_root
+# Full prompt (with tool descriptions) goes to bootstrap script for agent instructions
+# Chat prompt (no tools) goes to modelSpecs promptPrefix for regular chat models
 # Model lists for built-in endpoints (fetch: true not supported in v0.8.4)
 # Update these when providers add or remove models.
 librechat_anthropic_models:
@@ -97,9 +109,7 @@ librechat_admin_email: ops@lv3.org
 librechat_admin_password_local_file: "{{ librechat_local_artifact_dir }}/admin-password.txt"
 # Bootstrap script and system prompt absolute path for delegate_to: localhost
 librechat_bootstrap_script: "{{ repo_shared_root }}/scripts/bootstrap_librechat_agents.py"
-# Full system prompt (tools + agents) — only injected into agent instructions via bootstrap
 librechat_system_prompt_src_absolute: "{{ repo_shared_root }}/config/serverclaw/system-prompt.md"
-# Chat-only system prompt (no tools) — injected into modelSpecs promptPrefix for regular models
 librechat_chat_prompt_src_absolute: "{{ repo_shared_root }}/config/serverclaw/system-prompt-chat.md"
 # Web search
 librechat_enable_web_search: true

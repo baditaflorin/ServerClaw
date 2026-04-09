@@ -42,7 +42,7 @@ AGENT_PACKS = [
         "name": "ServerClaw Ops",
         "description": "Infrastructure observability — platform status, containers, logs, deployments, maintenance windows.",
         "specialty": "You specialize in infrastructure observability — checking platform status, listing containers, reading logs, and reviewing deployment history. You have tools that let you check real system state.",
-        "model": "claude-sonnet-4-20250514",
+        "model": "claude-sonnet-4-6-20250725",
         "provider": "anthropic",
         "tool_pack": "ops",
         "conversation_starters": [
@@ -57,7 +57,7 @@ AGENT_PACKS = [
         "name": "ServerClaw Tasks",
         "description": "Project management — create, view, update Plane tasks and comments.",
         "specialty": "You specialize in project management using Plane. You can list, create, update tasks and add comments. You have tools to interact with the Plane API directly.",
-        "model": "claude-sonnet-4-20250514",
+        "model": "claude-sonnet-4-6-20250725",
         "provider": "anthropic",
         "tool_pack": "tasks",
         "conversation_starters": [
@@ -71,7 +71,7 @@ AGENT_PACKS = [
         "name": "ServerClaw Docs",
         "description": "Knowledge base — search, read, and manage Outline wiki documents and collections.",
         "specialty": "You specialize in knowledge management using Outline wiki. You can search, read, create, and update documents and collections. You have tools for direct wiki API access.",
-        "model": "claude-sonnet-4-20250514",
+        "model": "claude-sonnet-4-6-20250725",
         "provider": "anthropic",
         "tool_pack": "docs",
         "conversation_starters": [
@@ -85,28 +85,13 @@ AGENT_PACKS = [
         "name": "ServerClaw Admin",
         "description": "Governed operations — execute commands, manage Nomad jobs, approval workflows. Elevated access required.",
         "specialty": "You specialize in governed operations and platform administration. You can execute governed commands, manage Nomad jobs, and check approval workflows. You have tools with direct API access.",
-        "model": "claude-sonnet-4-20250514",
+        "model": "claude-sonnet-4-6-20250725",
         "provider": "anthropic",
         "tool_pack": "admin",
         "conversation_starters": [
             "List available governed commands",
             "Show Nomad job status",
             "What workflows are available?",
-        ],
-    },
-    {
-        "id": "agent_serverclaw_memory",
-        "name": "ServerClaw Memory",
-        "description": "Cross-session knowledge — search 4,681+ indexed memories from prior agent sessions, ADRs, runbooks, and operational insights.",
-        "specialty": "You specialize in retrieving and saving institutional memory. You can search 4,681+ indexed memories from prior agent sessions to find past decisions, patterns, and operational context. You can save discoveries and insights for future sessions. You have tools to access MemPalace, a persistent cross-session memory system.",
-        "model": "claude-sonnet-4-6-20250725",
-        "provider": "anthropic",
-        "tool_pack": "memory",
-        "conversation_starters": [
-            "What was the Keycloak timeout fix?",
-            "Find decisions about database architecture",
-            "Search for convergence timeout patterns",
-            "What have we learned about deployment?",
         ],
     },
 ]
@@ -382,6 +367,72 @@ db.roles.updateOne({{name: "USER"}}, {{$set: {{"permissions.AGENTS.SHARED_GLOBAL
 db.projects.updateOne(
   {{name: "instance"}},
   {{$addToSet: {{agentIds: {{$each: agents.map(function(a) {{ return a.id; }})}}}}}}
+);
+
+// --- ACL Entries ---
+// LibreChat v0.8.4 uses an ACL system for agent visibility.
+// Without ACL entries, agents exist in MongoDB but are invisible via the API.
+// Create PUBLIC view entries (all users can see) and OWNER entries (author can edit).
+var viewerRole = db.accessroles.findOne({{name: "com_ui_role_viewer", resourceType: "agent"}});
+var ownerRole = db.accessroles.findOne({{name: "com_ui_role_owner", resourceType: "agent"}});
+
+if (viewerRole && ownerRole) {{
+  var aclCreated = 0;
+  agents.forEach(function(agent) {{
+    var agentDoc = db.agents.findOne({{id: agent.id}});
+    if (!agentDoc) return;
+
+    // PUBLIC view access — so all users can see the agent
+    var pubResult = db.aclentries.updateOne(
+      {{resourceId: agentDoc._id, resourceType: "agent", principalType: "public"}},
+      {{$set: {{
+        resourceId: agentDoc._id,
+        resourceType: "agent",
+        principalType: "public",
+        principalId: "public",
+        principalModel: "Public",
+        permBits: viewerRole.permBits,
+        roleId: viewerRole._id,
+        grantedBy: userId,
+        grantedAt: now,
+        __v: 0,
+        createdAt: now,
+        updatedAt: now
+      }}}},
+      {{upsert: true}}
+    );
+    if (pubResult.upsertedCount > 0) aclCreated++;
+
+    // OWNER access for the admin user
+    var ownResult = db.aclentries.updateOne(
+      {{resourceId: agentDoc._id, resourceType: "agent", principalType: "user", principalId: userId}},
+      {{$set: {{
+        resourceId: agentDoc._id,
+        resourceType: "agent",
+        principalType: "user",
+        principalId: userId,
+        principalModel: "User",
+        permBits: ownerRole.permBits,
+        roleId: ownerRole._id,
+        grantedBy: userId,
+        grantedAt: now,
+        __v: 0,
+        createdAt: now,
+        updatedAt: now
+      }}}},
+      {{upsert: true}}
+    );
+    if (ownResult.upsertedCount > 0) aclCreated++;
+  }});
+  print("ACL entries: " + aclCreated + " created");
+}} else {{
+  print("WARNING: access roles not found, skipping ACL entries");
+}}
+
+// Ensure all agents have Mongoose __v field (required for API queries)
+db.agents.updateMany(
+  {{__v: {{$exists: false}}}},
+  {{$set: {{__v: 0}}}}
 );
 
 print("Done. Actions: " + actionsCreated + " created, " + actionsUpdated + " updated. Agents: " + agentsCreated + " created, " + agentsUpdated + " updated.");

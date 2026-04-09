@@ -81,6 +81,7 @@ modelSpecs:
 actions:
   allowedDomains:
     - "{{ librechat_api_gateway_host }}"
+    - "{{ librechat_api_gateway_host.split(':')[0] }}"
 
 registration:
   socialLogins:
