@@ -1685,6 +1685,7 @@ platform_service_registry:
 
     extra_defaults:
       alertmanager_runtime_config_file: /etc/alertmanager/alertmanager.yml
+      alertmanager_runtime_data_dir: /var/lib/prometheus/alertmanager
       alertmanager_runtime_env_file: /etc/default/prometheus-alertmanager
       alertmanager_runtime_package: prometheus-alertmanager
       alertmanager_runtime_service_name: prometheus-alertmanager
