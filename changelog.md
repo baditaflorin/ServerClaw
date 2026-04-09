@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [ADR 0387] Platform DRY consolidation: eliminate hardcoded IPs across 13 roles and hostname literals across 6 files; all topology references now use playbook_execution_host_patterns or platform_topology_host; elevate ADRs 0370-0372, 0385 from Proposed to Accepted
 - [ADR 0373] Phase 5-6 Live-Apply Complete: Final 7 services migrated to derive_service_defaults (librechat, litellm, neko, netdata, repo_intake, falco, falco_event_bridge); 100% platform adoption achieved; cosmetic cleanup removing 2583 redundant variable definitions from role defaults/specs; all 73 services now use unified IoC pattern with zero duplication
 - [ADR 0386/0387] Zero-to-platform bootstrap and Docker development environment: init_local_overlay.py generates .local/ from secret manifest with SSH keys and 237 auto-generated secrets; local-overlay-template/ provides 63-dir scaffold; Docker dev environment (vm-base container, Tier 1 minimal 4-container / Tier 2 full 7-container compose); inventory templates for forks and Docker dev; provider bootstrap profiles (Hetzner, generic Debian, homelab); verification playbooks for Proxmox, guests, and platform health; unified bootstrap-from-scratch runbook; Makefile targets: init-local, bootstrap, bootstrap-minimal, docker-dev-up/down/converge/verify/reset
 
@@ -61,10 +62,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.72 release notes](docs/release-notes/0.178.72.md)
+- [0.178.73 release notes](docs/release-notes/0.178.73.md)
 
 ## Previous Releases
 
+- [0.178.72 release notes](docs/release-notes/0.178.72.md)
 - [0.178.71 release notes](docs/release-notes/0.178.71.md)
 - [0.178.70 release notes](docs/release-notes/0.178.70.md)
 - [0.178.69 release notes](docs/release-notes/0.178.69.md)
@@ -76,9 +78,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.62 release notes](docs/release-notes/0.178.62.md)
 - [0.178.61 release notes](docs/release-notes/0.178.61.md)
 - [0.178.60 release notes](docs/release-notes/0.178.60.md)
-- [0.178.59 release notes](docs/release-notes/0.178.59.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (407 releases)](docs/release-notes/index/2026.md)
+- [2026 (408 releases)](docs/release-notes/index/2026.md)
