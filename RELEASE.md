@@ -1,10 +1,10 @@
-# Release 0.178.70
+# Release 0.178.71
 
 - Date: 2026-04-09
 
 ## Summary
 - [ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox_florin'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain
-- API gateway execute-host-command tool: ServerClaw agents run bash commands directly on any platform host via nsenter (true host shell — systemctl, journalctl, docker, free all work); multi-host targeting via SSH (proxmox, postgres-lv3, docker-runtime-lv3, build-server, coolify-lv3, runtime-comms-lv3); safety-filtered blocked patterns; mempalace>=0.3.0 added to container image
+- ADR 0386 agent cross-host execution: all 7 platform hosts reachable via execute-host-command tool; local nsenter for runtime-control-lv3, direct SSH for Proxmox, SSH→Proxmox→qm guest exec for VMs (nftables blocks inter-VM SSH); agent SSH key provisioned at /etc/lv3/api-gateway/agent-ssh-key; mempalace>=0.3.0 added to container image
 - [ADR 0385] IoC refactor: single identity.yml replaces all hardcoded operator values; fork operators edit one file to rebrand; 281 files converted from hardcoded lv3.org/proxmox_florin to template expressions; generators and validators updated to resolve identity vars; IoC regression test added
 - API gateway tool resilience: Docker socket fallback for list-containers and get-container-logs (no Portainer dependency); internal URL override for platform-context queries (bypasses JWT auth layer); mempalace tool metadata fixes (runbook refs, audit_on_call); command-catalog execution profile fix for refresh-discovery-surfaces
 - ADR 0373 Phase 4 complete: unified service registry pattern for all 74 platform services; each service registered with service_type (docker_compose, system_package, infrastructure, multi_instance); derive_service_defaults extended with conditional branching for all types; alertmanager_runtime migrated as reference implementation; comprehensive runbook created for future service additions (docs/runbooks/add-new-service-to-platform.md); pattern enables programmatic, DRY, IoC-based infrastructure configuration across entire platform
