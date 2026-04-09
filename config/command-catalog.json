@@ -4864,7 +4864,15 @@
       "workflow_id": "refresh-discovery-surfaces",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Optional SSH key for remote wiki sync operations."
+        }
+      ],
       "expected_preconditions": [
         "make preflight WORKFLOW=refresh-discovery-surfaces passes"
       ],
