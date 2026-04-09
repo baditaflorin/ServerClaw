@@ -6,7 +6,7 @@
 # ============================================================================
 repository: proxmox_reference_platform
 schema_version: 1
-generated: '2026-04-06'
+generated: '2026-04-09'
 source_root: docs/discovery/repo-structure
 pack_manifest: docs/discovery/onboarding-packs.yaml
 purpose: Generated root repository discovery entrypoint. Read this first for quick orientation, then open the deeper section files under docs/discovery/repo-structure/ when you need detail.

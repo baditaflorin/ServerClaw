@@ -1,8 +1,9 @@
-# Release 0.178.68
+# Release 0.178.69
 
 - Date: 2026-04-09
 
 ## Summary
+- API gateway execute-host-command tool: ServerClaw agents can now run bash commands on the host via temporary Docker containers with read-only root mount, safety-filtered blocked patterns (rm -rf, mkfs, shutdown, etc.), and Docker multiplexed log parsing; mempalace>=0.3.0 added to container image so all 4 mempalace tools work (search, add-drawer, wake-up, status)
 - [ADR 0385] IoC refactor: single identity.yml replaces all hardcoded operator values; fork operators edit one file to rebrand; 281 files converted from hardcoded lv3.org/proxmox_florin to template expressions; generators and validators updated to resolve identity vars; IoC regression test added
 - API gateway tool resilience: Docker socket fallback for list-containers and get-container-logs (no Portainer dependency); internal URL override for platform-context queries (bypasses JWT auth layer); mempalace tool metadata fixes (runbook refs, audit_on_call); command-catalog execution profile fix for refresh-discovery-surfaces
 - ADR 0373 Phase 4 complete: unified service registry pattern for all 74 platform services; each service registered with service_type (docker_compose, system_package, infrastructure, multi_instance); derive_service_defaults extended with conditional branching for all types; alertmanager_runtime migrated as reference implementation; comprehensive runbook created for future service additions (docs/runbooks/add-new-service-to-platform.md); pattern enables programmatic, DRY, IoC-based infrastructure configuration across entire platform
