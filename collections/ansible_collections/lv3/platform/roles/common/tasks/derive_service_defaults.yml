@@ -21,18 +21,20 @@
 - name: "Validate {{ common_derive_service_name }} exists in platform_service_registry"
   ansible.builtin.assert:
     that:
-      - "'platform_service_registry' in hostvars[platform_topology_host]"
-      - common_derive_service_name in hostvars[platform_topology_host]['platform_service_registry']
+      - platform_service_registry is defined
+      - common_derive_service_name in platform_service_registry
     fail_msg: >-
       Service '{{ common_derive_service_name }}' not found in platform_service_registry.
       Add it to inventory/group_vars/platform_services.yml.
     quiet: true
 
-# Get service registry entry for convenience
+# Get service registry entry for convenience.
+# Uses platform_service_registry directly (group_var available to all platform hosts)
+# rather than hostvars[platform_topology_host] which is unavailable in scope runner shards.
 - name: "Get service registry entry for {{ common_derive_service_name }}"
   ansible.builtin.set_fact:
-    __derive_service_entry: "{{ hostvars[platform_topology_host].platform_service_registry[common_derive_service_name] }}"
-    __derive_service_type: "{{ hostvars[platform_topology_host].platform_service_registry[common_derive_service_name].service_type | default('docker_compose') }}"
+    __derive_service_entry: "{{ platform_service_registry[common_derive_service_name] }}"
+    __derive_service_type: "{{ platform_service_registry[common_derive_service_name].service_type | default('docker_compose') }}"
 
 # ============================================================================
 # DOCKER_COMPOSE SERVICE TYPE (60 services)
