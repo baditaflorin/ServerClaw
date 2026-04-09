@@ -11,8 +11,8 @@ public_edge_oidc_auth_cookie_secret_local_file: /Users/live/Documents/GITHUB_PRO
 public_edge_oidc_auth_cookie_name: _lv3_ops_portal_proxy
 public_edge_oidc_auth_client_id: ops-portal-oauth
 public_edge_oidc_auth_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/ops-portal-client-secret.txt
-public_edge_oidc_auth_issuer_url: https://sso.{{ platform_domain }}/realms/lv3
-public_edge_oidc_auth_public_login_url: https://sso.{{ platform_domain }}/realms/lv3/protocol/openid-connect/auth
+public_edge_oidc_auth_issuer_url: "{{ keycloak_oidc_issuer_url }}"
+public_edge_oidc_auth_public_login_url: "{{ keycloak_oidc_auth_url }}"
 public_edge_oidc_auth_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('keycloak', 'internal') }}"
 public_edge_oidc_auth_redirect_url: https://ops.{{ platform_domain }}/oauth2/callback
 public_edge_oidc_auth_allowed_groups:
@@ -25,10 +25,10 @@ public_edge_oidc_auth_scope: openid profile email
 public_edge_oidc_auth_cookie_domain: .{{ platform_domain }}
 public_edge_oidc_auth_cookie_expire: 8h
 public_edge_oidc_auth_cookie_refresh: 1h
-public_edge_oidc_auth_redeem_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/token"
-public_edge_oidc_auth_profile_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/userinfo"
-public_edge_oidc_auth_validate_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/userinfo"
-public_edge_oidc_auth_jwks_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/certs"
+public_edge_oidc_auth_redeem_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
+public_edge_oidc_auth_profile_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/userinfo"
+public_edge_oidc_auth_validate_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/userinfo"
+public_edge_oidc_auth_jwks_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/certs"
 public_edge_oidc_auth_probe_hostname: ops.{{ platform_domain }}
 
 # Watchdog — checks oauth2-proxy is alive and auto-restarts via systemd every 30s

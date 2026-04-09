@@ -44,7 +44,7 @@ librechat_oidc_client_id: serverclaw
 # HTTPS via the NGINX edge.
 # Docker bridge can't resolve public sso.{{ platform_domain }} due to hairpin NAT; extra_hosts
 # maps sso.{{ platform_domain }} to the NGINX internal IP so the container reaches Keycloak.
-librechat_oidc_issuer: https://sso.{{ platform_domain }}/realms/lv3
+librechat_oidc_issuer: "{{ keycloak_oidc_issuer_url }}"
 librechat_oidc_callback_url: /oauth/openid/callback
 librechat_oidc_button_label: Login with Keycloak
 librechat_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/serverclaw-client-secret.txt"

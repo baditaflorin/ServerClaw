@@ -61,7 +61,7 @@ langfuse_bootstrap_user_password_remote_file: "{{ langfuse_secret_dir }}/bootstr
 langfuse_project_public_key_remote_file: "{{ langfuse_secret_dir }}/project-public-key.txt"
 langfuse_project_secret_key_remote_file: "{{ langfuse_secret_dir }}/project-secret-key.txt"
 langfuse_keycloak_client_id: langfuse
-langfuse_keycloak_issuer: https://sso.{{ platform_domain }}/realms/lv3
+langfuse_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
 langfuse_init_org_id: lv3
 langfuse_init_org_name: LV3
 langfuse_init_project_id: lv3-agent-observability

@@ -3920,7 +3920,7 @@ platform_service_topology:
 platform_session_authority:
   authority_hostname: ops.{{ platform_domain }}
   ops_portal_client_id: ops-portal-oauth
-  keycloak_logout_url: https://sso.{{ platform_domain }}/realms/lv3/protocol/openid-connect/logout
+  keycloak_logout_url: "{{ keycloak_oidc_logout_url }}"
   oauth2_proxy_sign_out_url: https://ops.{{ platform_domain }}/oauth2/sign_out
   shared_logout_path: /.well-known/lv3/session/logout
   shared_logout_url: https://ops.{{ platform_domain }}/.well-known/lv3/session/logout

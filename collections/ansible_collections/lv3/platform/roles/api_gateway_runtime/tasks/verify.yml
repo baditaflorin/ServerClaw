@@ -58,7 +58,7 @@
   block:
     - name: Wait for the local Keycloak realm discovery endpoint used by API gateway verification
       ansible.builtin.uri:
-        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/.well-known/openid-configuration"
+        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
         method: GET
         return_content: true
         status_code: 200
@@ -124,7 +124,7 @@
   block:
     - name: Request a Keycloak bearer token for API gateway verification
       ansible.builtin.uri:
-        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/protocol/openid-connect/token"
+        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
         method: POST
         body_format: form-urlencoded
         body:

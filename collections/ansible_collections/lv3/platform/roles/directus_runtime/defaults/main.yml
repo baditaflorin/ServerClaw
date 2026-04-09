@@ -35,7 +35,7 @@ directus_key_remote_file: "{{ directus_secret_dir }}/key.txt"
 directus_secret_remote_file: "{{ directus_secret_dir }}/secret.txt"
 directus_admin_password_remote_file: "{{ directus_secret_dir }}/admin-password.txt"
 directus_keycloak_client_id: directus
-directus_keycloak_issuer_url: https://sso.{{ platform_domain }}/realms/lv3
+directus_keycloak_issuer_url: "{{ keycloak_oidc_issuer_url }}"
 directus_keycloak_allow_public_registration: true
 directus_keycloak_sync_user_info: true
 directus_keycloak_group_claim_name: groups
