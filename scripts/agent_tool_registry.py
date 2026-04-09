@@ -616,33 +616,67 @@ def _docker_socket_available() -> bool:
     return Path(DOCKER_SOCKET_PATH).exists()
 
 
-def _docker_socket_request(method: str, path: str, params: dict[str, str] | None = None) -> Any:
-    """Make a request to the Docker Engine API via the Unix socket."""
+def _docker_unix_connection(timeout: float = 30):  # type: ignore[return]
+    """Create an HTTP connection over the Docker Unix socket."""
     import http.client
-    import socket
+    import socket as _socket
 
-    class DockerUnixConnection(http.client.HTTPConnection):
-        def __init__(self, socket_path: str, timeout: float = 30):
-            super().__init__("localhost", timeout=int(timeout))
+    class _Conn(http.client.HTTPConnection):
+        def __init__(self, socket_path: str, _timeout: float = 30):
+            super().__init__("localhost", timeout=int(_timeout))
             self._socket_path = socket_path
 
         def connect(self) -> None:
-            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.sock = _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM)
             self.sock.settimeout(self.timeout)
             self.sock.connect(self._socket_path)
 
+    return _Conn(DOCKER_SOCKET_PATH, timeout)
+
+
+def _docker_socket_request(method: str, path: str, params: dict[str, str] | None = None) -> Any:
+    """Make a request to the Docker Engine API via the Unix socket."""
     if params:
         query = "&".join(f"{k}={v}" for k, v in params.items())
         full_path = f"{path}?{query}"
     else:
         full_path = path
 
-    conn = DockerUnixConnection(DOCKER_SOCKET_PATH)
+    conn = _docker_unix_connection()
     conn.request(method, full_path, headers={"Host": "localhost"})
     response = conn.getresponse()
     if response.status != 200:
         raise ValueError(f"Docker API returned HTTP {response.status}: {response.read().decode()}")
     return json.loads(response.read().decode("utf-8"))
+
+
+def _docker_socket_json(method: str, path: str, body: dict[str, Any] | None = None,
+                        *, accept_status: tuple[int, ...] = (200, 201, 204)) -> Any:
+    """Docker Engine API request with optional JSON body.  Returns parsed JSON or None for 204."""
+    conn = _docker_unix_connection(timeout=60)
+    headers: dict[str, str] = {"Host": "localhost"}
+    encoded_body: bytes | None = None
+    if body is not None:
+        headers["Content-Type"] = "application/json"
+        encoded_body = json.dumps(body).encode("utf-8")
+    conn.request(method, path, body=encoded_body, headers=headers)
+    response = conn.getresponse()
+    raw = response.read()
+    if response.status not in accept_status:
+        raise ValueError(f"Docker API {method} {path} returned HTTP {response.status}: {raw.decode()}")
+    if response.status == 204 or not raw:
+        return None
+    return json.loads(raw.decode("utf-8"))
+
+
+def _docker_socket_raw(method: str, path: str, *, timeout: float = 30) -> bytes:
+    """Docker Engine API request returning raw bytes (for log streams)."""
+    conn = _docker_unix_connection(timeout=timeout)
+    conn.request(method, path, headers={"Host": "localhost"})
+    response = conn.getresponse()
+    if response.status != 200:
+        raise ValueError(f"Docker API {method} {path} returned HTTP {response.status}")
+    return response.read()
 
 
 def _portainer_available() -> bool:
@@ -1435,6 +1469,130 @@ def tool_mempalace_status(_tool: dict[str, Any], args: dict[str, Any]) -> dict[s
         }
 
 
+# Host Command Execution
+_HOST_COMMAND_BLOCKED_PATTERNS: Final[list[str]] = [
+    "rm -rf /",
+    "mkfs",
+    "dd if=/dev/zero",
+    "dd if=/dev/urandom",
+    ":(){ :",
+    "> /dev/sd",
+    "shutdown",
+    "reboot",
+    "init 0",
+    "init 6",
+    "passwd",
+    "userdel",
+]
+
+_HOST_COMMAND_EXEC_IMAGE: Final[str] = "debian:bookworm-slim"
+
+
+def _strip_docker_log_header(raw: bytes) -> str:
+    """Strip Docker multiplexed stream headers from log output.
+
+    Docker log API with stdout/stderr returns 8-byte framed messages:
+      [stream_type(1) + 0(3) + size(4 big-endian)] + payload
+    """
+    lines: list[str] = []
+    offset = 0
+    while offset + 8 <= len(raw):
+        size = int.from_bytes(raw[offset + 4 : offset + 8], "big")
+        if offset + 8 + size > len(raw):
+            break
+        lines.append(raw[offset + 8 : offset + 8 + size].decode("utf-8", errors="replace"))
+        offset += 8 + size
+    if not lines:
+        return raw.decode("utf-8", errors="replace")
+    return "".join(lines)
+
+
+def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Execute a shell command on the Docker host via a temporary container.
+
+    Uses the Docker Engine API to create a one-shot container with read-only
+    access to the host root filesystem (mounted at /host).  The container is
+    automatically removed after execution.
+    """
+    command = require_str(args.get("command"), "arguments.command")
+    timeout_secs = require_int(args.get("timeout", 30), "arguments.timeout", minimum=1)
+
+    # Safety filter — block obviously destructive patterns
+    cmd_lower = command.lower()
+    for pattern in _HOST_COMMAND_BLOCKED_PATTERNS:
+        if pattern in cmd_lower:
+            return {
+                "status": "blocked",
+                "command": command,
+                "exit_code": -1,
+                "stdout": "",
+                "stderr": f"Command blocked by safety filter: contains '{pattern}'",
+                "host": "runtime-control-lv3",
+            }
+
+    if not _docker_socket_available():
+        raise ValueError(
+            "Cannot execute host commands: Docker socket not available at "
+            f"{DOCKER_SOCKET_PATH}. Mount the Docker socket to enable this tool."
+        )
+
+    # Create a temporary container with host root mounted read-only
+    create_resp = _docker_socket_json("POST", "/containers/create", body={
+        "Image": _HOST_COMMAND_EXEC_IMAGE,
+        "Cmd": ["bash", "-c", command],
+        "HostConfig": {
+            "AutoRemove": False,
+            "NetworkMode": "host",
+            "PidMode": "host",
+            "ReadonlyRootfs": False,
+            "Binds": ["/:/host:ro"],
+        },
+        "WorkingDir": "/host",
+        "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "TERM=xterm",
+        ],
+    })
+    container_id = require_str(create_resp.get("Id"), "container creation response.Id")
+
+    try:
+        # Start the container
+        _docker_socket_json("POST", f"/containers/{container_id}/start",
+                            accept_status=(204, 304))
+
+        # Wait for it to finish (with timeout)
+        wait_resp = _docker_socket_json(
+            "POST",
+            f"/containers/{container_id}/wait?condition=not-running",
+            accept_status=(200,),
+        )
+        exit_code = wait_resp.get("StatusCode", -1) if wait_resp else -1
+
+        # Retrieve stdout + stderr logs
+        raw_logs = _docker_socket_raw(
+            "GET",
+            f"/containers/{container_id}/logs?stdout=1&stderr=1&tail=1000",
+            timeout=float(timeout_secs),
+        )
+        output = _strip_docker_log_header(raw_logs)
+    finally:
+        # Always clean up the container
+        try:
+            _docker_socket_json("DELETE", f"/containers/{container_id}?force=1",
+                                accept_status=(200, 204, 404, 409))
+        except Exception:
+            pass  # best-effort cleanup
+
+    return {
+        "status": "success" if exit_code == 0 else "error",
+        "command": command,
+        "exit_code": exit_code,
+        "stdout": output,
+        "stderr": "",
+        "host": "runtime-control-lv3",
+    }
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -1472,6 +1630,7 @@ HANDLERS: Final[dict[str, Any]] = {
     "mempalace_add_drawer": tool_mempalace_add_drawer,
     "mempalace_wake_up": tool_mempalace_wake_up,
     "mempalace_status": tool_mempalace_status,
+    "execute_host_command": tool_execute_host_command,
 }
 
 

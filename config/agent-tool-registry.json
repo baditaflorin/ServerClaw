@@ -2316,6 +2316,71 @@
         "kind": "handler",
         "handler": "mempalace_status"
       }
+    },
+    {
+      "name": "execute-host-command",
+      "title": "Execute Host Command",
+      "description": "Execute a shell command on the platform host (runtime-control-lv3) via a temporary Docker container with read-only access to the host filesystem. Use for system inspection commands like df -h, free -m, uptime, cat /etc/os-release, ip addr, ss -tlnp, etc.",
+      "category": "execute",
+      "transport": "controller_local",
+      "endpoint": "handler://execute_host_command",
+      "auth": "docker-socket",
+      "runbook": "docs/runbooks/container-ops.md",
+      "approval_required": false,
+      "audit_on_call": true,
+      "mcp_annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command"],
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Shell command to execute on the host (e.g., 'df -h', 'free -m', 'uptime', 'cat /proc/loadavg')"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120,
+            "description": "Command timeout in seconds (default: 30)"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status", "command", "exit_code", "stdout", "stderr", "host"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["success", "error", "blocked"]
+          },
+          "command": {
+            "type": "string"
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "stdout": {
+            "type": "string"
+          },
+          "stderr": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "execute_host_command"
+      }
     }
   ]
 }
