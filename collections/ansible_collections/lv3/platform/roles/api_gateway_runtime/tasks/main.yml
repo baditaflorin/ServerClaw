@@ -76,6 +76,8 @@
       mode: "0755"
     - path: "{{ api_gateway_data_dir }}/receipts/drift-reports"
       mode: "0755"
+    - path: "{{ api_gateway_env_file | dirname }}"
+      mode: "0700"
 
 - name: Ensure the local API gateway artifact directory exists
   ansible.builtin.file:
