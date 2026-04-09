@@ -1,8 +1,9 @@
-# Release 0.178.75
+# Release 0.178.76
 
 - Date: 2026-04-09
 
 ## Summary
+- Public release readiness: Apache 2.0 LICENSE, rewritten README with quick start (Docker + server), fork instructions, and architecture overview; platform_container_registry added to identity.yml; CHECK_RUNNER_REGISTRY override documented in Makefile
 - ADR 0388: Centralize Keycloak realm name and OIDC issuer URLs — keycloak_realm_name derived from platform_domain in identity.yml; 8 central OIDC URL variables (issuer, auth, token, userinfo, jwks, logout, discovery); 34 hardcoded `realms/lv3` literals replaced across 20 role defaults and 2 task files; fork operators changing platform_domain automatically get correct SSO configuration with zero additional edits; also fixes semaphore_runtime using wrong SSO hostname (auth vs sso)
 - ADR 0386: Unified disk space monitoring — shared Telegraf base inputs on all VMs, disk_metrics.py query module, agent tool (get-disk-usage), platform-context API endpoint (GET /v1/platform/disk-usage), and Windmill disk-space-monitor workflow; auto-propagates when VMs are added/removed via capacity-model.json
 - ADR 0387: Harbor OIDC Keycloak protocol mappers and client configuration fixed — Harbor login via `registry.lv3.org/c/oidc/login` now works with proper email, username, and groups claims extraction; client secret authenticator and backchannel logout configured; idempotent client update task ensures protocol mappers always match repo truth

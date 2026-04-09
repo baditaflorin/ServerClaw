@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.75",
+  "repo_version": "0.178.76",
   "platform_version": "0.178.72",
-  "generated_at": "2026-04-09T16:47:28Z",
-  "next_refresh_at": "2026-04-09T17:47:28Z",
+  "generated_at": "2026-04-09T17:10:16Z",
+  "next_refresh_at": "2026-04-09T18:10:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1471,7 +1471,6 @@
           "converge-crawl4ai",
           "guest-live",
           "mutation",
-          "preflight",
           "validated"
         ],
         "risk_class": "HIGH",
@@ -3336,31 +3335,6 @@
         "runbook": "docs/runbooks/disaster-recovery.md"
       },
       {
-        "id": "disk-space-monitor",
-        "description": "Query disk space usage across all platform VMs via InfluxDB, compare against capacity-model.json budgets, and alert when usage exceeds threshold.",
-        "tags": [
-          "disk-space-monitor",
-          "mutation",
-          "repo-only",
-          "validated"
-        ],
-        "risk_class": "MEDIUM",
-        "automation_eligible": true,
-        "agent_trust_required": "T2",
-        "execution_class": "mutation",
-        "live_impact": "repo_only",
-        "budget": {
-          "max_duration_seconds": 600,
-          "max_steps": 200,
-          "max_concurrent_instances": 3,
-          "max_touched_hosts": 10,
-          "max_restarts": 1,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/capacity-model.md"
-      },
-      {
         "id": "ephemeral-pool-reconcile",
         "description": "Keep the ADR 0186 prewarmed fixture pools topped up, record spillover decisions, and preserve one warm spare per common fixture profile when local capacity allows.",
         "tags": [
@@ -5019,7 +4993,6 @@
         "path": "docs/runbooks/capacity-model.md",
         "workflow_ids": [
           "capacity-report",
-          "disk-space-monitor",
           "weekly-capacity-report"
         ]
       },
@@ -6383,10 +6356,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.74",
+    "last_version": "0.178.75",
     "deployed_at": "2026-04-09",
-    "summary": "ADR 0388: Centralize Keycloak realm name and OIDC issuer URLs \u2014 keycloak_realm_name derived from platform_domain in identity.yml; 8 central OIDC URL variables (issuer, auth, token, userinfo, jwks, logout, discovery); 34 hardcoded `realms/lv3` literals replaced across 20 role defaults and 2 task files; fork operators changing platform_domain automatically get correct SSO configuration with zero additional edits; also fixes semaphore_runtime using wrong SSO hostname (auth vs sso) ADR 0386: Unified disk space monitoring \u2014 shared Telegraf base inputs on all VMs, disk_metrics.py query module, agent tool (get-disk-usage), platform-context API endpoint (GET /v1/platform/disk-usage), and Windmill disk-space-monitor workflow; auto-propagates when VMs are added/removed via capacity-model.json",
-    "release_notes_url": "docs/release-notes/0.178.75.md"
+    "summary": "Public release readiness: Apache 2.0 LICENSE, rewritten README with quick start (Docker + server), fork instructions, and architecture overview; platform_container_registry added to identity.yml; CHECK_RUNNER_REGISTRY override documented in Makefile ADR 0388: Centralize Keycloak realm name and OIDC issuer URLs \u2014 keycloak_realm_name derived from platform_domain in identity.yml; 8 central OIDC URL variables (issuer, auth, token, userinfo, jwks, logout, discovery); 34 hardcoded `realms/lv3` literals replaced across 20 role defaults and 2 task files; fork operators changing platform_domain automatically get correct SSO configuration with zero additional edits; also fixes semaphore_runtime using wrong SSO hostname (auth vs sso)",
+    "release_notes_url": "docs/release-notes/0.178.76.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
