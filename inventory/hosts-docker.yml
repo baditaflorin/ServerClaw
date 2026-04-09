@@ -1,0 +1,106 @@
+# =============================================================================
+# ServerClaw — Docker Development Inventory
+# =============================================================================
+# Targets the Docker containers started by docker-dev/ compose files.
+# Same IPs as production, containers replace VMs.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts-docker.yml playbooks/site.yml
+#   make docker-dev-converge
+#
+# See ADR 0387: ServerClaw-in-Docker
+# =============================================================================
+
+all:
+  vars:
+    playbook_execution_env: "{{ env | default('production') }}"
+    playbook_execution_allowed_envs:
+      - production
+    # Docker-dev mode: skip Proxmox API, firewall, Tailscale, systemd timers
+    platform_environment: docker-dev
+    platform_skip_proxmox_api: true
+    ansible_user: ops
+    ansible_ssh_private_key_file: "{{ lookup('env', 'LOCAL_OVERLAY_ROOT') | default(playbook_dir ~ '/../.local', true) }}/ssh/bootstrap.id_ed25519"
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+    playbook_execution_host_patterns:
+      proxmox_hosts:
+        production: "proxmox_hosts:&production"
+      lv3_guests:
+        production: "lv3_guests:&production"
+      postgres_guests:
+        production: "postgres_guests:&production"
+      backup_guests:
+        production: "backup_guests:&production"
+      nginx_edge:
+        production: nginx-docker
+      docker_runtime:
+        production: docker-runtime-docker
+      runtime_control:
+        production: runtime-control-docker
+      postgres:
+        production: postgres-docker
+      backup:
+        production: backup-docker
+      monitoring:
+        production: monitoring-docker
+      docker_build:
+        production: docker-build-docker
+
+  children:
+    production:
+      hosts:
+        localhost:
+        nginx-docker:
+        docker-runtime-docker:
+        docker-build-docker:
+        monitoring-docker:
+        postgres-docker:
+        backup-docker:
+        runtime-control-docker:
+
+    platform:
+      children:
+        proxmox_hosts:
+        lv3_guests:
+        postgres_guests:
+        backup_guests:
+
+    proxmox_hosts:
+      hosts:
+        localhost:
+          ansible_connection: local
+          # Stub: Proxmox API calls are skipped in docker-dev mode
+
+    lv3_guests:
+      hosts:
+        nginx-docker:
+          ansible_host: 10.10.10.10
+          deployment_environment: production
+        docker-runtime-docker:
+          ansible_host: 10.10.10.20
+          deployment_environment: production
+        docker-build-docker:
+          ansible_host: 10.10.10.30
+          deployment_environment: production
+        monitoring-docker:
+          ansible_host: 10.10.10.40
+          deployment_environment: production
+        postgres-docker:
+          ansible_host: 10.10.10.50
+          deployment_environment: production
+        backup-docker:
+          ansible_host: 10.10.10.60
+          deployment_environment: production
+        runtime-control-docker:
+          ansible_host: 10.10.10.92
+          deployment_environment: production
+
+    postgres_guests:
+      hosts:
+        postgres-docker:
+
+    backup_guests:
+      hosts:
+        backup-docker:
+          ansible_host: 10.10.10.60

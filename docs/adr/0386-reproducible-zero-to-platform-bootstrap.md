@@ -49,7 +49,7 @@ Credit where due — the platform has strong foundations for this:
 
 ### What Is Missing
 
-1. **`.local-example/` scaffold** — No template showing the required directory
+1. **`local-overlay-template/` scaffold** — No template showing the required directory
    structure, file formats, and which secrets are required vs optional vs
    auto-generated
 2. **`make bootstrap` single entrypoint** — No command that runs the full
@@ -78,10 +78,10 @@ through a single documented path.
 
 ### Layer 1: Local Overlay Scaffold (`make init-local`)
 
-Create a `.local-example/` directory in the repo containing:
+Create a `local-overlay-template/` directory in the repo containing:
 
 ```
-.local-example/
+local-overlay-template/
 ├── README.md                          # What this directory is, how to use it
 ├── ssh/
 │   └── .gitkeep                       # Operator generates bootstrap.id_ed25519 here
@@ -99,7 +99,7 @@ Create a `.local-example/` directory in the repo containing:
 
 Add a `make init-local` target that:
 
-1. Copies `.local-example/` to `.local/` (abort if `.local/` already exists)
+1. Copies `local-overlay-template/` to `.local/` (abort if `.local/` already exists)
 2. Generates an ED25519 SSH keypair at `.local/ssh/bootstrap.id_ed25519`
 3. Generates random passwords for all `generated_by_repo` secrets listed in
    `config/controller-local-secrets.json`
@@ -233,7 +233,7 @@ and customizing it.
 
 - **Single-path bootstrap:** Any operator can go from bare server to
   running platform following one runbook
-- **Fork-friendly:** `.local-example/` and `hosts.yml.example` eliminate
+- **Fork-friendly:** `local-overlay-template/` and `hosts.yml.example` eliminate
   the reverse-engineering step for new forks
 - **Provider-agnostic:** Provider profiles decouple the out-of-band OS
   install from the in-band IaC, making non-Hetzner deployments first-class
@@ -244,7 +244,7 @@ and customizing it.
 
 ### Negative
 
-- **Maintenance burden:** `.local-example/` must be kept in sync with
+- **Maintenance burden:** `local-overlay-template/` must be kept in sync with
   `controller-local-secrets.json` — add a CI check for drift
 - **Provider profiles are documentation, not automation:** The out-of-band
   OS install step remains manual for most providers
@@ -256,7 +256,7 @@ and customizing it.
 - Add a `make bootstrap-minimal` target that converges only the critical
   path (Proxmox → Docker runtime → PostgreSQL → Keycloak → Nginx) — enough
   to prove the platform works, with remaining services added incrementally
-- Add a pre-commit hook that validates `.local-example/` against the
+- Add a pre-commit hook that validates `local-overlay-template/` against the
   secret manifest
 - Document expected wall-clock time for each bootstrap stage
 
@@ -266,7 +266,7 @@ and customizing it.
 
 ### Phase 1: Foundation (1-2 weeks)
 
-- [ ] Create `.local-example/` scaffold from `controller-local-secrets.json`
+- [ ] Create `local-overlay-template/` scaffold from `controller-local-secrets.json`
 - [ ] Write `scripts/init_local_overlay.py`
 - [ ] Add `make init-local` target
 - [ ] Create `inventory/hosts.yml.example`
@@ -290,7 +290,7 @@ and customizing it.
 
 ### Phase 4: Polish (ongoing)
 
-- [ ] CI check: `.local-example/` ↔ `controller-local-secrets.json` drift
+- [ ] CI check: `local-overlay-template/` ↔ `controller-local-secrets.json` drift
 - [ ] Pre-commit hook for inventory example freshness
 - [ ] Onboarding pack generation includes bootstrap steps
 - [ ] Test full bootstrap on a fresh Hetzner server (end-to-end validation)
