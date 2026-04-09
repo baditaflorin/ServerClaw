@@ -60,6 +60,7 @@ harbor_keycloak_bootstrap_admin_password_remote_file: /etc/lv3/keycloak/bootstra
 harbor_keycloak_admin_group: harbor-admins
 harbor_keycloak_client_id: harbor
 harbor_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/harbor-client-secret.txt"
+harbor_keycloak_client_secret: ""
 harbor_oidc_provider_name: Keycloak
 harbor_oidc_scope: openid,profile,email,groups
 harbor_oidc_user_claim: preferred_username
