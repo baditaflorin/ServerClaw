@@ -74,7 +74,7 @@
         url: https://127.0.0.1/health
         method: GET
         headers:
-          Host: headscale.lv3.org
+          Host: headscale.{{ platform_domain }}
         status_code: 200
         validate_certs: false
       changed_when: false

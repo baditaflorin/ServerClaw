@@ -5,7 +5,7 @@ falco_event_bridge_service_name: lv3-falco-event-bridge
 falco_event_bridge_service_file: "/etc/systemd/system/{{ falco_event_bridge_service_name }}.service"
 falco_event_bridge_env_file: "{{ falco_event_bridge_site_dir }}/falco-event-bridge.env"
 falco_event_bridge_listen_host: 0.0.0.0
-falco_event_bridge_listen_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.falco_event_bridge_port }}"
+falco_event_bridge_listen_port: "{{ hostvars[platform_topology_host].platform_port_assignments.falco_event_bridge_port }}"
 falco_event_bridge_source_host: docker-runtime-lv3
 falco_event_bridge_actor_id: falco-event-bridge
 falco_event_bridge_event_topic: platform.security.falco
@@ -13,7 +13,7 @@ falco_event_bridge_nats_subject: platform.security.falco
 falco_event_bridge_nats_host: >-
   {{
     (
-      hostvars['proxmox_florin'].proxmox_guests
+      hostvars[platform_topology_host].proxmox_guests
       | selectattr('name', 'equalto', 'runtime-control-lv3')
       | map(attribute='ipv4')
       | first
@@ -22,7 +22,7 @@ falco_event_bridge_nats_host: >-
 falco_event_bridge_nats_port: 4222
 falco_event_bridge_nats_username: jetstream-admin
 falco_event_bridge_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
-falco_event_bridge_ntfy_base_url: "http://127.0.0.1:{{ hostvars['proxmox_florin'].platform_port_assignments.ntfy_port }}"
+falco_event_bridge_ntfy_base_url: "http://127.0.0.1:{{ hostvars[platform_topology_host].platform_port_assignments.ntfy_port }}"
 falco_event_bridge_ntfy_topic: platform-security-critical
 falco_event_bridge_ntfy_username: alertmanager
 falco_event_bridge_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt

@@ -1,7 +1,7 @@
 ---
 # Purpose: Default runtime inputs for the Flagsmith feature flag and remote configuration deployment.
 
-flagsmith_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('flagsmith') }}"
+flagsmith_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('flagsmith') }}"
 flagsmith_site_dir: /opt/flagsmith
 flagsmith_compose_file: "{{ flagsmith_site_dir }}/docker-compose.yml"
 flagsmith_env_file: "{{ compose_runtime_secret_root }}/flagsmith/runtime.env"
@@ -34,7 +34,7 @@ flagsmith_task_processor_sleep_interval_ms: 500
 flagsmith_task_processor_grace_period_ms: 20000
 flagsmith_task_processor_threads: 2
 flagsmith_task_processor_queue_pop_size: 10
-flagsmith_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+flagsmith_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 flagsmith_database_name: flagsmith
 flagsmith_database_user: flagsmith
 flagsmith_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith
@@ -45,7 +45,7 @@ flagsmith_environment_keys_local_file: /Users/live/Documents/GITHUB_PROJECTS/pro
 flagsmith_django_secret_key_remote_file: "{{ flagsmith_secret_dir }}/django-secret-key.txt"
 flagsmith_admin_password_remote_file: "{{ flagsmith_secret_dir }}/admin-password.txt"
 flagsmith_seed_script_remote_file: "{{ flagsmith_site_dir }}/flagsmith_seed.py"
-flagsmith_admin_email: flagsmith.automation@lv3.org
+flagsmith_admin_email: flagsmith.automation@{{ platform_domain }}
 flagsmith_admin_first_name: Flagsmith
 flagsmith_admin_last_name: Automation
 flagsmith_organisation_name: LV3 Platform

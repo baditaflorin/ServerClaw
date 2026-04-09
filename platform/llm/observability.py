@@ -6,7 +6,7 @@ import json
 import os
 
 
-DEFAULT_BASE_URL = "https://langfuse.lv3.org"
+DEFAULT_BASE_URL = os.environ.get("LANGFUSE_BASE_URL", "https://langfuse.localhost")
 
 
 @dataclass(frozen=True)

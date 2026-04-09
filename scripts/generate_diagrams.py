@@ -98,7 +98,7 @@ def scene(elements: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "type": "excalidraw",
         "version": 2,
-        "source": "https://draw.lv3.org",
+        "source": "https://draw.localhost",
         "elements": elements,
         "appState": {
             "gridSize": None,
@@ -187,7 +187,7 @@ def render_trust_tier_model(host_vars: dict[str, Any]) -> dict[str, Any]:
     authenticated = sorted(
         service["public_hostname"]
         for service in topology.values()
-        if service.get("public_hostname") in {"docs.lv3.org", "home.lv3.org", "langfuse.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org", "draw.lv3.org"}
+        if service.get("public_hostname") in {"docs.localhost", "home.localhost", "langfuse.localhost", "logs.localhost", "n8n.localhost", "ops.localhost", "draw.localhost"}
     )
     private = sorted(
         service["service_name"]
@@ -195,11 +195,11 @@ def render_trust_tier_model(host_vars: dict[str, Any]) -> dict[str, Any]:
         if service.get("exposure_model") == "private-only"
     )[:6]
     elements: list[dict[str, Any]] = []
-    elements += rectangle("Public Edge\nnginx.lv3.org", x=80, y=60, height=96, background="#dbeafe")
+    elements += rectangle("Public Edge\nnginx.localhost", x=80, y=60, height=96, background="#dbeafe")
     elements += rectangle("Authenticated Edge\n" + "\n".join(authenticated[:4]), x=420, y=60, height=148, background="#e0e7ff")
     elements += rectangle("Private Runtime\n" + "\n".join(private[:4]), x=760, y=60, height=148, background="#dcfce7")
     elements += rectangle("Tailnet / Host Access\n100.64.0.1 and private TCP proxies", x=1080, y=60, height=96, background="#fef3c7")
-    elements += rectangle("draw.lv3.org\nshared oauth2-proxy auth\n/socket.io/ split route", x=420, y=300, height=120, background="#ede9fe")
+    elements += rectangle("draw.localhost\nshared oauth2-proxy auth\n/socket.io/ split route", x=420, y=300, height=120, background="#ede9fe")
     elements += rectangle("10.10.10.20:3095\nfrontend", x=760, y=280, background="#f5f3ff")
     elements += rectangle("10.10.10.20:3096\ncollaboration room", x=760, y=420, background="#f5f3ff")
     elements.append(arrow("public-auth", x=300, y=120, dx=120, dy=0))

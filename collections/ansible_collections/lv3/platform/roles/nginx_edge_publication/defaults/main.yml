@@ -57,7 +57,7 @@ public_edge_dns_hetzner_propagation_seconds: 120
 public_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
 public_edge_certbot_plugin_path: >-
   {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
-public_edge_apex_hostname: lv3.org
+public_edge_apex_hostname: {{ platform_domain }}
 public_edge_probe_hostname: "{{ public_edge_service_topology.nginx_edge.public_hostname }}"
 public_edge_additional_certificate_domains:
   - "{{ public_edge_apex_hostname }}"
@@ -109,118 +109,118 @@ public_edge_security_headers_default:
     object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline';
     img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
 public_edge_security_headers_overrides:
-  api.lv3.org:
+  api.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
       object-src 'none'
-  bi.lv3.org:
+  bi.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://bi.lv3.org https://sso.lv3.org; worker-src 'self' blob:;
+      connect-src 'self' https://bi.{{ platform_domain }} https://sso.{{ platform_domain }}; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
-  coolify.lv3.org:
+  coolify.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:;
-      connect-src 'self' https://coolify.lv3.org wss://coolify.lv3.org;
+      connect-src 'self' https://coolify.{{ platform_domain }} wss://coolify.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
-  annotate.lv3.org:
+  annotate.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
       style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
-      font-src 'self' data:; connect-src 'self' https://annotate.lv3.org
-      https://sso.lv3.org wss://annotate.lv3.org; worker-src 'self' blob:;
+      font-src 'self' data:; connect-src 'self' https://annotate.{{ platform_domain }}
+      https://sso.{{ platform_domain }} wss://annotate.{{ platform_domain }}; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
-  chat.lv3.org:
+  chat.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://chat.lv3.org ws://chat.lv3.org wss://chat.lv3.org;
+      connect-src 'self' https://chat.{{ platform_domain }} ws://chat.{{ platform_domain }} wss://chat.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
-  docs.lv3.org:
+  docs.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'
       https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data:
       https://fonts.gstatic.com; connect-src 'self'; manifest-src 'self'
-  draw.lv3.org:
+  draw.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;
-      connect-src 'self' https://draw.lv3.org wss://draw.lv3.org; worker-src 'self' blob:;
+      connect-src 'self' https://draw.{{ platform_domain }} wss://draw.{{ platform_domain }}; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
-  grist.lv3.org:
+  grist.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob:; font-src 'self' data:;
-      connect-src 'self' https://grist.lv3.org https://sso.lv3.org; manifest-src 'self'
-  grafana.lv3.org:
+      connect-src 'self' https://grist.{{ platform_domain }} https://sso.{{ platform_domain }}; manifest-src 'self'
+  grafana.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://grafana.lv3.org wss://grafana.lv3.org;
+      connect-src 'self' https://grafana.{{ platform_domain }} wss://grafana.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
-  notebooks.lv3.org:
+  notebooks.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
       style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
-      font-src 'self' data:; connect-src 'self' https://notebooks.lv3.org
-      wss://notebooks.lv3.org https://sso.lv3.org; worker-src 'self' blob:;
+      font-src 'self' data:; connect-src 'self' https://notebooks.{{ platform_domain }}
+      wss://notebooks.{{ platform_domain }} https://sso.{{ platform_domain }}; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
-  n8n.lv3.org:
+  n8n.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://n8n.lv3.org wss://n8n.lv3.org;
+      connect-src 'self' https://n8n.{{ platform_domain }} wss://n8n.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
-  agents.lv3.org:
+  agents.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://agents.lv3.org wss://agents.lv3.org;
+      connect-src 'self' https://agents.{{ platform_domain }} wss://agents.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
-  tasks.lv3.org:
+  tasks.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://tasks.lv3.org wss://tasks.lv3.org;
+      connect-src 'self' https://tasks.{{ platform_domain }} wss://tasks.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
-  realtime.lv3.org:
+  realtime.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
       style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
-      font-src 'self' data:; connect-src 'self' https://realtime.lv3.org ws://realtime.lv3.org
-      wss://realtime.lv3.org; worker-src 'self' blob:; child-src 'self' blob:;
+      font-src 'self' data:; connect-src 'self' https://realtime.{{ platform_domain }} ws://realtime.{{ platform_domain }}
+      wss://realtime.{{ platform_domain }}; worker-src 'self' blob:; child-src 'self' blob:;
       manifest-src 'self'
-  logs.lv3.org:
+  logs.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://*.duckdb.org;
       base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none';
       script-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://*.duckdb.org;
       style-src 'self' 'unsafe-inline' blob:; img-src 'self' data:;
-      font-src 'self' data:; connect-src 'self' https://logs.lv3.org wss://logs.lv3.org;
+      font-src 'self' data:; connect-src 'self' https://logs.{{ platform_domain }} wss://logs.{{ platform_domain }};
       manifest-src 'self'
-  ops.lv3.org:
+  ops.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' https://unpkg.com;
       style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com;
       font-src 'self' data: https://unpkg.com;
       connect-src 'self'; manifest-src 'self'
-  sso.lv3.org:
+  sso.{{ platform_domain }}:
     # Keycloak uses same-origin iframes for session management (authChecker.js
     # and the admin-console 3rd-party-cookie probe).  frame-ancestors must be
     # 'self', and X-Frame-Options must be SAMEORIGIN, or the iframe times out
@@ -229,43 +229,43 @@ public_edge_security_headers_overrides:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
-      img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.lv3.org;
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.{{ platform_domain }};
       frame-src 'self'; manifest-src 'self'
-  wiki.lv3.org:
+  wiki.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data: https: blob:; font-src 'self' data:;
-      connect-src 'self' https://wiki.lv3.org; manifest-src 'self'
-  status.lv3.org:
+      connect-src 'self' https://wiki.{{ platform_domain }}; manifest-src 'self'
+  status.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:; connect-src 'self'
-      https://status.lv3.org ws://status.lv3.org wss://status.lv3.org; manifest-src 'self'
-  git.lv3.org:
+      https://status.{{ platform_domain }} ws://status.{{ platform_domain }} wss://status.{{ platform_domain }}; manifest-src 'self'
+  git.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://git.lv3.org wss://git.lv3.org; manifest-src 'self'
-  uptime.lv3.org:
+      connect-src 'self' https://git.{{ platform_domain }} wss://git.{{ platform_domain }}; manifest-src 'self'
+  uptime.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:; connect-src 'self'
-      https://uptime.lv3.org ws://uptime.lv3.org wss://uptime.lv3.org; manifest-src 'self'
-  scheduler.lv3.org:
+      https://uptime.{{ platform_domain }} ws://uptime.{{ platform_domain }} wss://uptime.{{ platform_domain }}; manifest-src 'self'
+  scheduler.{{ platform_domain }}:
     content_security_policy: >-
-      default-src 'self'; base-uri 'self'; form-action 'self' https://sso.lv3.org;
+      default-src 'self'; base-uri 'self'; form-action 'self' https://sso.{{ platform_domain }};
       frame-ancestors 'none'; object-src 'none';
       script-src 'self' 'unsafe-inline' 'unsafe-eval';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:;
-      connect-src 'self' https://scheduler.lv3.org wss://scheduler.lv3.org;
+      connect-src 'self' https://scheduler.{{ platform_domain }} wss://scheduler.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
 public_edge_extra_sites:
-  - hostname: minio-console.lv3.org
+  - hostname: minio-console.{{ platform_domain }}
     kind: proxy
     upstream: "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}"
     client_max_body_size: 0
@@ -275,16 +275,16 @@ public_edge_extra_sites:
     proxy_send_timeout_seconds: 900
     security_headers_enabled: false
     preserve_upstream_security_headers: true
-  - hostname: changelog.lv3.org
+  - hostname: changelog.{{ platform_domain }}
     kind: static_dir
     source_dir: changelog-portal
-  - hostname: docs.lv3.org
+  - hostname: docs.{{ platform_domain }}
     kind: static_dir
     source_dir: docs-portal
 public_edge_authenticated_sites:
-  annotate.lv3.org:
+  annotate.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  analytics.lv3.org:
+  analytics.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
       - /api/error
@@ -294,38 +294,38 @@ public_edge_authenticated_sites:
       - /api/system/health/ready
     unauthenticated_prefix_paths:
       - /js/
-  changelog.lv3.org:
+  changelog.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  coolify.lv3.org:
+  coolify.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  billing.lv3.org:
+  billing.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_proxy_routes:
       - path: /api/health
         upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/health"
       - path: /api/v1/events
         upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/events"
-  docs.lv3.org:
+  docs.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  draw.lv3.org:
+  draw.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  flags.lv3.org:
+  flags.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
       - /health
-  agents.lv3.org:
+  agents.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
       - /healthz
-  langfuse.lv3.org:
+  langfuse.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_prefix_paths:
       - /api/public/
-  minio-console.lv3.org:
+  minio-console.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  tasks.lv3.org:
+  tasks.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  n8n.lv3.org:
+  n8n.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
       - /healthz
@@ -333,13 +333,13 @@ public_edge_authenticated_sites:
       - /webhook/
       - /webhook-test/
       - /webhook-waiting/
-  logs.lv3.org:
+  logs.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  realtime.lv3.org:
+  realtime.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  home.lv3.org:
+  home.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
-  ops.lv3.org:
+  ops.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
       - /health

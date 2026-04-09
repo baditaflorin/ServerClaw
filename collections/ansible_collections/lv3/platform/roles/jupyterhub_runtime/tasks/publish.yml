@@ -38,7 +38,7 @@
 - name: Assert the JupyterHub public OIDC login handoff points at Keycloak
   ansible.builtin.assert:
     that:
-      - "'sso.lv3.org' in (jupyterhub_public_oidc_redirect.location | default(''))"
+      - "'sso.{{ platform_domain }}' in (jupyterhub_public_oidc_redirect.location | default(''))"
     fail_msg: "The JupyterHub public oauth_login endpoint did not redirect to Keycloak."
 
 - name: Verify the JupyterHub public admin API responds with the service token

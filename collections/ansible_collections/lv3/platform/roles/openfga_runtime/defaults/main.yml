@@ -10,14 +10,14 @@
 # from platform_service_registry — ADR 0373.
 openfga_database_name: openfga
 openfga_database_user: openfga
-openfga_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+openfga_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 openfga_database_password_local_file: "{{ openfga_local_artifact_dir }}/database-password.txt"
 openfga_preshared_key_local_file: "{{ openfga_local_artifact_dir }}/preshared-key.txt"
-openfga_internal_http_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.openfga_http_port }}"
+openfga_internal_http_port: "{{ hostvars[platform_topology_host].platform_port_assignments.openfga_http_port }}"
 openfga_internal_grpc_port: 8097
 openfga_controller_url: >-
-  http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{
-    hostvars['proxmox_florin'].platform_port_assignments.openfga_host_proxy_port
+  http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{
+    hostvars[platform_topology_host].platform_port_assignments.openfga_host_proxy_port
   }}
 openfga_local_url: "http://127.0.0.1:{{ openfga_internal_http_port }}"
 openfga_http_addr: "0.0.0.0:{{ openfga_internal_http_port }}"

@@ -10,4 +10,4 @@ groups:
         annotations:
           summary: Gotenberg is unreachable on the private runtime port.
           description: The Gotenberg readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-gotenberg/
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-gotenberg/

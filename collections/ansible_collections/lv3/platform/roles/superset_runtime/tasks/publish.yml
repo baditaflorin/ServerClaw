@@ -70,7 +70,7 @@
       - --expected-chart
       - "{{ superset_landing_chart_title }}"
       - --expected-sso-host
-      - sso.lv3.org
+      - sso.{{ platform_domain }}
       - --admin-username
       - "{{ superset_admin_username }}"
       - --admin-password-file
@@ -100,7 +100,7 @@
       - --expected-chart
       - "{{ superset_landing_chart_title }}"
       - --expected-sso-host
-      - sso.lv3.org
+      - sso.{{ platform_domain }}
       - --admin-username
       - "{{ superset_admin_username }}"
       - --admin-password-file

@@ -2,16 +2,16 @@
 # Playbook: refresh-discovery-surfaces.yml
 # Purpose: Regenerate and deploy all discovery surfaces that consume the service catalog.
 #
-# Use case: Run after any service deployment to propagate changes to home.lv3.org,
-#           ops.lv3.org, and wiki.lv3.org (Outline).  Designed as the single cascade
+# Use case: Run after any service deployment to propagate changes to home.{{ platform_domain }},
+#           ops.{{ platform_domain }}, and wiki.{{ platform_domain }} (Outline).  Designed as the single cascade
 #           entry point that eliminates drift between the canonical service catalog
 #           and the operator-facing portals.
 #
 # Inputs (optional):
 #   - env (str, default=production): Deployment environment selector.
-#   - refresh_homepage (bool, default=true): Refresh home.lv3.org.
-#   - refresh_ops_portal (bool, default=true): Refresh ops.lv3.org.
-#   - refresh_outline (bool, default=true): Sync ADRs + docs to wiki.lv3.org.
+#   - refresh_homepage (bool, default=true): Refresh home.{{ platform_domain }}.
+#   - refresh_ops_portal (bool, default=true): Refresh ops.{{ platform_domain }}.
+#   - refresh_outline (bool, default=true): Sync ADRs + docs to wiki.{{ platform_domain }}.
 #   - refresh_platform_manifest (bool, default=true): Regenerate build/platform-manifest.json.
 #   - refresh_discovery_artifacts (bool, default=true): Regenerate build/onboarding/ artifacts.
 #   - refresh_trigger_service (str, default=unknown): Name of the service that triggered this refresh.
@@ -19,9 +19,9 @@
 # Outputs:
 #   - Platform manifest regenerated.
 #   - Discovery artifacts regenerated.
-#   - home.lv3.org updated with current service catalog.
-#   - ops.lv3.org updated with current service catalog.
-#   - wiki.lv3.org ADR collection synced.
+#   - home.{{ platform_domain }} updated with current service catalog.
+#   - ops.{{ platform_domain }} updated with current service catalog.
+#   - wiki.{{ platform_domain }} ADR collection synced.
 #
 # Idempotency: Fully idempotent. Safe to run repeatedly.
 #
@@ -126,7 +126,7 @@
 # (requires service registry integration per ADR 0373). Will be re-enabled after ADR 0373 implementation.
 # See: https://github.com/baditaflorin/proxmox_florin_server/issues/XXX
 
-# - name: Refresh home.lv3.org service listing
+# - name: Refresh home.{{ platform_domain }} service listing
 #   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
 #   become: true
 #   gather_facts: true
@@ -142,7 +142,7 @@
 # NOTE: Skipped for now due to pre-existing Docker Compose build-context sync issues.
 # Service catalog changes are regenerated locally; remote convergence disabled pending investigation.
 
-# - name: Refresh ops.lv3.org service listing
+# - name: Refresh ops.{{ platform_domain }} service listing
 #   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
 #   become: true
 #   gather_facts: true
@@ -164,6 +164,6 @@
       ansible.builtin.debug:
         msg: >-
           Discovery surface refresh complete.
-          Regenerated: platform-manifest.json, discovery artifacts, wiki.lv3.org ADR corpus.
-          Pending: home.lv3.org and ops.lv3.org (blocked on ADR 0373 service registry implementation).
+          Regenerated: platform-manifest.json, discovery artifacts, wiki.{{ platform_domain }} ADR corpus.
+          Pending: home.{{ platform_domain }} and ops.{{ platform_domain }} (blocked on ADR 0373 service registry implementation).
           See: docs/adr/0383-discovery-surface-refresh-cascade.md

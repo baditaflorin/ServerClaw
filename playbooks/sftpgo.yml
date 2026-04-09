@@ -2,7 +2,7 @@
 # Playbook: sftpgo.yml
 # Purpose: Converge SFTPGo DNS publication, PostgreSQL access, runtime state, and edge publication for the managed file-transfer surface.
 # Use case: Run during SFTPGo deployment, update, or recovery when the repo-managed SFTP and WebDAV service must match ADR 0291.
-# Outputs: The files.lv3.org DNS record, PostgreSQL backend, SFTPGo runtime, private controller path, and public edge publication are reconciled to repo state.
+# Outputs: The files.{{ platform_domain }} DNS record, PostgreSQL backend, SFTPGo runtime, private controller path, and public edge publication are reconciled to repo state.
 # Idempotency: Fully idempotent
 # Dependencies: ADR 0291, postgres_vm, keycloak_runtime, sftpgo_postgres, sftpgo_runtime, nginx_edge_publication.
 #

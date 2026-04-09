@@ -927,7 +927,7 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
         if args.domain:
             domains = [args.domain]
         elif args.subdomain:
-            domains = [f"http://{args.subdomain}.apps.lv3.org"]
+            domains = [f"http://{args.subdomain}.apps.localhost"]
         else:
             smoke_domains = auth.get("smoke_domains", [])
             if not isinstance(smoke_domains, list) or not smoke_domains:
@@ -1413,8 +1413,8 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_parser.add_argument("--app-name", default="repo-smoke", help="Coolify application name.")
     deploy_parser.add_argument("--project", default="LV3 Apps", help="Coolify project name.")
     deploy_parser.add_argument("--environment", default="production", help="Coolify environment name.")
-    deploy_parser.add_argument("--domain", help="Full domain URL, for example http://apps.lv3.org.")
-    deploy_parser.add_argument("--subdomain", help="Subdomain under apps.lv3.org, for example hello.")
+    deploy_parser.add_argument("--domain", help="Full domain URL, for example http://apps.localhost.")
+    deploy_parser.add_argument("--subdomain", help="Subdomain under apps.localhost, for example hello.")
     deploy_parser.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
     deploy_parser.add_argument("--ports", default="80", help="Comma-separated exposed ports.")
     deploy_parser.add_argument("--description", help="Optional Coolify application description.")

@@ -11,14 +11,14 @@
 
 windmill_workspace_id: lv3
 windmill_workspace_name: LV3
-windmill_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
+windmill_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('windmill') }}"
 windmill_runtime_packages:
   - make
   - openssl
   - python3-psycopg
   - tar
-windmill_server_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_server_port }}"
-windmill_host_proxy_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
+windmill_server_port: "{{ hostvars[platform_topology_host].platform_port_assignments.windmill_server_port }}"
+windmill_host_proxy_port: "{{ hostvars[platform_topology_host].platform_port_assignments.windmill_host_proxy_port }}"
 windmill_server_network_mode: host
 windmill_server_requires_docker_nat: "{{ windmill_server_network_mode != 'host' }}"
 windmill_extra_image: "{{ container_image_catalog.images.windmill_extra_runtime.ref }}"
@@ -69,7 +69,7 @@ windmill_nats_password: >-
     | default('', true)
     | trim
   }}
-windmill_ntfy_base_url: https://ntfy.lv3.org
+windmill_ntfy_base_url: https://ntfy.{{ platform_domain }}
 windmill_ntfy_token_local_file: "{{ windmill_controller_repo_common_root }}/.local/ntfy/windmill-token.txt"
 windmill_ntfy_resource_type_name: ntfy_platform_channel
 windmill_ntfy_resource_path: f/lv3/ntfy_platform
@@ -107,7 +107,7 @@ windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
 windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password
 windmill_private_base_url: "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
-windmill_base_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+windmill_base_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
 windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
 windmill_worker_network_mode: "{{ windmill_server_network_mode }}"
 windmill_requires_docker_bridge_chains: true
@@ -408,7 +408,7 @@ windmill_seed_app_repo_root_local_dir: "{{ windmill_seed_repo_root_local_dir }}/
 windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
 windmill_mutation_audit_file: "{{ mutation_audit_log_file }}"
-windmill_integration_test_runner_username: test-runner@lv3.org
+windmill_integration_test_runner_username: test-runner@{{ platform_domain }}
 windmill_integration_test_runner_password_local_file: >-
   {{ windmill_controller_repo_common_root }}/.local/integration-tests/test-runner-password.txt
 windmill_seed_scripts:

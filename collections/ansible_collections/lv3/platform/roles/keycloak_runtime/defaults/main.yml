@@ -11,7 +11,7 @@
 # derive_service_defaults when the role is invoked.
 # Purpose: Default runtime inputs for Keycloak and its repo-managed identity integrations.
 
-keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
+keycloak_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('keycloak') }}"
 keycloak_session_authority: "{{ platform_session_authority }}"
 keycloak_image_pull_retries: 5
 keycloak_image_pull_delay_seconds: 5
@@ -21,7 +21,7 @@ keycloak_compose_project_name: keycloak
 keycloak_compose_network_name: "{{ keycloak_compose_project_name }}_default"
 keycloak_database_name: keycloak
 keycloak_database_user: keycloak
-keycloak_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+keycloak_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 keycloak_database_password_local_file: "{{ keycloak_local_artifact_dir }}/database-password.txt"
 keycloak_internal_http_port: "{{ platform_service_topology | platform_service_port('keycloak', 'internal') }}"
 keycloak_local_http_port: 18080
@@ -40,7 +40,7 @@ keycloak_operator_password_remote_file: "{{ keycloak_secret_dir }}/florin.badita
 keycloak_outline_automation_username: outline.automation
 keycloak_outline_automation_first_name: Outline
 keycloak_outline_automation_last_name: Automation
-keycloak_outline_automation_email: outline.automation@lv3.org
+keycloak_outline_automation_email: outline.automation@{{ platform_domain }}
 keycloak_outline_automation_password_remote_file: "{{ keycloak_secret_dir }}/outline.automation-password"
 keycloak_bootstrap_admin_password_local_file: "{{ keycloak_local_artifact_dir }}/bootstrap-admin-password.txt"
 keycloak_admin_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/admin-client-secret.txt"
@@ -156,19 +156,19 @@ keycloak_startup_probe_delay: 5
 keycloak_repo_user_reconciliation_retries: 24
 keycloak_repo_user_reconciliation_delay: 5
 keycloak_reconcile_outline_users: true
-keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"
-keycloak_langfuse_root_url: https://langfuse.lv3.org
-keycloak_grist_root_url: https://grist.lv3.org
-keycloak_directus_root_url: https://data.lv3.org
-keycloak_glitchtip_root_url: https://errors.lv3.org
-keycloak_jupyterhub_root_url: https://notebooks.lv3.org
-keycloak_superset_root_url: https://bi.lv3.org
-keycloak_outline_root_url: https://wiki.lv3.org
-keycloak_paperless_root_url: https://paperless.lv3.org
-keycloak_serverclaw_root_url: https://chat.lv3.org
-keycloak_gitea_root_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('gitea', 'public') }}"
-keycloak_ops_portal_root_url: https://ops.lv3.org
-keycloak_open_webui_root_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('open_webui', 'controller') }}"
+keycloak_grafana_root_url: "https://{{ hostvars[platform_topology_host].lv3_service_topology.grafana.public_hostname }}"
+keycloak_langfuse_root_url: https://langfuse.{{ platform_domain }}
+keycloak_grist_root_url: https://grist.{{ platform_domain }}
+keycloak_directus_root_url: https://data.{{ platform_domain }}
+keycloak_glitchtip_root_url: https://errors.{{ platform_domain }}
+keycloak_jupyterhub_root_url: https://notebooks.{{ platform_domain }}
+keycloak_superset_root_url: https://bi.{{ platform_domain }}
+keycloak_outline_root_url: https://wiki.{{ platform_domain }}
+keycloak_paperless_root_url: https://paperless.{{ platform_domain }}
+keycloak_serverclaw_root_url: https://chat.{{ platform_domain }}
+keycloak_gitea_root_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('gitea', 'public') }}"
+keycloak_ops_portal_root_url: https://ops.{{ platform_domain }}
+keycloak_open_webui_root_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('open_webui', 'controller') }}"
 keycloak_ops_portal_post_logout_redirect_uris:
   - "{{ keycloak_ops_portal_root_url }}/"
   - "{{ keycloak_ops_portal_root_url }}"
@@ -207,19 +207,19 @@ keycloak_serverclaw_post_logout_redirect_uris:
   - "{{ keycloak_serverclaw_root_url }}/"
 keycloak_dify_client_id: dify
 keycloak_dify_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/dify-client-secret.txt"
-keycloak_dify_root_url: https://agents.lv3.org
+keycloak_dify_root_url: https://agents.{{ platform_domain }}
 keycloak_dify_post_logout_redirect_uris:
   - "{{ keycloak_dify_root_url }}"
   - "{{ keycloak_dify_root_url }}/"
 keycloak_nomad_client_id: nomad
 keycloak_nomad_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/nomad-client-secret.txt"
-keycloak_nomad_root_url: https://scheduler.lv3.org
+keycloak_nomad_root_url: https://scheduler.{{ platform_domain }}
 keycloak_nomad_post_logout_redirect_uris:
   - "{{ keycloak_nomad_root_url }}/ui"
   - "{{ keycloak_nomad_root_url }}"
 keycloak_plane_client_id: lv3-plane-oidc
 keycloak_plane_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/plane-client-secret.txt"
-keycloak_plane_root_url: https://tasks.lv3.org
+keycloak_plane_root_url: https://tasks.{{ platform_domain }}
 keycloak_plane_post_logout_redirect_uris:
   - "{{ keycloak_plane_root_url }}"
   - "{{ keycloak_plane_root_url }}/"

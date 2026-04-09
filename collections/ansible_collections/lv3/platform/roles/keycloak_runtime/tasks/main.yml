@@ -1875,7 +1875,7 @@
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_dify_client_id }}"
         name: Dify
-        description: Repo-managed OIDC client for the Dify agent platform at agents.lv3.org.
+        description: Repo-managed OIDC client for the Dify agent platform at agents.{{ platform_domain }}.
         enabled: true
         protocol: openid-connect
         public_client: false
@@ -1905,7 +1905,7 @@
         realm: "{{ keycloak_realm_name }}"
         client_id: "{{ keycloak_nomad_client_id }}"
         name: Nomad Scheduler
-        description: Repo-managed OIDC client for the Nomad scheduler native OIDC auth method at scheduler.lv3.org.
+        description: Repo-managed OIDC client for the Nomad scheduler native OIDC auth method at scheduler.{{ platform_domain }}.
         enabled: true
         protocol: openid-connect
         public_client: false

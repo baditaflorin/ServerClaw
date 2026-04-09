@@ -40,7 +40,7 @@ VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 OUTLINE_SYNC_SCRIPT = repo_path("scripts", "sync_docs_to_outline.py")
 OUTLINE_TOOL_SCRIPT = repo_path("scripts", "outline_tool.py")
 OUTLINE_API_TOKEN_PATH = repo_path(".local", "outline", "api-token.txt")
-OUTLINE_BASE_URL = "https://wiki.lv3.org"
+OUTLINE_BASE_URL = "https://wiki.localhost"
 OUTLINE_SYNC_DISABLE_ENV = "LV3_SKIP_OUTLINE_SYNC"
 SEMVER_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 

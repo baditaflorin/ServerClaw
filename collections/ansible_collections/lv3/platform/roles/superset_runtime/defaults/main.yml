@@ -8,7 +8,7 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-superset_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('superset') }}"
+superset_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('superset') }}"
 superset_session_authority: "{{ platform_session_authority }}"
 superset_build_dir: "{{ superset_site_dir }}/build"
 superset_pythonpath_dir: "{{ superset_site_dir }}/pythonpath"
@@ -16,11 +16,11 @@ superset_asset_dir: "{{ superset_site_dir }}/assets"
 superset_static_env_file: "{{ superset_site_dir }}/runtime.env"
 superset_internal_base_url: "http://127.0.0.1:{{ superset_internal_port }}"
 superset_public_base_url: "https://{{ superset_service_topology.public_hostname }}"
-superset_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+superset_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
 superset_public_hostname_overrides:
   - hostname: "{{ superset_service_topology.public_hostname }}"
     address: "{{ superset_public_edge_private_ip }}"
-  - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ superset_public_edge_private_ip }}"
 superset_compose_project_name: superset
 superset_compose_network_name: "{{ superset_compose_project_name }}_default"
@@ -48,7 +48,7 @@ superset_controller_bootstrap_script_local_path: "{{ inventory_dir ~ '/../script
 superset_verify_report_remote_file: "{{ superset_data_dir }}/verify-local-report.json"
 superset_verify_report_container_file: /app/superset_home/verify-local-report.json
 superset_verify_report_local_file: "{{ superset_local_artifact_dir }}/verify-public-report.json"
-superset_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+superset_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 superset_database_port: 5432
 superset_database_name: postgres
 superset_database_schema: superset
@@ -56,7 +56,7 @@ superset_database_user: superset
 superset_reader_user: superset_reader
 superset_database_display_name_prefix: "PostgreSQL"
 superset_register_plausible_clickhouse: true
-superset_plausible_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('plausible') }}"
+superset_plausible_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('plausible') }}"
 superset_plausible_clickhouse_name: "Plausible ClickHouse"
 superset_plausible_clickhouse_uri: "clickhousedb://default:@{{ superset_plausible_service_topology.private_ip }}:8123/plausible_events_db"
 superset_landing_dataset_name: platform_database_inventory
@@ -67,9 +67,9 @@ superset_landing_dashboard_slug: lv3-platform-database-inventory
 superset_admin_username: admin
 superset_admin_first_name: LV3
 superset_admin_last_name: Admin
-superset_admin_email: superset.admin@lv3.org
+superset_admin_email: superset.admin@{{ platform_domain }}
 superset_keycloak_client_id: superset
-superset_keycloak_issuer: https://sso.lv3.org/realms/lv3
+superset_keycloak_issuer: https://sso.{{ platform_domain }}/realms/lv3
 superset_keycloak_server_metadata_url: "{{ superset_keycloak_issuer }}/.well-known/openid-configuration"
 superset_keycloak_authorize_url: "{{ superset_keycloak_issuer }}/protocol/openid-connect/auth"
 superset_keycloak_token_url: "{{ superset_keycloak_issuer }}/protocol/openid-connect/token"

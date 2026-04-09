@@ -9,12 +9,12 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 minio_policy_dir: "{{ minio_site_dir }}/policies"
-minio_api_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('minio', 'internal') }}"
-minio_console_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('minio', 'console') }}"
-minio_private_api_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'internal') }}"
-minio_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'public') }}"
-minio_console_private_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'console_internal') }}"
-minio_console_public_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'console_public') }}"
+minio_api_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('minio', 'internal') }}"
+minio_console_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('minio', 'console') }}"
+minio_private_api_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('minio', 'internal') }}"
+minio_public_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('minio', 'public') }}"
+minio_console_private_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('minio', 'console_internal') }}"
+minio_console_public_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('minio', 'console_public') }}"
 minio_root_user: minio-root
 minio_root_password_local_file: "{{ minio_local_artifact_dir }}/root-password.txt"
 minio_root_password_remote_file: "{{ minio_secret_dir }}/root-password.txt"
@@ -28,7 +28,7 @@ minio_langfuse_secret_key_local_file: "{{ repo_shared_local_root }}/langfuse/min
 minio_langfuse_bucket_name: langfuse-exports
 minio_langfuse_policy_name: langfuse-exports
 minio_langfuse_allowed_origins:
-  - https://langfuse.lv3.org
+  - https://langfuse.{{ platform_domain }}
 minio_langfuse_cors_smoke_object_name: __lv3-langfuse-cors-smoke.txt
 minio_langfuse_policy_document:
   Version: "2012-10-17"

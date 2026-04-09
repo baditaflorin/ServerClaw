@@ -21,7 +21,7 @@ server_resident_reconciliation_gitea_admin_token_local_file: >-
 server_resident_reconciliation_gitea_read_token_local_file: >-
   {{ lookup('ansible.builtin.env', 'LV3_SERVER_RESIDENT_RECONCILIATION_GITEA_TOKEN_FILE') | default('/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/lv3-reconcile-read-token.txt', true) }}
 server_resident_reconciliation_gitea_username: lv3-reconcile
-server_resident_reconciliation_gitea_email: lv3-reconcile@lv3.org
+server_resident_reconciliation_gitea_email: lv3-reconcile@{{ platform_domain }}
 server_resident_reconciliation_gitea_login_name: empty
 server_resident_reconciliation_gitea_source_id: 0
 server_resident_reconciliation_gitea_token_name: proxmox-florin-ansible-pull

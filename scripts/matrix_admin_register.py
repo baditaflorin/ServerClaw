@@ -180,7 +180,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Create or verify a Matrix user through Synapse shared-secret registration.",
     )
-    parser.add_argument("--base-url", required=True, help="Matrix base URL, for example https://matrix.lv3.org")
+    parser.add_argument("--base-url", required=True, help="Matrix base URL, for example https://matrix.localhost")
     parser.add_argument("--shared-secret-file", required=True, type=Path)
     parser.add_argument("--username", required=True, help="Localpart or full MXID to register and verify")
     parser.add_argument("--password-file", required=True, type=Path)

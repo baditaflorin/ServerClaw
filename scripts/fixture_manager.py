@@ -45,7 +45,7 @@ TEMPLATE_MANIFEST_PATH = REPO_ROOT / "config" / "vm-template-manifest.json"
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 PROXMOX_ENV_KEYS = ("TF_VAR_proxmox_endpoint", "TF_VAR_proxmox_api_token")
-TOFU_IMAGE = os.environ.get("TOFU_IMAGE", "registry.lv3.org/check-runner/infra:2026.03.23")
+TOFU_IMAGE = os.environ.get("TOFU_IMAGE", "registry.localhost/check-runner/infra:2026.03.23")
 TOFU_PLATFORM = os.environ.get("TOFU_PLATFORM", "linux/amd64")
 TOFU_DOCKER_NETWORK = os.environ.get("TOFU_DOCKER_NETWORK", "host")
 CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
@@ -356,7 +356,7 @@ def default_fixture_context() -> dict[str, str]:
         "cloud_init_datastore_id": yaml_scalar(GROUP_VARS_PATH, "proxmox_snippets_storage_id", "local"),
         "ci_user": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_ci_user", "ops"),
         "nameserver": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_nameserver", "1.1.1.1"),
-        "search_domain": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_searchdomain", "lv3.org"),
+        "search_domain": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_searchdomain", "localhost"),
         "jump_user": yaml_scalar(GROUP_VARS_PATH, "proxmox_host_admin_user", "ops"),
         "jump_host": os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
         or jump_host,

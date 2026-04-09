@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Plane runtime converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, tasks.lv3.org published through the edge, and controller-local auth artifacts refreshed.
+#   - Plane runtime converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, tasks.{{ platform_domain }} published through the edge, and controller-local auth artifacts refreshed.
 #
 # Idempotency: Fully idempotent
 #              Runtime secrets and bootstrap artifacts are reused when present, and repeat runs reconcile the same Plane workspace/project/API token contract.

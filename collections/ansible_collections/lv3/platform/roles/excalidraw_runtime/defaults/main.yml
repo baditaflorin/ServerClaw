@@ -18,7 +18,7 @@ excalidraw_runtime_app_port: "{{ platform_service_topology | platform_service_po
 excalidraw_runtime_room_port: "{{ platform_port_assignments.excalidraw_room_port }}"
 excalidraw_runtime_app_container_port: 80
 excalidraw_runtime_bind_host: 127.0.0.1
-excalidraw_runtime_public_url: "https://{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('excalidraw')).public_hostname }}"
-excalidraw_runtime_public_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('excalidraw')).public_hostname }}"
+excalidraw_runtime_public_url: "https://{{ (hostvars[platform_topology_host].lv3_service_topology | service_topology_get('excalidraw')).public_hostname }}"
+excalidraw_runtime_public_host: "{{ (hostvars[platform_topology_host].lv3_service_topology | service_topology_get('excalidraw')).public_hostname }}"
 excalidraw_runtime_collab_origin: "{{ excalidraw_runtime_public_url }}"
 excalidraw_runtime_upstream_collab_origin: https://oss-collab.excalidraw.com

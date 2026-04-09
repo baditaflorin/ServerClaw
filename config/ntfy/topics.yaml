@@ -1,7 +1,7 @@
 schema_version: "1.0.0"
 
 publication:
-  public_base_url: https://ntfy.lv3.org
+  public_base_url: https://ntfy.{{ platform_domain }}
   internal_base_url: http://10.10.10.20:2586
 
 topics:

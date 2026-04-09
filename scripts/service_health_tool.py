@@ -10,7 +10,7 @@ IMPORTANT: Most probes use 127.0.0.1 or 10.x (private network) URLs — those ar
 designed to run FROM INSIDE the VM, not from the controller. This tool will mark
 them as "local_only" and provide the exact SSH command to run them manually.
 
-Only public-facing URLs (lv3.org etc.) are probed directly.
+Only public-facing URLs (localhost etc.) are probed directly.
 
 USAGE EXAMPLES
 --------------

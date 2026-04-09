@@ -1,6 +1,6 @@
 ---
 service_audit_name: grist
-service_dns_fqdn: grist.lv3.org
+service_dns_fqdn: grist.{{ platform_domain }}
 service_runtime_roles:
   - lv3.platform.docker_runtime
   - lv3.platform.keycloak_runtime

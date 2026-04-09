@@ -42,7 +42,7 @@ SITE_SOURCE_DOCS = {
 }
 SITE_GENERATED_DIR = repo_path("docs", "site-generated")
 TEMPLATE_DIR = repo_path("docs", "templates")
-OPENAPI_DEFAULT_URL = "https://api.lv3.org/v1/openapi.json"
+OPENAPI_DEFAULT_URL = "https://api.localhost/v1/openapi.json"
 REPO_ROOT = repo_path()
 LINK_PATTERN = re.compile(r"(!?\[[^\]]*])\(([^)]+)\)")
 SENSITIVITY_LEVELS = ("PUBLIC", "INTERNAL", "RESTRICTED", "CONFIDENTIAL")
@@ -1114,7 +1114,7 @@ def fetch_openapi_snapshot(url: str | None, *, timeout: float = 5.0) -> tuple[di
                 "version": VERSION_PATH.read_text(encoding="utf-8").strip(),
                 "description": "Fallback OpenAPI snapshot generated from the API publication catalog.",
             },
-            "servers": [{"url": "https://api.lv3.org"}],
+            "servers": [{"url": "https://api.localhost"}],
             "paths": paths,
         },
         "fallback:config/api-publication.json",
@@ -1301,7 +1301,7 @@ def validate_site(output_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate the MkDocs source tree for docs.lv3.org.")
+    parser = argparse.ArgumentParser(description="Generate the MkDocs source tree for docs.localhost.")
     parser.add_argument("--write", action="store_true", help="Write generated site source into docs/site-generated.")
     parser.add_argument("--check", action="store_true", help="Generate into a temp dir and validate the expected artifacts.")
     parser.add_argument(

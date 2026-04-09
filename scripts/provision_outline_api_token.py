@@ -43,7 +43,7 @@ DEFAULT_OUTLINE_DB = "outline"
 DEFAULT_OUTLINE_DB_USER = "outline"
 
 # The automation service account created during initial Outline setup
-AUTOMATION_USER_EMAIL = "outline.automation@lv3.org"
+AUTOMATION_USER_EMAIL = "outline.automation@localhost"
 AUTOMATION_USER_QUERY = f"""
 SELECT id FROM users
 WHERE email = '{AUTOMATION_USER_EMAIL}' AND "deletedAt" IS NULL
@@ -168,7 +168,7 @@ def provision(name: str = "agent-automation", dry_run: bool = False) -> str:
     # Write to .local/outline/admin-auth.json
     auth_path = LOCAL_ROOT / "outline" / "admin-auth.json"
     auth_data = {
-        "base_url": "https://wiki.lv3.org",
+        "base_url": "https://wiki.localhost",
         "api_token": token,
     }
     if not dry_run:

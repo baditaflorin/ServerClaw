@@ -177,7 +177,7 @@ def default_grafana_url(*, repo_root: Path | None = None, service_catalog_path: 
             public_url = service.get("public_url")
             if isinstance(public_url, str) and public_url.strip():
                 return public_url.rstrip("/")
-    return "https://grafana.lv3.org"
+    return os.environ.get("GRAFANA_PUBLIC_URL", "https://grafana.localhost")
 
 
 def slo_metric_queries(slo: dict[str, Any]) -> dict[str, str]:

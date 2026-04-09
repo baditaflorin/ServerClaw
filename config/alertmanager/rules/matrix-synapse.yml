@@ -10,4 +10,4 @@ groups:
         annotations:
           summary: Matrix Synapse is unreachable on the repo-managed client API path.
           description: The Matrix Synapse readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-matrix-synapse/
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-matrix-synapse/

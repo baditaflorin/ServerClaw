@@ -27,7 +27,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml  # noqa: E402
-from validation_toolkit import require_int, require_mapping, require_str  # noqa: E402
+from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_services.yml"
@@ -44,8 +44,7 @@ _FQDN_RE = re.compile(r"^[a-z0-9]([a-z0-9\-]*\.)+[a-z]{2,}$")
 
 def load_registry() -> dict[str, Any]:
     """Load and return platform_service_registry dict."""
-    with REGISTRY_PATH.open() as f:
-        data = yaml.safe_load(f)
+    data = load_yaml_with_identity(REGISTRY_PATH)
     data = require_mapping(data, str(REGISTRY_PATH))
     return require_mapping(
         data.get("platform_service_registry"),

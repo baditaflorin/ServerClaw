@@ -10,21 +10,21 @@
 # are derived at play time from platform_service_registry by common/tasks/derive_service_defaults.
 # Only non-conventional, Directus-specific defaults remain here.
 ---
-directus_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('directus') }}"
+directus_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('directus') }}"
 directus_session_authority: "{{ platform_session_authority }}"
 directus_public_base_url: "https://{{ directus_service_topology.public_hostname }}"
-directus_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+directus_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
 directus_public_hostname_overrides:
   - hostname: "{{ directus_service_topology.public_hostname }}"
     address: "{{ directus_public_edge_private_ip }}"
-  - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ directus_public_edge_private_ip }}"
 directus_compose_project_name: directus
 directus_compose_network_name: "{{ directus_compose_project_name }}_default"
 directus_container_port: "{{ platform_service_topology | platform_service_port('directus', 'internal') }}"
 directus_database_name: directus
 directus_database_user: directus
-directus_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+directus_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 directus_database_password_local_file: "{{ directus_local_artifact_dir }}/database-password.txt"
 directus_key_local_file: "{{ directus_local_artifact_dir }}/key.txt"
 directus_secret_local_file: "{{ directus_local_artifact_dir }}/secret.txt"
@@ -35,7 +35,7 @@ directus_key_remote_file: "{{ directus_secret_dir }}/key.txt"
 directus_secret_remote_file: "{{ directus_secret_dir }}/secret.txt"
 directus_admin_password_remote_file: "{{ directus_secret_dir }}/admin-password.txt"
 directus_keycloak_client_id: directus
-directus_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
+directus_keycloak_issuer_url: https://sso.{{ platform_domain }}/realms/lv3
 directus_keycloak_allow_public_registration: true
 directus_keycloak_sync_user_info: true
 directus_keycloak_group_claim_name: groups

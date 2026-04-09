@@ -19,7 +19,7 @@ from typing import Any, Callable, Iterable
 
 
 SURFACE_ID = "windmill.operator_access_admin"
-PLAUSIBLE_SITE_DOMAIN = "ops.lv3.org"
+PLAUSIBLE_SITE_DOMAIN = "ops.localhost"
 DEFAULT_WINDOW_DAYS = 30
 LEDGER_RELATIVE_PATH = Path(".local/state/journey-analytics/operator-access-admin-events.jsonl")
 LATEST_REPORT_RELATIVE_PATH = Path(".local/state/journey-analytics/operator-access-admin-latest.json")

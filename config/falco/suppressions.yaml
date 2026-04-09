@@ -4,7 +4,7 @@
 - macro: known_drop_and_execute_activities
   condition: >-
     or (
-      container.image.repository = "registry.lv3.org/check-runner/python"
+      container.image.repository = "registry.{{ platform_domain }}/check-runner/python"
       and proc.name = "semgrep-core"
       and proc.exepath contains "/site-packages/semgrep/bin/semgrep-core"
     )

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from urllib import error, request
 
-DEFAULT_BASE_URL = "https://wiki.lv3.org"
+DEFAULT_BASE_URL = "https://wiki.localhost"
 DEFAULT_TOKEN_FILE = Path(".local/outline/api-token.txt")
 UUID_NAMESPACE = uuid.UUID("e7dc945f-7c87-4a79-aaab-9a1c6655a7aa")
 

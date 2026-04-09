@@ -212,7 +212,7 @@ def safe_requested_url(value: str | None) -> str | None:
     if parsed.scheme != "https":
         return None
     host = parsed.hostname or ""
-    if host == "lv3.org" or host.endswith(".lv3.org"):
+    if host == "localhost" or host.endswith(".localhost"):
         return candidate
     return None
 
@@ -1529,10 +1529,10 @@ class PortalSettings:
                 os.getenv("OPS_PORTAL_ATTENTION_STATE_FILE", "/srv/ops-portal/state/attention-state.json")
             ),
             maintenance_windows_path=Path(maintenance_file) if maintenance_file else None,
-            docs_base_url=os.getenv("OPS_PORTAL_DOCS_BASE_URL", "https://docs.lv3.org").rstrip("/"),
+            docs_base_url=os.getenv("OPS_PORTAL_DOCS_BASE_URL", "https://docs.localhost").rstrip("/"),
             grafana_logs_url=os.getenv(
                 "OPS_PORTAL_GRAFANA_LOGS_URL",
-                "https://grafana.lv3.org/explore?left=%7B%22queries%22:%5B%5D%7D",
+                "https://grafana.localhost/explore?left=%7B%22queries%22:%5B%5D%7D",
             ),
         )
 

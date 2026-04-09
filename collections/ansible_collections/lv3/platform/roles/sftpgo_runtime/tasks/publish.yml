@@ -150,7 +150,7 @@
   ansible.builtin.assert:
     that:
       - sftpgo_oidc_redirect.location is defined
-      - hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname in sftpgo_oidc_redirect.location
+      - hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname in sftpgo_oidc_redirect.location
       - "'/protocol/openid-connect/auth' in sftpgo_oidc_redirect.location"
     fail_msg: "SFTPGo admin OIDC login did not redirect to the expected Keycloak authorize endpoint."
 

@@ -1,6 +1,6 @@
 #cloud-config
 hostname: {{ item.name }}
-fqdn: {{ item.name }}.lv3.org
+fqdn: {{ item.name }}.{{ platform_domain }}
 manage_etc_hosts: true
 package_update: false
 package_upgrade: false

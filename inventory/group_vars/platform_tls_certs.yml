@@ -1,171 +1,171 @@
 # GENERATED — do not edit. Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only tls
 platform_tls_certs:
-  agents.lv3.org:
+  agents.{{ platform_domain }}:
     cert_validity_days: 90
     service: dify
     source: letsencrypt
     wildcard: false
-  analytics.lv3.org:
+  analytics.{{ platform_domain }}:
     cert_validity_days: 90
     service: plausible
     source: letsencrypt
     wildcard: false
-  annotate.lv3.org:
+  annotate.{{ platform_domain }}:
     cert_validity_days: 90
     service: label_studio
     source: letsencrypt
     wildcard: false
-  api.lv3.org:
+  api.{{ platform_domain }}:
     cert_validity_days: 90
     service: api_gateway
     source: letsencrypt
     wildcard: false
-  bi.lv3.org:
+  bi.{{ platform_domain }}:
     cert_validity_days: 90
     service: superset
     source: letsencrypt
     wildcard: false
-  billing.lv3.org:
+  billing.{{ platform_domain }}:
     cert_validity_days: 90
     service: lago
     source: letsencrypt
     wildcard: false
-  chat.lv3.org:
+  chat.{{ platform_domain }}:
     cert_validity_days: 90
     service: open_webui
     source: letsencrypt
     wildcard: false
-  ci.lv3.org:
+  ci.{{ platform_domain }}:
     cert_validity_days: 90
     service: woodpecker
     source: letsencrypt
     wildcard: false
-  cloud.lv3.org:
+  cloud.{{ platform_domain }}:
     cert_validity_days: 90
     service: nextcloud
     source: letsencrypt
     wildcard: false
-  data.lv3.org:
+  data.{{ platform_domain }}:
     cert_validity_days: 90
     service: directus
     source: letsencrypt
     wildcard: false
-  draw.lv3.org:
+  draw.{{ platform_domain }}:
     cert_validity_days: 90
     service: excalidraw
     source: letsencrypt
     wildcard: false
-  errors.lv3.org:
+  errors.{{ platform_domain }}:
     cert_validity_days: 90
     service: glitchtip
     source: letsencrypt
     wildcard: false
-  files.lv3.org:
+  files.{{ platform_domain }}:
     cert_validity_days: 90
     service: sftpgo
     source: letsencrypt
     wildcard: false
-  flags.lv3.org:
+  flags.{{ platform_domain }}:
     cert_validity_days: 90
     service: flagsmith
     source: letsencrypt
     wildcard: false
-  grist.lv3.org:
+  grist.{{ platform_domain }}:
     cert_validity_days: 90
     service: grist
     source: letsencrypt
     wildcard: false
-  langfuse.lv3.org:
+  langfuse.{{ platform_domain }}:
     cert_validity_days: 90
     service: langfuse
     source: letsencrypt
     wildcard: false
-  livekit.lv3.org:
+  livekit.{{ platform_domain }}:
     cert_validity_days: 90
     service: livekit
     source: letsencrypt
     wildcard: false
-  logs.lv3.org:
+  logs.{{ platform_domain }}:
     cert_validity_days: 90
     service: dozzle
     source: letsencrypt
     wildcard: false
-  mail.lv3.org:
+  mail.{{ platform_domain }}:
     cert_validity_days: 90
     service: mail_platform
     source: letsencrypt
     wildcard: false
-  matrix.lv3.org:
+  matrix.{{ platform_domain }}:
     cert_validity_days: 90
     service: matrix_synapse
     source: letsencrypt
     wildcard: false
-  minio-console.lv3.org:
+  minio-console.{{ platform_domain }}:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  minio.lv3.org:
+  minio.{{ platform_domain }}:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  n8n.lv3.org:
+  n8n.{{ platform_domain }}:
     cert_validity_days: 90
     service: n8n
     source: letsencrypt
     wildcard: false
-  notebooks.lv3.org:
+  notebooks.{{ platform_domain }}:
     cert_validity_days: 90
     service: jupyterhub
     source: letsencrypt
     wildcard: false
-  ntfy.lv3.org:
+  ntfy.{{ platform_domain }}:
     cert_validity_days: 90
     service: ntfy
     source: letsencrypt
     wildcard: false
-  ops.lv3.org:
+  ops.{{ platform_domain }}:
     cert_validity_days: 90
     service: ops_portal
     source: letsencrypt
     wildcard: false
-  paperless.lv3.org:
+  paperless.{{ platform_domain }}:
     cert_validity_days: 90
     service: paperless
     source: letsencrypt
     wildcard: false
-  registry.lv3.org:
+  registry.{{ platform_domain }}:
     cert_validity_days: 90
     service: harbor
     source: letsencrypt
     wildcard: false
-  repowise.lv3.org:
+  repowise.{{ platform_domain }}:
     cert_validity_days: 90
     service: repowise
     source: letsencrypt
     wildcard: false
-  sso.lv3.org:
+  sso.{{ platform_domain }}:
     cert_validity_days: 90
     service: keycloak
     source: letsencrypt
     wildcard: false
-  tasks.lv3.org:
+  tasks.{{ platform_domain }}:
     cert_validity_days: 90
     service: plane
     source: letsencrypt
     wildcard: false
-  uptime.lv3.org:
+  uptime.{{ platform_domain }}:
     cert_validity_days: 90
     service: uptime_kuma
     source: letsencrypt
     wildcard: false
-  vault.lv3.org:
+  vault.{{ platform_domain }}:
     cert_validity_days: 90
     service: vaultwarden
     source: step-ca
     wildcard: false
-  wiki.lv3.org:
+  wiki.{{ platform_domain }}:
     cert_validity_days: 90
     service: outline
     source: letsencrypt

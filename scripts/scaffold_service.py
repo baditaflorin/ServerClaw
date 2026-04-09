@@ -969,7 +969,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     args.today = args.today or __import__("datetime").date.today().isoformat()
     args.description = args.description or f"TODO: describe the {args.name} service."
-    args.subdomain = args.subdomain or f"{args.name}.lv3.org"
+    args.subdomain = args.subdomain or f"{args.name}.localhost"
 
     try:
         repo_paths = build_repo_paths(Path(args.repo_root).resolve())

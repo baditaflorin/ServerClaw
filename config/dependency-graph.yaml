@@ -100,7 +100,7 @@ extra_edges:
       source: manifest
       relationship: edge_publication
       strength: hard
-      description: Neko WebRTC signalling is proxied through the shared NGINX edge at browser.lv3.org with TLS termination and WebSocket upgrade support.
+      description: Neko WebRTC signalling is proxied through the shared NGINX edge at browser.{{ platform_domain }} with TLS termination and WebSocket upgrade support.
   - from: service:neko
     to: service:keycloak
     edge_kind: depends_on

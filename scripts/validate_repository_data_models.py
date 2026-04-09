@@ -2307,8 +2307,8 @@ def validate_identity_taxonomy(
         raise ValueError("identity principal 'ops@pam' must be classified as a human_operator")
     if principal_classes.get("lv3-automation@pve") != "agent":
         raise ValueError("identity principal 'lv3-automation@pve' must be classified as an agent")
-    if principal_classes.get("server@lv3.org") != "service":
-        raise ValueError("identity principal 'server@lv3.org' must be classified as a service")
+    if principal_classes.get("server@localhost") != "service":
+        raise ValueError("identity principal 'server@localhost' must be classified as a service")
     if principal_classes.get("root") != "break_glass":
         raise ValueError("identity principal 'root' must be classified as break_glass")
 

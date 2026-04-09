@@ -1,6 +1,6 @@
 ---
 # Playbook: harbor.yml
-# Purpose: Deploy Harbor on runtime-control-lv3 and publish registry.lv3.org through the shared NGINX edge.
+# Purpose: Deploy Harbor on runtime-control-lv3 and publish registry.{{ platform_domain }} through the shared NGINX edge.
 # Use case: Run when provisioning or updating the managed Harbor registry runtime and its public edge publication.
 #
 # Inputs (required):
@@ -11,7 +11,7 @@
 #
 # Outputs:
 #   - Harbor runtime converged on runtime-control-lv3 under /opt/harbor.
-#   - registry.lv3.org published through nginx-lv3.
+#   - registry.{{ platform_domain }} published through nginx-lv3.
 #
 # Idempotency: Fully idempotent
 #              The Harbor installer assets and compose stack are rendered from repo inputs and can be re-applied safely.
@@ -20,7 +20,7 @@
 #   - ADR 0201: Harbor with CVE scanning is the service being deployed.
 #   - Requires: runtime-control-lv3, nginx-lv3, and Keycloak on runtime-control-lv3 to be reachable.
 #   - Role: harbor_runtime — installs Harbor, bootstraps local runtime secrets, and verifies core services.
-#   - Role: nginx_edge_publication — renders the public reverse-proxy publication for registry.lv3.org.
+#   - Role: nginx_edge_publication — renders the public reverse-proxy publication for registry.{{ platform_domain }}.
 #
 # Related ADRs: 0056, 0083, 0089, 0201
 # Related Runbooks: docs/runbooks/configure-harbor.md

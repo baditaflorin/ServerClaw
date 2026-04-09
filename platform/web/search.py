@@ -7,7 +7,7 @@ import urllib.request
 from dataclasses import dataclass
 
 
-DEFAULT_QUERY_URL = "http://search.lv3.org/search?q=<query>&format=json"
+DEFAULT_QUERY_URL = os.environ.get("LV3_WEB_SEARCH_QUERY_URL", "http://search.localhost/search?q=<query>&format=json")
 
 
 @dataclass(frozen=True)

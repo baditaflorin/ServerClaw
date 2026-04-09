@@ -54,7 +54,7 @@
             'login' in grist_publish_auth_redirect.location
             or 'oidc' in grist_publish_auth_redirect.location
             or 'oauth' in grist_publish_auth_redirect.location
-            or hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname in grist_publish_auth_redirect.location
+            or hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname in grist_publish_auth_redirect.location
           )
         )
         or

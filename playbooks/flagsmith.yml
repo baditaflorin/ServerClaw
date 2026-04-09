@@ -11,7 +11,7 @@
 #
 # Outputs:
 #   - PostgreSQL role and database, Flagsmith runtime secrets, baseline org/project/environment state, environment API keys,
-#     and edge-authenticated publication at `flags.lv3.org`.
+#     and edge-authenticated publication at `flags.{{ platform_domain }}`.
 #
 # Idempotency: Fully idempotent
 #
@@ -20,7 +20,7 @@
 #   - Requires: postgres-vm, docker-runtime, OpenBao, and the shared NGINX edge to already exist.
 #   - Role: lv3.platform.flagsmith_postgres - converges the shared PostgreSQL database and role.
 #   - Role: lv3.platform.flagsmith_runtime - converges the Flagsmith CE runtime and repo-managed seed state.
-#   - Role: lv3.platform.nginx_edge_publication - publishes `flags.lv3.org` behind the shared edge auth boundary.
+#   - Role: lv3.platform.nginx_edge_publication - publishes `flags.{{ platform_domain }}` behind the shared edge auth boundary.
 #
 # Related ADRs: 0021, 0042, 0077, 0086, 0288
 # Related Runbooks: docs/runbooks/configure-flagsmith.md

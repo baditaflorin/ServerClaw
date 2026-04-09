@@ -1,6 +1,6 @@
 ---
 service_audit_name: glitchtip
-service_dns_fqdn: errors.lv3.org
+service_dns_fqdn: errors.{{ platform_domain }}
 service_postgres_role: lv3.platform.glitchtip_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime

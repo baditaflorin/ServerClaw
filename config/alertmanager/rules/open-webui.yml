@@ -10,5 +10,5 @@ groups:
         annotations:
           summary: Open WebUI is unreachable on the private controller endpoint.
           description: The Open WebUI readiness probe through the managed private contract has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-open-webui/
-          dashboard_url: https://grafana.lv3.org/d/lv3-open-webui/lv3-open-webui
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-open-webui/
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-open-webui/lv3-open-webui

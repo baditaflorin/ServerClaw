@@ -10,5 +10,5 @@ groups:
         annotations:
           summary: Vaultwarden is unreachable on the private HTTPS endpoint.
           description: The Vaultwarden readiness probe has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-vaultwarden/
-          dashboard_url: https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-vaultwarden/
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vaultwarden/lv3-vaultwarden

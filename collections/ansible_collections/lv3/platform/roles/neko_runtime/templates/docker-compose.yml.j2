@@ -11,7 +11,7 @@ services:
     restart: "{{ neko_runtime_restart_policy }}"
 
     # Use host network for direct UDP media streaming (WebRTC)
-    # Signalling: TCP port {{ neko_runtime_port }} (proxied via NGINX at browser.lv3.org)
+    # Signalling: TCP port {{ neko_runtime_port }} (proxied via NGINX at browser.{{ platform_domain }})
     # Media: UDP ports 50000-60000 (direct from Proxmox host)
     network_mode: host
 

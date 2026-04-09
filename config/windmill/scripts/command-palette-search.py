@@ -39,7 +39,7 @@ def load_search_client(repo_root: Path) -> type:
     return module.SearchClient
 
 
-DOCS_BASE_URL = "https://docs.lv3.org"
+DOCS_BASE_URL = "https://docs.localhost"
 SEARCH_COLLECTIONS = ("runbooks", "adrs")
 COLLECTION_KIND = {
     "runbooks": "runbook",

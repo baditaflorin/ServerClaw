@@ -40,7 +40,7 @@ PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaul
 GLOBAL_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 RECEIPTS_DIR = repo_path("receipts", "subdomain-exposure-audit")
 HETZNER_DNS_API_TOKEN_ENV = "HETZNER_DNS_API_TOKEN"
-EXPECTED_EDGE_OIDC_PREFIX = "https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth"
+EXPECTED_EDGE_OIDC_PREFIX = "https://sso.localhost/realms/lv3/protocol/openid-connect/auth"
 PROBE_USER_AGENT = "lv3-subdomain-exposure-audit/1.0"
 PUBLIC_ENDPOINT_STATUSES = {"active", "planned"}
 EXPECTED_ISSUER_BY_TLS_PROVIDER = {
@@ -374,7 +374,7 @@ def build_registry(
 
     return {
         "schema_version": "2.0.0",
-        "zone_name": "lv3.org",
+        "zone_name": "localhost",
         "publications": publication_entries,
         "summary": summary,
     }
@@ -419,7 +419,7 @@ def collect_repo_findings(
         certificate_catalog = load_certificate_catalog()
     if edge_certificate_domains is None:
         edge_certificate_domains = expected_edge_certificate_domains()
-    zone_name = registry.get("zone_name", "lv3.org")
+    zone_name = registry.get("zone_name", "localhost")
 
     certificate_entries = subdomain_catalog.require_list(
         certificate_catalog.get("certificates"),
@@ -705,7 +705,7 @@ def collect_http_auth_findings(registry: dict[str, Any]) -> list[dict[str, Any]]
 def fetch_hetzner_zone_records(
     *,
     api_base_url: str = "https://dns.hetzner.com/api/v1",
-    zone_name: str = "lv3.org",
+    zone_name: str = "localhost",
     api_token: str | None = None,
 ) -> list[dict[str, Any]]:
     token = api_token or os.environ.get(HETZNER_DNS_API_TOKEN_ENV, "").strip()

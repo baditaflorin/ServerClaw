@@ -59,15 +59,15 @@ SERVICE_ICONS = {
 BOOKMARK_GROUPS = [
     {
         "Quick Actions": [
-            {"name": "Ops Portal", "abbr": "OP", "href": "https://ops.lv3.org"},
-            {"name": "Grafana", "abbr": "GR", "href": "https://grafana.lv3.org"},
-            {"name": "Status", "abbr": "ST", "href": "https://status.lv3.org"},
-            {"name": "Docs", "abbr": "DO", "href": "https://docs.lv3.org"},
+            {"name": "Ops Portal", "abbr": "OP", "href": "https://ops.localhost"},
+            {"name": "Grafana", "abbr": "GR", "href": "https://grafana.localhost"},
+            {"name": "Status", "abbr": "ST", "href": "https://status.localhost"},
+            {"name": "Docs", "abbr": "DO", "href": "https://docs.localhost"},
         ]
     },
     {
         "Control Plane": [
-            {"name": "Proxmox", "abbr": "PV", "href": "https://proxmox.lv3.org"},
+            {"name": "Proxmox", "abbr": "PV", "href": "https://proxmox.localhost"},
             {"name": "Windmill", "abbr": "WM", "href": "http://100.118.189.95:8005"},
             {"name": "NetBox", "abbr": "NB", "href": "http://100.118.189.95:8004"},
             {"name": "Portainer", "abbr": "PT", "href": "https://100.118.189.95:9444"},

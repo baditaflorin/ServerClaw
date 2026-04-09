@@ -8,7 +8,7 @@ This tool reads config/certificate-catalog.json and probes each endpoint.
 
 NOTE: Endpoints on private IPs (10.x, 192.168.x) are unreachable from the
 controller and will be reported as "unknown" — that is expected, not an error.
-Only public endpoints (lv3.org domains, etc.) can be probed from here.
+Only public endpoints (localhost domains, etc.) can be probed from here.
 
 USAGE EXAMPLES
 --------------

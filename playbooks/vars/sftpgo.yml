@@ -1,6 +1,6 @@
 ---
 service_audit_name: sftpgo
-service_dns_fqdn: files.lv3.org
+service_dns_fqdn: files.{{ platform_domain }}
 service_postgres_role: lv3.platform.sftpgo_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime

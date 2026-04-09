@@ -4,18 +4,18 @@
 # platform_service_registry — ADR 0373.
 # Purpose: Default runtime inputs for the Paperless document archive and API.
 
-paperless_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('paperless') }}"
+paperless_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('paperless') }}"
 paperless_openbao_api_token_path: services/paperless/api-token
 paperless_openbao_runtime_compose_file: "{{ openbao_compose_file | default('/opt/openbao/docker-compose.yml') }}"
 paperless_openbao_runtime_service_name: openbao
 paperless_openbao_runtime_recovery_enabled: "{{ paperless_openbao_runtime_compose_file | length > 0 }}"
 paperless_internal_base_url: "http://127.0.0.1:{{ paperless_internal_port }}"
 paperless_public_base_url: "https://{{ paperless_service_topology.public_hostname }}"
-paperless_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+paperless_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
 paperless_public_hostname_overrides:
   - hostname: "{{ paperless_service_topology.public_hostname }}"
     address: "{{ paperless_public_edge_private_ip }}"
-  - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ paperless_public_edge_private_ip }}"
 paperless_redis_container_name: paperless-redis
 paperless_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
@@ -23,7 +23,7 @@ paperless_image_pull_retries: 5
 paperless_image_pull_delay_seconds: 5
 paperless_database_name: paperless
 paperless_database_user: paperless
-paperless_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+paperless_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 paperless_database_password_local_file: "{{ paperless_local_artifact_dir }}/database-password.txt"
 paperless_secret_key_local_file: "{{ paperless_local_artifact_dir }}/secret-key.txt"
 paperless_redis_password_local_file: "{{ paperless_local_artifact_dir }}/redis-password.txt"
@@ -42,9 +42,9 @@ paperless_sync_report_file: "{{ paperless_site_dir }}/taxonomy-sync-report.json"
 paperless_sync_script: "{{ playbook_dir }}/../scripts/paperless_sync.py"
 paperless_keycloak_client_id: paperless
 paperless_keycloak_provider_id: keycloak
-paperless_keycloak_issuer: https://sso.lv3.org/realms/lv3
+paperless_keycloak_issuer: https://sso.{{ platform_domain }}/realms/lv3
 paperless_admin_username: admin
-paperless_admin_mail: paperless-admin@lv3.org
+paperless_admin_mail: paperless-admin@{{ platform_domain }}
 paperless_timezone: Europe/Bucharest
 paperless_ocr_language: eng
 paperless_volume_names:

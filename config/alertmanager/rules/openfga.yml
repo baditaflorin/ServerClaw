@@ -10,5 +10,5 @@ groups:
         annotations:
           summary: OpenFGA is unreachable on the private controller endpoint.
           description: The OpenFGA readiness probe through the managed private contract has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-openfga/
-          dashboard_url: https://grafana.lv3.org/d/lv3-openfga/lv3-openfga
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-openfga/
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-openfga/lv3-openfga

@@ -10,4 +10,4 @@ groups:
         annotations:
           summary: Typesense is unreachable on the private controller path.
           description: The Typesense readiness probe has been failing for at least two minutes on docker-runtime-lv3.
-          runbook_url: https://docs.lv3.org/runbooks/configure-typesense/
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-typesense/

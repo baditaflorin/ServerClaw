@@ -215,8 +215,8 @@
   no_log: true
   notify: Restart Alertmanager
 
-- name: Copy platform alert rules
-  ansible.builtin.copy:
+- name: Template platform alert rules
+  ansible.builtin.template:
     src: "{{ alertmanager_runtime_platform_rules_source }}"
     dest: "{{ alertmanager_runtime_rules_dir }}/platform.yml"
     owner: root

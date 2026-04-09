@@ -1,6 +1,6 @@
 ---
 # Playbook: serverclaw.yml
-# Purpose: Converge the first live ServerClaw surface, its Keycloak OIDC client, and the authenticated public edge publication on chat.lv3.org.
+# Purpose: Converge the first live ServerClaw surface, its Keycloak OIDC client, and the authenticated public edge publication on chat.{{ platform_domain }}.
 # Use case: Run during ServerClaw deployment, upgrade, or recovery when the chat-first assistant surface must match repo truth.
 #
 # Inputs (required):
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - ServerClaw is deployed on coolify-lv3, the dedicated Keycloak client secret is mirrored locally, the Proxmox VM firewall exposes the upstream proxy lane, and chat.lv3.org is published through the shared edge.
+#   - ServerClaw is deployed on coolify-lv3, the dedicated Keycloak client secret is mirrored locally, the Proxmox VM firewall exposes the upstream proxy lane, and chat.{{ platform_domain }} is published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #

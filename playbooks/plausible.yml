@@ -1,7 +1,7 @@
 ---
 # Playbook: plausible.yml
 # Purpose: Converge the Plausible runtime, edge publication, and repo-managed site registrations for privacy-first public traffic analytics.
-# Use case: Run during production or staging deployment, upgrade, or recovery when `analytics.lv3.org` and the shared edge injection contract must match repo truth.
+# Use case: Run during production or staging deployment, upgrade, or recovery when `analytics.{{ platform_domain }}` and the shared edge injection contract must match repo truth.
 #
 # Inputs (required):
 #   - env (string, required): Target environment selector used to choose the docker-runtime and nginx guests.
@@ -18,7 +18,7 @@
 #   - ADR 0283: Plausible is the privacy-first analytics layer for public LV3 pages.
 #   - Requires: docker-runtime, OpenBao, the internal submission relay on mail-platform, and the shared NGINX edge to already exist.
 #   - Role: lv3.platform.plausible_runtime - converges the Plausible runtime and bootstrap state.
-#   - Role: lv3.platform.nginx_edge_publication - publishes `analytics.lv3.org` and injects the tracker on declared public pages.
+#   - Role: lv3.platform.nginx_edge_publication - publishes `analytics.{{ platform_domain }}` and injects the tracker on declared public pages.
 #
 # Related ADRs: 0021, 0077, 0086, 0191, 0283
 # Related Runbooks: docs/runbooks/configure-plausible.md

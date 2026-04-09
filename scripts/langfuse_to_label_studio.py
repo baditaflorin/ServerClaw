@@ -13,10 +13,10 @@ Filtering strategy:
 
 Usage:
     python scripts/langfuse_to_label_studio.py sync \\
-        --ls-base-url https://annotate.lv3.org \\
+        --ls-base-url https://annotate.localhost \\
         --ls-token-file .local/label-studio/admin-token.txt \\
         --ls-project-title "Langfuse Trace Review" \\
-        --langfuse-base-url https://langfuse.lv3.org \\
+        --langfuse-base-url https://langfuse.localhost \\
         --langfuse-public-key pk-lf-... \\
         --langfuse-secret-key-file .local/langfuse/project-secret-key.txt \\
         --lookback-hours 24 \\
@@ -325,7 +325,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     sync_p.add_argument("--ls-base-url", required=True)
     sync_p.add_argument("--ls-token-file", required=True)
     sync_p.add_argument("--ls-project-title", default="Langfuse Trace Review")
-    sync_p.add_argument("--langfuse-base-url", default="https://langfuse.lv3.org")
+    sync_p.add_argument("--langfuse-base-url", default="https://langfuse.localhost")
     sync_p.add_argument("--langfuse-public-key")
     sync_p.add_argument("--langfuse-secret-key-file")
     sync_p.add_argument("--langfuse-project-id", default="lv3-agent-observability")

@@ -9,13 +9,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: api.lv3.org
+    probe_hostname: api.{{ platform_domain }}
     certificate_id: api-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://api.lv3.org:443/healthz
+    display_url: https://api.{{ platform_domain }}:443/healthz
 - targets:
     - https://10.10.10.60:8007/api2/json/version
   labels:
@@ -45,13 +45,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: changelog.lv3.org
+    probe_hostname: changelog.{{ platform_domain }}
     certificate_id: changelog-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://changelog.lv3.org:443/
+    display_url: https://changelog.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -63,13 +63,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: coolify.lv3.org
+    probe_hostname: coolify.{{ platform_domain }}
     certificate_id: coolify-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://coolify.lv3.org:443/
+    display_url: https://coolify.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -81,13 +81,13 @@
     exposure: edge-published
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: apps.lv3.org
+    probe_hostname: apps.{{ platform_domain }}
     certificate_id: apps-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://apps.lv3.org:443/
+    display_url: https://apps.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.71:443/
   labels:
@@ -117,13 +117,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: agents.lv3.org
+    probe_hostname: agents.{{ platform_domain }}
     certificate_id: agents-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://agents.lv3.org:443/healthz
+    display_url: https://agents.{{ platform_domain }}:443/healthz
 - targets:
     - https://10.10.10.10:443/server/health
   labels:
@@ -135,13 +135,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: data.lv3.org
+    probe_hostname: data.{{ platform_domain }}
     certificate_id: data-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://data.lv3.org:443/server/health
+    display_url: https://data.{{ platform_domain }}:443/server/health
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -153,13 +153,13 @@
     exposure: informational-only
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: build.lv3.org
+    probe_hostname: build.{{ platform_domain }}
     certificate_id: build-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://build.lv3.org:443/
+    display_url: https://build.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -171,13 +171,13 @@
     exposure: informational-only
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: docker.lv3.org
+    probe_hostname: docker.{{ platform_domain }}
     certificate_id: docker-runtime-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://docker.lv3.org:443/
+    display_url: https://docker.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -189,13 +189,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: docs.lv3.org
+    probe_hostname: docs.{{ platform_domain }}
     certificate_id: docs-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://docs.lv3.org:443/
+    display_url: https://docs.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -207,13 +207,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: logs.lv3.org
+    probe_hostname: logs.{{ platform_domain }}
     certificate_id: logs-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://logs.lv3.org:443/
+    display_url: https://logs.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -225,13 +225,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: draw.lv3.org
+    probe_hostname: draw.{{ platform_domain }}
     certificate_id: draw-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://draw.lv3.org:443/
+    display_url: https://draw.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/health
   labels:
@@ -243,13 +243,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: flags.lv3.org
+    probe_hostname: flags.{{ platform_domain }}
     certificate_id: flags-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://flags.lv3.org:443/health
+    display_url: https://flags.{{ platform_domain }}:443/health
 - targets:
     - https://10.10.10.10:443/api/0/internal/health/
   labels:
@@ -261,13 +261,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: errors.lv3.org
+    probe_hostname: errors.{{ platform_domain }}
     certificate_id: errors-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://errors.lv3.org:443/api/0/internal/health/
+    display_url: https://errors.{{ platform_domain }}:443/api/0/internal/health/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -279,13 +279,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: grafana.lv3.org
+    probe_hostname: grafana.{{ platform_domain }}
     certificate_id: grafana-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://grafana.lv3.org:443/
+    display_url: https://grafana.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/status
   labels:
@@ -297,13 +297,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: grist.lv3.org
+    probe_hostname: grist.{{ platform_domain }}
     certificate_id: grist-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://grist.lv3.org:443/status
+    display_url: https://grist.{{ platform_domain }}:443/status
 - targets:
     - https://10.10.10.10:443/api/v2.0/ping
   labels:
@@ -315,13 +315,13 @@
     exposure: edge-published
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: registry.lv3.org
+    probe_hostname: registry.{{ platform_domain }}
     certificate_id: registry-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://registry.lv3.org:443/api/v2.0/ping
+    display_url: https://registry.{{ platform_domain }}:443/api/v2.0/ping
 - targets:
     - https://10.10.10.10:443/health
   labels:
@@ -333,13 +333,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: headscale.lv3.org
+    probe_hostname: headscale.{{ platform_domain }}
     certificate_id: headscale-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://headscale.lv3.org:443/health
+    display_url: https://headscale.{{ platform_domain }}:443/health
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -351,13 +351,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: home.lv3.org
+    probe_hostname: home.{{ platform_domain }}
     certificate_id: home-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://home.lv3.org:443/
+    display_url: https://home.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/hub/health
   labels:
@@ -369,13 +369,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: notebooks.lv3.org
+    probe_hostname: notebooks.{{ platform_domain }}
     certificate_id: notebooks-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://notebooks.lv3.org:443/hub/health
+    display_url: https://notebooks.{{ platform_domain }}:443/hub/health
 - targets:
     - https://10.10.10.10:443/realms/lv3/.well-known/openid-configuration
   labels:
@@ -387,13 +387,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: sso.lv3.org
+    probe_hostname: sso.{{ platform_domain }}
     certificate_id: keycloak-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://sso.lv3.org:443/realms/lv3/.well-known/openid-configuration
+    display_url: https://sso.{{ platform_domain }}:443/realms/lv3/.well-known/openid-configuration
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -405,13 +405,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: annotate.lv3.org
+    probe_hostname: annotate.{{ platform_domain }}
     certificate_id: annotate-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://annotate.lv3.org:443/
+    display_url: https://annotate.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/api/health
   labels:
@@ -423,13 +423,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: billing.lv3.org
+    probe_hostname: billing.{{ platform_domain }}
     certificate_id: billing-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://billing.lv3.org:443/api/health
+    display_url: https://billing.{{ platform_domain }}:443/api/health
 - targets:
     - https://10.10.10.10:443/api/public/health
   labels:
@@ -441,13 +441,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: langfuse.lv3.org
+    probe_hostname: langfuse.{{ platform_domain }}
     certificate_id: langfuse-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://langfuse.lv3.org:443/api/public/health
+    display_url: https://langfuse.{{ platform_domain }}:443/api/public/health
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -459,13 +459,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: livekit.lv3.org
+    probe_hostname: livekit.{{ platform_domain }}
     certificate_id: livekit-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://livekit.lv3.org:443/
+    display_url: https://livekit.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -477,13 +477,13 @@
     exposure: informational-only
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: mail.lv3.org
+    probe_hostname: mail.{{ platform_domain }}
     certificate_id: mail-platform-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://mail.lv3.org:443/
+    display_url: https://mail.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/_matrix/client/versions
   labels:
@@ -495,13 +495,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: matrix.lv3.org
+    probe_hostname: matrix.{{ platform_domain }}
     certificate_id: matrix-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://matrix.lv3.org:443/_matrix/client/versions
+    display_url: https://matrix.{{ platform_domain }}:443/_matrix/client/versions
 - targets:
     - https://10.10.10.10:443/minio/health/live
   labels:
@@ -513,13 +513,13 @@
     exposure: edge-published
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: minio.lv3.org
+    probe_hostname: minio.{{ platform_domain }}
     certificate_id: minio-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://minio.lv3.org:443/minio/health/live
+    display_url: https://minio.{{ platform_domain }}:443/minio/health/live
 - targets:
     - https://10.10.10.10:443/healthz
   labels:
@@ -531,13 +531,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: n8n.lv3.org
+    probe_hostname: n8n.{{ platform_domain }}
     certificate_id: n8n-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://n8n.lv3.org:443/healthz
+    display_url: https://n8n.{{ platform_domain }}:443/healthz
 - targets:
     - https://10.10.10.10:443/status.php
   labels:
@@ -549,13 +549,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: cloud.lv3.org
+    probe_hostname: cloud.{{ platform_domain }}
     certificate_id: cloud-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://cloud.lv3.org:443/status.php
+    display_url: https://cloud.{{ platform_domain }}:443/status.php
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -567,13 +567,13 @@
     exposure: edge-published
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: nginx.lv3.org
+    probe_hostname: nginx.{{ platform_domain }}
     certificate_id: nginx-edge-public
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://nginx.lv3.org:443/
+    display_url: https://nginx.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -585,13 +585,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: scheduler.lv3.org
+    probe_hostname: scheduler.{{ platform_domain }}
     certificate_id: scheduler-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://scheduler.lv3.org:443/
+    display_url: https://scheduler.{{ platform_domain }}:443/
 - targets:
     - https://100.64.0.1:8013/
   labels:
@@ -621,13 +621,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: ntfy.lv3.org
+    probe_hostname: ntfy.{{ platform_domain }}
     certificate_id: ntfy-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://ntfy.lv3.org:443/v1/health
+    display_url: https://ntfy.{{ platform_domain }}:443/v1/health
 - targets:
     - https://100.64.0.1:8200/v1/sys/health
   labels:
@@ -657,13 +657,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: ops.lv3.org
+    probe_hostname: ops.{{ platform_domain }}
     certificate_id: ops-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://ops.lv3.org:443/health
+    display_url: https://ops.{{ platform_domain }}:443/health
 - targets:
     - https://10.10.10.10:443/_health
   labels:
@@ -675,13 +675,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: wiki.lv3.org
+    probe_hostname: wiki.{{ platform_domain }}
     certificate_id: wiki-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://wiki.lv3.org:443/_health
+    display_url: https://wiki.{{ platform_domain }}:443/_health
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -693,13 +693,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: paperless.lv3.org
+    probe_hostname: paperless.{{ platform_domain }}
     certificate_id: paperless-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://paperless.lv3.org:443/
+    display_url: https://paperless.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -711,13 +711,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: tasks.lv3.org
+    probe_hostname: tasks.{{ platform_domain }}
     certificate_id: tasks-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://tasks.lv3.org:443/
+    display_url: https://tasks.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/api/system/health/ready
   labels:
@@ -729,13 +729,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: analytics.lv3.org
+    probe_hostname: analytics.{{ platform_domain }}
     certificate_id: analytics-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://analytics.lv3.org:443/api/system/health/ready
+    display_url: https://analytics.{{ platform_domain }}:443/api/system/health/ready
 - targets:
     - https://100.64.0.1:9444/api/status
   labels:
@@ -765,13 +765,13 @@
     exposure: informational-only
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: proxmox.lv3.org
+    probe_hostname: proxmox.{{ platform_domain }}
     certificate_id: proxmox-edge-page
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://proxmox.lv3.org:443/
+    display_url: https://proxmox.{{ platform_domain }}:443/
 - targets:
     - https://100.64.0.1:8006/api2/json/version
   labels:
@@ -783,7 +783,7 @@
     exposure: informational-only
     auth_requirement: private_network
     probe_module: http_2xx_follow_redirects
-    probe_hostname: proxmox.lv3.org
+    probe_hostname: proxmox.{{ platform_domain }}
     certificate_id: proxmox-ui
     expected_issuer: letsencrypt
     policy_unit: days
@@ -801,13 +801,13 @@
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: realtime.lv3.org
+    probe_hostname: realtime.{{ platform_domain }}
     certificate_id: realtime-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://realtime.lv3.org:443/
+    display_url: https://realtime.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -819,13 +819,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: repowise.lv3.org
+    probe_hostname: repowise.{{ platform_domain }}
     certificate_id: repowise-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://repowise.lv3.org:443/
+    display_url: https://repowise.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -837,13 +837,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: chat.lv3.org
+    probe_hostname: chat.{{ platform_domain }}
     certificate_id: chat-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://chat.lv3.org:443/
+    display_url: https://chat.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -855,13 +855,13 @@
     exposure: edge-published
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
-    probe_hostname: status.lv3.org
+    probe_hostname: status.{{ platform_domain }}
     certificate_id: status-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://status.lv3.org:443/
+    display_url: https://status.{{ platform_domain }}:443/
 - targets:
     - https://100.64.0.1:9443/health
   labels:
@@ -891,13 +891,13 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: bi.lv3.org
+    probe_hostname: bi.{{ platform_domain }}
     certificate_id: bi-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://bi.lv3.org:443/health
+    display_url: https://bi.{{ platform_domain }}:443/health
 - targets:
     - https://10.10.10.10:443/
   labels:
@@ -909,15 +909,15 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: uptime.lv3.org
+    probe_hostname: uptime.{{ platform_domain }}
     certificate_id: uptime-kuma-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://uptime.lv3.org:443/
+    display_url: https://uptime.{{ platform_domain }}:443/
 - targets:
-    - https://vault.lv3.org:443/alive
+    - https://vault.{{ platform_domain }}:443/alive
   labels:
     assurance_id: vaultwarden-operator
     service_id: vaultwarden
@@ -933,7 +933,7 @@
     policy_unit: hours
     policy_warn: '6'
     policy_critical: '2'
-    display_url: https://vault.lv3.org:443/alive
+    display_url: https://vault.{{ platform_domain }}:443/alive
 - targets:
     - https://10.10.10.10:443/healthz
   labels:
@@ -945,10 +945,10 @@
     exposure: edge-published
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
-    probe_hostname: ci.lv3.org
+    probe_hostname: ci.{{ platform_domain }}
     certificate_id: ci-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://ci.lv3.org:443/healthz
+    display_url: https://ci.{{ platform_domain }}:443/healthz

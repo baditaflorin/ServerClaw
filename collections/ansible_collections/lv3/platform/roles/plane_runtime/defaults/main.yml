@@ -29,14 +29,14 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-28
-plane_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('plane') }}"
+plane_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('plane') }}"
 plane_log_dir: "{{ plane_data_dir }}/logs"
 plane_minio_data_dir: "{{ plane_data_dir }}/minio"
 plane_valkey_data_dir: "{{ plane_data_dir }}/valkey"
 plane_rabbitmq_data_dir: "{{ plane_data_dir }}/rabbitmq"
 plane_migrator_log_dir: "{{ plane_log_dir }}/migrator"
-plane_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'internal') }}"
-plane_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'controller') }}"
+plane_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('plane', 'internal') }}"
+plane_controller_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('plane', 'controller') }}"
 plane_public_base_url: "https://{{ plane_service_topology.public_hostname }}"
 plane_app_release: v1.2.3
 plane_frontend_image: "{{ container_image_catalog.images.plane_frontend_runtime.ref }}"
@@ -77,7 +77,7 @@ plane_openbao_policy_name: lv3-service-plane-runtime
 plane_openbao_approle_name: plane-runtime
 plane_database_name: plane
 plane_database_user: plane_admin
-plane_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+plane_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 plane_database_password_local_file: "{{ plane_local_artifact_dir }}/database-password.txt"
 plane_secret_key_local_file: "{{ plane_local_artifact_dir }}/secret-key.txt"
 plane_live_server_secret_key_local_file: "{{ plane_local_artifact_dir }}/live-server-secret-key.txt"
@@ -96,7 +96,7 @@ plane_bootstrap_admin_password_remote_file: "{{ plane_secret_dir }}/bootstrap-ad
 plane_minio_root_user: plane
 plane_aws_access_key_id: plane
 plane_s3_bucket_name: uploads
-plane_bootstrap_admin_email: ops@lv3.org
+plane_bootstrap_admin_email: ops@{{ platform_domain }}
 plane_bootstrap_admin_first_name: Florin
 plane_bootstrap_admin_last_name: Badita
 plane_bootstrap_company_name: LV3
@@ -121,7 +121,7 @@ plane_workspace_members: []
 
 # Keycloak OIDC Integration (ADR 0353)
 plane_oidc_enabled: true
-plane_oidc_server_url: "https://sso.lv3.org"
+plane_oidc_server_url: "https://sso.{{ platform_domain }}"
 plane_oidc_realm: "lv3"
 plane_oidc_client_id: "lv3-plane-oidc"
 plane_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/plane-oidc-client-secret.txt"

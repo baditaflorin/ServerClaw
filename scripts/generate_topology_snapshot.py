@@ -343,7 +343,7 @@ def build_topology(
         "environments": {
             "prod": {
                 "node": "Debian-trixie-latest-amd64-base",
-                "api_url": "https://proxmox.lv3.org:8006/api2/json",
+                "api_url": "https://proxmox.localhost:8006/api2/json",
                 "vms": prod_vms,
                 "services": {
                     "coolify": {

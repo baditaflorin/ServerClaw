@@ -9,5 +9,5 @@ groups:
           service: nextcloud
         annotations:
           summary: Nextcloud is unreachable on the public cloud endpoint.
-          description: The Nextcloud readiness probe for cloud.lv3.org has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-nextcloud/
+          description: The Nextcloud readiness probe for cloud.{{ platform_domain }} has been failing for at least two minutes.
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-nextcloud/

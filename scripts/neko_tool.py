@@ -145,11 +145,11 @@ def _build_neko_block(instances: dict[str, dict[str, Any]]) -> str:
         "# Example:",
         "#   neko_instances:",
         "#     florin:",
-        "#       email: florin@lv3.org",
+        "#       email: florin@localhost",
         "#       port: 8080",
         '#       udp_range: "50000-50999"',
         "#     alice:",
-        "#       email: alice@lv3.org",
+        "#       email: alice@localhost",
         "#       port: 8081",
         '#       udp_range: "51000-51999"',
     ]

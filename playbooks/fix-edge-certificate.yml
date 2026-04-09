@@ -1,5 +1,5 @@
 ---
-- name: Fix NGINX Edge Certificate Issues (ci.lv3.org, bi.lv3.org, etc)
+- name: Fix NGINX Edge Certificate Issues (ci.{{ platform_domain }}, bi.{{ platform_domain }}, etc)
   hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
   become: true
   gather_facts: true
@@ -13,7 +13,7 @@
   tasks:
     - name: Validate controller connectivity
       ansible.builtin.debug:
-        msg: "Fixing NGINX edge certificate for missing domains (ci.lv3.org, bi.lv3.org, etc)"
+        msg: "Fixing NGINX edge certificate for missing domains (ci.{{ platform_domain }}, bi.{{ platform_domain }}, etc)"
 
     - name: Load subdomain catalog
       ansible.builtin.set_fact:
@@ -128,7 +128,7 @@
               - --non-interactive
               - --agree-tos
               - --email
-              - "{{ public_edge_certbot_email | default('admin@lv3.org') }}"
+              - "{{ public_edge_certbot_email | default('admin@{{ platform_domain }}') }}"
               - "{% for domain in edge_published_domains | sort %}-d {{ domain }}{{ ' ' if not loop.last else '' }}{% endfor %}"
           when: missing_domains | length > 0
           async: 300

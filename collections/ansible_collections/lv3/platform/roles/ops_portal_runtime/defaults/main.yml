@@ -6,7 +6,7 @@
 # Use case: Run from the managed ops-portal playbook when the repo-managed dashboard, templates, or supporting portal data contracts change.
 #
 # Inputs (required):
-#   - hostvars['proxmox_florin'].lv3_service_topology (mapping, required): Service topology facts used to resolve the API gateway contract.
+#   - hostvars[platform_topology_host].lv3_service_topology (mapping, required): Service topology facts used to resolve the API gateway contract.
 #
 # Inputs (optional):
 #   - ops_portal_maintenance_windows_file (string, optional, default=""): Override file for active maintenance windows mirrored into the runtime.
@@ -29,21 +29,21 @@
 # allows validate_argument_spec (which fires before role tasks) to pass before
 # the derive_service_defaults tasks_from overrides this with the registry value.
 ops_portal_site_dir: >-
-  {{ hostvars['proxmox_florin'].platform_service_registry['ops_portal'].site_dir
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].site_dir
      | default('/opt/ops-portal') }}
 ops_portal_secret_dir: >-
-  {{ hostvars['proxmox_florin'].platform_service_registry['ops_portal'].secret_dir
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].secret_dir
      | default('/etc/lv3/ops_portal') }}
 ops_portal_data_dir: "{{ ops_portal_site_dir }}/data"
 ops_portal_compose_file: "{{ ops_portal_site_dir }}/docker-compose.yml"
 ops_portal_env_file: "{{ ops_portal_site_dir }}/ops-portal.env"
 ops_portal_container_name: >-
-  {{ hostvars['proxmox_florin'].platform_service_registry['ops_portal'].container_name
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].container_name
      | default('ops-portal') }}
 ops_portal_internal_port: >-
-  {{ hostvars['proxmox_florin'].platform_service_registry['ops_portal'].internal_port
+  {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].internal_port
      | default(8092) }}
-ops_portal_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
+ops_portal_gateway_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('api_gateway') }}"
 ops_portal_service_dir: "{{ ops_portal_site_dir }}/service"
 ops_portal_build_context_dir: "{{ ops_portal_site_dir }}/build-context"
 ops_portal_state_dir: "{{ ops_portal_site_dir }}/state"
@@ -88,7 +88,7 @@ ops_portal_gateway_url: >-
     )
     or
     (
-      hostvars['proxmox_florin'].api_gateway_internal_url
+      hostvars[platform_topology_host].api_gateway_internal_url
       | default('', true)
     )
     or
@@ -96,19 +96,19 @@ ops_portal_gateway_url: >-
       'http://'
       ~ (ops_portal_gateway_service_topology.private_ip | default('', true))
       ~ ':'
-      ~ (hostvars['proxmox_florin'].platform_port_assignments.api_gateway_internal_port | default(8083) | string)
+      ~ (hostvars[platform_topology_host].platform_port_assignments.api_gateway_internal_port | default(8083) | string)
       if (ops_portal_gateway_service_topology.private_ip | default('', true))
       else ''
     )
     or
     (
       'http://127.0.0.1:'
-      ~ (hostvars['proxmox_florin'].platform_port_assignments.api_gateway_internal_port | default(8083) | string)
+      ~ (hostvars[platform_topology_host].platform_port_assignments.api_gateway_internal_port | default(8083) | string)
     )
   }}
-ops_portal_public_base_url: https://ops.lv3.org
-ops_portal_docs_base_url: https://docs.lv3.org
-ops_portal_grafana_logs_url: https://grafana.lv3.org/explore?left=%7B%22queries%22:%5B%5D%7D
+ops_portal_public_base_url: https://ops.{{ platform_domain }}
+ops_portal_docs_base_url: https://docs.{{ platform_domain }}
+ops_portal_grafana_logs_url: https://grafana.{{ platform_domain }}/explore?left=%7B%22queries%22:%5B%5D%7D
 ops_portal_service_image_name: lv3-ops-portal
 ops_portal_repo_root: "{{ playbook_dir | dirname }}"
 ops_portal_static_api_token: >-

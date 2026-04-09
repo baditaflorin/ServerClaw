@@ -1,6 +1,6 @@
 ---
 service_audit_name: directus
-service_dns_fqdn: data.lv3.org
+service_dns_fqdn: data.{{ platform_domain }}
 service_postgres_role: lv3.platform.directus_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime

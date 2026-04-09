@@ -228,7 +228,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--postgres-admin-dsn", help="Superuser DSN for PostgreSQL cleanup.")
     parser.add_argument("--loki-url", help="Loki base URL with admin deletion enabled.")
     parser.add_argument("--openbao-addr", help="OpenBao base URL.")
-    parser.add_argument("--keycloak-url", help="Keycloak admin base URL, for example https://sso.lv3.org.")
+    parser.add_argument("--keycloak-url", help="Keycloak admin base URL, for example https://sso.localhost.")
     parser.add_argument("--keycloak-realm", default="lv3", help="Keycloak realm containing the service client.")
     args = parser.parse_args(argv)
 

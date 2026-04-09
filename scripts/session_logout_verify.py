@@ -31,11 +31,11 @@ def discover_local_root(repo_root: Path) -> Path:
 
 DEFAULT_LOCAL_ROOT = discover_local_root(REPO_ROOT)
 DEFAULT_PASSWORD_FILE = DEFAULT_LOCAL_ROOT / "keycloak" / "outline.automation-password.txt"
-DEFAULT_EDGE_URL = "https://home.lv3.org/"
-DEFAULT_EDGE_LOGOUT_URL = "https://home.lv3.org/.well-known/lv3/session/logout"
-DEFAULT_OUTLINE_OIDC_URL = "https://wiki.lv3.org/auth/oidc"
-DEFAULT_OUTLINE_LOGOUT_URL = "https://wiki.lv3.org/logout"
-DEFAULT_LOGGED_OUT_URL = "https://ops.lv3.org/.well-known/lv3/session/logged-out"
+DEFAULT_EDGE_URL = "https://home.localhost/"
+DEFAULT_EDGE_LOGOUT_URL = "https://home.localhost/.well-known/lv3/session/logout"
+DEFAULT_OUTLINE_OIDC_URL = "https://wiki.localhost/auth/oidc"
+DEFAULT_OUTLINE_LOGOUT_URL = "https://wiki.localhost/logout"
+DEFAULT_LOGGED_OUT_URL = "https://ops.localhost/.well-known/lv3/session/logged-out"
 DEFAULT_SHARED_PROXY_COOKIE_NAME = "_lv3_ops_portal_proxy"
 DEFAULT_OUTLINE_SESSION_COOKIE_NAME = "accessToken"
 

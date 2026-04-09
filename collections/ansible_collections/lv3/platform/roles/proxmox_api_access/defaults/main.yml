@@ -5,7 +5,7 @@
 # Idempotency: N/A for defaults file because it only declares variables that downstream tasks consume.
 # Dependencies: ADR 0165, ADR 0034, ADR 0167, and ADR 0333.
 ---
-proxmox_api_hostname: proxmox.lv3.org
+proxmox_api_hostname: proxmox.{{ platform_domain }}
 proxmox_api_automation_user: lv3-automation@pve
 proxmox_api_automation_comment: LV3 durable automation identity
 proxmox_api_token_id: primary

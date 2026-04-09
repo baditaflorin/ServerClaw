@@ -1,6 +1,6 @@
 ---
 service_audit_name: nextcloud
-service_dns_fqdn: cloud.lv3.org
+service_dns_fqdn: cloud.{{ platform_domain }}
 service_postgres_role: lv3.platform.nextcloud_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime

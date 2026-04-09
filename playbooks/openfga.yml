@@ -93,12 +93,12 @@
     openfga_bootstrap_script: "{{ playbook_dir }}/../scripts/serverclaw_authz.py"
     openfga_bootstrap_report_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/serverclaw-authz-bootstrap-report.json
     openfga_bootstrap_url: >-
-      http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{
-        hostvars['proxmox_florin'].platform_port_assignments.openfga_host_proxy_port
+      http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{
+        hostvars[platform_topology_host].platform_port_assignments.openfga_host_proxy_port
       }}
     openfga_bootstrap_preshared_key_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt
     openfga_bootstrap_keycloak_url: >-
-      {{ hostvars['proxmox_florin'].platform_service_topology.keycloak.urls.public }}
+      {{ hostvars[platform_topology_host].platform_service_topology.keycloak.urls.public }}
 
   tasks:
     - name: Bootstrap the ServerClaw authorization store, model, and tuples

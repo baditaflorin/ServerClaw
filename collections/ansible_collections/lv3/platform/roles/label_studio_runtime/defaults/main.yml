@@ -9,7 +9,7 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 label_studio_repo_root: "{{ inventory_dir | dirname }}"
-label_studio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('label_studio') }}"
+label_studio_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('label_studio') }}"
 label_studio_internal_base_url: "{{ platform_service_topology | platform_service_url('label_studio', 'internal') }}"
 label_studio_public_base_url: "https://{{ label_studio_service_topology.public_hostname }}"
 label_studio_compose_project_name: label_studio
@@ -17,14 +17,14 @@ label_studio_compose_network_name: "{{ label_studio_compose_project_name }}_defa
 label_studio_container_port: 8080
 label_studio_database_name: label_studio
 label_studio_database_user: label_studio
-label_studio_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+label_studio_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 label_studio_database_port: 5432
 label_studio_database_password_local_file: "{{ label_studio_repo_root }}/.local/label-studio/database-password.txt"
 label_studio_admin_password_local_file: "{{ label_studio_repo_root }}/.local/label-studio/admin-password.txt"
 label_studio_admin_token_local_file: "{{ label_studio_repo_root }}/.local/label-studio/admin-token.txt"
 label_studio_admin_password_remote_file: "{{ label_studio_secret_dir }}/admin-password.txt"
 label_studio_admin_token_remote_file: "{{ label_studio_secret_dir }}/admin-token.txt"
-label_studio_admin_email: label-studio.admin@lv3.org
+label_studio_admin_email: label-studio.admin@{{ platform_domain }}
 label_studio_runtime_uid: 1001
 label_studio_runtime_gid: 1001
 label_studio_health_path: /api/version

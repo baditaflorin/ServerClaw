@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Matrix Synapse converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, a host-side Tailscale proxy published on proxmox_florin, and matrix.lv3.org published through the shared edge.
+#   - Matrix Synapse converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, a host-side Tailscale proxy published on proxmox_florin, and matrix.{{ platform_domain }} published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #              Runtime secrets, signing material, and the bootstrap admin account are reused when present, and repeat runs reconcile the same service contract.

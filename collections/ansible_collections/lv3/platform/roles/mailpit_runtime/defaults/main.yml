@@ -2,7 +2,7 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-mailpit_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('mailpit') }}"
+mailpit_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('mailpit') }}"
 mailpit_http_port: "{{ mailpit_service_topology.ports.internal }}"
 mailpit_smtp_port: "{{ mailpit_service_topology.ports.smtp }}"
 mailpit_bind_host: "{{ ansible_host }}"
@@ -10,7 +10,7 @@ mailpit_loopback_bind_host: 127.0.0.1
 mailpit_api_url: "{{ mailpit_service_topology.urls.internal }}/api/v1"
 mailpit_disable_version_check: true
 mailpit_docker_network_name: dev-tools_default
-mailpit_test_from_address: mailpit-probe@lv3.org
-mailpit_test_to_address: dev-mail@lv3.org
+mailpit_test_from_address: mailpit-probe@{{ platform_domain }}
+mailpit_test_to_address: dev-mail@{{ platform_domain }}
 mailpit_test_subject_prefix: LV3 Mailpit probe
 mailpit_test_body: Mailpit captured the repo-managed SMTP probe.

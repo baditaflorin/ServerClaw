@@ -1001,7 +1001,7 @@ def _outline_client():  # type: ignore[return]
     from outline_client import OutlineClient  # lazy import
 
     auth = _resolve_service_auth("outline")
-    base_url = auth.get("base_url", "https://wiki.lv3.org")
+    base_url = auth.get("base_url", "https://wiki.localhost")
     api_token = auth.get("api_token") or auth.get("token")
     if not api_token:
         raise RuntimeError("Outline auth missing 'api_token' field")

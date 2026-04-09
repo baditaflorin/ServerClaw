@@ -110,8 +110,8 @@
     one_api_bootstrap_script: "{{ playbook_dir }}/../scripts/one_api_bootstrap.py"
     one_api_bootstrap_report_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/bootstrap-report.json
     one_api_bootstrap_url: >-
-      http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{
-        hostvars['proxmox_florin'].platform_port_assignments.one_api_host_proxy_port
+      http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{
+        hostvars[platform_topology_host].platform_port_assignments.one_api_host_proxy_port
       }}
     one_api_bootstrap_root_access_token_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-access-token.txt
     one_api_bootstrap_root_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/one-api/root-password.txt

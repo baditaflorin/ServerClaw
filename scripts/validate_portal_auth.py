@@ -17,10 +17,10 @@ ALLOWED_AUTH_REQUIREMENTS = {
 }
 EDGE_OIDC_REQUIREMENTS = {"edge_oidc"}
 PORTAL_REQUIREMENTS = {
-    "changelog.lv3.org": "edge_oidc",
-    "docs.lv3.org": "edge_oidc",
-    "grafana.lv3.org": "upstream_auth",
-    "ops.lv3.org": "edge_oidc",
+    "changelog.localhost": "edge_oidc",
+    "docs.localhost": "edge_oidc",
+    "grafana.localhost": "upstream_auth",
+    "ops.localhost": "edge_oidc",
 }
 
 

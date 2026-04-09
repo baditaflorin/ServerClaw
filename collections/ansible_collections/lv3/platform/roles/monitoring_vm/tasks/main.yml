@@ -217,8 +217,8 @@
     mode: "0644"
   notify: Restart Prometheus
 
-- name: Copy Prometheus SLO alert rules
-  ansible.builtin.copy:
+- name: Template Prometheus SLO alert rules
+  ansible.builtin.template:
     src: "{{ monitoring_prometheus_slo_alerts_source_file }}"
     dest: "{{ monitoring_prometheus_slo_alerts_file }}"
     owner: root
@@ -226,8 +226,8 @@
     mode: "0644"
   notify: Restart Prometheus
 
-- name: Copy Prometheus SLO probe targets
-  ansible.builtin.copy:
+- name: Template Prometheus SLO probe targets
+  ansible.builtin.template:
     src: "{{ monitoring_prometheus_slo_targets_source_file }}"
     dest: "{{ monitoring_prometheus_slo_targets_file }}"
     owner: root
@@ -235,8 +235,8 @@
     mode: "0644"
   notify: Restart Prometheus
 
-- name: Copy Prometheus HTTPS/TLS assurance alert rules
-  ansible.builtin.copy:
+- name: Template Prometheus HTTPS/TLS assurance alert rules
+  ansible.builtin.template:
     src: "{{ monitoring_prometheus_https_tls_alerts_source_file }}"
     dest: "{{ monitoring_prometheus_https_tls_alerts_file }}"
     owner: root
@@ -244,8 +244,8 @@
     mode: "0644"
   notify: Restart Prometheus
 
-- name: Copy Prometheus HTTPS/TLS assurance probe targets
-  ansible.builtin.copy:
+- name: Template Prometheus HTTPS/TLS assurance probe targets
+  ansible.builtin.template:
     src: "{{ monitoring_prometheus_https_tls_targets_source_file }}"
     dest: "{{ monitoring_prometheus_https_tls_targets_file }}"
     owner: root

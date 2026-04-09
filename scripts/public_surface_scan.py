@@ -595,7 +595,7 @@ def classify_nuclei_findings(
                 scan_id=scan_id,
                 severity=severity,
                 component="open-redirect",
-                target=str(item.get("host") or item.get("matched-at") or "https://lv3.org"),
+                target=str(item.get("host") or item.get("matched-at") or "https://localhost"),
                 finding_id=f"open-redirect.{item.get('template-id', 'unknown')}",
                 summary=str(info.get("name") or "Nuclei finding"),
                 observed=str(item.get("matcher-name") or item.get("template-id") or "nuclei-match"),

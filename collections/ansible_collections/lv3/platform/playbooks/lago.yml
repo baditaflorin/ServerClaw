@@ -1,6 +1,6 @@
 ---
 # Playbook: lago.yml
-# Purpose: Converge Lago, its shared PostgreSQL backend, the billing gateway adapter, and the protected edge publication for `billing.lv3.org`.
+# Purpose: Converge Lago, its shared PostgreSQL backend, the billing gateway adapter, and the protected edge publication for `billing.{{ platform_domain }}`.
 # Use case: Run when the usage metering and billing API layer must be applied, upgraded, or recovered entirely from repo-managed automation.
 #
 # Inputs (required):
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
 #
 # Outputs:
-#   - A repo-managed Lago runtime on docker-runtime-lv3, a shared PostgreSQL backend on postgres-lv3, gateway-backed public ingest at `billing.lv3.org/api/v1/events`, and protected browser access through the shared edge auth flow.
+#   - A repo-managed Lago runtime on docker-runtime-lv3, a shared PostgreSQL backend on postgres-lv3, gateway-backed public ingest at `billing.{{ platform_domain }}/api/v1/events`, and protected browser access through the shared edge auth flow.
 #
 # Idempotency: Partially idempotent
 #              Re-converges keep the seeded billing catalog stable, but each smoke verification emits a fresh synthetic usage event.
@@ -97,7 +97,7 @@
       ansible.builtin.assert:
         that:
           - lago_public_root_protection.status in [302, 401]
-        fail_msg: "billing.lv3.org root unexpectedly allowed anonymous browser access."
+        fail_msg: "billing.{{ platform_domain }} root unexpectedly allowed anonymous browser access."
 
     - name: Generate a unique transaction id for the public Lago smoke event
       ansible.builtin.set_fact:

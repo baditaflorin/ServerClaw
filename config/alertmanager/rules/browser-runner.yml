@@ -10,4 +10,4 @@ groups:
         annotations:
           summary: Browser runner is unreachable on the private runtime port.
           description: The browser runner readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-browser-runner/
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-browser-runner/

@@ -36,7 +36,7 @@
     temporal_visibility_database_name: temporal_visibility
     temporal_database_user: temporal
     temporal_database_host: "{{ ansible_host }}"
-    temporal_controller_database_url: "{{ hostvars['proxmox_florin'].platform_service_topology.postgres.urls.controller }}"
+    temporal_controller_database_url: "{{ hostvars[platform_topology_host].platform_service_topology.postgres.urls.controller }}"
     temporal_controller_database_host: "{{ temporal_controller_database_url | urlsplit('hostname') }}"
     temporal_controller_database_port: "{{ temporal_controller_database_url | urlsplit('port') | default('5432', true) }}"
     temporal_schema_tool_delegate_host: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"

@@ -9,6 +9,6 @@ groups:
           service: harbor
         annotations:
           summary: Harbor is unreachable on the public registry endpoint.
-          description: The Harbor readiness probe for registry.lv3.org has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-harbor/
-          dashboard_url: https://grafana.lv3.org/d/lv3-harbor/lv3-harbor
+          description: The Harbor readiness probe for registry.{{ platform_domain }} has been failing for at least two minutes.
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-harbor/
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-harbor/lv3-harbor

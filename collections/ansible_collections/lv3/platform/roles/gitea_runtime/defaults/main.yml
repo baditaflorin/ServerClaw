@@ -27,8 +27,8 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are DERIVED
 # from platform_service_registry via derive_service_defaults task. Do not redefine here.
 
-gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
-gitea_keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
+gitea_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('gitea') }}"
+gitea_keycloak_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('keycloak') }}"
 gitea_bootstrap_script: "{{ gitea_site_dir }}/bootstrap-gitea.sh"
 gitea_network_name: gitea_runtime_default
 gitea_network_subnet: 172.16.240.0/24
@@ -53,12 +53,12 @@ gitea_oidc_group_team_map:
   /lv3-platform-admins:
     ops:
       - Owners
-gitea_minio_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('minio') }}"
+gitea_minio_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('minio') }}"
 gitea_minio_access_key_id: gitealfs
 gitea_minio_secret_key_local_file: "{{ gitea_local_artifact_dir }}/minio-secret-key.txt"
 gitea_minio_bucket_name: gitea-lfs
 gitea_minio_region: us-east-1
-gitea_minio_endpoint: "{{ gitea_minio_service_topology.private_ip }}:{{ hostvars['proxmox_florin'].platform_port_assignments.minio_api_port }}"
+gitea_minio_endpoint: "{{ gitea_minio_service_topology.private_ip }}:{{ hostvars[platform_topology_host].platform_port_assignments.minio_api_port }}"
 gitea_admin_username: ops-gitea
 gitea_admin_email: "{{ proxmox_notification_email }}"
 gitea_admin_password_remote_file: "{{ gitea_secret_dir }}/admin-password"

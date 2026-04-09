@@ -8,7 +8,7 @@
 # Topology:
 #   Operator (headscale 100.64.0.0/10)
 #       ↓
-#   nginx-lv3 (TLS termination, browser.lv3.org)
+#   nginx-lv3 (TLS termination, browser.{{ platform_domain }})
 #       ↓ X-Auth-Request-Email (per-user routing via map)
 #   runtime-comms-lv3 (VMID 121, 10.10.10.21)
 #       ├─ neko-<name> signalling (TCP port per instance)
@@ -82,7 +82,7 @@
   tags: [tier-2, keycloak, service-neko]
 
   vars:
-    _neko_kc_url: "https://sso.lv3.org"
+    _neko_kc_url: "https://sso.{{ platform_domain }}"
     _neko_kc_realm: "lv3"
     _neko_kc_admin_client_id: "lv3-admin-runtime"
     _neko_kc_secret_file: "{{ lookup('env', 'REPO_ROOT') | default(playbook_dir + '/../../../..', true) }}/.local/keycloak/admin-client-secret.txt"
@@ -226,20 +226,20 @@
   serial: 1
 
   tasks:
-    - name: Render browser.lv3.org NGINX site configuration
+    - name: Render browser.{{ platform_domain }} NGINX site configuration
       ansible.builtin.template:
         src: "{{ playbook_dir }}/templates/nginx-site-neko.conf.j2"
-        dest: "/etc/nginx/sites-available/browser.lv3.org.conf"
+        dest: "/etc/nginx/sites-available/browser.{{ platform_domain }}.conf"
         owner: root
         group: root
         mode: '0644'
       register: nginx_neko_site
       tags: [nginx, neko, edge-publication]
 
-    - name: Enable browser.lv3.org site
+    - name: Enable browser.{{ platform_domain }} site
       ansible.builtin.file:
-        src: "/etc/nginx/sites-available/browser.lv3.org.conf"
-        dest: "/etc/nginx/sites-enabled/browser.lv3.org.conf"
+        src: "/etc/nginx/sites-available/browser.{{ platform_domain }}.conf"
+        dest: "/etc/nginx/sites-enabled/browser.{{ platform_domain }}.conf"
         state: link
         force: true
       tags: [nginx, neko, edge-publication]
@@ -257,9 +257,9 @@
       when: nginx_neko_site.changed
       tags: [nginx, neko, edge-publication]
 
-    - name: Verify browser.lv3.org is reachable (expects oauth2 redirect, not 500)
+    - name: Verify browser.{{ platform_domain }} is reachable (expects oauth2 redirect, not 500)
       ansible.builtin.uri:
-        url: "https://browser.lv3.org/"
+        url: "https://browser.{{ platform_domain }}/"
         validate_certs: true
         follow_redirects: none
         status_code: [200, 302, 401, 403]
@@ -274,7 +274,7 @@
         msg:
           - "Neko NGINX Edge Publication"
           - "============================="
-          - "Hostname:  browser.lv3.org"
+          - "Hostname:  browser.{{ platform_domain }}"
           - "Instances: {{ neko_instances | length }}"
           - "Routing:   X-Auth-Request-Email → per-user container (TCP port map)"
           - "TLS:       Let's Encrypt"
@@ -333,9 +333,9 @@
           - "Neko Multi-Instance Deployment Summary"
           - "======================================"
           - "Configured instances: {{ neko_instances | length }}"
-          - "Edge URL: https://browser.lv3.org"
+          - "Edge URL: https://browser.{{ platform_domain }}"
           - ""
-          - "Each user authenticates via Keycloak SSO (browser.lv3.org)."
+          - "Each user authenticates via Keycloak SSO (browser.{{ platform_domain }})."
           - "After login, NGINX routes X-Auth-Request-Email to their container."
           - "Users not assigned a container receive HTTP 403."
           - ""

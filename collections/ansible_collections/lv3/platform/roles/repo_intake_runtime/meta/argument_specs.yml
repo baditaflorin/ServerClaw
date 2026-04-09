@@ -24,7 +24,7 @@ argument_specs:
         description: Local listener port
       repo_intake_gateway_url:
         type: str
-        default: https://api.lv3.org
+        default: https://api.{{ platform_domain }}
         description: API gateway URL
       repo_intake_session_secret:
         type: str

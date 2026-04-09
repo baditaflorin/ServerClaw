@@ -129,7 +129,7 @@
       - --cicustom
       - "user={{ proxmox_snippets_storage_id }}:snippets/{{ item.name }}-user-data.yml"
       - --description
-      - "{{ item.role }} VM for lv3.org platform"
+      - "{{ item.role }} VM for {{ platform_domain }} platform"
   loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   changed_when: true
   vars:

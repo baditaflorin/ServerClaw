@@ -8,7 +8,7 @@ dozzle_runtime_image: "{{ container_image_catalog.images.dozzle_runtime.ref }}"
 dozzle_runtime_hub_container_name: dozzle
 dozzle_runtime_agent_container_name: dozzle-agent
 dozzle_runtime_hub_port: "{{ platform_service_topology | platform_service_port('dozzle', 'internal') }}"
-dozzle_runtime_agent_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.dozzle_agent_port }}"
+dozzle_runtime_agent_port: "{{ hostvars[platform_topology_host].platform_port_assignments.dozzle_agent_port }}"
 dozzle_runtime_hub_inventory_host: docker-runtime-lv3
 dozzle_runtime_agent_inventory_hosts:
   - docker-runtime-lv3

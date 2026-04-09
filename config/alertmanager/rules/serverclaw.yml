@@ -10,4 +10,4 @@ groups:
         annotations:
           summary: ServerClaw is unreachable on the published runtime path.
           description: The ServerClaw readiness probe on coolify-lv3 has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-serverclaw/
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-serverclaw/

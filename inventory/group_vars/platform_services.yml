@@ -66,13 +66,13 @@ platform_service_registry:
       api_gateway_database_port: 5432
     dns:
       records:
-        - fqdn: api.lv3.org
+        - fqdn: "api.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 60
     tls:
       domains:
-        - api.lv3.org
+        - "api.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -89,7 +89,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8080
       upstream_host: runtime-control-lv3
-      public_fqdn: api.lv3.org
+      public_fqdn: api.{{ platform_domain }}
       auth_proxy: false             # upstream handles its own auth
 
   artifact_cache:
@@ -137,7 +137,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8000
       upstream_host: coolify-lv3
-      public_fqdn: coolify.lv3.org
+      public_fqdn: coolify.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   crawl4ai:
@@ -163,19 +163,19 @@ platform_service_registry:
     needs_openbao: true
     hairpin:
       publish:
-        - hostname: agents.lv3.org
+        - hostname: "agents.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: dify.lv3.org
+        - hostname: "dify.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: agents.lv3.org
+        - fqdn: "agents.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 60
     tls:
       domains:
-        - agents.lv3.org
+        - "agents.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -185,7 +185,7 @@ platform_service_registry:
       client_id: dify
       client_secret_local_file: .local/keycloak/dify-client-secret.txt
       redirect_uris:
-        - https://agents.lv3.org/console/api/oauth/login/oidc/callback
+        - "https://agents.{{ platform_domain }}/console/api/oauth/login/oidc/callback"
       scopes:
         - openid
         - profile
@@ -195,7 +195,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8094
       upstream_host: docker-runtime-lv3
-      public_fqdn: agents.lv3.org
+      public_fqdn: agents.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   directus:
@@ -208,26 +208,26 @@ platform_service_registry:
     needs_openbao: true
     needs_postgres: true
     extra_defaults:
-      directus_admin_email: directus.admin@lv3.org
+      directus_admin_email: directus.admin@{{ platform_domain }}
       directus_health_path: /server/health
       directus_ping_path: /server/ping
       directus_graphql_path: /graphql
       directus_openapi_path: /server/specs/oas
     hairpin:
       publish:
-        - hostname: data.lv3.org
+        - hostname: "data.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: data.lv3.org
+        - fqdn: "data.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 60
     tls:
       domains:
-        - data.lv3.org
+        - "data.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -237,7 +237,7 @@ platform_service_registry:
       client_id: directus
       client_secret_local_file: .local/keycloak/directus-client-secret.txt
       redirect_uris:
-        - https://data.lv3.org/auth/login/keycloak/callback
+        - "https://data.{{ platform_domain }}/auth/login/keycloak/callback"
       scopes:
         - openid
         - profile
@@ -247,7 +247,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8055
       upstream_host: docker-runtime-lv3
-      public_fqdn: data.lv3.org
+      public_fqdn: data.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
 
   dozzle:
@@ -260,13 +260,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: logs.lv3.org
+        - fqdn: "logs.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - logs.lv3.org
+        - "logs.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -274,7 +274,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8089
       upstream_host: docker-runtime-lv3
-      public_fqdn: logs.lv3.org
+      public_fqdn: logs.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   # ---------------------------------------------------------------------------
@@ -291,13 +291,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: draw.lv3.org
+        - fqdn: "draw.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - draw.lv3.org
+        - "draw.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -305,7 +305,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 3095
       upstream_host: docker-runtime-lv3
-      public_fqdn: draw.lv3.org
+      public_fqdn: draw.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   # ---------------------------------------------------------------------------
@@ -325,13 +325,13 @@ platform_service_registry:
       flagsmith_health_path: /health
     dns:
       records:
-        - fqdn: flags.lv3.org
+        - fqdn: "flags.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - flags.lv3.org
+        - "flags.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -339,7 +339,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8017
       upstream_host: docker-runtime-lv3
-      public_fqdn: flags.lv3.org
+      public_fqdn: flags.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   # ---------------------------------------------------------------------------
@@ -357,7 +357,7 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: git.lv3.org
+        - fqdn: "git.{{ platform_domain }}"
           type: internal
           target_host: nginx-lv3
           ttl: 3600
@@ -367,7 +367,7 @@ platform_service_registry:
       client_id: gitea-oauth
       client_secret_local_file: .local/keycloak/gitea-client-secret.txt
       redirect_uris:
-        - https://git.lv3.org/user/oauth2/Keycloak/callback
+        - "https://git.{{ platform_domain }}/user/oauth2/Keycloak/callback"
       scopes:
         - openid
         - profile
@@ -385,13 +385,13 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: errors.lv3.org
+        - fqdn: "errors.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - errors.lv3.org
+        - "errors.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -401,7 +401,7 @@ platform_service_registry:
       client_id: glitchtip
       client_secret_local_file: .local/keycloak/glitchtip-client-secret.txt
       redirect_uris:
-        - https://errors.lv3.org/accounts/oidc/keycloak/login/callback/
+        - "https://errors.{{ platform_domain }}/accounts/oidc/keycloak/login/callback/"
       scopes:
         - openid
         - profile
@@ -411,7 +411,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 3005
       upstream_host: docker-runtime-lv3
-      public_fqdn: errors.lv3.org
+      public_fqdn: errors.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
 
   gotenberg:
@@ -434,19 +434,19 @@ platform_service_registry:
     needs_postgres: false
     hairpin:
       publish:
-        - hostname: grist.lv3.org
+        - hostname: "grist.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: grist.lv3.org
+        - fqdn: "grist.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - grist.lv3.org
+        - "grist.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -456,7 +456,7 @@ platform_service_registry:
       client_id: grist
       client_secret_local_file: .local/keycloak/grist-client-secret.txt
       redirect_uris:
-        - https://grist.lv3.org/oauth2/callback
+        - "https://grist.{{ platform_domain }}/oauth2/callback"
       scopes:
         - openid
         - profile
@@ -466,7 +466,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8484
       upstream_host: docker-runtime-lv3
-      public_fqdn: grist.lv3.org
+      public_fqdn: grist.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
 
   # ---------------------------------------------------------------------------
@@ -482,13 +482,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: registry.lv3.org
+        - fqdn: "registry.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - registry.lv3.org
+        - "registry.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -498,7 +498,7 @@ platform_service_registry:
       client_id: harbor
       client_secret_local_file: .local/keycloak/harbor-client-secret.txt
       redirect_uris:
-        - https://registry.lv3.org/c/oidc/callback
+        - "https://registry.{{ platform_domain }}/c/oidc/callback"
       scopes:
         - openid
         - profile
@@ -509,7 +509,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8095
       upstream_host: runtime-control-lv3
-      public_fqdn: registry.lv3.org
+      public_fqdn: registry.{{ platform_domain }}
       auth_proxy: false             # harbor has its own auth; OCI clients authenticate directly
 
   homepage:
@@ -524,7 +524,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 3090
       upstream_host: runtime-general-lv3
-      public_fqdn: home.lv3.org
+      public_fqdn: home.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   # ---------------------------------------------------------------------------
@@ -541,19 +541,19 @@ platform_service_registry:
     needs_openbao: true
     hairpin:
       publish:
-        - hostname: notebooks.lv3.org
+        - hostname: "notebooks.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: notebooks.lv3.org
+        - fqdn: "notebooks.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - notebooks.lv3.org
+        - "notebooks.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -563,7 +563,7 @@ platform_service_registry:
       client_id: jupyterhub
       client_secret_local_file: .local/keycloak/jupyterhub-client-secret.txt
       redirect_uris:
-        - https://notebooks.lv3.org/hub/oauth_callback
+        - "https://notebooks.{{ platform_domain }}/hub/oauth_callback"
       scopes:
         - openid
         - profile
@@ -573,7 +573,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8097
       upstream_host: docker-runtime-lv3
-      public_fqdn: notebooks.lv3.org
+      public_fqdn: notebooks.{{ platform_domain }}
       auth_proxy: false             # JupyterHub has native SSO via Keycloak OIDC
       websocket: true               # JupyterHub uses WebSockets for kernel comms
 
@@ -591,17 +591,17 @@ platform_service_registry:
     needs_openbao: true
     hairpin:
       publish:
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: sso.lv3.org
+        - fqdn: "sso.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 60
     tls:
       domains:
-        - sso.lv3.org
+        - "sso.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -609,10 +609,10 @@ platform_service_registry:
       enabled: true
       upstream_port: 8091
       upstream_host: docker-runtime-lv3
-      public_fqdn: sso.lv3.org
+      public_fqdn: sso.{{ platform_domain }}
       auth_proxy: false             # Keycloak IS the SSO provider; cannot front itself
       extra_fqdns:
-        - sso.staging.lv3.org
+        - "sso.staging.{{ platform_domain }}"
 
   # ---------------------------------------------------------------------------
   # L
@@ -629,13 +629,13 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: annotate.lv3.org
+        - fqdn: "annotate.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - annotate.lv3.org
+        - "annotate.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -643,7 +643,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8110
       upstream_host: docker-runtime-lv3
-      public_fqdn: annotate.lv3.org
+      public_fqdn: annotate.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   lago:
@@ -657,13 +657,13 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: billing.lv3.org
+        - fqdn: "billing.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - billing.lv3.org
+        - "billing.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -671,7 +671,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8099
       upstream_host: docker-runtime-lv3
-      public_fqdn: billing.lv3.org
+      public_fqdn: billing.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   langfuse:
@@ -685,19 +685,19 @@ platform_service_registry:
     needs_postgres: true
     hairpin:
       publish:
-        - hostname: langfuse.lv3.org
+        - hostname: "langfuse.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: langfuse.lv3.org
+        - fqdn: "langfuse.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - langfuse.lv3.org
+        - "langfuse.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -707,7 +707,7 @@ platform_service_registry:
       client_id: langfuse
       client_secret_local_file: .local/keycloak/langfuse-client-secret.txt
       redirect_uris:
-        - https://langfuse.lv3.org/api/auth/callback/keycloak
+        - "https://langfuse.{{ platform_domain }}/api/auth/callback/keycloak"
       scopes:
         - openid
         - profile
@@ -717,7 +717,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 3002
       upstream_host: docker-runtime-lv3
-      public_fqdn: langfuse.lv3.org
+      public_fqdn: langfuse.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   livekit:
@@ -730,13 +730,13 @@ platform_service_registry:
     needs_openbao: true
     dns:
       records:
-        - fqdn: livekit.lv3.org
+        - fqdn: "livekit.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 60
     tls:
       domains:
-        - livekit.lv3.org
+        - "livekit.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -744,7 +744,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 7880
       upstream_host: docker-runtime-lv3
-      public_fqdn: livekit.lv3.org
+      public_fqdn: livekit.{{ platform_domain }}
       auth_proxy: false             # LiveKit SDK handles token-based auth
       websocket: true               # LiveKit uses WebSockets / WebRTC signalling
 
@@ -762,13 +762,13 @@ platform_service_registry:
     needs_openbao: true
     dns:
       records:
-        - fqdn: mail.lv3.org
+        - fqdn: "mail.{{ platform_domain }}"
           type: internal
           target_host: docker-runtime-lv3
           ttl: 3600
     tls:
       domains:
-        - mail.lv3.org
+        - "mail.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -793,13 +793,13 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: matrix.lv3.org
+        - fqdn: "matrix.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - matrix.lv3.org
+        - "matrix.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -807,7 +807,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8008
       upstream_host: docker-runtime-lv3
-      public_fqdn: matrix.lv3.org
+      public_fqdn: matrix.{{ platform_domain }}
       auth_proxy: false             # Matrix handles its own auth via homeserver
       websocket: true               # Matrix client-server API uses WebSockets
 
@@ -831,18 +831,18 @@ platform_service_registry:
     needs_openbao: true
     dns:
       records:
-        - fqdn: minio.lv3.org
+        - fqdn: "minio.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
-        - fqdn: minio-console.lv3.org
+        - fqdn: "minio-console.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - minio.lv3.org
-        - minio-console.lv3.org
+        - "minio.{{ platform_domain }}"
+        - "minio-console.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -850,10 +850,10 @@ platform_service_registry:
       enabled: true
       upstream_port: 9010
       upstream_host: docker-runtime-lv3
-      public_fqdn: minio.lv3.org
+      public_fqdn: minio.{{ platform_domain }}
       auth_proxy: false             # MinIO S3 API uses access-key auth
 
-  # NOTE: minio-console.lv3.org proxies to port 9011 (console). Declared as a
+  # NOTE: minio-console.{{ platform_domain }} proxies to port 9011 (console). Declared as a
   # separate upstream in the generated config; the extra_fqdns approach is
   # insufficient because it uses a different port. See config/generated/.
   # ---------------------------------------------------------------------------
@@ -871,13 +871,13 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: n8n.lv3.org
+        - fqdn: "n8n.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - n8n.lv3.org
+        - "n8n.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -885,7 +885,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 5678
       upstream_host: docker-runtime-lv3
-      public_fqdn: n8n.lv3.org
+      public_fqdn: n8n.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # n8n uses WebSockets for workflow execution events
 
@@ -907,7 +907,7 @@ platform_service_registry:
     container_name: netbox
     needs_openbao: true
     needs_postgres: true
-    # NOTE: netbox.lv3.org is not in subdomain-catalog.json; no dns section until it is registered.
+    # NOTE: netbox.{{ platform_domain }} is not in subdomain-catalog.json; no dns section until it is registered.
 
   nextcloud:
     service_type: docker_compose
@@ -920,13 +920,13 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: cloud.lv3.org
+        - fqdn: "cloud.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - cloud.lv3.org
+        - "cloud.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -934,7 +934,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8084
       upstream_host: docker-runtime-lv3
-      public_fqdn: cloud.lv3.org
+      public_fqdn: cloud.{{ platform_domain }}
       auth_proxy: false             # Nextcloud has native OIDC via Keycloak
       max_body_size: 4096m          # large file uploads
 
@@ -948,13 +948,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: ntfy.lv3.org
+        - fqdn: "ntfy.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - ntfy.lv3.org
+        - "ntfy.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -962,7 +962,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 2586
       upstream_host: docker-runtime-lv3
-      public_fqdn: ntfy.lv3.org
+      public_fqdn: ntfy.{{ platform_domain }}
       auth_proxy: false             # ntfy has its own access-control layer
 
   # ---------------------------------------------------------------------------
@@ -997,13 +997,13 @@ platform_service_registry:
     needs_openbao: true
     dns:
       records:
-        - fqdn: chat.lv3.org
+        - fqdn: "chat.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - chat.lv3.org
+        - "chat.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1013,7 +1013,7 @@ platform_service_registry:
       client_id: open-webui
       client_secret_local_file: .local/keycloak/open-webui-client-secret.txt
       redirect_uris:
-        - https://chat.lv3.org/oauth/oidc/callback
+        - "https://chat.{{ platform_domain }}/oauth/oidc/callback"
       scopes:
         - openid
         - profile
@@ -1048,13 +1048,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: ops.lv3.org
+        - fqdn: "ops.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - ops.lv3.org
+        - "ops.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1064,7 +1064,7 @@ platform_service_registry:
       client_id: ops-portal-oauth
       client_secret_local_file: .local/keycloak/ops-portal-client-secret.txt
       redirect_uris:
-        - https://ops.lv3.org/oauth2/callback
+        - "https://ops.{{ platform_domain }}/oauth2/callback"
       scopes:
         - openid
         - profile
@@ -1074,12 +1074,12 @@ platform_service_registry:
       enabled: true
       upstream_port: 8092
       upstream_host: docker-runtime-lv3
-      public_fqdn: ops.lv3.org
+      public_fqdn: ops.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       unauthenticated_prefix_paths:
         - /static/                   # CSS, JS, and static assets bypass OAuth2
       extra_fqdns:
-        - ops.staging.lv3.org
+        - "ops.staging.{{ platform_domain }}"
 
   repo_intake:
     service_type: docker_compose
@@ -1091,13 +1091,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: repo-intake.lv3.org
+        - fqdn: "repo-intake.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - repo-intake.lv3.org
+        - "repo-intake.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1107,7 +1107,7 @@ platform_service_registry:
       client_id: repo-intake-oauth
       client_secret_local_file: .local/keycloak/repo-intake-client-secret.txt
       redirect_uris:
-        - https://repo-intake.lv3.org/oauth2/callback
+        - "https://repo-intake.{{ platform_domain }}/oauth2/callback"
       scopes:
         - openid
         - profile
@@ -1117,12 +1117,12 @@ platform_service_registry:
       enabled: true
       upstream_port: 8096
       upstream_host: docker-runtime-lv3
-      public_fqdn: repo-intake.lv3.org
+      public_fqdn: repo-intake.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       unauthenticated_prefix_paths:
         - /static/                   # CSS, JS, and static assets bypass OAuth2
       extra_fqdns:
-        - repo-intake.staging.lv3.org
+        - "repo-intake.staging.{{ platform_domain }}"
 
   outline:
     service_type: docker_compose
@@ -1135,19 +1135,19 @@ platform_service_registry:
     needs_postgres: true
     hairpin:
       publish:
-        - hostname: wiki.lv3.org
+        - hostname: "wiki.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: wiki.lv3.org
+        - fqdn: "wiki.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - wiki.lv3.org
+        - "wiki.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1157,7 +1157,7 @@ platform_service_registry:
       client_id: outline
       client_secret_local_file: .local/keycloak/outline-client-secret.txt
       redirect_uris:
-        - https://wiki.lv3.org/auth/oidc.callback
+        - "https://wiki.{{ platform_domain }}/auth/oidc.callback"
       scopes:
         - openid
         - profile
@@ -1167,7 +1167,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 3006
       upstream_host: docker-runtime-lv3
-      public_fqdn: wiki.lv3.org
+      public_fqdn: wiki.{{ platform_domain }}
       auth_proxy: false             # Outline OIDC via Keycloak handles auth
       websocket: true               # Outline real-time collab uses WebSockets
 
@@ -1186,19 +1186,19 @@ platform_service_registry:
     needs_postgres: true
     hairpin:
       publish:
-        - hostname: paperless.lv3.org
+        - hostname: "paperless.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: paperless.lv3.org
+        - fqdn: "paperless.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - paperless.lv3.org
+        - "paperless.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1208,7 +1208,7 @@ platform_service_registry:
       client_id: paperless
       client_secret_local_file: .local/keycloak/paperless-client-secret.txt
       redirect_uris:
-        - https://paperless.lv3.org/accounts/oidc/keycloak/login/callback/
+        - "https://paperless.{{ platform_domain }}/accounts/oidc/keycloak/login/callback/"
       scopes:
         - openid
         - profile
@@ -1218,7 +1218,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8018
       upstream_host: docker-runtime-lv3
-      public_fqdn: paperless.lv3.org
+      public_fqdn: paperless.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
       max_body_size: 256m           # large document uploads
 
@@ -1242,13 +1242,13 @@ platform_service_registry:
     needs_postgres: true
     dns:
       records:
-        - fqdn: tasks.lv3.org
+        - fqdn: "tasks.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - tasks.lv3.org
+        - "tasks.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1256,7 +1256,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8093
       upstream_host: docker-runtime-lv3
-      public_fqdn: tasks.lv3.org
+      public_fqdn: tasks.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # Plane uses WebSockets for real-time updates
 
@@ -1270,13 +1270,13 @@ platform_service_registry:
     needs_openbao: true
     dns:
       records:
-        - fqdn: analytics.lv3.org
+        - fqdn: "analytics.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - analytics.lv3.org
+        - "analytics.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1284,7 +1284,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8016
       upstream_host: docker-runtime-lv3
-      public_fqdn: analytics.lv3.org
+      public_fqdn: analytics.{{ platform_domain }}
       auth_proxy: true              # dashboard gated; /js/ and /api/event are unauthenticated paths
 
   portainer:
@@ -1318,13 +1318,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: repo-intake.lv3.org
+        - fqdn: "repo-intake.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - repo-intake.lv3.org
+        - "repo-intake.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1341,7 +1341,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8096
       upstream_host: docker-runtime-lv3
-      public_fqdn: repo-intake.lv3.org
+      public_fqdn: repo-intake.{{ platform_domain }}
       auth_proxy: true
 
   redpanda:
@@ -1363,13 +1363,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: repowise.lv3.org
+        - fqdn: "repowise.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - repowise.lv3.org
+        - "repowise.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1377,7 +1377,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 7070
       upstream_host: docker-runtime-lv3
-      public_fqdn: repowise.lv3.org
+      public_fqdn: repowise.{{ platform_domain }}
       auth_proxy: false             # upstream auth handles its own access control
 
   # ---------------------------------------------------------------------------
@@ -1394,7 +1394,7 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: search.lv3.org
+        - fqdn: "search.{{ platform_domain }}"
           type: internal
           target_host: nginx-lv3
           ttl: 3600
@@ -1418,19 +1418,19 @@ platform_service_registry:
     needs_openbao: true
     hairpin:
       publish:
-        - hostname: files.lv3.org
+        - hostname: "files.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: files.lv3.org
+        - fqdn: "files.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - files.lv3.org
+        - "files.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1440,7 +1440,7 @@ platform_service_registry:
       client_id: sftpgo
       client_secret_local_file: .local/keycloak/sftpgo-client-secret.txt
       redirect_uris:
-        - https://files.lv3.org/web/oidc/redirect
+        - "https://files.{{ platform_domain }}/web/oidc/redirect"
       scopes:
         - openid
         - profile
@@ -1467,19 +1467,19 @@ platform_service_registry:
     needs_postgres: true
     hairpin:
       publish:
-        - hostname: bi.lv3.org
+        - hostname: "bi.{{ platform_domain }}"
           address_host: nginx-lv3
-        - hostname: sso.lv3.org
+        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx-lv3
     dns:
       records:
-        - fqdn: bi.lv3.org
+        - fqdn: "bi.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - bi.lv3.org
+        - "bi.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1489,7 +1489,7 @@ platform_service_registry:
       client_id: superset
       client_secret_local_file: .local/keycloak/superset-client-secret.txt
       redirect_uris:
-        - https://bi.lv3.org/oauth-authorized/keycloak
+        - "https://bi.{{ platform_domain }}/oauth-authorized/keycloak"
       scopes:
         - openid
         - profile
@@ -1499,7 +1499,7 @@ platform_service_registry:
       enabled: true
       upstream_port: 8105
       upstream_host: docker-runtime-lv3
-      public_fqdn: bi.lv3.org
+      public_fqdn: bi.{{ platform_domain }}
       auth_proxy: false             # Superset native Keycloak OIDC handles auth
 
   # ---------------------------------------------------------------------------
@@ -1557,13 +1557,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: uptime.lv3.org
+        - fqdn: "uptime.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - uptime.lv3.org
+        - "uptime.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1571,11 +1571,11 @@ platform_service_registry:
       enabled: true
       upstream_port: 3001
       upstream_host: docker-runtime-lv3
-      public_fqdn: uptime.lv3.org
+      public_fqdn: uptime.{{ platform_domain }}
       auth_proxy: false             # upstream auth handles its own access control
       websocket: true               # Uptime Kuma uses WebSockets for live status updates
       extra_fqdns:
-        - uptime.staging.lv3.org
+        - "uptime.staging.{{ platform_domain }}"
 
   # ---------------------------------------------------------------------------
   # V
@@ -1591,13 +1591,13 @@ platform_service_registry:
     needs_openbao: false
     dns:
       records:
-        - fqdn: vault.lv3.org
+        - fqdn: "vault.{{ platform_domain }}"
           type: internal
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - vault.lv3.org
+        - "vault.{{ platform_domain }}"
       cert_source: step-ca
       wildcard: false
       cert_validity_days: 90
@@ -1617,7 +1617,7 @@ platform_service_registry:
       client_id: vikunja
       client_secret_local_file: .local/keycloak/vikunja-client-secret.txt
       redirect_uris:
-        - https://tasks.lv3.org/auth/openid/lv3
+        - "https://tasks.{{ platform_domain }}/auth/openid/lv3"
       scopes:
         - openid
         - profile
@@ -1650,18 +1650,18 @@ platform_service_registry:
       enabled: true
       upstream_port: 8102
       upstream_host: docker-runtime-lv3
-      public_fqdn: ci.lv3.org
+      public_fqdn: ci.{{ platform_domain }}
       auth_proxy: false             # Woodpecker has native Gitea OAuth handles auth
       websocket: true               # Woodpecker uses WebSockets for live build logs
     dns:
       records:
-        - fqdn: ci.lv3.org
+        - fqdn: "ci.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - ci.lv3.org
+        - "ci.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1743,18 +1743,18 @@ platform_service_registry:
       enabled: true
       upstream_port: 8096
       upstream_host: docker-runtime-lv3
-      public_fqdn: agents.lv3.org
+      public_fqdn: agents.{{ platform_domain }}
       auth_proxy: true
       websocket: true
     dns:
       records:
-        - fqdn: agents.lv3.org
+        - fqdn: "agents.{{ platform_domain }}"
           type: public
           target_host: nginx-lv3
           ttl: 3600
     tls:
       domains:
-        - agents.lv3.org
+        - "agents.{{ platform_domain }}"
       cert_source: letsencrypt
 
   litellm:

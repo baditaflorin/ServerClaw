@@ -48,7 +48,7 @@ neko_log_max_file: "3"
 # Admin API credentials (same vars used by keycloak_runtime role)
 # These are read from the controller environment or local secrets.
 neko_keycloak_realm: "lv3"
-neko_keycloak_admin_url: "https://sso.lv3.org"
+neko_keycloak_admin_url: "https://sso.{{ platform_domain }}"
 
 # Attribute set on Keycloak users managed by this role.
 # Used to identify users to clean up when removed from neko_instances.

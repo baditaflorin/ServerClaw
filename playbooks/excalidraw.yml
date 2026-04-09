@@ -1,6 +1,6 @@
 ---
 # Playbook: excalidraw.yml
-# Purpose: Converge the Excalidraw runtime on docker-runtime-lv3 and publish draw.lv3.org through the shared authenticated edge.
+# Purpose: Converge the Excalidraw runtime on docker-runtime-lv3 and publish draw.{{ platform_domain }} through the shared authenticated edge.
 # Use case: Run when changing ADR 0202 runtime automation, shared-edge publication, or live Excalidraw image pins.
 #
 # Inputs (required):
@@ -11,7 +11,7 @@
 #
 # Outputs:
 #   - Excalidraw frontend and collaboration room containers running on docker-runtime-lv3
-#   - Shared-edge publication for https://draw.lv3.org with the repo-managed oauth2-proxy gate
+#   - Shared-edge publication for https://draw.{{ platform_domain }} with the repo-managed oauth2-proxy gate
 #
 # Idempotency: Partially idempotent
 #

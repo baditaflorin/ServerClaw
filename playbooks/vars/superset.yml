@@ -1,6 +1,6 @@
 ---
 service_audit_name: superset
-service_dns_fqdn: bi.lv3.org
+service_dns_fqdn: bi.{{ platform_domain }}
 service_postgres_role: lv3.platform.superset_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime

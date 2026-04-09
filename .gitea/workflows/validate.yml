@@ -11,7 +11,7 @@ jobs:
   validate:
     runs-on: self-hosted
     container:
-      image: registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+      image: ${{ vars.CONTAINER_REGISTRY }}/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
     steps:
       - name: Checkout
         env:
@@ -175,7 +175,7 @@ jobs:
           python3 scripts/ntfy_publish.py \
             --publisher gitea_actions \
             --topic platform.ci.critical \
-            --base-url https://ntfy.lv3.org \
+            --base-url https://ntfy.${{ vars.PLATFORM_DOMAIN }} \
             --token "$NTFY_TOKEN" \
             --message "Repository validation failed for ${GITHUB_REF_NAME:-unknown} at ${GITHUB_SHA:-unknown}." \
             --sequence-id "gitea:${GITHUB_SHA:-unknown}:validate"

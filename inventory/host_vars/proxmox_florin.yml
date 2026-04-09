@@ -131,7 +131,7 @@ monitoring_prometheus_listen_address: 0.0.0.0:9090
 openbao_http_extra_bind_addresses:
   - "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
-proxmox_tailscale_login_server: https://headscale.lv3.org
+proxmox_tailscale_login_server: https://headscale.{{ platform_domain }}
 proxmox_tailscale_tags: []
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"
@@ -167,7 +167,7 @@ proxmox_public_ingress_tcp_forwards:
   - listen_port: 8080
     target_host: 10.10.10.41
     target_port: 8080
-    description: Neko remote desktop signalling (proxied via NGINX edge as browser.lv3.org)
+    description: Neko remote desktop signalling (proxied via NGINX edge as browser.{{ platform_domain }})
 proxmox_public_ingress_udp_forwards:
   - listen_port: 7882
     target_host: 10.10.10.20
@@ -176,7 +176,7 @@ proxmox_public_ingress_udp_forwards:
     target_host: 10.10.10.41
     target_port_start: 50000
     target_port_range: 50000-60000
-    description: Neko WebRTC media streams (UDP RTP/STUN for browser.lv3.org)
+    description: Neko WebRTC media streams (UDP RTP/STUN for browser.{{ platform_domain }})
 platform_failure_domains:
   - id: host:proxmox_florin
     kind: host
@@ -1491,7 +1491,7 @@ network_policy:
           ports:
             - 80
             - 443
-          description: Shared edge publication for wildcard app ingress on apps.lv3.org
+          description: Shared edge publication for wildcard app ingress on apps.{{ platform_domain }}
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -1779,7 +1779,7 @@ network_policy:
             - 8086
             - 8087
             - 8088
-          description: Neko signalling proxies from NGINX edge (browser.lv3.org) — one port per instance
+          description: Neko signalling proxies from NGINX edge (browser.{{ platform_domain }}) — one port per instance
         - source: public
           protocol: udp
           ports:
@@ -1860,7 +1860,7 @@ backup_vm_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_fl
 
 postgres_ha:
   scope: postgres-ha
-  database_hostname: database.lv3.org
+  database_hostname: database.{{ platform_domain }}
   vip_ipv4: 10.10.10.55
   vip_cidr: 24
   postgres_port: 5432
@@ -1898,7 +1898,7 @@ postgres_ha:
 
 postgres_apps_ha:
   scope: postgres-apps-ha
-  database_hostname: database-apps.lv3.org
+  database_hostname: database-apps.{{ platform_domain }}
   vip_ipv4: 10.10.10.56
   vip_cidr: 24
   postgres_port: 5432
@@ -1933,7 +1933,7 @@ postgres_apps_ha:
 
 postgres_data_ha:
   scope: postgres-data-ha
-  database_hostname: database-data.lv3.org
+  database_hostname: database-data.{{ platform_domain }}
   vip_ipv4: 10.10.10.57
   vip_cidr: 24
   postgres_port: 5432
@@ -1973,7 +1973,7 @@ mail_platform_dns_records:
     ttl: 60
   - name: "@"
     type: MX
-    value: "10 mail.lv3.org."
+    value: "10 mail.{{ platform_domain }}."
     ttl: 300
   - name: "@"
     type: TXT
@@ -1982,7 +1982,7 @@ mail_platform_dns_records:
     ttl: 300
   - name: _dmarc
     type: TXT
-    value: '"v=DMARC1; p=quarantine; rua=mailto:baditaflorin@gmail.com"'
+    value: "\"v=DMARC1; p=quarantine; rua=mailto:{{ platform_operator_email }}\""
     ttl: 300
   - name: brevo1._domainkey
     type: CNAME
@@ -2030,29 +2030,29 @@ route_dns_assertion_retired_records:
     state: absent
 
 plausible_site_registrations:
-  - hostname: nginx.lv3.org
-    site_domain: nginx.lv3.org
+  - hostname: nginx.{{ platform_domain }}
+    site_domain: nginx.{{ platform_domain }}
     timezone: Europe/Bucharest
-  - hostname: proxmox.lv3.org
-    site_domain: proxmox.lv3.org
+  - hostname: proxmox.{{ platform_domain }}
+    site_domain: proxmox.{{ platform_domain }}
     timezone: Europe/Bucharest
-  - hostname: docker.lv3.org
-    site_domain: docker.lv3.org
+  - hostname: docker.{{ platform_domain }}
+    site_domain: docker.{{ platform_domain }}
     timezone: Europe/Bucharest
-  - hostname: build.lv3.org
-    site_domain: build.lv3.org
+  - hostname: build.{{ platform_domain }}
+    site_domain: build.{{ platform_domain }}
     timezone: Europe/Bucharest
-  - hostname: mail.lv3.org
-    site_domain: mail.lv3.org
+  - hostname: mail.{{ platform_domain }}
+    site_domain: mail.{{ platform_domain }}
     timezone: Europe/Bucharest
-  - hostname: status.lv3.org
-    site_domain: status.lv3.org
+  - hostname: status.{{ platform_domain }}
+    site_domain: status.{{ platform_domain }}
     timezone: Europe/Bucharest
-  - hostname: uptime.lv3.org
-    site_domain: uptime.lv3.org
+  - hostname: uptime.{{ platform_domain }}
+    site_domain: uptime.{{ platform_domain }}
     timezone: Europe/Bucharest
-  - hostname: ops.lv3.org
-    site_domain: ops.lv3.org
+  - hostname: ops.{{ platform_domain }}
+    site_domain: ops.{{ platform_domain }}
     timezone: Europe/Bucharest
 
 lv3_service_topology:
@@ -2060,7 +2060,7 @@ lv3_service_topology:
     service_name: nginx-edge
     owning_vm: nginx-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'nginx-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: nginx.lv3.org
+    public_hostname: nginx.{{ platform_domain }}
     exposure_model: edge-static
     observability:
       guest_dashboard: true
@@ -2078,13 +2078,13 @@ lv3_service_topology:
       kind: static
       slug: nginx
       title: LV3 Edge
-      description: NGINX is the public edge for published lv3.org services on this platform.
+      description: NGINX is the public edge for published {{ platform_domain }} services on this platform.
       meta: Use the named subdomains for the actual service entry points exposed at the edge.
   grafana:
     service_name: grafana
     owning_vm: monitoring-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: grafana.lv3.org
+    public_hostname: grafana.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: true
@@ -2112,7 +2112,7 @@ lv3_service_topology:
     service_name: realtime
     owning_vm: monitoring-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: realtime.lv3.org
+    public_hostname: realtime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2135,7 +2135,7 @@ lv3_service_topology:
     service_name: headscale
     owning_vm: proxmox_florin
     private_ip: "{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}"
-    public_hostname: headscale.lv3.org
+    public_hostname: headscale.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2164,7 +2164,7 @@ lv3_service_topology:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
     private_ip: "{{ management_tailscale_ipv4 }}"
-    public_hostname: proxmox.lv3.org
+    public_hostname: proxmox.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: false
@@ -2190,7 +2190,7 @@ lv3_service_topology:
     service_name: docker-runtime
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: docker.lv3.org
+    public_hostname: docker.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: true
@@ -2214,7 +2214,7 @@ lv3_service_topology:
     service_name: docker-build
     owning_vm: docker-build-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-build-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: build.lv3.org
+    public_hostname: build.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: true
@@ -2238,7 +2238,7 @@ lv3_service_topology:
     service_name: uptime-kuma
     owning_vm: runtime-general-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: uptime.lv3.org
+    public_hostname: uptime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2259,7 +2259,7 @@ lv3_service_topology:
     service_name: status-page
     owning_vm: runtime-general-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: status.lv3.org
+    public_hostname: status.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2281,7 +2281,7 @@ lv3_service_topology:
     service_name: mail-platform
     owning_vm: runtime-control-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: mail.lv3.org
+    public_hostname: mail.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: false
@@ -2313,7 +2313,7 @@ lv3_service_topology:
     service_name: livekit
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: livekit.lv3.org
+    public_hostname: livekit.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2402,7 +2402,7 @@ lv3_service_topology:
     service_name: nomad
     owning_vm: monitoring-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: scheduler.lv3.org
+    public_hostname: scheduler.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2424,12 +2424,12 @@ lv3_service_topology:
       kind: tailscale-tcp-proxy
       url: "{{ nomad_controller_url }}"
     urls:
-      public: https://scheduler.lv3.org
+      public: https://scheduler.{{ platform_domain }}
   gitea:
     service_name: gitea
     owning_vm: runtime-control-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: git.lv3.org
+    public_hostname: git.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2459,7 +2459,7 @@ lv3_service_topology:
     service_name: matrix-synapse
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: matrix.lv3.org
+    public_hostname: matrix.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2506,7 +2506,7 @@ lv3_service_topology:
     service_name: searxng
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: search.lv3.org
+    public_hostname: search.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2520,12 +2520,12 @@ lv3_service_topology:
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
-      url: "http://search.lv3.org"
+      url: "http://search.{{ platform_domain }}"
   langfuse:
     service_name: langfuse
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: langfuse.lv3.org
+    public_hostname: langfuse.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2547,7 +2547,7 @@ lv3_service_topology:
     service_name: flagsmith
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: flags.lv3.org
+    public_hostname: flags.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2569,7 +2569,7 @@ lv3_service_topology:
     service_name: plausible
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: analytics.lv3.org
+    public_hostname: analytics.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2593,8 +2593,8 @@ lv3_service_topology:
     service_name: minio
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: minio.lv3.org
-    console_public_hostname: minio-console.lv3.org
+    public_hostname: minio.{{ platform_domain }}
+    console_public_hostname: minio-console.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2628,7 +2628,7 @@ lv3_service_topology:
     service_name: glitchtip
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: errors.lv3.org
+    public_hostname: errors.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2650,7 +2650,7 @@ lv3_service_topology:
     service_name: lago
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: billing.lv3.org
+    public_hostname: billing.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2675,7 +2675,7 @@ lv3_service_topology:
     service_name: dify
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: agents.lv3.org
+    public_hostname: agents.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2697,7 +2697,7 @@ lv3_service_topology:
     service_name: plane
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: tasks.lv3.org
+    public_hostname: tasks.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2722,7 +2722,7 @@ lv3_service_topology:
     service_name: woodpecker
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: ci.lv3.org
+    public_hostname: ci.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2747,7 +2747,7 @@ lv3_service_topology:
     service_name: outline
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: wiki.lv3.org
+    public_hostname: wiki.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2769,7 +2769,7 @@ lv3_service_topology:
     service_name: grist
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: grist.lv3.org
+    public_hostname: grist.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2791,7 +2791,7 @@ lv3_service_topology:
     service_name: paperless
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: paperless.lv3.org
+    public_hostname: paperless.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2819,7 +2819,7 @@ lv3_service_topology:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: logs.lv3.org
+    public_hostname: logs.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2841,7 +2841,7 @@ lv3_service_topology:
     service_name: excalidraw
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: draw.lv3.org
+    public_hostname: draw.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2899,7 +2899,7 @@ lv3_service_topology:
     service_name: serverclaw
     owning_vm: coolify-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: chat.lv3.org
+    public_hostname: chat.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2937,7 +2937,7 @@ lv3_service_topology:
     service_name: n8n
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: n8n.lv3.org
+    public_hostname: n8n.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2958,7 +2958,7 @@ lv3_service_topology:
     service_name: nextcloud
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: cloud.lv3.org
+    public_hostname: cloud.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2993,7 +2993,7 @@ lv3_service_topology:
     service_name: coolify
     owning_vm: coolify-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: coolify.lv3.org
+    public_hostname: coolify.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3018,7 +3018,7 @@ lv3_service_topology:
     service_name: coolify-apps
     owning_vm: coolify-apps-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: apps.lv3.org
+    public_hostname: apps.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3036,7 +3036,7 @@ lv3_service_topology:
       kind: proxy
       upstream: "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}:443"
       aliases:
-        - "*.apps.lv3.org"
+        - "*.apps.{{ platform_domain }}"
       crawl_policy_enabled: false
       security_headers_enabled: false
       preserve_upstream_security_headers: true
@@ -3044,7 +3044,7 @@ lv3_service_topology:
     service_name: api-gateway
     owning_vm: runtime-control-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: api.lv3.org
+    public_hostname: api.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3100,7 +3100,7 @@ lv3_service_topology:
     service_name: keycloak
     owning_vm: runtime-control-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: sso.lv3.org
+    public_hostname: sso.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3119,12 +3119,12 @@ lv3_service_topology:
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
     urls:
       internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
-      public: https://sso.lv3.org
+      public: https://sso.{{ platform_domain }}
   harbor:
     service_name: harbor
     owning_vm: runtime-control-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: registry.lv3.org
+    public_hostname: registry.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3150,7 +3150,7 @@ lv3_service_topology:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: ops.lv3.org
+    public_hostname: ops.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3171,7 +3171,7 @@ lv3_service_topology:
     service_name: homepage
     owning_vm: runtime-general-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: home.lv3.org
+    public_hostname: home.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3224,7 +3224,7 @@ lv3_service_topology:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: ntfy.lv3.org
+    public_hostname: ntfy.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3271,7 +3271,7 @@ lv3_service_topology:
     service_name: vaultwarden
     owning_vm: runtime-control-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: vault.lv3.org
+    public_hostname: vault.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3289,7 +3289,7 @@ lv3_service_topology:
     service_name: postgres
     owning_vm: postgres-lv3
     private_ip: "{{ postgres_ha.vip_ipv4 }}"
-    public_hostname: database.lv3.org
+    public_hostname: database.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: true
@@ -3313,7 +3313,7 @@ lv3_service_topology:
     service_name: directus
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: data.lv3.org
+    public_hostname: data.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3335,7 +3335,7 @@ lv3_service_topology:
     service_name: jupyterhub
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: notebooks.lv3.org
+    public_hostname: notebooks.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3360,7 +3360,7 @@ lv3_service_topology:
     service_name: label_studio
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: annotate.lv3.org
+    public_hostname: annotate.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3382,7 +3382,7 @@ lv3_service_topology:
     service_name: superset
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: bi.lv3.org
+    public_hostname: bi.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3404,7 +3404,7 @@ lv3_service_topology:
     service_name: repowise
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: repowise.lv3.org
+    public_hostname: repowise.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false

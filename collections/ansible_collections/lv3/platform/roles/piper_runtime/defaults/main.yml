@@ -8,7 +8,7 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-piper_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('piper') }}"
+piper_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('piper') }}"
 piper_runtime_site_dir: /opt/piper
 piper_runtime_service_dir: "{{ piper_runtime_site_dir }}/service"
 piper_runtime_compose_file: "{{ piper_runtime_site_dir }}/docker-compose.yml"

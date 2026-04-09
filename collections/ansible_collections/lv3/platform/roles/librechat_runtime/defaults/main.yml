@@ -42,9 +42,9 @@ librechat_creds_iv_remote_file: "{{ librechat_secret_dir }}/creds-iv"
 librechat_enable_oidc: true
 librechat_oidc_client_id: serverclaw
 # HTTPS via the NGINX edge at 10.10.10.10 (nginx-lv3).
-# Docker bridge can't resolve public sso.lv3.org due to hairpin NAT; extra_hosts
-# maps sso.lv3.org to the NGINX internal IP so the container reaches Keycloak.
-librechat_oidc_issuer: https://sso.lv3.org/realms/lv3
+# Docker bridge can't resolve public sso.{{ platform_domain }} due to hairpin NAT; extra_hosts
+# maps sso.{{ platform_domain }} to the NGINX internal IP so the container reaches Keycloak.
+librechat_oidc_issuer: https://sso.{{ platform_domain }}/realms/lv3
 librechat_oidc_callback_url: /oauth/openid/callback
 librechat_oidc_button_label: Login with Keycloak
 librechat_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/serverclaw-client-secret.txt"
@@ -105,7 +105,7 @@ librechat_openai_models:
 # Ollama models (auto-discovered via fetch: true on custom endpoint)
 librechat_ollama_default_model: gemma4:e4b
 # Admin
-librechat_admin_email: ops@lv3.org
+librechat_admin_email: ops@{{ platform_domain }}
 librechat_admin_password_local_file: "{{ librechat_local_artifact_dir }}/admin-password.txt"
 # Bootstrap script and system prompt absolute path for delegate_to: localhost
 librechat_bootstrap_script: "{{ repo_shared_root }}/scripts/bootstrap_librechat_agents.py"
@@ -117,5 +117,5 @@ librechat_searxng_query_url: "http://host.docker.internal:8888/search?q=%s&forma
 # Extra hosts for hairpin NAT — Docker bridge can't reach public IPs of these
 # services, so we route through the NGINX edge internal IP (10.10.10.10).
 librechat_extra_hosts:
-  - "sso.lv3.org:10.10.10.10"
-  - "chat.lv3.org:10.10.10.10"
+  - "sso.{{ platform_domain }}:10.10.10.10"
+  - "chat.{{ platform_domain }}:10.10.10.10"

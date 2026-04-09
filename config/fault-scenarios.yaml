@@ -10,7 +10,7 @@ scenarios:
     expected_behaviour: |
       Keycloak discovery becomes unavailable while the container is stopped.
       The repo-managed container restart restores both the local readiness path and the
-      public `sso.lv3.org` discovery endpoint inside the configured recovery window.
+      public `sso.{{ platform_domain }}` discovery endpoint inside the configured recovery window.
     tags:
       - monthly
       - deployment_subset
@@ -40,7 +40,7 @@ scenarios:
           validate_tls: false
           execution_context: host_network_helper
           headers:
-            Host: sso.lv3.org
+            Host: sso.{{ platform_domain }}
       during:
         - kind: health_probe
           probe_id: keycloak
@@ -57,7 +57,7 @@ scenarios:
           validate_tls: false
           execution_context: host_network_helper
           headers:
-            Host: sso.lv3.org
+            Host: sso.{{ platform_domain }}
       after:
         - kind: health_probe
           probe_id: keycloak
@@ -74,7 +74,7 @@ scenarios:
           validate_tls: false
           execution_context: host_network_helper
           headers:
-            Host: sso.lv3.org
+            Host: sso.{{ platform_domain }}
 
   - name: fault:openbao-unavailable
     description: Pause the local OpenBao container and verify the local health endpoint fails during the outage and returns after the managed unpause.

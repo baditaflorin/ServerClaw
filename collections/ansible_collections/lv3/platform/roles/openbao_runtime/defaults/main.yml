@@ -27,7 +27,7 @@ openbao_runtime_uid: "100"
 openbao_runtime_gid: "1000"
 openbao_tls_mount_dir: /openbao/tls
 openbao_controller_url: "{{ platform_service_topology | platform_service_url('openbao', 'controller') }}"
-openbao_postgres_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+openbao_postgres_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 openbao_api_addr: >-
   {{
     openbao_controller_url

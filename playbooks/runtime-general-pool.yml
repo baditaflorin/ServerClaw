@@ -424,7 +424,7 @@
 
     - name: Verify the public status page route through the shared edge
       ansible.builtin.uri:
-        url: https://status.lv3.org/
+        url: https://status.{{ platform_domain }}/
         method: GET
         status_code:
           - 200

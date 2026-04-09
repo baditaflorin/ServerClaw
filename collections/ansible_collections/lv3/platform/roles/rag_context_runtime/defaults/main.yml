@@ -50,10 +50,10 @@ platform_context_minio_secret_key_local_file: "{{ platform_context_local_artifac
 platform_context_minio_access_key_id: ragstaging
 platform_context_minio_bucket_name: rag-staging
 platform_context_minio_region: us-east-1
-platform_context_minio_endpoint: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'internal') }}"
+platform_context_minio_endpoint: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('minio', 'internal') }}"
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
-platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
+platform_context_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
 platform_context_private_url: "http://127.0.0.1:{{ platform_context_internal_port }}"
 platform_context_qdrant_host_port: 6333
 platform_context_qdrant_image: qdrant/qdrant:v1.15.1

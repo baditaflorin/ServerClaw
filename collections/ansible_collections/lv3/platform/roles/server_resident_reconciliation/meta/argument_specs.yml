@@ -81,7 +81,7 @@ argument_specs:
       server_resident_reconciliation_gitea_email:
         type: str
         required: false
-        default: lv3-reconcile@lv3.org
+        default: lv3-reconcile@{{ platform_domain }}
       server_resident_reconciliation_gitea_login_name:
         type: str
         required: false

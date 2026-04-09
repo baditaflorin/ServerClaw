@@ -1063,9 +1063,9 @@ def build_config() -> GatewayConfig:
         ),
         jwks_url=os.environ.get(
             "KEYCLOAK_JWKS_URL",
-            "https://sso.lv3.org/realms/lv3/protocol/openid-connect/certs",
+            "https://sso.localhost/realms/lv3/protocol/openid-connect/certs",
         ),
-        issuer=os.environ.get("KEYCLOAK_ISSUER_URL", "https://sso.lv3.org/realms/lv3"),
+        issuer=os.environ.get("KEYCLOAK_ISSUER_URL", "https://sso.localhost/realms/lv3"),
         expected_audience=os.environ.get("KEYCLOAK_EXPECTED_AUDIENCE") or None,
         nats_url=os.environ.get("NATS_URL") or None,
         nats_username=os.environ.get("LV3_NATS_USERNAME") or None,
@@ -1592,9 +1592,9 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "service": "lv3-api-gateway",
             "version": "0.1.0",
             "status": "ok",
-            "docs": "https://api.lv3.org/docs",
-            "openapi_schema": "https://api.lv3.org/v1/openapi.json",
-            "health_check": "https://api.lv3.org/healthz",
+            "docs": "https://api.localhost/docs",
+            "openapi_schema": "https://api.localhost/v1/openapi.json",
+            "health_check": "https://api.localhost/healthz",
         }
 
     @app.get("/healthz")

@@ -1,6 +1,6 @@
 ---
 # Purpose: Converge the Plausible Analytics runtime, OpenBao-backed secrets, and repo-managed bootstrap contract.
-# Use case: Run during Plausible deploys, updates, and recovery when analytics.lv3.org must match repo truth.
+# Use case: Run during Plausible deploys, updates, and recovery when analytics.{{ platform_domain }} must match repo truth.
 # Inputs: Runtime paths, image pins, SMTP credentials, registered sites, and OpenBao integration settings.
 # Outputs: A running Plausible CE stack on docker-runtime-lv3 plus controller-local mirrors of the generated runtime secrets.
 # Idempotency: Partially idempotent because generated secrets are created once and the bootstrap contract may intentionally reconcile live state.

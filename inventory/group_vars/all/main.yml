@@ -1,3 +1,10 @@
+# =============================================================================
+# Platform Defaults — structural settings that work unchanged across forks
+# =============================================================================
+# Operator-specific values (domain, email, name, network ACLs) live in
+# identity.yml — see ADR 0385.
+# =============================================================================
+
 repo_version: 0.106.1
 platform_version: 0.40.0
 container_image_catalog_path: "{{ inventory_dir | dirname }}/config/image-catalog.json"
@@ -69,45 +76,30 @@ proxmox_snippets_storage_id: local
 proxmox_guest_ci_user: ops
 ansible_remote_tmp: /tmp
 proxmox_guest_nameserver: 1.1.1.1
-proxmox_guest_searchdomain: lv3.org
 proxmox_guest_ssh_connection_mode: tailscale_direct
 proxmox_guest_ssh_jump_host: >-
-  {{ lookup('env', 'LV3_PROXMOX_HOST_ADDR') | default(hostvars['proxmox_florin'].ansible_host, true) }}
+  {{ lookup('env', 'LV3_PROXMOX_HOST_ADDR') | default(hostvars[platform_topology_host].ansible_host, true) }}
 proxmox_guest_ssh_bootstrap_key_path: >-
   {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PRIVATE_KEY') | default(repo_shared_bootstrap_private_key_path, true) }}
 proxmox_guest_ssh_proxy_command: >-
   -o ProxyJump={{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }}
 proxmox_guest_ssh_public_proxy_command: >-
-  -o ProxyJump={{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].management_ipv4 }}
+  -o ProxyJump={{ proxmox_host_admin_user }}@{{ hostvars[platform_topology_host].management_ipv4 }}
 proxmox_guest_ssh_common_args:
   tailscale_direct: "-o IdentitiesOnly=yes"
   proxmox_host_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_proxy_command }}"
   proxmox_host_public_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_public_proxy_command }}"
 
 proxmox_host_admin_user: ops
-proxmox_host_admin_comment: LV3 Operations
 proxmox_host_admin_shell: /bin/bash
 proxmox_host_sudo_group: sudo
 proxmox_host_ssh_hardening_file: /etc/ssh/sshd_config.d/90-lv3-hardening.conf
-proxmox_management_allowed_sources:
-  - 100.64.0.0/10
-  - 10.10.10.0/24
-  - 90.95.35.115/32
 proxmox_breakglass_ssh_port: 2222
-proxmox_notification_email: baditaflorin@gmail.com
-proxmox_notification_author: Proxmox LV3
-proxmox_notification_endpoint_name: lv3-ops-email
-proxmox_notification_endpoint_comment: LV3 operations mailbox
-proxmox_notification_matcher_name: lv3-all-events
-proxmox_notification_matcher_comment: Send all Proxmox notifications to LV3 operations
 proxmox_acme_account_name: default
-proxmox_acme_contact_email: baditaflorin@gmail.com
 proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
 proxmox_acme_plugin_id: lv3-hetzner-dns
-proxmox_acme_domain: proxmox.lv3.org
 proxmox_acme_validation_delay: 30
 proxmox_tfa_description: Primary TOTP
-proxmox_api_hostname: proxmox.lv3.org
 proxmox_api_automation_user: lv3-automation@pve
 proxmox_api_automation_comment: LV3 durable automation identity
 proxmox_api_token_id: primary
@@ -163,7 +155,6 @@ proxmox_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-api/lv3-auto
 proxmox_tool_topology_file: "{{ repo_shared_local_root }}/proxmox-api/topology.yaml"
 
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
-hetzner_dns_zone_name: lv3.org
 
 monitoring_local_artifact_dir: "{{ repo_shared_local_root }}/monitoring"
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
@@ -176,7 +167,6 @@ monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archiv
 monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
 monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
 monitoring_influxdb_url: http://127.0.0.1:8086
-monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
 monitoring_loki_push_api_url: >-
   http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:3100/loki/api/v1/push
@@ -186,7 +176,6 @@ openbao_host_audit_log_file: /opt/openbao/logs/audit.log
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 
-mail_platform_domain: lv3.org
 mail_platform_mailbox_localpart: server
 mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
 mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
@@ -197,10 +186,9 @@ mail_platform_metrics_password_local_file: "{{ repo_shared_local_root }}/mail-pl
 mail_platform_gateway_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/gateway-api-key.txt"
 mail_platform_brevo_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/brevo-api-key.txt"
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
-mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
 smtp_host: lv3-mail-stalwart
-smtp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+smtp_port: "{{ hostvars[platform_topology_host].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
 smtp_starttls: false
 smtp_auth_enabled: true
 smtp_username: "{{ mail_platform_mailbox_login }}"
@@ -241,7 +229,7 @@ one_api_database_password_local_file: "{{ one_api_local_artifact_dir }}/database
 one_api_session_secret_local_file: "{{ one_api_local_artifact_dir }}/session-secret.txt"
 one_api_root_access_token_local_file: "{{ one_api_local_artifact_dir }}/root-access-token.txt"
 one_api_root_password_local_file: "{{ one_api_local_artifact_dir }}/root-password.txt"
-one_api_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ one_api_host_proxy_port }}"
+one_api_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ one_api_host_proxy_port }}"
 one_api_internal_url: "http://{{ hostvars['docker-runtime-lv3'].ansible_host }}:{{ one_api_port }}"
 one_api_openai_base_url: "{{ one_api_internal_url }}/v1"
 one_api_controller_openai_base_url: "{{ one_api_controller_url }}/v1"
@@ -250,12 +238,9 @@ one_api_fallback_chat_model_alias: gpt-4.1-mini
 one_api_embedding_model_alias: text-embedding-3-small
 searxng_version: 2026.3.24-02ba38786
 searxng_image: "{{ container_image_catalog.images.searxng_runtime.ref }}"
-searxng_controller_url: http://search.lv3.org
 open_webui_version: 0.8.9
 open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
-open_webui_admin_email: ops@lv3.org
-open_webui_admin_name: Florin Badita
-open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
+open_webui_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
 open_webui_enable_openai_api: true
 open_webui_enable_ollama_api: false
 open_webui_ollama_base_url: "http://host.docker.internal:11434"
@@ -264,15 +249,10 @@ open_webui_searxng_query_url: "http://host.docker.internal:8881/search?q=<query>
 open_webui_default_models: "serverclaw:latest"
 open_webui_default_pinned_models: "serverclaw:latest"
 serverclaw_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
-serverclaw_admin_email: ops@lv3.org
-serverclaw_admin_name: Florin Badita
-serverclaw_public_url: https://chat.lv3.org
-serverclaw_webui_name: ServerClaw
 serverclaw_enable_oidc: true
 serverclaw_enable_login_form: true
 serverclaw_enable_password_auth: true
 serverclaw_oidc_client_id: serverclaw
-serverclaw_oidc_provider_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
 serverclaw_enable_openai_api: false
 serverclaw_enable_ollama_api: true
 serverclaw_ollama_base_url: http://10.10.10.20:11434
@@ -291,8 +271,6 @@ serverclaw_session_cookie_same_site: lax
 serverclaw_auth_cookie_same_site: lax
 serverclaw_session_cookie_secure: true
 serverclaw_auth_cookie_secure: true
-serverclaw_extra_hosts:
-  - "sso.lv3.org:10.10.10.10"
 serverclaw_public_models:
   - id: gpt-4o-mini
     name: "GPT-4o Mini"
@@ -305,21 +283,21 @@ serverclaw_public_models:
   - id: claude-haiku-4-5-20251001
     name: "Claude Haiku 4.5"
 platform_context_host_proxy_port: 8010
-platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
+platform_context_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
 platform_context_embedding_backend: ollama
 platform_context_embedding_model: nomic-embed-text
 platform_context_embedding_dimension: 0
 ntopng_proxy_port: 3001
 ntopng_http_port: 3000
-ntopng_operator_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"
+ntopng_operator_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"
 mattermost_host_proxy_port: 8066
-mattermost_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ mattermost_host_proxy_port }}"
+mattermost_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ mattermost_host_proxy_port }}"
 portainer_host_proxy_port: 9444
-portainer_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ portainer_host_proxy_port }}"
+portainer_controller_url: "https://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ portainer_host_proxy_port }}"
 coolify_dashboard_port: 8000
 coolify_proxy_port: 80
 coolify_host_proxy_port: 8012
-coolify_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ coolify_host_proxy_port }}"
+coolify_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ coolify_host_proxy_port }}"
 
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
@@ -411,7 +389,7 @@ playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/con
 playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"
 playbook_execution_ntfy_publish_script: "{{ inventory_dir | dirname }}/scripts/ntfy_publish.py"
 playbook_execution_ntfy_topic_registry_path: "{{ inventory_dir | dirname }}/config/ntfy/topics.yaml"
-playbook_execution_ntfy_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ntfy', 'internal') }}"
+playbook_execution_ntfy_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('ntfy', 'internal') }}"
 playbook_execution_ntfy_token_local_file: "{{ repo_shared_local_root }}/ntfy/ansible-token.txt"
 playbook_execution_ntfy_dedupe_state_file: "{{ repo_shared_local_root }}/state/ntfy/ansible-playbooks.json"
 playbook_execution_ntfy_start_topic: platform-ansible-warn

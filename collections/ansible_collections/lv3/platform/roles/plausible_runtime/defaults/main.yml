@@ -28,7 +28,7 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
-plausible_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('plausible') }}"
+plausible_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('plausible') }}"
 plausible_clickhouse_config_dir: "{{ plausible_site_dir }}/clickhouse"
 plausible_internal_base_url: "{{ platform_service_topology | platform_service_url('plausible', 'internal') }}"
 plausible_public_base_url: "https://{{ plausible_service_topology.public_hostname }}"
@@ -47,9 +47,9 @@ plausible_secret_key_base_remote_file: "{{ plausible_secret_dir }}/secret-key-ba
 plausible_bootstrap_user_password_remote_file: "{{ plausible_secret_dir }}/bootstrap-user-password.txt"
 plausible_mailbox_password_local_file: "{{ mail_platform_mailbox_password_local_file }}"
 plausible_smtp_host: 10.10.10.20
-plausible_smtp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port }}"
+plausible_smtp_port: "{{ hostvars[platform_topology_host].platform_port_assignments.mail_platform_internal_submission_port }}"
 plausible_smtp_username: server
-plausible_mailer_email: server@lv3.org
+plausible_mailer_email: server@{{ platform_domain }}
 plausible_mailer_name: LV3 Plausible
 plausible_mailer_adapter: Bamboo.SMTPAdapter
 plausible_bootstrap_user_email: baditaflorin@gmail.com
@@ -58,4 +58,4 @@ plausible_default_site_timezone: Europe/Bucharest
 plausible_disable_registration: true
 plausible_enable_email_verification: false
 plausible_verify_site_domain: "{{ (plausible_site_registrations | first).site_domain }}"
-plausible_site_registrations: "{{ hostvars['proxmox_florin'].plausible_site_registrations | default([]) }}"
+plausible_site_registrations: "{{ hostvars[platform_topology_host].plausible_site_registrations | default([]) }}"

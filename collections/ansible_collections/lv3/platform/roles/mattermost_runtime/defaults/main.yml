@@ -9,7 +9,7 @@ mattermost_server_port: "{{ platform_service_topology | platform_service_port('m
 mattermost_host_proxy_port: "{{ platform_service_topology | platform_service_port('mattermost', 'controller') }}"
 mattermost_database_name: mattermost
 mattermost_database_user: mattermost_admin
-mattermost_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+mattermost_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 mattermost_database_port: 5432
 mattermost_database_password_local_file: "{{ mattermost_local_artifact_dir }}/database-password.txt"
 mattermost_admin_username: ops

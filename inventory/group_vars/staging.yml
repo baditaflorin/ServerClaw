@@ -1,5 +1,5 @@
 smtp_host: mailpit
-smtp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_smtp_port | default(1025) }}"
+smtp_port: "{{ hostvars[platform_topology_host].platform_port_assignments.mailpit_smtp_port | default(1025) }}"
 smtp_starttls: false
 smtp_auth_enabled: false
 smtp_username: ""

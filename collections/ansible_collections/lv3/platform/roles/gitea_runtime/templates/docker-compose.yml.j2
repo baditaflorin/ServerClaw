@@ -32,7 +32,7 @@ services:
     env_file:
       - {{ gitea_env_file }}
     extra_hosts:
-      - "sso.lv3.org:{{ hostvars['nginx-lv3'].ansible_host }}"
+      - "sso.{{ platform_domain }}:{{ hostvars['nginx-lv3'].ansible_host }}"
     ports:
       - "{{ ansible_host }}:{{ gitea_http_port }}:3000"
     volumes:

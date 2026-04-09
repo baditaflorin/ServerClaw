@@ -193,7 +193,7 @@
       {{
         'http://' ~ glitchtip_alert_ntfy_username ~ ':'
         ~ ((lookup('ansible.builtin.file', glitchtip_ntfy_alertmanager_password_local_file) | trim) | urlencode)
-        ~ '@' ~ ansible_host ~ ':' ~ (hostvars['proxmox_florin'].platform_port_assignments.ntfy_port | string)
+        ~ '@' ~ ansible_host ~ ':' ~ (hostvars[platform_topology_host].platform_port_assignments.ntfy_port | string)
         ~ '/' ~ glitchtip_alert_ntfy_topic
         if glitchtip_ntfy_password_local.stat.exists
         else ''

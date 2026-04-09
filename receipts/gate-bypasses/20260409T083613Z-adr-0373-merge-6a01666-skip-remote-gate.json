@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T08:36:13Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "adr-0373-merge",
+  "commit": "6a01666f48dec8c60c805dbcc7ba85b54f7190e3",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Create missing env_file parent directory for API gateway secrets",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Same pattern as librechat_runtime directory creation",
+      "env_file path derived from compose_runtime_secret_root"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml"
+  }
+}

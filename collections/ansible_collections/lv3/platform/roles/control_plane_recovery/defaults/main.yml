@@ -47,7 +47,7 @@ control_plane_recovery_windmill_backup_database_inventory_host: >-
   {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
 control_plane_recovery_windmill_backup_database_host: >-
   {{
-    hostvars['proxmox_florin'].proxmox_guests
+    hostvars[platform_topology_host].proxmox_guests
     | selectattr('name', 'equalto', control_plane_recovery_windmill_backup_database_inventory_host)
     | map(attribute='ipv4')
     | first

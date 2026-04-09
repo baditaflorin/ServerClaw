@@ -2,8 +2,8 @@ schema_version: "1.0.0"
 environment: production
 refresh_interval_minutes: 60
 identity:
-  platform_name: lv3.org
-  operator: Florin Badita
+  platform_name: {{ platform_domain }}
+  operator: "{{ platform_operator_name }}"
   description: Single-node Proxmox homelab with repository-managed agentic operations automation.
 registered_agents:
   - agent_id: agent/observation-loop
@@ -34,13 +34,13 @@ agentic_architecture:
       endpoint: lv3 <instruction>
       adr: "0090"
     - component: Ops portal
-      endpoint: https://ops.lv3.org
+      endpoint: https://ops.{{ platform_domain }}
       adr: "0093"
     - component: Windmill workflows
-      endpoint: https://windmill.lv3.org
+      endpoint: https://windmill.{{ platform_domain }}
       adr: "0044"
     - component: API gateway
-      endpoint: https://api.lv3.org
+      endpoint: https://api.{{ platform_domain }}
       adr: "0092"
   pipeline:
     - Goal compiler (ADR 0112)

@@ -228,7 +228,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Exercise Matrix bridge management rooms by DMing the repo-managed bridge bots and waiting for a reply.",
     )
-    parser.add_argument("--base-url", required=True, help="Matrix base URL, for example https://matrix.lv3.org")
+    parser.add_argument("--base-url", required=True, help="Matrix base URL, for example https://matrix.localhost")
     parser.add_argument("--username", required=True)
     parser.add_argument("--password-file", required=True, type=Path)
     parser.add_argument("--access-token-file", type=Path, help="Optional local file used to reuse or persist a verified Matrix access token")

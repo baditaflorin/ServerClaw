@@ -1,8 +1,8 @@
 ---
 # _includes/dns_publication.yml
 # Purpose: Converge a single Hetzner DNS A record from the subdomain catalog.
-# Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.lv3.org")
-# Usage: import_playbook with -e service_dns_fqdn=data.lv3.org, or set in a vars file.
+# Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.{{ platform_domain }}")
+# Usage: import_playbook with -e service_dns_fqdn=data.{{ platform_domain }}, or set in a vars file.
 
 - name: "Ensure Hetzner DNS publication for {{ service_dns_fqdn }}"
   hosts: localhost

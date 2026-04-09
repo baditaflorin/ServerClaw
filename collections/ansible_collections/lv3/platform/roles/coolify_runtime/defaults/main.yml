@@ -31,15 +31,15 @@ coolify_dashboard_port: "{{ platform_service_topology | platform_service_port('c
 coolify_proxy_port: "{{ platform_service_topology | platform_service_port('coolify_apps', 'internal') }}"
 coolify_controller_url: "{{ platform_service_topology | platform_service_url('coolify', 'controller') }}"
 coolify_private_url: "http://{{ ansible_host }}:{{ coolify_dashboard_port }}"
-coolify_public_url: https://coolify.lv3.org
-coolify_apps_public_url: https://apps.lv3.org
-coolify_tunnel_host: "{{ hostvars['proxmox_florin'].ansible_host | default(hostvars['proxmox_florin'].management_ipv4 | default(''), true) }}"
+coolify_public_url: https://coolify.{{ platform_domain }}
+coolify_apps_public_url: https://apps.{{ platform_domain }}
+coolify_tunnel_host: "{{ hostvars[platform_topology_host].ansible_host | default(hostvars[platform_topology_host].management_ipv4 | default(''), true) }}"
 coolify_tunnel_user: ops
 coolify_bridge_subnet: 172.18.0.0/16
 coolify_bridge_gateway: 172.18.0.1
 
 coolify_root_username: LV3 Ops
-coolify_root_email: ops@lv3.org
+coolify_root_email: ops@{{ platform_domain }}
 coolify_api_token_name: lv3-automation
 coolify_api_allowed_ips:
   - 127.0.0.1
@@ -69,5 +69,5 @@ coolify_smoke_app_name: repo-smoke
 coolify_smoke_repo_url: https://github.com/coollabsio/coolify-examples
 coolify_smoke_repo_branch: main
 coolify_smoke_base_directory: static
-coolify_smoke_domain: http://apps.lv3.org
-coolify_smoke_alias_domain: http://repo-smoke.apps.lv3.org
+coolify_smoke_domain: http://apps.{{ platform_domain }}
+coolify_smoke_alias_domain: http://repo-smoke.apps.{{ platform_domain }}

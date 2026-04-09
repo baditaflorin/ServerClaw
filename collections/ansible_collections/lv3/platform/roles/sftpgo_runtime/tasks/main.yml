@@ -91,7 +91,7 @@
     set -euo pipefail
     if [ ! -s "{{ sftpgo_smoke_user_private_key_local_file }}" ]; then
       umask 077
-      ssh-keygen -q -t ed25519 -N '' -C "{{ sftpgo_smoke_user_username }}@lv3.org" -f "{{ sftpgo_smoke_user_private_key_local_file }}"
+      ssh-keygen -q -t ed25519 -N '' -C "{{ sftpgo_smoke_user_username }}@{{ platform_domain }}" -f "{{ sftpgo_smoke_user_private_key_local_file }}"
       echo changed
     fi
     if [ ! -s "{{ sftpgo_smoke_user_public_key_local_file }}" ]; then

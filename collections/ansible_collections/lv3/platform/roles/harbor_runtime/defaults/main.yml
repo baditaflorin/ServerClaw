@@ -25,7 +25,7 @@
 #   - Role: harbor_runtime — converges the Harbor stack and verification flow.
 #
 # Related ADRs: 0165, 0201
-harbor_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology.harbor }}"
+harbor_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology.harbor }}"
 harbor_public_hostname: "{{ harbor_service_topology.public_hostname }}"
 harbor_public_base_url: "https://{{ harbor_public_hostname }}"
 harbor_installer_root: "{{ harbor_site_dir }}/installer"
@@ -43,13 +43,13 @@ harbor_database_password_remote_file: "{{ harbor_secret_dir }}/database-password
 harbor_admin_password_local_file: "{{ harbor_local_artifact_dir }}/admin-password.txt"
 harbor_database_password_local_file: "{{ harbor_local_artifact_dir }}/database-password.txt"
 harbor_check_runner_robot_local_file: "{{ harbor_local_artifact_dir }}/check-runner-robot.json"
-harbor_http_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.harbor_port | default(8095) }}"
+harbor_http_port: "{{ hostvars[platform_topology_host].platform_port_assignments.harbor_port | default(8095) }}"
 harbor_prepare_with_trivy: true
 harbor_project_creation_restriction: adminonly
 harbor_trivy_security_check: vuln
 harbor_trivy_ignore_unfixed: false
 harbor_keycloak_local_admin_url: http://127.0.0.1:18080
-harbor_keycloak_public_base_url: https://sso.lv3.org
+harbor_keycloak_public_base_url: https://sso.{{ platform_domain }}
 harbor_keycloak_realm_name: lv3
 harbor_keycloak_bootstrap_admin_username: lv3-bootstrap-admin
 harbor_keycloak_bootstrap_admin_password_remote_file: /etc/lv3/keycloak/bootstrap-admin-password

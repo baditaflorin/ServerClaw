@@ -9,7 +9,7 @@
 #   - none
 #
 # Inputs (optional):
-#   - matrix_synapse_server_name (str, optional, default=matrix.lv3.org): Canonical Matrix server name.
+#   - matrix_synapse_server_name (str, optional, default=matrix.{{ platform_domain }}): Canonical Matrix server name.
 #   - matrix_synapse_admin_localpart (str, optional, default=ops): Bootstrap admin localpart.
 #   - matrix_synapse_disable_federation (bool, optional, default=true): Whether the repo-managed listener stays client-only.
 #
@@ -43,15 +43,15 @@ matrix_synapse_mautrix_whatsapp_registration_file: "{{ matrix_synapse_mautrix_wh
 matrix_synapse_mautrix_whatsapp_container_name: matrix-mautrix-whatsapp
 matrix_synapse_mautrix_discord_image: "{{ container_image_catalog.images.matrix_mautrix_discord_runtime.ref }}"
 matrix_synapse_mautrix_whatsapp_image: "{{ container_image_catalog.images.matrix_mautrix_whatsapp_runtime.ref }}"
-matrix_synapse_server_name: matrix.lv3.org
-matrix_synapse_public_hostname: "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.public_hostname }}"
-matrix_synapse_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
-matrix_synapse_host_proxy_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
-matrix_synapse_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
-matrix_synapse_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
-matrix_synapse_public_url: "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}"
-matrix_synapse_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}/"
-matrix_synapse_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+matrix_synapse_server_name: matrix.{{ platform_domain }}
+matrix_synapse_public_hostname: "{{ hostvars[platform_topology_host].platform_service_topology.matrix_synapse.public_hostname }}"
+matrix_synapse_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
+matrix_synapse_host_proxy_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
+matrix_synapse_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
+matrix_synapse_controller_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
+matrix_synapse_public_url: "{{ hostvars[platform_topology_host].platform_service_topology.matrix_synapse.urls.public }}"
+matrix_synapse_public_base_url: "{{ hostvars[platform_topology_host].platform_service_topology.matrix_synapse.urls.public }}/"
+matrix_synapse_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 matrix_synapse_database_port: 5432
 matrix_synapse_database_name: matrix_synapse
 matrix_synapse_database_user: matrix_synapse

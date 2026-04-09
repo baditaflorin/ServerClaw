@@ -10,4 +10,4 @@ groups:
         annotations:
           summary: Apache Tika is unreachable on the private runtime port.
           description: The Apache Tika readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-tika/
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-tika/

@@ -18,7 +18,7 @@ Examples
   python scripts/subdomain_tool.py list
   python scripts/subdomain_tool.py show --prefix gitea
   python scripts/subdomain_tool.py exposed
-  python scripts/subdomain_tool.py check --fqdn git.lv3.org
+  python scripts/subdomain_tool.py check --fqdn git.localhost
   python scripts/subdomain_tool.py summary
 """
 from __future__ import annotations

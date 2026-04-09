@@ -8,19 +8,19 @@ from pathlib import Path
 
 RUNNERS = {
     "ansible": {
-        "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+        "image": "registry.localhost/check-runner/ansible:2.17.10",
         "context": "docker/check-runners/ansible",
     },
     "python": {
-        "image": "registry.lv3.org/check-runner/python:3.12.10",
+        "image": "registry.localhost/check-runner/python:3.12.10",
         "context": "docker/check-runners/python",
     },
     "infra": {
-        "image": "registry.lv3.org/check-runner/infra:2026.03.23",
+        "image": "registry.localhost/check-runner/infra:2026.03.23",
         "context": "docker/check-runners/infra",
     },
     "security": {
-        "image": "registry.lv3.org/check-runner/security:2026.03.23",
+        "image": "registry.localhost/check-runner/security:2026.03.23",
         "context": "docker/check-runners/security",
     },
 }

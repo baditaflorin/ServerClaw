@@ -220,7 +220,7 @@ STATIC_OPS_PAGE_HELP: dict[str, dict[str, Any]] = {
 }
 
 
-def build_static_ops_page_help(page_path: str, docs_base_url: str = "https://docs.lv3.org") -> dict[str, Any]:
+def build_static_ops_page_help(page_path: str, docs_base_url: str = "https://docs.localhost") -> dict[str, Any]:
     payload = STATIC_OPS_PAGE_HELP.get(page_path, STATIC_OPS_PAGE_HELP["index.html"])
     return {
         "title": "Contextual Help",
@@ -276,7 +276,7 @@ CHANGELOG_PAGE_HELP: dict[str, dict[str, Any]] = {
 }
 
 
-def build_changelog_page_help(page_path: str, docs_base_url: str = "https://docs.lv3.org") -> dict[str, Any]:
+def build_changelog_page_help(page_path: str, docs_base_url: str = "https://docs.localhost") -> dict[str, Any]:
     if page_path.startswith("service/"):
         payload = {
             "summary": "Use this service timeline to confirm what changed, when it changed, and whether the latest receipt matches the current runtime.",

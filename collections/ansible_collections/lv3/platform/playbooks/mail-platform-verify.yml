@@ -38,7 +38,7 @@
 
     - name: Clear any previous Mailpit messages before the staging SMTP probe
       ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_http_port | default(8025) }}/api/v1/messages"
+        url: "http://127.0.0.1:{{ hostvars[platform_topology_host].platform_port_assignments.mailpit_http_port | default(8025) }}/api/v1/messages"
         method: DELETE
         status_code: 200
         return_content: true
@@ -52,19 +52,19 @@
   gather_facts: true
 
   tasks:
-    - name: Try SMTP probe to server mailbox through mail.lv3.org
+    - name: Try SMTP probe to server mailbox through mail.{{ platform_domain }}
       ansible.builtin.shell: |
         python3 - <<'PY'
         import smtplib
         from email.message import EmailMessage
 
         message = EmailMessage()
-        message['From'] = 'monitor-probe@lv3.org'
-        message['To'] = 'server@lv3.org'
+        message['From'] = 'monitor-probe@{{ platform_domain }}'
+        message['To'] = 'server@{{ platform_domain }}'
         message['Subject'] = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} public'
-        message.set_content('Inbound SMTP probe delivered through mail.lv3.org')
+        message.set_content('Inbound SMTP probe delivered through mail.{{ platform_domain }}')
 
-        with smtplib.SMTP('mail.lv3.org', 25, timeout=30) as client:
+        with smtplib.SMTP('mail.{{ platform_domain }}', 25, timeout=30) as client:
             client.send_message(message)
 
         print('sent')
@@ -83,8 +83,8 @@
         from email.message import EmailMessage
 
         message = EmailMessage()
-        message['From'] = 'monitor-probe@lv3.org'
-        message['To'] = 'server@lv3.org'
+        message['From'] = 'monitor-probe@{{ platform_domain }}'
+        message['To'] = 'server@{{ platform_domain }}'
         message['Subject'] = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} private'
         message.set_content('Inbound SMTP probe delivered through 10.10.10.92')
 
@@ -108,12 +108,12 @@
         from email.message import EmailMessage
 
         message = EmailMessage()
-        message['From'] = 'monitor-probe@lv3.org'
-        message['To'] = 'mailpit-staging@lv3.org'
+        message['From'] = 'monitor-probe@{{ platform_domain }}'
+        message['To'] = 'mailpit-staging@{{ platform_domain }}'
         message['Subject'] = 'LV3 staging Mailpit probe {{ mail_platform_probe_id | default("manual") }}'
         message.set_content('Staging mail verification was captured by Mailpit')
 
-        with smtplib.SMTP('{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}', {{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_smtp_port | default(1025) }}, timeout=30) as client:
+        with smtplib.SMTP('{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}', {{ hostvars[platform_topology_host].platform_port_assignments.mailpit_smtp_port | default(1025) }}, timeout=30) as client:
             client.send_message(message)
 
         print('sent')
@@ -345,7 +345,7 @@
 
     - name: Read the captured staging Mailpit messages
       ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_http_port | default(8025) }}/api/v1/messages"
+        url: "http://127.0.0.1:{{ hostvars[platform_topology_host].platform_port_assignments.mailpit_http_port | default(8025) }}/api/v1/messages"
         method: GET
         status_code: 200
       register: mailpit_staging_messages
@@ -371,7 +371,7 @@
           - mailpit_clear_messages.content == 'ok'
           - hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].mailpit_staging_probe.stdout == 'sent'
           - mailpit_staging_matching_messages | length == 1
-          - mailpit_staging_matching_messages[0].To[0].Address == 'mailpit-staging@lv3.org'
+          - mailpit_staging_matching_messages[0].To[0].Address == 'mailpit-staging@{{ platform_domain }}'
           - mailpit_staging_matching_messages[0].Snippet == 'Staging mail verification was captured by Mailpit'
         fail_msg: "The staging SMTP probe did not appear in Mailpit as expected."
       when: playbook_execution_env == 'staging'

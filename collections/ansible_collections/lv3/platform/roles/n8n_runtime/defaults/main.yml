@@ -15,11 +15,11 @@ n8n_container_name: n8n
 n8n_image: "{{ container_image_catalog.images.n8n_runtime.ref }}"
 n8n_network_mode: host
 n8n_requires_docker_nat: "{{ n8n_network_mode != 'host' }}"
-n8n_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('n8n', 'internal') }}"
-n8n_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('n8n', 'internal') }}"
-n8n_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.urls.public }}"
-n8n_public_hostname: "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.public_hostname }}"
-n8n_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+n8n_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('n8n', 'internal') }}"
+n8n_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('n8n', 'internal') }}"
+n8n_public_base_url: "{{ hostvars[platform_topology_host].platform_service_topology.n8n.urls.public }}"
+n8n_public_hostname: "{{ hostvars[platform_topology_host].platform_service_topology.n8n.public_hostname }}"
+n8n_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 n8n_database_port: 5432
 n8n_database_name: n8n
 n8n_database_user: n8n
@@ -29,7 +29,7 @@ n8n_owner_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flo
 n8n_encryption_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/encryption-key.txt
 n8n_owner_password_remote_file: "{{ n8n_secret_dir }}/owner-password.txt"
 n8n_encryption_key_remote_file: "{{ n8n_secret_dir }}/encryption-key.txt"
-n8n_owner_email: ops@lv3.org
+n8n_owner_email: ops@{{ platform_domain }}
 n8n_owner_first_name: Florin
 n8n_owner_last_name: Badita
 n8n_proxy_hops: 1

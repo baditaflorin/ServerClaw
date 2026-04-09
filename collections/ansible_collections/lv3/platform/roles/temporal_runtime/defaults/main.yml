@@ -16,7 +16,7 @@ temporal_dynamic_config_file: "{{ temporal_config_dir }}/dynamicconfig.yml"
 temporal_database_name: temporal
 temporal_visibility_database_name: temporal_visibility
 temporal_database_user: temporal
-temporal_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+temporal_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 temporal_database_password_local_file: "{{ temporal_local_artifact_dir }}/database-password.txt"
 temporal_schema_bootstrap_report_local_file: "{{ temporal_local_artifact_dir }}/schema-bootstrap-report.json"
 temporal_namespace_report_local_file: "{{ temporal_local_artifact_dir }}/namespace-report.json"
@@ -41,7 +41,7 @@ temporal_num_history_shards: 4
 temporal_cluster_name: active
 temporal_default_namespace: lv3
 temporal_default_namespace_retention: 168h
-temporal_namespace_owner_email: ops@lv3.org
+temporal_namespace_owner_email: ops@{{ platform_domain }}
 temporal_public_frontend_address: temporal-frontend:7233
 temporal_public_frontend_http_address: temporal-frontend:7243
 temporal_server_components:

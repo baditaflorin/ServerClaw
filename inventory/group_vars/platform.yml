@@ -1667,7 +1667,7 @@ platform_service_topology:
     service_name: nginx-edge
     owning_vm: nginx-lv3
     private_ip: 10.10.10.10
-    public_hostname: nginx.lv3.org
+    public_hostname: nginx.{{ platform_domain }}
     exposure_model: edge-static
     observability:
       guest_dashboard: true
@@ -1685,7 +1685,7 @@ platform_service_topology:
       kind: static
       slug: nginx
       title: LV3 Edge
-      description: NGINX is the public edge for published lv3.org services on this
+      description: NGINX is the public edge for published {{ platform_domain }} services on this
         platform.
       meta: Use the named subdomains for the actual service entry points exposed at
         the edge.
@@ -1697,12 +1697,12 @@ platform_service_topology:
     mobility_tier: anchor
     ports: {}
     urls:
-      public: https://nginx.lv3.org
+      public: https://nginx.{{ platform_domain }}
   grafana:
     service_name: grafana
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: grafana.lv3.org
+    public_hostname: grafana.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: true
@@ -1735,7 +1735,7 @@ platform_service_topology:
     ports:
       internal: 3000
     urls:
-      public: https://grafana.lv3.org
+      public: https://grafana.{{ platform_domain }}
       internal: http://10.10.10.40:3000
       influxdb: http://10.10.10.40:8086
       loki_push: http://10.10.10.40:3100/loki/api/v1/push
@@ -1747,7 +1747,7 @@ platform_service_topology:
     service_name: realtime
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: realtime.lv3.org
+    public_hostname: realtime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -1775,13 +1775,13 @@ platform_service_topology:
     ports:
       internal: 19999
     urls:
-      public: https://realtime.lv3.org
+      public: https://realtime.{{ platform_domain }}
       internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
     private_ip: 10.10.10.1
-    public_hostname: headscale.lv3.org
+    public_hostname: headscale.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -1807,7 +1807,7 @@ platform_service_topology:
     ports:
       internal: 8080
     urls:
-      public: https://headscale.lv3.org
+      public: https://headscale.{{ platform_domain }}
       internal: http://10.10.10.1:8080
   alertmanager:
     service_name: alertmanager
@@ -1831,7 +1831,7 @@ platform_service_topology:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
     private_ip: 100.64.0.1
-    public_hostname: proxmox.lv3.org
+    public_hostname: proxmox.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: false
@@ -1863,13 +1863,13 @@ platform_service_topology:
     ports:
       controller: 8006
     urls:
-      public: https://proxmox.lv3.org
+      public: https://proxmox.{{ platform_domain }}
       controller: https://100.64.0.1:8006/
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: docker.lv3.org
+    public_hostname: docker.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: true
@@ -1899,12 +1899,12 @@ platform_service_topology:
     mobility_tier: anchor
     ports: {}
     urls:
-      public: https://docker.lv3.org
+      public: https://docker.{{ platform_domain }}
   docker_build:
     service_name: docker-build
     owning_vm: docker-build-lv3
     private_ip: 10.10.10.30
-    public_hostname: build.lv3.org
+    public_hostname: build.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: true
@@ -1934,12 +1934,12 @@ platform_service_topology:
     mobility_tier: anchor
     ports: {}
     urls:
-      public: https://build.lv3.org
+      public: https://build.{{ platform_domain }}
   uptime_kuma:
     service_name: uptime-kuma
     owning_vm: runtime-general-lv3
     private_ip: 10.10.10.91
-    public_hostname: uptime.lv3.org
+    public_hostname: uptime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -1965,13 +1965,13 @@ platform_service_topology:
     ports:
       internal: 3001
     urls:
-      public: https://uptime.lv3.org
+      public: https://uptime.{{ platform_domain }}
       internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
     owning_vm: runtime-general-lv3
     private_ip: 10.10.10.91
-    public_hostname: status.lv3.org
+    public_hostname: status.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -1998,13 +1998,13 @@ platform_service_topology:
     ports:
       internal: 3001
     urls:
-      public: https://status.lv3.org
+      public: https://status.{{ platform_domain }}
       internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: mail.lv3.org
+    public_hostname: mail.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: false
@@ -2035,7 +2035,7 @@ platform_service_topology:
     ports:
       private_api: 8081
     urls:
-      public: https://mail.lv3.org
+      public: https://mail.{{ platform_domain }}
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
@@ -2061,7 +2061,7 @@ platform_service_topology:
     service_name: livekit
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: livekit.lv3.org
+    public_hostname: livekit.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2092,7 +2092,7 @@ platform_service_topology:
       media_tcp: 7881
       media_udp: 7882
     urls:
-      public: https://livekit.lv3.org
+      public: https://livekit.{{ platform_domain }}
       internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
@@ -2227,7 +2227,7 @@ platform_service_topology:
     service_name: nomad
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: scheduler.lv3.org
+    public_hostname: scheduler.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2249,7 +2249,7 @@ platform_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
     urls:
-      public: https://scheduler.lv3.org
+      public: https://scheduler.{{ platform_domain }}
       internal: https://10.10.10.40:4646
       controller: https://100.64.0.1:8013
     service_id: nomad
@@ -2265,7 +2265,7 @@ platform_service_topology:
     service_name: gitea
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: git.lv3.org
+    public_hostname: git.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2300,7 +2300,7 @@ platform_service_topology:
       internal: 3003
       controller: 3009
     urls:
-      public: https://git.lv3.org
+      public: https://git.{{ platform_domain }}
       internal: http://10.10.10.92:3003
       controller: http://100.64.0.1:3009
   mattermost:
@@ -2330,7 +2330,7 @@ platform_service_topology:
     service_name: matrix-synapse
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: matrix.lv3.org
+    public_hostname: matrix.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2361,7 +2361,7 @@ platform_service_topology:
       internal: 8008
       controller: 8015
     urls:
-      public: https://matrix.lv3.org
+      public: https://matrix.{{ platform_domain }}
       internal: http://10.10.10.20:8008
       controller: http://100.64.0.1:8015
   netbox:
@@ -2414,7 +2414,7 @@ platform_service_topology:
     service_name: searxng
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: search.lv3.org
+    public_hostname: search.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -2439,14 +2439,14 @@ platform_service_topology:
       internal: 8881
       controller: 80
     urls:
-      public: http://search.lv3.org
+      public: http://search.{{ platform_domain }}
       internal: http://10.10.10.20:8881
       controller: http://100.64.0.1:80
   langfuse:
     service_name: langfuse
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: langfuse.lv3.org
+    public_hostname: langfuse.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2473,13 +2473,13 @@ platform_service_topology:
     ports:
       internal: 3002
     urls:
-      public: https://langfuse.lv3.org
+      public: https://langfuse.{{ platform_domain }}
       internal: http://10.10.10.20:3002
   flagsmith:
     service_name: flagsmith
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: flags.lv3.org
+    public_hostname: flags.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2506,13 +2506,13 @@ platform_service_topology:
     ports:
       internal: 8017
     urls:
-      public: https://flags.lv3.org
+      public: https://flags.{{ platform_domain }}
       internal: http://10.10.10.20:8017
   plausible:
     service_name: plausible
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: analytics.lv3.org
+    public_hostname: analytics.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2541,14 +2541,14 @@ platform_service_topology:
     ports:
       internal: 8016
     urls:
-      public: https://analytics.lv3.org
+      public: https://analytics.{{ platform_domain }}
       internal: http://10.10.10.20:8016
   minio:
     service_name: minio
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: minio.lv3.org
-    console_public_hostname: minio-console.lv3.org
+    public_hostname: minio.{{ platform_domain }}
+    console_public_hostname: minio-console.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2588,15 +2588,15 @@ platform_service_topology:
       internal: 9010
       console: 9011
     urls:
-      public: https://minio.lv3.org
+      public: https://minio.{{ platform_domain }}
       internal: http://10.10.10.20:9010
       console_internal: http://10.10.10.20:9011
-      console_public: https://minio-console.lv3.org
+      console_public: https://minio-console.{{ platform_domain }}
   glitchtip:
     service_name: glitchtip
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: errors.lv3.org
+    public_hostname: errors.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2623,13 +2623,13 @@ platform_service_topology:
     ports:
       internal: 3005
     urls:
-      public: https://errors.lv3.org
+      public: https://errors.{{ platform_domain }}
       internal: http://10.10.10.20:3005
   lago:
     service_name: lago
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: billing.lv3.org
+    public_hostname: billing.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2660,14 +2660,14 @@ platform_service_topology:
       internal: 8100
       api: 8099
     urls:
-      public: https://billing.lv3.org
+      public: https://billing.{{ platform_domain }}
       internal: http://10.10.10.20:8100
       api: http://10.10.10.20:8099
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: agents.lv3.org
+    public_hostname: agents.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2694,13 +2694,13 @@ platform_service_topology:
     ports:
       internal: 8094
     urls:
-      public: https://agents.lv3.org
+      public: https://agents.{{ platform_domain }}
       internal: http://10.10.10.20:8094
   plane:
     service_name: plane
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: tasks.lv3.org
+    public_hostname: tasks.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2731,14 +2731,14 @@ platform_service_topology:
       internal: 8093
       controller: 8011
     urls:
-      public: https://tasks.lv3.org
+      public: https://tasks.{{ platform_domain }}
       internal: http://10.10.10.20:8093
       controller: http://100.64.0.1:8011
   woodpecker:
     service_name: woodpecker
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: ci.lv3.org
+    public_hostname: ci.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2769,14 +2769,14 @@ platform_service_topology:
       internal: 8102
       controller: 8017
     urls:
-      public: https://ci.lv3.org
+      public: https://ci.{{ platform_domain }}
       internal: http://10.10.10.20:8102
       controller: http://100.64.0.1:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: wiki.lv3.org
+    public_hostname: wiki.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2803,13 +2803,13 @@ platform_service_topology:
     ports:
       internal: 3006
     urls:
-      public: https://wiki.lv3.org
+      public: https://wiki.{{ platform_domain }}
       internal: http://10.10.10.20:3006
   grist:
     service_name: grist
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: grist.lv3.org
+    public_hostname: grist.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2836,13 +2836,13 @@ platform_service_topology:
     ports:
       internal: 8484
     urls:
-      public: https://grist.lv3.org
+      public: https://grist.{{ platform_domain }}
       internal: http://10.10.10.20:8484
   paperless:
     service_name: paperless
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: paperless.lv3.org
+    public_hostname: paperless.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2875,13 +2875,13 @@ platform_service_topology:
     ports:
       internal: 8018
     urls:
-      public: https://paperless.lv3.org
+      public: https://paperless.{{ platform_domain }}
       internal: http://10.10.10.20:8018
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: logs.lv3.org
+    public_hostname: logs.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2908,13 +2908,13 @@ platform_service_topology:
     ports:
       internal: 8089
     urls:
-      public: https://logs.lv3.org
+      public: https://logs.{{ platform_domain }}
       internal: http://10.10.10.20:8089
   excalidraw:
     service_name: excalidraw
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: draw.lv3.org
+    public_hostname: draw.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -2943,7 +2943,7 @@ platform_service_topology:
     ports:
       internal: 3095
     urls:
-      public: https://draw.lv3.org
+      public: https://draw.{{ platform_domain }}
       internal: http://10.10.10.20:3095
   open_webui:
     service_name: open-webui
@@ -3022,7 +3022,7 @@ platform_service_topology:
     service_name: librechat
     owning_vm: coolify-lv3
     private_ip: 10.10.10.70
-    public_hostname: chat.lv3.org
+    public_hostname: chat.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3049,7 +3049,7 @@ platform_service_topology:
     ports:
       internal: 8096
     urls:
-      public: https://chat.lv3.org
+      public: https://chat.{{ platform_domain }}
       internal: http://10.10.10.70:8096
   gotenberg:
     service_name: gotenberg
@@ -3073,7 +3073,7 @@ platform_service_topology:
     service_name: serverclaw
     owning_vm: coolify-lv3
     private_ip: 10.10.10.70
-    public_hostname: chat.lv3.org
+    public_hostname: chat.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3100,7 +3100,7 @@ platform_service_topology:
     ports:
       internal: 8096
     urls:
-      public: https://chat.lv3.org
+      public: https://chat.{{ platform_domain }}
       internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
@@ -3142,7 +3142,7 @@ platform_service_topology:
     service_name: n8n
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: n8n.lv3.org
+    public_hostname: n8n.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3168,13 +3168,13 @@ platform_service_topology:
     ports:
       internal: 5678
     urls:
-      public: https://n8n.lv3.org
+      public: https://n8n.{{ platform_domain }}
       internal: http://10.10.10.20:5678
   nextcloud:
     service_name: nextcloud
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: cloud.lv3.org
+    public_hostname: cloud.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3214,13 +3214,13 @@ platform_service_topology:
     ports:
       internal: 8084
     urls:
-      public: https://cloud.lv3.org
+      public: https://cloud.{{ platform_domain }}
       internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
     private_ip: 10.10.10.70
-    public_hostname: coolify.lv3.org
+    public_hostname: coolify.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3251,14 +3251,14 @@ platform_service_topology:
       internal: 8000
       controller: 8012
     urls:
-      public: https://coolify.lv3.org
+      public: https://coolify.{{ platform_domain }}
       internal: http://10.10.10.70:8000
       controller: http://100.64.0.1:8012
   coolify_apps:
     service_name: coolify-apps
     owning_vm: coolify-apps-lv3
     private_ip: 10.10.10.71
-    public_hostname: apps.lv3.org
+    public_hostname: apps.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3276,7 +3276,7 @@ platform_service_topology:
       kind: proxy
       upstream: https://10.10.10.71:443
       aliases:
-        - '*.apps.lv3.org'
+        - '*.apps.{{ platform_domain }}'
       crawl_policy_enabled: false
       security_headers_enabled: false
       preserve_upstream_security_headers: true
@@ -3289,13 +3289,13 @@ platform_service_topology:
     ports:
       internal: 443
     urls:
-      public: https://apps.lv3.org
+      public: https://apps.{{ platform_domain }}
       internal: https://10.10.10.71:443
   api_gateway:
     service_name: api-gateway
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: api.lv3.org
+    public_hostname: api.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3321,7 +3321,7 @@ platform_service_topology:
     ports:
       internal: 8083
     urls:
-      public: https://api.lv3.org
+      public: https://api.{{ platform_domain }}
       internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
@@ -3404,7 +3404,7 @@ platform_service_topology:
     service_name: keycloak
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: sso.lv3.org
+    public_hostname: sso.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3422,7 +3422,7 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8091
     urls:
-      public: https://sso.lv3.org
+      public: https://sso.{{ platform_domain }}
       internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
@@ -3436,7 +3436,7 @@ platform_service_topology:
     service_name: harbor
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: registry.lv3.org
+    public_hostname: registry.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3467,13 +3467,13 @@ platform_service_topology:
     ports:
       internal: 8095
     urls:
-      public: https://registry.lv3.org
+      public: https://registry.{{ platform_domain }}
       internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: ops.lv3.org
+    public_hostname: ops.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3499,13 +3499,13 @@ platform_service_topology:
     ports:
       internal: 8092
     urls:
-      public: https://ops.lv3.org
+      public: https://ops.{{ platform_domain }}
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
     owning_vm: runtime-general-lv3
     private_ip: 10.10.10.91
-    public_hostname: home.lv3.org
+    public_hostname: home.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3531,7 +3531,7 @@ platform_service_topology:
     ports:
       internal: 3090
     urls:
-      public: https://home.lv3.org
+      public: https://home.{{ platform_domain }}
       internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
@@ -3602,7 +3602,7 @@ platform_service_topology:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: ntfy.lv3.org
+    public_hostname: ntfy.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3632,7 +3632,7 @@ platform_service_topology:
     ports:
       internal: 2586
     urls:
-      public: https://ntfy.lv3.org
+      public: https://ntfy.{{ platform_domain }}
       internal: http://10.10.10.20:2586
   ntopng:
     service_name: ntopng
@@ -3684,7 +3684,7 @@ platform_service_topology:
     service_name: vaultwarden
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: vault.lv3.org
+    public_hostname: vault.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -3698,7 +3698,7 @@ platform_service_topology:
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
-      url: https://vault.lv3.org
+      url: https://vault.{{ platform_domain }}
     service_id: vaultwarden
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/vaultwarden.yml
@@ -3709,14 +3709,14 @@ platform_service_topology:
       internal: 8222
       controller: 443
     urls:
-      public: https://vault.lv3.org
+      public: https://vault.{{ platform_domain }}
       internal: https://10.10.10.92:8222
-      controller: https://vault.lv3.org
+      controller: https://vault.{{ platform_domain }}
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3
     private_ip: 10.10.10.55
-    public_hostname: database.lv3.org
+    public_hostname: database.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: true
@@ -3738,8 +3738,8 @@ platform_service_topology:
       internal: 5432
       controller: 5432
     urls:
-      public: https://database.lv3.org
-      internal: postgresql://database.lv3.org:5432
+      public: https://database.{{ platform_domain }}
+      internal: postgresql://database.{{ platform_domain }}:5432
       controller: postgresql://100.64.0.1:5432
   backup_pbs:
     service_name: backup-pbs
@@ -3761,7 +3761,7 @@ platform_service_topology:
     service_name: directus
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: data.lv3.org
+    public_hostname: data.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3788,13 +3788,13 @@ platform_service_topology:
     ports:
       internal: 8055
     urls:
-      public: https://data.lv3.org
+      public: https://data.{{ platform_domain }}
       internal: http://10.10.10.20:8055
   jupyterhub:
     service_name: jupyterhub
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: notebooks.lv3.org
+    public_hostname: notebooks.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3824,13 +3824,13 @@ platform_service_topology:
     ports:
       internal: 8097
     urls:
-      public: https://notebooks.lv3.org
+      public: https://notebooks.{{ platform_domain }}
       internal: http://10.10.10.20:8097
   label_studio:
     service_name: label_studio
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: annotate.lv3.org
+    public_hostname: annotate.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3857,13 +3857,13 @@ platform_service_topology:
     ports:
       internal: 8110
     urls:
-      public: https://annotate.lv3.org
+      public: https://annotate.{{ platform_domain }}
       internal: http://10.10.10.20:8110
   superset:
     service_name: superset
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: bi.lv3.org
+    public_hostname: bi.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3890,13 +3890,13 @@ platform_service_topology:
     ports:
       internal: 8105
     urls:
-      public: https://bi.lv3.org
+      public: https://bi.{{ platform_domain }}
       internal: http://10.10.10.20:8105
   repowise:
     service_name: repowise
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: repowise.lv3.org
+    public_hostname: repowise.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -3916,20 +3916,20 @@ platform_service_topology:
     service_id: repowise
     ports: {}
     urls:
-      public: https://repowise.lv3.org
+      public: https://repowise.{{ platform_domain }}
 platform_session_authority:
-  authority_hostname: ops.lv3.org
+  authority_hostname: ops.{{ platform_domain }}
   ops_portal_client_id: ops-portal-oauth
-  keycloak_logout_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout
-  oauth2_proxy_sign_out_url: https://ops.lv3.org/oauth2/sign_out
+  keycloak_logout_url: https://sso.{{ platform_domain }}/realms/lv3/protocol/openid-connect/logout
+  oauth2_proxy_sign_out_url: https://ops.{{ platform_domain }}/oauth2/sign_out
   shared_logout_path: /.well-known/lv3/session/logout
-  shared_logout_url: https://ops.lv3.org/.well-known/lv3/session/logout
+  shared_logout_url: https://ops.{{ platform_domain }}/.well-known/lv3/session/logout
   shared_proxy_cleanup_path: /.well-known/lv3/session/proxy-logout
-  shared_proxy_cleanup_url: https://ops.lv3.org/.well-known/lv3/session/proxy-logout
+  shared_proxy_cleanup_url: https://ops.{{ platform_domain }}/.well-known/lv3/session/proxy-logout
   shared_logged_out_path: /.well-known/lv3/session/logged-out
-  shared_logged_out_url: https://ops.lv3.org/.well-known/lv3/session/logged-out
+  shared_logged_out_url: https://ops.{{ platform_domain }}/.well-known/lv3/session/logged-out
   cookie_name: "_lv3_ops_portal_proxy"
-  cookie_domain: ".lv3.org"
+  cookie_domain: ".{{ platform_domain }}"
 platform_dns_records:
   public: &id001
     - name: '@'
@@ -4118,7 +4118,7 @@ platform_dns_records:
       ttl: 60
     - name: '@'
       type: MX
-      value: 10 mail.lv3.org.
+      value: 10 mail.{{ platform_domain }}.
       ttl: 300
     - name: '@'
       type: TXT
@@ -4126,7 +4126,7 @@ platform_dns_records:
       ttl: 300
     - name: _dmarc
       type: TXT
-      value: '"v=DMARC1; p=quarantine; rua=mailto:baditaflorin@gmail.com"'
+      value: "\"v=DMARC1; p=quarantine; rua=mailto:{{ platform_operator_email }}\""
       ttl: 300
     - name: brevo1._domainkey
       type: CNAME
@@ -4183,7 +4183,7 @@ public_edge_service_topology:
     service_name: nginx-edge
     owning_vm: nginx-lv3
     private_ip: 10.10.10.10
-    public_hostname: nginx.lv3.org
+    public_hostname: nginx.{{ platform_domain }}
     exposure_model: edge-static
     observability:
       guest_dashboard: true
@@ -4201,7 +4201,7 @@ public_edge_service_topology:
       kind: static
       slug: nginx
       title: LV3 Edge
-      description: NGINX is the public edge for published lv3.org services on this
+      description: NGINX is the public edge for published {{ platform_domain }} services on this
         platform.
       meta: Use the named subdomains for the actual service entry points exposed at
         the edge.
@@ -4213,12 +4213,12 @@ public_edge_service_topology:
     mobility_tier: anchor
     ports: {}
     urls:
-      public: https://nginx.lv3.org
+      public: https://nginx.{{ platform_domain }}
   grafana:
     service_name: grafana
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: grafana.lv3.org
+    public_hostname: grafana.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: true
@@ -4251,7 +4251,7 @@ public_edge_service_topology:
     ports:
       internal: 3000
     urls:
-      public: https://grafana.lv3.org
+      public: https://grafana.{{ platform_domain }}
       internal: http://10.10.10.40:3000
       influxdb: http://10.10.10.40:8086
       loki_push: http://10.10.10.40:3100/loki/api/v1/push
@@ -4263,7 +4263,7 @@ public_edge_service_topology:
     service_name: realtime
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: realtime.lv3.org
+    public_hostname: realtime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4291,13 +4291,13 @@ public_edge_service_topology:
     ports:
       internal: 19999
     urls:
-      public: https://realtime.lv3.org
+      public: https://realtime.{{ platform_domain }}
       internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
     private_ip: 10.10.10.1
-    public_hostname: headscale.lv3.org
+    public_hostname: headscale.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4323,7 +4323,7 @@ public_edge_service_topology:
     ports:
       internal: 8080
     urls:
-      public: https://headscale.lv3.org
+      public: https://headscale.{{ platform_domain }}
       internal: http://10.10.10.1:8080
   alertmanager:
     service_name: alertmanager
@@ -4347,7 +4347,7 @@ public_edge_service_topology:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
     private_ip: 100.64.0.1
-    public_hostname: proxmox.lv3.org
+    public_hostname: proxmox.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: false
@@ -4379,13 +4379,13 @@ public_edge_service_topology:
     ports:
       controller: 8006
     urls:
-      public: https://proxmox.lv3.org
+      public: https://proxmox.{{ platform_domain }}
       controller: https://100.64.0.1:8006/
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: docker.lv3.org
+    public_hostname: docker.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: true
@@ -4415,12 +4415,12 @@ public_edge_service_topology:
     mobility_tier: anchor
     ports: {}
     urls:
-      public: https://docker.lv3.org
+      public: https://docker.{{ platform_domain }}
   docker_build:
     service_name: docker-build
     owning_vm: docker-build-lv3
     private_ip: 10.10.10.30
-    public_hostname: build.lv3.org
+    public_hostname: build.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: true
@@ -4450,12 +4450,12 @@ public_edge_service_topology:
     mobility_tier: anchor
     ports: {}
     urls:
-      public: https://build.lv3.org
+      public: https://build.{{ platform_domain }}
   uptime_kuma:
     service_name: uptime-kuma
     owning_vm: runtime-general-lv3
     private_ip: 10.10.10.91
-    public_hostname: uptime.lv3.org
+    public_hostname: uptime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4481,13 +4481,13 @@ public_edge_service_topology:
     ports:
       internal: 3001
     urls:
-      public: https://uptime.lv3.org
+      public: https://uptime.{{ platform_domain }}
       internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
     owning_vm: runtime-general-lv3
     private_ip: 10.10.10.91
-    public_hostname: status.lv3.org
+    public_hostname: status.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4514,13 +4514,13 @@ public_edge_service_topology:
     ports:
       internal: 3001
     urls:
-      public: https://status.lv3.org
+      public: https://status.{{ platform_domain }}
       internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: mail.lv3.org
+    public_hostname: mail.{{ platform_domain }}
     exposure_model: informational-only
     observability:
       guest_dashboard: false
@@ -4551,7 +4551,7 @@ public_edge_service_topology:
     ports:
       private_api: 8081
     urls:
-      public: https://mail.lv3.org
+      public: https://mail.{{ platform_domain }}
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
@@ -4577,7 +4577,7 @@ public_edge_service_topology:
     service_name: livekit
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: livekit.lv3.org
+    public_hostname: livekit.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4608,7 +4608,7 @@ public_edge_service_topology:
       media_tcp: 7881
       media_udp: 7882
     urls:
-      public: https://livekit.lv3.org
+      public: https://livekit.{{ platform_domain }}
       internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
@@ -4743,7 +4743,7 @@ public_edge_service_topology:
     service_name: nomad
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: scheduler.lv3.org
+    public_hostname: scheduler.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4765,7 +4765,7 @@ public_edge_service_topology:
       kind: tailscale-tcp-proxy
       url: https://100.64.0.1:8013
     urls:
-      public: https://scheduler.lv3.org
+      public: https://scheduler.{{ platform_domain }}
       internal: https://10.10.10.40:4646
       controller: https://100.64.0.1:8013
     service_id: nomad
@@ -4781,7 +4781,7 @@ public_edge_service_topology:
     service_name: gitea
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: git.lv3.org
+    public_hostname: git.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4816,7 +4816,7 @@ public_edge_service_topology:
       internal: 3003
       controller: 3009
     urls:
-      public: https://git.lv3.org
+      public: https://git.{{ platform_domain }}
       internal: http://10.10.10.92:3003
       controller: http://100.64.0.1:3009
   mattermost:
@@ -4846,7 +4846,7 @@ public_edge_service_topology:
     service_name: matrix-synapse
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: matrix.lv3.org
+    public_hostname: matrix.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4877,7 +4877,7 @@ public_edge_service_topology:
       internal: 8008
       controller: 8015
     urls:
-      public: https://matrix.lv3.org
+      public: https://matrix.{{ platform_domain }}
       internal: http://10.10.10.20:8008
       controller: http://100.64.0.1:8015
   netbox:
@@ -4930,7 +4930,7 @@ public_edge_service_topology:
     service_name: searxng
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: search.lv3.org
+    public_hostname: search.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -4955,14 +4955,14 @@ public_edge_service_topology:
       internal: 8881
       controller: 80
     urls:
-      public: http://search.lv3.org
+      public: http://search.{{ platform_domain }}
       internal: http://10.10.10.20:8881
       controller: http://100.64.0.1:80
   langfuse:
     service_name: langfuse
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: langfuse.lv3.org
+    public_hostname: langfuse.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4989,13 +4989,13 @@ public_edge_service_topology:
     ports:
       internal: 3002
     urls:
-      public: https://langfuse.lv3.org
+      public: https://langfuse.{{ platform_domain }}
       internal: http://10.10.10.20:3002
   flagsmith:
     service_name: flagsmith
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: flags.lv3.org
+    public_hostname: flags.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5022,13 +5022,13 @@ public_edge_service_topology:
     ports:
       internal: 8017
     urls:
-      public: https://flags.lv3.org
+      public: https://flags.{{ platform_domain }}
       internal: http://10.10.10.20:8017
   plausible:
     service_name: plausible
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: analytics.lv3.org
+    public_hostname: analytics.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5057,14 +5057,14 @@ public_edge_service_topology:
     ports:
       internal: 8016
     urls:
-      public: https://analytics.lv3.org
+      public: https://analytics.{{ platform_domain }}
       internal: http://10.10.10.20:8016
   minio:
     service_name: minio
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: minio.lv3.org
-    console_public_hostname: minio-console.lv3.org
+    public_hostname: minio.{{ platform_domain }}
+    console_public_hostname: minio-console.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5104,15 +5104,15 @@ public_edge_service_topology:
       internal: 9010
       console: 9011
     urls:
-      public: https://minio.lv3.org
+      public: https://minio.{{ platform_domain }}
       internal: http://10.10.10.20:9010
       console_internal: http://10.10.10.20:9011
-      console_public: https://minio-console.lv3.org
+      console_public: https://minio-console.{{ platform_domain }}
   glitchtip:
     service_name: glitchtip
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: errors.lv3.org
+    public_hostname: errors.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5139,13 +5139,13 @@ public_edge_service_topology:
     ports:
       internal: 3005
     urls:
-      public: https://errors.lv3.org
+      public: https://errors.{{ platform_domain }}
       internal: http://10.10.10.20:3005
   lago:
     service_name: lago
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: billing.lv3.org
+    public_hostname: billing.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5176,14 +5176,14 @@ public_edge_service_topology:
       internal: 8100
       api: 8099
     urls:
-      public: https://billing.lv3.org
+      public: https://billing.{{ platform_domain }}
       internal: http://10.10.10.20:8100
       api: http://10.10.10.20:8099
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: agents.lv3.org
+    public_hostname: agents.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5210,13 +5210,13 @@ public_edge_service_topology:
     ports:
       internal: 8094
     urls:
-      public: https://agents.lv3.org
+      public: https://agents.{{ platform_domain }}
       internal: http://10.10.10.20:8094
   plane:
     service_name: plane
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: tasks.lv3.org
+    public_hostname: tasks.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5247,14 +5247,14 @@ public_edge_service_topology:
       internal: 8093
       controller: 8011
     urls:
-      public: https://tasks.lv3.org
+      public: https://tasks.{{ platform_domain }}
       internal: http://10.10.10.20:8093
       controller: http://100.64.0.1:8011
   woodpecker:
     service_name: woodpecker
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: ci.lv3.org
+    public_hostname: ci.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5285,14 +5285,14 @@ public_edge_service_topology:
       internal: 8102
       controller: 8017
     urls:
-      public: https://ci.lv3.org
+      public: https://ci.{{ platform_domain }}
       internal: http://10.10.10.20:8102
       controller: http://100.64.0.1:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: wiki.lv3.org
+    public_hostname: wiki.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5319,13 +5319,13 @@ public_edge_service_topology:
     ports:
       internal: 3006
     urls:
-      public: https://wiki.lv3.org
+      public: https://wiki.{{ platform_domain }}
       internal: http://10.10.10.20:3006
   grist:
     service_name: grist
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: grist.lv3.org
+    public_hostname: grist.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5352,13 +5352,13 @@ public_edge_service_topology:
     ports:
       internal: 8484
     urls:
-      public: https://grist.lv3.org
+      public: https://grist.{{ platform_domain }}
       internal: http://10.10.10.20:8484
   paperless:
     service_name: paperless
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: paperless.lv3.org
+    public_hostname: paperless.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5391,13 +5391,13 @@ public_edge_service_topology:
     ports:
       internal: 8018
     urls:
-      public: https://paperless.lv3.org
+      public: https://paperless.{{ platform_domain }}
       internal: http://10.10.10.20:8018
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: logs.lv3.org
+    public_hostname: logs.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5424,13 +5424,13 @@ public_edge_service_topology:
     ports:
       internal: 8089
     urls:
-      public: https://logs.lv3.org
+      public: https://logs.{{ platform_domain }}
       internal: http://10.10.10.20:8089
   excalidraw:
     service_name: excalidraw
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: draw.lv3.org
+    public_hostname: draw.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5459,7 +5459,7 @@ public_edge_service_topology:
     ports:
       internal: 3095
     urls:
-      public: https://draw.lv3.org
+      public: https://draw.{{ platform_domain }}
       internal: http://10.10.10.20:3095
   open_webui:
     service_name: open-webui
@@ -5538,7 +5538,7 @@ public_edge_service_topology:
     service_name: librechat
     owning_vm: coolify-lv3
     private_ip: 10.10.10.70
-    public_hostname: chat.lv3.org
+    public_hostname: chat.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5565,7 +5565,7 @@ public_edge_service_topology:
     ports:
       internal: 8096
     urls:
-      public: https://chat.lv3.org
+      public: https://chat.{{ platform_domain }}
       internal: http://10.10.10.70:8096
   gotenberg:
     service_name: gotenberg
@@ -5589,7 +5589,7 @@ public_edge_service_topology:
     service_name: serverclaw
     owning_vm: coolify-lv3
     private_ip: 10.10.10.70
-    public_hostname: chat.lv3.org
+    public_hostname: chat.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5616,7 +5616,7 @@ public_edge_service_topology:
     ports:
       internal: 8096
     urls:
-      public: https://chat.lv3.org
+      public: https://chat.{{ platform_domain }}
       internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
@@ -5658,7 +5658,7 @@ public_edge_service_topology:
     service_name: n8n
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: n8n.lv3.org
+    public_hostname: n8n.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5684,13 +5684,13 @@ public_edge_service_topology:
     ports:
       internal: 5678
     urls:
-      public: https://n8n.lv3.org
+      public: https://n8n.{{ platform_domain }}
       internal: http://10.10.10.20:5678
   nextcloud:
     service_name: nextcloud
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: cloud.lv3.org
+    public_hostname: cloud.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5730,13 +5730,13 @@ public_edge_service_topology:
     ports:
       internal: 8084
     urls:
-      public: https://cloud.lv3.org
+      public: https://cloud.{{ platform_domain }}
       internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
     private_ip: 10.10.10.70
-    public_hostname: coolify.lv3.org
+    public_hostname: coolify.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5767,14 +5767,14 @@ public_edge_service_topology:
       internal: 8000
       controller: 8012
     urls:
-      public: https://coolify.lv3.org
+      public: https://coolify.{{ platform_domain }}
       internal: http://10.10.10.70:8000
       controller: http://100.64.0.1:8012
   coolify_apps:
     service_name: coolify-apps
     owning_vm: coolify-apps-lv3
     private_ip: 10.10.10.71
-    public_hostname: apps.lv3.org
+    public_hostname: apps.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5792,7 +5792,7 @@ public_edge_service_topology:
       kind: proxy
       upstream: https://10.10.10.71:443
       aliases:
-        - '*.apps.lv3.org'
+        - '*.apps.{{ platform_domain }}'
       crawl_policy_enabled: false
       security_headers_enabled: false
       preserve_upstream_security_headers: true
@@ -5805,13 +5805,13 @@ public_edge_service_topology:
     ports:
       internal: 443
     urls:
-      public: https://apps.lv3.org
+      public: https://apps.{{ platform_domain }}
       internal: https://10.10.10.71:443
   api_gateway:
     service_name: api-gateway
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: api.lv3.org
+    public_hostname: api.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5837,7 +5837,7 @@ public_edge_service_topology:
     ports:
       internal: 8083
     urls:
-      public: https://api.lv3.org
+      public: https://api.{{ platform_domain }}
       internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
@@ -5920,7 +5920,7 @@ public_edge_service_topology:
     service_name: keycloak
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: sso.lv3.org
+    public_hostname: sso.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5938,7 +5938,7 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.20:8091
     urls:
-      public: https://sso.lv3.org
+      public: https://sso.{{ platform_domain }}
       internal: http://10.10.10.20:8091
     service_id: keycloak
     runtime_pool: runtime-control
@@ -5952,7 +5952,7 @@ public_edge_service_topology:
     service_name: harbor
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: registry.lv3.org
+    public_hostname: registry.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -5983,13 +5983,13 @@ public_edge_service_topology:
     ports:
       internal: 8095
     urls:
-      public: https://registry.lv3.org
+      public: https://registry.{{ platform_domain }}
       internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: ops.lv3.org
+    public_hostname: ops.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6015,13 +6015,13 @@ public_edge_service_topology:
     ports:
       internal: 8092
     urls:
-      public: https://ops.lv3.org
+      public: https://ops.{{ platform_domain }}
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
     owning_vm: runtime-general-lv3
     private_ip: 10.10.10.91
-    public_hostname: home.lv3.org
+    public_hostname: home.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6047,7 +6047,7 @@ public_edge_service_topology:
     ports:
       internal: 3090
     urls:
-      public: https://home.lv3.org
+      public: https://home.{{ platform_domain }}
       internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
@@ -6118,7 +6118,7 @@ public_edge_service_topology:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: ntfy.lv3.org
+    public_hostname: ntfy.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6148,7 +6148,7 @@ public_edge_service_topology:
     ports:
       internal: 2586
     urls:
-      public: https://ntfy.lv3.org
+      public: https://ntfy.{{ platform_domain }}
       internal: http://10.10.10.20:2586
   ntopng:
     service_name: ntopng
@@ -6200,7 +6200,7 @@ public_edge_service_topology:
     service_name: vaultwarden
     owning_vm: runtime-control-lv3
     private_ip: 10.10.10.92
-    public_hostname: vault.lv3.org
+    public_hostname: vault.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -6214,7 +6214,7 @@ public_edge_service_topology:
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
-      url: https://vault.lv3.org
+      url: https://vault.{{ platform_domain }}
     service_id: vaultwarden
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/vaultwarden.yml
@@ -6225,14 +6225,14 @@ public_edge_service_topology:
       internal: 8222
       controller: 443
     urls:
-      public: https://vault.lv3.org
+      public: https://vault.{{ platform_domain }}
       internal: https://10.10.10.92:8222
-      controller: https://vault.lv3.org
+      controller: https://vault.{{ platform_domain }}
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3
     private_ip: 10.10.10.55
-    public_hostname: database.lv3.org
+    public_hostname: database.{{ platform_domain }}
     exposure_model: private-only
     observability:
       guest_dashboard: true
@@ -6254,8 +6254,8 @@ public_edge_service_topology:
       internal: 5432
       controller: 5432
     urls:
-      public: https://database.lv3.org
-      internal: postgresql://database.lv3.org:5432
+      public: https://database.{{ platform_domain }}
+      internal: postgresql://database.{{ platform_domain }}:5432
       controller: postgresql://100.64.0.1:5432
   backup_pbs:
     service_name: backup-pbs
@@ -6277,7 +6277,7 @@ public_edge_service_topology:
     service_name: directus
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: data.lv3.org
+    public_hostname: data.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6304,13 +6304,13 @@ public_edge_service_topology:
     ports:
       internal: 8055
     urls:
-      public: https://data.lv3.org
+      public: https://data.{{ platform_domain }}
       internal: http://10.10.10.20:8055
   jupyterhub:
     service_name: jupyterhub
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: notebooks.lv3.org
+    public_hostname: notebooks.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6340,13 +6340,13 @@ public_edge_service_topology:
     ports:
       internal: 8097
     urls:
-      public: https://notebooks.lv3.org
+      public: https://notebooks.{{ platform_domain }}
       internal: http://10.10.10.20:8097
   label_studio:
     service_name: label_studio
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: annotate.lv3.org
+    public_hostname: annotate.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6373,13 +6373,13 @@ public_edge_service_topology:
     ports:
       internal: 8110
     urls:
-      public: https://annotate.lv3.org
+      public: https://annotate.{{ platform_domain }}
       internal: http://10.10.10.20:8110
   superset:
     service_name: superset
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: bi.lv3.org
+    public_hostname: bi.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6406,13 +6406,13 @@ public_edge_service_topology:
     ports:
       internal: 8105
     urls:
-      public: https://bi.lv3.org
+      public: https://bi.{{ platform_domain }}
       internal: http://10.10.10.20:8105
   repowise:
     service_name: repowise
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
-    public_hostname: repowise.lv3.org
+    public_hostname: repowise.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -6432,12 +6432,12 @@ public_edge_service_topology:
     service_id: repowise
     ports: {}
     urls:
-      public: https://repowise.lv3.org
+      public: https://repowise.{{ platform_domain }}
 uptime_kuma_service_topology:
   service_name: uptime-kuma
   owning_vm: runtime-general-lv3
   private_ip: 10.10.10.91
-  public_hostname: uptime.lv3.org
+  public_hostname: uptime.{{ platform_domain }}
   exposure_model: edge-published
   observability:
     guest_dashboard: false
@@ -6463,10 +6463,10 @@ uptime_kuma_service_topology:
   ports:
     internal: 3001
   urls:
-    public: https://uptime.lv3.org
+    public: https://uptime.{{ platform_domain }}
     internal: http://10.10.10.91:3001
 hetzner_dns_records: *id001
-platform_postgres_host: database.lv3.org
+platform_postgres_host: database.{{ platform_domain }}
 openbao_postgres_host: 10.10.10.50
 openbao_http_extra_bind_addresses:
   - 10.10.10.92
@@ -6506,10 +6506,10 @@ woodpecker_host_proxy_port: 8017
 woodpecker_private_base_url: http://10.10.10.20:8102
 woodpecker_controller_url: http://100.64.0.1:8017
 api_gateway_internal_port: 8083
-api_gateway_public_url: https://api.lv3.org
+api_gateway_public_url: https://api.{{ platform_domain }}
 api_gateway_internal_url: http://10.10.10.92:8083
 headscale_http_port: 8080
-headscale_public_url: https://headscale.lv3.org
+headscale_public_url: https://headscale.{{ platform_domain }}
 headscale_internal_url: http://10.10.10.1:8080
 ntopng_proxy_port: 3001
 ntopng_operator_url: http://100.64.0.1:3001
@@ -6521,14 +6521,14 @@ matrix_synapse_port: 8008
 matrix_synapse_host_proxy_port: 8015
 matrix_synapse_private_base_url: http://10.10.10.20:8008
 matrix_synapse_controller_url: http://100.64.0.1:8015
-matrix_synapse_public_url: https://matrix.lv3.org
+matrix_synapse_public_url: https://matrix.{{ platform_domain }}
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
-gitea_root_url: https://git.lv3.org
+gitea_root_url: https://git.{{ platform_domain }}
 gitea_private_base_url: http://10.10.10.92:3003
 gitea_controller_url: http://100.64.0.1:3009
-minio_public_url: https://minio.lv3.org
-minio_console_public_url: https://minio-console.lv3.org
+minio_public_url: https://minio.{{ platform_domain }}
+minio_console_public_url: https://minio-console.{{ platform_domain }}
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
 platform_context_private_url: http://127.0.0.1:8010
@@ -6536,7 +6536,7 @@ platform_context_controller_url: http://100.64.0.1:8010
 portainer_host_proxy_port: 9444
 portainer_controller_url: https://100.64.0.1:9444
 vaultwarden_https_port: 8222
-vaultwarden_controller_url: https://vault.lv3.org
+vaultwarden_controller_url: https://vault.{{ platform_domain }}
 step_ca_api_port: 9000
 step_ca_proxy_port: 9443
 step_ca_internal_url: https://10.10.10.92:9000
@@ -6657,11 +6657,11 @@ mail_platform_internal_submission_port: 1587
 # Example:
 #   neko_instances:
 #     florin:
-#       email: florin@lv3.org
+#       email: florin@{{ platform_domain }}
 #       port: 8080
 #       udp_range: "50000-52999"
 #     alice:
-#       email: alice@lv3.org
+#       email: alice@{{ platform_domain }}
 #       port: 8081
 #       udp_range: "53000-55999"
 neko_instances:
@@ -6674,11 +6674,11 @@ neko_instances:
     port: 8081
     udp_range: "51000-51999"
   browser_smoke:
-    email: browser.smoke@lv3.org
+    email: browser.smoke@{{ platform_domain }}
     port: 8083
     udp_range: "53000-53999"
   demo-20260327-0430:
-    email: demo-20260327-0430@lv3.org
+    email: demo-20260327-0430@{{ platform_domain }}
     port: 8084
     udp_range: "54000-54999"
   florin:
@@ -6690,11 +6690,11 @@ neko_instances:
     port: 8085
     udp_range: "55000-55999"
   outline_automation:
-    email: outline.automation@lv3.org
+    email: outline.automation@{{ platform_domain }}
     port: 8086
     udp_range: "56000-56999"
   test:
-    email: test@lv3.org
+    email: test@{{ platform_domain }}
     port: 8087
     udp_range: "57000-57999"
   baditaflorin_tmp003:

@@ -10,15 +10,15 @@
 # from platform_service_registry — ADR 0373.
 one_api_database_name: oneapi
 one_api_database_user: oneapi
-one_api_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+one_api_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 one_api_database_password_local_file: "{{ repo_shared_local_root }}/one-api/database-password.txt"
 one_api_session_secret_local_file: "{{ repo_shared_local_root }}/one-api/session-secret.txt"
 one_api_root_access_token_local_file: "{{ repo_shared_local_root }}/one-api/root-access-token.txt"
 one_api_root_password_local_file: "{{ repo_shared_local_root }}/one-api/root-password.txt"
-one_api_internal_http_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.one_api_port }}"
+one_api_internal_http_port: "{{ hostvars[platform_topology_host].platform_port_assignments.one_api_port }}"
 one_api_controller_url: >-
-  http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{
-    hostvars['proxmox_florin'].platform_port_assignments.one_api_host_proxy_port
+  http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{
+    hostvars[platform_topology_host].platform_port_assignments.one_api_host_proxy_port
   }}
 one_api_local_url: "http://127.0.0.1:{{ one_api_internal_http_port }}"
 one_api_root_user_display_name: LV3 Platform Root

@@ -20,7 +20,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://data.lv3.org/server/health
+    - https://data.{{ platform_domain }}/server/health
   labels:
     service_id: directus
     slo_id: directus-availability
@@ -34,7 +34,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://draw.lv3.org
+    - https://draw.{{ platform_domain }}
   labels:
     service_id: excalidraw
     slo_id: excalidraw-availability
@@ -55,49 +55,49 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://errors.lv3.org/api/0/internal/health/
+    - https://errors.{{ platform_domain }}/api/0/internal/health/
   labels:
     service_id: glitchtip
     slo_id: glitchtip-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://grafana.lv3.org
+    - https://grafana.{{ platform_domain }}
   labels:
     service_id: grafana
     slo_id: grafana-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://registry.lv3.org/api/v2.0/ping
+    - https://registry.{{ platform_domain }}/api/v2.0/ping
   labels:
     service_id: harbor
     slo_id: harbor-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://home.lv3.org
+    - https://home.{{ platform_domain }}
   labels:
     service_id: homepage
     slo_id: homepage-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+    - https://sso.{{ platform_domain }}/realms/lv3/.well-known/openid-configuration
   labels:
     service_id: keycloak
     slo_id: keycloak-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+    - https://sso.{{ platform_domain }}/realms/lv3/.well-known/openid-configuration
   labels:
     service_id: keycloak
     slo_id: keycloak-latency
     indicator: latency
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://langfuse.lv3.org/api/public/health
+    - https://langfuse.{{ platform_domain }}/api/public/health
   labels:
     service_id: langfuse
     slo_id: langfuse-availability
@@ -111,14 +111,14 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://minio.lv3.org/minio/health/live
+    - https://minio.{{ platform_domain }}/minio/health/live
   labels:
     service_id: minio
     slo_id: minio-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://matrix.lv3.org/_matrix/client/versions
+    - https://matrix.{{ platform_domain }}/_matrix/client/versions
   labels:
     service_id: matrix_synapse
     slo_id: matrix-synapse-availability
@@ -132,14 +132,14 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://cloud.lv3.org/status.php
+    - https://cloud.{{ platform_domain }}/status.php
   labels:
     service_id: nextcloud
     slo_id: nextcloud-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://nginx.lv3.org
+    - https://nginx.{{ platform_domain }}
   labels:
     service_id: nginx_edge
     slo_id: nginx-edge-availability
@@ -160,7 +160,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://grist.lv3.org/status
+    - https://grist.{{ platform_domain }}/status
   labels:
     service_id: grist
     slo_id: grist-availability
@@ -181,14 +181,14 @@
     indicator: latency
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://wiki.lv3.org/_health
+    - https://wiki.{{ platform_domain }}/_health
   labels:
     service_id: outline
     slo_id: outline-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://notebooks.lv3.org/hub/health
+    - https://notebooks.{{ platform_domain }}/hub/health
   labels:
     service_id: jupyterhub
     slo_id: jupyterhub-availability
@@ -209,14 +209,14 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://paperless.lv3.org/
+    - https://paperless.{{ platform_domain }}/
   labels:
     service_id: paperless
     slo_id: paperless-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://tasks.lv3.org/
+    - https://tasks.{{ platform_domain }}/
   labels:
     service_id: plane
     slo_id: plane-availability
@@ -230,7 +230,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://analytics.lv3.org/api/system/health/ready
+    - https://analytics.{{ platform_domain }}/api/system/health/ready
   labels:
     service_id: plausible
     slo_id: plausible-availability
@@ -251,21 +251,21 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://chat.lv3.org
+    - https://chat.{{ platform_domain }}
   labels:
     service_id: serverclaw
     slo_id: serverclaw-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://status.lv3.org
+    - https://status.{{ platform_domain }}
   labels:
     service_id: status_page
     slo_id: status-page-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://bi.lv3.org/health
+    - https://bi.{{ platform_domain }}/health
   labels:
     service_id: superset
     slo_id: superset-availability
@@ -293,14 +293,14 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://uptime.lv3.org
+    - https://uptime.{{ platform_domain }}
   labels:
     service_id: uptime_kuma
     slo_id: uptime-kuma-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://vault.lv3.org/alive
+    - https://vault.{{ platform_domain }}/alive
   labels:
     service_id: vaultwarden
     slo_id: vaultwarden-availability
@@ -314,7 +314,7 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://ci.lv3.org/healthz
+    - https://ci.{{ platform_domain }}/healthz
   labels:
     service_id: woodpecker
     slo_id: woodpecker-availability

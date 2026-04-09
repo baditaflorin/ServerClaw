@@ -131,12 +131,9 @@ sso_clients:
   repo-intake-oauth:
     provider: keycloak
     public_client: false
-    redirect_uris:
-    - https://repo-intake.lv3.org/oauth2/callback
+    redirect_uris: []
     scopes:
     - openid
-    - profile
-    - email
     service: repo_intake
   sftpgo:
     provider: keycloak

@@ -7,8 +7,8 @@ homepage_bind_host: "{{ ansible_host }}"
 homepage_loopback_bind_host: 127.0.0.1
 homepage_port: "{{ platform_service_topology | platform_service_port('homepage', 'internal') }}"
 homepage_internal_url: "{{ platform_service_topology | platform_service_url('homepage', 'internal') }}"
-homepage_public_url: "https://{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('homepage')).public_hostname }}"
-homepage_public_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('homepage')).public_hostname }}"
+homepage_public_url: "https://{{ (hostvars[platform_topology_host].lv3_service_topology | service_topology_get('homepage')).public_hostname }}"
+homepage_public_host: "{{ (hostvars[platform_topology_host].lv3_service_topology | service_topology_get('homepage')).public_hostname }}"
 homepage_allowed_hosts:
   - "{{ homepage_public_host }}"
   - "{{ homepage_bind_host }}:{{ homepage_port }}"

@@ -1,6 +1,6 @@
 ---
 # Playbook: realtime.yml
-# Purpose: Converge the Netdata parent and child streaming topology plus the authenticated realtime.lv3.org edge route.
+# Purpose: Converge the Netdata parent and child streaming topology plus the authenticated realtime.{{ platform_domain }} edge route.
 # Use case: Run when ADR 0196 Netdata real-time streaming metrics must be applied or re-verified on production.
 #
 # Inputs (required):
@@ -10,7 +10,7 @@
 #   - bypass_promotion (bool, optional, default=false): Explicit break-glass flag for latest-main live apply flows.
 #
 # Outputs:
-#   - Netdata is converged on the Proxmox host and the selected guests, the monitoring parent exports Prometheus metrics, and realtime.lv3.org is published through the shared authenticated edge.
+#   - Netdata is converged on the Proxmox host and the selected guests, the monitoring parent exports Prometheus metrics, and realtime.{{ platform_domain }} is published through the shared authenticated edge.
 #
 # Idempotency: Fully idempotent
 #

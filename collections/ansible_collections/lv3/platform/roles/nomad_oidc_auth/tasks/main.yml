@@ -1,6 +1,6 @@
 ---
 # Purpose: Configure Nomad's native OIDC auth method with Keycloak SSO.
-# Use case: Allows platform admins to sign into the Nomad UI at scheduler.lv3.org via Keycloak OIDC.
+# Use case: Allows platform admins to sign into the Nomad UI at scheduler.{{ platform_domain }} via Keycloak OIDC.
 # Idempotency: All API calls use PUT or check-before-create patterns.
 # Dependencies: Nomad cluster must be running with ACL enabled; Keycloak client must exist.
 

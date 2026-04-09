@@ -34,7 +34,7 @@ semaphore_admin_auth_local_file: "{{ semaphore_local_artifact_dir }}/admin-auth.
 semaphore_bootstrap_spec_local_file: "{{ semaphore_local_artifact_dir }}/bootstrap-spec.json"
 semaphore_admin_username: ops-semaphore
 semaphore_admin_name: LV3 Operations
-semaphore_admin_email: ops-semaphore@lv3.org
+semaphore_admin_email: ops-semaphore@{{ platform_domain }}
 semaphore_private_base_url: "{{ platform_service_topology | platform_service_url('semaphore', 'internal') }}"
 semaphore_controller_url: "{{ platform_service_topology | platform_service_url('semaphore', 'controller') }}"
 semaphore_verify_ssl: false
@@ -45,7 +45,7 @@ semaphore_oidc_provider: keycloak
 semaphore_oidc_client_id: semaphore
 semaphore_oidc_client_secret_local_file: "{{ semaphore_local_artifact_dir }}/oidc-client-secret.txt"
 semaphore_oidc_client_secret_guest_file: "{{ semaphore_secret_dir }}/oidc-client-secret"
-semaphore_oidc_issuer_url: "https://auth.lv3.org/realms/lv3"
+semaphore_oidc_issuer_url: "https://auth.{{ platform_domain }}/realms/lv3"
 semaphore_oidc_callback_url: "{{ semaphore_controller_url }}/auth/oidc/callback"
 semaphore_oidc_scopes: "openid profile email"
 semaphore_oidc_auto_provision_user: true

@@ -37,7 +37,7 @@ woodpecker_server_image: "{{ container_image_catalog.images.woodpecker_server_ru
 woodpecker_database_name: woodpecker
 woodpecker_database_user: woodpecker
 woodpecker_database_port: 5432
-woodpecker_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+woodpecker_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 woodpecker_database_password_local_file: "{{ repo_shared_local_root }}/woodpecker/database-password.txt"
 
 # Service topology derived from platform facts

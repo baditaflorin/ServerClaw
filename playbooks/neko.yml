@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
 #
 # Outputs:
-#   - Neko is running on runtime-comms-lv3 with WebRTC signalling at browser.lv3.org, UDP media forwarding from Proxmox host, and firewall rules preventing concurrent-apply races.
+#   - Neko is running on runtime-comms-lv3 with WebRTC signalling at browser.{{ platform_domain }}, UDP media forwarding from Proxmox host, and firewall rules preventing concurrent-apply races.
 #
 # Idempotency: Fully idempotent
 #              The playbook re-renders the container stack deterministically and reapplies the firewall contract safely.
@@ -19,7 +19,7 @@
 #   - ADR 0380: Defines Neko as the interactive remote desktop platform for operator debugging.
 #   - Requires: runtime-comms-lv3 host access through the Proxmox jump path plus local OpenBao for runtime secret injection.
 #   - Role: lv3.platform.neko_runtime — renders, deploys, and verifies the Neko WebRTC runtime stack.
-#   - Role: lv3.platform.nginx_edge_publication — publishes browser.lv3.org with HTTPS and WebSocket upgrade.
+#   - Role: lv3.platform.nginx_edge_publication — publishes browser.{{ platform_domain }} with HTTPS and WebSocket upgrade.
 #
 # Related ADRs: 0077, 0153, 0170, 0293, 0347, 0380
 # Related Runbooks: docs/adr/0380-neko-for-operator-remote-browser-access.md
@@ -31,7 +31,7 @@
 
 - import_playbook: _includes/dns_publication.yml
   vars:
-    service_dns_fqdn: browser.lv3.org
+    service_dns_fqdn: browser.{{ platform_domain }}
 
 # --- Neko-specific plays ---
 
@@ -102,21 +102,21 @@
     - role: lv3.platform.nginx_edge_publication
 
   post_tasks:
-    - name: Deploy browser.lv3.org nginx site (Neko multi-instance email router)
+    - name: Deploy browser.{{ platform_domain }} nginx site (Neko multi-instance email router)
       ansible.builtin.template:
         src: "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2"
-        dest: /etc/nginx/sites-available/browser.lv3.org.conf
+        dest: /etc/nginx/sites-available/browser.{{ platform_domain }}.conf
         owner: root
         group: root
         mode: "0644"
 
-    - name: Enable browser.lv3.org site
+    - name: Enable browser.{{ platform_domain }} site
       ansible.builtin.file:
-        src: /etc/nginx/sites-available/browser.lv3.org.conf
-        dest: /etc/nginx/sites-enabled/browser.lv3.org.conf
+        src: /etc/nginx/sites-available/browser.{{ platform_domain }}.conf
+        dest: /etc/nginx/sites-enabled/browser.{{ platform_domain }}.conf
         state: link
 
-    - name: Reload nginx to apply browser.lv3.org site
+    - name: Reload nginx to apply browser.{{ platform_domain }} site
       ansible.builtin.service:
         name: nginx
         state: reloaded

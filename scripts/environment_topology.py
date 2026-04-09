@@ -211,8 +211,8 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
                     f"environments[{index}].private_network.gateway_ipv4 must be inside {parsed_network}"
                 )
 
-        if env_id == "production" and base_domain != "lv3.org":
-            raise ValueError("production.base_domain must be lv3.org")
+        if env_id == "production" and not base_domain:
+            raise ValueError("production.base_domain must be set")
 
         indexed[env_id] = environment
 

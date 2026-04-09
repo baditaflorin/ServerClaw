@@ -10,13 +10,13 @@ configured to check:
 
 Usage:
     python3 scripts/add-certificate-monitors-to-uptime-kuma.py \
-        --base-url https://uptime.lv3.org \
+        --base-url https://uptime.localhost \
         --api-key <uptime-kuma-api-key> \
         --config config/subdomain-catalog.json
 
 Requirements:
     - requests library (pip install requests)
-    - Uptime Kuma admin API key from https://uptime.lv3.org/settings
+    - Uptime Kuma admin API key from https://uptime.localhost/settings
 """
 
 import json
@@ -125,7 +125,7 @@ def main():
         description="Add SSL certificate monitors to Uptime Kuma"
     )
     parser.add_argument("--base-url", required=True,
-                        help="Uptime Kuma base URL (e.g., https://uptime.lv3.org)")
+                        help="Uptime Kuma base URL (e.g., https://uptime.localhost)")
     parser.add_argument("--api-key", required=True,
                         help="Uptime Kuma API key (from settings)")
     parser.add_argument("--config", default="config/subdomain-catalog.json",

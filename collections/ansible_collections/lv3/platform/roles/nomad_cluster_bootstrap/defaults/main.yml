@@ -20,7 +20,7 @@ nomad_cluster_bootstrap_runtime_host: "{{ playbook_execution_host_patterns.docke
 nomad_cluster_bootstrap_build_host: "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
 nomad_cluster_bootstrap_server_ip: "{{ hostvars[nomad_cluster_bootstrap_server_host].ansible_host }}"
 nomad_cluster_bootstrap_build_ip: "{{ hostvars[nomad_cluster_bootstrap_build_host].nomad_cluster_advertise_address | default(hostvars[nomad_cluster_bootstrap_build_host].ansible_host) }}"
-nomad_cluster_bootstrap_proxy_ip: "{{ hostvars['proxmox_florin'].ansible_host }}"
+nomad_cluster_bootstrap_proxy_ip: "{{ hostvars[platform_topology_host].ansible_host }}"
 nomad_cluster_bootstrap_region: global
 nomad_cluster_bootstrap_certificate_days: 365
 nomad_cluster_bootstrap_expected_nodes:

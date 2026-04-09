@@ -14,7 +14,7 @@ from dify_api import DifyClient, read_secret
 
 REGISTRY_PATH = repo_path("config", "agent-tool-registry.json")
 DEFAULT_PROVIDER_NAME = "lv3_platform"
-DEFAULT_GATEWAY_BASE_URL = "https://api.lv3.org"
+DEFAULT_GATEWAY_BASE_URL = "https://api.localhost"
 DEFAULT_TOOLS_HEADER = "X-LV3-Dify-Api-Key"
 
 
@@ -108,7 +108,7 @@ def sync_tool_provider(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Publish the governed LV3 tool registry into Dify.")
-    parser.add_argument("--base-url", required=True, help="Public Dify base URL, for example https://agents.lv3.org")
+    parser.add_argument("--base-url", required=True, help="Public Dify base URL, for example https://agents.localhost")
     parser.add_argument("--admin-email", required=True, help="Dify admin email")
     parser.add_argument("--admin-password-file", required=True, help="Path to the Dify admin password file")
     parser.add_argument("--tools-api-key-file", required=True, help="Path to the Dify tools gateway API key file")

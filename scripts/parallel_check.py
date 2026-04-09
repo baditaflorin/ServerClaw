@@ -31,7 +31,7 @@ RUNNER_UNAVAILABLE_MARKERS = (
     "cannot connect to the docker daemon",
     "error during connect",
     "is the docker daemon running",
-    "unable to find image 'registry.lv3.org/check-runner/",
+    "unable to find image 'registry.localhost/check-runner/",
     "unsupported manifest media type",
     "no matching manifest for",
     "pull access denied",

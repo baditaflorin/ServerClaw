@@ -10,4 +10,4 @@ groups:
         annotations:
           summary: Dozzle is unreachable on the private runtime port.
           description: The Dozzle readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
-          runbook_url: https://docs.lv3.org/runbooks/configure-dozzle/
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-dozzle/

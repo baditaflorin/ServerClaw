@@ -1,9 +1,9 @@
 ---
 - name: Record shared Postgres HA facts
   ansible.builtin.set_fact:
-    postgres_ha_cluster: "{{ hostvars['proxmox_florin'].postgres_ha }}"
-    postgres_ha_is_initial_primary: "{{ inventory_hostname == hostvars['proxmox_florin'].postgres_ha.initial_primary }}"
-    postgres_ha_keepalived_priority: "{{ hostvars['proxmox_florin'].postgres_ha.keepalived.priorities[inventory_hostname] }}"
+    postgres_ha_cluster: "{{ hostvars[platform_topology_host].postgres_ha }}"
+    postgres_ha_is_initial_primary: "{{ inventory_hostname == hostvars[platform_topology_host].postgres_ha.initial_primary }}"
+    postgres_ha_keepalived_priority: "{{ hostvars[platform_topology_host].postgres_ha.keepalived.priorities[inventory_hostname] }}"
     postgres_ha_peer_hosts: >-
       {{
         ansible_play_hosts_all

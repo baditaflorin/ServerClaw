@@ -418,7 +418,7 @@ def ensure_host_network_inventory(
             "assigned_object_type": "dcim.interface",
             "assigned_object_id": interfaces[host_vars["proxmox_wan_bridge"]]["id"],
             "status": "active",
-            "dns_name": "proxmox.lv3.org",
+            "dns_name": "proxmox.localhost",
             "description": "Primary public IPv4 for the Proxmox host.",
         },
         update_fields=["assigned_object_type", "assigned_object_id", "status", "dns_name", "description"],

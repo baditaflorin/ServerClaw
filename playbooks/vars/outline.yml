@@ -1,6 +1,6 @@
 ---
 service_audit_name: outline
-service_dns_fqdn: wiki.lv3.org
+service_dns_fqdn: wiki.{{ platform_domain }}
 service_postgres_role: lv3.platform.outline_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime

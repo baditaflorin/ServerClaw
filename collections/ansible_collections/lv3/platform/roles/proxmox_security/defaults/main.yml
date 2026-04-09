@@ -9,7 +9,7 @@ proxmox_acme_account_name: default
 proxmox_acme_contact_email: baditaflorin@gmail.com
 proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
 proxmox_acme_plugin_id: lv3-hetzner-dns
-proxmox_acme_domain: proxmox.lv3.org
+proxmox_acme_domain: proxmox.{{ platform_domain }}
 proxmox_acme_validation_delay: 30
 proxmox_security_manage_acme: true
 proxmox_tfa_description: Primary TOTP

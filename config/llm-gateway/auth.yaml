@@ -1,7 +1,7 @@
 schema_version: "1.0.0"
 oidc:
-  issuer: https://sso.lv3.org/realms/lv3
-  discovery_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+  issuer: https://sso.{{ platform_domain }}/realms/lv3
+  discovery_url: https://sso.{{ platform_domain }}/realms/lv3/.well-known/openid-configuration
   client_id: serverclaw
   scopes: [openid, email, profile]
   # client_secret injected via OpenBao at runtime

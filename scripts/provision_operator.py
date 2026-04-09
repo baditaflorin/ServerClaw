@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-provision_operator.py — Canonical operator onboarding script for lv3.org platform.
+provision_operator.py — Canonical operator onboarding script for localhost platform.
 
 Implements ADR 0318: repeatable, code-first operator provisioning with audit-trail CC.
 Wraps the Keycloak direct-API procedure from ADR 0317 and adds Headscale VPN +
@@ -135,7 +135,7 @@ def read_platform_smtp_password() -> str:
 
 
 # Keycloak
-DEFAULT_KEYCLOAK_URL = "https://sso.lv3.org"
+DEFAULT_KEYCLOAK_URL = "https://sso.localhost"
 REALM = "lv3"
 ADMIN_USER = "lv3-bootstrap-admin"
 BOOTSTRAP_PASS_FILE = repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
@@ -145,18 +145,18 @@ PASSWORD_DIR = repo_path(".local", "keycloak")
 SMTP_HOST = "10.10.10.20"
 SMTP_PORT = 587
 SMTP_USER = "platform"
-SMTP_FROM = "LV3 Platform <platform@lv3.org>"
+SMTP_FROM = "LV3 Platform <platform@localhost>"
 SMTP_PASS_FILE = repo_path(".local", "mail-platform", "profiles", "platform-transactional-mailbox-password.txt")
 SSH_KEY_FILE = repo_path(".local", "ssh", "bootstrap.id_ed25519")
 SSH_PROXY = "ops@100.64.0.1"
 
 # Headscale (self-hosted Tailscale control server)
-DEFAULT_HEADSCALE_URL = "https://headscale.lv3.org"
+DEFAULT_HEADSCALE_URL = "https://headscale.localhost"
 HEADSCALE_API_KEY_FILE = repo_path(".local", "headscale", "api-key.txt")
 HEADSCALE_AUTHKEY_DIR = repo_path(".local", "headscale")
 
 # step-ca
-STEP_CA_URL = "https://ca.lv3.org"
+STEP_CA_URL = "https://ca.localhost"
 STEP_CA_ROOT_CERT = repo_path(".local", "step-ca", "certs", "root_ca.crt")
 
 # Role → (realm_roles, groups, openbao_policies)
@@ -352,30 +352,30 @@ def get_ca_fingerprint() -> str:
 PLAIN_TEMPLATE = """\
 Hi {first_name},
 
-Welcome to the lv3.org homelab platform! {requester_name} has provisioned you
+Welcome to the localhost homelab platform! {requester_name} has provisioned you
 a {role} account valid until {expiry}.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  YOUR SSO CREDENTIALS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Login portal : https://sso.lv3.org
+  Login portal : https://sso.localhost
   Username     : {username}
   Password     : {password}
   Expires      : {expiry}
 
-Change your password: https://sso.lv3.org/realms/lv3/account/
+Change your password: https://sso.localhost/realms/lv3/account/
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  PLATFORM SERVICES  (all use SSO)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Grafana  (metrics)       https://grafana.lv3.org
-  Gitea    (source code)   https://gitea.lv3.org
-  Outline  (docs/wiki)     https://outline.lv3.org
-  Vikunja  (tasks)         https://vikunja.lv3.org
-  Open WebUI (AI)          https://chat.lv3.org
-  Mattermost (chat)        https://mattermost.lv3.org
-  Harbor (registry)        https://harbor.lv3.org
-  Windmill (workflows)     https://windmill.lv3.org
+  Grafana  (metrics)       https://grafana.localhost
+  Gitea    (source code)   https://gitea.localhost
+  Outline  (docs/wiki)     https://outline.localhost
+  Vikunja  (tasks)         https://vikunja.localhost
+  Open WebUI (AI)          https://chat.localhost
+  Mattermost (chat)        https://mattermost.localhost
+  Harbor (registry)        https://harbor.localhost
+  Windmill (workflows)     https://windmill.localhost
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  VPN ACCESS (Tailscale / Headscale)
@@ -388,7 +388,7 @@ The platform uses a self-hosted Tailscale control server (Headscale).
 
   # 2. Connect (pre-auth key valid until {expiry})
   sudo tailscale up \\
-    --login-server https://headscale.lv3.org \\
+    --login-server https://headscale.localhost \\
     --authkey {headscale_authkey} \\
     --hostname {username}-laptop
 
@@ -403,7 +403,7 @@ The platform uses a self-hosted Tailscale control server (Headscale).
 
   # 2. Bootstrap the CA (one-time)
   step ca bootstrap \\
-    --ca-url https://ca.lv3.org \\
+    --ca-url https://ca.localhost \\
     --fingerprint {ca_fingerprint}
 
   # 3. Follow the operator onboarding runbook for your first SSH cert
@@ -420,7 +420,7 @@ Platform hosts once on VPN:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CODEBASE TOUR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Repo: https://gitea.lv3.org/platform/proxmox_florin_server
+Repo: https://gitea.localhost/platform/proxmox_florin_server
 
   config/                   operators.yaml, schemas, service catalog
   docs/adr/                 Architecture Decision Records — READ FIRST
@@ -433,17 +433,17 @@ CI/CD: every push runs 22 validation checks before landing on main.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  QUICK CHECKLIST
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  □ Log in at https://sso.lv3.org and change your password
-  □ sudo tailscale up --login-server https://headscale.lv3.org --authkey <above>
-  □ step ca bootstrap --ca-url https://ca.lv3.org --fingerprint {ca_fingerprint}
+  □ Log in at https://sso.localhost and change your password
+  □ sudo tailscale up --login-server https://headscale.localhost --authkey <above>
+  □ step ca bootstrap --ca-url https://ca.localhost --fingerprint {ca_fingerprint}
   □ Review docs/runbooks/operator-onboarding.md for SSH setup
   □ ssh {username}@100.64.0.1
-  □ Browse https://grafana.lv3.org for platform dashboards
+  □ Browse https://grafana.localhost for platform dashboards
 
 Account expires {expiry}.
 
 Welcome aboard,
-lv3.org platform (provisioned by Codex agent per ADR 0318)
+localhost platform (provisioned by Codex agent per ADR 0318)
 ---
 CC: {cc_email} — audit record per ADR 0318.
 """
@@ -475,7 +475,7 @@ def build_email(
     )
     expiry_short = expiry[:10]
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"[lv3.org] Platform access — {first_name} — expires {expiry_short}"
+    msg["Subject"] = f"[localhost] Platform access — {first_name} — expires {expiry_short}"
     msg["From"] = SMTP_FROM
     msg["To"] = to_email
     msg["Cc"] = cc_email
@@ -499,7 +499,7 @@ with smtplib.SMTP("{SMTP_HOST}", {SMTP_PORT}, timeout=15) as s:
     if s.has_extn("STARTTLS"):
         s.starttls(); s.ehlo()
     s.login("{SMTP_USER}", {repr(smtp_pass)})
-    s.sendmail("platform@lv3.org", {repr(recipients)}, msg_str)
+    s.sendmail("platform@localhost", {repr(recipients)}, msg_str)
     print("sent")
 """
     result = subprocess.run(
@@ -691,7 +691,7 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Provision a new operator account on lv3.org (ADR 0318).",
+        description="Provision a new operator account on localhost (ADR 0318).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )

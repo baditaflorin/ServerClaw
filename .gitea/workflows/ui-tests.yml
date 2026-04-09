@@ -51,7 +51,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.44.0-jammy
     services:
       portal:
-        image: registry.lv3.org/ops-portal/app:latest
+        image: ${{ vars.CONTAINER_REGISTRY }}/ops-portal/app:latest
         env:
           OPS_PORTAL_SESSION_SECRET: ci-test-secret
           GATEWAY_URL: http://mock-gateway:8080

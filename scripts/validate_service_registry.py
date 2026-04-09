@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml  # noqa: E402 — must come after sys.path adjustment
-from validation_toolkit import require_int, require_mapping, require_str  # noqa: E402
+from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_services.yml"
@@ -29,8 +29,7 @@ REQUIRED_FIELDS = ("image_catalog_key", "internal_port", "host_group")
 
 
 def load_registry() -> dict:
-    with REGISTRY_PATH.open() as f:
-        data = yaml.safe_load(f)
+    data = load_yaml_with_identity(REGISTRY_PATH)
     return require_mapping(data, str(REGISTRY_PATH))
 
 

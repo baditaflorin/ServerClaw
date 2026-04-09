@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T09:12:32Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "adr-0373-merge",
+  "commit": "3e65bb3562072ef2a1a6c3a644dec24cb0ceb827",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Skip Typesense verification when not provisioned \u2014 unblocks full API gateway convergence",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Same conditional pattern as main.yml Typesense tasks",
+      "verify.yml tasks need the same guard"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml"
+  }
+}

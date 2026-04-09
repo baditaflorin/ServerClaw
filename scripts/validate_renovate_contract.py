@@ -65,7 +65,7 @@ def validate_workflow() -> None:
 
     job = workflow["jobs"]["renovate"]
     require(job.get("runs-on") == "self-hosted", "Renovate workflow must target the self-hosted runner")
-    require("registry.lv3.org/check-runner/renovate:" in workflow_text, "Renovate workflow must pull the Renovate image through Harbor")
+    require("registry.localhost/check-runner/renovate:" in workflow_text, "Renovate workflow must pull the Renovate image through Harbor")
     require("@sha256:" in workflow_text, "Renovate workflow must pin the Renovate image to a digest")
     require("ghcr.io/renovatebot/renovate" not in workflow_text, "Renovate workflow must not pull the runtime image directly from GHCR")
     require("scripts/renovate_runtime_token.py create" in workflow_text, "Renovate workflow must mint a short-lived runtime token")

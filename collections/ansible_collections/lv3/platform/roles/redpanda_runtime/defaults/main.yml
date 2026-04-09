@@ -2,7 +2,7 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-redpanda_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('redpanda') }}"
+redpanda_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('redpanda') }}"
 redpanda_config_dir: "{{ redpanda_site_dir }}/config"
 redpanda_compose_env_file: "{{ compose_runtime_secret_root }}/redpanda/runtime.env"
 redpanda_volume_name: lv3-redpanda-data

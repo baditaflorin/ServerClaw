@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T08:18:18Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "adr-0373-merge",
+  "commit": "5e96ada3bcd8de74642a2227fed21efe37c72899",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Fix argument_specs for api_gateway_runtime \u2014 derived vars must not be in argument_specs",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Same pattern as librechat_runtime argument_specs fix",
+      "derive_service_defaults provides the removed vars at task time"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "docs/adr/0373-service-registry-and-derived-defaults.md"
+  }
+}

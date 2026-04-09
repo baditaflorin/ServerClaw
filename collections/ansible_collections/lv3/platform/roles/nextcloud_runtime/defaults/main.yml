@@ -27,7 +27,7 @@ nextcloud_port: "{{ platform_service_topology | platform_service_port('nextcloud
 nextcloud_internal_base_url: "{{ platform_service_topology | platform_service_url('nextcloud', 'internal') }}"
 nextcloud_public_base_url: "{{ platform_service_topology.nextcloud.urls.public }}"
 nextcloud_public_hostname: "{{ platform_service_topology.nextcloud.public_hostname }}"
-nextcloud_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+nextcloud_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 nextcloud_database_port: 5432
 nextcloud_database_name: nextcloud
 nextcloud_database_user: nextcloud
@@ -39,7 +39,7 @@ nextcloud_admin_password_remote_file: "{{ nextcloud_secret_dir }}/admin-password
 nextcloud_redis_password_remote_file: "{{ nextcloud_secret_dir }}/redis-password.txt"
 nextcloud_admin_user: ops
 nextcloud_trusted_proxies:
-  - "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+  - "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
 nextcloud_php_memory_limit: 1024M
 nextcloud_php_upload_limit: 16G
 nextcloud_overwrite_protocol: https

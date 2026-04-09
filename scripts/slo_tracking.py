@@ -160,7 +160,7 @@ def default_grafana_url(service_catalog_path: Path = SERVICE_CATALOG_PATH) -> st
             public_url = service.get("public_url")
             if isinstance(public_url, str) and public_url.strip():
                 return public_url.rstrip("/")
-    return "https://grafana.lv3.org"
+    return "https://grafana.localhost"
 
 
 def slo_success_expr(slo: dict[str, Any], window: str) -> str:

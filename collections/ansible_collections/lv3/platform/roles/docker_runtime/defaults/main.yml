@@ -48,11 +48,11 @@ docker_runtime_engine_packages:
 
 docker_runtime_admin_users:
   - "{{ proxmox_guest_ci_user }}"
-docker_runtime_public_edge_ipv4: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+docker_runtime_public_edge_ipv4: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
 docker_runtime_public_edge_host_aliases: >-
   {{
     (
-      hostvars['proxmox_florin'].platform_service_topology
+      hostvars[platform_topology_host].platform_service_topology
       | service_topology_edge_sites
       | map(attribute='hostname')
       | list

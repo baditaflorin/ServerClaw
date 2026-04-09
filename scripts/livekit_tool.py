@@ -357,7 +357,7 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         subparser = subparsers.add_parser(name, help=f"{name.replace('-', ' ')} against the LiveKit Twirp API.")
         add_credentials(subparser)
-        subparser.add_argument("--url", required=True, help="Base LiveKit URL, such as https://livekit.lv3.org.")
+        subparser.add_argument("--url", required=True, help="Base LiveKit URL, such as https://livekit.localhost.")
         subparser.add_argument("--identity", default="livekit-cli", help="Admin identity used for room management.")
         subparser.add_argument("--timeout-seconds", type=int, default=120, help="HTTP timeout and admin token TTL.")
         if name in {"create-room", "delete-room"}:

@@ -26,7 +26,7 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
-lago_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago') }}"
+lago_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('lago') }}"
 lago_storage_dir: "{{ lago_data_dir }}/storage"
 lago_redis_data_dir: "{{ lago_data_dir }}/redis"
 lago_redis_data_owner: "999"
@@ -54,7 +54,7 @@ lago_redis_cable_url: "redis://:{{ lago_redis_password | urlencode }}@{{ lago_re
 lago_runtime_apt_lock_timeout: 1200
 lago_database_name: lago
 lago_database_user: lago
-lago_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+lago_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 lago_database_port: 5432
 lago_database_password_local_file: "{{ lago_local_artifact_dir }}/database-password.txt"
 lago_redis_password_local_file: "{{ lago_local_artifact_dir }}/redis-password.txt"
@@ -86,7 +86,7 @@ lago_rails_env: production
 lago_rack_env: "{{ lago_rails_env }}"
 lago_annotaterb_skip_on_db_tasks: "1"
 lago_org_name: LV3 Billing
-lago_org_user_email: billing-admin@lv3.org
+lago_org_user_email: billing-admin@{{ platform_domain }}
 lago_disable_signup: true
 lago_disable_segment: true
 lago_disable_pdf_generation: false
@@ -106,7 +106,7 @@ lago_smoke_charge_code: api_calls_charge
 lago_smoke_charge_unit_amount: "0.01"
 lago_smoke_external_customer_id: lv3-billing-smoke-customer
 lago_smoke_customer_name: LV3 Billing Smoke Customer
-lago_smoke_customer_email: billing-smoke@lv3.org
+lago_smoke_customer_email: billing-smoke@{{ platform_domain }}
 lago_smoke_external_subscription_id: lv3-billing-smoke-subscription
 lago_smoke_subscription_name: LV3 Billing Smoke Subscription
 lago_smoke_event_properties: {}

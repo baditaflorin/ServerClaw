@@ -14,7 +14,7 @@ Auth file  (.local/proxmox-api/lv3-automation-<env>.json)
 Uses the same schema written by the proxmox_security / proxmox_api_token Ansible roles:
 
   {
-    "api_url":              "https://proxmox.lv3.org:8006/api2/json",
+    "api_url":              "https://proxmox.localhost:8006/api2/json",
     "full_token_id":        "lv3-automation@pve!primary",
     "value":                "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "authorization_header": "PVEAPIToken=lv3-automation@pve!primary=<secret>"

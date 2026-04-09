@@ -13,7 +13,7 @@ headscale_tls_cache_dir: /var/lib/headscale/cache
 headscale_database_path: /var/lib/headscale/db.sqlite
 headscale_noise_private_key_path: /var/lib/headscale/noise_private.key
 headscale_derp_private_key_path: /var/lib/headscale/derp_server_private.key
-headscale_server_url: https://headscale.lv3.org
+headscale_server_url: https://headscale.{{ platform_domain }}
 headscale_listen_addr: "0.0.0.0:{{ platform_port_assignments.headscale_http_port }}"
 headscale_metrics_listen_addr: 127.0.0.1:9091
 headscale_grpc_listen_addr: 127.0.0.1:50443

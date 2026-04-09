@@ -57,7 +57,7 @@ def maybe_langfuse_trace_config(repo_root: Path) -> dict[str, str] | None:
     if not public_key or not secret_key:
         return None
     platform_vars_path = config_root / "inventory" / "group_vars" / "platform.yml"
-    langfuse_host = "https://langfuse.lv3.org"
+    langfuse_host = "https://langfuse.localhost"
     if platform_vars_path.exists():
         platform_vars = yaml.safe_load(platform_vars_path.read_text(encoding="utf-8")) or {}
         langfuse_host = (
@@ -101,7 +101,7 @@ def main() -> int:
     parser.add_argument("--admin-password-file", required=True, help="Path to the Dify admin password file")
     parser.add_argument("--init-password-file", help="Optional path to the Dify init-validation password file")
     parser.add_argument("--tools-api-key-file", help="Optional path to the Dify tools gateway API key file")
-    parser.add_argument("--gateway-base-url", default="https://api.lv3.org", help="Platform API gateway base URL")
+    parser.add_argument("--gateway-base-url", default="https://api.localhost", help="Platform API gateway base URL")
     parser.add_argument("--provider-name", default="lv3_platform", help="Dify API tool provider name")
     parser.add_argument(
         "--export-path",

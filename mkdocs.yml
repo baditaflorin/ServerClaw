@@ -1,5 +1,5 @@
 site_name: LV3 Platform Docs
-site_url: https://docs.lv3.org
+site_url: https://docs.{{ platform_domain }}
 site_description: Generated developer portal and service documentation for the LV3 platform.
 docs_dir: docs/site-generated
 site_dir: build/docs-portal

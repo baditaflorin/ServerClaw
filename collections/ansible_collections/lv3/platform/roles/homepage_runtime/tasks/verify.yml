@@ -14,10 +14,10 @@
       - url: "{{ homepage_internal_url }}/api/services"
         assertions:
           - "'Homepage' in common_verify_extra_response.content"
-          - "'https://home.lv3.org' in common_verify_extra_response.content"
+          - "'https://home.{{ platform_domain }}' in common_verify_extra_response.content"
         assertion_msg: "Homepage started, but the repo-managed services catalog was not rendered."
       - url: "{{ homepage_internal_url }}/api/bookmarks"
         assertions:
           - "'Ops Portal' in common_verify_extra_response.content"
-          - "'https://ops.lv3.org' in common_verify_extra_response.content"
+          - "'https://ops.{{ platform_domain }}' in common_verify_extra_response.content"
         assertion_msg: "Homepage started, but the repo-managed bookmarks catalog was not rendered."

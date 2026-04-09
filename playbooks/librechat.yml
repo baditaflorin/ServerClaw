@@ -1,13 +1,13 @@
 ---
 # Playbook: librechat.yml
-# Purpose: Converge LibreChat, its Keycloak OIDC client, and the authenticated public edge publication on chat.lv3.org.
+# Purpose: Converge LibreChat, its Keycloak OIDC client, and the authenticated public edge publication on chat.{{ platform_domain }}.
 # Use case: Run during LibreChat deployment, upgrade, or recovery when the chat surface must match repo truth.
 #
 # Inputs (required):
 #   - env (str, required): Target environment selector.
 #
 # Outputs:
-#   - LibreChat is deployed on coolify-lv3, Keycloak OIDC is configured, chat.lv3.org is published through the shared edge.
+#   - LibreChat is deployed on coolify-lv3, Keycloak OIDC is configured, chat.{{ platform_domain }} is published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #
