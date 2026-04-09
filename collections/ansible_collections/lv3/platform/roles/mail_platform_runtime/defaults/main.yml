@@ -15,8 +15,8 @@
 # Idempotency: Fully idempotent because these defaults describe desired state only and do not mutate targets on their own.
 # Dependencies: ADR 0165, ADR 0077, and the shared mail platform runtime contract.
 
-mail_platform_domain: {{ platform_domain }}
-mail_platform_hostname: mail.{{ platform_domain }}
+mail_platform_domain: "{{ platform_domain }}"
+mail_platform_hostname: "mail.{{ platform_domain }}"
 mail_platform_mailbox_localpart: server
 mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
 mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
