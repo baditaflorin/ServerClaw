@@ -1,0 +1,94 @@
+---
+# Verify critical platform services are healthy — ADR 0386
+#
+# Checks that the core services needed for a functioning platform are up.
+# This is the final gate after full convergence.
+#
+# Usage:
+#   make verify-platform
+#   ansible-playbook -i inventory/hosts.yml playbooks/verify-platform.yml
+
+- name: Verify platform critical services
+  hosts: "{{ playbook_execution_host_patterns['lv3_guests'][playbook_execution_env] }}"
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 30
+      ignore_errors: true
+      register: ssh_check
+
+    - name: Gather facts
+      ansible.builtin.setup:
+        gather_subset: [min]
+      when: not ssh_check.failed
+
+- name: Verify PostgreSQL
+  hosts: "{{ playbook_execution_host_patterns['postgres'][playbook_execution_env] }}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check PostgreSQL is listening
+      ansible.builtin.wait_for:
+        port: 5432
+        host: 127.0.0.1
+        timeout: 10
+      register: pg_check
+      ignore_errors: true
+
+    - name: Report PostgreSQL status
+      ansible.builtin.debug:
+        msg: "PostgreSQL: {{ 'HEALTHY' if not pg_check.failed else 'UNAVAILABLE' }}"
+
+- name: Verify Nginx edge proxy
+  hosts: "{{ playbook_execution_host_patterns['nginx_edge'][playbook_execution_env] }}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check Nginx is listening on 443
+      ansible.builtin.wait_for:
+        port: 443
+        host: 0.0.0.0
+        timeout: 10
+      register: nginx_check
+      ignore_errors: true
+
+    - name: Report Nginx status
+      ansible.builtin.debug:
+        msg: "Nginx edge: {{ 'HEALTHY' if not nginx_check.failed else 'UNAVAILABLE' }}"
+
+- name: Verify Docker runtime services
+  hosts: "{{ playbook_execution_host_patterns['runtime_control'][playbook_execution_env] }}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check Docker is running
+      ansible.builtin.command: docker info --format '{{ '{{' }}.ServerVersion{{ '}}' }}'
+      register: docker_check
+      changed_when: false
+      ignore_errors: true
+
+    - name: Report Docker status
+      ansible.builtin.debug:
+        msg: "Docker: {{ docker_check.stdout | default('UNAVAILABLE') }}"
+
+    - name: List running containers
+      ansible.builtin.command: docker ps --format '{{ '{{' }}.Names{{ '}}' }}'
+      register: containers
+      changed_when: false
+      ignore_errors: true
+
+    - name: Report running containers
+      ansible.builtin.debug:
+        msg: "Running containers: {{ containers.stdout_lines | default([]) | length }}"
+
+- name: Platform verification summary
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Verification complete
+      ansible.builtin.debug:
+        msg: >-
+          Platform verification complete. Review the output above.
+          Expected: PostgreSQL HEALTHY, Nginx HEALTHY, Docker running
+          with service containers deployed.

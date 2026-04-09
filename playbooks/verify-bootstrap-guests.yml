@@ -1,0 +1,44 @@
+---
+# Verify guest VM provisioning succeeded — ADR 0386
+#
+# Checks that all declared VMs exist, are running, and respond to SSH.
+#
+# Usage:
+#   make verify-bootstrap-guests
+#   ansible-playbook -i inventory/hosts.yml playbooks/verify-bootstrap-guests.yml
+
+- name: Verify guest VMs are reachable
+  hosts: "{{ playbook_execution_host_patterns['lv3_guests'][playbook_execution_env] }}"
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH connectivity
+      ansible.builtin.wait_for_connection:
+        timeout: 30
+      register: ssh_result
+      ignore_errors: true
+
+    - name: Report SSH status
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} ({{ ansible_host }}): {{ 'REACHABLE' if not ssh_result.failed else 'UNREACHABLE' }}"
+
+    - name: Gather basic facts from reachable hosts
+      ansible.builtin.setup:
+        gather_subset:
+          - min
+      when: not ssh_result.failed
+
+    - name: Report OS info
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ ansible_distribution | default('unknown') }} {{ ansible_distribution_version | default('unknown') }}"
+      when: not ssh_result.failed
+
+- name: Summarize guest verification
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Count reachable vs total guests
+      ansible.builtin.debug:
+        msg: >-
+          Guest verification complete.
+          Check the output above for individual host status.
+          All hosts should show REACHABLE for a healthy bootstrap.

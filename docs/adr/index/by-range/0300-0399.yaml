@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-08'
+generated: '2026-04-09'
 facet: range
 label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 93
+total_adrs: 98
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -1787,3 +1787,79 @@ adrs:
     summary: Introduce a refresh-discovery-surfaces playbook and Make target that acts as
     filename: 0383-discovery-surface-refresh-cascade.md
     path: docs/adr/0383-discovery-surface-refresh-cascade.md
+  - adr: 0384
+    title: MemPalace Agent Memory System Integration
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: agent-discovery
+    keywords:
+      - mempalace
+      - agent
+      - memory
+      - system
+      - integration
+    summary: Integrate MemPalace as the primary agent cross-session memory system for the proxmoxflorinserver platform.
+    filename: 0384-mempalace-agent-memory-system.md
+    path: docs/adr/0384-mempalace-agent-memory-system.md
+  - adr: 0385
+    title: Decouple Platform from Operator Identity
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: identity
+    keywords:
+      - decouple
+      - platform
+      - from
+      - operator
+      - identity
+    summary: Fix the four patterns using Ansible's own variable system — no custom lookup
+    filename: 0385-ioc-library-refactor.md
+    path: docs/adr/0385-ioc-library-refactor.md
+  - adr: 0385
+    title: MemPalace Integration with chat.lv3.org
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - mempalace
+      - integration
+      - chat
+      - lv3
+      - org
+    summary: Implement unified cross-interface memory by connecting chat.lv3.org to MemPalace, enabling both Claude Code and
+      chat.lv3.org users to access a shared memory poo
+    filename: 0385-mempalace-chat-lv3-integration.md
+    path: docs/adr/0385-mempalace-chat-lv3-integration.md
+  - adr: 0386
+    title: Reproducible Zero-to-Platform Bootstrap for Public Forks
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - reproducible
+      - zero-to-platform
+      - bootstrap
+      - public
+      - forks
+    summary: Implement a four-layer bootstrap system that takes a fork operator from
+    filename: 0386-reproducible-zero-to-platform-bootstrap.md
+    path: docs/adr/0386-reproducible-zero-to-platform-bootstrap.md
+  - adr: 0387
+    title: ServerClaw-in-Docker — Containerized Platform Development Environment
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - serverclaw-in-docker
+      - containerized
+      - platform
+      - development
+      - environment
+    summary: Implement a three-tier containerized development environment that
+    filename: 0387-serverclaw-in-docker.md
+    path: docs/adr/0387-serverclaw-in-docker.md

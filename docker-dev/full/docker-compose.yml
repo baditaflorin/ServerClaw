@@ -1,0 +1,150 @@
+# ServerClaw Full Topology Development Environment — ADR 0387 Tier 2
+#
+# Runs 7 containers matching the production VM topology:
+#   - nginx-edge      (10.10.10.10) — Public-facing reverse proxy
+#   - docker-runtime  (10.10.10.20) — General Docker runtime
+#   - docker-build    (10.10.10.30) — Build server with DinD
+#   - monitoring-vm   (10.10.10.40) — Grafana + Prometheus
+#   - postgres-vm     (10.10.10.50) — Shared PostgreSQL
+#   - backup-vm       (10.10.10.60) — Backup target
+#   - runtime-control (10.10.10.92) — API gateway, agent tools
+#
+# Requirements: 16-24 GB RAM, 8 CPU cores, 50 GB disk
+#
+# Usage:
+#   make docker-dev-up-full     # start
+#   make docker-dev-converge    # run Ansible against these containers
+#   make docker-dev-down        # stop
+
+networks:
+  serverclaw:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24
+          gateway: 10.10.10.1
+
+x-vm-base: &vm-base
+  build:
+    context: ../images/vm-base
+    dockerfile: Dockerfile
+  privileged: false
+  restart: unless-stopped
+  networks:
+    - serverclaw
+  volumes:
+    - bootstrap-pubkey:/run/secrets:ro
+  tmpfs:
+    - /run
+    - /tmp
+
+services:
+  # --- Key injection init container ---
+  key-init:
+    image: alpine:3.20
+    volumes:
+      - bootstrap-pubkey:/out
+      - ../../.local/ssh/bootstrap.id_ed25519.pub:/in/bootstrap.pub:ro
+    entrypoint: ["/bin/sh", "-c", "cp /in/bootstrap.pub /out/bootstrap_pubkey && chmod 644 /out/bootstrap_pubkey"]
+    networks:
+      - serverclaw
+
+  nginx-edge:
+    <<: *vm-base
+    hostname: nginx-edge
+    container_name: serverclaw-nginx-edge
+    networks:
+      serverclaw:
+        ipv4_address: 10.10.10.10
+    ports:
+      - "8443:443"
+      - "8080:80"
+    depends_on:
+      key-init:
+        condition: service_completed_successfully
+
+  docker-runtime:
+    <<: *vm-base
+    hostname: docker-runtime
+    container_name: serverclaw-docker-runtime
+    networks:
+      serverclaw:
+        ipv4_address: 10.10.10.20
+    volumes:
+      - bootstrap-pubkey:/run/secrets:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      key-init:
+        condition: service_completed_successfully
+
+  docker-build:
+    <<: *vm-base
+    hostname: docker-build
+    container_name: serverclaw-docker-build
+    networks:
+      serverclaw:
+        ipv4_address: 10.10.10.30
+    volumes:
+      - bootstrap-pubkey:/run/secrets:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      key-init:
+        condition: service_completed_successfully
+
+  monitoring-vm:
+    <<: *vm-base
+    hostname: monitoring-vm
+    container_name: serverclaw-monitoring-vm
+    networks:
+      serverclaw:
+        ipv4_address: 10.10.10.40
+    depends_on:
+      key-init:
+        condition: service_completed_successfully
+
+  postgres-vm:
+    <<: *vm-base
+    hostname: postgres-vm
+    container_name: serverclaw-postgres-vm
+    networks:
+      serverclaw:
+        ipv4_address: 10.10.10.50
+    depends_on:
+      key-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "ssh-keyscan", "-T", "2", "127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 5
+
+  backup-vm:
+    <<: *vm-base
+    hostname: backup-vm
+    container_name: serverclaw-backup-vm
+    networks:
+      serverclaw:
+        ipv4_address: 10.10.10.60
+    depends_on:
+      key-init:
+        condition: service_completed_successfully
+
+  runtime-control:
+    <<: *vm-base
+    hostname: runtime-control
+    container_name: serverclaw-runtime-control
+    networks:
+      serverclaw:
+        ipv4_address: 10.10.10.92
+    volumes:
+      - bootstrap-pubkey:/run/secrets:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      key-init:
+        condition: service_completed_successfully
+      postgres-vm:
+        condition: service_healthy
+
+volumes:
+  bootstrap-pubkey:

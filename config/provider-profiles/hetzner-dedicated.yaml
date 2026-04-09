@@ -1,0 +1,84 @@
+# Provider Bootstrap Profile: Hetzner Dedicated Server
+# See ADR 0386 + ADR 0003
+
+provider: hetzner-dedicated
+bootstrap_method: rescue-installimage
+description: >
+  Bootstrap a Hetzner dedicated server using the Rescue System and installimage.
+  This is the reference provider for the ServerClaw platform.
+
+prerequisites:
+  - Hetzner Robot account with at least one dedicated server
+  - Server accessible in Rescue Mode (Linux 64-bit)
+  - Bootstrap SSH public key uploaded to Hetzner Robot (or injected manually)
+
+hardware_requirements:
+  min_ram_gb: 32
+  min_disk_gb: 500
+  min_cores: 8
+  architecture: x86_64
+  notes: >
+    Tested on Hetzner AX41-NVMe (AMD Ryzen 5 3600, 64GB RAM, 2x512GB NVMe).
+    Smaller configurations may work but are not validated.
+
+steps:
+  - name: Activate Rescue System
+    manual: true
+    description: >
+      In Hetzner Robot, select your server → Rescue tab → Activate Rescue System.
+      Choose Linux 64-bit. Note the temporary root password shown.
+    validation: null
+
+  - name: Boot into Rescue
+    manual: true
+    description: >
+      Reset the server (Robot → Reset tab → Execute an Automatic Hardware Reset).
+      Wait 2-3 minutes, then SSH in as root with the rescue password.
+    validation: "ssh root@<SERVER_IP> 'cat /etc/motd | grep -i rescue'"
+
+  - name: Install Debian 13 via installimage
+    manual: true
+    description: |
+      Run installimage in the rescue shell:
+        installimage
+      Select: Debian → Debian-1300-trixie-amd64-base
+      Configure:
+        DRIVE1 /dev/nvme0n1
+        DRIVE2 /dev/nvme1n1  (if available)
+        SWRAID 1             (if two drives)
+        SWRAIDLEVEL 1
+        HOSTNAME your-proxmox-host
+      Save and confirm. Wait for installation to complete. Reboot.
+    runbook: docs/runbooks/initial-access.md
+    validation: "ssh root@<SERVER_IP> 'cat /etc/debian_version | grep -q 13'"
+
+  - name: Inject bootstrap SSH key
+    manual: true
+    description: |
+      After reboot, SSH in as root (password from Hetzner Robot or installimage).
+      Inject the bootstrap key:
+        mkdir -p /root/.ssh
+        echo '<BOOTSTRAP_PUBKEY>' >> /root/.ssh/authorized_keys
+        chmod 600 /root/.ssh/authorized_keys
+    validation: "ssh -i .local/ssh/bootstrap.id_ed25519 root@<SERVER_IP> 'whoami'"
+
+  - name: Run Proxmox bootstrap via Ansible
+    command: "make install-proxmox HOST=<SERVER_IP>"
+    description: Installs Proxmox VE, configures networking, creates ops user.
+    validation: "make verify-bootstrap-proxmox HOST=<SERVER_IP>"
+
+  - name: Provision guest VMs
+    command: "make provision-guests"
+    description: Creates all guest VMs on the Proxmox host.
+    validation: "make verify-bootstrap-guests"
+
+  - name: Full platform convergence
+    command: "make converge-site"
+    description: Deploys all 73+ services across the guest VMs.
+    validation: "make verify-platform"
+
+post_bootstrap:
+  - Set up DNS records pointing to the server's public IP
+  - Configure TLS certificates (step-ca or Let's Encrypt)
+  - Set up Tailscale/Headscale for VPN access
+  - Create operator accounts in Keycloak

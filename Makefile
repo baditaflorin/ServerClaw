@@ -104,6 +104,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: syntax-check-matrix-synapse converge-matrix-synapse
 .PHONY: syntax-check-nextcloud converge-nextcloud
 .PHONY: syntax-check-nomad converge-nomad
+.PHONY: init-local bootstrap bootstrap-minimal verify-bootstrap-proxmox verify-bootstrap-guests verify-platform docker-dev-up docker-dev-up-full docker-dev-down docker-dev-verify docker-dev-converge docker-dev-reset generate-local-example
 
 prepare-run-namespace:
 	@$(RUN_ID_ENV) python3 $(REPO_ROOT)/scripts/run_namespace.py --repo-root "$(REPO_ROOT)" --ensure >/dev/null
@@ -1595,3 +1596,120 @@ provision-adr-governance-dry-run:
 		-i $(ANSIBLE_INVENTORY) \
 		-e "plane_admin_bootstrap_token=$(PLANE_ADMIN_TOKEN)" \
 		--check
+
+# =============================================================================
+# Bootstrap — ADR 0386
+# =============================================================================
+
+init-local: ## Initialize .local/ overlay with SSH keys and secrets
+	@if [ "$(FORCE)" = "true" ]; then \
+		python3 $(REPO_ROOT)/scripts/init_local_overlay.py --force; \
+	else \
+		python3 $(REPO_ROOT)/scripts/init_local_overlay.py; \
+	fi
+
+generate-local-example: ## Regenerate local-overlay-template/ scaffold from secret manifest
+	python3 $(REPO_ROOT)/scripts/init_local_overlay.py --generate-example
+
+bootstrap: ## Full platform bootstrap from bare Debian 13 (ADR 0386)
+	@echo "=== Stage 1: Local overlay initialization ==="
+	@if [ ! -d "$(LOCAL_OVERLAY_ROOT)" ]; then \
+		$(MAKE) init-local; \
+	else \
+		echo "  .local/ exists — skipping init (use FORCE=true to regenerate missing files)"; \
+	fi
+	@echo ""
+	@echo "=== Stage 2: Proxmox VE installation ==="
+	$(MAKE) install-proxmox
+	$(MAKE) verify-bootstrap-proxmox
+	@echo ""
+	@echo "=== Stage 3: Network and access ==="
+	$(MAKE) configure-network
+	$(MAKE) harden-access
+	@echo ""
+	@echo "=== Stage 4: Guest provisioning ==="
+	$(MAKE) provision-guests
+	$(MAKE) verify-bootstrap-guests
+	@echo ""
+	@echo "=== Stage 5: Platform convergence ==="
+	$(MAKE) converge-site
+	$(MAKE) verify-platform
+	@echo ""
+	@echo "=== Bootstrap complete ==="
+
+bootstrap-minimal: ## Bootstrap critical path only (PG + Keycloak + Nginx + OpenBao)
+	@echo "=== Minimal bootstrap: critical path only ==="
+	@if [ ! -d "$(LOCAL_OVERLAY_ROOT)" ]; then \
+		$(MAKE) init-local; \
+	else \
+		echo "  .local/ exists — skipping init"; \
+	fi
+	$(MAKE) install-proxmox
+	$(MAKE) verify-bootstrap-proxmox
+	$(MAKE) configure-network
+	$(MAKE) provision-guests
+	$(MAKE) verify-bootstrap-guests
+	$(MAKE) converge-postgres-vm
+	$(MAKE) converge-keycloak
+	$(MAKE) converge-openbao
+	$(MAKE) converge-api-gateway
+	@echo ""
+	@echo "=== Minimal bootstrap complete (PG, Keycloak, OpenBao, API Gateway) ==="
+
+verify-bootstrap-proxmox: ## Verify Proxmox VE is installed and operational
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-proxmox.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+
+verify-bootstrap-guests: ## Verify all guest VMs are reachable
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-guests.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+
+verify-platform: ## Verify critical platform services are healthy
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-platform.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+
+converge-site: ## Full site convergence (all services)
+	$(MAKE) preflight WORKFLOW=converge-site
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/collections/ansible_collections/lv3/platform/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) $(EXTRA_ARGS)
+
+# =============================================================================
+# Docker Development Environment — ADR 0387
+# =============================================================================
+
+docker-dev-up: ## Start minimal Docker dev environment (Tier 1)
+	@test -f "$(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub" || (echo "Run 'make init-local' first to generate SSH keys"; exit 1)
+	docker compose -f $(REPO_ROOT)/docker-dev/minimal/docker-compose.yml up -d --build
+	@echo "Waiting for containers to initialize..."
+	@sleep 5
+	$(MAKE) docker-dev-verify
+
+docker-dev-up-full: ## Start full-topology Docker dev environment (Tier 2)
+	@test -f "$(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub" || (echo "Run 'make init-local' first to generate SSH keys"; exit 1)
+	docker compose -f $(REPO_ROOT)/docker-dev/full/docker-compose.yml up -d --build
+	@echo "Waiting for containers to initialize..."
+	@sleep 5
+	$(MAKE) docker-dev-verify
+
+docker-dev-down: ## Stop Docker dev environment
+	docker compose -f $(REPO_ROOT)/docker-dev/minimal/docker-compose.yml down 2>/dev/null || true
+	docker compose -f $(REPO_ROOT)/docker-dev/full/docker-compose.yml down 2>/dev/null || true
+
+docker-dev-verify: ## Verify Docker dev containers are SSH-reachable
+	@echo "Checking SSH access to containers..."
+	@for host in 10.10.10.10 10.10.10.50 10.10.10.92; do \
+		if ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 \
+			-i $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519 ops@$$host "echo OK" 2>/dev/null; then \
+			echo "  OK $$host"; \
+		else \
+			echo "  FAIL $$host"; \
+		fi; \
+	done
+
+docker-dev-converge: ## Run Ansible convergence against Docker dev containers
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) \
+		-i $(REPO_ROOT)/inventory/hosts-docker.yml \
+		$(REPO_ROOT)/collections/ansible_collections/lv3/platform/playbooks/site.yml \
+		--private-key $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519 \
+		$(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+docker-dev-reset: ## Destroy and recreate Docker dev environment
+	$(MAKE) docker-dev-down
+	docker volume ls -q --filter name=serverclaw | xargs -r docker volume rm 2>/dev/null || true
+	$(MAKE) docker-dev-up
