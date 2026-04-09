@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0388: Centralize Keycloak realm name and OIDC issuer URLs — keycloak_realm_name derived from platform_domain in identity.yml; 8 central OIDC URL variables (issuer, auth, token, userinfo, jwks, logout, discovery); 34 hardcoded `realms/lv3` literals replaced across 20 role defaults and 2 task files; fork operators changing platform_domain automatically get correct SSO configuration with zero additional edits; also fixes semaphore_runtime using wrong SSO hostname (auth vs sso)
 - ADR 0386: Unified disk space monitoring — shared Telegraf base inputs on all VMs, disk_metrics.py query module, agent tool (get-disk-usage), platform-context API endpoint (GET /v1/platform/disk-usage), and Windmill disk-space-monitor workflow; auto-propagates when VMs are added/removed via capacity-model.json
 - ADR 0387: Harbor OIDC Keycloak protocol mappers and client configuration fixed — Harbor login via `registry.lv3.org/c/oidc/login` now works with proper email, username, and groups claims extraction; client secret authenticator and backchannel logout configured; idempotent client update task ensures protocol mappers always match repo truth
 - [ADR 0386/0387] Zero-to-platform bootstrap and Docker development environment: init_local_overlay.py generates .local/ from secret manifest with SSH keys and 237 auto-generated secrets; local-overlay-template/ provides 63-dir scaffold; Docker dev environment (vm-base container, Tier 1 minimal 4-container / Tier 2 full 7-container compose); inventory templates for forks and Docker dev; provider bootstrap profiles (Hetzner, generic Debian, homelab); verification playbooks for Proxmox, guests, and platform health; unified bootstrap-from-scratch runbook; Makefile targets: init-local, bootstrap, bootstrap-minimal, docker-dev-up/down/converge/verify/reset
@@ -61,10 +62,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.74 release notes](docs/release-notes/0.178.74.md)
+- [0.178.75 release notes](docs/release-notes/0.178.75.md)
 
 ## Previous Releases
 
+- [0.178.74 release notes](docs/release-notes/0.178.74.md)
 - [0.178.73 release notes](docs/release-notes/0.178.73.md)
 - [0.178.72 release notes](docs/release-notes/0.178.72.md)
 - [0.178.71 release notes](docs/release-notes/0.178.71.md)
@@ -76,9 +78,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.64 release notes](docs/release-notes/0.178.64.md)
 - [0.178.63 release notes](docs/release-notes/0.178.63.md)
 - [0.178.62 release notes](docs/release-notes/0.178.62.md)
-- [0.178.61 release notes](docs/release-notes/0.178.61.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (409 releases)](docs/release-notes/index/2026.md)
+- [2026 (410 releases)](docs/release-notes/index/2026.md)
