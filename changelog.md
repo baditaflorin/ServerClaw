@@ -12,10 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- [ADR 0387] Platform DRY consolidation: eliminate hardcoded IPs across 13 roles and hostname literals across 6 files; all topology references now use playbook_execution_host_patterns or platform_topology_host; elevate ADRs 0370-0372, 0385 from Proposed to Accepted
-- [ADR 0373] Phase 5-6 Live-Apply Complete: Final 7 services migrated to derive_service_defaults (librechat, litellm, neko, netdata, repo_intake, falco, falco_event_bridge); 100% platform adoption achieved; cosmetic cleanup removing 2583 redundant variable definitions from role defaults/specs; all 73 services now use unified IoC pattern with zero duplication
+- ADR 0387: Harbor OIDC Keycloak protocol mappers and client configuration fixed — Harbor login via `registry.lv3.org/c/oidc/login` now works with proper email, username, and groups claims extraction; client secret authenticator and backchannel logout configured; idempotent client update task ensures protocol mappers always match repo truth
 - [ADR 0386/0387] Zero-to-platform bootstrap and Docker development environment: init_local_overlay.py generates .local/ from secret manifest with SSH keys and 237 auto-generated secrets; local-overlay-template/ provides 63-dir scaffold; Docker dev environment (vm-base container, Tier 1 minimal 4-container / Tier 2 full 7-container compose); inventory templates for forks and Docker dev; provider bootstrap profiles (Hetzner, generic Debian, homelab); verification playbooks for Proxmox, guests, and platform health; unified bootstrap-from-scratch runbook; Makefile targets: init-local, bootstrap, bootstrap-minimal, docker-dev-up/down/converge/verify/reset
-
 - [ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox_florin'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain
 - ADR 0386 agent cross-host execution: all 7 platform hosts reachable via execute-host-command tool; local nsenter for runtime-control-lv3, direct SSH for Proxmox, SSH→Proxmox→qm guest exec for VMs (nftables blocks inter-VM SSH); agent SSH key provisioned at /etc/lv3/api-gateway/agent-ssh-key; mempalace>=0.3.0 added to container image
 - [ADR 0385] IoC refactor: single identity.yml replaces all hardcoded operator values; fork operators edit one file to rebrand; 281 files converted from hardcoded lv3.org/proxmox_florin to template expressions; generators and validators updated to resolve identity vars; IoC regression test added
@@ -62,11 +60,10 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.73 release notes](docs/release-notes/0.178.73.md)
+- [0.178.72 release notes](docs/release-notes/0.178.72.md)
 
 ## Previous Releases
 
-- [0.178.72 release notes](docs/release-notes/0.178.72.md)
 - [0.178.71 release notes](docs/release-notes/0.178.71.md)
 - [0.178.70 release notes](docs/release-notes/0.178.70.md)
 - [0.178.69 release notes](docs/release-notes/0.178.69.md)
@@ -78,8 +75,9 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.62 release notes](docs/release-notes/0.178.62.md)
 - [0.178.61 release notes](docs/release-notes/0.178.61.md)
 - [0.178.60 release notes](docs/release-notes/0.178.60.md)
+- [0.178.59 release notes](docs/release-notes/0.178.59.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (408 releases)](docs/release-notes/index/2026.md)
+- [2026 (407 releases)](docs/release-notes/index/2026.md)

@@ -35,6 +35,12 @@
   gather_facts: true
   vars:
     preflight_wait_for_connection: false
+    # ADR 0373: Conventional service variables (derive_service_defaults compatibility)
+    harbor_site_dir: /opt/harbor
+    harbor_data_dir: /opt/harbor/data
+    harbor_secret_dir: /etc/lv3/harbor
+    harbor_local_artifact_dir: "{{ repo_shared_local_root }}/harbor"
+    harbor_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology.harbor }}"
   tags:
     - tier-2
     - infrastructure

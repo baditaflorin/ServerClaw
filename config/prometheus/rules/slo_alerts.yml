@@ -136,7 +136,7 @@ groups:
           indicator: availability
         annotations:
           summary: directus-availability is burning its error budget at 14x
-          description: Directus should keep the public health contract on data.{{ platform_domain }}
+          description: Directus should keep the public health contract on data.lv3.org
             reachable through the shared edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_directus_availability
@@ -149,7 +149,7 @@ groups:
           indicator: availability
         annotations:
           summary: directus-availability is burning its error budget at 3x
-          description: Directus should keep the public health contract on data.{{ platform_domain }}
+          description: Directus should keep the public health contract on data.lv3.org
             reachable through the shared edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_directus_availability
@@ -162,7 +162,7 @@ groups:
           indicator: availability
         annotations:
           summary: directus-availability has less than 10% error budget remaining
-          description: Directus should keep the public health contract on data.{{ platform_domain }}
+          description: Directus should keep the public health contract on data.lv3.org
             reachable through the shared edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_dozzle_availability

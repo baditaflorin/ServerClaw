@@ -36,58 +36,58 @@ argument_specs:
         required: true
       harbor_site_dir:
         type: path
-        required: true
+        required: false
       harbor_installer_root:
         type: path
-        required: true
+        required: false
       harbor_installer_dir:
         type: path
-        required: true
+        required: false
       harbor_installer_version:
         type: str
-        required: true
+        required: false
       harbor_installer_archive:
         type: path
-        required: true
+        required: false
       harbor_installer_url:
         type: str
-        required: true
+        required: false
       harbor_config_file:
         type: path
-        required: true
+        required: false
       harbor_generated_compose_file:
         type: path
-        required: true
+        required: false
       harbor_data_dir:
         type: path
-        required: true
+        required: false
       harbor_log_dir:
         type: path
-        required: true
+        required: false
       harbor_secret_dir:
         type: path
-        required: true
+        required: false
       harbor_admin_password_remote_file:
         type: path
-        required: true
+        required: false
       harbor_database_password_remote_file:
         type: path
-        required: true
+        required: false
       harbor_local_artifact_dir:
         type: path
-        required: true
+        required: false
       harbor_admin_password_local_file:
         type: path
-        required: true
+        required: false
       harbor_database_password_local_file:
         type: path
-        required: true
+        required: false
       harbor_check_runner_robot_local_file:
         type: path
-        required: true
+        required: false
       harbor_http_port:
         type: int
-        required: true
+        required: false
       harbor_prepare_with_trivy:
         type: bool
         required: true

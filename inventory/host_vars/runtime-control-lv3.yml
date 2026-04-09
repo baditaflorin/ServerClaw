@@ -1,0 +1,6 @@
+---
+# Harbor service variables - defined here to ensure availability during role initialization
+harbor_site_dir: /opt/harbor
+harbor_data_dir: /opt/harbor/data
+harbor_secret_dir: /etc/lv3/harbor
+harbor_local_artifact_dir: "{{ repo_shared_local_root }}/harbor"
