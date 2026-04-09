@@ -609,12 +609,70 @@ def tool_run_governed_command(_tool: dict[str, Any], args: dict[str, Any]) -> tu
     )
 
 
+DOCKER_SOCKET_PATH: Final[str] = "/var/run/docker.sock"
+
+
+def _docker_socket_available() -> bool:
+    return Path(DOCKER_SOCKET_PATH).exists()
+
+
+def _docker_socket_request(method: str, path: str, params: dict[str, str] | None = None) -> Any:
+    """Make a request to the Docker Engine API via the Unix socket."""
+    import http.client
+    import socket
+
+    class DockerUnixConnection(http.client.HTTPConnection):
+        def __init__(self, socket_path: str, timeout: float = 30):
+            super().__init__("localhost", timeout=int(timeout))
+            self._socket_path = socket_path
+
+        def connect(self) -> None:
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.sock.settimeout(self.timeout)
+            self.sock.connect(self._socket_path)
+
+    if params:
+        query = "&".join(f"{k}={v}" for k, v in params.items())
+        full_path = f"{path}?{query}"
+    else:
+        full_path = path
+
+    conn = DockerUnixConnection(DOCKER_SOCKET_PATH)
+    conn.request(method, full_path, headers={"Host": "localhost"})
+    response = conn.getresponse()
+    if response.status != 200:
+        raise ValueError(f"Docker API returned HTTP {response.status}: {response.read().decode()}")
+    return json.loads(response.read().decode("utf-8"))
+
+
+def _portainer_available() -> bool:
+    """Check whether Portainer credentials are configured."""
+    base_url = os.environ.get(PORTAINER_BASE_URL_ENV, "").strip()
+    if base_url:
+        return True
+    return DEFAULT_PORTAINER_AUTH_FILE_PATH.is_file()
+
+
 def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
-    from portainer_tool import PortainerClient  # lazy import — requests not required at registry load time
     include_stopped = bool(args.get("include_stopped", False))
-    client = PortainerClient(resolve_portainer_auth())
-    client.login()
-    containers = client.list_containers(all_containers=include_stopped)
+
+    if _portainer_available():
+        from portainer_tool import PortainerClient  # lazy import
+        client = PortainerClient(resolve_portainer_auth())
+        client.login()
+        containers = client.list_containers(all_containers=include_stopped)
+        source = "portainer"
+    elif _docker_socket_available():
+        params = {"all": "1" if include_stopped else "0"}
+        containers = _docker_socket_request("GET", "/containers/json", params)
+        source = "docker-socket"
+    else:
+        raise ValueError(
+            "Cannot list containers: no Portainer credentials configured and "
+            "Docker socket not available at /var/run/docker.sock. "
+            "Mount the Docker socket or provision Portainer credentials."
+        )
+
     normalized = [
         {
             "id": c["Id"][:12],
@@ -625,16 +683,60 @@ def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[st
         }
         for c in containers
     ]
-    return {"count": len(normalized), "containers": normalized}
+    return {"count": len(normalized), "containers": normalized, "source": source}
 
 
 def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
-    from portainer_tool import PortainerClient  # lazy import — requests not required at registry load time
     container = require_str(args.get("container"), "arguments.container")
     tail = require_int(args.get("tail", 100), "arguments.tail", minimum=1)
-    client = PortainerClient(resolve_portainer_auth())
-    client.login()
-    logs = client.container_logs(container, tail)
+
+    if _portainer_available():
+        from portainer_tool import PortainerClient  # lazy import
+        client = PortainerClient(resolve_portainer_auth())
+        client.login()
+        logs = client.container_logs(container, tail)
+    elif _docker_socket_available():
+        # Resolve container name to ID via Docker API
+        all_containers = _docker_socket_request("GET", "/containers/json", {"all": "1"})
+        target_id = None
+        for c in all_containers:
+            names = [n.lstrip("/") for n in c.get("Names", [])]
+            if container in names or c["Id"].startswith(container):
+                target_id = c["Id"]
+                break
+        if target_id is None:
+            raise ValueError(f"Container not found: {container}")
+        # Fetch logs — Docker API returns plain text for logs endpoint
+        import http.client
+        import socket
+
+        class DockerUnixConnection(http.client.HTTPConnection):
+            def __init__(self, socket_path: str, timeout: float = 30):
+                super().__init__("localhost", timeout=int(timeout))
+                self._socket_path = socket_path
+
+            def connect(self) -> None:
+                self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                self.sock.settimeout(self.timeout)
+                self.sock.connect(self._socket_path)
+
+        conn = DockerUnixConnection(DOCKER_SOCKET_PATH)
+        conn.request(
+            "GET",
+            f"/containers/{target_id}/logs?stdout=1&stderr=1&tail={tail}",
+            headers={"Host": "localhost"},
+        )
+        response = conn.getresponse()
+        if response.status != 200:
+            raise ValueError(f"Docker API returned HTTP {response.status}")
+        from portainer_tool import decode_docker_log_stream
+        logs = decode_docker_log_stream(response.read())
+    else:
+        raise ValueError(
+            "Cannot get container logs: no Portainer credentials configured and "
+            "Docker socket not available."
+        )
+
     return {"container": container, "tail": tail, "logs": logs}
 
 

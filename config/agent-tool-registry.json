@@ -1016,11 +1016,11 @@
     {
       "name": "list-containers",
       "title": "List Containers",
-      "description": "List all Docker containers across the managed Portainer endpoint. Returns name, image, state, and status for each container.",
+      "description": "List Docker containers on the local host. Uses Docker socket directly when available, falls back to Portainer API if configured.",
       "category": "observe",
       "transport": "controller_local",
-      "endpoint": "service://portainer/containers",
-      "auth": "portainer-admin",
+      "endpoint": "service://docker/containers",
+      "auth": "docker-socket-or-portainer-admin",
       "approval_required": false,
       "audit_on_call": true,
       "input_schema": {
@@ -1049,6 +1049,10 @@
             "items": {
               "type": "object"
             }
+          },
+          "source": {
+            "type": "string",
+            "description": "The backend used to list containers (docker-socket or portainer)."
           }
         }
       },
@@ -1065,11 +1069,11 @@
     {
       "name": "get-container-logs",
       "title": "Get Container Logs",
-      "description": "Retrieve recent stdout and stderr log lines for a named Docker container via Portainer. Accepts a container name, ID, or ID prefix.",
+      "description": "Retrieve recent stdout and stderr log lines for a named Docker container. Uses Docker socket directly when available, falls back to Portainer API if configured. Accepts a container name, ID, or ID prefix.",
       "category": "observe",
       "transport": "controller_local",
-      "endpoint": "service://portainer/containers/{container}/logs",
-      "auth": "portainer-admin",
+      "endpoint": "service://docker/containers/{container}/logs",
+      "auth": "docker-socket-or-portainer-admin",
       "approval_required": false,
       "audit_on_call": true,
       "input_schema": {
