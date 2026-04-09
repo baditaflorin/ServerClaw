@@ -46,6 +46,7 @@ HOST_VARS_PATH: Final[Path] = repo_path("inventory", "host_vars", "proxmox_flori
 SERVICE_CATALOG_PATH: Final[Path] = repo_path("config", "service-capability-catalog.json")
 AUDIT_LOG_ENV: Final[str] = "LV3_AGENT_TOOL_AUDIT_LOG_PATH"
 PLATFORM_CONTEXT_TOKEN_ENV: Final[str] = "LV3_PLATFORM_CONTEXT_API_TOKEN_FILE"
+PLATFORM_CONTEXT_TOKEN_VALUE_ENV: Final[str] = "LV3_GATEWAY_PLATFORM_CONTEXT_LEGACY_TOKEN"
 BROWSER_RUNNER_BASE_URL_ENV: Final[str] = "LV3_BROWSER_RUNNER_BASE_URL"
 DEFAULT_PLATFORM_CONTEXT_TOKEN_PATH: Final[Path] = REPO_ROOT / ".local" / "platform-context" / "api-token.txt"
 PORTAINER_BASE_URL_ENV: Final[str] = "LV3_PORTAINER_BASE_URL"
@@ -271,6 +272,21 @@ def resolve_platform_context_token_path() -> Path:
     return DEFAULT_PLATFORM_CONTEXT_TOKEN_PATH
 
 
+def resolve_platform_context_token() -> str:
+    """Resolve the platform-context API token.
+
+    Checks (in order):
+    1. Direct token value from LV3_GATEWAY_PLATFORM_CONTEXT_LEGACY_TOKEN env var
+       (set by the api-gateway.env.j2 template — avoids needing a file mount)
+    2. Token file path from LV3_PLATFORM_CONTEXT_API_TOKEN_FILE env var
+    3. Default file path at REPO_ROOT/.local/platform-context/api-token.txt
+    """
+    direct = os.environ.get(PLATFORM_CONTEXT_TOKEN_VALUE_ENV, "").strip()
+    if direct:
+        return direct
+    return read_secret_file(resolve_platform_context_token_path(), "platform-context API token")
+
+
 def resolve_portainer_auth() -> dict[str, Any]:
     base_url = os.environ.get(PORTAINER_BASE_URL_ENV, "").strip()
     if base_url:
@@ -466,7 +482,7 @@ def tool_export_mcp_tools(registry: dict[str, Any], args: dict[str, Any]) -> dic
 def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     question = require_str(args.get("question"), "arguments.question")
     top_k = require_int(args.get("top_k", 5), "arguments.top_k", minimum=1)
-    token = read_secret_file(resolve_platform_context_token_path(), "platform-context API token")
+    token = resolve_platform_context_token()
     request = urllib.request.Request(
         require_str(tool.get("endpoint"), f"{tool['name']}.endpoint"),
         method="POST",

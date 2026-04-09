@@ -169,10 +169,10 @@ api_gateway_runtime_assurance_matrix_src: "{{ api_gateway_repo_root }}/config/ru
 api_gateway_environment_topology_src: "{{ api_gateway_repo_root }}/config/environment-topology.json"
 api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
-api_gateway_platform_context_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
-api_gateway_dify_tools_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt
-api_gateway_billing_ingest_producers_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/producer-catalog.json
-api_gateway_lago_org_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/org-api-key.txt
+api_gateway_platform_context_token_local_file: "{{ api_gateway_shared_local_root }}/platform-context/api-token.txt"
+api_gateway_dify_tools_api_key_local_file: "{{ api_gateway_shared_local_root }}/dify/tools-api-key.txt"
+api_gateway_billing_ingest_producers_local_file: "{{ api_gateway_shared_local_root }}/lago/producer-catalog.json"
+api_gateway_lago_org_api_key_local_file: "{{ api_gateway_shared_local_root }}/lago/org-api-key.txt"
 api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key
 api_gateway_typesense_service_topology: >-
   {{
@@ -369,7 +369,7 @@ api_gateway_portainer_base_url: https://10.10.10.20:9443
 api_gateway_portainer_username: ops-portainer
 api_gateway_portainer_endpoint_id: "1"
 api_gateway_portainer_verify_ssl: false
-api_gateway_portainer_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/portainer/admin-password.txt
+api_gateway_portainer_admin_password_local_file: "{{ api_gateway_shared_local_root }}/portainer/admin-password.txt"
 api_gateway_portainer_admin_password: >-
   {{
     lookup('ansible.builtin.file', api_gateway_portainer_admin_password_local_file, errors='ignore')
