@@ -450,7 +450,7 @@ config_location_sections:
         related_files:
           - 'config/*/: Per-service configuration files'
           - 'build/platform-manifest.json: Generated manifest from this file'
-          - 'inventory/group_vars/all.yml: Common variables'
+          - 'inventory/group_vars/all/identity.yml: Common variables'
         schema_hint: "services:\n  - service: service_name\n    vm: vm_name\n    image: image:version\n    port: port_number\n"
       config/integrations/:
         purpose: "ADR 0353 service integration contracts \u2014 canonical declarations of every cross-service dependency (postgres, s3, secrets, oidc, smtp, nats)"

@@ -1560,7 +1560,7 @@
         "roles/proxmox_ntopng",
         "roles/proxmox_tailscale_proxy",
         "roles/proxmox_security",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -1740,7 +1740,7 @@
         "roles/mail_platform_observability",
         "roles/proxmox_network",
         "roles/monitoring_vm",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -1791,7 +1791,7 @@
         "playbooks/services/mailpit.yml",
         "roles/mailpit_runtime",
         "playbooks/mail-platform-verify.yml",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/group_vars/staging.yml",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
@@ -2032,7 +2032,7 @@
         "roles/openbao_runtime",
         "roles/openbao_postgres_backend",
         "roles/postgres_vm",
-        "inventory/group_vars/all.yml"
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml"
       ],
       "outputs": [
         "A private OpenBao deployment on docker-runtime-lv3 with controller-local bootstrap artifacts, scoped human and machine auth identities, seeded platform secrets, Transit keys, and PostgreSQL dynamic credentials."
@@ -2087,7 +2087,7 @@
         "roles/step_ca_ssh_trust",
         "roles/proxmox_security",
         "roles/proxmox_tailscale_proxy",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -2617,7 +2617,7 @@
         "roles/coolify_runtime/tasks/main.yml",
         "roles/coolify_runtime/tasks/verify.yml",
         "scripts/coolify_tool.py",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -3794,7 +3794,7 @@
         "roles/control_plane_recovery",
         "roles/control_plane_recovery_store",
         "roles/control_plane_recovery_controller",
-        "inventory/group_vars/all.yml"
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml"
       ],
       "outputs": [
         "Scheduled runtime exports for step-ca, OpenBao, Windmill, and the mail platform on docker-runtime-lv3 plus backup-lv3 restore drills, a mirrored controller recovery bundle, and an immutable off-host witness generation with a witness-replication receipt."
@@ -4168,7 +4168,7 @@
         "roles/api_gateway_runtime/tasks/main.yml",
         "roles/linux_guest_firewall/templates/nftables.conf.j2",
         "roles/nginx_edge_publication/tasks/main.yml",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml",
         "config/api-gateway-catalog.json"
       ],
@@ -4541,7 +4541,7 @@
         "roles/netbox_runtime",
         "roles/netbox_sync",
         "roles/proxmox_tailscale_proxy",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml",
         "scripts/netbox_inventory_sync.py",
         "config/control-plane-lanes.json"
@@ -4848,7 +4848,7 @@
         "playbooks/services/one-api.yml",
         "collections/ansible_collections/lv3/platform/roles/one_api_postgres",
         "collections/ansible_collections/lv3/platform/roles/one_api_runtime",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/group_vars/platform.yml",
         "inventory/host_vars/proxmox_florin.yml",
         "config/one-api/bootstrap.json",
@@ -4905,7 +4905,7 @@
         "roles/open_webui_runtime",
         "roles/proxmox_tailscale_proxy/tasks/main.yml",
         "roles/proxmox_security/tasks/main.yml",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -4958,7 +4958,7 @@
         "playbooks/serverclaw.yml",
         "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
         "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/group_vars/platform.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
@@ -5013,7 +5013,7 @@
         "roles/proxmox_tailscale_proxy/tasks/main.yml",
         "roles/proxmox_security/tasks/main.yml",
         "roles/hetzner_dns_record",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -5061,7 +5061,7 @@
         "playbooks/ollama.yml",
         "roles/ollama_runtime",
         "config/ollama-models.yaml",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml",
         "scripts/ollama_probe.py"
       ],
@@ -5569,7 +5569,7 @@
         "scripts/platform_context_service.py",
         "config/agent-tool-registry.json",
         "config/windmill/scripts/rebuild-rag-index.py",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -5622,7 +5622,7 @@
         "roles/portainer_runtime",
         "roles/proxmox_tailscale_proxy/tasks/main.yml",
         "roles/proxmox_security/tasks/main.yml",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
@@ -5731,7 +5731,7 @@
         "roles/monitoring_mattermost_notifications",
         "roles/proxmox_tailscale_proxy",
         "roles/proxmox_security",
-        "inventory/group_vars/all.yml",
+        "inventory/group_vars/all/identity.yml", "inventory/group_vars/all/main.yml",
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
