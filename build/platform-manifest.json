@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.73",
+  "repo_version": "0.178.74",
   "platform_version": "0.178.72",
-  "generated_at": "2026-04-09T16:12:54Z",
-  "next_refresh_at": "2026-04-09T17:12:54Z",
+  "generated_at": "2026-04-09T16:31:21Z",
+  "next_refresh_at": "2026-04-09T17:31:21Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3336,6 +3336,31 @@
         "runbook": "docs/runbooks/disaster-recovery.md"
       },
       {
+        "id": "disk-space-monitor",
+        "description": "Query disk space usage across all platform VMs via InfluxDB, compare against capacity-model.json budgets, and alert when usage exceeds threshold.",
+        "tags": [
+          "disk-space-monitor",
+          "mutation",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 200,
+          "max_concurrent_instances": 3,
+          "max_touched_hosts": 10,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/capacity-model.md"
+      },
+      {
         "id": "ephemeral-pool-reconcile",
         "description": "Keep the ADR 0186 prewarmed fixture pools topped up, record spillover decisions, and preserve one warm spare per common fixture profile when local capacity allows.",
         "tags": [
@@ -4994,6 +5019,7 @@
         "path": "docs/runbooks/capacity-model.md",
         "workflow_ids": [
           "capacity-report",
+          "disk-space-monitor",
           "weekly-capacity-report"
         ]
       },
@@ -6357,10 +6383,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.72",
+    "last_version": "0.178.73",
     "deployed_at": "2026-04-09",
-    "summary": "[ADR 0387] Platform DRY consolidation: eliminate hardcoded IPs across 13 roles and hostname literals across 6 files; all topology references now use playbook_execution_host_patterns or platform_topology_host; elevate ADRs 0370-0372, 0385 from Proposed to Accepted [ADR 0373] Phase 5-6 Live-Apply Complete: Final 7 services migrated to derive_service_defaults (librechat, litellm, neko, netdata, repo_intake, falco, falco_event_bridge); 100% platform adoption achieved; cosmetic cleanup removing 2583 redundant variable definitions from role defaults/specs; all 73 services now use unified IoC pattern with zero duplication",
-    "release_notes_url": "docs/release-notes/0.178.73.md"
+    "summary": "ADR 0386: Unified disk space monitoring \u2014 shared Telegraf base inputs on all VMs, disk_metrics.py query module, agent tool (get-disk-usage), platform-context API endpoint (GET /v1/platform/disk-usage), and Windmill disk-space-monitor workflow; auto-propagates when VMs are added/removed via capacity-model.json ADR 0387: Harbor OIDC Keycloak protocol mappers and client configuration fixed \u2014 Harbor login via `registry.lv3.org/c/oidc/login` now works with proper email, username, and groups claims extraction; client secret authenticator and backchannel logout configured; idempotent client update task ensures protocol mappers always match repo truth",
+    "release_notes_url": "docs/release-notes/0.178.74.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
