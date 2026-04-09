@@ -652,6 +652,7 @@
       - path: "{{ api_gateway_typesense_api_key_local_file }}"
         description: "Typesense API key"
         prerequisite: "Converge the Typesense runtime before refreshing the API gateway structured-search catalog"
+  when: api_gateway_resolved_typesense_api_key | default('') | length > 0
 
 - name: Wait for the controller-visible Typesense health endpoint
   ansible.builtin.uri:
@@ -665,6 +666,7 @@
   delay: 5
   until: api_gateway_typesense_health.status == 200
   changed_when: false
+  when: api_gateway_resolved_typesense_api_key | default('') | length > 0
 
 - name: Sync the Typesense platform-services collection from the service catalog
   ansible.builtin.command:
@@ -689,6 +691,7 @@
       | default('{}', true)
       | from_json
     ).changed | bool
+  when: api_gateway_resolved_typesense_api_key | default('') | length > 0
 
 - name: Verify the API gateway runtime
   ansible.builtin.meta: reset_connection
