@@ -259,15 +259,12 @@
       }}
   no_log: true
 
-- name: Assert the API gateway structured-search Typesense connection settings resolved
-  ansible.builtin.assert:
-    that:
-      - api_gateway_resolved_typesense_base_url | length > 0
-      - api_gateway_resolved_typesense_api_key | length > 0
-    fail_msg: >-
-      API gateway structured-search requires a Typesense base URL and controller-local API key
-      before the runtime environment can be rendered.
-  no_log: true
+- name: Warn when Typesense connection settings are missing (structured-search will be degraded)
+  ansible.builtin.debug:
+    msg: >-
+      Typesense API key not found at {{ api_gateway_typesense_api_key_local_file }}.
+      Structured-search features will be unavailable until Typesense is provisioned.
+  when: api_gateway_resolved_typesense_api_key | default('') | length == 0
 
 - name: Render the API gateway environment file
   ansible.builtin.template:
