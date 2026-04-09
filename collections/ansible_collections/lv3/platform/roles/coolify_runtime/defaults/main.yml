@@ -44,7 +44,7 @@ coolify_api_token_name: lv3-automation
 coolify_api_allowed_ips:
   - 127.0.0.1
   - "{{ coolify_bridge_gateway }}"
-  - 10.10.10.1
+  - "{{ hostvars[platform_topology_host].ansible_host }}"
 coolify_verify_ssl: false
 
 coolify_server_name: coolify-lv3

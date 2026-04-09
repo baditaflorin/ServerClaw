@@ -7,7 +7,7 @@
       - proxmox_metrics_token_hash_file | length > 0
       - monitoring_influxdb_org | length > 0
       - monitoring_influxdb_bucket | length > 0
-      - hostvars['monitoring-lv3'].ansible_host is defined
+      - hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].ansible_host is defined
     fail_msg: "proxmox_metrics requires the mirrored writer token plus monitoring-lv3 host metadata."
 
 - name: Check Proxmox metrics prerequisites on the control machine
@@ -55,7 +55,7 @@
     proxmox_metrics_needs_update: >-
       {{
         proxmox_metrics_current_config_raw.rc != 0
-        or (proxmox_metrics_current_config.server | default('')) != hostvars['monitoring-lv3'].ansible_host
+        or (proxmox_metrics_current_config.server | default('')) != hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].ansible_host
         or (proxmox_metrics_current_config.port | default(0) | int) != 8086
         or (proxmox_metrics_current_config.type | default('')) != 'influxdb'
         or (proxmox_metrics_current_config.influxdbproto | default('')) != 'http'
@@ -77,7 +77,7 @@
       - --type
       - influxdb
       - --server
-      - "{{ hostvars['monitoring-lv3'].ansible_host }}"
+      - "{{ hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].ansible_host }}"
       - --port
       - "8086"
       - --influxdbproto
@@ -101,7 +101,7 @@
       - set
       - "/cluster/metrics/server/{{ proxmox_metrics_server_id }}"
       - --server
-      - "{{ hostvars['monitoring-lv3'].ansible_host }}"
+      - "{{ hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].ansible_host }}"
       - --port
       - "8086"
       - --influxdbproto

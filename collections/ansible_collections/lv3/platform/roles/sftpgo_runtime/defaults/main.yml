@@ -48,7 +48,7 @@ sftpgo_public_hostname_overrides:
   - hostname: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ sftpgo_public_edge_private_ip }}"
 sftpgo_event_subject: platform.sftpgo.events
-sftpgo_nats_host: 10.10.10.20
+sftpgo_nats_host: "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}"
 sftpgo_nats_port: 4222
 sftpgo_nats_username: jetstream-admin
 sftpgo_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt

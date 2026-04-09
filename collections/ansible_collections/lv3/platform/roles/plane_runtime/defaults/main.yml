@@ -110,7 +110,7 @@ plane_sync_adr_dir: "{{ playbook_dir }}/../docs/adr"
 plane_gunicorn_workers: 2
 plane_trusted_proxies:
   - 127.0.0.1
-  - 10.10.10.10
+  - "{{ hostvars[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ansible_host }}"
   - 100.64.0.1
 plane_healthcheck_path: /api/instances/
 # Workspace members to ensure exist after bootstrap.

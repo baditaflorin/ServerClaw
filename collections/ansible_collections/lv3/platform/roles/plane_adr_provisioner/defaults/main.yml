@@ -2,7 +2,7 @@
 # Plane ADR Provisioner defaults
 
 # Plane connection details (from platform variables)
-plane_private_base_url: "{{ plane_private_base_url | default('http://10.10.10.20:8093') }}"
+plane_private_base_url: "{{ plane_private_base_url | default('http://' ~ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host ~ ':8093') }}"
 plane_workspace_slug: default
 
 # Admin token for bootstrapping project/tokens
