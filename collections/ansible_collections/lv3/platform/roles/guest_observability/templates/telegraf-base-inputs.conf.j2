@@ -1,0 +1,22 @@
+# Base system-level Telegraf inputs deployed by guest_observability.
+# Service-specific inputs (docker, nginx, postgres, etc.) live in their
+# own lv3-*.conf files rendered by each observability role.
+
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+  collect_cpu_time = false
+  report_active = true
+
+[[inputs.mem]]
+
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "overlay", "squashfs"]
+
+[[inputs.diskio]]
+
+[[inputs.net]]
+
+[[inputs.system]]
+
+[[inputs.processes]]

@@ -24,3 +24,4 @@ guest_observability_managed_directories:
     group: root
     mode: "0700"
 guest_observability_telegraf_service_name: telegraf
+guest_observability_base_inputs_config_file: /etc/telegraf/telegraf.d/lv3-base-inputs.conf
