@@ -164,7 +164,8 @@ def build_recent_changes(current_version: str) -> dict[str, str]:
 
 
 def load_static_config() -> dict[str, Any]:
-    payload = load_yaml(STATIC_CONFIG_PATH)
+    from validation_toolkit import load_yaml_with_identity
+    payload = load_yaml_with_identity(STATIC_CONFIG_PATH)
     if not isinstance(payload, dict):
         raise ValueError(f"{STATIC_CONFIG_PATH} must be a mapping")
     if payload.get("schema_version") != "1.0.0":

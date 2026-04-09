@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.67",
+  "repo_version": "0.178.68",
   "platform_version": "0.178.66",
-  "generated_at": "2026-04-09T12:47:44Z",
-  "next_refresh_at": "2026-04-09T13:47:44Z",
+  "generated_at": "2026-04-09T13:18:16Z",
+  "next_refresh_at": "2026-04-09T14:18:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6357,10 +6357,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.66",
+    "last_version": "0.178.67",
     "deployed_at": "2026-04-09",
-    "summary": "API gateway tool resilience: Docker socket fallback for list-containers and get-container-logs (no Portainer dependency); internal URL override for platform-context queries (bypasses JWT auth layer); mempalace tool metadata fixes (runbook refs, audit_on_call); command-catalog execution profile fix for refresh-discovery-surfaces ADR 0373 Phase 4 complete: unified service registry pattern for all 74 platform services; each service registered with service_type (docker_compose, system_package, infrastructure, multi_instance); derive_service_defaults extended with conditional branching for all types; alertmanager_runtime migrated as reference implementation; comprehensive runbook created for future service additions (docs/runbooks/add-new-service-to-platform.md); pattern enables programmatic, DRY, IoC-based infrastructure configuration across entire platform",
-    "release_notes_url": "docs/release-notes/0.178.67.md"
+    "summary": "[ADR 0385] IoC refactor: single identity.yml replaces all hardcoded operator values; fork operators edit one file to rebrand; 281 files converted from hardcoded lv3.org/proxmox_florin to template expressions; generators and validators updated to resolve identity vars; IoC regression test added API gateway tool resilience: Docker socket fallback for list-containers and get-container-logs (no Portainer dependency); internal URL override for platform-context queries (bypasses JWT auth layer); mempalace tool metadata fixes (runbook refs, audit_on_call); command-catalog execution profile fix for refresh-discovery-surfaces",
+    "release_notes_url": "docs/release-notes/0.178.68.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
