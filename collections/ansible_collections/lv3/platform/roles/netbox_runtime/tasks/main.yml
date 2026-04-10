@@ -325,10 +325,22 @@
   failed_when: false
   no_log: true
 
-- name: Wait for NetBox superuser initialization (before token provisioning)
-  ansible.builtin.pause:
-    seconds: 30
+- name: Wait for NetBox superuser to be usable (active wait with login test)
+  ansible.builtin.uri:
+    url: "{{ netbox_private_base_url }}/api/users/users/?limit=1"
+    method: GET
+    user: "{{ netbox_superuser_name }}"
+    password: "{{ netbox_superuser_password }}"
+    force_basic_auth: true
+    status_code: [200, 401, 403]
+    return_content: false
+  register: netbox_superuser_readiness
+  retries: 60
+  delay: 5
+  until: netbox_superuser_readiness.status == 200
   when: not netbox_superuser_api_token_local.stat.exists
+  changed_when: false
+  failed_when: false
 
 - name: Provision the NetBox bootstrap API token
   ansible.builtin.uri:
