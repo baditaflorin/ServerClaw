@@ -15,24 +15,28 @@ argument_specs:
           - Human-readable Windmill workspace name.
       windmill_site_dir:
         type: path
-        required: true
+        required: false
         description:
           - Base directory for the Windmill runtime stack.
+          - Derived by derive_service_defaults when not set explicitly.
       windmill_secret_dir:
         type: path
-        required: true
+        required: false
         description:
           - Directory that stores Windmill secrets on the guest.
+          - Derived by derive_service_defaults when not set explicitly.
       windmill_compose_file:
         type: path
-        required: true
+        required: false
         description:
           - Compose file path for the Windmill runtime stack.
+          - Derived by derive_service_defaults when not set explicitly.
       windmill_env_file:
         type: path
-        required: true
+        required: false
         description:
           - Environment file rendered for Windmill.
+          - Derived by derive_service_defaults when not set explicitly.
       windmill_server_port:
         type: int
         required: true
@@ -60,9 +64,10 @@ argument_specs:
           - Whether any part of the Windmill compose stack depends on Docker bridge nat and filter chains.
       windmill_base_url:
         type: str
-        required: true
+        required: false
         description:
           - Operator-facing base URL for Windmill.
+          - Derived by derive_service_defaults when not set explicitly.
       windmill_database_name:
         type: str
         required: true
@@ -85,9 +90,10 @@ argument_specs:
           - PostgreSQL port for the Windmill runtime.
       windmill_database_password_local_file:
         type: path
-        required: true
+        required: false
         description:
           - Controller-local file that stores the runtime database password.
+          - Default depends on windmill_local_artifact_dir (derived by derive_service_defaults).
       windmill_seed_scripts:
         type: list
         elements: dict
