@@ -1053,6 +1053,75 @@
       }
     },
     {
+      "id": "librechat",
+      "name": "LibreChat",
+      "description": "Private multi-model chat interface with Keycloak SSO, agent presets, and customizable UI.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://10.10.10.70:8096",
+      "public_url": "https://chat.lv3.org",
+      "subdomain": "chat.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "LibreChat Public",
+      "health_probe_id": "librechat",
+      "image_catalog_ids": [],
+      "secret_catalog_ids": [],
+      "adr": "0380",
+      "runbook": "docs/runbooks/configure-librechat.md",
+      "runtime_pool": "dedicated-coolify",
+      "deployment_surface": "playbooks/services/librechat.yml",
+      "restart_domain": "dedicated-coolify-core",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify",
+      "mobility_tier": "movable_singleton",
+      "tags": [
+        "chat",
+        "llm",
+        "ui"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://chat.lv3.org",
+          "subdomain": "chat.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "litellm",
+      "name": "LiteLLM",
+      "description": "Private LLM proxy and router providing unified API access to multiple language model providers.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:4000",
+      "exposure": "private-only",
+      "health_probe_id": "litellm",
+      "image_catalog_ids": [],
+      "secret_catalog_ids": [],
+      "adr": "0381",
+      "runbook": "docs/runbooks/configure-litellm.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/litellm.yml",
+      "restart_domain": "runtime-ai-inference",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
+      "mobility_tier": "elastic_stateless",
+      "tags": [
+        "llm",
+        "proxy",
+        "routing",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:4000"
+        }
+      }
+    },
+    {
       "id": "lago",
       "name": "Lago",
       "description": "Usage metering and billing control plane with a protected operator browser surface and a governed public event-ingest adapter.",
