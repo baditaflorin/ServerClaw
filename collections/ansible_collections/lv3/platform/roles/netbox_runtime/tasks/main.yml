@@ -364,12 +364,27 @@
   retries: 30
   delay: 10
   until: netbox_token_provision.status in [200, 201]
-  no_log: true
 
-- name: Debug NetBox token provisioning status
+- name: Debug NetBox token provisioning response
   ansible.builtin.debug:
-    msg: "Token provisioning returned HTTP {{ netbox_token_provision.status | default('unknown') }}"
-  when: netbox_token_provision is not skipped and netbox_token_provision.status not in [200, 201]
+    msg: |
+      Token provisioning returned HTTP {{ netbox_token_provision.status | default('unknown') }}
+      Response type: {{ netbox_token_provision.json | type_debug }}
+      Response keys: {{ netbox_token_provision.json.keys() | list if (netbox_token_provision.json | type_debug == 'dict') else 'not a dict' }}
+      Has 'key' field: {{ 'key' in netbox_token_provision.json if (netbox_token_provision.json | type_debug == 'dict') else 'N/A' }}
+      Has 'token' field: {{ 'token' in netbox_token_provision.json if (netbox_token_provision.json | type_debug == 'dict') else 'N/A' }}
+      Raw response: {{ netbox_token_provision.json }}
+  when: netbox_token_provision is not skipped
+  changed_when: false
+
+- name: Write NetBox token provisioning response to file
+  ansible.builtin.copy:
+    content: "{{ netbox_token_provision | to_nice_json }}"
+    dest: "/tmp/netbox-token-provision-response.json"
+    mode: "0644"
+  delegate_to: localhost
+  become: false
+  when: netbox_token_provision is not skipped
   changed_when: false
 
 - name: Persist the NetBox bootstrap API token locally
