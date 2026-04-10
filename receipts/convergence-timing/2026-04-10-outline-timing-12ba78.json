@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-10-outline-timing-12ba78",
+  "service": "outline",
+  "env": "production",
+  "command": "/Users/live/.local/share/uv/tools/ansible-core/bin/ansible-playbook playbooks/outline.yml -e @playbooks/vars/outline.yml -e env=production",
+  "timing": {
+    "started_at": "2026-04-10T12:29:54+00:00",
+    "completed_at": "2026-04-10T12:30:22+00:00",
+    "duration_seconds": 28.18
+  },
+  "outcome": "failed",
+  "returncode": 4,
+  "source_commit": "34349cbc61ea",
+  "repo_version": "0.178.92",
+  "ansible_summary": {
+    "recap": {},
+    "phases_observed": [],
+    "changed_tasks": [],
+    "failed_tasks": [],
+    "outcome": "ok"
+  }
+}
