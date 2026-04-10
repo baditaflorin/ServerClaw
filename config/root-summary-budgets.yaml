@@ -8,7 +8,7 @@ readme:
     recent_entries: 25
     history_path: docs/status/history/merged-workstreams.md
 changelog:
-  max_lines: 95
+  max_lines: 100
   previous_release_entries: 12
   archive_index_path: docs/release-notes/index/README.md
 release_notes_index:

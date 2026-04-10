@@ -1,8 +1,10 @@
-# Release 0.178.95
+# Release 0.178.97
 
 - Date: 2026-04-10
 
 ## Summary
+- [adr-0403] Safe Password Alphabet Standard — bans base64 passwords (which produce `/` and `+` that silently break DATABASE_URL); mandates hex_32 and urlsafe_32 as the only permitted forms; documents the Outline incident root cause; deprecates base64_24 generator in secret_rotation.py; mandates urlencode guards in URL-embedding Jinja2 templates
+- NetBox infrastructure converged successfully — fixed ADR 0373 service variable defaults (hardcoded /opt/netbox path, repo_shared_local_root artifact dir); establishes ADR 0392 timing baseline for future reference
 - [adr-0402] Remove JupyterHub (notebooks.lv3.org) — zero active users, maintenance overhead eliminated; jupyterhub_runtime role deleted, jupyterhub Keycloak OIDC client removed, 15 catalogs cleaned, ADR 0291 deprecated; postmortem documents 7 new ADR 0396 gaps (platform_services.yml orphaned blocks, keycloak shared role tasks, uptime kuma/workbench IA non-catalog JSONs)
 - [adr-0396 amendments] Close 7 ADR 0396 postmortem gaps — 9 new CATALOG_REGISTRY entries (subdomain-exposure-registry, certificate-catalog, command-catalog, top_level_key, yaml_topology_block); role_name lookup (Amendment 3); inline # SERVICE: marker removal in role defaults/J2 templates (Amendment 4); https_tls Prometheus files regenerated with BEGIN/END SERVICE markers (Amendment 5); post-purge JSON/YAML integrity validation (Amendment 6); --validate-registry self-check (Amendment 1); projected ~95% CPU-only decommissioning
 - [adr-0401] Remove Netdata from the platform — Prometheus + node_exporter cover all host metrics; netdata_runtime role deleted, realtime.lv3.org deprovisioned, 15 catalogs cleaned via decommission script, ADR 0196 deprecated; equivalent browser dashboards via Grafana Node Exporter Full (dashboard 1860)
