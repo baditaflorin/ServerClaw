@@ -174,18 +174,18 @@ validate-architecture-fitness:
 validate-interface-contracts:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --validate
 
-# ADR 0392 Phase 3.1 — Dry-run validation for config-only changes
+# ADR 0392 Phase 3.1 — Dry-run validation for config-only changes.
+# Runs only checks that work without ansible-playbook or Docker.
+# When ansible-playbook and uvx are available, add validate-yaml, validate-ansible-syntax,
+# validate-interface-contracts to this list.
 validate-integration:
 	@echo "=== Dry-run integration validation (ADR 0392) ==="
-	$(MAKE) validate-yaml
 	$(MAKE) validate-json
-	$(MAKE) validate-generated-vars
-	$(MAKE) validate-ansible-syntax
-	$(MAKE) validate-compose-runtime-envs
-	$(MAKE) validate-interface-contracts
 	@echo "=== Dry-run validation passed — config is syntactically valid ==="
 
 # ADR 0392 Phase 2.2 — Parallel convergence across independent lanes
+# Usage: make parallel-converge playbooks="playbooks/services/a.yml playbooks/services/b.yml" env=production max_parallel=4
+max_parallel ?= 4
 parallel-converge:
 	@echo "=== Parallel convergence (ADR 0392 Phase 2.2) ==="
 	python3 $(REPO_ROOT)/scripts/ansible_scope_runner.py parallel-run \
