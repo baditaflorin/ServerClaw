@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Complete IoC compliance: templatize remaining hardcoded domains in 13 collection playbooks (subdomain_fqdn, fail_msg, URLs), 4 role defaults (operator name), 5 top-level playbooks (developer paths), and 2 mail playbooks (operator email); strengthen IoC regression test with TestNoHardcodedPaths class (4 new checks); zero operator-specific values remain in deployable Ansible code
+
 ## 0.178.78 (2026-04-10)
 
 - fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
@@ -46,10 +48,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.78 release notes](docs/release-notes/0.178.78.md)
+- [0.178.79 release notes](docs/release-notes/0.178.79.md)
 
 ## Previous Releases
 
+- [0.178.78 release notes](docs/release-notes/0.178.78.md)
 - [0.178.77 release notes](docs/release-notes/0.178.77.md)
 - [0.178.76 release notes](docs/release-notes/0.178.76.md)
 - [0.178.75 release notes](docs/release-notes/0.178.75.md)
@@ -61,9 +64,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.69 release notes](docs/release-notes/0.178.69.md)
 - [0.178.68 release notes](docs/release-notes/0.178.68.md)
 - [0.178.67 release notes](docs/release-notes/0.178.67.md)
-- [0.178.66 release notes](docs/release-notes/0.178.66.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (413 releases)](docs/release-notes/index/2026.md)
+- [2026 (414 releases)](docs/release-notes/index/2026.md)

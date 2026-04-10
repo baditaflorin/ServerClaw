@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.78",
+  "repo_version": "0.178.79",
   "platform_version": "0.178.73",
-  "generated_at": "2026-04-10T01:08:51Z",
-  "next_refresh_at": "2026-04-10T02:08:51Z",
+  "generated_at": "2026-04-10T02:00:59Z",
+  "next_refresh_at": "2026-04-10T03:00:59Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -363,6 +363,28 @@
         "primary_url": "https://langfuse.lv3.org",
         "last_live_apply": "2026-04-05T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "librechat": {
+        "service_name": "LibreChat",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://chat.lv3.org",
+        "last_live_apply": "2026-04-04T00:00:00Z"
+      },
+      "litellm": {
+        "service_name": "LiteLLM",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:4000",
+        "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "livekit": {
         "service_name": "LiveKit",
@@ -6382,10 +6404,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.77",
+    "last_version": "0.178.78",
     "deployed_at": "2026-04-10",
-    "summary": "fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety fix: Remove duplicate repo_intake entry in platform_services.yml registry",
-    "release_notes_url": "docs/release-notes/0.178.78.md"
+    "summary": "Complete IoC compliance: templatize remaining hardcoded domains in 13 collection playbooks (subdomain_fqdn, fail_msg, URLs), 4 role defaults (operator name), 5 top-level playbooks (developer paths), and 2 mail playbooks (operator email); strengthen IoC regression test with TestNoHardcodedPaths class (4 new checks); zero operator-specific values remain in deployable Ansible code fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety",
+    "release_notes_url": "docs/release-notes/0.178.79.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
