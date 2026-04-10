@@ -4838,8 +4838,8 @@
         "make preflight WORKFLOW=refresh-discovery-surfaces passes"
       ],
       "evidence": {
-        "live_apply_receipt_required": false,
-        "notes": "Discovery surface refresh is a local regeneration and wiki sync operation."
+        "live_apply_receipt_required": true,
+        "notes": "Discovery surface refresh is a local regeneration and wiki sync operation. Receipt tracks which commit triggered the refresh and wiki sync outcome."
       },
       "failure_guidance": {
         "stop_conditions": [

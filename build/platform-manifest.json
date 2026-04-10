@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.86",
+  "repo_version": "0.178.87",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T07:05:28Z",
-  "next_refresh_at": "2026-04-10T08:05:28Z",
+  "generated_at": "2026-04-10T09:47:40Z",
+  "next_refresh_at": "2026-04-10T10:47:40Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6356,10 +6356,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.85",
+    "last_version": "0.178.86",
     "deployed_at": "2026-04-10",
-    "summary": "[adr-0385] Eliminate 122+ hardcoded paths and hostnames from role defaults \u2014 all absolute paths use repo_shared_local_root, all hostnames use playbook_execution_host_patterns or inventory_hostname, all PWD lookups use inventory_dir [adr-0390] Remove Open WebUI from the platform \u2014 containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged",
-    "release_notes_url": "docs/release-notes/0.178.86.md"
+    "summary": "fix: API gateway validation regression \u2014 command catalog required live_apply_receipt for all commands (rejected read-only refresh-discovery-surfaces), schema validator crashed on JSON Schema union types like [\"number\", \"null\"]; fixed both, added scripts volume mount for durability [adr-0385] Eliminate 122+ hardcoded paths and hostnames from role defaults \u2014 all absolute paths use repo_shared_local_root, all hostnames use playbook_execution_host_patterns or inventory_hostname, all PWD lookups use inventory_dir",
+    "release_notes_url": "docs/release-notes/0.178.87.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

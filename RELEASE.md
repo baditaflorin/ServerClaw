@@ -1,8 +1,9 @@
-# Release 0.178.86
+# Release 0.178.87
 
 - Date: 2026-04-10
 
 ## Summary
+- fix: API gateway validation regression — command catalog required live_apply_receipt for all commands (rejected read-only refresh-discovery-surfaces), schema validator crashed on JSON Schema union types like ["number", "null"]; fixed both, added scripts volume mount for durability
 - [adr-0385] Eliminate 122+ hardcoded paths and hostnames from role defaults — all absolute paths use repo_shared_local_root, all hostnames use playbook_execution_host_patterns or inventory_hostname, all PWD lookups use inventory_dir
 - [adr-0390] Remove Open WebUI from the platform — containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged
 - fix: Add missing keycloak service variables to playbook — ADR 0373 derive_service_defaults compatibility

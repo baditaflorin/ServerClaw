@@ -73,8 +73,13 @@ def validate_json_schema_shape(
     if "title" in schema:
         require_str(schema.get("title"), f"{path}.title")
     schema_type = schema.get("type")
-    if schema_type is not None and schema_type not in {"object", "array", "string", "integer", "boolean"}:
-        raise ValueError(f"{path}.type uses unsupported schema type '{schema_type}'")
+    _ALLOWED_TYPES = {"object", "array", "string", "integer", "number", "boolean", "null"}
+    if schema_type is not None:
+        # JSON Schema allows "type" to be a string or a list of strings (union types)
+        type_list = schema_type if isinstance(schema_type, list) else [schema_type]
+        for t in type_list:
+            if t not in _ALLOWED_TYPES:
+                raise ValueError(f"{path}.type uses unsupported schema type '{t}'")
     if "properties" in schema:
         properties = require_mapping(schema.get("properties"), f"{path}.properties")
         for key, value in properties.items():
