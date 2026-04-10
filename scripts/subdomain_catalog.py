@@ -39,8 +39,15 @@ ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
 
 
 
+def _is_jinja2_expression(value: str) -> bool:
+    """Return True if the value contains a Jinja2 template expression."""
+    return "{{" in value
+
+
 def require_hostname(value: Any, path: str) -> str:
     value = require_str(value, path)
+    if _is_jinja2_expression(value):
+        return value  # Jinja2 template — resolved at Ansible runtime
     if not HOSTNAME_PATTERN.match(value):
         raise ValueError(f"{path} must be a lowercase hostname")
     return value
@@ -48,6 +55,8 @@ def require_hostname(value: Any, path: str) -> str:
 
 def require_route_hostname(value: Any, path: str) -> str:
     value = require_str(value, path)
+    if _is_jinja2_expression(value):
+        return value  # Jinja2 template — resolved at Ansible runtime
     if not ROUTE_HOSTNAME_PATTERN.match(value):
         raise ValueError(f"{path} must be a lowercase hostname or wildcard route hostname")
     return value
@@ -55,6 +64,8 @@ def require_route_hostname(value: Any, path: str) -> str:
 
 def require_prefix(value: Any, path: str) -> str:
     value = require_str(value, path)
+    if _is_jinja2_expression(value):
+        return value  # Jinja2 template — resolved at Ansible runtime
     if not PREFIX_PATTERN.match(value):
         raise ValueError(f"{path} must be a lowercase DNS label")
     return value

@@ -231,6 +231,8 @@ def require_date(value: Any, path: str) -> str:
 
 def require_hostname(value: Any, path: str) -> str:
     value = require_str(value, path)
+    if "{{" in value:
+        return value  # Jinja2 template — resolved at Ansible runtime
     if not HOSTNAME_PATTERN.match(value):
         raise ValueError(f"{path} must be a lowercase hostname or label")
     return value
@@ -491,6 +493,8 @@ def validate_service_topology_entry(
         )
         for index, alias in enumerate(aliases):
             alias = require_str(alias, f"lv3_service_topology.{service_id}.edge.aliases[{index}]")
+            if "{{" in alias:
+                continue  # Jinja2 template — resolved at Ansible runtime
             if not (
                 HOSTNAME_PATTERN.match(alias)
                 or (

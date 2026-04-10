@@ -68,6 +68,8 @@ def require_int(value: Any, path: str, *, minimum: int | None = None, maximum: i
 def require_identifier(value: Any, path: str) -> str:
     """Validate that value is a lowercase alphanumeric identifier (hyphens and underscores allowed)."""
     s = require_str(value, path)
+    if "{{" in s:
+        return s  # Jinja2 template — resolved at Ansible runtime
     import re
     if not re.fullmatch(r"[a-z][a-z0-9_-]*", s):
         raise ValueError(
@@ -79,6 +81,8 @@ def require_identifier(value: Any, path: str) -> str:
 def require_http_url(value: Any, path: str) -> str:
     """Validate that value is a string starting with http:// or https://."""
     s = require_str(value, path)
+    if "{{" in s:
+        return s  # Jinja2 template — resolved at Ansible runtime
     if not s.startswith(("http://", "https://")):
         raise ValueError(f"{path} must be an HTTP(S) URL")
     return s
