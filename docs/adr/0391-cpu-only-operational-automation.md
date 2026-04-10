@@ -1,11 +1,14 @@
 # ADR 0391: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
 
-**Status:** Accepted
-**Decision Date:** 2026-04-10
-**Concern:** Operational Efficiency, Cost Reduction, Determinism, Reliability
-**Depends on:** ADR 0373 (Service Registry), ADR 0389 (Decommissioning Procedure)
-
----
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.79
+- Implemented In Platform Version: not yet applied
+- Implemented On: 2026-04-10
+- Date: 2026-04-10
+- Concern: Operational Efficiency, Cost Reduction, Determinism, Reliability
+- Depends on: ADR 0373 (Service Registry), ADR 0389 (Decommissioning Procedure)
+- Tags: automation, cpu-only, operational, cli, contracts, deterministic
 
 ## Context
 

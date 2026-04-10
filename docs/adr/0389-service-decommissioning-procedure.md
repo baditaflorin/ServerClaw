@@ -1,11 +1,14 @@
 # ADR 0389: Standard Procedure for Decommissioning a Platform Service
 
-**Status:** Accepted
-**Decision Date:** 2026-04-10
-**Concern:** Operational Hygiene, Service Lifecycle, Codebase Maintainability
-**Depends on:** ADR 0373 (Service Registry), ADR 0385 (IoC Library Refactor)
-
----
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.79
+- Implemented In Platform Version: not yet applied
+- Implemented On: 2026-04-10
+- Date: 2026-04-10
+- Concern: Operational Hygiene, Service Lifecycle, Codebase Maintainability
+- Depends on: ADR 0373 (Service Registry), ADR 0385 (IoC Library Refactor)
+- Tags: lifecycle, decommissioning, automation, scripts, procedures
 
 ## Context
 

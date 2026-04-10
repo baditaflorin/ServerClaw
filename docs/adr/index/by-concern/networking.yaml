@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-09'
+generated: '2026-04-10'
 facet: concern
 concern: networking
 total_adrs: 27
@@ -497,19 +497,23 @@ adrs:
     path: docs/adr/0364-native-build-server-gate-execution.md
   - adr: 0391
     title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
     concern: networking
     keywords:
+      - automation
       - cpu-only
       - operational
-      - automation
+      - cli
+      - contracts
+      - deterministic
       - eliminate
       - ai
       - from
-      - deterministic
       - work
     summary: A single entry point that answers operational questions by querying existing
     filename: 0391-cpu-only-operational-automation.md
     path: docs/adr/0391-cpu-only-operational-automation.md
+    implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'

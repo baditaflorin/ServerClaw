@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-09'
+generated: '2026-04-10'
 facet: concern
 concern: platform
-total_adrs: 141
+total_adrs: 140
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2429,20 +2429,6 @@ adrs:
     summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
     filename: 0378-serverclaw-tool-surface-in-open-webui.md
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
-  - adr: 0382
-    title: Convergence Speed and Incremental Apply
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - convergence
-      - speed
-      - incremental
-      - apply
-    summary: 'Plays that only delegate to localhost (DNS, preflight) do not need remote facts. Change from:'
-    filename: 0382-convergence-speed-and-incremental-apply.md
-    path: docs/adr/0382-convergence-speed-and-incremental-apply.md
   - adr: 0385
     title: MemPalace Integration with chat.lv3.org
     status: Proposed
@@ -2487,28 +2473,17 @@ adrs:
     summary: Implement a three-tier containerized development environment that
     filename: 0387-serverclaw-in-docker.md
     path: docs/adr/0387-serverclaw-in-docker.md
-  - adr: 0389
-    title: Standard Procedure for Decommissioning a Platform Service
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - standard
-      - procedure
-      - decommissioning
-      - platform
-      - service
-    summary: 1. Create the decommissioning ADR — records why the service is being
-    filename: 0389-service-decommissioning-procedure.md
-    path: docs/adr/0389-service-decommissioning-procedure.md
   - adr: 0390
     title: Remove Open WebUI from the Platform
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
     concern: platform
     keywords:
+      - lifecycle
+      - decommissioning
+      - open-webui
+      - removal
       - remove
       - open
       - webui
@@ -2517,3 +2492,19 @@ adrs:
     summary: Remove Open WebUI from the platform following ADR 0389's phased procedure.
     filename: 0390-remove-open-webui.md
     path: docs/adr/0390-remove-open-webui.md
+    implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'
+  - adr: 0392
+    title: Convergence Speed and Incremental Apply
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - convergence
+      - speed
+      - incremental
+      - apply
+    summary: 'Plays that only delegate to localhost (DNS, preflight) do not need remote facts. Change from:'
+    filename: 0392-convergence-speed-and-incremental-apply.md
+    path: docs/adr/0392-convergence-speed-and-incremental-apply.md

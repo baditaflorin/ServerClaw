@@ -1,11 +1,14 @@
 # ADR 0390: Remove Open WebUI from the Platform
 
-**Status:** Accepted
-**Decision Date:** 2026-04-10
-**Concern:** Service Lifecycle, Operational Simplification
-**Depends on:** ADR 0389 (Service Decommissioning Procedure)
-
----
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.79
+- Implemented In Platform Version: not yet applied
+- Implemented On: 2026-04-10
+- Date: 2026-04-10
+- Concern: Service Lifecycle, Operational Simplification
+- Depends on: ADR 0389 (Service Decommissioning Procedure)
+- Tags: lifecycle, decommissioning, open-webui, removal
 
 ## Context
 

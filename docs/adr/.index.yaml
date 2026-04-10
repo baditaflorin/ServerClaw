@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-09'
+generated: '2026-04-10'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
 total_adrs: 424
 adr_number_range:
   first: '0001'
-  last: 0391
-  next_available: 0392
+  last: 0392
+  next_available: 0393
 implementation_status_summary:
-  Implemented: 333
+  Implemented: 336
   Partial: 2
   Not Implemented: 31
   Deprecated: 5
   Accepted: 24
-  Proposed: 29
+  Proposed: 26
 decision_status_summary:
-  Accepted: 333
-  Proposed: 35
+  Accepted: 336
+  Proposed: 32
   Deprecated: 7
   Implemented: 49
 facets:
@@ -46,7 +46,7 @@ facets:
       path: docs/adr/index/by-range/0300-0399.yaml
       count: 105
       first_adr: '0300'
-      last_adr: 0391
+      last_adr: 0392
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -59,7 +59,7 @@ facets:
       count: 10
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 28
+      count: 29
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 6
@@ -83,7 +83,7 @@ facets:
       count: 27
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 141
+      count: 140
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -106,7 +106,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 333
+      count: 336
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -126,29 +126,37 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 29
+      count: 26
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0392
+  next_available_adr: 0393
 latest_adrs:
+  - adr: 0392
+    title: Convergence Speed and Incremental Apply
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0392-convergence-speed-and-incremental-apply.md
   - adr: 0391
     title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
-    implementation_status: Proposed
+    implementation_status: Implemented
     concern: networking
     path: docs/adr/0391-cpu-only-operational-automation.md
+    implemented_on: '2026-04-10'
   - adr: 0390
     title: Remove Open WebUI from the Platform
-    implementation_status: Proposed
+    implementation_status: Implemented
     concern: platform
     path: docs/adr/0390-remove-open-webui.md
+    implemented_on: '2026-04-10'
   - adr: 0389
     title: Standard Procedure for Decommissioning a Platform Service
-    implementation_status: Proposed
-    concern: platform
+    implementation_status: Implemented
+    concern: automation
     path: docs/adr/0389-service-decommissioning-procedure.md
+    implemented_on: '2026-04-10'
   - adr: 0388
     title: Centralize Keycloak Realm Name and OIDC Issuer URL
     implementation_status: Proposed
@@ -180,11 +188,6 @@ latest_adrs:
     concern: agent-discovery
     path: docs/adr/0386-agent-cross-host-execution-and-mcp-tool-surface.md
     implemented_on: '2026-04-09'
-  - adr: 0385
-    title: MemPalace Integration with chat.lv3.org
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0385-mempalace-chat-lv3-integration.md
 discovery_queries:
   how do we bootstrap:
     - '0001'
