@@ -394,8 +394,9 @@ windmill_operator_manager_env:
   OPENBAO_INIT_JSON: >-
     {{
       lookup('ansible.builtin.file', windmill_controller_local_root ~ '/openbao/init.json', errors='ignore')
-      | default('', true)
+      | default('{}', true)
       | trim
+      | from_json | to_json
     }}
   TAILSCALE_API_KEY: "{{ lookup('ansible.builtin.env', 'TAILSCALE_API_KEY') | default('', true) }}"
   TAILSCALE_TAILNET: "{{ lookup('ansible.builtin.env', 'TAILSCALE_TAILNET') | default('', true) }}"
