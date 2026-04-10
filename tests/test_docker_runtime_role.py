@@ -707,12 +707,12 @@ exit 1
         input=json.dumps(
             [
                 {
-                    "Name": "/one-api",
+                    "Name": "/test-service",
                     "Config": {
                         "Labels": {
                             "com.docker.compose.project.working_dir": str(tmp_path),
                             "com.docker.compose.project.config_files": str(compose_file),
-                            "com.docker.compose.service": "one-api",
+                            "com.docker.compose.service": "test-service",
                         }
                     },
                 }

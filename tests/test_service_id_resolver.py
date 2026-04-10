@@ -31,7 +31,3 @@ def test_resolve_service_id_maps_nats_jetstream_playbook_to_canonical_service() 
 
 def test_resolve_service_id_maps_tesseract_ocr_playbook_to_canonical_service() -> None:
     assert service_id_resolver.resolve_service_id("tesseract-ocr") == "tesseract_ocr"
-
-
-def test_resolve_service_id_maps_one_api_playbook_to_canonical_service() -> None:
-    assert service_id_resolver.resolve_service_id("one-api") == "one_api"

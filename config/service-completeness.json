@@ -483,16 +483,6 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
-    "one_api": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "dashboard_file": "config/grafana/dashboards/one-api.json",
-      "alert_rule_file": "config/alertmanager/rules/one-api.yml",
-      "suppressed_checks": {}
-    },
     "service_type": "compose",
     "requires_subdomain": false,
     "requires_oidc": true,

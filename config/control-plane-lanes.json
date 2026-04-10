@@ -243,23 +243,10 @@
           "notes": "This is the sanctioned agent-observability API surface for trace ingestion and read-back verification."
         },
         {
-          "id": "one-api-unified-llm-api",
-          "kind": "service_api",
-          "endpoint": "http://100.64.0.1:8018/v1",
-          "auth": "Repo-managed One-API consumer bearer tokens for the OpenAI-compatible data plane and a controller-local root access token for governed admin bootstrap and verification.",
-          "service_refs": [
-            "one_api"
-          ],
-          "workflow_refs": [
-            "converge-one-api"
-          ],
-          "notes": "This is the sanctioned unified local LLM API. Repo-managed consumers such as ServerClaw should call One-API instead of binding directly to Ollama."
-        },
-        {
           "id": "ollama-local-inference-api",
           "kind": "service_api",
           "endpoint": "http://10.10.10.20:11434",
-          "auth": "Private network reachability only; the service is intentionally not published on the public edge and is primarily consumed by One-API plus bounded local verification paths.",
+          "auth": "Private network reachability only; the service is intentionally not published on the public edge and is primarily consumed by bounded local verification paths.",
           "service_refs": [
             "ollama"
           ],

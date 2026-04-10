@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 106
+total_adrs: 107
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -2005,3 +2005,23 @@ adrs:
     summary: Both checklocalsecrets (shared preflight) and per-role secret file
     filename: 0392-optional-secret-propagation.md
     path: docs/adr/0392-optional-secret-propagation.md
+  - adr: 0393
+    title: Remove One-API from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: api
+    keywords:
+      - lifecycle
+      - decommissioning
+      - one-api
+      - llm-proxy
+      - removal
+      - remove
+      - from
+      - platform
+    summary: Remove One-API from the platform following ADR 0389's phased procedure.
+    filename: 0393-remove-one-api.md
+    path: docs/adr/0393-remove-one-api.md
+    implemented_in_repo_version: 0.178.86
+    implemented_on: '2026-04-10'

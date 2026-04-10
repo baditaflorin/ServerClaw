@@ -1,8 +1,9 @@
-# Release 0.178.87
+# Release 0.178.88
 
 - Date: 2026-04-10
 
 ## Summary
+- [adr-0393] Remove One-API from the platform — containers already stopped, 85 file references purged across 9 roles/2 playbooks/27 config catalogs/7 tests, 4 secrets removed from secret catalog, ADR 0294 deprecated; LLM access path simplified to direct Ollama or external APIs
 - fix: API gateway validation regression — command catalog required live_apply_receipt for all commands (rejected read-only refresh-discovery-surfaces), schema validator crashed on JSON Schema union types like ["number", "null"]; fixed both, added scripts volume mount for durability
 - [adr-0385] Eliminate 122+ hardcoded paths and hostnames from role defaults — all absolute paths use repo_shared_local_root, all hostnames use playbook_execution_host_patterns or inventory_hostname, all PWD lookups use inventory_dir
 - [adr-0390] Remove Open WebUI from the platform — containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged

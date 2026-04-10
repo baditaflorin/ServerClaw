@@ -193,6 +193,16 @@ parallel-converge:
 		--env $(env) \
 		--max-parallel $(max_parallel)
 
+# ADR 0392 — Timed convergence wrapper (records timing receipts to receipts/convergence-timing/)
+# Usage: make time-converge service=api-gateway env=production
+# Usage: make time-converge service=api-gateway env=production capture_summary=1
+time-converge:
+	@echo "=== Timed convergence (ADR 0392) ==="
+	python3 $(REPO_ROOT)/scripts/convergence_timer.py run \
+		--service $(service) \
+		--env $(or $(env),production) \
+		$(if $(capture_summary),--capture-summary,)
+
 install-hooks:
 	mkdir -p "$$(git rev-parse --git-path hooks)"
 	install -m 0755 $(REPO_ROOT)/.githooks/pre-push "$$(git rev-parse --git-path hooks)/pre-push"

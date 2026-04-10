@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 336
+total_adrs: 337
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -4896,7 +4896,7 @@ adrs:
     implemented_on: '2026-03-30'
   - adr: 0294
     title: One-API As The Unified LLM API Proxy And Router
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-29'
     concern: api
@@ -6245,4 +6245,24 @@ adrs:
     filename: 0391-cpu-only-operational-automation.md
     path: docs/adr/0391-cpu-only-operational-automation.md
     implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'
+  - adr: 0393
+    title: Remove One-API from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: api
+    keywords:
+      - lifecycle
+      - decommissioning
+      - one-api
+      - llm-proxy
+      - removal
+      - remove
+      - from
+      - platform
+    summary: Remove One-API from the platform following ADR 0389's phased procedure.
+    filename: 0393-remove-one-api.md
+    path: docs/adr/0393-remove-one-api.md
+    implemented_in_repo_version: 0.178.86
     implemented_on: '2026-04-10'

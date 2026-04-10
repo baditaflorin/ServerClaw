@@ -4795,63 +4795,6 @@
         "escalation_action": "notify_and_abort"
       }
     },
-    "converge-one-api": {
-      "description": "Converge One-API on docker-runtime-lv3, publish the Proxmox host controller proxy, and bootstrap the repo-managed routing and consumer-token contract for local LLM access.",
-      "lifecycle_status": "active",
-      "preferred_entrypoint": {
-        "kind": "make_target",
-        "target": "converge-one-api",
-        "command": "make converge-one-api"
-      },
-      "preflight": {
-        "required": true,
-        "required_secret_ids": [
-          "bootstrap_ssh_private_key"
-        ],
-        "generated_secret_ids": [
-          "one_api_database_password",
-          "one_api_session_secret",
-          "one_api_root_access_token",
-          "one_api_root_password",
-          "serverclaw_provider_env"
-        ]
-      },
-      "validation_targets": [
-        "validate",
-        "syntax-check-one-api"
-      ],
-      "live_impact": "host_and_guest_live",
-      "owner_runbook": "docs/runbooks/configure-one-api.md",
-      "implementation_refs": [
-        "Makefile",
-        "collections/ansible_collections/lv3/platform/roles/one_api_postgres",
-        "collections/ansible_collections/lv3/platform/roles/one_api_runtime",
-        "inventory/group_vars/all/identity.yml",
-        "inventory/group_vars/all/main.yml",
-        "inventory/group_vars/platform.yml",
-        "inventory/host_vars/proxmox_florin.yml",
-        "config/one-api/bootstrap.json",
-        "scripts/one_api_bootstrap.py"
-      ],
-      "outputs": [
-        "A private One-API runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Proxmox-host controller proxy, repo-managed routing channels, per-consumer API tokens, and verified provider env files for ServerClaw."
-      ],
-      "verification_commands": [
-        "make syntax-check-one-api",
-        "curl -fsS http://100.64.0.1:8018/api/status",
-        "python3 $(git rev-parse --show-toplevel)/scripts/one_api_bootstrap.py verify --config $(git rev-parse --show-toplevel)/config/one-api/bootstrap.json --one-api-url http://100.64.0.1:8018 --root-access-token-file $(scripts/resolve_local_overlay_root.sh)/one-api/root-access-token.txt"
-      ],
-      "execution_class": "mutation",
-      "budget": {
-        "max_duration_seconds": 1800,
-        "max_steps": 320,
-        "max_concurrent_instances": 1,
-        "max_touched_hosts": 3,
-        "max_restarts": 1,
-        "max_rollback_depth": 1,
-        "escalation_action": "notify_and_abort"
-      }
-    },
     "converge-serverclaw": {
       "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
       "lifecycle_status": "active",
@@ -8003,7 +7946,7 @@
       }
     },
     "converge-litellm": {
-      "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend, replacing One API as the programmatic LLM gateway.",
+      "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",

@@ -2234,52 +2234,6 @@
         ]
       }
     },
-    "one_api": {
-      "service_name": "one-api",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "one_api_runtime",
-      "verify_file": "roles/one_api_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "One-API startup completes once the local status endpoint answers on the runtime listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8101/api/status",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The One-API local status endpoint continues to answer on docker-runtime-lv3.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8101/api/status",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The repo-managed One-API runtime status endpoint is ready for authenticated admin verification.",
-        "timeout_seconds": 120,
-        "retries": 12,
-        "delay_seconds": 2,
-        "url": "http://127.0.0.1:8101/api/status",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The private One-API surface is verified through repo-managed local status and authenticated admin API probes instead of an unauthenticated Uptime Kuma monitor."
-      }
-    },
     "openbao": {
       "service_name": "openbao",
       "owning_vm": "runtime-control-lv3",

@@ -396,13 +396,6 @@ playbooks:
     shared_surfaces:
       - service:openfga
       - inventory/host_vars/proxmox_florin.yml
-  playbooks/one-api.yml:
-    playbook_id: one-api
-    canonical_service_id: one_api
-    mutation_scope: platform
-    shared_surfaces:
-      - service:one-api
-      - inventory/host_vars/proxmox_florin.yml
   playbooks/litellm.yml:
     playbook_id: litellm
     canonical_service_id: litellm

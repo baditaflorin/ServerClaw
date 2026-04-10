@@ -267,12 +267,6 @@ roles:
   openfga_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  one_api_postgres:
-    policy: tracked
-    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  one_api_runtime:
-    policy: tracked
-    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   ollama_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

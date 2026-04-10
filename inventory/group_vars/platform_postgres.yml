@@ -121,14 +121,6 @@ platform_postgres_clients:
     password_remote_dir: /etc/lv3/nextcloud
     password_remote_file: /etc/lv3/nextcloud/database-password
 
-  - service: one_api
-    database: oneapi
-    user: oneapi
-    source_vm: docker-runtime-lv3
-    password_local_file: "{{ repo_shared_root }}/.local/one-api/database-password.txt"
-    password_remote_dir: /etc/lv3/one-api
-    password_remote_file: /etc/lv3/one-api/database-password
-
   - service: litellm
     database: litellm
     user: litellm

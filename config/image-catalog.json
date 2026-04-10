@@ -1156,39 +1156,6 @@
         "converge-librechat"
       ]
     },
-    "one_api_runtime": {
-      "kind": "runtime",
-      "service_id": "one_api",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "one-api",
-      "registry_ref": "docker.io/justsong/one-api",
-      "tag": "v0.6.10",
-      "digest": "sha256:18324b85189be50c9f889f61d1723973dd088ef56f24670d6aab076ac0a044b8",
-      "ref": "docker.io/justsong/one-api:v0.6.10@sha256:18324b85189be50c9f889f61d1723973dd088ef56f24670d6aab076ac0a044b8",
-      "platform": "linux/amd64",
-      "pinned_on": "2026-03-30",
-      "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-one-api-runtime.json",
-      "exception": {
-        "owner": "Platform operations",
-        "justification": "The pinned upstream One-API image still reports critical and high Trivy findings in Alpine base packages and the bundled Go binary; keep it digest-pinned and private-only while upstream remediates.",
-        "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service remains private-only behind the Proxmox host controller proxy, authenticated API gateway route, and repo-managed per-consumer tokens."
-        ],
-        "approved_on": "2026-03-30",
-        "expires_on": "2026-04-13",
-        "remediation_plan": "Re-scan and refresh one_api_runtime with make upgrade-container-image IMAGE_ID=one_api_runtime WRITE=true APPLY=true before the exception expires."
-      },
-      "consumers": [
-        "collections/ansible_collections/lv3/platform/roles/one_api_runtime/templates/docker-compose.yml.j2",
-        "scripts/upgrade_container_image.py",
-        "docs/runbooks/container-image-policy.md"
-      ],
-      "apply_targets": [
-        "converge-one-api"
-      ]
-    },
     "openbao_runtime": {
       "kind": "runtime",
       "service_id": "openbao",

@@ -42,8 +42,6 @@ platform_port_assignments:
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
-  one_api_port: 8101
-  one_api_host_proxy_port: 8018
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   redpanda_kafka_port: 9092
@@ -877,11 +875,10 @@ network_policy:
           protocol: tcp
           ports:
             - 8055
-            - 8101
             - 11235
             - 8881
             - 11434
-          description: Private guest-to-guest access to the Directus, One-API, Crawl4AI, Ollama, and SearXNG internal APIs
+          description: Private guest-to-guest access to the Directus, Crawl4AI, Ollama, and SearXNG internal APIs
         - source: all_guests
           protocol: tcp
           ports:
@@ -927,11 +924,10 @@ network_policy:
           ports:
             - 5000
             - 8055
-            - 8101
             - 11235
             - 8881
             - 11434
-          description: Local Docker workloads that use the private Changedetection, Directus, One-API, Crawl4AI, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Changedetection, Directus, Crawl4AI, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
@@ -947,11 +943,10 @@ network_policy:
           ports:
             - 5000
             - 8055
-            - 8101
             - 11235
             - 8881
             - 11434
-          description: Local Docker workloads that use the private Changedetection, Directus, One-API, Crawl4AI, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Changedetection, Directus, Crawl4AI, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -1040,8 +1035,7 @@ network_policy:
             - 5000
             - 8089
             - 8100
-            - 8101
-          description: Private monitoring probes for the Changedetection, Dozzle, Piper, and One-API runtimes
+          description: Private monitoring probes for the Changedetection, Dozzle, and Piper runtimes
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -2864,17 +2858,6 @@ lv3_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-  one_api:
-    service_name: one-api
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    exposure_model: private-only
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    access:
-      kind: tailscale-tcp-proxy
-      url: "{{ one_api_controller_url }}"
   gotenberg:
     service_name: gotenberg
     owning_vm: runtime-ai-lv3

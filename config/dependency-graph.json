@@ -390,15 +390,6 @@
       "adr": "0284"
     },
     {
-      "id": "one_api",
-      "service": "one_api",
-      "name": "One-API",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "automation",
-      "adr": "0294"
-    },
-    {
       "id": "litellm",
       "service": "litellm",
       "name": "LiteLLM Proxy",
@@ -1250,11 +1241,6 @@
       "description": "ServerClaw can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
     },
     {
-      "to": "one_api",
-      "type": "hard",
-      "description": "ServerClaw uses the private One-API runtime for repo-managed local model access."
-    },
-    {
       "to": "ollama",
       "type": "hard",
       "description": "ServerClaw routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
@@ -1268,12 +1254,6 @@
       "to": "searxng",
       "type": "soft",
       "description": "ServerClaw delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
-    },
-    {
-      "from": "one_api",
-      "to": "ollama",
-      "type": "hard",
-      "description": "One-API forwards local chat and embedding aliases to the private Ollama runtime."
     },
     {
       "from": "litellm",
@@ -1682,12 +1662,6 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to chat.lv3.org depends on the shared NGINX edge publication path."
-    },
-    {
-      "from": "serverclaw",
-      "to": "one_api",
-      "type": "hard",
-      "description": "ServerClaw uses the private One-API runtime for repo-managed local model access."
     },
     {
       "from": "serverclaw",

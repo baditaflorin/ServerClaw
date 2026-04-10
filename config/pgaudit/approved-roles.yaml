@@ -15,7 +15,6 @@ approved_roles:
   - n8n
   - netbox
   - nextcloud
-  - oneapi
   - openbao_rotator
   - openfga
   - ops

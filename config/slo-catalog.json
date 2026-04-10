@@ -215,16 +215,6 @@
       "description": "The edge reverse proxy remains reachable for published services."
     },
     {
-      "id": "one-api-availability",
-      "service_id": "one_api",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "http://10.10.10.20:8101/api/status",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "One-API remains reachable on the private runtime network for governed local LLM proxy traffic."
-    },
-    {
       "id": "grist-availability",
       "service_id": "grist",
       "indicator": "availability",

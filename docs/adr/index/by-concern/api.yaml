@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-10'
 facet: concern
 concern: api
-total_adrs: 10
+total_adrs: 11
 adrs:
   - adr: 0049
     title: Private-First API Publication Model
@@ -178,7 +178,7 @@ adrs:
     implemented_on: '2026-03-31'
   - adr: 0294
     title: One-API As The Unified LLM API Proxy And Router
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-29'
     concern: api
@@ -196,3 +196,23 @@ adrs:
     implemented_in_repo_version: 0.177.135
     implemented_in_platform_version: 0.130.85
     implemented_on: '2026-04-01'
+  - adr: 0393
+    title: Remove One-API from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: api
+    keywords:
+      - lifecycle
+      - decommissioning
+      - one-api
+      - llm-proxy
+      - removal
+      - remove
+      - from
+      - platform
+    summary: Remove One-API from the platform following ADR 0389's phased procedure.
+    filename: 0393-remove-one-api.md
+    path: docs/adr/0393-remove-one-api.md
+    implemented_in_repo_version: 0.178.86
+    implemented_on: '2026-04-10'

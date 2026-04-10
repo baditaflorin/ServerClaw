@@ -137,15 +137,6 @@
       "approval_notes": "ADR 0146 approves this public-edge observability surface so agent traces can be emitted without relying on private network paths."
     },
     {
-      "id": "one-api-unified-llm-api",
-      "title": "One-API unified LLM API",
-      "lane": "api",
-      "lane_surface_ref": "one-api-unified-llm-api",
-      "publication_tier": "operator-only",
-      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8018 and the LV3 private guest network.",
-      "approval_notes": "This OpenAI-compatible local model router remains private-first for repo-managed consumers and operator verification; do not publish it through public DNS or the NGINX edge."
-    },
-    {
       "id": "ollama-local-inference-api",
       "title": "Ollama local inference API",
       "lane": "api",

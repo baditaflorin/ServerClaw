@@ -259,7 +259,6 @@ recover_vm_150() {
         /etc/lv3/postgres/n8n-password.txt                n8n/database-password.txt \
         /etc/lv3/postgres/netbox-password.txt             netbox/database-password.txt \
         /etc/lv3/postgres/nextcloud-password.txt          nextcloud/database-password.txt \
-        /etc/lv3/postgres/one-api-password.txt            one-api/database-password.txt \
         /etc/lv3/postgres/openfga-password.txt            openfga/database-password.txt \
         /etc/lv3/postgres/outline-password.txt            outline/database-password.txt \
         /etc/lv3/postgres/paperless-password.txt          paperless/database-password.txt \

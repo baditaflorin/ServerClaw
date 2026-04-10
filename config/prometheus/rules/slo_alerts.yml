@@ -836,46 +836,6 @@ groups:
           summary: nginx-edge-availability has less than 10% error budget remaining
           description: The edge reverse proxy remains reachable for published services.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_one_api_availability
-        expr: (slo:one_api_availability:error_rate_5m > (14 * 0.010000)) and (slo:one_api_availability:error_rate_1h
-          > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: one_api
-          slo_id: one-api-availability
-          indicator: availability
-        annotations:
-          summary: one-api-availability is burning its error budget at 14x
-          description: One-API remains reachable on the private runtime network for
-            governed local LLM proxy traffic.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_one_api_availability
-        expr: slo:one_api_availability:error_rate_1h > (3 * 0.010000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: one_api
-          slo_id: one-api-availability
-          indicator: availability
-        annotations:
-          summary: one-api-availability is burning its error budget at 3x
-          description: One-API remains reachable on the private runtime network for
-            governed local LLM proxy traffic.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_one_api_availability
-        expr: slo:one_api_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: one_api
-          slo_id: one-api-availability
-          indicator: availability
-        annotations:
-          summary: one-api-availability has less than 10% error budget remaining
-          description: One-API remains reachable on the private runtime network for
-            governed local LLM proxy traffic.
-          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_grist_availability
         expr: (slo:grist_availability:error_rate_5m > (14 * 0.005000)) and (slo:grist_availability:error_rate_1h
           > (14 * 0.005000))

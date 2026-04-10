@@ -1,6 +1,6 @@
 # ADR 0294: One-API As The Unified LLM API Proxy And Router
 
-- Status: Accepted
+- Status: Deprecated
 - Implementation Status: Live applied
 - Implemented In Repo Version: 0.177.135
 - Implemented In Platform Version: 0.130.85

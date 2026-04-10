@@ -1955,49 +1955,6 @@
       }
     },
     {
-      "id": "one_api",
-      "name": "One-API",
-      "description": "Private unified LLM API proxy and router that exposes governed OpenAI-compatible access for platform consumers.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://100.64.0.1:8018/v1",
-      "exposure": "private-only",
-      "health_probe_id": "one_api",
-      "image_catalog_ids": [
-        "one_api_runtime"
-      ],
-      "secret_catalog_ids": [
-        "one_api_database_password",
-        "one_api_session_secret",
-        "one_api_root_access_token",
-        "one_api_root_password"
-      ],
-      "adr": "0294",
-      "adr_file": "docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md",
-      "runbook": "docs/runbooks/configure-one-api.md",
-      "runtime_pool": "runtime-ai",
-      "deployment_surface": "playbooks/services/one-api.yml",
-      "restart_domain": "runtime-ai-inference",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
-      "mobility_tier": "elastic_stateless",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-one-api/lv3-one-api",
-      "tags": [
-        "llm",
-        "proxy",
-        "routing",
-        "openai-compatible"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "http://100.64.0.1:8018/v1",
-          "notes": "ServerClaw and controller-local bootstrap checks use the private Proxmox host proxy while the runtime itself stays on docker-runtime-lv3."
-        }
-      }
-    },
-    {
       "id": "openbao",
       "name": "OpenBao",
       "description": "Private secrets authority for controller automation and runtime credentials.",
