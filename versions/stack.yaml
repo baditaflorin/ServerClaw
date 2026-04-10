@@ -148,7 +148,6 @@ live_apply_evidence:
     tesseract_ocr: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
     directus: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     temporal: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
     piper: 2026-03-31-adr-0284-piper-mainline-live-apply
     redpanda: 2026-03-31-adr-0290-redpanda-mainline-live-apply

@@ -1,6 +1,7 @@
 [
   {
     "name": "Platform API Gateway Public",
+    "service_id": "api_gateway",
     "type": "http",
     "url": "https://api.lv3.org/healthz",
     "description": "Public edge entrypoint for the unified LV3 API gateway.",
@@ -40,6 +41,7 @@
   },
   {
     "name": "Dify Public",
+    "service_id": "dify",
     "type": "http",
     "url": "https://agents.lv3.org/healthz",
     "description": "Dify publication through the shared NGINX edge and oauth2-proxy gate.",
@@ -53,6 +55,7 @@
   },
   {
     "name": "Directus Public Health",
+    "service_id": "directus",
     "type": "http",
     "url": "https://data.lv3.org/server/health",
     "description": "Public Directus health endpoint published through the shared NGINX edge.",
@@ -79,6 +82,7 @@
   },
   {
     "name": "Dozzle Private",
+    "service_id": "dozzle",
     "type": "http",
     "url": "http://10.10.10.20:8089/healthcheck",
     "description": "Private Dozzle healthcheck on docker-runtime-lv3.",
@@ -92,6 +96,7 @@
   },
   {
     "name": "Excalidraw Public",
+    "service_id": "excalidraw",
     "type": "http",
     "url": "https://draw.lv3.org",
     "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
@@ -105,6 +110,7 @@
   },
   {
     "name": "Flagsmith Public Health",
+    "service_id": "flagsmith",
     "type": "http",
     "url": "https://flags.lv3.org/health",
     "description": "Public Flagsmith health endpoint published through the shared NGINX edge VM.",
@@ -118,6 +124,7 @@
   },
   {
     "name": "Gitea Private",
+    "service_id": "gitea",
     "type": "http",
     "url": "http://10.10.10.92:3003/api/healthz",
     "description": "Private Gitea health endpoint on runtime-control-lv3.",
@@ -131,6 +138,7 @@
   },
   {
     "name": "Grafana Public",
+    "service_id": "grafana",
     "type": "http",
     "url": "https://grafana.lv3.org",
     "description": "Grafana publication through the NGINX edge VM.",
@@ -144,6 +152,7 @@
   },
   {
     "name": "Harbor Registry Public",
+    "service_id": "harbor",
     "type": "http",
     "url": "https://registry.lv3.org/api/v2.0/ping",
     "description": "Harbor ping endpoint published through the shared NGINX edge.",
@@ -157,6 +166,7 @@
   },
   {
     "name": "Headscale Public Health",
+    "service_id": "headscale",
     "type": "http",
     "url": "https://headscale.lv3.org/health",
     "description": "Public Headscale health endpoint published through the shared NGINX edge.",
@@ -170,6 +180,7 @@
   },
   {
     "name": "Homepage Public",
+    "service_id": "homepage",
     "type": "http",
     "url": "https://home.lv3.org",
     "description": "Unified service dashboard published through the authenticated shared NGINX edge.",
@@ -183,6 +194,7 @@
   },
   {
     "name": "Keycloak OIDC Discovery",
+    "service_id": "keycloak",
     "type": "http",
     "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
     "description": "Shared SSO discovery endpoint published through the NGINX edge VM.",
@@ -196,6 +208,7 @@
   },
   {
     "name": "Lago Public Health",
+    "service_id": "lago",
     "type": "http",
     "url": "https://billing.lv3.org/api/health",
     "description": "Public Lago health endpoint published through the shared NGINX edge and billing adapter path.",
@@ -209,6 +222,7 @@
   },
   {
     "name": "Langfuse Public Health",
+    "service_id": "langfuse",
     "type": "http",
     "url": "https://langfuse.lv3.org/api/public/health",
     "description": "Public Langfuse health endpoint published through the shared NGINX edge VM.",
@@ -235,6 +249,7 @@
   },
   {
     "name": "MinIO Public Health",
+    "service_id": "minio",
     "type": "http",
     "url": "https://minio.lv3.org/minio/health/live",
     "description": "Public MinIO S3 API health endpoint published through the shared NGINX edge VM.",
@@ -248,6 +263,7 @@
   },
   {
     "name": "Matrix Synapse Public",
+    "service_id": "matrix_synapse",
     "type": "http",
     "url": "https://matrix.lv3.org/_matrix/client/versions",
     "description": "Public Matrix Synapse client versions endpoint on matrix.lv3.org.",
@@ -261,6 +277,7 @@
   },
   {
     "name": "Mattermost Private",
+    "service_id": "mattermost",
     "type": "http",
     "url": "http://10.10.10.20:8065/api/v4/system/ping",
     "description": "Private Mattermost system ping endpoint on docker-runtime-lv3.",
@@ -274,6 +291,7 @@
   },
   {
     "name": "n8n Public Health",
+    "service_id": "n8n",
     "type": "http",
     "url": "https://n8n.lv3.org/healthz",
     "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
@@ -287,6 +305,7 @@
   },
   {
     "name": "Nextcloud Public Status",
+    "service_id": "nextcloud",
     "type": "http",
     "url": "https://cloud.lv3.org/status.php",
     "description": "Public Nextcloud status endpoint published through the shared NGINX edge VM.",
@@ -300,6 +319,7 @@
   },
   {
     "name": "NetBox Private",
+    "service_id": "netbox",
     "type": "http",
     "url": "http://10.10.10.20:8082/login/",
     "description": "Private NetBox login surface on docker-runtime-lv3.",
@@ -326,6 +346,7 @@
   },
   {
     "name": "ntfy Public",
+    "service_id": "ntfy",
     "type": "http",
     "url": "https://ntfy.lv3.org/v1/health",
     "description": "Published ntfy health endpoint through the shared NGINX edge.",
@@ -339,6 +360,7 @@
   },
   {
     "name": "Ops Portal Public",
+    "service_id": "ops_portal",
     "type": "http",
     "url": "https://ops.lv3.org/health",
     "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
@@ -352,6 +374,7 @@
   },
   {
     "name": "Grist Public Status",
+    "service_id": "grist",
     "type": "http",
     "url": "https://grist.lv3.org/status",
     "description": "Public Grist status endpoint published through the shared NGINX edge VM.",
@@ -365,6 +388,7 @@
   },
   {
     "name": "Outline Public Health",
+    "service_id": "outline",
     "type": "http",
     "url": "https://wiki.lv3.org/_health",
     "description": "Public Outline health endpoint published through the shared NGINX edge VM.",
@@ -378,6 +402,7 @@
   },
   {
     "name": "Paperless Public Health",
+    "service_id": "paperless",
     "type": "http",
     "url": "https://paperless.lv3.org/",
     "description": "Public Paperless root published through the shared NGINX edge VM.",
@@ -391,6 +416,7 @@
   },
   {
     "name": "Plane Public",
+    "service_id": "plane",
     "type": "http",
     "url": "https://tasks.lv3.org/",
     "description": "Public Plane board published through the shared NGINX edge and authenticated by the repo-managed oauth2-proxy flow.",
@@ -417,6 +443,7 @@
   },
   {
     "name": "Plausible Public Health",
+    "service_id": "plausible",
     "type": "http",
     "url": "https://analytics.lv3.org/api/system/health/ready",
     "description": "Public Plausible readiness endpoint published through the shared NGINX edge VM.",
@@ -430,6 +457,7 @@
   },
   {
     "name": "Portainer Private",
+    "service_id": "portainer",
     "type": "http",
     "url": "https://10.10.10.20:9443/api/status",
     "description": "Private Portainer status endpoint on docker-runtime-lv3.",
@@ -470,6 +498,7 @@
   },
   {
     "name": "Realtime Metrics Private",
+    "service_id": "netdata",
     "type": "http",
     "url": "http://10.10.10.40:19999/api/v1/info",
     "description": "Private Netdata parent healthcheck on monitoring-lv3.",
@@ -483,6 +512,7 @@
   },
   {
     "name": "Semaphore Private",
+    "service_id": "semaphore",
     "type": "http",
     "url": "http://10.10.10.92:3004/api/ping",
     "description": "Private Semaphore ping endpoint on runtime-control-lv3.",
@@ -496,6 +526,7 @@
   },
   {
     "name": "ServerClaw",
+    "service_id": "serverclaw",
     "type": "http",
     "url": "https://chat.lv3.org",
     "description": "Public ServerClaw assistant surface published through the shared NGINX edge.",
@@ -509,6 +540,7 @@
   },
   {
     "name": "Step CA Private",
+    "service_id": "step_ca",
     "type": "http",
     "url": "https://10.10.10.92:9000/health",
     "description": "Private step-ca health endpoint on runtime-control-lv3.",
@@ -523,6 +555,7 @@
   },
   {
     "name": "Superset Public Health",
+    "service_id": "superset",
     "type": "http",
     "url": "https://bi.lv3.org/health",
     "description": "Public Superset health endpoint published through the shared NGINX edge VM.",
@@ -536,6 +569,7 @@
   },
   {
     "name": "Tika Private",
+    "service_id": "tika",
     "type": "http",
     "url": "http://10.10.10.90:9998/version",
     "description": "Private Apache Tika version endpoint on runtime-ai-lv3.",
@@ -549,6 +583,7 @@
   },
   {
     "name": "Uptime Kuma Public",
+    "service_id": "uptime_kuma",
     "type": "http",
     "url": "https://uptime.lv3.org",
     "description": "Public Uptime Kuma entrypoint through the NGINX edge.",
@@ -562,6 +597,7 @@
   },
   {
     "name": "Windmill Private",
+    "service_id": "windmill",
     "type": "http",
     "url": "http://10.10.10.92:8000/api/version",
     "description": "Private Windmill API version endpoint on runtime-control-lv3.",
@@ -575,6 +611,7 @@
   },
   {
     "name": "Woodpecker Public",
+    "service_id": "woodpecker",
     "type": "http",
     "url": "https://ci.lv3.org/healthz",
     "description": "Woodpecker health endpoint published through the shared NGINX edge.",
@@ -588,6 +625,7 @@
   },
   {
     "name": "GlitchTip Public Health",
+    "service_id": "glitchtip",
     "type": "http",
     "url": "https://errors.lv3.org/api/0/internal/health/",
     "description": "Public GlitchTip health endpoint published through the shared NGINX edge VM.",
@@ -601,6 +639,7 @@
   },
   {
     "name": "Repowise Private",
+    "service_id": "repowise",
     "type": "http",
     "url": "http://10.10.10.20:7070/health",
     "description": "Private Repowise health endpoint on docker-runtime-lv3.",

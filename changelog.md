@@ -12,15 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [adr-0403] Service lifecycle contract — BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7
+
 - [adr-0402] Remove JupyterHub (notebooks.lv3.org) — zero active users, maintenance overhead eliminated; jupyterhub_runtime role deleted, jupyterhub Keycloak OIDC client removed, 15 catalogs cleaned, ADR 0291 deprecated; postmortem documents 7 new ADR 0396 gaps (platform_services.yml orphaned blocks, keycloak shared role tasks, uptime kuma/workbench IA non-catalog JSONs)
 - [adr-0396 amendments] Close 7 ADR 0396 postmortem gaps — 9 new CATALOG_REGISTRY entries (subdomain-exposure-registry, certificate-catalog, command-catalog, top_level_key, yaml_topology_block); role_name lookup (Amendment 3); inline # SERVICE: marker removal in role defaults/J2 templates (Amendment 4); https_tls Prometheus files regenerated with BEGIN/END SERVICE markers (Amendment 5); post-purge JSON/YAML integrity validation (Amendment 6); --validate-registry self-check (Amendment 1); projected ~95% CPU-only decommissioning
 - [adr-0401] Remove Netdata from the platform — Prometheus + node_exporter cover all host metrics; netdata_runtime role deleted, realtime.lv3.org deprovisioned, 15 catalogs cleaned via decommission script, ADR 0196 deprecated; equivalent browser dashboards via Grafana Node Exporter Full (dashboard 1860)
 - [adr-0399] Platform reconciliation daemon implemented (ADR 0399) — Phase 1: reconciliation library + CLI + Makefile targets; Phase 2: Windmill 15-min cron (reconcile-portals.py) + 60-min health sweep (portal-health-sweep.py); Phase 3: Gitea push-validation workflow; Phase 4: Grafana portal-reconciliation dashboard + ops portal widget; ADR 0400 homepage fidelity complete (catalog-driven bookmarks, text selectability CSS, verify fixes)
 - [adr-0392] Convergence timing infrastructure — convergence_timer.py + `make time-converge` records timing receipts to receipts/convergence-timing/; report/trend subcommands for drift detection; baselines: api-gateway 772s, windmill 1257s
 - [adr-0396] Deterministic service decommissioning — comprehensive CATALOG_REGISTRY covering 15 catalog types (7 handler strategies: array/dict_key/dict_key_by_value/workflow_dict/dep_graph/partitions/yaml_dict_key), YAML block markers in generated SLO Prometheus files (generate_slo_config.py, 44 services), decommission-preview subcommand in platform_ops.py, fixed dual-format ADR deprecation; reduces AI-required decommission work to zero
-
 - ADR 0394 + 0395: LibreChat Agents API integration plan and provider-agnostic agent abstraction layer — programmatic agent access via OpenAI-compatible and Open Responses endpoints, decoupled DTOs with AgentProvider ABC for runtime swappability
-
 - [adr-0393] Remove One-API from the platform — containers already stopped, 85 file references purged across 9 roles/2 playbooks/27 config catalogs/7 tests, 4 secrets removed from secret catalog, ADR 0294 deprecated; LLM access path simplified to direct Ollama or external APIs
 
 - fix: API gateway validation regression — command catalog required live_apply_receipt for all commands (rejected read-only refresh-discovery-surfaces), schema validator crashed on JSON Schema union types like ["number", "null"]; fixed both, added scripts volume mount for durability
@@ -72,10 +72,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.95 release notes](docs/release-notes/0.178.95.md)
+- [0.178.96 release notes](docs/release-notes/0.178.96.md)
 
 ## Previous Releases
 
+- [0.178.95 release notes](docs/release-notes/0.178.95.md)
 - [0.178.94 release notes](docs/release-notes/0.178.94.md)
 - [0.178.93 release notes](docs/release-notes/0.178.93.md)
 - [0.178.92 release notes](docs/release-notes/0.178.92.md)
@@ -87,9 +88,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.86 release notes](docs/release-notes/0.178.86.md)
 - [0.178.85 release notes](docs/release-notes/0.178.85.md)
 - [0.178.84 release notes](docs/release-notes/0.178.84.md)
-- [0.178.83 release notes](docs/release-notes/0.178.83.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (430 releases)](docs/release-notes/index/2026.md)
+- [2026 (431 releases)](docs/release-notes/index/2026.md)

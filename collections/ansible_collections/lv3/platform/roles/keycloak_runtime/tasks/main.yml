@@ -142,6 +142,7 @@
       KC_BOOTSTRAP_ADMIN_PASSWORD: "{{ keycloak_decoded_secrets[0] }}"
   no_log: true
 
+# BEGIN SERVICE: agent
 - name: Prepare OpenBao agent runtime secret injection for Keycloak
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -176,6 +177,7 @@
     common_openbao_compose_env_legacy_env_files:
       - "{{ keycloak_legacy_env_file }}"
   no_log: true
+# END SERVICE: agent
 
 - name: Render the Keycloak environment file
   ansible.builtin.template:
@@ -385,6 +387,7 @@
   changed_when: "'changed' in keycloak_replace_cleanup.stdout"
   when: keycloak_force_recreate
 
+# BEGIN SERVICE: agent
 - name: Force-recreate the Keycloak OpenBao agent after Docker networking recovery
   ansible.builtin.command:
     argv:
@@ -409,7 +412,9 @@
   delay: 5
   until: keycloak_openbao_agent_up.rc == 0
   when: keycloak_force_recreate
+# END SERVICE: agent
 
+# BEGIN SERVICE: agent
 - name: Wait for the Keycloak runtime env file after OpenBao agent recovery
   ansible.builtin.shell: |
     set -euo pipefail
@@ -426,6 +431,7 @@
   changed_when: false
   no_log: true
   when: keycloak_force_recreate
+# END SERVICE: agent
 
 - name: Force-recreate the Keycloak service and recover Docker bridge-chain loss after networking recovery
   when: keycloak_force_recreate
@@ -726,6 +732,7 @@
       register: keycloak_startup_probe_recovery_jgroups_cleanup
       changed_when: "'DELETE ' in (keycloak_startup_probe_recovery_jgroups_cleanup.stdout | default(''))"
 
+    # BEGIN SERVICE: agent
     - name: Recreate the Keycloak OpenBao agent before retrying the startup probes
       ansible.builtin.command:
         argv:
@@ -745,6 +752,7 @@
         or 'Recreating' in keycloak_startup_probe_recovery_openbao_agent_up.stdout
         or 'Starting' in keycloak_startup_probe_recovery_openbao_agent_up.stdout
         or 'Running' in keycloak_startup_probe_recovery_openbao_agent_up.stdout
+    # END SERVICE: agent
 
     - name: Wait for the Keycloak runtime env file after startup probe recovery
       ansible.builtin.shell: |
@@ -1664,6 +1672,7 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_group_realm_role_mappings_reconcile is succeeded
 
+    # BEGIN SERVICE: grafana
     - name: Ensure the Grafana OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1703,6 +1712,7 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_grafana_client_reconcile is succeeded
+    # END SERVICE: grafana
 
     - name: Ensure the operations portal OAuth client exists
       community.general.keycloak_client:
@@ -1744,6 +1754,7 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_ops_portal_client_reconcile is succeeded
 
+    # BEGIN SERVICE: gitea
     - name: Ensure the Gitea OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1785,7 +1796,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_gitea_client_reconcile is succeeded
+    # END SERVICE: gitea
 
+    # BEGIN SERVICE: agent
     - name: Ensure the agent service client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1807,7 +1820,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_agent_client_reconcile is succeeded
+    # END SERVICE: agent
 
+    # BEGIN SERVICE: langfuse
     - name: Ensure the Langfuse OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1839,6 +1854,8 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_langfuse_client_reconcile is succeeded
+    # END SERVICE: langfuse
+    # BEGIN SERVICE: dify
     - name: Ensure the Dify OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1869,6 +1886,8 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_dify_client_reconcile is succeeded
+    # END SERVICE: dify
+    # BEGIN SERVICE: nomad
     - name: Ensure the Nomad OIDC client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1909,6 +1928,8 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_nomad_client_reconcile is succeeded
+    # END SERVICE: nomad
+    # BEGIN SERVICE: directus
     - name: Ensure the Directus OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1947,7 +1968,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_directus_client_reconcile is succeeded
+    # END SERVICE: directus
 
+    # BEGIN SERVICE: outline
     - name: Ensure the Outline OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -1987,7 +2010,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_outline_client_reconcile is succeeded
+    # END SERVICE: outline
 
+    # BEGIN SERVICE: paperless
     - name: Ensure the Paperless OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2027,6 +2052,8 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_paperless_client_reconcile is succeeded
+    # END SERVICE: paperless
+    # BEGIN SERVICE: superset
     - name: Ensure the Superset OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2066,7 +2093,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_superset_client_reconcile is succeeded
+    # END SERVICE: superset
 
+    # BEGIN SERVICE: serverclaw
     - name: Ensure the ServerClaw OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2106,7 +2135,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_serverclaw_client_reconcile is succeeded
+    # END SERVICE: serverclaw
 
+    # BEGIN SERVICE: grist
     - name: Ensure the Grist OAuth client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2146,7 +2177,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_grist_client_reconcile is succeeded
+    # END SERVICE: grist
 
+    # BEGIN SERVICE: api_gateway
     - name: Ensure the API gateway client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2168,7 +2201,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_api_gateway_client_reconcile is succeeded
+    # END SERVICE: api_gateway
 
+    # BEGIN SERVICE: serverclaw
     - name: Ensure the obsolete ServerClaw operator CLI direct-grant client is absent
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2190,7 +2225,9 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_serverclaw_operator_cli_client_absent is succeeded
+    # END SERVICE: serverclaw
 
+    # BEGIN SERVICE: serverclaw_runtime
     - name: Ensure the ServerClaw runtime client exists
       community.general.keycloak_client:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2212,6 +2249,7 @@
       retries: "{{ keycloak_admin_reconciliation_retries }}"
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_serverclaw_runtime_client_reconcile is succeeded
+    # END SERVICE: serverclaw_runtime
 
     - name: Ensure realm roles are mapped to service account users
       community.general.keycloak_user_rolemapping:
@@ -2227,6 +2265,7 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_service_account_realm_role_mappings_reconcile is succeeded
 
+    # BEGIN SERVICE: grafana
     - name: Read the Grafana client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2237,6 +2276,7 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_grafana_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: grafana
 
     - name: Read the operations portal client secret
       community.general.keycloak_clientsecret_info:
@@ -2249,6 +2289,7 @@
       until: keycloak_ops_portal_client_secret_info is succeeded
       no_log: true
 
+    # BEGIN SERVICE: gitea
     - name: Read the Gitea client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2259,7 +2300,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_gitea_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: gitea
 
+    # BEGIN SERVICE: agent
     - name: Read the agent client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2270,7 +2313,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_agent_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: agent
 
+    # BEGIN SERVICE: langfuse
     - name: Read the Langfuse client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2281,7 +2326,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_langfuse_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: langfuse
 
+    # BEGIN SERVICE: directus
     - name: Read the Directus client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2292,7 +2339,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_directus_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: directus
 
+    # BEGIN SERVICE: grist
     - name: Read the Grist client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2303,7 +2352,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_grist_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: grist
 
+    # BEGIN SERVICE: glitchtip
     - name: Read the GlitchTip client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2314,7 +2365,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_glitchtip_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: glitchtip
 
+    # BEGIN SERVICE: outline
     - name: Read the Outline client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2325,7 +2378,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_outline_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: outline
 
+    # BEGIN SERVICE: paperless
     - name: Read the Paperless client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2336,7 +2391,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_paperless_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: paperless
 
+    # BEGIN SERVICE: superset
     - name: Read the Superset client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2347,7 +2404,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_superset_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: superset
 
+    # BEGIN SERVICE: serverclaw
     - name: Read the ServerClaw client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2358,7 +2417,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_serverclaw_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: serverclaw
 
+    # BEGIN SERVICE: api_gateway
     - name: Read the API gateway client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2369,7 +2430,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_api_gateway_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: api_gateway
 
+    # BEGIN SERVICE: serverclaw_runtime
     - name: Read the ServerClaw runtime client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2380,7 +2443,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_serverclaw_runtime_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: serverclaw_runtime
 
+    # BEGIN SERVICE: dify
     - name: Read the Dify client secret
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
@@ -2391,7 +2456,9 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_dify_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: dify
 
+    # BEGIN SERVICE: nomad
     - name: Read the Nomad client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2402,29 +2469,63 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_nomad_client_secret_info is succeeded
       no_log: true
+    # END SERVICE: nomad
 
 - name: Record the Keycloak client secrets
   ansible.builtin.set_fact:
+    # BEGIN SERVICE: grafana
     keycloak_grafana_client_secret: "{{ keycloak_grafana_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: grafana
+    # BEGIN SERVICE: ops_portal
     keycloak_ops_portal_client_secret: "{{ keycloak_ops_portal_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: ops_portal
+    # BEGIN SERVICE: gitea
     keycloak_gitea_client_secret: "{{ keycloak_gitea_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: gitea
+    # BEGIN SERVICE: agent
     keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: agent
+    # BEGIN SERVICE: langfuse
     keycloak_langfuse_client_secret: "{{ keycloak_langfuse_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: langfuse
+    # BEGIN SERVICE: grist
     keycloak_grist_client_secret: "{{ keycloak_grist_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: grist
+    # BEGIN SERVICE: glitchtip
     keycloak_glitchtip_client_secret: "{{ keycloak_glitchtip_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: glitchtip
+    # BEGIN SERVICE: directus
     keycloak_directus_client_secret: "{{ keycloak_directus_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: directus
+    # BEGIN SERVICE: outline
     keycloak_outline_client_secret: "{{ keycloak_outline_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: outline
+    # BEGIN SERVICE: paperless
     keycloak_paperless_client_secret: "{{ keycloak_paperless_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: paperless
+    # BEGIN SERVICE: superset
     keycloak_superset_client_secret: "{{ keycloak_superset_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: superset
+    # BEGIN SERVICE: serverclaw
     keycloak_serverclaw_client_secret: "{{ keycloak_serverclaw_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: serverclaw
+    # BEGIN SERVICE: api_gateway
     keycloak_api_gateway_client_secret: "{{ keycloak_api_gateway_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: api_gateway
+    # BEGIN SERVICE: serverclaw_runtime
     keycloak_serverclaw_runtime_client_secret: "{{ keycloak_serverclaw_runtime_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: serverclaw_runtime
+    # BEGIN SERVICE: dify
     keycloak_dify_client_secret: "{{ keycloak_dify_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: dify
+    # BEGIN SERVICE: nomad
     keycloak_nomad_client_secret: "{{ keycloak_nomad_client_secret_info.clientsecret_info.value }}"
+    # END SERVICE: nomad
   no_log: true
 
 - name: Reconcile the Plane OIDC client
   block:
+    # BEGIN SERVICE: plane
     - name: Acquire a fresh Keycloak admin token for Plane OIDC client reconciliation
       ansible.builtin.uri:
         url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
@@ -2442,18 +2543,24 @@
       until: keycloak_plane_admin_token.status == 200
       changed_when: false
       no_log: true
+    # END SERVICE: plane
 
+    # BEGIN SERVICE: plane
     - name: Run the Plane OIDC client reconciliation tasks
       ansible.builtin.include_tasks: plane_client.yml
       vars:
         keycloak_admin_token: "{{ keycloak_plane_admin_token.json.access_token }}"
   rescue:
+    # END SERVICE: plane
+    # BEGIN SERVICE: plane
     - name: Surface unexpected Plane OIDC client reconciliation failures
       ansible.builtin.fail:
         msg: >-
           Plane OIDC client reconciliation failed with error:
           {{ ansible_failed_result.msg | default(ansible_failed_result) }}
+    # END SERVICE: plane
 
+# BEGIN SERVICE: grafana
 - name: Mirror the Grafana client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_grafana_client_secret_local_file }}"
@@ -2462,6 +2569,7 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: grafana
 
 - name: Mirror the operations portal client secret to the control machine
   ansible.builtin.copy:
@@ -2472,6 +2580,7 @@
   become: false
   no_log: true
 
+# BEGIN SERVICE: gitea
 - name: Mirror the Gitea client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_gitea_client_secret_local_file }}"
@@ -2480,7 +2589,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: gitea
 
+# BEGIN SERVICE: agent
 - name: Mirror the agent client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_agent_client_secret_local_file }}"
@@ -2489,7 +2600,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: agent
 
+# BEGIN SERVICE: langfuse
 - name: Mirror the Langfuse client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_langfuse_client_secret_local_file }}"
@@ -2498,7 +2611,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: langfuse
 
+# BEGIN SERVICE: grist
 - name: Mirror the Grist client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_grist_client_secret_local_file }}"
@@ -2507,7 +2622,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: grist
 
+# BEGIN SERVICE: glitchtip
 - name: Mirror the GlitchTip client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_glitchtip_client_secret_local_file }}"
@@ -2516,7 +2633,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: glitchtip
 
+# BEGIN SERVICE: directus
 - name: Mirror the Directus client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_directus_client_secret_local_file }}"
@@ -2525,7 +2644,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: directus
 
+# BEGIN SERVICE: outline
 - name: Mirror the Outline client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_outline_client_secret_local_file }}"
@@ -2534,7 +2655,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: outline
 
+# BEGIN SERVICE: paperless
 - name: Mirror the Paperless client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_paperless_client_secret_local_file }}"
@@ -2543,7 +2666,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: paperless
 
+# BEGIN SERVICE: superset
 - name: Mirror the Superset client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_superset_client_secret_local_file }}"
@@ -2552,7 +2677,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: superset
 
+# BEGIN SERVICE: serverclaw
 - name: Mirror the ServerClaw client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_serverclaw_client_secret_local_file }}"
@@ -2561,7 +2688,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: serverclaw
 
+# BEGIN SERVICE: api_gateway
 - name: Mirror the API gateway client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_api_gateway_client_secret_local_file }}"
@@ -2570,14 +2699,18 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: api_gateway
 
+# BEGIN SERVICE: serverclaw
 - name: Remove the stale ServerClaw operator CLI client secret from the control machine
   ansible.builtin.file:
     path: "{{ repo_shared_local_root }}/keycloak/serverclaw-operator-client-secret.txt"
     state: absent
   delegate_to: localhost
   become: false
+# END SERVICE: serverclaw
 
+# BEGIN SERVICE: serverclaw_runtime
 - name: Mirror the ServerClaw runtime client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_serverclaw_runtime_client_secret_local_file }}"
@@ -2586,7 +2719,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: serverclaw_runtime
 
+# BEGIN SERVICE: dify
 - name: Mirror the Dify client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_dify_client_secret_local_file }}"
@@ -2595,7 +2730,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: dify
 
+# BEGIN SERVICE: nomad
 - name: Mirror the Nomad client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ keycloak_nomad_client_secret_local_file }}"
@@ -2604,7 +2741,9 @@
   delegate_to: localhost
   become: false
   no_log: true
+# END SERVICE: nomad
 
+# BEGIN SERVICE: plane
 - name: Mirror the Plane OIDC client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ plane_oidc_client_secret_local_file }}"
@@ -2614,6 +2753,7 @@
   become: false
   no_log: true
   when: plane_oidc_client_secret | default('') | length > 0
+# END SERVICE: plane
 
 - name: Reconcile repo-managed Keycloak users
   block:
@@ -2752,6 +2892,7 @@
   register: keycloak_realm_openid_config
   changed_when: false
 
+# BEGIN SERVICE: agent
 - name: Request an agent client-credentials token
   ansible.builtin.uri:
     url: "{{ keycloak_local_admin_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
@@ -2770,7 +2911,9 @@
   delay: "{{ keycloak_admin_reconciliation_delay }}"
   until: keycloak_agent_token.status == 200
   no_log: true
+# END SERVICE: agent
 
+# BEGIN SERVICE: serverclaw_runtime
 - name: Request the ServerClaw runtime client-credentials token
   ansible.builtin.uri:
     url: "{{ keycloak_local_admin_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
@@ -2789,6 +2932,7 @@
   delay: "{{ keycloak_admin_reconciliation_delay }}"
   until: keycloak_serverclaw_runtime_token.status == 200
   no_log: true
+# END SERVICE: serverclaw_runtime
 
 - name: Assert Keycloak endpoints and automation credentials are working
   ansible.builtin.assert:

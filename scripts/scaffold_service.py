@@ -60,6 +60,9 @@ class RepoPaths:
     service_completeness_path: Path
     grafana_dashboard_dir: Path
     alert_rule_dir: Path
+    platform_services_path: Path
+    uptime_kuma_monitors_path: Path
+    keycloak_runtime_defaults_path: Path
 
 
 @dataclass(frozen=True)
@@ -272,6 +275,13 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
         service_completeness_path=repo_root / "config" / "service-completeness.json",
         grafana_dashboard_dir=repo_root / "config" / "grafana" / "dashboards",
         alert_rule_dir=repo_root / "config" / "alertmanager" / "rules",
+        platform_services_path=repo_root / "inventory" / "group_vars" / "all" / "platform_services.yml",
+        uptime_kuma_monitors_path=repo_root / "config" / "uptime-kuma" / "monitors.json",
+        keycloak_runtime_defaults_path=(
+            repo_root
+            / "collections" / "ansible_collections" / "lv3" / "platform"
+            / "roles" / "keycloak_runtime" / "defaults" / "main.yml"
+        ),
     )
 
 
@@ -930,6 +940,116 @@ def write_placeholder_scan_receipt(repo_root: Path, spec: ServiceSpec) -> None:
     )
 
 
+def update_platform_services_registry(path: Path, spec: ServiceSpec) -> None:
+    """Append a scaffolded, marker-wrapped block to inventory/group_vars/all/platform_services.yml.
+
+    The block is appended at the end of the platform_service_registry dict (before any
+    trailing top-level keys) and wrapped in # BEGIN SERVICE / # END SERVICE markers so
+    decommission_service.py can remove it atomically.
+    """
+    if not path.is_file():
+        return
+
+    dns_section = ""
+    if spec.public_hostname:
+        hostname_var = spec.public_hostname.replace("lv3.org", "{{ platform_domain }}")
+        dns_section = (
+            f"    dns:\n"
+            f"      records:\n"
+            f"        - fqdn: \"{hostname_var}\"\n"
+            f"          type: public\n"
+            f"          target_host: nginx-lv3\n"
+            f"          ttl: 60\n"
+        )
+
+    block = (
+        f"  # BEGIN SERVICE: {spec.service_id}\n"
+        f"  {spec.service_id}:\n"
+        f"    service_type: docker_compose\n"
+        f"    image_catalog_key: {spec.image_id}\n"
+        f"    internal_port: {spec.port}\n"
+        f"    host_group: {spec.vm}\n"
+        f"    site_dir: /opt/{spec.name_slug}\n"
+        f"    container_name: {spec.name_slug}\n"
+        f"    needs_openbao: {str(spec.requires_secrets).lower()}\n"
+    )
+    if dns_section:
+        block += dns_section
+    block += f"  # END SERVICE: {spec.service_id}\n"
+
+    content = path.read_text()
+    # Insert before the first non-indented key that closes the registry dict,
+    # or simply append before end-of-file if no such key is found.
+    # Find the last "  # END SERVICE:" and insert after it.
+    last_end = content.rfind("  # END SERVICE:")
+    if last_end != -1:
+        insert_at = content.index("\n", last_end) + 1
+        content = content[:insert_at] + "\n" + block + content[insert_at:]
+    else:
+        content = content.rstrip("\n") + "\n\n" + block
+    path.write_text(content)
+
+
+def update_uptime_kuma_monitors(path: Path, spec: ServiceSpec) -> None:
+    """Append a scaffold monitor entry to config/uptime-kuma/monitors.json.
+
+    Only adds an entry when the service has an edge-published public URL.
+    The entry includes service_id for decommission_service.py compatibility.
+    """
+    if not path.is_file() or spec.exposure == "private-only":
+        return
+    if not spec.public_url:
+        return
+
+    monitors = load_json(path)
+    if not isinstance(monitors, list):
+        return
+    # Skip if already registered
+    if any(isinstance(m, dict) and m.get("service_id") == spec.service_id for m in monitors):
+        return
+
+    entry: dict[str, Any] = {
+        "name": f"{spec.display_name} Public",
+        "service_id": spec.service_id,
+        "type": "http",
+        "url": spec.public_url,
+        "description": f"TODO: describe the {spec.display_name} uptime monitor.",
+        "interval": 60,
+        "retryInterval": 60,
+        "maxretries": 0,
+        "maxredirects": 5,
+        "accepted_statuscodes": ["200-299"],
+    }
+    monitors.append(entry)
+    write_json(path, monitors)
+
+
+def update_keycloak_role_defaults(path: Path, spec: ServiceSpec) -> None:
+    """Append a scaffolded keycloak variable stub to keycloak_runtime/defaults/main.yml.
+
+    Only runs when the service requires OIDC. Adds the minimal variables needed
+    for keycloak_runtime to manage the service's OIDC client, wrapped in
+    # BEGIN SERVICE / # END SERVICE markers.
+
+    The caller (print_checklist) will remind the operator to also add the
+    corresponding tasks to keycloak_runtime/tasks/main.yml by hand.
+    """
+    if not spec.requires_oidc or not path.is_file():
+        return
+
+    stub = (
+        f"\n# BEGIN SERVICE: {spec.service_id}\n"
+        f"keycloak_{spec.service_id}_client_id: {spec.service_id}\n"
+        f"keycloak_{spec.service_id}_redirect_uris:\n"
+        f"  - \"{spec.public_url or spec.internal_url}/*\"\n"
+        f"keycloak_{spec.service_id}_root_url: \"{spec.public_url or spec.internal_url}\"\n"
+        f"keycloak_{spec.service_id}_client_secret: \"\"\n"
+        f"# END SERVICE: {spec.service_id}\n"
+    )
+    content = path.read_text()
+    path.write_text(content.rstrip("\n") + "\n" + stub)
+
+
 def print_checklist(spec: ServiceSpec) -> None:
     print(f"Scaffold created for '{spec.name_slug}'.")
     print("Required next steps:")
@@ -943,6 +1063,11 @@ def print_checklist(spec: ServiceSpec) -> None:
     print(f"  [ ] Review the generated role and runtime env contract: {spec.role_path.as_posix()}")
     print(f"  [ ] Review the generated playbook entry points: {spec.playbook_path.as_posix()}")
     print(f"  [ ] Complete the runbook and workstream metadata: {spec.runbook_path.as_posix()} {spec.workstream_path.as_posix()}")
+    if spec.requires_oidc:
+        print(
+            f"  [ ] KEYCLOAK: add task blocks to keycloak_runtime/tasks/main.yml — "
+            f"defaults stub was scaffolded automatically (search for '# BEGIN SERVICE: {spec.service_id}')"
+        )
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -989,6 +1114,9 @@ def main(argv: list[str] | None = None) -> int:
         update_slo_catalog(repo_paths.slo_catalog_path, spec)
         update_data_catalog(repo_paths.data_catalog_path, spec)
         update_service_completeness(repo_paths.service_completeness_path, spec)
+        update_platform_services_registry(repo_paths.platform_services_path, spec)
+        update_uptime_kuma_monitors(repo_paths.uptime_kuma_monitors_path, spec)
+        update_keycloak_role_defaults(repo_paths.keycloak_runtime_defaults_path, spec)
         write_placeholder_scan_receipt(repo_paths.root, spec)
         print_checklist(spec)
     except ValueError as exc:
