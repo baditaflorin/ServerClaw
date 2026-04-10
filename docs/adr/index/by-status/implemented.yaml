@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 338
+total_adrs: 339
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6287,4 +6287,25 @@ adrs:
     filename: 0396-deterministic-service-decommissioning.md
     path: docs/adr/0396-deterministic-service-decommissioning.md
     implemented_in_repo_version: 0.178.90
+    implemented_on: '2026-04-10'
+  - adr: 0397
+    title: Remove Netdata (realtime) from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: monitoring
+    keywords:
+      - lifecycle
+      - decommissioning
+      - netdata
+      - realtime
+      - observability
+      - monitoring
+      - remove
+      - from
+      - platform
+    summary: Remove Netdata from the platform. The service is registered as realtime
+    filename: 0397-remove-netdata.md
+    path: docs/adr/0397-remove-netdata.md
+    implemented_in_repo_version: 0.178.91
     implemented_on: '2026-04-10'

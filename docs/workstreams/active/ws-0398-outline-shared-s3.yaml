@@ -1,0 +1,57 @@
+id: ws-0398-outline-shared-s3
+adr: '0398'
+title: "Outline Shared S3 Migration"
+description: |
+  Migrate Outline from embedded MinIO to shared platform MinIO using the Managed S3 Bucket Consumer Pattern.
+  Fixes wiki.lv3.org asset loading by exposing S3 via public gateway.
+  Establishes reusable pattern for all services needing S3 access.
+status: in_progress
+owner: claude
+branch: claude/ws-0398-outline-shared-s3
+worktree_path: .claude/worktrees/gallant-elgamal
+doc: docs/workstreams/ws-0398-outline-shared-s3.md
+depends_on:
+  - adr-0274-minio-as-s3-storage
+  - adr-0373-unified-service-defaults
+  - adr-0397-managed-s3-consumer-pattern
+  - adr-0398-outline-shared-s3-migration
+conflicts_with: []
+shared_surfaces:
+  - docs/workstreams/ws-0398-outline-shared-s3.md
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/outline_runtime/
+  - public_edge or nginx_edge_publication role (S3 gateway)
+ownership_manifest:
+  owned_surfaces:
+    - id: outline_migration
+      paths:
+        - docs/workstreams/ws-0398-outline-shared-s3.md
+        - collections/ansible_collections/lv3/platform/roles/outline_runtime/
+      mode: exclusive
+    - id: minio_consumer
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/minio_runtime/defaults/main.yml
+      mode: modify
+    - id: s3_gateway
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/public_edge/
+      mode: modify
+notes: |
+  - Phase 1: Register outline with minio_runtime as managed consumer
+    * Add minio_outline_bucket_name, access_key_id, secret_key files to defaults
+    * Add minio_outline_policy_document for bucket access
+  - Phase 2: Update outline_runtime to use shared MinIO
+    * Remove embedded MinIO from docker-compose.yml.j2
+    * Remove MinIO setup from tasks/main.yml
+    * Update S3 env vars to use public gateway URL
+    * Reference shared MinIO credentials from controller mirror
+  - Phase 3: Configure public S3 gateway in NGINX edge
+    * Add proxy rule for s3.lv3.org → docker-runtime:9000
+    * Enable TLS termination
+  - Phase 4: Verify convergence and wiki functionality
+    * minio_runtime converges, creates bucket and credentials
+    * outline_runtime converges without embedded minio
+    * wiki.lv3.org loads and assets are accessible
+    * File upload/download in wiki works
+ready_to_merge: false
+live_applied: false
