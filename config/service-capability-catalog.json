@@ -1064,7 +1064,6 @@
       "public_url": "https://chat.lv3.org",
       "subdomain": "chat.lv3.org",
       "exposure": "edge-published",
-      "uptime_monitor_name": "LibreChat Public",
       "health_probe_id": "librechat",
       "image_catalog_ids": [],
       "secret_catalog_ids": [],
