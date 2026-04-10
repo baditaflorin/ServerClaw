@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- NetBox infrastructure deployment converged successfully — preflight hang fixed (follow: false on find task), token provisioning retry timeout increased to 300s, verification tasks conditionalized on token definition, ops/password credentials provisioned to .local/netbox/
 - [adr-0404] Service lifecycle contract — BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7
 
 - [adr-0402] Remove JupyterHub (notebooks.lv3.org) — zero active users, maintenance overhead eliminated; jupyterhub_runtime role deleted, jupyterhub Keycloak OIDC client removed, 15 catalogs cleaned, ADR 0291 deprecated; postmortem documents 7 new ADR 0396 gaps (platform_services.yml orphaned blocks, keycloak shared role tasks, uptime kuma/workbench IA non-catalog JSONs)
@@ -72,10 +73,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.98 release notes](docs/release-notes/0.178.98.md)
+- [0.178.99 release notes](docs/release-notes/0.178.99.md)
 
 ## Previous Releases
 
+- [0.178.98 release notes](docs/release-notes/0.178.98.md)
 - [0.178.97 release notes](docs/release-notes/0.178.97.md)
 - [0.178.96 release notes](docs/release-notes/0.178.96.md)
 - [0.178.95 release notes](docs/release-notes/0.178.95.md)
@@ -87,9 +89,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.89 release notes](docs/release-notes/0.178.89.md)
 - [0.178.88 release notes](docs/release-notes/0.178.88.md)
 - [0.178.87 release notes](docs/release-notes/0.178.87.md)
-- [0.178.86 release notes](docs/release-notes/0.178.86.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (433 releases)](docs/release-notes/index/2026.md)
+- [2026 (434 releases)](docs/release-notes/index/2026.md)
