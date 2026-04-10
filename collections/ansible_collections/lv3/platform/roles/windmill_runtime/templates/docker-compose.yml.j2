@@ -17,8 +17,6 @@ services:
           test -s {{ windmill_env_file }}
           && grep '^LV3_WINDMILL_BASE_URL=' {{ windmill_env_file }}
           && grep '^LV3_WINDMILL_TOKEN=' {{ windmill_env_file }}
-          && grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' {{ windmill_env_file }}
-          && grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' {{ windmill_env_file }}
       interval: 10s
       timeout: 3s
       retries: 12
