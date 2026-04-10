@@ -55,23 +55,18 @@ SERVICE_ICONS = {
     "windmill": "si-windmill",
 }
 
-BOOKMARK_GROUPS = [
-    {
-        "Quick Actions": [
-            {"name": "Ops Portal", "abbr": "OP", "href": "https://ops.localhost"},
-            {"name": "Grafana", "abbr": "GR", "href": "https://grafana.localhost"},
-            {"name": "Status", "abbr": "ST", "href": "https://status.localhost"},
-            {"name": "Docs", "abbr": "DO", "href": "https://docs.localhost"},
-        ]
-    },
-    {
-        "Control Plane": [
-            {"name": "Proxmox", "abbr": "PV", "href": "https://proxmox.localhost"},
-            {"name": "Windmill", "abbr": "WM", "href": "http://100.118.189.95:8005"},
-            {"name": "NetBox", "abbr": "NB", "href": "http://100.118.189.95:8004"},
-            {"name": "Portainer", "abbr": "PT", "href": "https://100.118.189.95:9444"},
-        ]
-    },
+QUICK_ACTION_SERVICE_IDS = [
+    ("ops_portal", "Ops Portal", "OP"),
+    ("grafana", "Grafana", "GR"),
+    ("status_page", "Status", "ST"),
+    ("docs_portal", "Docs", "DO"),
+]
+
+CONTROL_PLANE_SERVICE_IDS = [
+    ("proxmox_ui", "Proxmox", "PV"),
+    ("windmill", "Windmill", "WM"),
+    ("netbox", "NetBox", "NB"),
+    ("portainer", "Portainer", "PT"),
 ]
 
 
@@ -175,25 +170,36 @@ def build_services_payload() -> list[dict[str, list[dict[str, Any]]]]:
     return payload
 
 
+def _resolve_bookmark_group(
+    group_ids: list[tuple[str, str, str]],
+    service_index: dict[str, dict[str, Any]],
+) -> list[dict[str, list[dict[str, str]]]]:
+    bookmarks: list[dict[str, list[dict[str, str]]]] = []
+    for service_id, label, abbr in group_ids:
+        svc = service_index.get(service_id)
+        if not svc:
+            continue
+        try:
+            href = candidate_service_url(svc)
+        except ValueError:
+            continue
+        bookmarks.append({label: [{"abbr": abbr, "href": href}]})
+    return bookmarks
+
+
 def build_bookmarks_payload() -> list[dict[str, list[dict[str, str]]]]:
+    catalog = load_service_catalog()
+    service_index = {svc["id"]: svc for svc in catalog["services"]}
     payload: list[dict[str, list[dict[str, str]]]] = []
-    for group in BOOKMARK_GROUPS:
-        group_name, bookmarks = next(iter(group.items()))
-        payload.append(
-            {
-                group_name: [
-                    {
-                        bookmark["name"]: [
-                            {
-                                "abbr": bookmark["abbr"],
-                                "href": bookmark["href"],
-                            }
-                        ]
-                    }
-                    for bookmark in bookmarks
-                ]
-            }
-        )
+
+    quick_actions = _resolve_bookmark_group(QUICK_ACTION_SERVICE_IDS, service_index)
+    if quick_actions:
+        payload.append({"Quick Actions": quick_actions})
+
+    control_plane = _resolve_bookmark_group(CONTROL_PLANE_SERVICE_IDS, service_index)
+    if control_plane:
+        payload.append({"Control Plane": control_plane})
+
     return payload
 
 

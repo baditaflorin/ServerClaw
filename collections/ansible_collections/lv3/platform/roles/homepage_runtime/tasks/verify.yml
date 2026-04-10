@@ -4,7 +4,6 @@
 - name: Build Homepage verify expected strings
   ansible.builtin.set_fact:
     _homepage_verify_home_url: "https://home.{{ platform_domain }}"
-    _homepage_verify_ops_url: "https://ops.{{ platform_domain }}"
 
 - name: Verify the Homepage runtime health
   ansible.builtin.include_role:
@@ -25,5 +24,5 @@
       - url: "{{ homepage_internal_url }}/api/bookmarks"
         assertions:
           - "'Ops Portal' in common_verify_extra_response.content"
-          - "_homepage_verify_ops_url in common_verify_extra_response.content"
+          - "'Grafana' in common_verify_extra_response.content"
         assertion_msg: "Homepage started, but the repo-managed bookmarks catalog was not rendered."
