@@ -24,4 +24,5 @@
   delay: 5
   until: netbox_verify_api_token.status == 200
   changed_when: false
+  when: netbox_superuser_api_token is defined
   no_log: true
