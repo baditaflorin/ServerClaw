@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [adr-0390] Remove Open WebUI from the platform — containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged
 - fix: Add missing keycloak service variables to playbook — ADR 0373 derive_service_defaults compatibility
 - ADR 0369 implementation: validation_toolkit complete — 100% adoption across 57 scripts, eliminated 1500+ lines of copy-pasted validation code, added pre-commit enforcement
 - Complete IoC compliance: templatize remaining hardcoded domains in 13 collection playbooks (subdomain_fqdn, fail_msg, URLs), 4 role defaults (operator name), 5 top-level playbooks (developer paths), and 2 mail playbooks (operator email); strengthen IoC regression test with TestNoHardcodedPaths class (4 new checks); zero operator-specific values remain in deployable Ansible code
@@ -58,10 +59,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.84 release notes](docs/release-notes/0.178.84.md)
+- [0.178.85 release notes](docs/release-notes/0.178.85.md)
 
 ## Previous Releases
 
+- [0.178.84 release notes](docs/release-notes/0.178.84.md)
 - [0.178.83 release notes](docs/release-notes/0.178.83.md)
 - [0.178.82 release notes](docs/release-notes/0.178.82.md)
 - [0.178.81 release notes](docs/release-notes/0.178.81.md)
@@ -73,9 +75,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.75 release notes](docs/release-notes/0.178.75.md)
 - [0.178.74 release notes](docs/release-notes/0.178.74.md)
 - [0.178.73 release notes](docs/release-notes/0.178.73.md)
-- [0.178.72 release notes](docs/release-notes/0.178.72.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (419 releases)](docs/release-notes/index/2026.md)
+- [2026 (420 releases)](docs/release-notes/index/2026.md)

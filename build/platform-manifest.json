@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.84",
+  "repo_version": "0.178.85",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T03:51:23Z",
-  "next_refresh_at": "2026-04-10T04:51:23Z",
+  "generated_at": "2026-04-10T03:53:16Z",
+  "next_refresh_at": "2026-04-10T04:53:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6356,10 +6356,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.83",
+    "last_version": "0.178.84",
     "deployed_at": "2026-04-10",
-    "summary": "fix: Add missing keycloak service variables to playbook \u2014 ADR 0373 derive_service_defaults compatibility ADR 0369 implementation: validation_toolkit complete \u2014 100% adoption across 57 scripts, eliminated 1500+ lines of copy-pasted validation code, added pre-commit enforcement",
-    "release_notes_url": "docs/release-notes/0.178.84.md"
+    "summary": "[adr-0390] Remove Open WebUI from the platform \u2014 containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged fix: Add missing keycloak service variables to playbook \u2014 ADR 0373 derive_service_defaults compatibility",
+    "release_notes_url": "docs/release-notes/0.178.85.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
