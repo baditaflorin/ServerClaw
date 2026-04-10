@@ -78,8 +78,6 @@ keycloak_grafana_client_id: grafana-oauth
 keycloak_grafana_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/grafana-client-secret.txt"
 keycloak_ops_portal_client_id: ops-portal-oauth
 keycloak_ops_portal_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/ops-portal-client-secret.txt"
-keycloak_open_webui_client_id: open-webui
-keycloak_open_webui_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/open-webui-client-secret.txt"
 keycloak_gitea_client_id: gitea-oauth
 keycloak_gitea_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/gitea-client-secret.txt"
 keycloak_agent_client_id: lv3-agent-hub
@@ -168,14 +166,10 @@ keycloak_paperless_root_url: https://paperless.{{ platform_domain }}
 keycloak_serverclaw_root_url: https://chat.{{ platform_domain }}
 keycloak_gitea_root_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('gitea', 'public') }}"
 keycloak_ops_portal_root_url: https://ops.{{ platform_domain }}
-keycloak_open_webui_root_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('open_webui', 'controller') }}"
 keycloak_ops_portal_post_logout_redirect_uris:
   - "{{ keycloak_ops_portal_root_url }}/"
   - "{{ keycloak_ops_portal_root_url }}"
   - "{{ keycloak_session_authority.shared_logged_out_url }}"
-keycloak_open_webui_post_logout_redirect_uris:
-  - "{{ keycloak_open_webui_root_url }}/"
-  - "{{ keycloak_open_webui_root_url }}"
 keycloak_grafana_post_logout_redirect_uris:
   - "{{ keycloak_grafana_root_url }}/login"
   - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"

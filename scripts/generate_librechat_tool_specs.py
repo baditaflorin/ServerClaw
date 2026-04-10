@@ -24,7 +24,7 @@ OUTPUT_DIR = REPO_ROOT / "build" / "librechat-tools"
 TOOL_PACKS = {
     "ops": {
         "title": "ServerClaw Ops — Infrastructure Observability",
-        "description": "Platform status, container listing, logs, deployment history, and maintenance windows.",
+        "description": "Platform status, container listing, logs, deployment history, maintenance windows, host command execution, and disk usage.",
         "tools": [
             "get-platform-status",
             "list-containers",
@@ -33,6 +33,8 @@ TOOL_PACKS = {
             "get-deployment-history",
             "get-maintenance-windows",
             "query-platform-context",
+            "execute-host-command",
+            "get-disk-usage",
         ],
     },
     "tasks": {
@@ -57,6 +59,7 @@ TOOL_PACKS = {
             "create-outline-document",
             "update-outline-document",
             "upsert-outline-document",
+            "delete-outline-document",
         ],
     },
     "admin": {

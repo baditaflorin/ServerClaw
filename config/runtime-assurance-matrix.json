@@ -133,10 +133,6 @@
       "profile": "private_browser_surface",
       "notes": "ntopng exposes a private browser UI."
     },
-    "open_webui": {
-      "profile": "private_browser_surface",
-      "notes": "Open WebUI is a private browser workbench."
-    },
     "portainer": {
       "profile": "private_browser_surface",
       "notes": "Portainer is a private browser runtime surface."

@@ -26,7 +26,7 @@ falco_runtime_rule_sources:
     dest: "{{ falco_runtime_rules_dir }}/50-lv3-platform-overrides.yaml"
   - src: "{{ falco_runtime_repo_root }}/config/falco/suppressions.yaml"
     dest: "{{ falco_runtime_rules_dir }}/60-lv3-suppressions.yaml"
-falco_runtime_bridge_host_inventory_name: docker-runtime-lv3
+falco_runtime_bridge_host_inventory_name: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 falco_runtime_bridge_host: >-
   {{
     '127.0.0.1'

@@ -320,11 +320,8 @@ playbooks:
     shared_surfaces:
       - service:ops-portal
       - inventory/host_vars/proxmox_florin.yml
-  playbooks/open-webui.yml:
-    playbook_id: open-webui
     mutation_scope: platform
     shared_surfaces:
-      - service:open-webui
       - inventory/host_vars/proxmox_florin.yml
   playbooks/plausible.yml:
     playbook_id: plausible

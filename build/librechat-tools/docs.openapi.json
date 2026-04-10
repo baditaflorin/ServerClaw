@@ -480,6 +480,53 @@
           }
         }
       }
+    },
+    "/v1/dify-tools/delete-outline-document": {
+      "post": {
+        "operationId": "delete-outline-document",
+        "summary": "Delete Outline Document",
+        "description": "Permanently delete an Outline document by document ID. This action is irreversible. Requires human approval.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "document_id": {
+                    "type": "string",
+                    "description": "UUID of the document to delete"
+                  }
+                },
+                "required": [
+                  "document_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deleted": {
+                      "type": "boolean"
+                    },
+                    "document_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

@@ -2460,45 +2460,6 @@
         "timeout_seconds": 1800
       }
     },
-    "converge-open-webui": {
-      "description": "Converge the private Open WebUI runtime, its dedicated Keycloak OIDC client, the host-side proxy, and the retained break-glass admin state.",
-      "workflow_id": "converge-open-webui",
-      "scope": "host_and_guest",
-      "approval_policy": "sensitive_live_change",
-      "inputs": [
-        {
-          "name": "bootstrap_ssh_private_key",
-          "kind": "controller_secret",
-          "required": true,
-          "source": "config/controller-local-secrets.json",
-          "description": "Controller-side SSH key used through the Proxmox jump path."
-        }
-      ],
-      "expected_preconditions": [
-        "make preflight WORKFLOW=converge-open-webui passes",
-        "make validate passes before the apply",
-        "Approved model connector policy and private-only access expectations are reviewed before rollout",
-        "The shared Keycloak runtime is already deployed and reachable before replaying the dedicated Open WebUI client step"
-      ],
-      "evidence": {
-        "live_apply_receipt_required": true,
-        "notes": "Record Keycloak client reconciliation, runtime health, host-side proxy reachability, generated bootstrap secrets, OIDC redirect verification, and break-glass admin sign-in verification."
-      },
-      "failure_guidance": {
-        "stop_conditions": [
-          "Stop if Keycloak client reconciliation, runtime deployment, host-side proxy setup, OIDC redirect verification, or admin bootstrap verification fails.",
-          "Stop if the service becomes reachable without the intended private-only operator boundary."
-        ],
-        "rollback_guidance": [
-          "Restore the last known-good Open WebUI runtime, Keycloak client contract, and proxy state before retrying.",
-          "Do not leave ad hoc provider configuration or manual UI drift behind after a failed rollout."
-        ]
-      },
-      "execution": {
-        "profile": "docker_runtime_systemd_make",
-        "timeout_seconds": 1500
-      }
-    },
     "converge-openbao": {
       "description": "Converge the private OpenBao runtime, seeded auth identities, Transit, and PostgreSQL dynamic-credential integration.",
       "workflow_id": "converge-openbao",

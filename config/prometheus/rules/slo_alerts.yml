@@ -836,43 +836,6 @@ groups:
           summary: nginx-edge-availability has less than 10% error budget remaining
           description: The edge reverse proxy remains reachable for published services.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_open_webui_availability
-        expr: (slo:open_webui_availability:error_rate_5m > (14 * 0.010000)) and (slo:open_webui_availability:error_rate_1h
-          > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: open_webui
-          slo_id: open-webui-availability
-          indicator: availability
-        annotations:
-          summary: open-webui-availability is burning its error budget at 14x
-          description: Open WebUI remains reachable on the private runtime network.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_open_webui_availability
-        expr: slo:open_webui_availability:error_rate_1h > (3 * 0.010000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: open_webui
-          slo_id: open-webui-availability
-          indicator: availability
-        annotations:
-          summary: open-webui-availability is burning its error budget at 3x
-          description: Open WebUI remains reachable on the private runtime network.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_open_webui_availability
-        expr: slo:open_webui_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: open_webui
-          slo_id: open-webui-availability
-          indicator: availability
-        annotations:
-          summary: open-webui-availability has less than 10% error budget remaining
-          description: Open WebUI remains reachable on the private runtime network.
-          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_one_api_availability
         expr: (slo:one_api_availability:error_rate_5m > (14 * 0.010000)) and (slo:one_api_availability:error_rate_1h
           > (14 * 0.010000))

@@ -24,7 +24,7 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-04-05
-netdata_runtime_parent_inventory_host: monitoring-lv3
+netdata_runtime_parent_inventory_host: "{{ groups['monitoring'][0] | default('monitoring-lv3') }}"
 netdata_runtime_child_inventory_hosts: >-
   {{ (groups['lv3_guests'] + groups['proxmox_hosts'])
      | unique
@@ -40,7 +40,7 @@ netdata_runtime_state_dir: /etc/lv3/netdata
 netdata_runtime_parent_bind_to: "0.0.0.0:{{ netdata_runtime_parent_web_port }}"
 netdata_runtime_child_bind_to: "127.0.0.1:{{ netdata_runtime_parent_web_port }}"
 netdata_runtime_stream_allow_from:
-  - 10.10.10.*
+  - "{{ platform_guest_network_wildcard }}"
   - 100.64.0.1
   - 127.0.0.1
 netdata_runtime_parent_retention_time: 1d

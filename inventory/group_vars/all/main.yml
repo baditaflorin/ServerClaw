@@ -238,17 +238,6 @@ one_api_fallback_chat_model_alias: gpt-4.1-mini
 one_api_embedding_model_alias: text-embedding-3-small
 searxng_version: 2026.3.24-02ba38786
 searxng_image: "{{ container_image_catalog.images.searxng_runtime.ref }}"
-open_webui_version: 0.8.9
-open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
-open_webui_controller_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
-open_webui_enable_openai_api: true
-open_webui_enable_ollama_api: false
-open_webui_ollama_base_url: "http://host.docker.internal:11434"
-open_webui_enable_web_search: true
-open_webui_searxng_query_url: "http://host.docker.internal:8881/search?q=<query>&format=json"
-open_webui_default_models: "serverclaw:latest"
-open_webui_default_pinned_models: "serverclaw:latest"
-serverclaw_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 serverclaw_enable_oidc: true
 serverclaw_enable_login_form: true
 serverclaw_enable_password_auth: true

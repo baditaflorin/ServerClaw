@@ -243,15 +243,12 @@
           "notes": "This is the sanctioned agent-observability API surface for trace ingestion and read-back verification."
         },
         {
-          "id": "open-webui-operator-workbench",
           "kind": "service_api",
           "endpoint": "http://100.64.0.1:8008",
           "auth": "Repo-managed bootstrap admin password today; future OIDC through Keycloak once ADR 0056 is live.",
           "service_refs": [
-            "open_webui"
           ],
           "workflow_refs": [
-            "converge-open-webui"
           ],
           "notes": "This is the private operator-and-agent workbench. Keep model connectors repo-authoritative and do not publish it through the public edge."
         },

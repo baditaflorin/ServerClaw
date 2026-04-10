@@ -14,7 +14,6 @@ service_tiers:
   netbox: high
   nginx_edge: high
   ntopng: medium
-  open_webui: medium
   openbao: critical
   ops_portal: medium
   platform_context_api: medium
@@ -39,7 +38,6 @@ downstream_count_fallbacks:
   netbox: 4
   nginx_edge: 5
   ntopng: 1
-  open_webui: 1
   openbao: 7
   ops_portal: 1
   platform_context_api: 2

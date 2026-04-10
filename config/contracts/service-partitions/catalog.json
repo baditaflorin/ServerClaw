@@ -76,7 +76,6 @@
                 "jupyterhub",
                 "ollama",
                 "one_api",
-                "open_webui",
                 "piper",
                 "platform_context_api",
                 "tika",

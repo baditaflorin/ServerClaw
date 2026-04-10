@@ -31,7 +31,8 @@ control_plane_recovery_runtime_openbao_role_id_file: "{{ control_plane_recovery_
 control_plane_recovery_runtime_openbao_secret_id_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/secret_id"
 control_plane_recovery_runtime_backup_target_host: "{{ hostvars[playbook_execution_host_patterns.backup[playbook_execution_env]].ansible_host }}"
 control_plane_recovery_runtime_backup_target_user: lv3-control-plane-backup
-control_plane_recovery_runtime_backup_target_dir: /srv/control-plane-recovery/runtime/docker-runtime-lv3
+control_plane_recovery_runtime_backup_target_dir: >-
+  /srv/control-plane-recovery/runtime/{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}
 control_plane_recovery_runtime_backup_target_controller_dir: /srv/control-plane-recovery/controller
 control_plane_recovery_controller_repo_common_root: >-
   {{

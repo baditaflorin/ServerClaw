@@ -88,7 +88,6 @@ sso_clients:
     - profile
     - email
     service: langfuse
-  open-webui:
     provider: keycloak
     public_client: false
     redirect_uris:
@@ -97,7 +96,6 @@ sso_clients:
     - openid
     - profile
     - email
-    service: open_webui
   ops-portal-oauth:
     provider: keycloak
     public_client: false

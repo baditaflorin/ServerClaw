@@ -59,8 +59,6 @@ mail_platform_brevo_sender_name: "{{ platform_operator_name }} Mail Bridge"
 # ---------------------------------------------------------------------------
 # Open WebUI
 # ---------------------------------------------------------------------------
-open_webui_admin_email: "{{ platform_operator_email }}"
-open_webui_admin_name: "{{ platform_operator_name }}"
 
 # ---------------------------------------------------------------------------
 # ServerClaw (Open WebUI fork)
@@ -71,7 +69,7 @@ serverclaw_public_url: "https://chat.{{ platform_domain }}"
 serverclaw_webui_name: ServerClaw
 serverclaw_oidc_provider_url: "{{ keycloak_oidc_discovery_url }}"
 serverclaw_extra_hosts:
-  - "sso.{{ platform_domain }}:10.10.10.10"
+  - "sso.{{ platform_domain }}:{{ hostvars[platform_topology_host].platform_guest_catalog.by_name[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ipv4 }}"
 
 # ---------------------------------------------------------------------------
 # SearXNG
@@ -79,11 +77,19 @@ serverclaw_extra_hosts:
 searxng_controller_url: "http://search.{{ platform_domain }}"
 
 # ---------------------------------------------------------------------------
+# Guest network identity
+# ---------------------------------------------------------------------------
+platform_guest_network_cidr: 10.10.10.0/24
+platform_guest_network_prefix: "10.10.10."
+platform_guest_network_wildcard: "10.10.10.*"
+platform_tailscale_network_cidr: 100.64.0.0/10
+
+# ---------------------------------------------------------------------------
 # Network access control (deployment-specific trusted sources)
 # ---------------------------------------------------------------------------
 proxmox_management_allowed_sources:
-  - 100.64.0.0/10
-  - 10.10.10.0/24
+  - "{{ platform_tailscale_network_cidr }}"
+  - "{{ platform_guest_network_cidr }}"
   - 90.95.35.115/32
 
 # ---------------------------------------------------------------------------

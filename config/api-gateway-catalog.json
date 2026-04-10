@@ -147,10 +147,8 @@
       "healthcheck_path": "/api/"
     },
     {
-      "id": "open_webui",
       "name": "Open WebUI",
       "upstream": "http://10.10.10.20:8088",
-      "gateway_prefix": "/v1/open-webui",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,

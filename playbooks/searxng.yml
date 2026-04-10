@@ -8,7 +8,7 @@
     - role: lv3.platform.proxmox_tailscale_proxy
     - role: lv3.platform.proxmox_security
 
-- name: Converge SearXNG and refresh Open WebUI search settings on the Docker runtime VM
+- name: Converge SearXNG on the Docker runtime VM
   hosts: docker-runtime-lv3
   become: true
   gather_facts: true
@@ -24,7 +24,6 @@
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.searxng_runtime
-    - role: lv3.platform.open_webui_runtime
 
 - name: Converge the SearXNG tailnet DNS record
   hosts: localhost

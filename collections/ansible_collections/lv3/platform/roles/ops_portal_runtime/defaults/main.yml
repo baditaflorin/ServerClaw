@@ -53,7 +53,7 @@ ops_portal_network_mode: host
 ops_portal_bind_address: 0.0.0.0
 ops_portal_container_port: "{{ ops_portal_internal_port }}"
 ops_portal_verify_address: "{{ ansible_host | default('127.0.0.1') }}"
-ops_portal_gateway_substrate_owner_vm: runtime-control-lv3
+ops_portal_gateway_substrate_owner_vm: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
 ops_portal_gateway_substrate_port: 9080
 ops_portal_gateway_substrate_path: /api-gateway
 ops_portal_gateway_substrate_url: >-

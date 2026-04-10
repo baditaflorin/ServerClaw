@@ -32,7 +32,6 @@ platform_tls_certs:
     wildcard: false
   chat.{{ platform_domain }}:
     cert_validity_days: 90
-    service: open_webui
     source: letsencrypt
     wildcard: false
   ci.{{ platform_domain }}:

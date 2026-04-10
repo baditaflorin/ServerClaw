@@ -38,7 +38,6 @@ lanes:
       - netbox
       - ntfy
       - ollama
-      - open_webui
       - ops_portal
       - platform_context_api
       - portainer

@@ -47,7 +47,7 @@ coolify_api_allowed_ips:
   - "{{ hostvars[platform_topology_host].ansible_host }}"
 coolify_verify_ssl: false
 
-coolify_server_name: coolify-lv3
+coolify_server_name: "{{ inventory_hostname }}"
 coolify_server_description: Repo-managed local deployment target for LV3 application deploys.
 coolify_server_user: root
 coolify_server_host: host.docker.internal

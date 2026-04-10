@@ -727,7 +727,6 @@ class PlatformContextService:
             "platform_version": stack.get("platform_version"),
             "checked_at": checked_at,
             "proxmox_version": observed.get("proxmox", {}).get("version"),
-            "open_webui_url": observed.get("open_webui", {}).get("host_tailscale_proxy_url"),
             "windmill_url": observed.get("windmill", {}).get("host_tailscale_proxy_url"),
             "netbox_url": observed.get("netbox", {}).get("host_tailscale_proxy_url"),
         }

@@ -6,25 +6,17 @@ The entire service removal lifecycle is CPU-only. No AI agent required.
 Usage (full lifecycle):
 
     # 1. Dry-run: inspect the plan as JSON
-    python3 scripts/decommission_service.py --service open_webui
 
     # 2. Generate the removal ADR (templated from the dry-run, not AI-written)
-    python3 scripts/decommission_service.py --service open_webui \
         --generate-adr \
         --reason "Replaced by Dify for LLM interaction" \
         --replacement "Dify (ADR 0197)"
 
     # 3. Code purge (delete files, clean catalogs, regenerate artifacts)
-    python3 scripts/decommission_service.py --service open_webui \
-        --purge-code --confirm open_webui
 
     # 4. Runtime teardown (databases, secrets, OIDC — requires env vars)
-    python3 scripts/decommission_service.py --service open_webui \
-        --execute --confirm open_webui
 
     # 5. All at once
-    python3 scripts/decommission_service.py --service open_webui \
-        --generate-adr --purge-code --execute --confirm open_webui
 """
 
 from __future__ import annotations
@@ -265,15 +257,12 @@ def execute_plan(
 
 def _service_name_variants(service_id: str) -> list[str]:
     """Return all naming variants for grep patterns."""
-    underscore = service_id  # e.g. open_webui
-    hyphen = service_id.replace("_", "-")  # e.g. open-webui
-    joined = service_id.replace("_", "")  # e.g. openwebui
     return sorted(set([underscore, hyphen, joined]))
 
 
 def _grep_files(patterns: list[str], search_dirs: list[Path], *, exclude_dirs: list[str] | None = None) -> list[Path]:
     """Find files matching any pattern using ripgrep (fast) or grep fallback."""
-    exclude_dirs = exclude_dirs or [".git", "receipts", "docs/release-notes"]
+    exclude_dirs = exclude_dirs or [".git", "receipts", "docs/release-notes", "__pycache__"]
     combined_pattern = "|".join(re.escape(p) for p in patterns)
     cmd = ["grep", "-rl", "-E", combined_pattern]
     for exc in exclude_dirs:
@@ -379,7 +368,10 @@ def _remove_yaml_block(path: Path, service_id: str) -> bool:
     """Remove a top-level YAML key matching the service_id (simple line-based removal)."""
     if not path.is_file():
         return False
-    lines = path.read_text().splitlines(keepends=True)
+    try:
+        lines = path.read_text().splitlines(keepends=True)
+    except (UnicodeDecodeError, ValueError):
+        return False  # skip binary files
     variants = _service_name_variants(service_id)
     new_lines: list[str] = []
     skip_block = False
@@ -418,8 +410,11 @@ def _remove_line_references(path: Path, service_id: str) -> bool:
     """Remove individual lines referencing the service from a file."""
     if not path.is_file():
         return False
-    variants = _service_name_variants(service_id)
-    lines = path.read_text().splitlines(keepends=True)
+    try:
+        variants = _service_name_variants(service_id)
+        lines = path.read_text().splitlines(keepends=True)
+    except (UnicodeDecodeError, ValueError):
+        return False  # skip binary files
     filtered = [line for line in lines if not any(v in line for v in variants)]
     if len(filtered) == len(lines):
         return False

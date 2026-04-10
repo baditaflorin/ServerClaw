@@ -8,7 +8,6 @@ ROLE_RUNTIME_PATHS = {
     "keycloak_runtime": "/run/lv3-secrets/keycloak/runtime.env",
     "mattermost_runtime": "/run/lv3-secrets/mattermost/runtime.env",
     "matrix_synapse_runtime": "/run/lv3-secrets/matrix-synapse/runtime.env",
-    "open_webui_runtime": "/run/lv3-secrets/open-webui/runtime.env",
     "netbox_runtime": "/run/lv3-secrets/netbox/runtime.env",
     "plane_runtime": "/run/lv3-secrets/plane/runtime.env",
     "rag_context_runtime": "/run/lv3-secrets/platform-context/runtime.env",

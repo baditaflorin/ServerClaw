@@ -390,8 +390,6 @@
       "adr": "0284"
     },
     {
-      "id": "open_webui",
-      "service": "open_webui",
       "name": "Open WebUI",
       "vm": "docker-runtime-lv3",
       "tier": 3,
@@ -1254,31 +1252,26 @@
       "description": "Runtime-targeted batch jobs and internal helper workloads depend on the docker-runtime Nomad client remaining available for placement."
     },
     {
-      "from": "open_webui",
       "to": "keycloak",
       "type": "soft",
       "description": "Open WebUI can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
     },
     {
-      "from": "open_webui",
       "to": "one_api",
       "type": "hard",
       "description": "Open WebUI uses the private One-API runtime for repo-managed local model access."
     },
     {
-      "from": "open_webui",
       "to": "ollama",
       "type": "hard",
       "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
     },
     {
-      "from": "open_webui",
       "to": "openbao",
       "type": "startup_only",
       "description": "Open WebUI consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
     },
     {
-      "from": "open_webui",
       "to": "searxng",
       "type": "soft",
       "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."

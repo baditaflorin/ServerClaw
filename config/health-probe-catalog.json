@@ -2130,64 +2130,6 @@
         "reason": "Piper is intentionally private-only and is verified through the repo-managed health, voice-catalog, and WAV synthesis probes instead of a public monitor."
       }
     },
-    "open_webui": {
-      "service_name": "open-webui",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "open_webui_runtime",
-      "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Open WebUI startup completes once the repo-managed admin sign-in path succeeds locally.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
-        "method": "POST",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The Open WebUI root page responds on the local listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8088",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The repo-managed Open WebUI admin account can sign in successfully.",
-        "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
-        "method": "POST",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Open WebUI Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8088",
-          "description": "Private Open WebUI surface on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
     "litellm": {
       "service_name": "litellm",
       "owning_vm": "docker-runtime-lv3",

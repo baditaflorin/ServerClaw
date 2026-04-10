@@ -7,8 +7,6 @@ would otherwise require an AI agent session.
 ADR 0391: CPU-Only Operational Automation
 
 Usage:
-    python3 scripts/platform_ops.py references --service open_webui
-    python3 scripts/platform_ops.py impact --service open_webui
     python3 scripts/platform_ops.py converge-plan --since main
     python3 scripts/platform_ops.py converge-plan --changed-files inventory/group_vars/all/identity.yml
     python3 scripts/platform_ops.py completeness --failing

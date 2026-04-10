@@ -1,6 +1,6 @@
 # ADR 0377: Open WebUI Platform Knowledge Integration
 
-- Status: Proposed
+- Status: Deprecated
 - Implementation Status: Not Implemented
 - Date: 2026-04-06
 

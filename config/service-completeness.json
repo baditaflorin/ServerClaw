@@ -493,302 +493,298 @@
       "alert_rule_file": "config/alertmanager/rules/one-api.yml",
       "suppressed_checks": {}
     },
-    "open_webui": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service",
-      "dashboard_file": "config/grafana/dashboards/open-webui.json",
-      "alert_rule_file": "config/alertmanager/rules/open-webui.yml",
-      "suppressed_checks": {}
-    },
-    "openbao": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
-    },
-    "openfga": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "dashboard_file": "config/grafana/dashboards/openfga.json",
-      "alert_rule_file": "config/alertmanager/rules/openfga.yml",
-      "suppressed_checks": {}
-    },
-    "ops_portal": {
-      "service_type": "nginx-plugin",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
-    },
-    "outline": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "dashboard_file": "config/grafana/dashboards/outline.json",
-      "alert_rule_file": "config/alertmanager/rules/outline.yml",
-      "keycloak_client_generated": true,
-      "suppressed_checks": {}
-    },
-    "paperless": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
-      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
-      "keycloak_client_generated": true,
-      "suppressed_checks": {}
-    },
-    "piper": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
-      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
-      "suppressed_checks": {
-        "api_gateway": "2026-09-23"
-      }
-    },
-    "plane": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true
-    },
-    "platform_context_api": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service",
-      "suppressed_checks": {
-        "dependency_health_gate": "2026-05-15"
-      }
-    },
-    "plausible": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppressed_checks": {
-        "alert_rules": "2026-09-30",
-        "api_gateway": "2026-09-30",
-        "grafana_dashboard": "2026-09-30"
-      }
-    },
-    "portainer": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
-    },
-    "postgres": {
-      "service_type": "vm-service",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
-    },
-    "proxmox_ui": {
-      "service_type": "vm-service",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
-    },
-    "realtime": {
-      "service_type": "vm-service",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
-      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml"
-    },
-    "redpanda": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppressed_checks": {
-        "api_gateway": "2026-09-23",
-        "grafana_dashboard": "2026-09-23",
-        "slo_definition": "2026-09-23",
-        "alert_rules": "2026-09-23"
-      }
-    },
-    "repowise": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "suppressed_checks": {
-        "grafana_dashboard": "2027-01-01",
-        "alert_rules": "2027-01-01"
-      }
-    },
-    "searxng": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
-    },
-    "semaphore": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true
-    },
-    "serverclaw": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
-      "dashboard_file": "config/grafana/dashboards/serverclaw.json",
-      "alert_rule_file": "config/alertmanager/rules/serverclaw.yml",
-      "suppressed_checks": {}
-    },
-    "status_page": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
-    },
-    "step_ca": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
-    },
-    "superset": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
-      "suppressed_checks": {
-        "api_gateway": "2026-09-30",
-        "alert_rules": "2026-09-30",
-        "grafana_dashboard": "2026-09-30"
-      }
-    },
-    "temporal": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppressed_checks": {
-        "api_gateway": "2026-09-30",
-        "grafana_dashboard": "2026-09-30",
-        "slo_definition": "2026-09-30",
-        "alert_rules": "2026-09-30"
-      }
-    },
-    "tesseract_ocr": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
-      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
-      "suppressed_checks": {
-        "api_gateway": "2026-09-23"
-      }
-    },
-    "tika": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/tika.json",
-      "alert_rule_file": "config/alertmanager/rules/tika.yml",
-      "suppressed_checks": {
-        "api_gateway": "2026-09-23"
-      }
-    },
-    "typesense": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "dashboard_file": "config/grafana/dashboards/typesense.json",
-      "alert_rule_file": "config/alertmanager/rules/typesense.yml",
-      "suppressed_checks": {}
-    },
-    "uptime_kuma": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
-    },
-    "vaultwarden": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/vaultwarden.json",
-      "alert_rule_file": "config/alertmanager/rules/vaultwarden.yml",
-      "suppressed_checks": {}
-    },
-    "windmill": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
-    },
-    "woodpecker": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppressed_checks": {
-        "grafana_dashboard": "2026-09-23",
-        "alert_rules": "2026-09-23"
-      }
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": true,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service",
+    "suppressed_checks": {}
+  },
+  "openbao": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service"
+  },
+  "openfga": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "dashboard_file": "config/grafana/dashboards/openfga.json",
+    "alert_rule_file": "config/alertmanager/rules/openfga.yml",
+    "suppressed_checks": {}
+  },
+  "ops_portal": {
+    "service_type": "nginx-plugin",
+    "requires_subdomain": true,
+    "requires_oidc": true,
+    "requires_secrets": false,
+    "requires_compose_secrets": false,
+    "suppression_preset": "legacy-service"
+  },
+  "outline": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": true,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "dashboard_file": "config/grafana/dashboards/outline.json",
+    "alert_rule_file": "config/alertmanager/rules/outline.yml",
+    "keycloak_client_generated": true,
+    "suppressed_checks": {}
+  },
+  "paperless": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": true,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+    "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
+    "keycloak_client_generated": true,
+    "suppressed_checks": {}
+  },
+  "piper": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": false,
+    "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+    "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
+    "suppressed_checks": {
+      "api_gateway": "2026-09-23"
+    }
+  },
+  "plane": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true
+  },
+  "platform_context_api": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service",
+    "suppressed_checks": {
+      "dependency_health_gate": "2026-05-15"
+    }
+  },
+  "plausible": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppressed_checks": {
+      "alert_rules": "2026-09-30",
+      "api_gateway": "2026-09-30",
+      "grafana_dashboard": "2026-09-30"
+    }
+  },
+  "portainer": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service"
+  },
+  "postgres": {
+    "service_type": "vm-service",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": false,
+    "suppression_preset": "legacy-service"
+  },
+  "proxmox_ui": {
+    "service_type": "vm-service",
+    "requires_subdomain": true,
+    "requires_oidc": true,
+    "requires_secrets": true,
+    "requires_compose_secrets": false,
+    "suppression_preset": "legacy-service"
+  },
+  "realtime": {
+    "service_type": "vm-service",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": false,
+    "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+    "alert_rule_file": "config/prometheus/rules/slo_alerts.yml"
+  },
+  "redpanda": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppressed_checks": {
+      "api_gateway": "2026-09-23",
+      "grafana_dashboard": "2026-09-23",
+      "slo_definition": "2026-09-23",
+      "alert_rules": "2026-09-23"
+    }
+  },
+  "repowise": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": true,
+    "requires_secrets": false,
+    "requires_compose_secrets": false,
+    "suppressed_checks": {
+      "grafana_dashboard": "2027-01-01",
+      "alert_rules": "2027-01-01"
+    }
+  },
+  "searxng": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": false,
+    "suppression_preset": "legacy-service"
+  },
+  "semaphore": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true
+  },
+  "serverclaw": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": true,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "keycloak_client_generated": true,
+    "dashboard_file": "config/grafana/dashboards/serverclaw.json",
+    "alert_rule_file": "config/alertmanager/rules/serverclaw.yml",
+    "suppressed_checks": {}
+  },
+  "status_page": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service"
+  },
+  "step_ca": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service"
+  },
+  "superset": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": true,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "keycloak_client_generated": true,
+    "suppressed_checks": {
+      "api_gateway": "2026-09-30",
+      "alert_rules": "2026-09-30",
+      "grafana_dashboard": "2026-09-30"
+    }
+  },
+  "temporal": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppressed_checks": {
+      "api_gateway": "2026-09-30",
+      "grafana_dashboard": "2026-09-30",
+      "slo_definition": "2026-09-30",
+      "alert_rules": "2026-09-30"
+    }
+  },
+  "tesseract_ocr": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": false,
+    "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+    "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
+    "suppressed_checks": {
+      "api_gateway": "2026-09-23"
+    }
+  },
+  "tika": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": false,
+    "dashboard_file": "config/grafana/dashboards/tika.json",
+    "alert_rule_file": "config/alertmanager/rules/tika.yml",
+    "suppressed_checks": {
+      "api_gateway": "2026-09-23"
+    }
+  },
+  "typesense": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "dashboard_file": "config/grafana/dashboards/typesense.json",
+    "alert_rule_file": "config/alertmanager/rules/typesense.yml",
+    "suppressed_checks": {}
+  },
+  "uptime_kuma": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": false,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service"
+  },
+  "vaultwarden": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": false,
+    "dashboard_file": "config/grafana/dashboards/vaultwarden.json",
+    "alert_rule_file": "config/alertmanager/rules/vaultwarden.yml",
+    "suppressed_checks": {}
+  },
+  "windmill": {
+    "service_type": "compose",
+    "requires_subdomain": false,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppression_preset": "legacy-service"
+  },
+  "woodpecker": {
+    "service_type": "compose",
+    "requires_subdomain": true,
+    "requires_oidc": false,
+    "requires_secrets": true,
+    "requires_compose_secrets": true,
+    "suppressed_checks": {
+      "grafana_dashboard": "2026-09-23",
+      "alert_rules": "2026-09-23"
     }
   }
 }

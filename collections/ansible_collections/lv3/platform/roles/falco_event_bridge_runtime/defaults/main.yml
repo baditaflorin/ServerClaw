@@ -6,7 +6,7 @@ falco_event_bridge_service_file: "/etc/systemd/system/{{ falco_event_bridge_serv
 falco_event_bridge_env_file: "{{ falco_event_bridge_site_dir }}/falco-event-bridge.env"
 falco_event_bridge_listen_host: 0.0.0.0
 falco_event_bridge_listen_port: "{{ hostvars[platform_topology_host].platform_port_assignments.falco_event_bridge_port }}"
-falco_event_bridge_source_host: docker-runtime-lv3
+falco_event_bridge_source_host: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 falco_event_bridge_actor_id: falco-event-bridge
 falco_event_bridge_event_topic: platform.security.falco
 falco_event_bridge_nats_subject: platform.security.falco

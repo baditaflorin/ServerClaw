@@ -1,4 +1,2 @@
-# depends_on:
-#   - playbooks/services/open-webui.yml
 ---
 - import_playbook: ../ollama.yml

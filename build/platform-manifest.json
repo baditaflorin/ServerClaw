@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.83",
+  "repo_version": "0.178.84",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T03:01:41Z",
-  "next_refresh_at": "2026-04-10T04:01:41Z",
+  "generated_at": "2026-04-10T03:32:23Z",
+  "next_refresh_at": "2026-04-10T04:32:23Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -578,18 +578,6 @@
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8018/v1",
         "last_live_apply": "2026-04-06T00:00:00Z",
-        "slo_status": "unknown"
-      },
-      "open_webui": {
-        "service_name": "Open WebUI",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
-        "source": "repo_evidence",
-        "reason": "Repository evidence is complete enough for normal automation.",
-        "lifecycle_status": "active",
-        "primary_url": "http://100.64.0.1:8008",
-        "last_live_apply": "2026-04-05T00:00:00Z",
         "slo_status": "unknown"
       },
       "openbao": {
@@ -2524,32 +2512,6 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-one-api.md"
-      },
-      {
-        "id": "converge-open-webui",
-        "description": "Deploy private Open WebUI with a repo-managed Keycloak OIDC client, routine SSO sign-in, retained break-glass admin auth, and an operator-only Tailscale proxy on the Proxmox host.",
-        "tags": [
-          "converge-open-webui",
-          "host-and-guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "host_and_guest_live",
-        "budget": {
-          "max_duration_seconds": 1500,
-          "max_steps": 300,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 3,
-          "max_restarts": 0,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/configure-open-webui.md"
       },
       {
         "id": "converge-openbao",
@@ -5537,16 +5499,6 @@
         ]
       },
       {
-        "id": "configure-open-webui",
-        "title": "Configure Open WebUI",
-        "agent_trust_required": "T3",
-        "steps": 0,
-        "path": "docs/runbooks/configure-open-webui.md",
-        "workflow_ids": [
-          "converge-open-webui"
-        ]
-      },
-      {
         "id": "configure-openbao",
         "title": "Configure OpenBao",
         "agent_trust_required": "T3",
@@ -6404,10 +6356,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.82",
+    "last_version": "0.178.83",
     "deployed_at": "2026-04-10",
     "summary": "fix: Add missing keycloak service variables to playbook \u2014 ADR 0373 derive_service_defaults compatibility ADR 0369 implementation: validation_toolkit complete \u2014 100% adoption across 57 scripts, eliminated 1500+ lines of copy-pasted validation code, added pre-commit enforcement",
-    "release_notes_url": "docs/release-notes/0.178.83.md"
+    "release_notes_url": "docs/release-notes/0.178.84.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6464,13 +6416,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
-    },
-    {
-      "adr": "0377",
-      "title": "Open WebUI Platform Knowledge Integration",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0377-open-webui-platform-knowledge-integration.md"
     }
   ]
 }

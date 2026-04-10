@@ -16,6 +16,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - ADR 0369 implementation: validation_toolkit complete — 100% adoption across 57 scripts, eliminated 1500+ lines of copy-pasted validation code, added pre-commit enforcement
 - Complete IoC compliance: templatize remaining hardcoded domains in 13 collection playbooks (subdomain_fqdn, fail_msg, URLs), 4 role defaults (operator name), 5 top-level playbooks (developer paths), and 2 mail playbooks (operator email); strengthen IoC regression test with TestNoHardcodedPaths class (4 new checks); zero operator-specific values remain in deployable Ansible code
 - ADR 0392: Convergence speed and incremental apply — skip hardware facts, Docker image digest check before pull, parallel preflight secret checks, convergence fingerprinting (opt-in), parallel lane dispatch, dry-run validation target, gate result caching, reduced health check timeouts
+- fix: validate-integration target requires only locally-available tools (no ansible-playbook/Docker)
+- chore: regenerate ADR index with 0392 (renamed from duplicate 0382)
 - fix: Resolve Jinja2 template values in subdomain validation scripts (subdomain_catalog.py uses load_yaml_with_identity for host_vars/edge defaults)
 - fix: Add neko to lv3_service_topology (browser.lv3.org) with edge.kind=custom and certificate catalog entry
 - fix: Add tasks symlink in playbooks/_includes for Ansible import_playbook path resolution
@@ -56,10 +58,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.83 release notes](docs/release-notes/0.178.83.md)
+- [0.178.84 release notes](docs/release-notes/0.178.84.md)
 
 ## Previous Releases
 
+- [0.178.83 release notes](docs/release-notes/0.178.83.md)
 - [0.178.82 release notes](docs/release-notes/0.178.82.md)
 - [0.178.81 release notes](docs/release-notes/0.178.81.md)
 - [0.178.80 release notes](docs/release-notes/0.178.80.md)
@@ -71,9 +74,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.74 release notes](docs/release-notes/0.178.74.md)
 - [0.178.73 release notes](docs/release-notes/0.178.73.md)
 - [0.178.72 release notes](docs/release-notes/0.178.72.md)
-- [0.178.71 release notes](docs/release-notes/0.178.71.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (418 releases)](docs/release-notes/index/2026.md)
+- [2026 (419 releases)](docs/release-notes/index/2026.md)

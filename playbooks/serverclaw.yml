@@ -18,7 +18,6 @@
 #   - ADR 0254: ServerClaw is the distinct self-hosted assistant product surface on LV3.
 #   - Requires: docker-runtime-lv3, coolify-lv3, and nginx-lv3 to already exist and remain reachable.
 #   - Role: lv3.platform.keycloak_runtime - provisions the dedicated ServerClaw OIDC client.
-#   - Role: lv3.platform.open_webui_runtime - converges the isolated ServerClaw runtime on coolify-lv3.
 #
 # Related ADRs: 0060, 0097, 0145, 0148, 0254
 # Related Runbooks: docs/runbooks/configure-serverclaw.md
@@ -119,63 +118,6 @@
 
   roles:
     - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.open_webui_runtime
-      vars:
-        open_webui_site_dir: /opt/serverclaw
-        open_webui_data_dir: /opt/serverclaw/data
-        open_webui_secret_dir: /etc/lv3/serverclaw
-        open_webui_compose_file: /opt/serverclaw/docker-compose.yml
-        open_webui_env_file: /etc/lv3/serverclaw/runtime.env
-        open_webui_legacy_env_file: /opt/serverclaw/serverclaw.env
-        open_webui_openbao_agent_dir: /opt/serverclaw/openbao
-        open_webui_openbao_agent_container_name: serverclaw-openbao-agent
-        open_webui_enable_openbao_agent: false
-        open_webui_openbao_secret_path: services/serverclaw/runtime-env
-        open_webui_openbao_policy_name: lv3-service-serverclaw-runtime
-        open_webui_openbao_approle_name: serverclaw-runtime
-        open_webui_container_name: serverclaw
-        open_webui_port: "{{ platform_service_topology.serverclaw.ports.internal }}"
-        open_webui_host_proxy_port: "{{ platform_port_assignments.serverclaw_port }}"
-        open_webui_image: "{{ serverclaw_image }}"
-        open_webui_admin_name: "{{ serverclaw_admin_name }}"
-        open_webui_admin_email: "{{ serverclaw_admin_email }}"
-        open_webui_internal_base_url: "{{ platform_service_topology.serverclaw.urls.internal }}"
-        open_webui_controller_url: "{{ serverclaw_public_url }}"
-        open_webui_webui_url: "{{ serverclaw_public_url }}"
-        open_webui_webui_name: "{{ serverclaw_webui_name }}"
-        open_webui_local_artifact_dir: "{{ repo_shared_local_root }}/serverclaw"
-        open_webui_admin_password_local_file: "{{ repo_shared_local_root }}/serverclaw/admin-password.txt"
-        open_webui_secret_key_local_file: "{{ repo_shared_local_root }}/serverclaw/webui-secret-key.txt"
-        open_webui_provider_env_local_file: "{{ repo_shared_local_root }}/serverclaw/provider.env"
-        open_webui_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/serverclaw-client-secret.txt"
-        open_webui_admin_password_remote_file: /etc/lv3/serverclaw/admin-password.txt
-        open_webui_secret_key_remote_file: /etc/lv3/serverclaw/webui-secret-key.txt
-        open_webui_enable_oidc: "{{ serverclaw_enable_oidc }}"
-        open_webui_enable_login_form: "{{ serverclaw_enable_login_form }}"
-        open_webui_enable_password_auth: "{{ serverclaw_enable_password_auth }}"
-        open_webui_default_user_role: "{{ serverclaw_default_user_role }}"
-        open_webui_oidc_client_id: "{{ serverclaw_oidc_client_id }}"
-        open_webui_oidc_provider_url: "{{ serverclaw_oidc_provider_url }}"
-        open_webui_enable_openai_api: "{{ serverclaw_enable_openai_api }}"
-        open_webui_enable_ollama_api: "{{ serverclaw_enable_ollama_api }}"
-        open_webui_ollama_base_url: "{{ serverclaw_ollama_base_url }}"
-        open_webui_ollama_api_url: "{{ serverclaw_ollama_base_url }}"
-        open_webui_enable_web_search: "{{ serverclaw_enable_web_search }}"
-        open_webui_searxng_query_url: "{{ serverclaw_searxng_query_url }}"
-        open_webui_default_models: "{{ serverclaw_default_models }}"
-        open_webui_default_pinned_models: "{{ serverclaw_default_pinned_models }}"
-        open_webui_user_permissions_workspace_models_access: "{{ serverclaw_workspace_models_access }}"
-        open_webui_user_permissions_workspace_knowledge_access: "{{ serverclaw_workspace_knowledge_access }}"
-        open_webui_user_permissions_workspace_prompts_access: "{{ serverclaw_workspace_prompts_access }}"
-        open_webui_user_permissions_workspace_tools_access: "{{ serverclaw_workspace_tools_access }}"
-        open_webui_user_permissions_workspace_skills_access: "{{ serverclaw_workspace_skills_access }}"
-        open_webui_cors_allow_origin: "{{ serverclaw_cors_allow_origin }}"
-        open_webui_session_cookie_same_site: "{{ serverclaw_session_cookie_same_site }}"
-        open_webui_auth_cookie_same_site: "{{ serverclaw_auth_cookie_same_site }}"
-        open_webui_session_cookie_secure: "{{ serverclaw_session_cookie_secure }}"
-        open_webui_auth_cookie_secure: "{{ serverclaw_auth_cookie_secure }}"
-        open_webui_extra_hosts: "{{ serverclaw_extra_hosts | default([]) }}"
-        open_webui_public_models: "{{ serverclaw_public_models | default([]) }}"
 
   post_tasks:
     - name: Run shared post-verify checks

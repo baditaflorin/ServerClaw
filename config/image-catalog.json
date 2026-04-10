@@ -1189,39 +1189,6 @@
         "converge-one-api"
       ]
     },
-    "open_webui_runtime": {
-      "kind": "runtime",
-      "service_id": "open_webui",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "open-webui",
-      "registry_ref": "ghcr.io/open-webui/open-webui",
-      "tag": "v0.8.9",
-      "digest": "sha256:c5058cf3491ee7eade6ae050ffb78701d3195fe0600215aedd92bb4ec588bfb1",
-      "ref": "ghcr.io/open-webui/open-webui:v0.8.9@sha256:c5058cf3491ee7eade6ae050ffb78701d3195fe0600215aedd92bb4ec588bfb1",
-      "platform": "linux/amd64",
-      "pinned_on": "2026-03-22",
-      "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-22-open-webui-runtime.json",
-      "exception": {
-        "owner": "Platform operations",
-        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
-        "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
-        ],
-        "approved_on": "2026-03-22",
-        "expires_on": "2026-04-05",
-        "remediation_plan": "Re-scan and refresh open_webui_runtime with make upgrade-container-image IMAGE_ID=open_webui_runtime WRITE=true APPLY=true before the exception expires."
-      },
-      "consumers": [
-        "roles/open_webui_runtime/templates/docker-compose.yml.j2",
-        "scripts/upgrade_container_image.py",
-        "docs/runbooks/container-image-policy.md"
-      ],
-      "apply_targets": [
-        "converge-open-webui"
-      ]
-    },
     "openbao_runtime": {
       "kind": "runtime",
       "service_id": "openbao",

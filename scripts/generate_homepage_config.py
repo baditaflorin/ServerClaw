@@ -42,7 +42,6 @@ SERVICE_ICONS = {
     "nginx_edge": "si-nginx",
     "ntfy": "mdi-bell-badge",
     "ntopng": "mdi-chart-areaspline",
-    "open_webui": "mdi-robot-outline",
     "ollama": "mdi-head-snowflake-outline",
     "openbao": "mdi-vault",
     "ops_portal": "mdi-console-network",

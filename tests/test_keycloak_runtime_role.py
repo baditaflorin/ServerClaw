@@ -10,7 +10,6 @@ REPO_USER_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "rec
 ADMIN_CLIENT_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "reconcile_admin_client.yml"
 COMPOSE_TEMPLATE_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "templates" / "docker-compose.yml.j2"
 SERVERCLAW_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "serverclaw_client.yml"
-OPEN_WEBUI_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "open_webui_client.yml"
 
 
 def load_tasks(path: Path = TASKS_PATH) -> list[dict]:
@@ -31,10 +30,6 @@ def load_tasks(path: Path = TASKS_PATH) -> list[dict]:
 
 def load_serverclaw_tasks() -> list[dict]:
     return yaml.safe_load(SERVERCLAW_TASKS_PATH.read_text())
-
-
-def load_open_webui_client_tasks() -> list[dict]:
-    return yaml.safe_load(OPEN_WEBUI_TASKS_PATH.read_text())
 
 
 def load_admin_client_tasks() -> list[dict]:
@@ -93,15 +88,6 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_ops_portal_root_url }}/",
         "{{ keycloak_ops_portal_root_url }}",
         "{{ keycloak_session_authority.shared_logged_out_url }}",
-    ]
-    assert defaults["keycloak_open_webui_client_id"] == "open-webui"
-    assert defaults["keycloak_open_webui_client_secret_local_file"].endswith("/.local/keycloak/open-webui-client-secret.txt")
-    assert defaults["keycloak_open_webui_root_url"] == (
-        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('open_webui', 'controller') }}"
-    )
-    assert defaults["keycloak_open_webui_post_logout_redirect_uris"] == [
-        "{{ keycloak_open_webui_root_url }}/",
-        "{{ keycloak_open_webui_root_url }}",
     ]
     assert defaults["keycloak_grafana_post_logout_redirect_uris"] == [
         "{{ keycloak_grafana_root_url }}/login",
@@ -894,32 +880,6 @@ def test_role_manages_langfuse_client_secret() -> None:
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_langfuse_client_secret_local_file }}"
 
 
-def test_role_manages_open_webui_client_secret() -> None:
-    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
-    tasks = load_tasks()
-    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    open_webui_client_task = next(
-        task for task in realm_block["block"] if task.get("name") == "Ensure the Open WebUI OAuth client exists"
-    )
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Open WebUI client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Open WebUI client secret to the control machine")
-
-    assert defaults["keycloak_open_webui_client_id"] == "open-webui"
-    assert defaults["keycloak_open_webui_client_secret_local_file"].endswith("/.local/keycloak/open-webui-client-secret.txt")
-    assert open_webui_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_open_webui_client_id }}"
-    assert open_webui_client_task["community.general.keycloak_client"]["redirect_uris"] == [
-        "{{ keycloak_open_webui_root_url }}/oauth/oidc/callback"
-    ]
-    assert open_webui_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
-        "{{ keycloak_open_webui_post_logout_redirect_uris }}"
-    )
-    assert open_webui_client_task["community.general.keycloak_client"]["web_origins"] == ["{{ keycloak_open_webui_root_url }}"]
-    assert "auth_client_id" not in open_webui_client_task["community.general.keycloak_client"]
-    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_open_webui_client_id }}"
-    assert "auth_client_id" not in read_secret_task["community.general.keycloak_clientsecret_info"]
-    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_open_webui_client_secret_local_file }}"
-
-
 def test_role_manages_directus_client_secret() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
@@ -1116,30 +1076,6 @@ def test_serverclaw_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
     assert token_probe_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_admin_client_id }}"
     assert serverclaw_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_client_secret_local_file }}"
-
-
-def test_open_webui_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
-    tasks = load_open_webui_client_tasks()
-    readiness_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak readiness endpoint")
-    admin_api_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak admin API to answer")
-    token_probe_task = next(
-        task for task in tasks if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
-    )
-    realm_block = next(task for task in tasks if task.get("name") == "Converge the dedicated Open WebUI Keycloak client")
-    open_webui_client_task = next(
-        task for task in realm_block["block"] if task.get("name") == "Ensure the Open WebUI OAuth client exists"
-    )
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Open WebUI client secret to the control machine")
-    assert readiness_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
-    assert admin_api_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
-    assert token_probe_task["ansible.builtin.uri"]["body"]["grant_type"] == "client_credentials"
-    assert token_probe_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_admin_client_id }}"
-    assert token_probe_task["ansible.builtin.uri"]["body"]["client_secret"] == "{{ keycloak_admin_client_secret }}"
-    assert realm_block["module_defaults"]["group/community.general.keycloak"]["auth_client_id"] == "{{ keycloak_admin_client_id }}"
-    assert realm_block["module_defaults"]["group/community.general.keycloak"]["auth_client_secret"] == "{{ keycloak_admin_client_secret }}"
-    assert open_webui_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_open_webui_client_id }}"
-    assert "auth_client_id" not in open_webui_client_task["community.general.keycloak_client"]
-    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_open_webui_client_secret_local_file }}"
 
 
 def test_role_manages_the_outline_automation_identity() -> None:

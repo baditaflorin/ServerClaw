@@ -3710,7 +3710,6 @@
         "syntax-check-windmill",
         "syntax-check-keycloak",
         "syntax-check-netbox",
-        "syntax-check-open-webui",
         "syntax-check-mattermost"
       ],
       "live_impact": "guest_live",
@@ -3723,7 +3722,6 @@
         "collections/ansible_collections/lv3/platform/playbooks/windmill.yml",
         "collections/ansible_collections/lv3/platform/playbooks/keycloak.yml",
         "collections/ansible_collections/lv3/platform/playbooks/netbox.yml",
-        "collections/ansible_collections/lv3/platform/playbooks/open-webui.yml",
         "collections/ansible_collections/lv3/platform/playbooks/mattermost.yml"
       ],
       "outputs": [
@@ -4815,7 +4813,6 @@
           "one_api_session_secret",
           "one_api_root_access_token",
           "one_api_root_password",
-          "open_webui_provider_env",
           "serverclaw_provider_env"
         ]
       },
@@ -4855,62 +4852,6 @@
         "escalation_action": "notify_and_abort"
       }
     },
-    "converge-open-webui": {
-      "description": "Deploy private Open WebUI with a repo-managed Keycloak OIDC client, routine SSO sign-in, retained break-glass admin auth, and an operator-only Tailscale proxy on the Proxmox host.",
-      "lifecycle_status": "active",
-      "preferred_entrypoint": {
-        "kind": "make_target",
-        "target": "converge-open-webui",
-        "command": "make converge-open-webui"
-      },
-      "preflight": {
-        "required": true,
-        "required_secret_ids": [
-          "bootstrap_ssh_private_key"
-        ],
-        "generated_secret_ids": [
-          "open_webui_admin_password",
-          "open_webui_oidc_client_secret",
-          "open_webui_secret_key"
-        ]
-      },
-      "validation_targets": [
-        "validate",
-        "syntax-check-open-webui"
-      ],
-      "live_impact": "host_and_guest_live",
-      "owner_runbook": "docs/runbooks/configure-open-webui.md",
-      "implementation_refs": [
-        "Makefile",
-        "collections/ansible_collections/lv3/platform/playbooks/open-webui.yml",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/open_webui_client.yml",
-        "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
-        "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml",
-        "collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml",
-        "inventory/group_vars/all/identity.yml",
-        "inventory/group_vars/all/main.yml",
-        "inventory/host_vars/proxmox_florin.yml"
-      ],
-      "outputs": [
-        "A private Open WebUI runtime deployed on docker-runtime-lv3 with a repo-managed Keycloak client, routine OIDC login, retained local admin fallback, and an operator-only Tailscale proxy on the Proxmox host."
-      ],
-      "verification_commands": [
-        "make syntax-check-open-webui",
-        "curl -s http://100.64.0.1:8008/",
-        "curl -I http://100.64.0.1:8008/oauth/oidc/login",
-        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat $(scripts/resolve_local_overlay_root.sh)/open-webui/admin-password.txt)\"'\"}' http://100.64.0.1:8008/api/v1/auths/signin"
-      ],
-      "execution_class": "mutation",
-      "budget": {
-        "max_duration_seconds": 1500,
-        "max_steps": 300,
-        "max_concurrent_instances": 1,
-        "max_touched_hosts": 3,
-        "max_restarts": 0,
-        "max_rollback_depth": 1,
-        "escalation_action": "notify_and_abort"
-      }
-    },
     "converge-serverclaw": {
       "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
       "lifecycle_status": "active",
@@ -4938,7 +4879,6 @@
       "owner_runbook": "docs/runbooks/configure-serverclaw.md",
       "implementation_refs": [
         "Makefile",
-        "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
         "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
@@ -4992,7 +4932,6 @@
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/searxng.yml",
         "collections/ansible_collections/lv3/platform/roles/searxng_runtime",
-        "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
         "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/hetzner_dns_record",
@@ -7028,9 +6967,7 @@
         "docs/schema/platform-finding.json",
         "docs/runbooks/agent-observation-loop.md"
       ],
-      "outputs": [
-        "Structured drift findings under .local/platform-observation/latest plus an Open WebUI review digest under .local/open-webui/platform-findings-daily.md."
-      ],
+      "outputs": [],
       "verification_commands": [
         "uvx --from pyyaml python scripts/platform_observation_tool.py",
         "test -f .local/platform-observation/latest/findings.json"
