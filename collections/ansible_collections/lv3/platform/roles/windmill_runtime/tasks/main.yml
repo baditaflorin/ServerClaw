@@ -49,6 +49,7 @@
       - path: "{{ proxmox_api_token_local_file }}"
         description: "Proxmox API token payload"
         prerequisite: "Converge proxmox_api_access before enabling the Windmill reaper schedule"
+        optional: true
 
 - name: Ensure the Windmill runtime packages are present
   ansible.builtin.apt:
@@ -765,6 +766,14 @@
   loop: "{{ windmill_worker_repo_secret_directories }}"
   no_log: true
 
+- name: Check which optional worker checkout secret files exist locally
+  ansible.builtin.stat:
+    path: "{{ item.src }}"
+  loop: "{{ windmill_worker_repo_secret_files | selectattr('optional', 'defined') | selectattr('optional') | list }}"
+  register: windmill_optional_repo_secret_stats
+  delegate_to: localhost
+  no_log: true
+
 - name: Mirror the Windmill worker checkout bootstrap secret files
   ansible.builtin.copy:
     src: "{{ item.src }}"
@@ -772,7 +781,16 @@
     mode: "{{ item.mode }}"
     owner: "{{ proxmox_host_admin_user }}"
     group: "{{ proxmox_host_admin_user }}"
-  loop: "{{ windmill_worker_repo_secret_files }}"
+  loop: >-
+    {{
+      (windmill_worker_repo_secret_files | rejectattr('optional', 'defined') | list)
+      + (windmill_optional_repo_secret_stats.results
+         | default([])
+         | selectattr('stat.exists', 'defined')
+         | selectattr('stat.exists')
+         | map(attribute='item')
+         | list)
+    }}
   no_log: true
 
 - name: Ensure the Windmill seeded job secret directories exist
@@ -785,6 +803,14 @@
   loop: "{{ windmill_worker_seed_job_secret_directories }}"
   no_log: true
 
+- name: Check which optional seeded job secret files exist locally
+  ansible.builtin.stat:
+    path: "{{ item.src }}"
+  loop: "{{ windmill_worker_seed_job_secret_files | selectattr('optional', 'defined') | selectattr('optional') | list }}"
+  register: windmill_optional_seed_secret_stats
+  delegate_to: localhost
+  no_log: true
+
 - name: Mirror the Windmill seeded job secret files
   ansible.builtin.copy:
     src: "{{ item.src }}"
@@ -792,7 +818,16 @@
     mode: "{{ item.mode }}"
     owner: "{{ item.owner }}"
     group: "{{ item.group }}"
-  loop: "{{ windmill_worker_seed_job_secret_files }}"
+  loop: >-
+    {{
+      (windmill_worker_seed_job_secret_files | rejectattr('optional', 'defined') | list)
+      + (windmill_optional_seed_secret_stats.results
+         | default([])
+         | selectattr('stat.exists', 'defined')
+         | selectattr('stat.exists')
+         | map(attribute='item')
+         | list)
+    }}
   no_log: true
 
 - name: Remove the staged Windmill worker checkout archive from the guest

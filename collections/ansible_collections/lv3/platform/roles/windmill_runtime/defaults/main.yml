@@ -227,6 +227,7 @@ windmill_worker_repo_secret_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/atlas-approle.json"
     src: "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
     mode: "0600"
+    optional: true
 windmill_worker_seed_job_secret_directories:
   - path: "{{ windmill_worker_seed_job_secret_root }}/openbao"
     owner: root
@@ -247,6 +248,7 @@ windmill_worker_seed_job_secret_files:
     owner: root
     group: root
     mode: "0600"
+    optional: true
   - path: "{{ windmill_worker_seed_job_secret_root }}/ntfy/alertmanager-password.txt"
     src: "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
     owner: root
