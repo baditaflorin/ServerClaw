@@ -45,7 +45,7 @@ adrs:
     implemented_on: '2026-03-22'
   - adr: '0060'
     title: Open WebUI For Operator And Agent Workbench
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-22'
     concern: agent-discovery

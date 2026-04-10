@@ -680,7 +680,7 @@ adrs:
     implemented_on: '2026-03-22'
   - adr: '0060'
     title: Open WebUI For Operator And Agent Workbench
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-22'
     concern: agent-discovery
@@ -5888,7 +5888,7 @@ adrs:
     implemented_on: '2026-04-03'
   - adr: '0341'
     title: Open WebUI Keycloak OIDC With Break-Glass Fallback
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-04-03'
     concern: security
@@ -6169,7 +6169,7 @@ adrs:
     implemented_on: '2026-04-06'
   - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
-    status: Proposed
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-04-06'
     concern: platform

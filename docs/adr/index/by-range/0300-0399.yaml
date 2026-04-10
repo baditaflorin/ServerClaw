@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 105
+total_adrs: 106
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -905,7 +905,7 @@ adrs:
     implemented_on: '2026-04-03'
   - adr: '0341'
     title: Open WebUI Keycloak OIDC With Break-Glass Fallback
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-04-03'
     concern: security
@@ -1679,7 +1679,7 @@ adrs:
     path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
   - adr: '0377'
     title: Open WebUI Platform Knowledge Integration
-    status: Proposed
+    status: Deprecated
     implementation_status: Not Implemented
     date: '2026-04-06'
     concern: platform
@@ -1694,7 +1694,7 @@ adrs:
     path: docs/adr/0377-open-webui-platform-knowledge-integration.md
   - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
-    status: Proposed
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-04-06'
     concern: platform
@@ -1990,3 +1990,18 @@ adrs:
     summary: 'Plays that only delegate to localhost (DNS, preflight) do not need remote facts. Change from:'
     filename: 0392-convergence-speed-and-incremental-apply.md
     path: docs/adr/0392-convergence-speed-and-incremental-apply.md
+  - adr: 0392
+    title: — Optional Secret Propagation in Role Convergence
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - optional
+      - secret
+      - propagation
+      - role
+      - convergence
+    summary: Both checklocalsecrets (shared preflight) and per-role secret file
+    filename: 0392-optional-secret-propagation.md
+    path: docs/adr/0392-optional-secret-propagation.md

@@ -2401,7 +2401,7 @@ adrs:
     path: docs/adr/0374-cross-cutting-service-manifest.md
   - adr: '0377'
     title: Open WebUI Platform Knowledge Integration
-    status: Proposed
+    status: Deprecated
     implementation_status: Not Implemented
     date: '2026-04-06'
     concern: platform
@@ -2416,7 +2416,7 @@ adrs:
     path: docs/adr/0377-open-webui-platform-knowledge-integration.md
   - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
-    status: Proposed
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-04-06'
     concern: platform

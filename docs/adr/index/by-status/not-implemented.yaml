@@ -547,7 +547,7 @@ adrs:
     path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
   - adr: '0377'
     title: Open WebUI Platform Knowledge Integration
-    status: Proposed
+    status: Deprecated
     implementation_status: Not Implemented
     date: '2026-04-06'
     concern: platform
