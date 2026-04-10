@@ -1,10 +1,11 @@
-# Release 0.178.80
+# Release 0.178.81
 
 - Date: 2026-04-10
 
 ## Summary
 - ADR 0369 implementation: validation_toolkit complete — 100% adoption across 57 scripts, eliminated 1500+ lines of copy-pasted validation code, added pre-commit enforcement
 - Complete IoC compliance: templatize remaining hardcoded domains in 13 collection playbooks (subdomain_fqdn, fail_msg, URLs), 4 role defaults (operator name), 5 top-level playbooks (developer paths), and 2 mail playbooks (operator email); strengthen IoC regression test with TestNoHardcodedPaths class (4 new checks); zero operator-specific values remain in deployable Ansible code
+- ADR 0392: Convergence speed and incremental apply — skip hardware facts, Docker image digest check before pull, parallel preflight secret checks, convergence fingerprinting (opt-in), parallel lane dispatch, dry-run validation target, gate result caching, reduced health check timeouts
 - fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
 - fix: Remove duplicate repo_intake entry in platform_services.yml registry
 - fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
