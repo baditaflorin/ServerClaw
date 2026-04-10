@@ -1750,7 +1750,7 @@
         "make syntax-check-mail-platform",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
         "curl -s -H \"X-API-Key: $(cat $(scripts/resolve_local_overlay_root.sh)/mail-platform/gateway-api-key.txt)\" http://10.10.10.20:8081/v1/profiles",
-        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
+        "ansible-playbook -i $(git rev-parse --show-toplevel)/inventory/hosts.yml $(git rev-parse --show-toplevel)/playbooks/mail-platform-notification-profiles-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
         "curl -I https://grafana.lv3.org"
       ],
       "execution_class": "mutation",
@@ -1804,7 +1804,7 @@
         "make syntax-check-mailpit",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.91 'curl -fsS http://127.0.0.1:8025/api/v1/info'",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.91 'python3 - <<'\"'\"'PY'\"'\"'\nimport json\nimport smtplib\nimport urllib.request\nfrom email.message import EmailMessage\nsubject = \"LV3 workflow Mailpit verification\"\nurllib.request.urlopen(urllib.request.Request(\"http://127.0.0.1:8025/api/v1/messages\", method=\"DELETE\"), timeout=30).read()\nmessage = EmailMessage()\nmessage[\"From\"] = \"workflow-check@lv3.org\"\nmessage[\"To\"] = \"mailpit-workflow@lv3.org\"\nmessage[\"Subject\"] = subject\nmessage.set_content(\"Workflow verification through Mailpit\")\nwith smtplib.SMTP(\"127.0.0.1\", 1025, timeout=15) as client:\n    client.send_message(message)\npayload = json.loads(urllib.request.urlopen(\"http://127.0.0.1:8025/api/v1/messages\", timeout=30).read().decode(\"utf-8\"))\nassert any(item.get(\"Subject\") == subject for item in payload.get(\"messages\", []))\nprint(\"verified\")\nPY'",
-        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check"
+        "ansible-playbook -i $(git rev-parse --show-toplevel)/inventory/hosts.yml $(git rev-parse --show-toplevel)/playbooks/mail-platform-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1863,8 +1863,8 @@
       ],
       "verification_commands": [
         "make syntax-check-livekit",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/livekit_tool.py verify-room-lifecycle --url https://livekit.lv3.org --api-key-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-key.txt --api-secret-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-secret.txt --room-prefix livekit-workflow-verify --identity livekit-workflow-probe --timeout-seconds 120",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "python3 $(git rev-parse --show-toplevel)/scripts/livekit_tool.py verify-room-lifecycle --url https://livekit.lv3.org --api-key-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-key.txt --api-secret-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-secret.txt --room-prefix livekit-workflow-verify --identity livekit-workflow-probe --timeout-seconds 120",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1923,10 +1923,10 @@
       ],
       "verification_commands": [
         "make syntax-check-neko",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/verify_neko_webrtc_session.py --url browser.lv3.org --timeout 30",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_neko_firewall_concurrency.py",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_neko_timeout_hierarchy.py",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml runtime-comms-lv3 -m shell -a \"ss -lnt | grep -E ':(8080) ' && ss -lun | grep -E ':(50000|60000) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "python3 $(git rev-parse --show-toplevel)/scripts/verify_neko_webrtc_session.py --url browser.lv3.org --timeout 30",
+        "python3 $(git rev-parse --show-toplevel)/tests/test_neko_firewall_concurrency.py",
+        "python3 $(git rev-parse --show-toplevel)/tests/test_neko_timeout_hierarchy.py",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml runtime-comms-lv3 -m shell -a \"ss -lnt | grep -E ':(8080) ' && ss -lun | grep -E ':(50000|60000) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2376,7 +2376,7 @@
         "make syntax-check-openfga",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 '\\''curl -fsS http://127.0.0.1:8098/healthz && docker compose --file /opt/openfga/docker-compose.yml ps'\\'''",
         "curl -fsS -H \"Authorization: Bearer $(cat $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt --keycloak-url https://sso.lv3.org"
+        "python3 $(git rev-parse --show-toplevel)/scripts/serverclaw_authz.py verify --config $(git rev-parse --show-toplevel)/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt --keycloak-url https://sso.lv3.org"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2428,7 +2428,7 @@
       ],
       "verification_commands": [
         "make syntax-check-temporal",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3382,9 +3382,9 @@
         "A mutation-ledger file event describing the audit summary."
       ],
       "verification_commands": [
-        "uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/token_lifecycle.py validate",
+        "uv run --with pyyaml python $(git rev-parse --show-toplevel)/scripts/token_lifecycle.py validate",
         "make token-inventory-audit TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
-        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
       ],
       "execution_class": "diagnostic",
       "budget": {
@@ -3430,7 +3430,7 @@
       ],
       "verification_commands": [
         "make token-exposure-response TOKEN_ID=keycloak-agent-hub-client-secret EXPOSURE_SOURCE=git_diff TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
-        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3473,7 +3473,7 @@
       ],
       "verification_commands": [
         "make rotate-keycloak-client-secret TOKEN_ID=keycloak-agent-hub-client-secret TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
-        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3516,7 +3516,7 @@
       ],
       "verification_commands": [
         "make rotate-windmill-token TOKEN_ID=windmill-superadmin-token TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
-        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3559,7 +3559,7 @@
       ],
       "verification_commands": [
         "make rotate-grafana-service-token TOKEN_ID=grafana-service-account-token TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
-        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3604,7 +3604,7 @@
       ],
       "verification_commands": [
         "make rotate-platform-cli-token TOKEN_ID=local-platform-cli TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
-        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_lv3_cli.py /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_lv3_cli.py $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3655,8 +3655,8 @@
         "One named secret rotation planned or applied through the canonical catalog, the owning role-local rotate task, and the dedicated OpenBao path plus metadata."
       ],
       "verification_commands": [
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/secret_rotation.py --validate",
-        "python3 -m unittest discover -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests -p 'test_secret_rotation.py'",
+        "python3 $(git rev-parse --show-toplevel)/scripts/secret_rotation.py --validate",
+        "python3 -m unittest discover -s $(git rev-parse --show-toplevel)/tests -p 'test_secret_rotation.py'",
         "make syntax-check-secret-rotation",
         "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
       ],
@@ -3792,7 +3792,7 @@
         "make syntax-check-control-plane-recovery",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'",
-        "LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT=/path/to/off-host/archive python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_metadata_witness.py verify --archive-root \"$LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT\""
+        "LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT=/path/to/off-host/archive python3 $(git rev-parse --show-toplevel)/scripts/control_metadata_witness.py verify --archive-root \"$LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT\""
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4366,7 +4366,7 @@
       "verification_commands": [
         "make syntax-check-dify",
         "curl -fsS https://agents.lv3.org/healthz",
-        "uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url https://agents.lv3.org --admin-email baditaflorin@gmail.com --admin-password-file .local/dify/admin-password.txt --init-password-file .local/dify/init-password.txt --tools-api-key-file .local/dify/tools-api-key.txt --export-path platform/dify-workflows/lv3-dify-smoke.yml --sync-tools"
+        "uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url https://agents.lv3.org --admin-email \"$PLATFORM_OPERATOR_EMAIL\" --admin-password-file .local/dify/admin-password.txt --init-password-file .local/dify/init-password.txt --tools-api-key-file .local/dify/tools-api-key.txt --export-path platform/dify-workflows/lv3-dify-smoke.yml --sync-tools"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4538,7 +4538,7 @@
         "make syntax-check-netbox",
         "curl -s -o /dev/null -w '%{http_code}\\n' http://100.64.0.1:8004/login/",
         "curl -s -H \"Authorization: Bearer $(cat $(scripts/resolve_local_overlay_root.sh)/netbox/api-token.txt)\" http://100.64.0.1:8004/api/virtualization/virtual-machines/?limit=20",
-        "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.64.0.1:8004 --api-token-file $(scripts/resolve_local_overlay_root.sh)/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
+        "uvx --from pyyaml python $(git rev-parse --show-toplevel)/scripts/netbox_inventory_sync.py --api-url http://100.64.0.1:8004 --api-token-file $(scripts/resolve_local_overlay_root.sh)/netbox/api-token.txt --host-vars $(git rev-parse --show-toplevel)/inventory/host_vars/proxmox_florin.yml --stack $(git rev-parse --show-toplevel)/versions/stack.yaml --lane-catalog $(git rev-parse --show-toplevel)/config/control-plane-lanes.json"
       ],
       "required_read_surfaces": [
         "netbox",
@@ -4724,7 +4724,7 @@
       "verification_commands": [
         "make syntax-check-langfuse",
         "curl -s https://langfuse.lv3.org/api/public/health",
-        "uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py --base-url https://langfuse.lv3.org --project-id lv3-agent-observability --bootstrap-email baditaflorin@gmail.com --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt"
+        "uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py --base-url https://langfuse.lv3.org --project-id lv3-agent-observability --bootstrap-email \"$PLATFORM_OPERATOR_EMAIL\" --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4842,7 +4842,7 @@
       "verification_commands": [
         "make syntax-check-one-api",
         "curl -fsS http://100.64.0.1:8018/api/status",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/one_api_bootstrap.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/one-api/bootstrap.json --one-api-url http://100.64.0.1:8018 --root-access-token-file $(scripts/resolve_local_overlay_root.sh)/one-api/root-access-token.txt"
+        "python3 $(git rev-parse --show-toplevel)/scripts/one_api_bootstrap.py verify --config $(git rev-parse --show-toplevel)/config/one-api/bootstrap.json --one-api-url http://100.64.0.1:8018 --root-access-token-file $(scripts/resolve_local_overlay_root.sh)/one-api/root-access-token.txt"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4951,7 +4951,7 @@
       "verification_commands": [
         "make syntax-check-serverclaw",
         "curl -I https://chat.lv3.org/",
-        "ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml coolify-lv3 -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5056,7 +5056,7 @@
       "verification_commands": [
         "make syntax-check-ollama",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11434/api/version'",
-        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json'"
+        "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 $(git rev-parse --show-toplevel)/scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -5556,8 +5556,8 @@
       "verification_commands": [
         "make syntax-check-rag-context",
         "curl -s http://100.64.0.1:8010/healthz",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/build_rag_index.py --dry-run",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py --api-url http://100.64.0.1:8010 --question 'how does step-ca issue SSH certificates'"
+        "python3 $(git rev-parse --show-toplevel)/scripts/build_rag_index.py --dry-run",
+        "python3 $(git rev-parse --show-toplevel)/scripts/query_platform_context.py --api-url http://100.64.0.1:8010 --question 'how does step-ca issue SSH certificates'"
       ],
       "execution_class": "mutation",
       "budget": {
