@@ -10,7 +10,7 @@ from typing import Any
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_bool, require_list, require_mapping, require_str, require_string_list
+from validation_toolkit import load_yaml_with_identity, require_bool, require_list, require_mapping, require_str, require_string_list
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_catalog import configured_environment_ids
@@ -131,11 +131,11 @@ def load_subdomain_catalog() -> dict[str, Any]:
 
 
 def load_host_vars() -> dict[str, Any]:
-    return load_yaml(HOST_VARS_PATH)
+    return load_yaml_with_identity(HOST_VARS_PATH)
 
 
 def load_public_edge_defaults() -> dict[str, Any]:
-    return load_yaml(PUBLIC_EDGE_DEFAULTS_PATH)
+    return load_yaml_with_identity(PUBLIC_EDGE_DEFAULTS_PATH)
 
 
 def validate_reserved_prefixes(catalog: dict[str, Any]) -> dict[str, set[str]]:
