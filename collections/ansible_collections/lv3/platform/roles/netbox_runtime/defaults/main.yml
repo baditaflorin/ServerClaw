@@ -2,6 +2,16 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+
+# ADR 0373 service variable definitions
+netbox_site_dir: "{{ site_root }}/netbox"
+netbox_local_artifact_dir: "{{ controller_local_root }}/netbox"
+netbox_secret_dir: "/run/lv3-secrets/netbox"
+netbox_container_name: netbox
+netbox_image: "{{ container_image_catalog.images.netbox_runtime.ref }}"
+netbox_compose_file: "{{ netbox_site_dir }}/docker-compose.yml"
+netbox_env_file: "{{ netbox_site_dir }}/netbox.env"
+
 netbox_image_tag: v4.5.4
 netbox_redis_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref }}"
 netbox_server_port: "{{ platform_service_topology | platform_service_port('netbox', 'internal') }}"
