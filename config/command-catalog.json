@@ -2452,7 +2452,7 @@
         ],
         "rollback_guidance": [
           "Restore the last known-good repo-managed One-API runtime and bootstrap state before retrying instead of hand-editing channels, tokens, or runtime env files in the UI.",
-          "Replay dependent consumer converges after rollback so Open WebUI and ServerClaw do not keep stale provider configuration."
+          "Replay dependent consumer converges after rollback so ServerClaw do not keep stale provider configuration."
         ]
       },
       "execution": {
@@ -2861,7 +2861,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-rag-context passes",
         "make validate passes before the apply",
-        "The platform context corpus, private API publication, and Open WebUI integration boundary are reviewed before rollout"
+        "The platform context corpus, private API publication, and ServerClaw integration boundary are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -2874,7 +2874,7 @@
         ],
         "rollback_guidance": [
           "Restore the last known-good platform context runtime before retrying.",
-          "Do not leave ad hoc Open WebUI or Windmill integration drift behind after a failed rollout."
+          "Do not leave ad hoc ServerClaw or Windmill integration drift behind after a failed rollout."
         ]
       },
       "execution": {
@@ -3025,7 +3025,7 @@
       }
     },
     "converge-searxng": {
-      "description": "Converge the private SearXNG runtime, host-side tailnet proxy, DNS publication, and Open WebUI search integration state.",
+      "description": "Converge the private SearXNG runtime, host-side tailnet proxy, DNS publication, and ServerClaw search integration state.",
       "workflow_id": "converge-searxng",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -3048,7 +3048,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-searxng passes",
         "make validate passes before the apply",
-        "The tailnet-only exposure boundary and Open WebUI search integration behavior are reviewed before rollout"
+        "The tailnet-only exposure boundary and ServerClaw search integration behavior are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -3061,7 +3061,7 @@
         ],
         "rollback_guidance": [
           "Restore the last known-good SearXNG runtime and host proxy state before retrying.",
-          "Do not leave manual DNS or Open WebUI search configuration drift behind after a failed rollout."
+          "Do not leave manual DNS or ServerClaw search configuration drift behind after a failed rollout."
         ]
       },
       "execution": {

@@ -1993,7 +1993,7 @@
         "production": {
           "status": "active",
           "url": "http://100.64.0.1:8018/v1",
-          "notes": "Open WebUI, ServerClaw, and controller-local bootstrap checks use the private Proxmox host proxy while the runtime itself stays on docker-runtime-lv3."
+          "notes": "ServerClaw and controller-local bootstrap checks use the private Proxmox host proxy while the runtime itself stays on docker-runtime-lv3."
         }
       }
     },
@@ -2909,8 +2909,7 @@
       "exposure": "edge-published",
       "uptime_monitor_name": "ServerClaw",
       "health_probe_id": "serverclaw",
-      "image_catalog_ids": [
-      ],
+      "image_catalog_ids": [],
       "secret_catalog_ids": [
         "serverclaw_admin_password",
         "serverclaw_secret_key",

@@ -243,16 +243,6 @@
           "notes": "This is the sanctioned agent-observability API surface for trace ingestion and read-back verification."
         },
         {
-          "kind": "service_api",
-          "endpoint": "http://100.64.0.1:8008",
-          "auth": "Repo-managed bootstrap admin password today; future OIDC through Keycloak once ADR 0056 is live.",
-          "service_refs": [
-          ],
-          "workflow_refs": [
-          ],
-          "notes": "This is the private operator-and-agent workbench. Keep model connectors repo-authoritative and do not publish it through the public edge."
-        },
-        {
           "id": "one-api-unified-llm-api",
           "kind": "service_api",
           "endpoint": "http://100.64.0.1:8018/v1",
@@ -263,7 +253,7 @@
           "workflow_refs": [
             "converge-one-api"
           ],
-          "notes": "This is the sanctioned unified local LLM API. Repo-managed consumers such as Open WebUI and ServerClaw should call One-API instead of binding directly to Ollama."
+          "notes": "This is the sanctioned unified local LLM API. Repo-managed consumers such as ServerClaw should call One-API instead of binding directly to Ollama."
         },
         {
           "id": "ollama-local-inference-api",
@@ -289,7 +279,7 @@
           "workflow_refs": [
             "converge-rag-context"
           ],
-          "notes": "This is the private tool and retrieval API that backs the repo-grounded platform context surface for Open WebUI and other approved agent runtimes."
+          "notes": "This is the private tool and retrieval API that backs the repo-grounded platform context surface for ServerClaw and other approved agent runtimes."
         }
       ]
     },

@@ -823,8 +823,8 @@
     "standby": {
       "kind": "cold",
       "location": "docker-runtime-lv3",
-      "failover_trigger": "Restore docker-runtime-lv3 when Open WebUI or its runtime state cannot be recovered in place.",
-      "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Open WebUI converge from git."
+      "failover_trigger": "Restore docker-runtime-lv3 when ServerClaw or its runtime state cannot be recovered in place.",
+      "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the ServerClaw converge from git."
     }
   },
   "one_api": {

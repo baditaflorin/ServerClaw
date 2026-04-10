@@ -137,13 +137,6 @@
       "approval_notes": "ADR 0146 approves this public-edge observability surface so agent traces can be emitted without relying on private network paths."
     },
     {
-      "title": "Open WebUI operator workbench",
-      "lane": "api",
-      "publication_tier": "operator-only",
-      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8008, with routine browser sign-in brokered by Keycloak and a retained local break-glass admin path.",
-      "approval_notes": "This conversational operator surface stays private, relies on the shared Keycloak identity plane for normal access, and must not be published through the public edge."
-    },
-    {
       "id": "one-api-unified-llm-api",
       "title": "One-API unified LLM API",
       "lane": "api",
@@ -159,7 +152,7 @@
       "lane_surface_ref": "ollama-local-inference-api",
       "publication_tier": "internal-only",
       "reachability": "Reachable only on the LV3 private guest network at docker-runtime-lv3:11434.",
-      "approval_notes": "This private local-inference surface is consumed only by repo-managed internal callers such as Open WebUI and bounded goal-compiler fallback routing; do not publish it through public DNS or the NGINX edge."
+      "approval_notes": "This private local-inference surface is consumed only by repo-managed internal callers such as bounded goal-compiler fallback routing; do not publish it through public DNS or the NGINX edge."
     },
     {
       "id": "platform-context-api",
@@ -168,7 +161,7 @@
       "lane_surface_ref": "platform-context-api",
       "publication_tier": "operator-only",
       "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token.",
-      "approval_notes": "This governed retrieval and tool API remains private-first and is intended for approved operators, Open WebUI global tools, and other authenticated internal agent runtimes."
+      "approval_notes": "This governed retrieval and tool API remains private-first and is intended for approved operators, approved agent runtimes global tools, and other authenticated internal agent runtimes."
     },
     {
       "id": "stalwart-mail-events",

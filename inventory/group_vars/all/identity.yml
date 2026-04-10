@@ -57,11 +57,7 @@ mail_platform_domain: "{{ platform_domain }}"
 mail_platform_brevo_sender_name: "{{ platform_operator_name }} Mail Bridge"
 
 # ---------------------------------------------------------------------------
-# Open WebUI
-# ---------------------------------------------------------------------------
-
-# ---------------------------------------------------------------------------
-# ServerClaw (Open WebUI fork)
+# ServerClaw
 # ---------------------------------------------------------------------------
 serverclaw_admin_email: "{{ platform_operator_email }}"
 serverclaw_admin_name: "{{ platform_operator_name }}"

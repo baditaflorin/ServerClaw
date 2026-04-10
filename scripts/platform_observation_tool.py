@@ -1183,7 +1183,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--digest-path",
         default=str(DEFAULT_DIGEST_PATH),
-        help="Markdown digest path written for Open WebUI operator review.",
+        help="Markdown digest path written for operator review.",
     )
     parser.add_argument(
         "--publish-nats",

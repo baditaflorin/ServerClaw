@@ -4834,7 +4834,7 @@
         "scripts/one_api_bootstrap.py"
       ],
       "outputs": [
-        "A private One-API runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Proxmox-host controller proxy, repo-managed routing channels, per-consumer API tokens, and verified provider env files for Open WebUI and ServerClaw."
+        "A private One-API runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Proxmox-host controller proxy, repo-managed routing channels, per-consumer API tokens, and verified provider env files for ServerClaw."
       ],
       "verification_commands": [
         "make syntax-check-one-api",
@@ -4905,7 +4905,7 @@
       }
     },
     "converge-searxng": {
-      "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
+      "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render ServerClaw to use the local search endpoint.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4940,7 +4940,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "A private SearXNG runtime on docker-runtime-lv3, a tailnet-only hostname at search.lv3.org, and an Open WebUI runtime configured to use the local SearXNG search API."
+        "A private SearXNG runtime on docker-runtime-lv3, a tailnet-only hostname at search.lv3.org, and an ServerClaw runtime configured to use the local SearXNG search API."
       ],
       "verification_commands": [
         "make syntax-check-searxng",
@@ -4990,7 +4990,7 @@
         "scripts/ollama_probe.py"
       ],
       "outputs": [
-        "A private Ollama inference runtime on docker-runtime-lv3 with the repo-managed startup models available for goal-compiler and Open WebUI local inference."
+        "A private Ollama inference runtime on docker-runtime-lv3 with the repo-managed startup models available for goal-compiler and ServerClaw local inference."
       ],
       "verification_commands": [
         "make syntax-check-ollama",
@@ -8050,7 +8050,7 @@
       "owner_runbook": "docs/runbooks/configure-litellm.md"
     },
     "converge-librechat": {
-      "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge, replacing Open WebUI.",
+      "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",

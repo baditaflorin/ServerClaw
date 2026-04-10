@@ -390,13 +390,6 @@
       "adr": "0284"
     },
     {
-      "name": "Open WebUI",
-      "vm": "docker-runtime-lv3",
-      "tier": 3,
-      "category": "automation",
-      "adr": "0060"
-    },
-    {
       "id": "one_api",
       "service": "one_api",
       "name": "One-API",
@@ -1254,27 +1247,27 @@
     {
       "to": "keycloak",
       "type": "soft",
-      "description": "Open WebUI can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
+      "description": "ServerClaw can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
     },
     {
       "to": "one_api",
       "type": "hard",
-      "description": "Open WebUI uses the private One-API runtime for repo-managed local model access."
+      "description": "ServerClaw uses the private One-API runtime for repo-managed local model access."
     },
     {
       "to": "ollama",
       "type": "hard",
-      "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
+      "description": "ServerClaw routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
     },
     {
       "to": "openbao",
       "type": "startup_only",
-      "description": "Open WebUI consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
+      "description": "ServerClaw consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
     },
     {
       "to": "searxng",
       "type": "soft",
-      "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+      "description": "ServerClaw delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
     },
     {
       "from": "one_api",

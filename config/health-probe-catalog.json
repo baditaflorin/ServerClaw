@@ -3273,8 +3273,8 @@
     "serverclaw": {
       "service_name": "serverclaw",
       "owning_vm": "coolify-lv3",
-      "role": "open_webui_runtime",
-      "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
+      "role": "serverclaw_runtime",
+      "verify_file": "roles/serverclaw_runtime/tasks/verify.yml",
       "startup": {
         "kind": "http",
         "description": "ServerClaw startup completes once the local HTTP surface answers on the runtime VM.",

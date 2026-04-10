@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.84",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T03:32:23Z",
-  "next_refresh_at": "2026-04-10T04:32:23Z",
+  "generated_at": "2026-04-10T03:51:23Z",
+  "next_refresh_at": "2026-04-10T04:51:23Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -2047,7 +2047,7 @@
       },
       {
         "id": "converge-librechat",
-        "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge, replacing Open WebUI.",
+        "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge.",
         "tags": [
           "converge-librechat",
           "host-and-guest-live",
@@ -2853,7 +2853,7 @@
       },
       {
         "id": "converge-searxng",
-        "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
+        "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render ServerClaw to use the local search endpoint.",
         "tags": [
           "converge-searxng",
           "host-and-guest-live",
