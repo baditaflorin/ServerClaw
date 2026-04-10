@@ -343,7 +343,7 @@
     or not (netbox_existing_token_is_v2 | default(false))
     or (netbox_existing_token_check.stdout | default('000') | trim) != '200'
   failed_when: false
-  retries: 12
+  retries: 30
   delay: 10
   until: netbox_token_provision.status == 201
   no_log: true
