@@ -1,8 +1,8 @@
-# ADR 0382: Convergence Speed and Incremental Apply
+# ADR 0392: Convergence Speed and Incremental Apply
 
-**Status:** Proposed
+**Status:** Accepted
 
-**Date:** 2026-04-08
+**Date:** 2026-04-10
 
 **Extends:** ADR 0355 (Apply Phase Serialization), ADR 0372 (Data-Driven Playbook Composition)
 
@@ -164,14 +164,18 @@ All phases are additive. No existing behavior changes unless explicitly opted in
 - Phase 2: fingerprinting defaults to disabled; enable with `LV3_INCREMENTAL_CONVERGE=1`.
 - Phase 3: dry-run validation is a new Make target, does not replace existing gates.
 
-## Implementation Priority
+## Implementation Status
 
-| Phase | Effort | Impact | Timeline |
-|-------|--------|--------|----------|
-| 1.1 Conditional facts | 2h | -2 min | This week |
-| 1.2 Image digest check | 4h | -3 min | This week |
-| 1.3 Preflight parallel | 2h | -1 min | This week |
-| 2.1 Fingerprinting | 1-2d | -7 min (no-change) | Next sprint |
-| 2.2 Lane parallelism | 2-3d | -4 min | Next sprint |
-| 3.1 Dry-run validation | 4h | Unblocks push | This week |
-| 3.2 Gate caching | 4h | Faster push | This week |
+All phases implemented on 2026-04-10:
+
+| Phase | File(s) Changed | Notes |
+|-------|----------------|-------|
+| 1.1 Conditional facts | `ansible.cfg` | Added `gather_subset = !hardware` globally |
+| 1.2 Image digest check | `common/tasks/docker_compose_converge.yml` | Skips `docker compose pull` when images exist locally |
+| 1.3 Preflight parallel | `scripts/preflight_controller_local.py` | Secret checks now use `ThreadPoolExecutor` |
+| 2.1 Fingerprinting | `common/tasks/convergence_fingerprint.yml`, `common/defaults/main.yml` | Opt-in via `LV3_INCREMENTAL_CONVERGE=1` |
+| 2.2 Lane parallelism | `scripts/ansible_scope_runner.py` | New `parallel-run` command; `make parallel-converge` |
+| 3.1 Dry-run validation | `Makefile` | `make validate-integration` runs syntax + schema gates |
+| 3.2 Gate caching | `scripts/gate_result_cache.py` | Content-hash keyed cache with configurable TTL |
+
+**Also:** reduced default health check timeouts (port: 300s→120s, retries: 36→24) in `common/defaults/main.yml`.

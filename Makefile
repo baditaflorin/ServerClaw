@@ -125,7 +125,7 @@ push-local:
 	GATE_BYPASS_REASON_CODE=runner_image_pull_failure \
 	GATE_BYPASS_DETAIL="Docker registry registry.lv3.org not reachable from local machine" \
 	GATE_BYPASS_SUBSTITUTE_EVIDENCE="make validate-local passed; pre-commit hooks passed" \
-	GATE_BYPASS_REMEDIATION_REF="docs/adr/0382-convergence-speed-and-incremental-apply.md" \
+	GATE_BYPASS_REMEDIATION_REF="docs/adr/0392-convergence-speed-and-incremental-apply.md" \
 	GATE_BYPASS_OWNER="$$(git config user.name)" \
 	git push origin $$(git rev-parse --abbrev-ref HEAD)
 
@@ -173,6 +173,25 @@ validate-architecture-fitness:
 
 validate-interface-contracts:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --validate
+
+# ADR 0392 Phase 3.1 — Dry-run validation for config-only changes
+validate-integration:
+	@echo "=== Dry-run integration validation (ADR 0392) ==="
+	$(MAKE) validate-yaml
+	$(MAKE) validate-json
+	$(MAKE) validate-generated-vars
+	$(MAKE) validate-ansible-syntax
+	$(MAKE) validate-compose-runtime-envs
+	$(MAKE) validate-interface-contracts
+	@echo "=== Dry-run validation passed — config is syntactically valid ==="
+
+# ADR 0392 Phase 2.2 — Parallel convergence across independent lanes
+parallel-converge:
+	@echo "=== Parallel convergence (ADR 0392 Phase 2.2) ==="
+	python3 $(REPO_ROOT)/scripts/ansible_scope_runner.py parallel-run \
+		--playbooks $(playbooks) \
+		--env $(env) \
+		--max-parallel $(max_parallel)
 
 install-hooks:
 	mkdir -p "$$(git rev-parse --git-path hooks)"
