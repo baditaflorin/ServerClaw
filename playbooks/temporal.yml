@@ -30,7 +30,7 @@
   gather_facts: true
   vars:
     temporal_admin_tools_image: "{{ container_image_catalog.images.temporal_admin_tools_runtime.ref }}"
-    temporal_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal
+    temporal_local_artifact_dir: "{{ repo_shared_local_root }}/temporal"
     temporal_database_password_local_file: "{{ temporal_local_artifact_dir }}/database-password.txt"
     temporal_database_name: temporal
     temporal_visibility_database_name: temporal_visibility

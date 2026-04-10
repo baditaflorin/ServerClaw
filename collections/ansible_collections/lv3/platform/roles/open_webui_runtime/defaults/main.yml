@@ -11,7 +11,7 @@
 open_webui_enable_openbao_agent: true
 open_webui_port: "{{ platform_service_topology | platform_service_port('open_webui', 'internal') }}"
 open_webui_host_proxy_port: "{{ platform_service_topology | platform_service_port('open_webui', 'controller') }}"
-open_webui_admin_name: Florin Badita
+open_webui_admin_name: "{{ platform_operator_name }}"
 open_webui_admin_email: ops@{{ platform_domain }}
 open_webui_internal_base_url: "{{ platform_service_topology | platform_service_url('open_webui', 'internal') }}"
 open_webui_controller_url: "{{ platform_service_topology | platform_service_url('open_webui', 'controller') }}"

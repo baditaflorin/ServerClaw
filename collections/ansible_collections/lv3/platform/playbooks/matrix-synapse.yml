@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Matrix Synapse converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, a host-side Tailscale proxy published on proxmox_florin, and matrix.lv3.org published through the shared edge.
+#   - Matrix Synapse converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, a host-side Tailscale proxy published on proxmox_florin, and matrix.{{ platform_domain }} published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #              Runtime secrets, signing material, and the bootstrap admin account are reused when present, and repeat runs reconcile the same service contract.
@@ -50,7 +50,7 @@
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
     inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
-    subdomain_fqdn: matrix.lv3.org
+    subdomain_fqdn: "matrix.{{ platform_domain }}"
 
   tasks:
     - name: Load controller defaults
@@ -81,7 +81,7 @@
           - selected_subdomain.status in ['active', 'planned']
           - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
         fail_msg: >-
-          matrix.lv3.org must exist in config/subdomain-catalog.json before live apply.
+          matrix.{{ platform_domain }} must exist in config/subdomain-catalog.json before live apply.
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:

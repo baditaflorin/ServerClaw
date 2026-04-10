@@ -12,7 +12,7 @@
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
     inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
-    subdomain_fqdn: headscale.lv3.org
+    subdomain_fqdn: "headscale.{{ platform_domain }}"
 
   tasks:
     - name: Load controller defaults
@@ -41,7 +41,7 @@
         that:
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
-        fail_msg: "headscale.lv3.org must exist in config/subdomain-catalog.json before live apply."
+        fail_msg: "headscale.{{ platform_domain }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:
@@ -130,7 +130,7 @@
         url: https://127.0.0.1/health
         method: GET
         headers:
-          Host: headscale.lv3.org
+          Host: "headscale.{{ platform_domain }}"
         status_code: 200
         validate_certs: false
       changed_when: false

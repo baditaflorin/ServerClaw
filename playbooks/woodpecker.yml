@@ -159,8 +159,8 @@
     woodpecker_public_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('woodpecker', 'public') }}"
     woodpecker_controller_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('woodpecker', 'controller') }}"
     woodpecker_gitea_controller_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('gitea', 'controller') }}"
-    woodpecker_auth_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/admin-auth.json
-    woodpecker_api_token_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/api-token.txt
+    woodpecker_auth_file: "{{ repo_shared_local_root }}/woodpecker/admin-auth.json"
+    woodpecker_api_token_file: "{{ repo_shared_local_root }}/woodpecker/api-token.txt"
     woodpecker_bootstrap_spec_file: "{{ repo_shared_local_root }}/woodpecker/bootstrap-spec.json"
     woodpecker_gitea_password_file: "{{ repo_shared_local_root }}/gitea/admin-password.txt"
     woodpecker_gitea_token_file: "{{ repo_shared_local_root }}/gitea/admin-token.txt"

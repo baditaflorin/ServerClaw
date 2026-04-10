@@ -143,11 +143,11 @@
         open_webui_controller_url: "{{ serverclaw_public_url }}"
         open_webui_webui_url: "{{ serverclaw_public_url }}"
         open_webui_webui_name: "{{ serverclaw_webui_name }}"
-        open_webui_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw
-        open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/admin-password.txt
-        open_webui_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/webui-secret-key.txt
-        open_webui_provider_env_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/provider.env
-        open_webui_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-client-secret.txt
+        open_webui_local_artifact_dir: "{{ repo_shared_local_root }}/serverclaw"
+        open_webui_admin_password_local_file: "{{ repo_shared_local_root }}/serverclaw/admin-password.txt"
+        open_webui_secret_key_local_file: "{{ repo_shared_local_root }}/serverclaw/webui-secret-key.txt"
+        open_webui_provider_env_local_file: "{{ repo_shared_local_root }}/serverclaw/provider.env"
+        open_webui_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/serverclaw-client-secret.txt"
         open_webui_admin_password_remote_file: /etc/lv3/serverclaw/admin-password.txt
         open_webui_secret_key_remote_file: /etc/lv3/serverclaw/webui-secret-key.txt
         open_webui_enable_oidc: "{{ serverclaw_enable_oidc }}"

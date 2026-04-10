@@ -53,7 +53,7 @@ plausible_mailer_email: server@{{ platform_domain }}
 plausible_mailer_name: LV3 Plausible
 plausible_mailer_adapter: Bamboo.SMTPAdapter
 plausible_bootstrap_user_email: "{{ platform_operator_email }}"
-plausible_bootstrap_user_name: Florin Badita
+plausible_bootstrap_user_name: "{{ platform_operator_name }}"
 plausible_default_site_timezone: Europe/Bucharest
 plausible_disable_registration: true
 plausible_enable_email_verification: false

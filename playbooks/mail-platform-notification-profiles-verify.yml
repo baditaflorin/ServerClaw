@@ -54,7 +54,7 @@
         payload = json.dumps(
             {
                 'profile_id': 'platform-transactional',
-                'to': ['baditaflorin@gmail.com'],
+                'to': ['{{ platform_operator_email }}'],
                 'subject': 'LV3 scoped profile rejection test',
                 'text': 'This request should be rejected before delivery.',
             }
@@ -116,7 +116,7 @@
         for profile_id, key_path, subject, text in profiles:
             payload = json.dumps(
                 {
-                    'to': ['baditaflorin@gmail.com'],
+                    'to': ['{{ platform_operator_email }}'],
                     'subject': subject,
                     'text': text,
                     'html': f'<p>{text}</p>',
