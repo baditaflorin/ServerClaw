@@ -9,6 +9,9 @@ netbox_local_artifact_dir: "{{ repo_shared_local_root }}/netbox"
 netbox_secret_dir: "/run/lv3-secrets/netbox"
 netbox_container_name: netbox
 netbox_image: quay.io/netboxcommunity/netbox:v4.5.4
+netbox_openbao_agent_image: "{{ openbao_agent_image }}"
+netbox_openbao_agent_container_name: netbox-openbao-agent
+netbox_openbao_agent_dir: "{{ netbox_site_dir }}/openbao"
 netbox_compose_file: "{{ netbox_site_dir }}/docker-compose.yml"
 netbox_env_file: "{{ netbox_site_dir }}/netbox.env"
 
