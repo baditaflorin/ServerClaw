@@ -19,6 +19,7 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
+from validation_toolkit import require_bool, require_enum, require_identifier, require_int, require_list, require_mapping, require_semver, require_str, require_string_list
 from command_catalog import load_command_catalog, validate_command_catalog
 from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
@@ -206,40 +207,8 @@ def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
     return result
 
 
-def require_mapping(value: Any, path: str) -> dict:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be a mapping")
-    return value
-
-
-def require_list(value: Any, path: str) -> list:
-    if not isinstance(value, list):
-        raise ValueError(f"{path} must be a list")
-    return value
-
-
-def require_str(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
 def require_repo_relative_path(value: Any, path: str) -> str:
     return validate_repo_relative_path(require_str(value, path), label=path)
-
-
-def require_bool(value: Any, path: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{path} must be a boolean")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int | None = None) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{path} must be an integer")
-    if minimum is not None and value < minimum:
-        raise ValueError(f"{path} must be >= {minimum}")
-    return value
 
 
 def require_int_or_template(value: Any, path: str, minimum: int | None = None) -> int | str:
@@ -249,13 +218,6 @@ def require_int_or_template(value: Any, path: str, minimum: int | None = None) -
             return value
         raise ValueError(f"{path} must be an integer or a Jinja template expression")
     return require_int(value, path, minimum)
-
-
-def require_semver(value: Any, path: str) -> str:
-    value = require_str(value, path)
-    if not SEMVER_PATTERN.match(value):
-        raise ValueError(f"{path} must use semantic version format")
-    return value
 
 
 def require_date(value: Any, path: str) -> str:
@@ -274,13 +236,6 @@ def require_hostname(value: Any, path: str) -> str:
     return value
 
 
-def require_identifier(value: Any, path: str) -> str:
-    value = require_str(value, path)
-    if not IDENTIFIER_PATTERN.match(value):
-        raise ValueError(f"{path} must use lowercase letters, numbers, hyphens, or underscores")
-    return value
-
-
 def require_ipv4(value: Any, path: str) -> str:
     value = require_str(value, path)
     try:
@@ -296,29 +251,6 @@ def require_network(value: Any, path: str) -> str:
         ipaddress.ip_network(value, strict=False)
     except ValueError as exc:
         raise ValueError(f"{path} must be a valid network or CIDR") from exc
-    return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    items = require_list(value, path)
-    result = []
-    for index, item in enumerate(items):
-        result.append(require_str(item, f"{path}[{index}]"))
-    return result
-
-
-def require_int_list(value: Any, path: str, minimum: int = 1) -> list[int]:
-    items = require_list(value, path)
-    result = []
-    for index, item in enumerate(items):
-        result.append(require_int(item, f"{path}[{index}]", minimum))
-    return result
-
-
-def require_enum(value: Any, path: str, allowed: set[str]) -> str:
-    value = require_str(value, path)
-    if value not in allowed:
-        raise ValueError(f"{path} must be one of {sorted(allowed)}")
     return value
 
 

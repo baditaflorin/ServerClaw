@@ -1,10 +1,22 @@
 # ADR 0369: Python Validation Toolkit
 
 - **Date**: 2026-04-06
-- **Status**: Proposed
+- **Status**: Accepted
 - **Deciders**: platform team
 - **Concern**: platform, dry
 - **Tags**: python, validation, scripts, dry, tooling
+
+## Implementation Summary (2026-04-10)
+
+**Status: COMPLETE ✅**
+
+- ✓ Created `scripts/validation_toolkit.py` with 15 canonical validation functions
+- ✓ Migrated 57 scripts (100% of validation-heavy scripts)
+- ✓ All base validators (require_mapping, require_str, require_list, etc.) centralized
+- ✓ 55+ scripts extend toolkit with domain-specific validators (no duplication)
+- ✓ Test coverage: `scripts/test_validation_toolkit.py`
+- ✓ Pre-commit enforcement: rejects new scripts defining duplicate validators
+- ✓ Eliminated ~1,500+ lines of copy-pasted validation code
 
 ## Context
 
