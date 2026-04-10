@@ -1,8 +1,9 @@
-# Release 0.178.99
+# Release 0.178.100
 
 - Date: 2026-04-10
 
 ## Summary
+- fix: Remove duplicate excalidraw topology block in proxmox_florin.yml that caused exposure_model to be overridden to private-only; changelog portal generation unblocked
 - NetBox infrastructure deployment converged successfully — preflight hang fixed (follow: false on find task), token provisioning retry timeout increased to 300s, verification tasks conditionalized on token definition, ops/password credentials provisioned to .local/netbox/
 - [adr-0404] Service lifecycle contract — BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7
 - [adr-0402] Remove JupyterHub (notebooks.lv3.org) — zero active users, maintenance overhead eliminated; jupyterhub_runtime role deleted, jupyterhub Keycloak OIDC client removed, 15 catalogs cleaned, ADR 0291 deprecated; postmortem documents 7 new ADR 0396 gaps (platform_services.yml orphaned blocks, keycloak shared role tasks, uptime kuma/workbench IA non-catalog JSONs)

@@ -2825,14 +2825,6 @@ lv3_service_topology:
       prefix_proxy_routes:
         - path: /socket.io/
           upstream: "http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port }}"
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    exposure_model: private-only
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    access:
-      kind: tailscale-tcp-proxy
   gotenberg:
     service_name: gotenberg
     owning_vm: runtime-ai-lv3
