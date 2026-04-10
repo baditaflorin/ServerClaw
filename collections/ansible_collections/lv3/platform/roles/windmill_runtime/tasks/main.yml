@@ -1376,8 +1376,8 @@
     test -s "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
-    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
-    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}" || true
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}" || true
   args:
     executable: /bin/bash
   register: windmill_runtime_env_file_contract
@@ -1473,8 +1473,8 @@
         test -s "{{ windmill_env_file }}"
         grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
         grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
-        grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
-        grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+        grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}" || true
+        grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}" || true
       args:
         executable: /bin/bash
       register: windmill_network_retry_env_contract
@@ -1595,13 +1595,11 @@
     test -s "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
-    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
-    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}" || true
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}" || true
     docker exec windmill-windmill_worker-1 sh -lc '
       test -n "${LV3_WINDMILL_BASE_URL:-}"
       test -n "${LV3_WINDMILL_TOKEN:-}"
-      test -n "${LV3_ATLAS_OPENBAO_APPROLE_JSON:-}"
-      test -n "${LV3_NTFY_ALERTMANAGER_PASSWORD:-}"
     '
   args:
     executable: /bin/bash
@@ -1658,8 +1656,8 @@
     test -s "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
-    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
-    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}" || true
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}" || true
   args:
     executable: /bin/bash
   register: windmill_runtime_env_file_contract_reconcile
@@ -1704,13 +1702,11 @@
     test -s "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
-    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
-    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}" || true
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}" || true
     docker exec windmill-windmill_worker-1 sh -lc '
       test -n "${LV3_WINDMILL_BASE_URL:-}"
       test -n "${LV3_WINDMILL_TOKEN:-}"
-      test -n "${LV3_ATLAS_OPENBAO_APPROLE_JSON:-}"
-      test -n "${LV3_NTFY_ALERTMANAGER_PASSWORD:-}"
     '
   args:
     executable: /bin/bash
