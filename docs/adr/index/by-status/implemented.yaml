@@ -4798,7 +4798,7 @@ adrs:
     implemented_on: '2026-03-31'
   - adr: 0291
     title: JupyterHub As The Interactive Notebook Environment
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
@@ -6288,27 +6288,6 @@ adrs:
     path: docs/adr/0396-deterministic-service-decommissioning.md
     implemented_in_repo_version: 0.178.90
     implemented_on: '2026-04-10'
-  - adr: 0397
-    title: Remove Netdata (realtime) from the Platform
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-04-10'
-    concern: monitoring
-    keywords:
-      - lifecycle
-      - decommissioning
-      - netdata
-      - realtime
-      - observability
-      - monitoring
-      - remove
-      - from
-      - platform
-    summary: Remove Netdata from the platform. The service is registered as realtime
-    filename: 0397-remove-netdata.md
-    path: docs/adr/0397-remove-netdata.md
-    implemented_in_repo_version: 0.178.91
-    implemented_on: '2026-04-10'
   - adr: 0399
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
     status: Accepted
@@ -6373,4 +6352,24 @@ adrs:
     filename: 0401-remove-netdata.md
     path: docs/adr/0401-remove-netdata.md
     implemented_in_repo_version: 0.178.92
+    implemented_on: '2026-04-10'
+  - adr: '0402'
+    title: Remove JupyterHub from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: platform
+    keywords:
+      - lifecycle
+      - decommissioning
+      - jupyterhub
+      - notebooks
+      - removal
+      - remove
+      - from
+      - platform
+    summary: 'Remove JupyterHub from the platform entirely:'
+    filename: 0402-remove-jupyterhub.md
+    path: docs/adr/0402-remove-jupyterhub.md
+    implemented_in_repo_version: 0.178.95
     implemented_on: '2026-04-10'

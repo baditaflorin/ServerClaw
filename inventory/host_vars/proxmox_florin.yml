@@ -83,7 +83,6 @@ platform_port_assignments:
   grist_port: 8484
   outline_port: 3006
   directus_port: 8055
-  jupyterhub_port: 8097
   label_studio_port: 8110
   superset_port: 8105
   piper_port: 8106
@@ -3282,31 +3281,6 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}"
-  jupyterhub:
-    service_name: jupyterhub
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: notebooks.{{ platform_domain }}
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: notebooks
-      type: A
-      target: "{{ management_ipv4 }}"
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      client_max_body_size: 2g
-      proxy_read_timeout_seconds: 3600
-      proxy_send_timeout_seconds: 3600
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.jupyterhub_port }}"
   label_studio:
     service_name: label_studio
     owning_vm: docker-runtime-lv3

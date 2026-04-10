@@ -1255,56 +1255,6 @@ groups:
           service_id: outline
           indicator: availability
 # END SERVICE: outline
-# BEGIN SERVICE: jupyterhub
-      - record: slo:jupyterhub_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="jupyterhub-availability"}[5m])
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-      - record: slo:jupyterhub_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="jupyterhub-availability"}[1h])
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-      - record: slo:jupyterhub_availability:success_ratio_6h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="jupyterhub-availability"}[6h])
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-      - record: slo:jupyterhub_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="jupyterhub-availability"}[30d])
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-      - record: slo:jupyterhub_availability:error_rate_5m
-        expr: 1 - slo:jupyterhub_availability:success_ratio_5m
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-      - record: slo:jupyterhub_availability:error_rate_1h
-        expr: 1 - slo:jupyterhub_availability:success_ratio_1h
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-      - record: slo:jupyterhub_availability:error_rate_6h
-        expr: 1 - slo:jupyterhub_availability:success_ratio_6h
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-      - record: slo:jupyterhub_availability:error_rate_30d
-        expr: 1 - slo:jupyterhub_availability:success_ratio_30d
-        labels:
-          slo_id: jupyterhub-availability
-          service_id: jupyterhub
-          indicator: availability
-# END SERVICE: jupyterhub
 # BEGIN SERVICE: label_studio
       - record: slo:label_studio_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[5m])

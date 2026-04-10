@@ -275,20 +275,6 @@ def test_build_platform_vars_includes_tesseract_ocr_private_topology() -> None:
     assert platform_vars["tesseract_ocr_port"] == 3008
 
 
-def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
-    platform_vars = generate_platform_vars.build_platform_vars()
-    jupyterhub = platform_vars["platform_service_topology"]["jupyterhub"]
-
-    assert jupyterhub["public_hostname"] == "notebooks.lv3.org"
-    assert jupyterhub["dns"]["name"] == "notebooks"
-    assert jupyterhub["ports"]["internal"] == 8097
-    assert jupyterhub["urls"]["public"] == "https://notebooks.lv3.org"
-    assert jupyterhub["urls"]["internal"] == "http://10.10.10.20:8097"
-    assert jupyterhub["edge"]["client_max_body_size"] == "2g"
-    assert jupyterhub["runtime_pool"] == "runtime-ai"
-    assert jupyterhub["mobility_tier"] == "burst_batch"
-
-
 def test_build_platform_vars_includes_superset_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     superset = platform_vars["platform_service_topology"]["superset"]
@@ -532,29 +518,6 @@ def test_build_service_urls_resolves_outline_internal_url() -> None:
     assert urls == {
         "public": "https://wiki.lv3.org",
         "internal": "http://10.10.10.20:3006",
-    }
-
-
-def test_build_service_urls_resolves_jupyterhub_internal_url() -> None:
-    ports = {"jupyterhub_port": 8097}
-    service = {"owning_vm": "docker-runtime-lv3", "public_hostname": "notebooks.lv3.org"}
-    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
-    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
-    stack = {"desired_state": {"host_id": "proxmox_florin"}}
-
-    port_map, urls = generate_platform_vars.build_service_urls(
-        "jupyterhub",
-        service,
-        host_vars,
-        guest_ipv4_by_name,
-        ports,
-        stack,
-    )
-
-    assert port_map == {"internal": 8097}
-    assert urls == {
-        "public": "https://notebooks.lv3.org",
-        "internal": "http://10.10.10.20:8097",
     }
 
 

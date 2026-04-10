@@ -372,11 +372,8 @@ playbooks:
     shared_surfaces:
       - service:paperless
       - inventory/host_vars/proxmox_florin.yml
-  playbooks/jupyterhub.yml:
-    playbook_id: jupyterhub
     mutation_scope: platform
     shared_surfaces:
-      - service:jupyterhub
       - inventory/host_vars/proxmox_florin.yml
   playbooks/label-studio.yml:
     playbook_id: label_studio
@@ -651,11 +648,8 @@ playbooks:
     shared_surfaces:
       - service:redpanda
       - inventory/host_vars/proxmox_florin.yml
-  playbooks/services/jupyterhub.yml:
-    playbook_id: jupyterhub
     mutation_scope: platform
     shared_surfaces:
-      - service:jupyterhub
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/label-studio.yml:
     playbook_id: label_studio

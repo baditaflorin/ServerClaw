@@ -398,26 +398,6 @@
   targets:
   - https://10.10.10.10:443/
 # END SERVICE: homepage
-# BEGIN SERVICE: jupyterhub
-- labels:
-    assurance_id: jupyterhub-public
-    auth_requirement: upstream_auth
-    certificate_id: notebooks-edge
-    display_url: https://notebooks.lv3.org:443/hub/health
-    environment: production
-    expected_issuer: letsencrypt
-    exposure: edge-published
-    policy_critical: '14'
-    policy_unit: days
-    policy_warn: '21'
-    probe_hostname: notebooks.lv3.org
-    probe_module: http_2xx_follow_redirects
-    scope: public
-    service_id: jupyterhub
-    service_name: JupyterHub
-  targets:
-  - https://10.10.10.10:443/hub/health
-# END SERVICE: jupyterhub
 # BEGIN SERVICE: keycloak
 - labels:
     assurance_id: keycloak-public

@@ -217,7 +217,6 @@ platform_ports:
   grist_port: 8484
   outline_port: 3006
   directus_port: 8055
-  jupyterhub_port: 8097
   label_studio_port: 8110
   superset_port: 8105
   piper_port: 8106
@@ -320,7 +319,6 @@ platform_port_assignments:
   grist_port: 8484
   outline_port: 3006
   directus_port: 8055
-  jupyterhub_port: 8097
   label_studio_port: 8110
   superset_port: 8105
   piper_port: 8106
@@ -3743,8 +3741,6 @@ platform_service_topology:
     urls:
       public: https://data.{{ platform_domain }}
       internal: http://10.10.10.20:8055
-  jupyterhub:
-    service_name: jupyterhub
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
     public_hostname: notebooks.{{ platform_domain }}
@@ -3768,9 +3764,7 @@ platform_service_topology:
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
       upstream: http://10.10.10.20:8097
-    service_id: jupyterhub
     runtime_pool: runtime-ai
-    deployment_surface: playbooks/services/jupyterhub.yml
     restart_domain: runtime-ai-execution
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
     mobility_tier: burst_batch
@@ -6222,8 +6216,6 @@ public_edge_service_topology:
     urls:
       public: https://data.{{ platform_domain }}
       internal: http://10.10.10.20:8055
-  jupyterhub:
-    service_name: jupyterhub
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
     public_hostname: notebooks.{{ platform_domain }}
@@ -6247,9 +6239,7 @@ public_edge_service_topology:
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
       upstream: http://10.10.10.20:8097
-    service_id: jupyterhub
     runtime_pool: runtime-ai
-    deployment_surface: playbooks/services/jupyterhub.yml
     restart_domain: runtime-ai-execution
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
     mobility_tier: burst_batch
@@ -6521,7 +6511,6 @@ browser_runner_port: 8096
 grist_port: 8484
 outline_port: 3006
 directus_port: 8055
-jupyterhub_port: 8097
 label_studio_port: 8110
 superset_port: 8105
 piper_port: 8106

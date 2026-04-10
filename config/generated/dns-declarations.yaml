@@ -120,7 +120,6 @@ dns_records:
     ttl: 3600
     type: public
   notebooks.lv3.org:
-    service: jupyterhub
     target_host: nginx-lv3
     ttl: 3600
     type: public

@@ -1477,51 +1477,6 @@
         "timeout_seconds": 300
       }
     },
-    "converge-jupyterhub": {
-      "description": "Converge the shared JupyterHub notebook environment, publish it at notebooks.lv3.org, and verify the smoke single-user spawn contract.",
-      "workflow_id": "converge-jupyterhub",
-      "scope": "guest_runtime",
-      "approval_policy": "sensitive_live_change",
-      "inputs": [
-        {
-          "name": "bootstrap_ssh_private_key",
-          "kind": "controller_secret",
-          "required": true,
-          "source": "config/controller-local-secrets.json",
-          "description": "Controller-side SSH key used through the Proxmox jump path."
-        },
-        {
-          "name": "hetzner_dns_api_token",
-          "kind": "controller_secret",
-          "required": true,
-          "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish notebooks.lv3.org and expand the shared edge certificate."
-        }
-      ],
-      "expected_preconditions": [
-        "make preflight WORKFLOW=converge-jupyterhub passes",
-        "make validate passes before the apply",
-        "The notebook environment blast radius for docker-runtime-lv3 and the public edge is reviewed before rollout"
-      ],
-      "evidence": {
-        "live_apply_receipt_required": true,
-        "notes": "Record the source commit, notebooks.lv3.org verification, Keycloak redirect verification, smoke-user spawn verification, and the notebook environment contract checks."
-      },
-      "failure_guidance": {
-        "stop_conditions": [
-          "Stop if Keycloak client creation, JupyterHub startup, public publication, or smoke single-user verification fails.",
-          "Stop if the rollout would leave the notebook surface publicly reachable without the documented JupyterHub-managed OIDC handoff."
-        ],
-        "rollback_guidance": [
-          "Restore the last known-good JupyterHub, Keycloak client, and edge publication state from version control before retrying.",
-          "Do not compensate for a broken notebook rollout by hand-editing live containers, secrets, or Keycloak clients outside the repo."
-        ]
-      },
-      "execution": {
-        "profile": "docker_runtime_systemd_make",
-        "timeout_seconds": 1800
-      }
-    },
     "converge-keycloak": {
       "description": "Converge the shared Keycloak SSO broker, publish it at sso.lv3.org, and wire Grafana to the shared OIDC login flow.",
       "workflow_id": "converge-keycloak",

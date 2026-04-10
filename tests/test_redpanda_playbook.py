@@ -43,7 +43,7 @@ def test_collection_and_service_wrappers_import_redpanda_playbooks() -> None:
     assert service == [{"import_playbook": "../redpanda.yml"}]
 
 
-def test_host_network_policy_allows_private_redpanda_ports_without_jupyterhub_collision() -> None:
+def test_host_network_policy_allows_private_redpanda_ports() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
 
@@ -55,5 +55,3 @@ def test_host_network_policy_allows_private_redpanda_ports_without_jupyterhub_co
     assert 8104 in management_rule["ports"]
     assert 8103 in guest_rule["ports"]
     assert 8104 in guest_rule["ports"]
-    assert 8097 not in management_rule["ports"]
-    assert 8099 not in management_rule["ports"]

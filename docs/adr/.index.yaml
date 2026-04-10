@@ -11,8 +11,8 @@ purpose: Compact ADR discovery manifest that points readers to shard-sized ADR m
 total_adrs: 435
 adr_number_range:
   first: '0001'
-  last: '0401'
-  next_available: '0402'
+  last: '0402'
+  next_available: '0403'
 implementation_status_summary:
   Implemented: 342
   Partial: 2
@@ -21,9 +21,9 @@ implementation_status_summary:
   Accepted: 24
   Proposed: 29
 decision_status_summary:
-  Accepted: 338
+  Accepted: 337
   Proposed: 35
-  Deprecated: 13
+  Deprecated: 14
   Implemented: 49
 facets:
   by_range:
@@ -44,14 +44,14 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 114
+      count: 113
       first_adr: '0300'
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 2
+      count: 3
       first_adr: '0400'
-      last_adr: '0401'
+      last_adr: '0402'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -82,13 +82,13 @@ facets:
       count: 7
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
-      count: 12
+      count: 11
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
       count: 27
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 142
+      count: 143
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -137,8 +137,14 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0402'
+  next_available_adr: '0403'
 latest_adrs:
+  - adr: '0402'
+    title: Remove JupyterHub from the Platform
+    implementation_status: Implemented
+    concern: platform
+    path: docs/adr/0402-remove-jupyterhub.md
+    implemented_on: '2026-04-10'
   - adr: '0401'
     title: Remove Netdata from the Platform
     implementation_status: Implemented
@@ -162,12 +168,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0398-outline-shared-s3-migration.md
-  - adr: 0397
-    title: Remove Netdata (realtime) from the Platform
-    implementation_status: Implemented
-    concern: monitoring
-    path: docs/adr/0397-remove-netdata.md
-    implemented_on: '2026-04-10'
   - adr: 0397
     title: Managed S3 Bucket Consumer Pattern
     implementation_status: Proposed

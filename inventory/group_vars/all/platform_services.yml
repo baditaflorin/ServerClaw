@@ -528,56 +528,6 @@ platform_service_registry:
       auth_proxy: true              # gated behind shared oauth2-proxy
 
   # ---------------------------------------------------------------------------
-  # J
-  # ---------------------------------------------------------------------------
-
-  jupyterhub:
-    service_type: docker_compose
-    image_catalog_key: ""            # uses upstream quay.io/jupyterhub/jupyterhub — pinned in defaults
-    internal_port: 8097
-    host_group: docker-runtime-lv3
-    site_dir: /opt/jupyterhub
-    container_name: jupyterhub
-    needs_openbao: true
-    hairpin:
-      publish:
-        - hostname: "notebooks.{{ platform_domain }}"
-          address_host: nginx-lv3
-        - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
-    dns:
-      records:
-        - fqdn: "notebooks.{{ platform_domain }}"
-          type: public
-          target_host: nginx-lv3
-          ttl: 3600
-    tls:
-      domains:
-        - "notebooks.{{ platform_domain }}"
-      cert_source: letsencrypt
-      wildcard: false
-      cert_validity_days: 90
-    sso:
-      enabled: true
-      provider: keycloak
-      client_id: jupyterhub
-      client_secret_local_file: .local/keycloak/jupyterhub-client-secret.txt
-      redirect_uris:
-        - "https://notebooks.{{ platform_domain }}/hub/oauth_callback"
-      scopes:
-        - openid
-        - profile
-        - email
-      public_client: false
-    proxy:
-      enabled: true
-      upstream_port: 8097
-      upstream_host: docker-runtime-lv3
-      public_fqdn: notebooks.{{ platform_domain }}
-      auth_proxy: false             # JupyterHub has native SSO via Keycloak OIDC
-      websocket: true               # JupyterHub uses WebSockets for kernel comms
-
-  # ---------------------------------------------------------------------------
   # K
   # ---------------------------------------------------------------------------
 

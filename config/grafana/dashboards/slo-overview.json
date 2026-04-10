@@ -5490,7 +5490,6 @@
     {
       "id": 136,
       "type": "text",
-      "title": "jupyterhub-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -5498,7 +5497,6 @@
         "y": 189
       },
       "options": {
-        "content": "### jupyterhub-availability\n\nJupyterHub remains reachable through the public LV3 edge for interactive exploratory notebook sessions.\n\nService: `jupyterhub`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=jupyterhub-availability)",
         "mode": "markdown"
       }
     },
@@ -5541,7 +5539,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:jupyterhub_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -5605,7 +5602,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:jupyterhub_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -5649,7 +5645,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:jupyterhub_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -5693,7 +5688,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:jupyterhub_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]

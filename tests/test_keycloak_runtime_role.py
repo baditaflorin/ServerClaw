@@ -67,8 +67,6 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
-    assert defaults["keycloak_jupyterhub_client_id"] == "jupyterhub"
-    assert defaults["keycloak_jupyterhub_client_secret_local_file"].endswith("/.local/keycloak/jupyterhub-client-secret.txt")
     assert defaults["keycloak_superset_client_id"] == "superset"
     assert defaults["keycloak_superset_client_secret_local_file"].endswith("/.local/keycloak/superset-client-secret.txt")
     assert defaults["keycloak_glitchtip_client_id"] == "glitchtip"
@@ -107,11 +105,6 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_outline_post_logout_redirect_uris"] == [
         "{{ keycloak_outline_root_url }}",
         "{{ keycloak_outline_root_url }}/",
-        "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
-    ]
-    assert defaults["keycloak_jupyterhub_post_logout_redirect_uris"] == [
-        "{{ keycloak_jupyterhub_root_url }}",
-        "{{ keycloak_jupyterhub_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
     assert defaults["keycloak_superset_root_url"] == "https://bi.lv3.org"
@@ -799,7 +792,6 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         "Ensure the Langfuse OAuth client exists",
         "Ensure the Outline OAuth client exists",
         "Ensure the Paperless OAuth client exists",
-        "Ensure the JupyterHub OAuth client exists",
         "Ensure the Superset OAuth client exists",
         "Ensure the ServerClaw OAuth client exists",
         "Ensure the API gateway client exists",
@@ -815,7 +807,6 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         "Read the Grist client secret",
         "Read the GlitchTip client secret",
         "Read the Outline client secret",
-        "Read the JupyterHub client secret",
         "Read the Paperless client secret",
         "Read the Superset client secret",
         "Read the ServerClaw client secret",
@@ -951,30 +942,6 @@ def test_role_manages_outline_client_secret() -> None:
     assert mirror_grist_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_grist_client_secret_local_file }}"
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_outline_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_client_secret_local_file }}"
-
-
-def test_role_manages_jupyterhub_client_secret() -> None:
-    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
-    tasks = load_tasks()
-    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    jupyterhub_client_task = next(
-        task for task in realm_block["block"] if task.get("name") == "Ensure the JupyterHub OAuth client exists"
-    )
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the JupyterHub client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the JupyterHub client secret to the control machine")
-
-    assert defaults["keycloak_jupyterhub_client_id"] == "jupyterhub"
-    assert defaults["keycloak_jupyterhub_client_secret_local_file"].endswith("/.local/keycloak/jupyterhub-client-secret.txt")
-    assert defaults["keycloak_jupyterhub_root_url"] == "https://notebooks.lv3.org"
-    assert jupyterhub_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_jupyterhub_client_id }}"
-    assert jupyterhub_client_task["community.general.keycloak_client"]["redirect_uris"] == [
-        "{{ keycloak_jupyterhub_root_url }}/hub/oauth_callback"
-    ]
-    assert jupyterhub_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
-        "{{ keycloak_jupyterhub_post_logout_redirect_uris }}"
-    )
-    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_jupyterhub_client_id }}"
-    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_jupyterhub_client_secret_local_file }}"
 
 
 def test_role_manages_paperless_client_secret() -> None:

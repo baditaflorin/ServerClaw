@@ -92,8 +92,6 @@ keycloak_grist_client_id: grist
 keycloak_grist_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/grist-client-secret.txt"
 keycloak_directus_client_id: directus
 keycloak_directus_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/directus-client-secret.txt"
-keycloak_jupyterhub_client_id: jupyterhub
-keycloak_jupyterhub_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/jupyterhub-client-secret.txt"
 keycloak_superset_client_id: superset
 keycloak_superset_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/superset-client-secret.txt"
 keycloak_glitchtip_client_id: glitchtip
@@ -159,7 +157,6 @@ keycloak_langfuse_root_url: https://langfuse.{{ platform_domain }}
 keycloak_grist_root_url: https://grist.{{ platform_domain }}
 keycloak_directus_root_url: https://data.{{ platform_domain }}
 keycloak_glitchtip_root_url: https://errors.{{ platform_domain }}
-keycloak_jupyterhub_root_url: https://notebooks.{{ platform_domain }}
 keycloak_superset_root_url: https://bi.{{ platform_domain }}
 keycloak_outline_root_url: https://wiki.{{ platform_domain }}
 keycloak_paperless_root_url: https://paperless.{{ platform_domain }}
@@ -184,10 +181,6 @@ keycloak_glitchtip_post_logout_redirect_uris:
 keycloak_outline_post_logout_redirect_uris:
   - "{{ keycloak_outline_root_url }}"
   - "{{ keycloak_outline_root_url }}/"
-  - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
-keycloak_jupyterhub_post_logout_redirect_uris:
-  - "{{ keycloak_jupyterhub_root_url }}"
-  - "{{ keycloak_jupyterhub_root_url }}/"
   - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
 keycloak_superset_post_logout_redirect_uris:
   - "{{ keycloak_superset_root_url }}"

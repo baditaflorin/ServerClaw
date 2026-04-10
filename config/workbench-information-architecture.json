@@ -589,7 +589,10 @@
       "role": "task",
       "role_description": "Governed actions, runbooks, deployments, and live drift visibility.",
       "primary_lane": "change",
-      "audience": ["operator", "admin"]
+      "audience": [
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "homepage",
@@ -598,7 +601,11 @@
       "role": "home",
       "role_description": "Service discovery, status overview, and orientation for new users.",
       "primary_lane": "start",
-      "audience": ["viewer", "operator", "admin"]
+      "audience": [
+        "viewer",
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "docs_portal",
@@ -607,16 +614,24 @@
       "role": "reference",
       "role_description": "Platform runbooks, ADRs, architecture references, and onboarding guides.",
       "primary_lane": "learn",
-      "audience": ["viewer", "operator", "admin"]
+      "audience": [
+        "viewer",
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "outline",
       "title": "Outline Wiki",
       "url": "https://outline.lv3.org",
       "role": "reference",
-      "role_description": "Living knowledge base — automation run summaries, changelogs, and team notes.",
+      "role_description": "Living knowledge base \u2014 automation run summaries, changelogs, and team notes.",
       "primary_lane": "learn",
-      "audience": ["viewer", "operator", "admin"]
+      "audience": [
+        "viewer",
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "plane",
@@ -625,7 +640,10 @@
       "role": "task",
       "role_description": "Project planning, issue tracking, and agent task coordination.",
       "primary_lane": "change",
-      "audience": ["operator", "admin"]
+      "audience": [
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "grafana",
@@ -634,7 +652,11 @@
       "role": "product_native",
       "role_description": "Metrics dashboards, log exploration, and alert management.",
       "primary_lane": "observe",
-      "audience": ["viewer", "operator", "admin"]
+      "audience": [
+        "viewer",
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "gitea",
@@ -643,7 +665,10 @@
       "role": "product_native",
       "role_description": "Source code hosting, CI pipelines, and repository management.",
       "primary_lane": "change",
-      "audience": ["operator", "admin"]
+      "audience": [
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "paperless",
@@ -652,16 +677,11 @@
       "role": "product_native",
       "role_description": "Document management and OCR search.",
       "primary_lane": "learn",
-      "audience": ["viewer", "operator", "admin"]
-    },
-    {
-      "id": "jupyterhub",
-      "title": "JupyterHub",
-      "url": "https://jupyter.lv3.org",
-      "role": "product_native",
-      "role_description": "Interactive data analysis and agent notebook sessions.",
-      "primary_lane": "change",
-      "audience": ["operator", "admin"]
+      "audience": [
+        "viewer",
+        "operator",
+        "admin"
+      ]
     },
     {
       "id": "windmill",
@@ -670,7 +690,10 @@
       "role": "product_native",
       "role_description": "Workflow automation, scheduled tasks, and script runners.",
       "primary_lane": "change",
-      "audience": ["operator", "admin"]
+      "audience": [
+        "operator",
+        "admin"
+      ]
     }
   ]
 }
