@@ -325,6 +325,11 @@
   failed_when: false
   no_log: true
 
+- name: Wait for NetBox superuser initialization (before token provisioning)
+  ansible.builtin.pause:
+    seconds: 30
+  when: not netbox_superuser_api_token_local.stat.exists
+
 - name: Provision the NetBox bootstrap API token
   ansible.builtin.uri:
     url: "{{ netbox_private_base_url }}/api/users/tokens/provision/"
