@@ -32,6 +32,7 @@
     paths: "{{ preflight_repo_root }}"
     recurse: true
     hidden: true
+    follow: false
     patterns: "*.env"
     excludes:
       - ".git"
