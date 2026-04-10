@@ -367,7 +367,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Convergence timing wrapper — measure, record, and report convergence durations (ADR 0392)."
     )
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
     # run
     run_p = subparsers.add_parser("run", help="Run a convergence and record timing.")
@@ -390,13 +390,13 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
-    if args.command == "run":
+    if args.subcommand == "run":
         return cmd_run(args)
-    if args.command == "report":
+    if args.subcommand == "report":
         if not args.all and not args.service:
             parser.error("--report requires --service or --all")
         return cmd_report(args)
-    if args.command == "trend":
+    if args.subcommand == "trend":
         return cmd_trend(args)
 
     return 1
