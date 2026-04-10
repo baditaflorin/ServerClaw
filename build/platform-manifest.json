@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.81",
-  "platform_version": "0.178.73",
-  "generated_at": "2026-04-10T02:36:35Z",
-  "next_refresh_at": "2026-04-10T03:36:35Z",
+  "repo_version": "0.178.82",
+  "platform_version": "0.178.74",
+  "generated_at": "2026-04-10T03:00:53Z",
+  "next_refresh_at": "2026-04-10T04:00:53Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6404,10 +6404,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.80",
+    "last_version": "0.178.81",
     "deployed_at": "2026-04-10",
     "summary": "ADR 0369 implementation: validation_toolkit complete \u2014 100% adoption across 57 scripts, eliminated 1500+ lines of copy-pasted validation code, added pre-commit enforcement Complete IoC compliance: templatize remaining hardcoded domains in 13 collection playbooks (subdomain_fqdn, fail_msg, URLs), 4 role defaults (operator name), 5 top-level playbooks (developer paths), and 2 mail playbooks (operator email); strengthen IoC regression test with TestNoHardcodedPaths class (4 new checks); zero operator-specific values remain in deployable Ansible code",
-    "release_notes_url": "docs/release-notes/0.178.81.md"
+    "release_notes_url": "docs/release-notes/0.178.82.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
