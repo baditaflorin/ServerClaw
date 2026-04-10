@@ -387,6 +387,22 @@
   when: netbox_token_provision is not skipped
   changed_when: false
 
+- name: Fail if token provisioning response is invalid
+  ansible.builtin.fail:
+    msg: |
+      Token provisioning returned HTTP {{ netbox_token_provision.status }} but response doesn't contain expected 'key' and 'token' fields.
+      Response type: {{ netbox_token_provision.json | type_debug }}
+      Response keys: {{ netbox_token_provision.json.keys() | list if (netbox_token_provision.json | type_debug == 'dict') else 'N/A' }}
+      Full response: {{ netbox_token_provision.json }}
+
+      This indicates the NetBox API endpoint response format has changed or is different than expected.
+      Check NetBox API documentation for /api/users/tokens/provision/ endpoint response format.
+  when: >-
+    netbox_token_provision is not skipped
+    and netbox_token_provision.status in [200, 201]
+    and not (netbox_token_provision.json.key is defined and netbox_token_provision.json.token is defined)
+  changed_when: false
+
 - name: Persist the NetBox bootstrap API token locally
   ansible.builtin.copy:
     dest: "{{ netbox_superuser_api_token_local_file }}"
