@@ -1309,41 +1309,6 @@ platform_service_registry:
     container_name: platform-context
     needs_openbao: true
 
-  repo_intake:
-    image_catalog_key: ""            # repo-intake is a bespoke FastAPI app, built locally
-    internal_port: 8096
-    host_group: docker-runtime-lv3
-    site_dir: /opt/repo-intake
-    container_name: repo-intake
-    needs_openbao: false
-    dns:
-      records:
-        - fqdn: "repo-intake.{{ platform_domain }}"
-          type: public
-          target_host: nginx-lv3
-          ttl: 3600
-    tls:
-      domains:
-        - "repo-intake.{{ platform_domain }}"
-      cert_source: letsencrypt
-      wildcard: false
-      cert_validity_days: 90
-    sso:
-      enabled: true
-      provider: keycloak
-      client_id: repo-intake-oauth
-      client_secret_local_file: .local/keycloak/repo-intake-client-secret.txt
-      redirect_uris: []
-      scopes:
-        - openid
-      public_client: false
-    proxy:
-      enabled: true
-      upstream_port: 8096
-      upstream_host: docker-runtime-lv3
-      public_fqdn: repo-intake.{{ platform_domain }}
-      auth_proxy: true
-
   redpanda:
     service_type: docker_compose
     image_catalog_key: redpanda_runtime
