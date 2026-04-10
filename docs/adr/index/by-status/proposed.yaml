@@ -10,7 +10,7 @@ generated: '2026-04-09'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 23
+total_adrs: 29
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -347,6 +347,33 @@ adrs:
     summary: Implement a four-layer bootstrap system that takes a fork operator from
     filename: 0386-reproducible-zero-to-platform-bootstrap.md
     path: docs/adr/0386-reproducible-zero-to-platform-bootstrap.md
+  - adr: 0386
+    title: — Unified Disk Space Monitoring
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: storage
+    keywords:
+      - unified
+      - disk
+      - space
+      - monitoring
+    summary: 'Implement a three-layer architecture with a single shared query module:'
+    filename: 0386-unified-disk-monitoring.md
+    path: docs/adr/0386-unified-disk-monitoring.md
+  - adr: 0387
+    title: Platform DRY Consolidation
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - platform
+      - dry
+      - consolidation
+    summary: This ADR serves as the consolidation point for DRY work. It elevates
+    filename: 0387-platform-dry-consolidation.md
+    path: docs/adr/0387-platform-dry-consolidation.md
   - adr: 0387
     title: ServerClaw-in-Docker — Containerized Platform Development Environment
     status: Proposed
@@ -362,3 +389,68 @@ adrs:
     summary: Implement a three-tier containerized development environment that
     filename: 0387-serverclaw-in-docker.md
     path: docs/adr/0387-serverclaw-in-docker.md
+  - adr: 0388
+    title: Centralize Keycloak Realm Name and OIDC Issuer URL
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - centralize
+      - keycloak
+      - realm
+      - name
+      - oidc
+      - issuer
+      - url
+    summary: 'Add to inventory/groupvars/all/identity.yml:'
+    filename: 0388-keycloak-realm-oidc-centralization.md
+    path: docs/adr/0388-keycloak-realm-oidc-centralization.md
+  - adr: 0389
+    title: Standard Procedure for Decommissioning a Platform Service
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - standard
+      - procedure
+      - decommissioning
+      - platform
+      - service
+    summary: 1. Create the decommissioning ADR — records why the service is being
+    filename: 0389-service-decommissioning-procedure.md
+    path: docs/adr/0389-service-decommissioning-procedure.md
+  - adr: 0390
+    title: Remove Open WebUI from the Platform
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - remove
+      - open
+      - webui
+      - from
+      - platform
+    summary: Remove Open WebUI from the platform following ADR 0389's phased procedure.
+    filename: 0390-remove-open-webui.md
+    path: docs/adr/0390-remove-open-webui.md
+  - adr: 0391
+    title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - cpu-only
+      - operational
+      - automation
+      - eliminate
+      - ai
+      - from
+      - deterministic
+      - work
+    summary: A single entry point that answers operational questions by querying existing
+    filename: 0391-cpu-only-operational-automation.md
+    path: docs/adr/0391-cpu-only-operational-automation.md

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-09'
 facet: concern
 concern: security
-total_adrs: 34
+total_adrs: 35
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -638,3 +638,20 @@ adrs:
     summary: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
     filename: 0382-keycloak-sign-in-button-stuck-postmortem.md
     path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md
+  - adr: 0388
+    title: Centralize Keycloak Realm Name and OIDC Issuer URL
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - centralize
+      - keycloak
+      - realm
+      - name
+      - oidc
+      - issuer
+      - url
+    summary: 'Add to inventory/groupvars/all/identity.yml:'
+    filename: 0388-keycloak-realm-oidc-centralization.md
+    path: docs/adr/0388-keycloak-realm-oidc-centralization.md
