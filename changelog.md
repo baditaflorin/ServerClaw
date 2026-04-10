@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- fix: Harbor OIDC client secret fallback — when Keycloak bootstrap is unavailable, read cached client secret from previous successful run instead of failing with empty secret; enables Harbor OIDC to work even if Keycloak bootstrap fails transiently
 - ADR 0387 Phase 2: Harbor OIDC login fixed — keycloak_realm_name hardcoded to "lv3" in harbor_runtime defaults; NGINX logout variable refactored to use $http_authorization (load-time variable) instead of $lv3_logout_authorization (runtime auth_request_set); solves Nginx map evaluation order constraints and enables Harbor registry login via Keycloak
 - Public release readiness: Apache 2.0 LICENSE, rewritten README with quick start (Docker + server), fork instructions, and architecture overview; platform_container_registry added to identity.yml; CHECK_RUNNER_REGISTRY override documented in Makefile
 - ADR 0388: Centralize Keycloak realm name and OIDC issuer URLs — keycloak_realm_name derived from platform_domain in identity.yml; 8 central OIDC URL variables (issuer, auth, token, userinfo, jwks, logout, discovery); 34 hardcoded `realms/lv3` literals replaced across 20 role defaults and 2 task files; fork operators changing platform_domain automatically get correct SSO configuration with zero additional edits; also fixes semaphore_runtime using wrong SSO hostname (auth vs sso)
@@ -64,10 +65,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.77 release notes](docs/release-notes/0.178.77.md)
+- [0.178.78 release notes](docs/release-notes/0.178.78.md)
 
 ## Previous Releases
 
+- [0.178.77 release notes](docs/release-notes/0.178.77.md)
 - [0.178.76 release notes](docs/release-notes/0.178.76.md)
 - [0.178.75 release notes](docs/release-notes/0.178.75.md)
 - [0.178.74 release notes](docs/release-notes/0.178.74.md)
@@ -79,9 +81,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.68 release notes](docs/release-notes/0.178.68.md)
 - [0.178.67 release notes](docs/release-notes/0.178.67.md)
 - [0.178.66 release notes](docs/release-notes/0.178.66.md)
-- [0.178.64 release notes](docs/release-notes/0.178.64.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (412 releases)](docs/release-notes/index/2026.md)
+- [2026 (413 releases)](docs/release-notes/index/2026.md)

@@ -707,6 +707,27 @@
   when: harbor_keycloak_bootstrap_success
   no_log: true
 
+- name: Fallback - read cached Harbor Keycloak client secret if bootstrap failed
+  ansible.builtin.slurp:
+    src: "{{ harbor_keycloak_client_secret_local_file }}"
+  register: harbor_keycloak_client_secret_cached
+  failed_when: false
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  when:
+    - not harbor_keycloak_bootstrap_success
+    - harbor_keycloak_client_secret | length == 0
+  no_log: true
+
+- name: Use cached client secret when bootstrap failed
+  ansible.builtin.set_fact:
+    harbor_keycloak_client_secret: "{{ harbor_keycloak_client_secret_cached.content | b64decode | trim }}"
+  when:
+    - not harbor_keycloak_bootstrap_success
+    - harbor_keycloak_client_secret_cached.content is defined
+  no_log: true
+
 - name: Mirror the Harbor Keycloak client secret to the control machine
   ansible.builtin.copy:
     dest: "{{ harbor_keycloak_client_secret_local_file }}"
