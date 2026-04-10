@@ -8,20 +8,20 @@
 schema_version: 2
 generated: '2026-04-10'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 435
+total_adrs: 436
 adr_number_range:
   first: '0001'
-  last: '0402'
-  next_available: '0403'
+  last: '0403'
+  next_available: '0404'
 implementation_status_summary:
   Implemented: 342
-  Partial: 2
+  Partial: 3
   Not Implemented: 33
   Deprecated: 5
   Accepted: 24
   Proposed: 29
 decision_status_summary:
-  Accepted: 337
+  Accepted: 338
   Proposed: 35
   Deprecated: 14
   Implemented: 49
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 3
+      count: 4
       first_adr: '0400'
-      last_adr: '0402'
+      last_adr: '0403'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -97,7 +97,7 @@ facets:
       count: 6
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 36
+      count: 37
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -115,7 +115,7 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 2
+      count: 3
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -137,8 +137,14 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0403'
+  next_available_adr: '0404'
 latest_adrs:
+  - adr: '0403'
+    title: Safe Password Alphabet Standard
+    implementation_status: Partial
+    concern: security
+    path: docs/adr/0403-safe-password-alphabet-standard.md
+    implemented_on: '2026-04-10'
   - adr: '0402'
     title: Remove JupyterHub from the Platform
     implementation_status: Implemented
@@ -189,12 +195,6 @@ latest_adrs:
     implementation_status: Not Implemented
     concern: automation
     path: docs/adr/0394-librechat-agents-api-integration.md
-  - adr: 0393
-    title: Remove One-API from the Platform
-    implementation_status: Implemented
-    concern: api
-    path: docs/adr/0393-remove-one-api.md
-    implemented_on: '2026-04-10'
 discovery_queries:
   how do we bootstrap:
     - '0001'

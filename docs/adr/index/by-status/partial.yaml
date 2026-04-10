@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 2
+total_adrs: 3
 adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
@@ -47,3 +47,23 @@ adrs:
     implemented_in_repo_version: 0.178.70
     implemented_in_platform_version: 0.178.70
     implemented_on: '2026-04-09'
+  - adr: '0403'
+    title: Safe Password Alphabet Standard
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-10'
+    concern: security
+    keywords:
+      - security
+      - secrets
+      - passwords
+      - credentials
+      - reliability
+      - safe
+      - password
+      - alphabet
+      - standard
+    summary: All machine-generated passwords on this platform MUST use one of two
+    filename: 0403-safe-password-alphabet-standard.md
+    path: docs/adr/0403-safe-password-alphabet-standard.md
+    implemented_on: '2026-04-10'

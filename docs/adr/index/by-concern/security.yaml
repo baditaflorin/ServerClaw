@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-10'
 facet: concern
 concern: security
-total_adrs: 36
+total_adrs: 37
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -670,3 +670,23 @@ adrs:
     summary: Both checklocalsecrets (shared preflight) and per-role secret file
     filename: 0392-optional-secret-propagation.md
     path: docs/adr/0392-optional-secret-propagation.md
+  - adr: '0403'
+    title: Safe Password Alphabet Standard
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-10'
+    concern: security
+    keywords:
+      - security
+      - secrets
+      - passwords
+      - credentials
+      - reliability
+      - safe
+      - password
+      - alphabet
+      - standard
+    summary: All machine-generated passwords on this platform MUST use one of two
+    filename: 0403-safe-password-alphabet-standard.md
+    path: docs/adr/0403-safe-password-alphabet-standard.md
+    implemented_on: '2026-04-10'
