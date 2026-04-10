@@ -32,7 +32,7 @@
   gather_facts: false
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all/identity.yml"
     subdomain_fqdn: errors.lv3.org
 
   tasks:
