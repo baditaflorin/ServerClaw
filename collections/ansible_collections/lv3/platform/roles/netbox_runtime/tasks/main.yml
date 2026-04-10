@@ -349,6 +349,12 @@
   until: netbox_token_provision.status in [200, 201]
   no_log: true
 
+- name: Debug NetBox token provisioning status
+  ansible.builtin.debug:
+    msg: "Token provisioning returned HTTP {{ netbox_token_provision.status | default('unknown') }}"
+  when: netbox_token_provision is not skipped and netbox_token_provision.status not in [200, 201]
+  changed_when: false
+
 - name: Persist the NetBox bootstrap API token locally
   ansible.builtin.copy:
     dest: "{{ netbox_superuser_api_token_local_file }}"
@@ -356,13 +362,21 @@
     mode: "0600"
   delegate_to: localhost
   become: false
-  when: netbox_token_provision is not skipped and netbox_token_provision.status in [200, 201]
+  when: >-
+    netbox_token_provision is not skipped
+    and netbox_token_provision.status in [200, 201]
+    and netbox_token_provision.json.key is defined
+    and netbox_token_provision.json.token is defined
   no_log: true
 
 - name: Record the provisioned NetBox bootstrap API token
   ansible.builtin.set_fact:
     netbox_superuser_api_token: "nbt_{{ netbox_token_provision.json.key }}.{{ netbox_token_provision.json.token }}"
-  when: netbox_token_provision is not skipped and netbox_token_provision.status in [200, 201]
+  when: >-
+    netbox_token_provision is not skipped
+    and netbox_token_provision.status in [200, 201]
+    and netbox_token_provision.json.key is defined
+    and netbox_token_provision.json.token is defined
   no_log: true
 
 - name: Verify the NetBox bootstrap API token
