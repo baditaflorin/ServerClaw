@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-10'
 facet: concern
 concern: agent-discovery
-total_adrs: 25
+total_adrs: 26
 adrs:
   - adr: '0017'
     title: ADR Lifecycle And Implementation Metadata
@@ -456,3 +456,23 @@ adrs:
     implemented_in_repo_version: 0.178.70
     implemented_in_platform_version: 0.178.70
     implemented_on: '2026-04-09'
+  - adr: 0395
+    title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: agent-discovery
+    keywords:
+      - dto
+      - abstraction
+      - decoupling
+      - agents
+      - provider-agnostic
+      - librechat
+      - clean-architecture
+      - agent
+      - interface
+      - layer
+    summary: 'Introduce an Agent Interface Abstraction Layer consisting of:'
+    filename: 0395-agent-interface-abstraction-layer.md
+    path: docs/adr/0395-agent-interface-abstraction-layer.md

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.88",
+  "repo_version": "0.178.89",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T10:13:21Z",
-  "next_refresh_at": "2026-04-10T11:13:21Z",
+  "generated_at": "2026-04-10T10:31:26Z",
+  "next_refresh_at": "2026-04-10T11:31:26Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6308,10 +6308,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.87",
+    "last_version": "0.178.88",
     "deployed_at": "2026-04-10",
-    "summary": "[adr-0393] Remove One-API from the platform \u2014 containers already stopped, 85 file references purged across 9 roles/2 playbooks/27 config catalogs/7 tests, 4 secrets removed from secret catalog, ADR 0294 deprecated; LLM access path simplified to direct Ollama or external APIs fix: API gateway validation regression \u2014 command catalog required live_apply_receipt for all commands (rejected read-only refresh-discovery-surfaces), schema validator crashed on JSON Schema union types like [\"number\", \"null\"]; fixed both, added scripts volume mount for durability",
-    "release_notes_url": "docs/release-notes/0.178.88.md"
+    "summary": "ADR 0394 + 0395: LibreChat Agents API integration plan and provider-agnostic agent abstraction layer \u2014 programmatic agent access via OpenAI-compatible and Open Responses endpoints, decoupled DTOs with AgentProvider ABC for runtime swappability [adr-0393] Remove One-API from the platform \u2014 containers already stopped, 85 file references purged across 9 roles/2 playbooks/27 config catalogs/7 tests, 4 secrets removed from secret catalog, ADR 0294 deprecated; LLM access path simplified to direct Ollama or external APIs",
+    "release_notes_url": "docs/release-notes/0.178.89.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6368,6 +6368,20 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
+    },
+    {
+      "adr": "0394",
+      "title": "Integrate LibreChat Agents API for Programmatic Agent Access",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0394-librechat-agents-api-integration.md"
+    },
+    {
+      "adr": "0395",
+      "title": "Agent Interface Abstraction Layer \u2014 Provider-Agnostic DTOs",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0395-agent-interface-abstraction-layer.md"
     }
   ]
 }

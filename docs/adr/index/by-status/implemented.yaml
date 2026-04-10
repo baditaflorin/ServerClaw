@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 337
+total_adrs: 338
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6265,4 +6265,26 @@ adrs:
     filename: 0393-remove-one-api.md
     path: docs/adr/0393-remove-one-api.md
     implemented_in_repo_version: 0.178.86
+    implemented_on: '2026-04-10'
+  - adr: 0394
+    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - automation
+      - cpu-only
+      - decommissioning
+      - catalog
+      - yaml-markers
+      - deterministic
+      - idempotency
+      - service
+      - schema
+      - registry
+    summary: Maintain a CATALOGREGISTRY constant in decommissionservice.py that
+    filename: 0394-deterministic-service-decommissioning.md
+    path: docs/adr/0394-deterministic-service-decommissioning.md
+    implemented_in_repo_version: 0.178.89
     implemented_on: '2026-04-10'

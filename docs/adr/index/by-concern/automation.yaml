@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-10'
 facet: concern
 concern: automation
-total_adrs: 29
+total_adrs: 31
 adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
@@ -539,3 +539,45 @@ adrs:
     path: docs/adr/0389-service-decommissioning-procedure.md
     implemented_in_repo_version: 0.178.79
     implemented_on: '2026-04-10'
+  - adr: 0394
+    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - automation
+      - cpu-only
+      - decommissioning
+      - catalog
+      - yaml-markers
+      - deterministic
+      - idempotency
+      - service
+      - schema
+      - registry
+    summary: Maintain a CATALOGREGISTRY constant in decommissionservice.py that
+    filename: 0394-deterministic-service-decommissioning.md
+    path: docs/adr/0394-deterministic-service-decommissioning.md
+    implemented_in_repo_version: 0.178.89
+    implemented_on: '2026-04-10'
+  - adr: 0394
+    title: Integrate LibreChat Agents API for Programmatic Agent Access
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - librechat
+      - agents-api
+      - open-responses
+      - openai-compatible
+      - serverclaw
+      - automation
+      - integrate
+      - agents
+      - api
+      - programmatic
+    summary: Integrate the LibreChat Agents API as a first-class platform capability,
+    filename: 0394-librechat-agents-api-integration.md
+    path: docs/adr/0394-librechat-agents-api-integration.md

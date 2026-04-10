@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 107
+total_adrs: 110
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -2025,3 +2025,65 @@ adrs:
     path: docs/adr/0393-remove-one-api.md
     implemented_in_repo_version: 0.178.86
     implemented_on: '2026-04-10'
+  - adr: 0394
+    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - automation
+      - cpu-only
+      - decommissioning
+      - catalog
+      - yaml-markers
+      - deterministic
+      - idempotency
+      - service
+      - schema
+      - registry
+    summary: Maintain a CATALOGREGISTRY constant in decommissionservice.py that
+    filename: 0394-deterministic-service-decommissioning.md
+    path: docs/adr/0394-deterministic-service-decommissioning.md
+    implemented_in_repo_version: 0.178.89
+    implemented_on: '2026-04-10'
+  - adr: 0394
+    title: Integrate LibreChat Agents API for Programmatic Agent Access
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - librechat
+      - agents-api
+      - open-responses
+      - openai-compatible
+      - serverclaw
+      - automation
+      - integrate
+      - agents
+      - api
+      - programmatic
+    summary: Integrate the LibreChat Agents API as a first-class platform capability,
+    filename: 0394-librechat-agents-api-integration.md
+    path: docs/adr/0394-librechat-agents-api-integration.md
+  - adr: 0395
+    title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: agent-discovery
+    keywords:
+      - dto
+      - abstraction
+      - decoupling
+      - agents
+      - provider-agnostic
+      - librechat
+      - clean-architecture
+      - agent
+      - interface
+      - layer
+    summary: 'Introduce an Agent Interface Abstraction Layer consisting of:'
+    filename: 0395-agent-interface-abstraction-layer.md
+    path: docs/adr/0395-agent-interface-abstraction-layer.md
