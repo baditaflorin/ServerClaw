@@ -12,6 +12,16 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+## 0.178.78 (2026-04-10)
+
+- fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
+- fix: Remove duplicate repo_intake entry in platform_services.yml registry
+- fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
+- fix: Escape Prometheus template syntax in alert rules for Jinja2 rendering compatibility
+- verified: Phase 6 cosmetic cleanup stable in production (118/118 convergence tasks passing)
+
+## 0.178.77 (Previous Release)
+
 - fix: Harbor OIDC client secret fallback — when Keycloak bootstrap is unavailable, read cached client secret from previous successful run instead of failing with empty secret; enables Harbor OIDC to work even if Keycloak bootstrap fails transiently
 - ADR 0387 Phase 2: Harbor OIDC login fixed — keycloak_realm_name hardcoded to "lv3" in harbor_runtime defaults; NGINX logout variable refactored to use $http_authorization (load-time variable) instead of $lv3_logout_authorization (runtime auth_request_set); solves Nginx map evaluation order constraints and enables Harbor registry login via Keycloak
 - Public release readiness: MIT LICENSE, rewritten README, identity.yml as single edit point; eliminated 119 hardcoded absolute paths, 11 hardcoded emails, and 15+ hardcoded hostnames/repo names from role defaults; added platform_repo_name/platform_gitea_org/platform_repo_checkout_path to identity.yml; parameterized packer variables; removed .idea/ from git; added .github/SECURITY.md, PR template, issue templates; zero operator-specific values remain in deployable Ansible code
@@ -22,40 +32,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox_florin'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain
 - ADR 0386 agent cross-host execution: all 7 platform hosts reachable via execute-host-command tool; local nsenter for runtime-control-lv3, direct SSH for Proxmox, SSH→Proxmox→qm guest exec for VMs (nftables blocks inter-VM SSH); agent SSH key provisioned at /etc/lv3/api-gateway/agent-ssh-key; mempalace>=0.3.0 added to container image
 - [ADR 0385] IoC refactor: single identity.yml replaces all hardcoded operator values; fork operators edit one file to rebrand; 281 files converted from hardcoded lv3.org/proxmox_florin to template expressions; generators and validators updated to resolve identity vars; IoC regression test added
-- API gateway tool resilience: Docker socket fallback for list-containers and get-container-logs (no Portainer dependency); internal URL override for platform-context queries (bypasses JWT auth layer); mempalace tool metadata fixes (runbook refs, audit_on_call); command-catalog execution profile fix for refresh-discovery-surfaces
-- ADR 0373 Phase 4 complete: unified service registry pattern for all 74 platform services; each service registered with service_type (docker_compose, system_package, infrastructure, multi_instance); derive_service_defaults extended with conditional branching for all types; alertmanager_runtime migrated as reference implementation; comprehensive runbook created for future service additions (docs/runbooks/add-new-service-to-platform.md); pattern enables programmatic, DRY, IoC-based infrastructure configuration across entire platform
-- ADR 0224: repo-intake promoted to first-class subdomain (repo-intake.lv3.org) with dedicated Ansible role, standalone FastAPI app, and nginx publication; extracted from ops-portal with catalog profile support and programmatic JSON API
-- LibreChat upgraded v0.7.8 → v0.8.4: 30+ security fixes, working Agents REST API, MCP support with lazy tool loading and circuit breakers, agent handoffs (routing between specialist agents), local document extraction (PDF/DOCX/XLS), modelSpecs improvements, OIDC hardening
-- ADR 0224 self-service repo intake GUI + JSON API deployed to ops.lv3.org; ADR 0307 platform workbench surface catalog published; ADR 0243 Storybook/Playwright/axe-core UI testing framework added; ops-portal role fixed for derive_service_defaults env_file directory creation
-- LibreChat Agents Phase 3: MongoDB-based agent bootstrap script seeds 4 ServerClaw agents (Ops/Tasks/Docs/Admin) idempotently via SSH+mongosh; Ansible task auto-bootstraps agents on convergence with zero manual setup; gate bypass catalog extended with gate_timeout, schema_migration_in_progress, network_partition reason codes
-- LibreChat Agents Phase 2: enabled agents endpoint with tool calling via Actions; 32 platform tools split into 4 packs (ops/tasks/docs/admin) with OpenAPI specs; tools API key deployed for authenticated calls to API gateway
-- LiteLLM + LibreChat Phase 1 complete: LiteLLM virtual keys bootstrapped for 5 consumers; LibreChat system prompt injection working via modelSpecs with label field fix; GPT-5.4 family added; One API decommissioned; disk resized 160→256GB on docker-runtime-lv3
-- ws-0377 LibreChat OIDC SSO integration with Keycloak; adds OpenAI and Anthropic API endpoint support; enables session token management and dynamic model fetching for serverless LLM integration
-- fix: docker_compose_v2 module in repowise_runtime (community.docker v4.0.0 removed docker_compose v1); Keycloak protocolMapper field name correction; Ansible user group variable in Plane secret tasks; missing Semaphore OpenBao compose_macros template; workstreams cleanup (move completed ADR 0346, 0254, 0375, and ops items to done)
-- adds ADR 0364 native build server gate execution — LV3_NATIVE_EXECUTION flag and native_command field eliminate per-check Docker overhead on the build server and amd64 emulation on arm64 controller hosts; adds Ansible playbook to pin gate tool versions
-- ADR 0376 identity-core watchdog: 15s OIDC discovery probes + auto-restart on 2 failures (6/hr rate limit); KC_CACHE=local prevents stale JGroups TCP loops; oauth2-proxy watchdog on nginx-lv3 restarts proxy on unresponsive state
-- ADR 0346 repowise semantic search: local code search using Ollama nomic-embed-text + Qdrant; repowise_corpus.py chunks code by language, repowise_index.py embeds and stores, repowise_service.py serves FastAPI /search with filters
-- ADR 0317/0318 operator provisioning: Keycloak direct-API provisioning via SSH proxy (ADR 0317); provision_operator.py v2 with Headscale + step-ca fingerprint in single onboarding email (ADR 0318)
-- LiteLLM Proxy + LibreChat deployed to production, replacing One API + Open WebUI; deployment fixes for OpenBao, Prisma, Docker port conflicts, and LibreChat config schema
-- ADR 0380 updated to Implemented status with multi-instance amendment; neko_tool.py CLI for programmatic instance management (add/remove/check/validate, auto-assigns ports and UDP ranges, JSON output for automation)
-
-- Neko multi-instance browser sessions: each user gets an isolated Neko container keyed by Keycloak email; adding/removing entries in neko_instances auto-provisions/deprovisions the container and Keycloak user; NGINX routes authenticated users to their container via email map; single-instance containers removed in favour of the loop-based neko_runtime role
-
-- fix ops.lv3.org auth loop — expire both session and PKCE CSRF cookies on oauth2-proxy 500 at /oauth2/callback, then redirect to Keycloak logout to kill the server-side session; without this, stale code_verifier in the CSRF cookie caused "Code not valid" on every login attempt
-
-- add LiteLLM Proxy + LibreChat to replace One API + Open WebUI — portable DTOs in config/llm-gateway/ decouple model catalog, consumer keys, auth, and RAG from specific tools; LiteLLM on port 4000 with YAML-driven model routing and fallback chains; LibreChat with native system prompt presets (no Ollama model creation hack); both roles follow service scaffold pattern with OpenBao sidecar
-
-- deploy Neko remote desktop at browser.lv3.org (ADR 0380) — dedicated runtime-comms-lv3 VM (VMID 121, 10.10.10.21), Chromium over WebRTC with host-mode networking for UDP media (50000-60000), TLS cert via certbot, published through nginx_edge_publication role with 3600s proxy timeout for long-lived streaming sessions
-
-- ADR governance system: pre-commit hook validates ADR status transitions (requires evidence for upgrades, reason for downgrades), Plane integration syncs 406 ADRs for team visibility, quarterly audit detects implementation drift automatically
-
-- fix redirect loop: stale session reset now redirects to Keycloak logout (kills Keycloak session + clears sso.lv3.org cookie) instead of /oauth2/sign_in, preventing Keycloak from auto-logging back in with a poisoned session
-
-- NGINX auto-clears stale session cookie on oauth2-proxy 500 at /oauth2/callback — users no longer see 500 errors or need to manually clear cookies after Keycloak restarts
-
-- made Keycloak Outline user reconciliation optional (keycloak_reconcile_outline_users) to unblock testing when Keycloak API becomes unresponsive; Gitea deployment no longer blocked by Outline reconciliation timeout
-- fixed Gitea and Keycloak convergence by correcting argument_specs contract (conventional variables from defaults must not be marked required inputs); all ADR 0373 pattern variables now properly defined in role defaults
-- deploy serverclaw:latest with baked-in system prompt as the default named model in chat.lv3.org; fix derive_service_defaults guard (use open_webui_site_dir is not defined), fix Ollama api/create URL for remote Ollama instance, add keycloak_local_artifact_dir fallback default, migrate woodpecker_runtime defaults to ADR 0373 pattern
+- ADR 0373 Phase 4: unified service registry pattern for 74 services with derive_service_defaults
+- LibreChat v0.8.4, LiteLLM Proxy, and Neko multi-instance deployment
+- ADR 0376/0380/0386: identity-core watchdog, Neko remote desktop, unified disk monitoring
+- ADR 0346 semantic search with Ollama + Qdrant; ADR 0364 native gate execution
+- ADR 0317/0318 operator provisioning via Keycloak + Headscale + step-ca
 
 - Operational fixes: OpenBao persistent unseal watcher service, Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated, dozzle-agent healthcheck disabled (scratch image).
 - fixed ServerClaw OIDC login by moving runtime.env to persistent /etc/lv3/serverclaw/ path, resolved hairpin NAT by adding extra_hosts support to open_webui_runtime, added USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS for model visibility, and made Keycloak startup idempotent by auto-creating the external Docker network

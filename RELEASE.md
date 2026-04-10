@@ -1,8 +1,13 @@
-# Release 0.178.77
+# Release 0.178.78
 
 - Date: 2026-04-10
 
 ## Summary
+- fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
+- fix: Remove duplicate repo_intake entry in platform_services.yml registry
+- fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
+- fix: Escape Prometheus template syntax in alert rules for Jinja2 rendering compatibility
+- verified: Phase 6 cosmetic cleanup stable in production (118/118 convergence tasks passing)
 - fix: Harbor OIDC client secret fallback — when Keycloak bootstrap is unavailable, read cached client secret from previous successful run instead of failing with empty secret; enables Harbor OIDC to work even if Keycloak bootstrap fails transiently
 - ADR 0387 Phase 2: Harbor OIDC login fixed — keycloak_realm_name hardcoded to "lv3" in harbor_runtime defaults; NGINX logout variable refactored to use $http_authorization (load-time variable) instead of $lv3_logout_authorization (runtime auth_request_set); solves Nginx map evaluation order constraints and enables Harbor registry login via Keycloak
 - Public release readiness: MIT LICENSE, rewritten README, identity.yml as single edit point; eliminated 119 hardcoded absolute paths, 11 hardcoded emails, and 15+ hardcoded hostnames/repo names from role defaults; added platform_repo_name/platform_gitea_org/platform_repo_checkout_path to identity.yml; parameterized packer variables; removed .idea/ from git; added .github/SECURITY.md, PR template, issue templates; zero operator-specific values remain in deployable Ansible code
