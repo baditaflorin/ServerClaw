@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T03:53:49Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "7006f0068b2eb5f3009cd9e055cae7e55d8c18a5",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Build server gate unreliable",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "pre-commit hooks passed",
+      "zero open_webui refs in active code",
+      "reconvergence validated"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-11",
+    "remediation_ref": "rebuild check-runner images"
+  }
+}

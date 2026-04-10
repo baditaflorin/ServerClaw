@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T02:42:12Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "33dde1576f0fdc11ad91381a87fd8558e17cffc6",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "Build server Docker runner unavailable; local validation passed",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "subdomain_catalog_validate_pass",
+      "subdomain_exposure_audit_validate_pass"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "docs/runbooks/gate-bypass-recovery.md"
+  }
+}

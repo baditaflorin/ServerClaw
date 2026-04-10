@@ -1,0 +1,25 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T03:29:07Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "b65854f1631eeb0bb3122f0780c1afd601a63752",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "pre-existing check-runner image pull failure; this commit adds optional secret flag to shared check_local_secrets and windmill mirror tasks",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "4 files: check_local_secrets.yml",
+      "windmill defaults/tasks",
+      "ADR 0392",
+      "all changes are additive optional flag"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "docs/adr/0392-optional-secret-propagation.md"
+  }
+}
