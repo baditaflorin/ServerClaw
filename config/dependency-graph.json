@@ -420,7 +420,7 @@
       "service": "librechat",
       "name": "LibreChat",
       "vm": "coolify-lv3",
-      "tier": 3,
+      "tier": 2,
       "category": "automation"
     },
     {
