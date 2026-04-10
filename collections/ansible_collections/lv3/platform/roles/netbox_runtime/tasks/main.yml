@@ -377,6 +377,7 @@
   delay: 5
   until: netbox_api_token_verify.status == 200
   changed_when: false
+  when: netbox_superuser_api_token is defined
   no_log: true
 
 - name: Verify NetBox health probes
