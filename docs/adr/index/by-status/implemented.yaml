@@ -6266,7 +6266,7 @@ adrs:
     path: docs/adr/0393-remove-one-api.md
     implemented_in_repo_version: 0.178.86
     implemented_on: '2026-04-10'
-  - adr: 0394
+  - adr: 0396
     title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
     status: Accepted
     implementation_status: Implemented
@@ -6284,7 +6284,7 @@ adrs:
       - schema
       - registry
     summary: Maintain a CATALOGREGISTRY constant in decommissionservice.py that
-    filename: 0394-deterministic-service-decommissioning.md
-    path: docs/adr/0394-deterministic-service-decommissioning.md
-    implemented_in_repo_version: 0.178.89
+    filename: 0396-deterministic-service-decommissioning.md
+    path: docs/adr/0396-deterministic-service-decommissioning.md
+    implemented_in_repo_version: 0.178.90
     implemented_on: '2026-04-10'

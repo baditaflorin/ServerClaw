@@ -460,6 +460,172 @@ def cmd_changelog(args: argparse.Namespace) -> dict[str, Any]:
 
 
 # ============================================================================
+# Subcommand: decommission-preview
+# ============================================================================
+
+def _find_yaml_marker_files(service_id: str) -> list[dict[str, Any]]:
+    """Find generated YAML files that have BEGIN/END SERVICE markers for this service."""
+    import re
+    variants = _service_name_variants(service_id)
+    candidate_paths = [
+        REPO_ROOT / "config" / "prometheus" / "rules" / "slo_alerts.yml",
+        REPO_ROOT / "config" / "prometheus" / "rules" / "slo_rules.yml",
+        REPO_ROOT / "config" / "prometheus" / "file_sd" / "slo_targets.yml",
+        REPO_ROOT / "config" / "dependency-graph.yaml",
+    ]
+    result: list[dict[str, Any]] = []
+    for path in candidate_paths:
+        if not path.is_file():
+            continue
+        try:
+            content = path.read_text()
+        except (UnicodeDecodeError, ValueError):
+            continue
+        found_variants: list[str] = []
+        for variant in variants:
+            if re.search(
+                rf"^ *# BEGIN SERVICE: {re.escape(variant)}\b",
+                content,
+                re.MULTILINE,
+            ):
+                found_variants.append(variant)
+        if found_variants:
+            result.append({
+                "file": str(path.relative_to(REPO_ROOT)),
+                "has_markers_for": found_variants,
+            })
+    return result
+
+
+def _catalog_removals(service_id: str) -> list[dict[str, Any]]:
+    """Check each catalog and report what would be removed for this service."""
+    # Lazy import from decommission_service to reuse its CATALOG_REGISTRY
+    try:
+        import decommission_service as ds
+    except ImportError:
+        return []
+
+    variants_set = set(_service_name_variants(service_id))
+    removals: list[dict[str, Any]] = []
+
+    for entry in ds.CATALOG_REGISTRY:
+        full = REPO_ROOT / entry["path"]
+        if not full.is_file():
+            continue
+        kind = entry["type"]
+        would_remove: list[str] = []
+        try:
+            if kind == "array":
+                catalog = load_json(repo_path(*entry["path"].split("/")))
+                items = catalog.get(entry["list_key"], [])
+                would_remove = [
+                    str(i.get(entry["id_field"]))
+                    for i in items
+                    if isinstance(i, dict) and i.get(entry["id_field"]) == service_id
+                ]
+            elif kind == "dict_key":
+                catalog = load_json(repo_path(*entry["path"].split("/")))
+                obj = catalog.get(entry["list_key"], {})
+                would_remove = [k for k in (obj or {}) if k in variants_set]
+            elif kind == "dict_key_by_value":
+                catalog = load_json(repo_path(*entry["path"].split("/")))
+                obj = catalog.get(entry["list_key"], {})
+                would_remove = [
+                    k for k, v in (obj or {}).items()
+                    if isinstance(v, dict) and v.get(entry["id_field"]) == service_id
+                ]
+            elif kind in ("workflow_dict", "secrets_dict"):
+                catalog = load_json(repo_path(*entry["path"].split("/")))
+                obj = catalog.get(entry["list_key"], {})
+                would_remove = [k for k in (obj or {}) if any(v in k for v in variants_set)]
+            elif kind == "dep_graph":
+                catalog = load_json(repo_path(*entry["path"].split("/")))
+                nodes = catalog.get(entry["nodes_key"], [])
+                edges = catalog.get(entry["edges_key"], [])
+                node_ids = [
+                    str(n.get("id", ""))
+                    for n in nodes
+                    if isinstance(n, dict) and n.get("id") in variants_set
+                ]
+                edge_ids = [
+                    f"{e.get('from')}→{e.get('to')}"
+                    for e in edges
+                    if isinstance(e, dict)
+                    and (e.get("from") in variants_set or e.get("to") in variants_set)
+                ]
+                would_remove = node_ids + edge_ids
+            elif kind == "partitions":
+                catalog = load_json(repo_path(*entry["path"].split("/")))
+                parts = catalog.get("partitions", {})
+                would_remove = [
+                    s
+                    for p in (parts or {}).values()
+                    if isinstance(p, dict)
+                    for s in p.get("services", [])
+                    if s in variants_set
+                ]
+            elif kind == "yaml_dict_key":
+                try:
+                    import yaml
+                    data = yaml.safe_load(full.read_text()) or {}
+                    obj = data.get(entry["list_key"], {})
+                    would_remove = [k for k in (obj or {}) if any(v in str(k) for v in variants_set)]
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+        if would_remove:
+            removals.append({
+                "catalog": entry["path"],
+                "type": kind,
+                "would_remove": would_remove,
+            })
+
+    return removals
+
+
+def cmd_decommission_preview(args: argparse.Namespace) -> dict[str, Any]:
+    """Preview exactly what decommission_service.py would change (dry-run with structural diffs)."""
+    service_id = args.service
+
+    # Lazy import: build_code_purge_plan from decommission_service
+    try:
+        import decommission_service as ds
+        purge_plan = ds.build_code_purge_plan(service_id)
+    except ImportError as exc:
+        return {"error": f"Cannot import decommission_service: {exc}"}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+    # Dependent services from dependency graph
+    dep_graph = load_dependency_graph()
+    dependents: list[str] = []
+    for edge in dep_graph.get("edges", dep_graph.get("extra_edges", [])):
+        if isinstance(edge, dict) and edge.get("to") == service_id:
+            dependents.append(edge.get("from", "unknown"))
+
+    # Catalog removals with entry IDs
+    catalog_removals = _catalog_removals(service_id)
+
+    # YAML marker files
+    yaml_marker_files = _find_yaml_marker_files(service_id)
+
+    return {
+        "service_id": service_id,
+        "delete_directories": purge_plan.get("delete_directories", []),
+        "delete_files": purge_plan.get("delete_files", []),
+        "catalog_removals": catalog_removals,
+        "yaml_marker_files": yaml_marker_files,
+        "dependent_services": sorted(set(dependents)),
+        "purge_command": (
+            f"python3 scripts/decommission_service.py --service {service_id}"
+            f" --purge-code --confirm {service_id}"
+        ),
+    }
+
+
+# ============================================================================
 # Main
 # ============================================================================
 
@@ -492,6 +658,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("changelog", help="Generate changelog from git commits.")
     p.add_argument("--since", required=True, help="Git ref to start from")
 
+    # decommission-preview
+    p = sub.add_parser("decommission-preview", help="Preview exactly what decommission_service.py would change.")
+    p.add_argument("--service", required=True)
+
     args = parser.parse_args(argv)
 
     handlers = {
@@ -500,6 +670,7 @@ def main(argv: list[str] | None = None) -> int:
         "converge-plan": cmd_converge_plan,
         "completeness": cmd_completeness,
         "changelog": cmd_changelog,
+        "decommission-preview": cmd_decommission_preview,
     }
 
     try:

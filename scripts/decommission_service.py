@@ -68,6 +68,35 @@ TESTS_DIR = repo_path("tests")
 VERSIONS_DIR = repo_path("versions")
 DOCS_ADR_DIR = repo_path("docs", "adr")
 
+# Comprehensive catalog registry — every catalog file that needs cleanup on service removal.
+# Each entry describes the file path, cleanup strategy, and key field.
+# Handlers: see _apply_catalog_registry_entry()
+CATALOG_REGISTRY: list[dict[str, str]] = [
+    # --- Array catalogs: filter items where item[id_field] == service_id ---
+    {"path": "config/service-capability-catalog.json", "type": "array",            "list_key": "services",    "id_field": "id"},
+    {"path": "config/subdomain-catalog.json",          "type": "array",            "list_key": "subdomains",  "id_field": "service"},
+    {"path": "config/slo-catalog.json",                "type": "array",            "list_key": "slos",        "id_field": "service_id"},
+    {"path": "config/data-catalog.json",               "type": "array",            "list_key": "data_stores", "id_field": "service"},
+    {"path": "config/api-gateway-catalog.json",        "type": "array",            "list_key": "services",    "id_field": "id"},
+    {"path": "config/secret-catalog.json",             "type": "array",            "list_key": "secrets",     "id_field": "owner_service"},
+    # --- Dict-key catalogs: delete key == service_id variant ---
+    {"path": "config/health-probe-catalog.json",            "type": "dict_key", "list_key": "services"},
+    {"path": "config/service-completeness.json",            "type": "dict_key", "list_key": "services"},
+    {"path": "config/service-redundancy-catalog.json",      "type": "dict_key", "list_key": "services"},
+    # --- Dict-key-by-value: delete key where value[id_field] == service_id ---
+    {"path": "config/image-catalog.json", "type": "dict_key_by_value", "list_key": "images", "id_field": "service_id"},
+    # --- Workflow dict: delete keys containing any service variant ---
+    {"path": "config/workflow-catalog.json",          "type": "workflow_dict", "list_key": "workflows"},
+    # --- Secrets dict: delete keys containing any service variant ---
+    {"path": "config/controller-local-secrets.json",  "type": "secrets_dict",  "list_key": "secrets"},
+    # --- Dependency graph: remove nodes by id AND edges by from/to ---
+    {"path": "config/dependency-graph.json",          "type": "dep_graph",     "nodes_key": "nodes", "edges_key": "edges"},
+    # --- Partitions: remove service_id from nested services[] string arrays ---
+    {"path": "config/contracts/service-partitions/catalog.json", "type": "partitions"},
+    # --- YAML dict-key: remove keys under list_key that match any variant ---
+    {"path": "config/ansible-role-idempotency.yml",   "type": "yaml_dict_key", "list_key": "roles"},
+]
+
 
 def load_service_catalog(path: Path = SERVICE_CATALOG_PATH) -> dict[str, Any]:
     return require_mapping(load_json(path), str(path))
@@ -257,6 +286,9 @@ def execute_plan(
 
 def _service_name_variants(service_id: str) -> list[str]:
     """Return all naming variants for grep patterns."""
+    underscore = service_id
+    hyphen = service_id.replace("_", "-")
+    joined = service_id.replace("_", "")
     return sorted(set([underscore, hyphen, joined]))
 
 
@@ -364,6 +396,200 @@ def _remove_from_json_catalog(path: Path, service_id: str, list_key: str, id_key
     return True
 
 
+def _remove_from_dict_key_catalog(path: Path, service_id: str, list_key: str) -> bool:
+    """Remove dict entry where key == service_id variant (e.g. health-probe-catalog)."""
+    if not path.is_file():
+        return False
+    catalog = load_json(path)
+    obj = catalog.get(list_key)
+    if not isinstance(obj, dict):
+        return False
+    variants = set(_service_name_variants(service_id))
+    to_remove = [k for k in obj if k in variants]
+    if not to_remove:
+        return False
+    for k in to_remove:
+        del obj[k]
+    write_json(path, catalog, indent=2)
+    return True
+
+
+def _remove_from_dict_key_by_value_catalog(
+    path: Path, service_id: str, list_key: str, id_field: str
+) -> bool:
+    """Remove dict entries where value[id_field] == service_id (e.g. image-catalog)."""
+    if not path.is_file():
+        return False
+    catalog = load_json(path)
+    obj = catalog.get(list_key)
+    if not isinstance(obj, dict):
+        return False
+    to_remove = [k for k, v in obj.items() if isinstance(v, dict) and v.get(id_field) == service_id]
+    if not to_remove:
+        return False
+    for k in to_remove:
+        del obj[k]
+    write_json(path, catalog, indent=2)
+    return True
+
+
+def _remove_from_workflow_dict(path: Path, service_id: str, list_key: str) -> bool:
+    """Remove workflow entries whose key contains any service variant."""
+    if not path.is_file():
+        return False
+    catalog = load_json(path)
+    obj = catalog.get(list_key)
+    if not isinstance(obj, dict):
+        return False
+    variants = _service_name_variants(service_id)
+    to_remove = [k for k in obj if any(v in k for v in variants)]
+    if not to_remove:
+        return False
+    for k in to_remove:
+        del obj[k]
+    write_json(path, catalog, indent=2)
+    return True
+
+
+def _remove_from_dep_graph(path: Path, service_id: str, nodes_key: str, edges_key: str) -> bool:
+    """Remove nodes (by id) and edges (by from/to) from a dependency graph JSON."""
+    if not path.is_file():
+        return False
+    catalog = load_json(path)
+    if not isinstance(catalog, dict):
+        return False
+    variants = set(_service_name_variants(service_id))
+    changed = False
+
+    nodes = catalog.get(nodes_key)
+    if isinstance(nodes, list):
+        before = len(nodes)
+        catalog[nodes_key] = [
+            n for n in nodes
+            if not (isinstance(n, dict) and (n.get("id") in variants or n.get("service") in variants))
+        ]
+        if len(catalog[nodes_key]) != before:
+            changed = True
+
+    edges = catalog.get(edges_key)
+    if isinstance(edges, list):
+        before = len(edges)
+        catalog[edges_key] = [
+            e for e in edges
+            if not (isinstance(e, dict) and (e.get("from") in variants or e.get("to") in variants))
+        ]
+        if len(catalog[edges_key]) != before:
+            changed = True
+
+    if changed:
+        write_json(path, catalog, indent=2)
+    return changed
+
+
+def _remove_from_partitions_catalog(path: Path, service_id: str) -> bool:
+    """Remove service_id from all partition services[] string arrays."""
+    if not path.is_file():
+        return False
+    catalog = load_json(path)
+    partitions = catalog.get("partitions")
+    if not isinstance(partitions, dict):
+        return False
+    variants = set(_service_name_variants(service_id))
+    changed = False
+    for partition in partitions.values():
+        if not isinstance(partition, dict):
+            continue
+        services_list = partition.get("services")
+        if isinstance(services_list, list):
+            before = len(services_list)
+            partition["services"] = [s for s in services_list if s not in variants]
+            if len(partition["services"]) != before:
+                changed = True
+    if changed:
+        write_json(path, catalog, indent=2)
+    return changed
+
+
+def _remove_from_yaml_dict_key(path: Path, service_id: str, list_key: str) -> bool:
+    """Remove YAML dict entries whose key contains any service variant.
+
+    Handles files like ansible-role-idempotency.yml where role names contain the service_id.
+    Uses PyYAML when available, falls back to line-based removal.
+    """
+    if not path.is_file():
+        return False
+    variants = _service_name_variants(service_id)
+    try:
+        import yaml  # optional dependency
+        content = path.read_text()
+        data = yaml.safe_load(content)
+        if not isinstance(data, dict) or list_key not in data:
+            return False
+        obj = data[list_key]
+        if not isinstance(obj, dict):
+            return False
+        to_remove = [k for k in obj if any(v in str(k) for v in variants)]
+        if not to_remove:
+            return False
+        for k in to_remove:
+            del obj[k]
+        path.write_text(yaml.dump(data, default_flow_style=False, allow_unicode=True))
+        return True
+    except ImportError:
+        # Fall back to line-based block removal under list_key
+        return _remove_yaml_block(path, service_id)
+
+
+def _remove_yaml_block_markers(path: Path, service_id: str) -> bool:
+    """Remove content between # BEGIN SERVICE: <variant> and # END SERVICE: <variant> markers.
+
+    This is the primary removal strategy for generated YAML files (SLO config, etc.)
+    that have block markers written by generate_slo_config.py.
+    """
+    if not path.is_file():
+        return False
+    try:
+        content = path.read_text()
+    except (UnicodeDecodeError, ValueError):
+        return False
+    variants = _service_name_variants(service_id)
+    changed = False
+    for variant in variants:
+        pattern = re.compile(
+            rf'^ *# BEGIN SERVICE: {re.escape(variant)}\n.*?^ *# END SERVICE: {re.escape(variant)}\n',
+            re.MULTILINE | re.DOTALL,
+        )
+        new_content, n = pattern.subn("", content)
+        if n:
+            content = new_content
+            changed = True
+    if changed:
+        path.write_text(content)
+    return changed
+
+
+def _apply_catalog_registry_entry(entry: dict[str, str], service_id: str) -> bool:
+    """Dispatch to the right handler based on the catalog type."""
+    path = repo_path(*entry["path"].split("/"))
+    kind = entry["type"]
+
+    if kind == "array":
+        return _remove_from_json_catalog(path, service_id, entry["list_key"], entry["id_field"])
+    elif kind == "dict_key":
+        return _remove_from_dict_key_catalog(path, service_id, entry["list_key"])
+    elif kind == "dict_key_by_value":
+        return _remove_from_dict_key_by_value_catalog(path, service_id, entry["list_key"], entry["id_field"])
+    elif kind in ("workflow_dict", "secrets_dict"):
+        return _remove_from_workflow_dict(path, service_id, entry["list_key"])
+    elif kind == "dep_graph":
+        return _remove_from_dep_graph(path, service_id, entry["nodes_key"], entry["edges_key"])
+    elif kind == "partitions":
+        return _remove_from_partitions_catalog(path, service_id)
+    elif kind == "yaml_dict_key":
+        return _remove_from_yaml_dict_key(path, service_id, entry["list_key"])
+    return False
+
+
 def _remove_yaml_block(path: Path, service_id: str) -> bool:
     """Remove a top-level YAML key matching the service_id (simple line-based removal)."""
     if not path.is_file():
@@ -422,30 +648,53 @@ def _remove_line_references(path: Path, service_id: str) -> bool:
     return True
 
 
-def _deprecate_adrs(service_id: str) -> list[str]:
-    """Find ADRs mentioning the service and mark them Deprecated."""
+def _deprecate_adrs(service_id: str, removing_adr: str | None = None) -> list[str]:
+    """Find ADRs mentioning the service and mark them Deprecated.
+
+    Handles both bold (**Status:** Accepted) and list-item (- Status: Accepted) formats.
+    """
     if not DOCS_ADR_DIR.is_dir():
         return []
     deprecated: list[str] = []
     variants = _service_name_variants(service_id)
+    removing_ref = f"ADR {removing_adr}" if removing_adr else "service removal ADR"
     for adr_file in sorted(DOCS_ADR_DIR.glob("*.md")):
         content = adr_file.read_text()
-        # Only deprecate ADRs that are primarily about this service (in the title)
+        # Only deprecate ADRs primarily about this service (in the title)
         first_line = content.split("\n", 1)[0].lower()
         if not any(v.replace("_", " ") in first_line or v in first_line for v in variants):
             continue
-        if "**Status:** Deprecated" in content:
+        already_deprecated = (
+            "**Status:** Deprecated" in content
+            or "- Status: Deprecated" in content
+        )
+        if already_deprecated:
             continue
+        # Handle bold format: **Status:** Accepted
         content = re.sub(
             r"\*\*Status:\*\*\s*\w+",
             "**Status:** Deprecated",
             content,
             count=1,
         )
-        if "Deprecated by ADR 0390" not in content:
+        # Handle list-item format: - Status: Accepted
+        content = re.sub(
+            r"^(- Status:)\s*\w+",
+            r"\1 Deprecated",
+            content,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        # Add cross-reference comment if not already present
+        if removing_ref not in content:
             content = content.replace(
                 "**Status:** Deprecated",
-                "**Status:** Deprecated (see ADR 0390 — service removed from platform)",
+                f"**Status:** Deprecated (see {removing_ref} — service removed from platform)",
+                1,
+            ).replace(
+                "- Status: Deprecated",
+                f"- Status: Deprecated (see {removing_ref} — service removed from platform)",
+                1,
             )
         adr_file.write_text(content)
         deprecated.append(adr_file.name)
@@ -464,24 +713,68 @@ def build_code_purge_plan(service_id: str) -> dict[str, Any]:
     deletable_files = _discover_deletable_files(service_id)
     variants = _service_name_variants(service_id)
 
-    # JSON catalogs to clean
-    json_catalogs: list[dict[str, str]] = []
-    catalog_specs = [
-        ("config/service-capability-catalog.json", "services", "id"),
-        ("config/subdomain-catalog.json", "subdomains", "service"),
-        ("config/service-redundancy-catalog.json", "groups", "id"),
-        ("config/service-completeness.json", "services", "id"),
-    ]
-    for rel_path, list_key, id_key in catalog_specs:
-        full = repo_path(*rel_path.split("/"))
-        if full.is_file():
-            catalog = load_json(full)
-            if isinstance(catalog, dict) and list_key in catalog:
-                items = catalog[list_key]
-                if isinstance(items, list) and any(
-                    isinstance(i, dict) and i.get(id_key) == service_id for i in items
-                ):
-                    json_catalogs.append({"path": rel_path, "list_key": list_key, "id_key": id_key})
+    # Structured catalog entries to clean — uses CATALOG_REGISTRY for comprehensive coverage
+    registry_hits: list[dict[str, str]] = []
+    variants_set = set(variants)
+    for entry in CATALOG_REGISTRY:
+        full = repo_path(*entry["path"].split("/"))
+        if not full.is_file():
+            continue
+        kind = entry["type"]
+        hit = False
+        try:
+            if kind == "array":
+                catalog = load_json(full)
+                items = catalog.get(entry["list_key"], [])
+                hit = isinstance(items, list) and any(
+                    isinstance(i, dict) and i.get(entry["id_field"]) == service_id for i in items
+                )
+            elif kind == "dict_key":
+                catalog = load_json(full)
+                obj = catalog.get(entry["list_key"], {})
+                hit = isinstance(obj, dict) and bool(variants_set & set(obj.keys()))
+            elif kind == "dict_key_by_value":
+                catalog = load_json(full)
+                obj = catalog.get(entry["list_key"], {})
+                hit = isinstance(obj, dict) and any(
+                    isinstance(v, dict) and v.get(entry["id_field"]) == service_id
+                    for v in obj.values()
+                )
+            elif kind in ("workflow_dict", "secrets_dict"):
+                catalog = load_json(full)
+                obj = catalog.get(entry["list_key"], {})
+                hit = isinstance(obj, dict) and any(
+                    any(v in k for v in variants_set) for k in obj
+                )
+            elif kind == "dep_graph":
+                catalog = load_json(full)
+                nodes = catalog.get(entry["nodes_key"], [])
+                edges = catalog.get(entry["edges_key"], [])
+                hit = any(isinstance(n, dict) and n.get("id") in variants_set for n in nodes) or \
+                      any(isinstance(e, dict) and (e.get("from") in variants_set or e.get("to") in variants_set) for e in edges)
+            elif kind == "partitions":
+                catalog = load_json(full)
+                parts = catalog.get("partitions", {})
+                hit = any(
+                    s in variants_set
+                    for p in parts.values()
+                    if isinstance(p, dict)
+                    for s in p.get("services", [])
+                )
+            elif kind == "yaml_dict_key":
+                try:
+                    import yaml
+                    data = yaml.safe_load(full.read_text()) or {}
+                    obj = data.get(entry["list_key"], {})
+                    hit = isinstance(obj, dict) and any(any(v in str(k) for v in variants_set) for k in obj)
+                except Exception:
+                    hit = any(v in full.read_text() for v in variants_set)
+        except Exception:
+            pass
+        if hit:
+            registry_hits.append(entry)
+
+    json_catalogs = registry_hits  # for plan output compatibility
 
     # YAML/JSON files with line-level references
     search_dirs = [CONFIG_DIR, INVENTORY_DIR, repo_path("scripts")]
@@ -506,7 +799,7 @@ def build_code_purge_plan(service_id: str) -> dict[str, Any]:
         "delete_files": [str(f.relative_to(repo_path())) for f in deletable_files],
         "json_catalogs_to_clean": json_catalogs,
         "files_with_references": [str(f.relative_to(repo_path())) for f in ref_files],
-        "adr_deprecation": "will scan docs/adr/ for service-specific ADRs",
+        "adr_deprecation": "will scan docs/adr/ for service-specific ADRs (handles both bold and list-item Status: formats)",
         "stack_yaml": "will remove receipt entry",
         "regenerate": [
             "python scripts/platform_manifest.py --write",
@@ -543,15 +836,28 @@ def execute_code_purge(plan: dict[str, Any]) -> dict[str, Any]:
             full.unlink()
             results["files_deleted"].append(rel_file)
 
-    # 3. Clean JSON catalogs
-    for spec in plan["json_catalogs_to_clean"]:
-        full = repo_path(*spec["path"].split("/"))
-        if _remove_from_json_catalog(full, service_id, spec["list_key"], spec["id_key"]):
-            results["catalogs_cleaned"].append(spec["path"])
+    # 3. Clean catalogs using the registry (structured, schema-aware)
+    for entry in plan["json_catalogs_to_clean"]:
+        if _apply_catalog_registry_entry(entry, service_id):
+            results["catalogs_cleaned"].append(entry["path"])
 
-    # 4. Remove line-level references from remaining files
+    # 4. Remove service blocks from generated YAML files (marker-based)
+    generated_yaml_files = [
+        repo_path("config", "prometheus", "rules", "slo_alerts.yml"),
+        repo_path("config", "prometheus", "rules", "slo_rules.yml"),
+        repo_path("config", "prometheus", "file_sd", "slo_targets.yml"),
+        repo_path("config", "dependency-graph.yaml"),
+    ]
+    for yaml_file in generated_yaml_files:
+        if _remove_yaml_block_markers(yaml_file, service_id):
+            results["reference_files_cleaned"].append(str(yaml_file.relative_to(repo_path())))
+
+    # 4b. Remove line-level references from remaining files (fallback for non-catalog, non-marker files)
     for rel_file in plan["files_with_references"]:
         full = repo_path() / rel_file
+        # Skip files already handled by catalog registry or markers
+        if any(str(full).endswith(e["path"]) for e in CATALOG_REGISTRY):
+            continue
         if _remove_line_references(full, service_id):
             results["reference_files_cleaned"].append(rel_file)
 

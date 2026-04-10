@@ -2026,28 +2026,6 @@ adrs:
     implemented_in_repo_version: 0.178.86
     implemented_on: '2026-04-10'
   - adr: 0394
-    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-04-10'
-    concern: automation
-    keywords:
-      - automation
-      - cpu-only
-      - decommissioning
-      - catalog
-      - yaml-markers
-      - deterministic
-      - idempotency
-      - service
-      - schema
-      - registry
-    summary: Maintain a CATALOGREGISTRY constant in decommissionservice.py that
-    filename: 0394-deterministic-service-decommissioning.md
-    path: docs/adr/0394-deterministic-service-decommissioning.md
-    implemented_in_repo_version: 0.178.89
-    implemented_on: '2026-04-10'
-  - adr: 0394
     title: Integrate LibreChat Agents API for Programmatic Agent Access
     status: Proposed
     implementation_status: Not Implemented
@@ -2087,3 +2065,25 @@ adrs:
     summary: 'Introduce an Agent Interface Abstraction Layer consisting of:'
     filename: 0395-agent-interface-abstraction-layer.md
     path: docs/adr/0395-agent-interface-abstraction-layer.md
+  - adr: 0396
+    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - automation
+      - cpu-only
+      - decommissioning
+      - catalog
+      - yaml-markers
+      - deterministic
+      - idempotency
+      - service
+      - schema
+      - registry
+    summary: Maintain a CATALOGREGISTRY constant in decommissionservice.py that
+    filename: 0396-deterministic-service-decommissioning.md
+    path: docs/adr/0396-deterministic-service-decommissioning.md
+    implemented_in_repo_version: 0.178.90
+    implemented_on: '2026-04-10'

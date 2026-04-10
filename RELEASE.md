@@ -1,8 +1,9 @@
-# Release 0.178.89
+# Release 0.178.90
 
 - Date: 2026-04-10
 
 ## Summary
+- [adr-0396] Deterministic service decommissioning — comprehensive CATALOG_REGISTRY covering 15 catalog types (7 handler strategies: array/dict_key/dict_key_by_value/workflow_dict/dep_graph/partitions/yaml_dict_key), YAML block markers in generated SLO Prometheus files (generate_slo_config.py, 44 services), decommission-preview subcommand in platform_ops.py, fixed dual-format ADR deprecation; reduces AI-required decommission work to zero
 - ADR 0394 + 0395: LibreChat Agents API integration plan and provider-agnostic agent abstraction layer — programmatic agent access via OpenAI-compatible and Open Responses endpoints, decoupled DTOs with AgentProvider ABC for runtime swappability
 - [adr-0393] Remove One-API from the platform — containers already stopped, 85 file references purged across 9 roles/2 playbooks/27 config catalogs/7 tests, 4 secrets removed from secret catalog, ADR 0294 deprecated; LLM access path simplified to direct Ollama or external APIs
 - fix: API gateway validation regression — command catalog required live_apply_receipt for all commands (rejected read-only refresh-discovery-surfaces), schema validator crashed on JSON Schema union types like ["number", "null"]; fixed both, added scripts volume mount for durability

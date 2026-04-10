@@ -11,8 +11,8 @@ purpose: Compact ADR discovery manifest that points readers to shard-sized ADR m
 total_adrs: 429
 adr_number_range:
   first: '0001'
-  last: 0395
-  next_available: 0396
+  last: 0396
+  next_available: 0397
 implementation_status_summary:
   Implemented: 338
   Partial: 2
@@ -46,7 +46,7 @@ facets:
       path: docs/adr/index/by-range/0300-0399.yaml
       count: 110
       first_adr: '0300'
-      last_adr: 0395
+      last_adr: 0396
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -132,8 +132,14 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0396
+  next_available_adr: 0397
 latest_adrs:
+  - adr: 0396
+    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
+    implementation_status: Implemented
+    concern: automation
+    path: docs/adr/0396-deterministic-service-decommissioning.md
+    implemented_on: '2026-04-10'
   - adr: 0395
     title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
     implementation_status: Not Implemented
@@ -144,12 +150,6 @@ latest_adrs:
     implementation_status: Not Implemented
     concern: automation
     path: docs/adr/0394-librechat-agents-api-integration.md
-  - adr: 0394
-    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
-    implementation_status: Implemented
-    concern: automation
-    path: docs/adr/0394-deterministic-service-decommissioning.md
-    implemented_on: '2026-04-10'
   - adr: 0393
     title: Remove One-API from the Platform
     implementation_status: Implemented

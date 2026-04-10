@@ -203,6 +203,13 @@ time-converge:
 		--env $(or $(env),production) \
 		$(if $(capture_summary),--capture-summary,)
 
+# ADR 0396 — Generate SLO Prometheus config from catalog with block markers
+# Usage: make generate-slo-config
+# Usage: make generate-slo-config check=1  (CI mode — exits non-zero if out of date)
+generate-slo-config:
+	@echo "=== Generating SLO Prometheus config (ADR 0396) ==="
+	python3 $(REPO_ROOT)/scripts/generate_slo_config.py $(if $(check),--check,--write)
+
 install-hooks:
 	mkdir -p "$$(git rev-parse --git-path hooks)"
 	install -m 0755 $(REPO_ROOT)/.githooks/pre-push "$$(git rev-parse --git-path hooks)/pre-push"
