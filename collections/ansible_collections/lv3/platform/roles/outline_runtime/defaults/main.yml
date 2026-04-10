@@ -6,9 +6,14 @@
 
 outline_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('outline') }}"
 outline_session_authority: "{{ platform_session_authority }}"
-outline_minio_data_dir: "{{ outline_data_dir }}/minio"
 outline_internal_base_url: "http://127.0.0.1:{{ outline_internal_port }}"
 outline_public_base_url: "https://{{ outline_service_topology.public_hostname }}"
+# S3 access via shared platform MinIO (ADR 0274, ADR 0397, ADR 0398)
+outline_s3_bucket_name: "{{ minio_outline_bucket_name }}"
+outline_s3_access_key_id: "{{ minio_outline_access_key_id }}"
+outline_s3_secret_key_local_file: "{{ minio_outline_secret_key_local_file }}"
+outline_s3_public_url: "{{ minio_public_base_url }}"
+outline_s3_internal_url: "{{ minio_private_api_url }}"
 outline_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
 outline_public_hostname_overrides:
   - hostname: "{{ outline_service_topology.public_hostname }}"
@@ -44,8 +49,6 @@ outline_keycloak_logout_uri: >-
 outline_keycloak_username_claim: preferred_username
 outline_keycloak_scopes: openid profile email
 outline_bootstrap_username: outline.automation
-outline_bucket_name: outline
-outline_minio_root_user: minio
 outline_aws_region: eu-central-1
 outline_api_token_name: lv3-outline-sync
 outline_api_token_scopes:

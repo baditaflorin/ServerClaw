@@ -61,10 +61,6 @@
       mode: "0755"
     - path: "{{ outline_data_dir }}"
       mode: "0755"
-    - path: "{{ outline_minio_data_dir }}"
-      mode: "0755"
-    - path: "{{ outline_minio_data_dir }}/{{ outline_bucket_name }}"
-      mode: "0755"
     - path: "{{ outline_secret_dir }}"
       mode: "0700"
 
@@ -83,14 +79,10 @@
       - path: "{{ outline_redis_password_remote_file }}"
         command: "openssl rand -base64 24 | tr -d '\\n'"
         label: "outline-redis-password"
-      - path: "{{ outline_minio_root_password_remote_file }}"
-        command: "openssl rand -base64 24 | tr -d '\\n'"
-        label: "outline-minio-root-password"
     common_manage_service_secrets_read:
       - "{{ outline_secret_key_remote_file }}"
       - "{{ outline_utils_secret_remote_file }}"
       - "{{ outline_redis_password_remote_file }}"
-      - "{{ outline_minio_root_password_remote_file }}"
     common_manage_service_secrets_mirror:
       - dest: "{{ outline_secret_key_local_file }}"
         content_index: 0
@@ -98,8 +90,6 @@
         content_index: 1
       - dest: "{{ outline_redis_password_local_file }}"
         content_index: 2
-      - dest: "{{ outline_minio_root_password_local_file }}"
-        content_index: 3
     common_manage_service_secrets_local_artifact_dir: "{{ outline_local_artifact_dir }}"
     common_manage_service_secrets_fact_name: "outline_decoded_secrets"
   no_log: true
@@ -109,9 +99,9 @@
     outline_secret_key: "{{ outline_decoded_secrets[0] }}"
     outline_utils_secret: "{{ outline_decoded_secrets[1] }}"
     outline_redis_password: "{{ outline_decoded_secrets[2] }}"
-    outline_minio_root_password: "{{ outline_decoded_secrets[3] }}"
     outline_database_password: "{{ lookup('ansible.builtin.file', outline_database_password_local_file) | trim }}"
     outline_keycloak_client_secret: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
+    outline_s3_secret: "{{ lookup('ansible.builtin.file', outline_s3_secret_key_local_file) | trim }}"
     outline_runtime_secret_payload:
       DATABASE_URL: >-
         postgres://{{ outline_database_user }}:{{ (lookup('ansible.builtin.file', outline_database_password_local_file) | trim) | urlencode }}@{{ outline_database_host }}:5432/{{ outline_database_name }}
@@ -120,8 +110,8 @@
       SECRET_KEY: "{{ outline_decoded_secrets[0] }}"
       UTILS_SECRET: "{{ outline_decoded_secrets[1] }}"
       OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
-      AWS_SECRET_ACCESS_KEY: "{{ outline_decoded_secrets[3] }}"
-      AWS_S3_UPLOAD_BUCKET_URL: "http://minio:9000"
+      AWS_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', outline_s3_secret_key_local_file) | trim }}"
+      AWS_S3_UPLOAD_BUCKET_URL: "{{ outline_s3_public_url }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Outline

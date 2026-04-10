@@ -20,21 +20,6 @@ services:
       timeout: 5s
       retries: 12
 
-  minio:
-    image: {{ outline_minio_image }}
-    container_name: {{ outline_minio_container_name }}
-    restart: unless-stopped
-    command:
-      - server
-      - --console-address
-      - :9001
-      - /data
-    environment:
-      MINIO_ROOT_USER: {{ outline_minio_root_user }}
-      MINIO_ROOT_PASSWORD: {{ outline_minio_root_password }}
-    volumes:
-      - {{ outline_minio_data_dir }}:/data
-
   outline:
     image: {{ outline_image }}
     container_name: {{ outline_container_name }}
@@ -42,8 +27,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      minio:
-        condition: service_started
       openbao-agent:
         condition: service_healthy
     extra_hosts:
