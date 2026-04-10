@@ -352,7 +352,11 @@
     status_code: [200, 201, 400, 403, 415]
     return_content: true
     body_format: form-urlencoded
-    body: {}
+    body:
+      username: "{{ netbox_superuser_name }}"
+      password: "{{ netbox_superuser_password }}"
+      write_enabled: "true"
+      description: "Repo-managed bootstrap"
   register: netbox_token_provision
   when: >-
     not netbox_superuser_api_token_local.stat.exists
