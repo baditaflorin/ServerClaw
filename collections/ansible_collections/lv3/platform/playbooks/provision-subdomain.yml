@@ -5,8 +5,8 @@
   gather_facts: false
 
   vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all/identity.yml"
+    subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
     subdomain_fqdn: "{{ subdomain_fqdn | default(lookup('ansible.builtin.env', 'FQDN'), true) }}"
 
   tasks:
