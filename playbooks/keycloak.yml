@@ -73,6 +73,7 @@
     keycloak_data_dir: /opt/keycloak/data
     keycloak_secret_dir: /etc/lv3/keycloak
     keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
+    keycloak_image: quay.io/keycloak/keycloak:26.5.4
     keycloak_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak }}"
 
   pre_tasks:
