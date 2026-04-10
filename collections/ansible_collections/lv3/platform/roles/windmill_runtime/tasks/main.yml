@@ -772,6 +772,7 @@
   loop: "{{ windmill_worker_repo_secret_files | selectattr('optional', 'defined') | selectattr('optional') | list }}"
   register: windmill_optional_repo_secret_stats
   delegate_to: localhost
+  become: false
   no_log: true
 
 - name: Mirror the Windmill worker checkout bootstrap secret files
@@ -809,6 +810,7 @@
   loop: "{{ windmill_worker_seed_job_secret_files | selectattr('optional', 'defined') | selectattr('optional') | list }}"
   register: windmill_optional_seed_secret_stats
   delegate_to: localhost
+  become: false
   no_log: true
 
 - name: Mirror the Windmill seeded job secret files
