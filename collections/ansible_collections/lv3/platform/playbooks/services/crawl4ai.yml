@@ -1,0 +1,2 @@
+---
+- import_playbook: ../../../../../../playbooks/services/crawl4ai.yml
