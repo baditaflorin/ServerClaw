@@ -163,7 +163,6 @@ platform_ports:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
-  netdata_port: 19999
   mailpit_http_port: 8025
   mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
@@ -267,7 +266,6 @@ platform_port_assignments:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
-  netdata_port: 19999
   mailpit_http_port: 8025
   mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
@@ -1734,11 +1732,8 @@ platform_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
-  realtime:
-    service_name: realtime
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: realtime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -1746,7 +1741,6 @@ platform_service_topology:
     dns:
       managed: true
       visibility: public
-      name: realtime
       type: A
       target: 65.108.75.123
       ttl: 60
@@ -1757,16 +1751,13 @@ platform_service_topology:
       kind: proxy
       server_sent_events: true
       upstream: http://10.10.10.40:19999
-    service_id: realtime
     runtime_pool: dedicated-monitoring
-    deployment_surface: playbooks/services/realtime.yml
     restart_domain: dedicated-monitoring-core
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
     mobility_tier: movable_singleton
     ports:
       internal: 19999
     urls:
-      public: https://realtime.{{ platform_domain }}
       internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
@@ -3906,7 +3897,6 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
-    - name: realtime
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -4221,11 +4211,8 @@ public_edge_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
-  realtime:
-    service_name: realtime
     owning_vm: monitoring-lv3
     private_ip: 10.10.10.40
-    public_hostname: realtime.{{ platform_domain }}
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -4233,7 +4220,6 @@ public_edge_service_topology:
     dns:
       managed: true
       visibility: public
-      name: realtime
       type: A
       target: 65.108.75.123
       ttl: 60
@@ -4244,16 +4230,13 @@ public_edge_service_topology:
       kind: proxy
       server_sent_events: true
       upstream: http://10.10.10.40:19999
-    service_id: realtime
     runtime_pool: dedicated-monitoring
-    deployment_surface: playbooks/services/realtime.yml
     restart_domain: dedicated-monitoring-core
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
     mobility_tier: movable_singleton
     ports:
       internal: 19999
     urls:
-      public: https://realtime.{{ platform_domain }}
       internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
@@ -6501,7 +6484,6 @@ monitoring_prometheus_port: 9090
 monitoring_tempo_http_port: 3200
 monitoring_otlp_grpc_port: 4317
 monitoring_otlp_http_port: 4318
-netdata_port: 19999
 mailpit_http_port: 8025
 mailpit_smtp_port: 1025
 mail_platform_gateway_port: 8081

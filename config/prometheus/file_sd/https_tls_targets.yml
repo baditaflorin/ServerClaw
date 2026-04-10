@@ -793,21 +793,16 @@
 - targets:
     - https://10.10.10.10:443/
   labels:
-    assurance_id: realtime-public
-    service_id: realtime
     service_name: Netdata Realtime Metrics
     environment: production
     scope: public
     exposure: edge-published
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
-    probe_hostname: realtime.{{ platform_domain }}
-    certificate_id: realtime-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
     policy_critical: '14'
-    display_url: https://realtime.{{ platform_domain }}:443/
 - targets:
     - https://10.10.10.10:443/
   labels:

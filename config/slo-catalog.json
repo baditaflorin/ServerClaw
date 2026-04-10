@@ -326,16 +326,6 @@
       "description": "The public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification."
     },
     {
-      "id": "realtime-availability",
-      "service_id": "realtime",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "http://10.10.10.40:19999/api/v1/info",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics."
-    },
-    {
       "id": "semaphore-availability",
       "service_id": "semaphore",
       "indicator": "availability",

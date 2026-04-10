@@ -505,21 +505,6 @@
       "notes": "Object-change history should remain available through at least one quarterly planning cycle without growing unbounded."
     },
     {
-      "id": "netdata-realtime-metrics",
-      "service": "realtime",
-      "name": "Netdata realtime metrics store",
-      "class": "internal",
-      "retention_days": 1,
-      "backup_included": false,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "/var/cache/netdata",
-        "https://realtime.lv3.org"
-      ],
-      "notes": "Netdata stores short-lived host and guest metrics for live operator troubleshooting and anomaly triage; long-term retention remains outside the scope of this service."
-    },
-    {
       "id": "paperless-document-archive",
       "service": "paperless",
       "name": "Paperless document archive",

@@ -605,15 +605,6 @@
     "requires_compose_secrets": false,
     "suppression_preset": "legacy-service"
   },
-  "realtime": {
-    "service_type": "vm-service",
-    "requires_subdomain": true,
-    "requires_oidc": false,
-    "requires_secrets": false,
-    "requires_compose_secrets": false,
-    "dashboard_file": "config/grafana/dashboards/slo-overview.json",
-    "alert_rule_file": "config/prometheus/rules/slo_alerts.yml"
-  },
   "redpanda": {
     "service_type": "compose",
     "requires_subdomain": false,

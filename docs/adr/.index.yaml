@@ -8,13 +8,13 @@
 schema_version: 2
 generated: '2026-04-10'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 434
+total_adrs: 435
 adr_number_range:
   first: '0001'
-  last: '0400'
-  next_available: '0401'
+  last: '0401'
+  next_available: '0402'
 implementation_status_summary:
-  Implemented: 339
+  Implemented: 340
   Partial: 3
   Not Implemented: 34
   Deprecated: 5
@@ -137,8 +137,14 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0401'
+  next_available_adr: '0402'
 latest_adrs:
+  - adr: '0401'
+    title: Remove Netdata from the Platform
+    implementation_status: Implemented
+    concern: monitoring
+    path: docs/adr/0401-remove-netdata.md
+    implemented_on: '2026-04-10'
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
     implementation_status: Partial
@@ -154,12 +160,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0398-outline-shared-s3-migration.md
-  - adr: 0397
-    title: Remove Netdata (realtime) from the Platform
-    implementation_status: Implemented
-    concern: monitoring
-    path: docs/adr/0397-remove-netdata.md
-    implemented_on: '2026-04-10'
   - adr: 0397
     title: Managed S3 Bucket Consumer Pattern
     implementation_status: Proposed

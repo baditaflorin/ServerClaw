@@ -197,14 +197,6 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
       connect-src 'self' https://tasks.{{ platform_domain }} wss://tasks.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
-  realtime.{{ platform_domain }}:
-    content_security_policy: >-
-      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
-      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
-      style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
-      font-src 'self' data:; connect-src 'self' https://realtime.{{ platform_domain }} ws://realtime.{{ platform_domain }}
-      wss://realtime.{{ platform_domain }}; worker-src 'self' blob:; child-src 'self' blob:;
-      manifest-src 'self'
   logs.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://*.duckdb.org;
@@ -334,8 +326,6 @@ public_edge_authenticated_sites:
       - /webhook-test/
       - /webhook-waiting/
   logs.{{ platform_domain }}:
-    auth_proxy_upstream: http://127.0.0.1:4180
-  realtime.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
   home.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180

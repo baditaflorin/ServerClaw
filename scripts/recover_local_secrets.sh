@@ -196,7 +196,6 @@ recover_vm_120() {
         /etc/lv3/mattermost/admin-password                mattermost/admin-password.txt \
         /etc/lv3/mattermost/incoming-webhooks.json        mattermost/incoming-webhooks.json \
         /etc/lv3/minio/root-password.txt                  minio/root-password.txt \
-        /etc/lv3/monitoring/netdata-stream-api-key         monitoring/netdata-stream-api-key.txt \
         /etc/lv3/n8n/encryption-key.txt                   n8n/encryption-key.txt \
         /etc/lv3/n8n/owner-password.txt                   n8n/owner-password.txt \
         /etc/lv3/nextcloud/admin-password.txt             nextcloud/admin-password.txt \
@@ -274,11 +273,6 @@ recover_vm_150() {
         /etc/lv3/postgres/sftpgo-password.txt             sftpgo/database-password.txt
 }
 
-recover_vm_140() {
-    recover_from_vm_batch 140 monitoring-lv3 \
-        /etc/lv3/monitoring/netdata-stream-api-key         monitoring/netdata-stream-api-key.txt
-}
-
 recover_vm_110() {
     recover_from_vm_batch 110 nginx-lv3 \
         /etc/lv3/ntfy/alertmanager-password               ntfy/alertmanager-password.txt \
@@ -296,7 +290,6 @@ start_time=$(date +%s)
 
 recover_vm_120 &
 recover_vm_150 &
-recover_vm_140 &
 recover_vm_110 &
 recover_vm_160 &
 

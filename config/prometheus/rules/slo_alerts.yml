@@ -837,32 +837,6 @@ groups:
           description: The public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification.
           runbook: docs/runbooks/slo-tracking.md
 # END SERVICE: plausible
-# BEGIN SERVICE: realtime
-      - alert: SLOFastBurn_realtime_availability
-        expr: (slo:realtime_availability:error_rate_5m > (14 * 0.010000)) and (slo:realtime_availability:error_rate_1h > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: realtime
-          slo_id: realtime-availability
-          indicator: availability
-        annotations:
-          summary: realtime-availability is burning its error budget at 14x
-          description: The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_realtime_availability
-        expr: (slo:realtime_availability:error_rate_6h > (6 * 0.010000)) and (slo:realtime_availability:error_rate_30d > (6 * 0.010000))
-        for: 15m
-        labels:
-          severity: warning
-          service_id: realtime
-          slo_id: realtime-availability
-          indicator: availability
-        annotations:
-          summary: realtime-availability is burning its error budget at 6x
-          description: The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics.
-          runbook: docs/runbooks/slo-tracking.md
-# END SERVICE: realtime
 # BEGIN SERVICE: semaphore
       - alert: SLOFastBurn_semaphore_availability
         expr: (slo:semaphore_availability:error_rate_5m > (14 * 0.005000)) and (slo:semaphore_availability:error_rate_1h > (14 * 0.005000))

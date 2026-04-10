@@ -352,7 +352,6 @@ LAUNCHER_PURPOSE_OVERRIDES = {
     "plane": "plan",
     "portainer": "administer",
     "proxmox_ui": "administer",
-    "realtime": "observe",
     "status_page": "observe",
     "uptime_kuma": "observe",
     "windmill": "operate",
@@ -388,7 +387,6 @@ DEFAULT_PERSONA_CATALOG = {
             "focus_purposes": ["observe", "operate", "administer"],
             "default_favorites": [
                 "service:grafana",
-                "service:realtime",
                 "service:dozzle",
                 "service:status_page",
                 "workflow:continuous-drift-detection",

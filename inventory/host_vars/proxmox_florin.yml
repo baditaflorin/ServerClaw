@@ -30,7 +30,6 @@ platform_port_assignments:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
-  netdata_port: 19999
   mailpit_http_port: 8025
   mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
@@ -2097,29 +2096,6 @@ lv3_service_topology:
       blocked_exact_paths:
         - path: /api/health
           status: 404
-  realtime:
-    service_name: realtime
-    owning_vm: monitoring-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: realtime.{{ platform_domain }}
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: realtime
-      type: A
-      target: "{{ management_ipv4 }}"
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      server_sent_events: true
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.netdata_port }}"
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin

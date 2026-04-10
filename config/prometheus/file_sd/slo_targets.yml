@@ -289,15 +289,6 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 # END SERVICE: plausible
-# BEGIN SERVICE: realtime
-- targets:
-    - http://10.10.10.40:19999/api/v1/info
-  labels:
-    service_id: realtime
-    slo_id: realtime-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-# END SERVICE: realtime
 # BEGIN SERVICE: semaphore
 - targets:
     - http://10.10.10.92:3004/api/ping

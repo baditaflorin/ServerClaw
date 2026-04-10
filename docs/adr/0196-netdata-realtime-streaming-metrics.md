@@ -1,6 +1,6 @@
 # ADR 0196: Netdata Realtime Streaming Metrics
 
-- Status: Accepted
+- Status: Deprecated (superseded by ADR 0401 — service removed from platform)
 - Implementation Status: Live applied
 - Implemented In Repo Version: 0.177.25
 - Implemented In Platform Version: 0.130.32

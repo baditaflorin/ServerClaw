@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [adr-0401] Remove Netdata from the platform — Prometheus + node_exporter cover all host metrics; netdata_runtime role deleted, realtime.lv3.org deprovisioned, 15 catalogs cleaned via decommission script, ADR 0196 deprecated; equivalent browser dashboards via Grafana Node Exporter Full (dashboard 1860)
+
 - [adr-0399] Platform reconciliation daemon proposed (ADR 0399) — continuous portal regeneration via Windmill cron + health sweep, OpenClaw-inspired heartbeat/cron dual model; homepage text selectability CSS fix (ADR 0400)
 - [adr-0392] Convergence timing infrastructure — convergence_timer.py + `make time-converge` records timing receipts to receipts/convergence-timing/; report/trend subcommands for drift detection; baselines: api-gateway 772s, windmill 1257s
 - [adr-0396] Deterministic service decommissioning — comprehensive CATALOG_REGISTRY covering 15 catalog types (7 handler strategies: array/dict_key/dict_key_by_value/workflow_dict/dep_graph/partitions/yaml_dict_key), YAML block markers in generated SLO Prometheus files (generate_slo_config.py, 44 services), decommission-preview subcommand in platform_ops.py, fixed dual-format ADR deprecation; reduces AI-required decommission work to zero
@@ -69,10 +71,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.91 release notes](docs/release-notes/0.178.91.md)
+- [0.178.92 release notes](docs/release-notes/0.178.92.md)
 
 ## Previous Releases
 
+- [0.178.91 release notes](docs/release-notes/0.178.91.md)
 - [0.178.90 release notes](docs/release-notes/0.178.90.md)
 - [0.178.89 release notes](docs/release-notes/0.178.89.md)
 - [0.178.88 release notes](docs/release-notes/0.178.88.md)
@@ -84,9 +87,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.82 release notes](docs/release-notes/0.178.82.md)
 - [0.178.81 release notes](docs/release-notes/0.178.81.md)
 - [0.178.80 release notes](docs/release-notes/0.178.80.md)
-- [0.178.79 release notes](docs/release-notes/0.178.79.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (426 releases)](docs/release-notes/index/2026.md)
+- [2026 (427 releases)](docs/release-notes/index/2026.md)

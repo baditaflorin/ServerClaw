@@ -32,7 +32,6 @@
       ],
       "default_favorites": [
         "service:grafana",
-        "service:realtime",
         "service:dozzle",
         "service:status_page",
         "workflow:continuous-drift-detection"

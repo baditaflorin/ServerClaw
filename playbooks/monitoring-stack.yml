@@ -1,7 +1,7 @@
 ---
 # Playbook: monitoring-stack.yml
 # Purpose: Compose the full monitoring stack playbook by importing the monitoring-related service playbooks in the managed order.
-# Use case: Run when converging monitoring surfaces such as Grafana, realtime metrics, log shipping, and Proxmox metrics collectors.
+# Use case: Run when converging monitoring surfaces such as Grafana, log shipping, and Proxmox metrics collectors.
 #
 # Inputs (required):
 #   - inventory groups and host vars (generated, required): Supply the target hosts and service topology used by the imported playbooks.
@@ -17,16 +17,14 @@
 #
 # Dependencies:
 #   - ADR 0041: Defines the monitoring stack baseline.
-#   - ADR 0196: Adds the realtime service to the monitoring composition.
 #   - Requires: The imported playbooks under playbooks/services/ exist and remain valid.
 #
-# Related ADRs: 0041, 0165, 0196
+# Related ADRs: 0041, 0165
 # Related Runbooks: docs/runbooks/deploy-uptime-kuma.md
 #
 # Author: LV3 Platform
 # Last Updated: 2026-03-28
 - import_playbook: services/grafana.yml
-- import_playbook: services/realtime.yml
 - import_playbook: services/proxmox-metrics.yml
 - import_playbook: services/proxmox-host-log-shipping.yml
 - import_playbook: services/nginx-observability.yml

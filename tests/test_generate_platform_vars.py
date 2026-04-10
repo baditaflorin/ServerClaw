@@ -691,26 +691,6 @@ def test_build_platform_vars_includes_matrix_synapse_publication_topology() -> N
     assert matrix_synapse["urls"]["controller"] == "http://100.64.0.1:8015"
 
 
-def test_build_service_urls_resolves_realtime_internal_url() -> None:
-    ports = {"netdata_port": 19999}
-    service = {"owning_vm": "monitoring-lv3"}
-    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
-    guest_ipv4_by_name = {"monitoring-lv3": "10.10.10.40"}
-    stack = {"desired_state": {"host_id": "proxmox_florin"}}
-
-    port_map, urls = generate_platform_vars.build_service_urls(
-        "realtime",
-        service,
-        host_vars,
-        guest_ipv4_by_name,
-        ports,
-        stack,
-    )
-
-    assert port_map == {"internal": 19999}
-    assert urls == {"internal": "http://10.10.10.40:19999"}
-
-
 def test_build_service_urls_include_coolify_controller_and_apps_endpoints() -> None:
     ports = {
         "coolify_dashboard_port": 8000,

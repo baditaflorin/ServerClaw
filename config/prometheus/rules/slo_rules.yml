@@ -1605,56 +1605,6 @@ groups:
           service_id: plausible
           indicator: availability
 # END SERVICE: plausible
-# BEGIN SERVICE: realtime
-      - record: slo:realtime_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="realtime-availability"}[5m])
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-      - record: slo:realtime_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="realtime-availability"}[1h])
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-      - record: slo:realtime_availability:success_ratio_6h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="realtime-availability"}[6h])
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-      - record: slo:realtime_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="realtime-availability"}[30d])
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-      - record: slo:realtime_availability:error_rate_5m
-        expr: 1 - slo:realtime_availability:success_ratio_5m
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-      - record: slo:realtime_availability:error_rate_1h
-        expr: 1 - slo:realtime_availability:success_ratio_1h
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-      - record: slo:realtime_availability:error_rate_6h
-        expr: 1 - slo:realtime_availability:success_ratio_6h
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-      - record: slo:realtime_availability:error_rate_30d
-        expr: 1 - slo:realtime_availability:success_ratio_30d
-        labels:
-          slo_id: realtime-availability
-          service_id: realtime
-          indicator: availability
-# END SERVICE: realtime
 # BEGIN SERVICE: semaphore
       - record: slo:semaphore_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="semaphore-availability"}[5m])

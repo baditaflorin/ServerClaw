@@ -104,7 +104,6 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "minio-console.lv3.org",
                 "n8n.lv3.org",
                 "ops.lv3.org",
-                "realtime.lv3.org",
                 "tasks.lv3.org",
             ],
         )
@@ -151,8 +150,6 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("unauthenticated_paths", protected_sites["logs.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["home.lv3.org"])
         self.assertEqual(protected_sites["tasks.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertNotIn("unauthenticated_paths", protected_sites["realtime.lv3.org"])
-
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
 
@@ -248,7 +245,6 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("grafana.lv3.org", security_overrides)
         self.assertIn("logs.lv3.org", security_overrides)
         self.assertIn("tasks.lv3.org", security_overrides)
-        self.assertIn("realtime.lv3.org", security_overrides)
         self.assertIn("https://annotate.lv3.org", security_overrides["annotate.lv3.org"]["content_security_policy"])
         self.assertIn("'unsafe-eval'", security_overrides["coolify.lv3.org"]["content_security_policy"])
         self.assertIn("wss://draw.lv3.org", security_overrides["draw.lv3.org"]["content_security_policy"])
@@ -263,7 +259,6 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("'unsafe-inline'", security_overrides["wiki.lv3.org"]["content_security_policy"])
         self.assertIn("https://wiki.lv3.org", security_overrides["wiki.lv3.org"]["content_security_policy"])
         self.assertIn("wss://tasks.lv3.org", security_overrides["tasks.lv3.org"]["content_security_policy"])
-        self.assertIn("wss://realtime.lv3.org", security_overrides["realtime.lv3.org"]["content_security_policy"])
 
     def test_template_supports_root_proxy_path_override(self) -> None:
         self.assertIn("site.root_proxy_path is defined", self.template)

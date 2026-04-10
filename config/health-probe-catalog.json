@@ -3098,52 +3098,6 @@
         }
       }
     },
-    "realtime": {
-      "service_name": "realtime",
-      "owning_vm": "monitoring-lv3",
-      "role": "netdata_runtime",
-      "verify_file": "roles/netdata_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Netdata parent info endpoint responds on monitoring-lv3.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:19999/api/v1/info",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Netdata parent exporter responds with consolidated metrics on monitoring-lv3.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:19999/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Realtime Metrics Private",
-          "type": "http",
-          "url": "http://10.10.10.40:19999/api/v1/info",
-          "description": "Private Netdata parent healthcheck on monitoring-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
     "searxng": {
       "service_name": "searxng",
       "owning_vm": "docker-runtime-lv3",

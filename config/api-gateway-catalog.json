@@ -280,17 +280,6 @@
       "healthcheck_path": "/api/status"
     },
     {
-      "id": "realtime",
-      "name": "Realtime Metrics",
-      "upstream": "http://10.10.10.40:19999",
-      "gateway_prefix": "/v1/realtime",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-read",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/api/v1/info"
-    },
-    {
       "id": "semaphore",
       "name": "Semaphore",
       "upstream": "http://10.10.10.92:3004",

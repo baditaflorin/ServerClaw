@@ -98,7 +98,7 @@
     - (__derive_service_entry.image_catalog_key | default('')) | length == 0
 
 # ============================================================================
-# SYSTEM_PACKAGE SERVICE TYPE (3 services: alertmanager, nginx_runtime, netdata)
+# SYSTEM_PACKAGE SERVICE TYPE (2 services: alertmanager, nginx_runtime)
 # ============================================================================
 # Derives: config_dir, data_dir, secret_dir, env_file (for environment overrides)
 

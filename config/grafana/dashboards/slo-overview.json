@@ -6967,7 +6967,6 @@
     {
       "id": 171,
       "type": "text",
-      "title": "realtime-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -6975,7 +6974,6 @@
         "y": 238
       },
       "options": {
-        "content": "### realtime-availability\n\nThe Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics.\n\nService: `realtime`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=realtime-availability)",
         "mode": "markdown"
       }
     },
@@ -7018,7 +7016,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:realtime_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -7082,7 +7079,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:realtime_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -7126,7 +7122,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:realtime_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -7170,7 +7165,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:realtime_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]

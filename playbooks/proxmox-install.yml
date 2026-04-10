@@ -12,7 +12,6 @@
 #   - Proxmox platform packages, host access, networking, security, API access, backup policy, and host control-loop systemd units converged from repo truth.
 #
 # Post-provisioning dependencies (see AGENTS.md Cross-Service Wiring Rules):
-#   - make live-apply-service service=realtime        # Netdata child agents
 #   - make live-apply-service service=guest-log-shipping  # Loki log agents
 #   Running `site.yml` (full converge) satisfies all of these automatically.
 #

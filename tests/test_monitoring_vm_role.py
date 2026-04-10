@@ -137,14 +137,6 @@ def test_log_canary_dashboard_is_copied_imported_and_verified() -> None:
     )
 
 
-def test_prometheus_template_scrapes_netdata_parent_exporter() -> None:
-    template = (ROLE_ROOT / "templates" / "prometheus.yml.j2").read_text()
-
-    assert "job_name: netdata" in template
-    assert "/api/v1/allmetrics" in template
-    assert "prometheus_all_hosts" in template
-
-
 def test_prometheus_template_scrapes_loki_canary_metrics() -> None:
     template = (ROLE_ROOT / "templates" / "prometheus.yml.j2").read_text()
 

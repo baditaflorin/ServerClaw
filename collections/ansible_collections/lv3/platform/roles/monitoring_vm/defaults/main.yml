@@ -17,10 +17,9 @@
 #
 # Dependencies:
 #   - ADR 0041: Defines the monitoring stack baseline.
-#   - ADR 0196: Adds the realtime Netdata publication surface to monitoring-stack composition.
 #   - Role: monitoring_vm — converges the monitoring guest and bundled observability services.
 #
-# Related ADRs: 0041, 0165, 0196
+# Related ADRs: 0041, 0165
 # Related Runbooks: docs/runbooks/deploy-uptime-kuma.md
 #
 # Author: LV3 Platform
@@ -161,9 +160,6 @@ monitoring_postgres_audit_metrics_target: >-
       'postgres-staging-lv3' if inventory_hostname == 'monitoring-staging-lv3' else 'postgres-lv3'
     ].ipv4
   }}:{{ monitoring_postgres_audit_metrics_port }}
-monitoring_netdata_parent_port: "{{ hostvars[groups['proxmox_hosts'][0]].platform_port_assignments.netdata_port }}"
-monitoring_netdata_parent_metrics_url: >-
-  http://127.0.0.1:{{ monitoring_netdata_parent_port }}/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected
 monitoring_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
 monitoring_tempo_version: 2.10.3
 monitoring_tempo_deb_url: https://github.com/grafana/tempo/releases/download/v2.10.3/tempo_2.10.3_linux_amd64.deb
