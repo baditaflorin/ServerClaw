@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.78",
+  "repo_version": "0.178.77",
   "platform_version": "0.178.72",
-  "generated_at": "2026-04-10T00:01:37Z",
-  "next_refresh_at": "2026-04-10T01:01:37Z",
+  "generated_at": "2026-04-10T00:24:39Z",
+  "next_refresh_at": "2026-04-10T01:24:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6382,10 +6382,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.77",
+    "last_version": "0.178.76",
     "deployed_at": "2026-04-10",
     "summary": "fix: Harbor OIDC client secret fallback \u2014 when Keycloak bootstrap is unavailable, read cached client secret from previous successful run instead of failing with empty secret; enables Harbor OIDC to work even if Keycloak bootstrap fails transiently ADR 0387 Phase 2: Harbor OIDC login fixed \u2014 keycloak_realm_name hardcoded to \"lv3\" in harbor_runtime defaults; NGINX logout variable refactored to use $http_authorization (load-time variable) instead of $lv3_logout_authorization (runtime auth_request_set); solves Nginx map evaluation order constraints and enables Harbor registry login via Keycloak",
-    "release_notes_url": "docs/release-notes/0.178.78.md"
+    "release_notes_url": "docs/release-notes/0.178.77.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
