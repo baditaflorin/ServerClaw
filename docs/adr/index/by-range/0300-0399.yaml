@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 107
+total_adrs: 109
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -2025,3 +2025,43 @@ adrs:
     path: docs/adr/0393-remove-one-api.md
     implemented_in_repo_version: 0.178.86
     implemented_on: '2026-04-10'
+  - adr: 0394
+    title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: ci-cd
+    keywords:
+      - reconciliation
+      - automation
+      - cron
+      - heartbeat
+      - portals
+      - iac
+      - drift
+      - platform
+      - daemon
+      - continuous
+    summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
+    filename: 0394-platform-reconciliation-daemon.md
+    path: docs/adr/0394-platform-reconciliation-daemon.md
+  - adr: 0395
+    title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
+    status: Proposed
+    implementation_status: Partial
+    date: '2026-04-10'
+    concern: api
+    keywords:
+      - homepage
+      - dashboard
+      - ux
+      - selectability
+      - catalog-fidelity
+      - iac
+      - fidelity
+      - catalog-driven
+      - lifecycle
+      - compliance
+    summary: 'Add user-select: text overrides to the generated custom.css to ensure'
+    filename: 0395-homepage-dashboard-fidelity.md
+    path: docs/adr/0395-homepage-dashboard-fidelity.md

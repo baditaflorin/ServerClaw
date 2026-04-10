@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 31
+total_adrs: 32
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -560,3 +560,23 @@ adrs:
     summary: 'We will wire platform knowledge into Open WebUI through three layers:'
     filename: 0377-open-webui-platform-knowledge-integration.md
     path: docs/adr/0377-open-webui-platform-knowledge-integration.md
+  - adr: 0394
+    title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: ci-cd
+    keywords:
+      - reconciliation
+      - automation
+      - cron
+      - heartbeat
+      - portals
+      - iac
+      - drift
+      - platform
+      - daemon
+      - continuous
+    summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
+    filename: 0394-platform-reconciliation-daemon.md
+    path: docs/adr/0394-platform-reconciliation-daemon.md

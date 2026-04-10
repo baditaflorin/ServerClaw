@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-10'
 facet: concern
 concern: ci-cd
-total_adrs: 42
+total_adrs: 43
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -789,3 +789,23 @@ adrs:
       functions. All 43+ catalog/registry scripts must i
     filename: 0369-python-validation-toolkit.md
     path: docs/adr/0369-python-validation-toolkit.md
+  - adr: 0394
+    title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: ci-cd
+    keywords:
+      - reconciliation
+      - automation
+      - cron
+      - heartbeat
+      - portals
+      - iac
+      - drift
+      - platform
+      - daemon
+      - continuous
+    summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
+    filename: 0394-platform-reconciliation-daemon.md
+    path: docs/adr/0394-platform-reconciliation-daemon.md
