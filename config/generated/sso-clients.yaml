@@ -68,7 +68,6 @@ sso_clients:
     - email
     - groups
     service: harbor
-  jupyterhub:
     provider: keycloak
     public_client: false
     redirect_uris:
@@ -77,7 +76,6 @@ sso_clients:
     - openid
     - profile
     - email
-    service: jupyterhub
   langfuse:
     provider: keycloak
     public_client: false

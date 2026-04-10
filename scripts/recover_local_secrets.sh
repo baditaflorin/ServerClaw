@@ -231,8 +231,6 @@ recover_vm_120() {
         /etc/lv3/harbor/admin-password                    harbor/admin-password.txt \
         /etc/lv3/harbor/database-password                 harbor/database-password.txt \
         /etc/lv3/netbox/secret-key                        netbox/secret-key.txt \
-        /etc/lv3/jupyterhub/service-api-token.txt         jupyterhub/service-api-token.txt \
-        /etc/lv3/jupyterhub/minio-root-password.txt       jupyterhub/minio-root-password.txt \
         /etc/lv3/platform-context/api-token.txt           platform-context/api-token.txt \
         /etc/lv3/ops-portal/session-secret.txt            ops-portal/oauth2-proxy-cookie-secret.txt \
         /etc/lv3/step-ca/hosts-password.txt               step-ca/secrets/provisioners/hosts-password.txt

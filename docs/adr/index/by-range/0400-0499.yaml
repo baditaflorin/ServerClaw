@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 2
+total_adrs: 3
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -56,4 +56,24 @@ adrs:
     filename: 0401-remove-netdata.md
     path: docs/adr/0401-remove-netdata.md
     implemented_in_repo_version: 0.178.92
+    implemented_on: '2026-04-10'
+  - adr: '0402'
+    title: Remove JupyterHub from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: platform
+    keywords:
+      - lifecycle
+      - decommissioning
+      - jupyterhub
+      - notebooks
+      - removal
+      - remove
+      - from
+      - platform
+    summary: 'Remove JupyterHub from the platform entirely:'
+    filename: 0402-remove-jupyterhub.md
+    path: docs/adr/0402-remove-jupyterhub.md
+    implemented_in_repo_version: 0.178.95
     implemented_on: '2026-04-10'

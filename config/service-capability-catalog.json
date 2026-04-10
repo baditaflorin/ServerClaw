@@ -1378,7 +1378,7 @@
         "redpanda",
         "private"
       ],
-      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime-lv3 already reserves 8097 for JupyterHub and 8099 for the Temporal UI.",
+      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime-lv3 reserves 8099 for the Temporal UI.",
       "environments": {
         "production": {
           "status": "active",
@@ -2218,48 +2218,6 @@
           "status": "active",
           "url": "https://wiki.lv3.org",
           "subdomain": "wiki.lv3.org"
-        }
-      }
-    },
-    {
-      "id": "jupyterhub",
-      "name": "JupyterHub",
-      "description": "Shared interactive notebook environment for exploratory platform analysis, prototype workflows, and governed operator experimentation.",
-      "category": "access",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8097",
-      "public_url": "https://notebooks.lv3.org",
-      "subdomain": "notebooks.lv3.org",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "JupyterHub Public Health",
-      "health_probe_id": "jupyterhub",
-      "secret_catalog_ids": [
-        "jupyterhub_service_api_token",
-        "jupyterhub_minio_root_password",
-        "keycloak_jupyterhub_client_secret"
-      ],
-      "adr": "0291",
-      "adr_file": "docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md",
-      "runbook": "docs/runbooks/configure-jupyterhub.md",
-      "runtime_pool": "runtime-ai",
-      "deployment_surface": "playbooks/services/jupyterhub.yml",
-      "restart_domain": "runtime-ai-execution",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
-      "mobility_tier": "burst_batch",
-      "tags": [
-        "jupyter",
-        "notebooks",
-        "exploration",
-        "oidc"
-      ],
-      "notes": "The current repo-managed notebook contract exposes Ollama, the private platform-context API, and the service-local jupyterhub-shared MinIO bucket inside spawned single-user servers; shared global MinIO, raw Qdrant, and LiteLLM remain future work.",
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://notebooks.lv3.org",
-          "subdomain": "notebooks.lv3.org"
         }
       }
     },

@@ -403,19 +403,6 @@
     ]
   },
   {
-    "name": "JupyterHub Public Health",
-    "type": "http",
-    "url": "https://notebooks.lv3.org/hub/health",
-    "description": "Public JupyterHub health endpoint published through the shared NGINX edge VM.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 5,
-    "accepted_statuscodes": [
-      "200-299"
-    ]
-  },
-  {
     "name": "Platform Context Private",
     "type": "http",
     "url": "http://10.10.10.20:8010/healthz",

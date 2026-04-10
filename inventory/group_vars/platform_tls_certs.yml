@@ -116,7 +116,6 @@ platform_tls_certs:
     wildcard: false
   notebooks.{{ platform_domain }}:
     cert_validity_days: 90
-    service: jupyterhub
     source: letsencrypt
     wildcard: false
   ntfy.{{ platform_domain }}:

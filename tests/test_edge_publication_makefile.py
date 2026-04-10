@@ -23,12 +23,6 @@ def test_converge_keycloak_bootstrap_materializes_shared_edge_generated_portals(
     assert workflows["converge-keycloak"]["preflight"]["bootstrap_manifest_ids"] == ["shared-edge-generated-portals"]
 
 
-def test_converge_jupyterhub_bootstrap_materializes_shared_edge_generated_portals() -> None:
-    workflows = json.loads((REPO_ROOT / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))["workflows"]
-
-    assert workflows["converge-jupyterhub"]["preflight"]["bootstrap_manifest_ids"] == ["shared-edge-generated-portals"]
-
-
 def test_route_dns_assertion_ledger_runs_public_endpoint_admission_before_apply() -> None:
     makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
 

@@ -83,9 +83,10 @@ CATALOG_REGISTRY: list[dict[str, str]] = [
     {"path": "config/certificate-catalog.json",             "type": "array",            "list_key": "certificates",  "id_field": "service_id"},
     # --- Dict-key catalogs: delete key == service_id variant ---
     {"path": "config/health-probe-catalog.json",            "type": "dict_key",     "list_key": "services"},
-    {"path": "config/service-redundancy-catalog.json",      "type": "dict_key",     "list_key": "services"},
+    {"path": "config/service-completeness.json",            "type": "dict_key",     "list_key": "services"},
     # --- Top-level key: service entries live directly at the root of the JSON ---
-    {"path": "config/service-completeness.json",            "type": "top_level_key"},
+    # service-redundancy-catalog has entries at the top level, NOT nested under "services"
+    {"path": "config/service-redundancy-catalog.json",      "type": "top_level_key"},
     # --- Dict-key-by-value: delete key where value[id_field] == service_id ---
     {"path": "config/image-catalog.json", "type": "dict_key_by_value", "list_key": "images", "id_field": "service_id"},
     # --- Workflow dict: delete keys containing any service variant ---

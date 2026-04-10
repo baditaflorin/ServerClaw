@@ -3803,64 +3803,6 @@
         "escalation_action": "notify_and_abort"
       }
     },
-    "converge-jupyterhub": {
-      "description": "Deploy JupyterHub on docker-runtime-lv3, publish it at notebooks.lv3.org, and verify the interactive notebook spawn contract against current platform services.",
-      "lifecycle_status": "active",
-      "preferred_entrypoint": {
-        "kind": "make_target",
-        "target": "converge-jupyterhub",
-        "command": "HETZNER_DNS_API_TOKEN=... make converge-jupyterhub"
-      },
-      "preflight": {
-        "required": true,
-        "required_secret_ids": [
-          "bootstrap_ssh_private_key",
-          "hetzner_dns_api_token"
-        ],
-        "bootstrap_manifest_ids": [
-          "shared-edge-generated-portals"
-        ],
-        "generated_secret_ids": [
-          "keycloak_jupyterhub_client_secret",
-          "jupyterhub_service_api_token",
-          "jupyterhub_minio_root_password"
-        ]
-      },
-      "validation_targets": [
-        "validate",
-        "syntax-check-jupyterhub"
-      ],
-      "live_impact": "guest_live",
-      "owner_runbook": "docs/runbooks/configure-jupyterhub.md",
-      "implementation_refs": [
-        "Makefile",
-        "collections/ansible_collections/lv3/platform/roles/jupyterhub_runtime",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
-        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
-        "inventory/host_vars/proxmox_florin.yml",
-        "config/service-capability-catalog.json",
-        "config/health-probe-catalog.json",
-        "config/api-gateway-catalog.json"
-      ],
-      "outputs": [
-        "A public JupyterHub notebook environment on docker-runtime-lv3 with Keycloak browser login, repo-managed single-user images, and smoke-verified access to current exploratory platform dependencies."
-      ],
-      "verification_commands": [
-        "make syntax-check-jupyterhub",
-        "curl -fsS https://notebooks.lv3.org/hub/health",
-        "curl -I https://notebooks.lv3.org/hub/oauth_login"
-      ],
-      "execution_class": "mutation",
-      "budget": {
-        "max_duration_seconds": 1800,
-        "max_steps": 320,
-        "max_concurrent_instances": 1,
-        "max_touched_hosts": 2,
-        "max_restarts": 1,
-        "max_rollback_depth": 1,
-        "escalation_action": "notify_and_abort"
-      }
-    },
     "converge-label-studio": {
       "description": "Converge Label Studio on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
       "lifecycle_status": "active",

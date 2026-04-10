@@ -1,6 +1,6 @@
 # ADR 0291: JupyterHub As The Interactive Notebook Environment
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.111
 - Implemented In Platform Version: 0.130.71

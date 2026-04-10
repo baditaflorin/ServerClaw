@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 114
+total_adrs: 113
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -2102,27 +2102,6 @@ adrs:
     summary: 'We will establish a Managed S3 Bucket Consumer Pattern that allows any service to declaratively request:'
     filename: 0397-managed-s3-bucket-consumer-pattern.md
     path: docs/adr/0397-managed-s3-bucket-consumer-pattern.md
-  - adr: 0397
-    title: Remove Netdata (realtime) from the Platform
-    status: Accepted
-    implementation_status: Implemented
-    date: '2026-04-10'
-    concern: monitoring
-    keywords:
-      - lifecycle
-      - decommissioning
-      - netdata
-      - realtime
-      - observability
-      - monitoring
-      - remove
-      - from
-      - platform
-    summary: Remove Netdata from the platform. The service is registered as realtime
-    filename: 0397-remove-netdata.md
-    path: docs/adr/0397-remove-netdata.md
-    implemented_in_repo_version: 0.178.91
-    implemented_on: '2026-04-10'
   - adr: 0398
     title: Outline Shared S3 Migration
     status: Proposed

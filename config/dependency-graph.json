@@ -469,15 +469,6 @@
       "adr": "0199"
     },
     {
-      "id": "jupyterhub",
-      "service": "jupyterhub",
-      "name": "JupyterHub",
-      "vm": "docker-runtime-lv3",
-      "tier": 1,
-      "category": "access",
-      "adr": "0291"
-    },
-    {
       "id": "lago",
       "service": "lago",
       "name": "Lago",
@@ -1461,36 +1452,6 @@
       "to": "postgres",
       "type": "hard",
       "description": "Outline stores workspace, user, and document metadata in Postgres."
-    },
-    {
-      "from": "jupyterhub",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "JupyterHub delegates routine browser sign-in to the shared Keycloak OIDC broker."
-    },
-    {
-      "from": "jupyterhub",
-      "to": "nginx_edge",
-      "type": "soft",
-      "description": "Public access to notebooks.lv3.org depends on the shared NGINX edge publication path."
-    },
-    {
-      "from": "jupyterhub",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "JupyterHub starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
-    },
-    {
-      "from": "jupyterhub",
-      "to": "ollama",
-      "type": "soft",
-      "description": "Spawned notebook servers expose the private Ollama runtime for local model inference and the OpenAI-compatible API path."
-    },
-    {
-      "from": "jupyterhub",
-      "to": "platform_context_api",
-      "type": "soft",
-      "description": "Spawned notebook servers expose the private platform-context API for exploratory repository and platform lookups."
     },
     {
       "from": "lago",

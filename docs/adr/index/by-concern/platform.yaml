@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-10'
 facet: concern
 concern: platform
-total_adrs: 142
+total_adrs: 143
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -1935,7 +1935,7 @@ adrs:
     implemented_on: '2026-03-31'
   - adr: 0291
     title: JupyterHub As The Interactive Notebook Environment
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
@@ -2538,3 +2538,23 @@ adrs:
       Consumer Pattern (ADR 0397).
     filename: 0398-outline-shared-s3-migration.md
     path: docs/adr/0398-outline-shared-s3-migration.md
+  - adr: '0402'
+    title: Remove JupyterHub from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: platform
+    keywords:
+      - lifecycle
+      - decommissioning
+      - jupyterhub
+      - notebooks
+      - removal
+      - remove
+      - from
+      - platform
+    summary: 'Remove JupyterHub from the platform entirely:'
+    filename: 0402-remove-jupyterhub.md
+    path: docs/adr/0402-remove-jupyterhub.md
+    implemented_in_repo_version: 0.178.95
+    implemented_on: '2026-04-10'

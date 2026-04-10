@@ -226,15 +226,6 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 # END SERVICE: outline
-# BEGIN SERVICE: jupyterhub
-- targets:
-    - https://notebooks.lv3.org/hub/health
-  labels:
-    service_id: jupyterhub
-    slo_id: jupyterhub-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-# END SERVICE: jupyterhub
 # BEGIN SERVICE: label_studio
 - targets:
     - http://10.10.10.20:8110/api/version

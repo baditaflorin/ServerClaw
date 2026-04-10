@@ -121,8 +121,6 @@ platform_nginx_upstreams:
   websocket: false
   max_body_size: 10m
   path_prefix: /
-- name: jupyterhub_upstream
-  service_name: jupyterhub
   fqdn: notebooks.lv3.org
   extra_fqdns: []
   port: 8097
@@ -258,12 +256,8 @@ platform_nginx_upstreams:
 - name: repo_intake_upstream
   service_name: repo_intake
   fqdn: repo-intake.lv3.org
-<<<<<<< HEAD
   extra_fqdns:
   - repo-intake.staging.lv3.org
-=======
-  extra_fqdns: []
->>>>>>> 4b9afe929 (feat: ADR 0224 repo-intake promoted to first-class subdomain service)
   port: 8096
   host: docker-runtime-lv3
   ip: 10.10.10.20

@@ -138,9 +138,6 @@ roles:
   homepage_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  jupyterhub_runtime:
-    policy: tracked
-    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   keycloak_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

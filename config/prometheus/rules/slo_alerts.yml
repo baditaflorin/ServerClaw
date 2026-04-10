@@ -655,32 +655,6 @@ groups:
           description: Outline remains reachable through the public LV3 edge for living knowledge browsing and sync automation.
           runbook: docs/runbooks/slo-tracking.md
 # END SERVICE: outline
-# BEGIN SERVICE: jupyterhub
-      - alert: SLOFastBurn_jupyterhub_availability
-        expr: (slo:jupyterhub_availability:error_rate_5m > (14 * 0.005000)) and (slo:jupyterhub_availability:error_rate_1h > (14 * 0.005000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: jupyterhub
-          slo_id: jupyterhub-availability
-          indicator: availability
-        annotations:
-          summary: jupyterhub-availability is burning its error budget at 14x
-          description: JupyterHub remains reachable through the public LV3 edge for interactive exploratory notebook sessions.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_jupyterhub_availability
-        expr: (slo:jupyterhub_availability:error_rate_6h > (6 * 0.005000)) and (slo:jupyterhub_availability:error_rate_30d > (6 * 0.005000))
-        for: 15m
-        labels:
-          severity: warning
-          service_id: jupyterhub
-          slo_id: jupyterhub-availability
-          indicator: availability
-        annotations:
-          summary: jupyterhub-availability is burning its error budget at 6x
-          description: JupyterHub remains reachable through the public LV3 edge for interactive exploratory notebook sessions.
-          runbook: docs/runbooks/slo-tracking.md
-# END SERVICE: jupyterhub
 # BEGIN SERVICE: label_studio
       - alert: SLOFastBurn_label_studio_availability
         expr: (slo:label_studio_availability:error_rate_5m > (14 * 0.010000)) and (slo:label_studio_availability:error_rate_1h > (14 * 0.010000))
