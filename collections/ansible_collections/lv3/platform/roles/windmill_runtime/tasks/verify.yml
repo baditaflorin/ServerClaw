@@ -254,14 +254,27 @@
   loop: "{{ windmill_worker_seed_job_secret_directories }}"
   no_log: true
 
+- name: Stat optional Windmill Atlas verification seeded job secret files before mirror
+  ansible.builtin.stat:
+    path: "{{ item.src }}"
+  loop: "{{ windmill_worker_seed_job_secret_files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_verify_seed_secret_stat
+
 - name: Mirror the Windmill Atlas verification seeded job secret files to the guest immediately before Atlas verification
   ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.path }}"
-    mode: "{{ item.mode }}"
-    owner: "{{ item.owner }}"
-    group: "{{ item.group }}"
-  loop: "{{ windmill_worker_seed_job_secret_files }}"
+    src: "{{ item.item.src }}"
+    dest: "{{ item.item.path }}"
+    mode: "{{ item.item.mode }}"
+    owner: "{{ item.item.owner }}"
+    group: "{{ item.item.group }}"
+  loop: "{{ windmill_verify_seed_secret_stat.results }}"
+  loop_control:
+    label: "{{ item.item.path | basename }}"
+  when: item.stat.exists or not (item.item.optional | default(false) | bool)
   no_log: true
 
 - name: Define the critical Windmill verification script expectations
