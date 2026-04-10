@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-10-netbox-timing-1b7488",
+  "service": "netbox",
+  "env": "production",
+  "command": "make converge-netbox env=production",
+  "timing": {
+    "started_at": "2026-04-10T12:49:20+00:00",
+    "completed_at": "2026-04-10T12:49:22+00:00",
+    "duration_seconds": 1.11
+  },
+  "outcome": "failed",
+  "returncode": 2,
+  "source_commit": "da29fc71e72c",
+  "repo_version": "0.178.93",
+  "ansible_summary": {
+    "recap": {},
+    "phases_observed": [],
+    "changed_tasks": [],
+    "failed_tasks": [],
+    "outcome": "ok"
+  }
+}
