@@ -102,6 +102,14 @@ CATALOG_REGISTRY: list[dict[str, str]] = [
     {"path": "config/ansible-role-idempotency.yml",   "type": "yaml_dict_key",      "list_key": "roles"},
     # --- YAML topology block: remove service key from lv3_service_topology dict ---
     {"path": "inventory/host_vars/proxmox_florin.yml", "type": "yaml_topology_block", "list_key": "lv3_service_topology"},
+    # --- YAML var-prefix: remove <service_id>_* lines under a named parent dict ---
+    {"path": "inventory/host_vars/proxmox_florin.yml", "type": "yaml_var_prefix", "parent_key": "platform_port_assignments"},
+    # --- YAML block-marker files: use BEGIN/END SERVICE markers (one entry per hand-authored file) ---
+    {"path": "inventory/group_vars/all/platform_services.yml", "type": "yaml_marker_block"},
+    # --- Flat JSON array (root IS the array, no list_key wrapper) ---
+    {"path": "config/uptime-kuma/monitors.json", "type": "json_array_flat", "id_field": "service_id"},
+    # --- workbench-IA service_overrides array (standard array with service_id) ---
+    {"path": "config/workbench-information-architecture.json", "type": "array", "list_key": "service_overrides", "id_field": "service_id"},
 ]
 
 
@@ -691,6 +699,132 @@ def _remove_yaml_block_markers(path: Path, service_id: str) -> bool:
     return changed
 
 
+def _remove_from_json_array_flat(path: Path, service_id: str, id_field: str) -> bool:
+    """Remove entries from a JSON file whose root IS a bare array (no list_key wrapper).
+
+    Used for config/uptime-kuma/monitors.json where the root is ``[{...}, ...]``.
+    Entries are removed when item[id_field] matches any service variant.
+    """
+    if not path.is_file():
+        return False
+    try:
+        data = load_json(path)
+    except Exception:
+        return False
+    if not isinstance(data, list):
+        return False
+    variants = set(_service_name_variants(service_id))
+    filtered = [
+        item for item in data
+        if not (isinstance(item, dict) and item.get(id_field) in variants)
+    ]
+    if len(filtered) == len(data):
+        return False
+    write_json(path, filtered, indent=2)
+    return True
+
+
+def _remove_from_yaml_var_prefix(path: Path, parent_key: str, service_id: str) -> bool:
+    """Remove lines under parent_key whose YAML key starts with any service variant.
+
+    Operates line-by-line to preserve all comments and surrounding structure.
+    Used to clean up standalone ``<service_id>_port: N`` entries under
+    ``platform_port_assignments`` in inventory/host_vars/proxmox_florin.yml.
+    """
+    if not path.is_file():
+        return False
+    try:
+        lines = path.read_text().splitlines(keepends=True)
+    except (UnicodeDecodeError, ValueError):
+        return False
+    variants = set(_service_name_variants(service_id))
+    new_lines: list[str] = []
+    in_parent = False
+    parent_indent = -1
+    changed = False
+
+    for line in lines:
+        raw = line.rstrip("\n").rstrip("\r")
+        stripped = raw.lstrip()
+        if not stripped:
+            new_lines.append(line)
+            continue
+        current_indent = len(raw) - len(stripped)
+        key_part = stripped.split(":")[0].strip() if ":" in stripped else stripped.split()[0]
+
+        if not in_parent and key_part == parent_key:
+            in_parent = True
+            parent_indent = current_indent
+            new_lines.append(line)
+            continue
+
+        if in_parent and current_indent <= parent_indent and key_part != parent_key:
+            in_parent = False
+
+        if in_parent and not stripped.startswith("#"):
+            if any(key_part == v or key_part.startswith(f"{v}_") for v in variants):
+                changed = True
+                continue
+
+        new_lines.append(line)
+
+    if changed:
+        path.write_text("".join(new_lines))
+    return changed
+
+
+def _remove_service_test_functions(path: Path, service_id: str) -> bool:
+    """Remove Python test functions whose names contain any service_id variant.
+
+    Uses the AST module for exact start/end line numbers — safe for multi-line
+    functions, decorators, and nested functions.  Returns True if any functions
+    were removed.
+    """
+    if not path.is_file():
+        return False
+    try:
+        source = path.read_text()
+    except (UnicodeDecodeError, ValueError):
+        return False
+    try:
+        import ast as _ast
+        tree = _ast.parse(source)
+    except SyntaxError:
+        return False
+    variants = _service_name_variants(service_id)
+    lines_to_remove: set[int] = set()
+
+    for node in _ast.walk(tree):
+        if not isinstance(node, _ast.FunctionDef):
+            continue
+        if not node.name.startswith("test_"):
+            continue
+        name_lower = node.name.lower()
+        if not any(v.replace("-", "_") in name_lower for v in variants):
+            continue
+        start = node.decorator_list[0].lineno if node.decorator_list else node.lineno
+        for lineno in range(start, node.end_lineno + 1):
+            lines_to_remove.add(lineno)
+
+    if not lines_to_remove:
+        return False
+
+    source_lines = source.splitlines(keepends=True)
+    # Also absorb a single blank line immediately before each function start
+    for lineno in sorted(lines_to_remove):
+        preceding = lineno - 1
+        if preceding > 0 and preceding not in lines_to_remove:
+            if not source_lines[preceding - 1].strip():
+                lines_to_remove.add(preceding)
+
+    new_lines = [
+        line for i, line in enumerate(source_lines, start=1)
+        if i not in lines_to_remove
+    ]
+    path.write_text("".join(new_lines))
+    return True
+
+
 def _remove_inline_service_markers(path: Path, service_id: str) -> bool:
     """Remove lines annotated with ``# SERVICE: <id>`` inline markers.
 
@@ -740,7 +874,10 @@ def _remove_role_inline_markers(service_id: str) -> list[str]:
         return modified
 
     for candidate in ROLES_ROOT.rglob("*.yml"):
-        if _remove_inline_service_markers(candidate, service_id):
+        # Try both annotation styles: inline # SERVICE: markers AND # BEGIN/END SERVICE: blocks
+        changed = _remove_inline_service_markers(candidate, service_id)
+        changed = _remove_yaml_block_markers(candidate, service_id) or changed
+        if changed:
             modified.append(str(candidate.relative_to(repo_path())))
     for candidate in ROLES_ROOT.rglob("*.j2"):
         if _remove_inline_service_markers(candidate, service_id):
@@ -772,6 +909,12 @@ def _apply_catalog_registry_entry(entry: dict[str, str], service_id: str) -> boo
         return _remove_from_yaml_dict_key(path, service_id, entry["list_key"])
     elif kind == "yaml_topology_block":
         return _remove_from_yaml_topology_block(path, entry["list_key"], service_id)
+    elif kind == "yaml_marker_block":
+        return _remove_yaml_block_markers(path, service_id)
+    elif kind == "json_array_flat":
+        return _remove_from_json_array_flat(path, service_id, entry["id_field"])
+    elif kind == "yaml_var_prefix":
+        return _remove_from_yaml_var_prefix(path, entry.get("parent_key", ""), service_id)
     return False
 
 
@@ -999,6 +1142,25 @@ def build_code_purge_plan(service_id: str) -> dict[str, Any]:
                     hit = isinstance(topology, dict) and bool(variants_set & set(topology.keys()))
                 except Exception:
                     hit = any(v in full.read_text() for v in variants_set)
+            elif kind == "yaml_marker_block":
+                content = full.read_text()
+                hit = any(f"# BEGIN SERVICE: {v}" in content for v in variants_set)
+            elif kind == "json_array_flat":
+                data = load_json(full)
+                hit = isinstance(data, list) and any(
+                    isinstance(i, dict) and i.get(entry["id_field"]) in variants_set for i in data
+                )
+            elif kind == "yaml_var_prefix":
+                try:
+                    import yaml
+                    data = yaml.safe_load(full.read_text()) or {}
+                    port_map = data.get(entry.get("parent_key", ""), {})
+                    hit = isinstance(port_map, dict) and any(
+                        any(k == v or k.startswith(f"{v}_") for v in variants_set)
+                        for k in port_map
+                    )
+                except Exception:
+                    hit = any(v in full.read_text() for v in variants_set)
         except Exception:
             pass
         if hit:
@@ -1047,6 +1209,7 @@ def execute_code_purge(plan: dict[str, Any]) -> dict[str, Any]:
         "catalogs_cleaned": [],
         "reference_files_cleaned": [],
         "inline_marker_files_cleaned": [],
+        "test_functions_removed": [],
         "adrs_deprecated": [],
         "stack_yaml_cleaned": False,
         "regeneration_commands": [],
@@ -1104,6 +1267,15 @@ def execute_code_purge(plan: dict[str, Any]) -> dict[str, Any]:
     inline_modified = _remove_role_inline_markers(service_id)
     results["inline_marker_files_cleaned"] = inline_modified
     modified_paths.extend(repo_path() / f for f in inline_modified)
+
+    # 4d. Remove service-specific test functions using AST (Gap 6 — ADR 0402 postmortem)
+    test_files_modified: list[str] = []
+    if TESTS_DIR.is_dir():
+        for test_file in sorted(TESTS_DIR.glob("test_*.py")):
+            if _remove_service_test_functions(test_file, service_id):
+                test_files_modified.append(str(test_file.relative_to(repo_path())))
+                modified_paths.append(test_file)
+    results["test_functions_removed"] = test_files_modified
 
     # 5. Deprecate ADRs
     results["adrs_deprecated"] = _deprecate_adrs(service_id)
@@ -1379,12 +1551,36 @@ def validate_catalog_registry(probe_service_id: str) -> list[str]:
                     found = isinstance(topology, dict) and bool(variants_set & set(topology.keys()))
                 except Exception:
                     pass
+            elif kind == "yaml_marker_block":
+                content = full.read_text()
+                found = any(f"# BEGIN SERVICE: {v}" in content for v in variants_set)
+            elif kind == "json_array_flat":
+                data = load_json(full)
+                found = isinstance(data, list) and any(
+                    isinstance(i, dict) and i.get(entry["id_field"]) in variants_set for i in data
+                )
+            elif kind == "yaml_var_prefix":
+                try:
+                    import yaml
+                    data = yaml.safe_load(full.read_text()) or {}
+                    port_map = data.get(entry.get("parent_key", ""), {})
+                    found = isinstance(port_map, dict) and any(
+                        any(k == v or k.startswith(f"{v}_") for v in variants_set)
+                        for k in port_map
+                    )
+                except Exception:
+                    pass
         except Exception:
             pass
 
         # Only warn on entries we'd expect to have this service (optional catalogs
-        # like dependency graph or redundancy catalog might legitimately be absent)
-        OPTIONAL_CATALOG_TYPES = {"dep_graph", "partitions", "yaml_topology_block"}
+        # might legitimately be absent for a given service)
+        OPTIONAL_CATALOG_TYPES = {
+            "dep_graph", "partitions", "yaml_topology_block",
+            "yaml_marker_block",  # platform_services.yml — only docker-compose services; VMs are absent
+            "json_array_flat",    # monitors.json — not all services have uptime monitors
+            "yaml_var_prefix",    # proxmox_florin.yml — not all services have port assignments
+        }
         if not found and kind not in OPTIONAL_CATALOG_TYPES:
             warnings.append(
                 f"WARN registry: {entry['path']} ({kind}) — zero matches for '{probe_service_id}'. "

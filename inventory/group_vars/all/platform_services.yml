@@ -54,6 +54,7 @@ platform_service_registry:
   # A
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: api_gateway
   api_gateway:
     service_type: docker_compose
     image_catalog_key: ""            # api-gateway is a bespoke binary, no catalog entry
@@ -91,7 +92,9 @@ platform_service_registry:
       upstream_host: runtime-control-lv3
       public_fqdn: api.{{ platform_domain }}
       auth_proxy: false             # upstream handles its own auth
+  # END SERVICE: api_gateway
 
+  # BEGIN SERVICE: artifact_cache
   artifact_cache:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/library/registry — no catalog key
@@ -99,11 +102,13 @@ platform_service_registry:
     host_group: artifact-cache-lv3
     site_dir: /opt/artifact-cache
     needs_openbao: false
+  # END SERVICE: artifact_cache
 
   # ---------------------------------------------------------------------------
   # B
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: browser_runner
   browser_runner:
     service_type: docker_compose
     image_catalog_key: ""            # built locally from Dockerfile.j2
@@ -112,11 +117,13 @@ platform_service_registry:
     site_dir: /opt/browser-runner
     container_name: browser-runner
     needs_openbao: false
+  # END SERVICE: browser_runner
 
   # ---------------------------------------------------------------------------
   # C
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: changedetection
   changedetection:
     service_type: docker_compose
     image_catalog_key: changedetection_runtime
@@ -125,7 +132,9 @@ platform_service_registry:
     site_dir: /opt/changedetection
     container_name: changedetection
     needs_openbao: false
+  # END SERVICE: changedetection
 
+  # BEGIN SERVICE: coolify
   coolify:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream ghcr.io/coollabsio/coolify
@@ -139,7 +148,9 @@ platform_service_registry:
       upstream_host: coolify-lv3
       public_fqdn: coolify.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: coolify
 
+  # BEGIN SERVICE: crawl4ai
   crawl4ai:
     service_type: docker_compose
     image_catalog_key: crawl4ai_runtime
@@ -148,11 +159,13 @@ platform_service_registry:
     site_dir: /opt/crawl4ai
     container_name: crawl4ai
     needs_openbao: false
+  # END SERVICE: crawl4ai
 
   # ---------------------------------------------------------------------------
   # D
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: dify
   dify:
     service_type: docker_compose
     image_catalog_key: dify_api_runtime
@@ -197,7 +210,9 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: agents.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: dify
 
+  # BEGIN SERVICE: directus
   directus:
     service_type: docker_compose
     image_catalog_key: directus_runtime
@@ -249,7 +264,9 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: data.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
+  # END SERVICE: directus
 
+  # BEGIN SERVICE: dozzle
   dozzle:
     service_type: docker_compose
     image_catalog_key: dozzle_runtime
@@ -276,11 +293,13 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: logs.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: dozzle
 
   # ---------------------------------------------------------------------------
   # E
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: excalidraw
   excalidraw:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/excalidraw/excalidraw
@@ -307,11 +326,13 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: draw.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: excalidraw
 
   # ---------------------------------------------------------------------------
   # F
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: flagsmith
   flagsmith:
     service_type: docker_compose
     image_catalog_key: flagsmith_runtime
@@ -341,11 +362,13 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: flags.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: flagsmith
 
   # ---------------------------------------------------------------------------
   # G
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: gitea
   gitea:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/gitea/gitea — pinned by digest in defaults
@@ -373,7 +396,9 @@ platform_service_registry:
         - profile
         - email
       public_client: false
+  # END SERVICE: gitea
 
+  # BEGIN SERVICE: glitchtip
   glitchtip:
     service_type: docker_compose
     image_catalog_key: glitchtip_runtime
@@ -413,7 +438,9 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: errors.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
+  # END SERVICE: glitchtip
 
+  # BEGIN SERVICE: gotenberg
   gotenberg:
     service_type: docker_compose
     image_catalog_key: gotenberg_runtime
@@ -422,7 +449,9 @@ platform_service_registry:
     site_dir: /opt/gotenberg
     container_name: gotenberg
     needs_openbao: false
+  # END SERVICE: gotenberg
 
+  # BEGIN SERVICE: grist
   grist:
     service_type: docker_compose
     image_catalog_key: grist_runtime
@@ -468,11 +497,13 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: grist.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
+  # END SERVICE: grist
 
   # ---------------------------------------------------------------------------
   # H
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: harbor
   harbor:
     service_type: docker_compose
     image_catalog_key: ""            # harbor is multi-component, no single catalog key
@@ -511,7 +542,9 @@ platform_service_registry:
       upstream_host: runtime-control-lv3
       public_fqdn: registry.{{ platform_domain }}
       auth_proxy: false             # harbor has its own auth; OCI clients authenticate directly
+  # END SERVICE: harbor
 
+  # BEGIN SERVICE: homepage
   homepage:
     service_type: docker_compose
     image_catalog_key: homepage_runtime
@@ -526,11 +559,13 @@ platform_service_registry:
       upstream_host: runtime-general-lv3
       public_fqdn: home.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: homepage
 
   # ---------------------------------------------------------------------------
   # K
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: keycloak
   keycloak:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream quay.io/keycloak/keycloak — pinned in defaults
@@ -563,11 +598,13 @@ platform_service_registry:
       auth_proxy: false             # Keycloak IS the SSO provider; cannot front itself
       extra_fqdns:
         - "sso.staging.{{ platform_domain }}"
+  # END SERVICE: keycloak
 
   # ---------------------------------------------------------------------------
   # L
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: label_studio
   label_studio:
     service_type: docker_compose
     image_catalog_key: label_studio_runtime
@@ -595,7 +632,9 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: annotate.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: label_studio
 
+  # BEGIN SERVICE: lago
   lago:
     service_type: docker_compose
     image_catalog_key: lago_api_runtime
@@ -623,7 +662,9 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: billing.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: lago
 
+  # BEGIN SERVICE: langfuse
   langfuse:
     service_type: docker_compose
     image_catalog_key: langfuse_runtime
@@ -669,7 +710,9 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: langfuse.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
+  # END SERVICE: langfuse
 
+  # BEGIN SERVICE: livekit
   livekit:
     service_type: docker_compose
     image_catalog_key: livekit_runtime
@@ -697,11 +740,13 @@ platform_service_registry:
       public_fqdn: livekit.{{ platform_domain }}
       auth_proxy: false             # LiveKit SDK handles token-based auth
       websocket: true               # LiveKit uses WebSockets / WebRTC signalling
+  # END SERVICE: livekit
 
   # ---------------------------------------------------------------------------
   # M
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: mail_platform
   mail_platform:
     service_type: docker_compose
     image_catalog_key: mail_platform_stalwart_runtime
@@ -722,7 +767,9 @@ platform_service_registry:
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
+  # END SERVICE: mail_platform
 
+  # BEGIN SERVICE: mailpit
   mailpit:
     service_type: docker_compose
     image_catalog_key: mailpit_runtime
@@ -731,7 +778,9 @@ platform_service_registry:
     site_dir: /opt/dev-tools/mailpit
     container_name: mailpit
     needs_openbao: false
+  # END SERVICE: mailpit
 
+  # BEGIN SERVICE: matrix_synapse
   matrix_synapse:
     service_type: docker_compose
     image_catalog_key: matrix_synapse_runtime
@@ -760,7 +809,9 @@ platform_service_registry:
       public_fqdn: matrix.{{ platform_domain }}
       auth_proxy: false             # Matrix handles its own auth via homeserver
       websocket: true               # Matrix client-server API uses WebSockets
+  # END SERVICE: matrix_synapse
 
+  # BEGIN SERVICE: mattermost
   mattermost:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream mattermost/mattermost-team-edition — pinned in defaults
@@ -770,7 +821,9 @@ platform_service_registry:
     container_name: lv3-mattermost
     needs_openbao: true
     needs_postgres: true
+  # END SERVICE: mattermost
 
+  # BEGIN SERVICE: minio
   minio:
     service_type: docker_compose
     image_catalog_key: minio_runtime
@@ -807,6 +860,7 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: minio.{{ platform_domain }}
       auth_proxy: false             # MinIO S3 API uses access-key auth
+  # END SERVICE: minio
 
   # NOTE: minio-console.{{ platform_domain }} proxies to port 9011 (console). Declared as a
   # separate upstream in the generated config; the extra_fqdns approach is
@@ -815,6 +869,7 @@ platform_service_registry:
   # N
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: n8n
   n8n:
     service_type: docker_compose
     image_catalog_key: n8n_runtime
@@ -843,7 +898,9 @@ platform_service_registry:
       public_fqdn: n8n.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # n8n uses WebSockets for workflow execution events
+  # END SERVICE: n8n
 
+  # BEGIN SERVICE: nats_jetstream
   nats_jetstream:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream nats:2.11-alpine
@@ -852,7 +909,9 @@ platform_service_registry:
     site_dir: /opt/nats-jetstream
     container_name: lv3-nats-jetstream
     needs_openbao: false
+  # END SERVICE: nats_jetstream
 
+  # BEGIN SERVICE: netbox
   netbox:
     service_type: docker_compose
     image_catalog_key: netbox_runtime
@@ -863,7 +922,9 @@ platform_service_registry:
     needs_openbao: true
     needs_postgres: true
     # NOTE: netbox.{{ platform_domain }} is not in subdomain-catalog.json; no dns section until it is registered.
+  # END SERVICE: netbox
 
+  # BEGIN SERVICE: nextcloud
   nextcloud:
     service_type: docker_compose
     image_catalog_key: nextcloud_runtime
@@ -892,7 +953,9 @@ platform_service_registry:
       public_fqdn: cloud.{{ platform_domain }}
       auth_proxy: false             # Nextcloud has native OIDC via Keycloak
       max_body_size: 4096m          # large file uploads
+  # END SERVICE: nextcloud
 
+  # BEGIN SERVICE: ntfy
   ntfy:
     service_type: docker_compose
     image_catalog_key: ntfy_runtime
@@ -919,11 +982,13 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: ntfy.{{ platform_domain }}
       auth_proxy: false             # ntfy has its own access-control layer
+  # END SERVICE: ntfy
 
   # ---------------------------------------------------------------------------
   # O
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: ollama
   ollama:
     service_type: docker_compose
     image_catalog_key: ollama_runtime
@@ -932,6 +997,7 @@ platform_service_registry:
     site_dir: /opt/ollama
     container_name: ollama
     needs_openbao: false
+  # END SERVICE: ollama
 
     service_type: docker_compose
     internal_port: 8088
@@ -960,6 +1026,7 @@ platform_service_registry:
         - email
       public_client: false
 
+  # BEGIN SERVICE: openbao
   openbao:
     service_type: docker_compose
     image_catalog_key: openbao_runtime
@@ -968,7 +1035,9 @@ platform_service_registry:
     site_dir: /opt/openbao
     container_name: lv3-openbao
     needs_openbao: false
+  # END SERVICE: openbao
 
+  # BEGIN SERVICE: openfga
   openfga:
     service_type: docker_compose
     image_catalog_key: openfga_runtime
@@ -977,7 +1046,9 @@ platform_service_registry:
     site_dir: /opt/openfga
     container_name: lv3-openfga
     needs_openbao: true
+  # END SERVICE: openfga
 
+  # BEGIN SERVICE: ops_portal
   ops_portal:
     service_type: docker_compose
     image_catalog_key: ""            # ops-portal is a bespoke container built locally
@@ -1020,7 +1091,9 @@ platform_service_registry:
         - /static/                   # CSS, JS, and static assets bypass OAuth2
       extra_fqdns:
         - "ops.staging.{{ platform_domain }}"
+  # END SERVICE: ops_portal
 
+  # BEGIN SERVICE: repo_intake
   repo_intake:
     service_type: docker_compose
     image_catalog_key: ""            # repo-intake is a bespoke container built locally
@@ -1063,7 +1136,9 @@ platform_service_registry:
         - /static/                   # CSS, JS, and static assets bypass OAuth2
       extra_fqdns:
         - "repo-intake.staging.{{ platform_domain }}"
+  # END SERVICE: repo_intake
 
+  # BEGIN SERVICE: outline
   outline:
     service_type: docker_compose
     image_catalog_key: outline_runtime
@@ -1110,11 +1185,13 @@ platform_service_registry:
       public_fqdn: wiki.{{ platform_domain }}
       auth_proxy: false             # Outline OIDC via Keycloak handles auth
       websocket: true               # Outline real-time collab uses WebSockets
+  # END SERVICE: outline
 
   # ---------------------------------------------------------------------------
   # P
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: paperless
   paperless:
     service_type: docker_compose
     image_catalog_key: paperless_runtime
@@ -1161,7 +1238,9 @@ platform_service_registry:
       public_fqdn: paperless.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
       max_body_size: 256m           # large document uploads
+  # END SERVICE: paperless
 
+  # BEGIN SERVICE: piper
   piper:
     service_type: docker_compose
     image_catalog_key: ""            # built locally from python base image
@@ -1170,7 +1249,9 @@ platform_service_registry:
     site_dir: /opt/piper
     container_name: piper
     needs_openbao: false
+  # END SERVICE: piper
 
+  # BEGIN SERVICE: plane
   plane:
     service_type: docker_compose
     image_catalog_key: plane_frontend_runtime
@@ -1199,7 +1280,9 @@ platform_service_registry:
       public_fqdn: tasks.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # Plane uses WebSockets for real-time updates
+  # END SERVICE: plane
 
+  # BEGIN SERVICE: plausible
   plausible:
     service_type: docker_compose
     image_catalog_key: plausible_runtime
@@ -1226,7 +1309,9 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: analytics.{{ platform_domain }}
       auth_proxy: true              # dashboard gated; /js/ and /api/event are unauthenticated paths
+  # END SERVICE: plausible
 
+  # BEGIN SERVICE: portainer
   portainer:
     service_type: docker_compose
     image_catalog_key: portainer_runtime
@@ -1235,11 +1320,13 @@ platform_service_registry:
     site_dir: /opt/portainer
     container_name: portainer
     needs_openbao: false
+  # END SERVICE: portainer
 
   # ---------------------------------------------------------------------------
   # R
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: rag_context
   rag_context:
     service_type: docker_compose
     image_catalog_key: ""            # rag-context uses qdrant/qdrant — no catalog key for main service
@@ -1248,7 +1335,9 @@ platform_service_registry:
     site_dir: /opt/platform-context
     container_name: platform-context
     needs_openbao: true
+  # END SERVICE: rag_context
 
+  # BEGIN SERVICE: redpanda
   redpanda:
     service_type: docker_compose
     image_catalog_key: redpanda_runtime
@@ -1257,7 +1346,9 @@ platform_service_registry:
     site_dir: /opt/redpanda
     container_name: lv3-redpanda
     needs_openbao: true
+  # END SERVICE: redpanda
 
+  # BEGIN SERVICE: repowise
   repowise:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream python:3.12-slim
@@ -1284,11 +1375,13 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: repowise.{{ platform_domain }}
       auth_proxy: false             # upstream auth handles its own access control
+  # END SERVICE: repowise
 
   # ---------------------------------------------------------------------------
   # S
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: searxng
   searxng:
     service_type: docker_compose
     image_catalog_key: searxng_runtime
@@ -1303,7 +1396,9 @@ platform_service_registry:
           type: internal
           target_host: nginx-lv3
           ttl: 3600
+  # END SERVICE: searxng
 
+  # BEGIN SERVICE: semaphore
   semaphore:
     service_type: docker_compose
     image_catalog_key: semaphore_runtime
@@ -1312,7 +1407,9 @@ platform_service_registry:
     site_dir: /opt/semaphore
     container_name: semaphore
     needs_openbao: true
+  # END SERVICE: semaphore
 
+  # BEGIN SERVICE: sftpgo
   sftpgo:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream drakkan/sftpgo — no catalog key
@@ -1351,7 +1448,9 @@ platform_service_registry:
         - profile
         - email
       public_client: false
+  # END SERVICE: sftpgo
 
+  # BEGIN SERVICE: step_ca
   step_ca:
     service_type: docker_compose
     image_catalog_key: step_ca_runtime
@@ -1360,7 +1459,9 @@ platform_service_registry:
     site_dir: /opt/step-ca
     container_name: step-ca
     needs_openbao: false
+  # END SERVICE: step_ca
 
+  # BEGIN SERVICE: superset
   superset:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/apache/superset — pinned in defaults
@@ -1406,11 +1507,13 @@ platform_service_registry:
       upstream_host: docker-runtime-lv3
       public_fqdn: bi.{{ platform_domain }}
       auth_proxy: false             # Superset native Keycloak OIDC handles auth
+  # END SERVICE: superset
 
   # ---------------------------------------------------------------------------
   # T
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: temporal
   temporal:
     service_type: docker_compose
     image_catalog_key: temporal_server_runtime
@@ -1420,7 +1523,9 @@ platform_service_registry:
     container_name: temporal-server
     needs_openbao: true
     needs_postgres: true
+  # END SERVICE: temporal
 
+  # BEGIN SERVICE: tesseract_ocr
   tesseract_ocr:
     service_type: docker_compose
     image_catalog_key: ""            # built locally from python base image
@@ -1429,7 +1534,9 @@ platform_service_registry:
     site_dir: /opt/tesseract-ocr
     container_name: tesseract-ocr
     needs_openbao: false
+  # END SERVICE: tesseract_ocr
 
+  # BEGIN SERVICE: tika
   tika:
     service_type: docker_compose
     image_catalog_key: tika_runtime
@@ -1438,7 +1545,9 @@ platform_service_registry:
     site_dir: /opt/tika
     container_name: tika
     needs_openbao: false
+  # END SERVICE: tika
 
+  # BEGIN SERVICE: typesense
   typesense:
     service_type: docker_compose
     image_catalog_key: typesense_runtime
@@ -1447,11 +1556,13 @@ platform_service_registry:
     site_dir: /opt/typesense
     container_name: typesense
     needs_openbao: true
+  # END SERVICE: typesense
 
   # ---------------------------------------------------------------------------
   # U
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: uptime_kuma
   uptime_kuma:
     service_type: docker_compose
     image_catalog_key: uptime_kuma_runtime
@@ -1481,11 +1592,13 @@ platform_service_registry:
       websocket: true               # Uptime Kuma uses WebSockets for live status updates
       extra_fqdns:
         - "uptime.staging.{{ platform_domain }}"
+  # END SERVICE: uptime_kuma
 
   # ---------------------------------------------------------------------------
   # V
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: vaultwarden
   vaultwarden:
     service_type: docker_compose
     image_catalog_key: vaultwarden_runtime
@@ -1506,7 +1619,9 @@ platform_service_registry:
       cert_source: step-ca
       wildcard: false
       cert_validity_days: 90
+  # END SERVICE: vaultwarden
 
+  # BEGIN SERVICE: vikunja
   vikunja:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream vikunja/api — no catalog key
@@ -1528,11 +1643,13 @@ platform_service_registry:
         - profile
         - email
       public_client: false
+  # END SERVICE: vikunja
 
   # ---------------------------------------------------------------------------
   # W
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: windmill
   windmill:
     service_type: docker_compose
     image_catalog_key: windmill_runtime
@@ -1542,7 +1659,9 @@ platform_service_registry:
     container_name: windmill-server
     needs_openbao: true
     needs_postgres: true
+  # END SERVICE: windmill
 
+  # BEGIN SERVICE: woodpecker
   woodpecker:
     service_type: docker_compose
     image_catalog_key: woodpecker_server_runtime
@@ -1570,11 +1689,13 @@ platform_service_registry:
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
+  # END SERVICE: woodpecker
 
   # ---------------------------------------------------------------------------
   # Infrastructure & Foundation Services (Added for ADR 0373 completion)
   # ---------------------------------------------------------------------------
 
+  # BEGIN SERVICE: alertmanager
   alertmanager:
     service_type: system_package
     image_catalog_key: alertmanager_runtime
@@ -1587,6 +1708,7 @@ platform_service_registry:
       config: /etc/alertmanager
       data: /var/lib/prometheus/alertmanager
       secrets: /etc/alertmanager
+  # END SERVICE: alertmanager
 
     extra_defaults:
       alertmanager_runtime_config_file: /etc/alertmanager/alertmanager.yml
@@ -1597,6 +1719,7 @@ platform_service_registry:
       alertmanager_runtime_port: 9093
       alertmanager_runtime_url: "http://127.0.0.1:9093"
 
+  # BEGIN SERVICE: docker_runtime
   docker_runtime:
     service_type: infrastructure
     image_catalog_key: docker_runtime
@@ -1607,7 +1730,9 @@ platform_service_registry:
     needs_postgres: false
     extra_defaults:
       docker_runtime_is_host_level: true
+  # END SERVICE: docker_runtime
 
+  # BEGIN SERVICE: docker_runtime_observability
   docker_runtime_observability:
     service_type: infrastructure
     image_catalog_key: docker_runtime_observability
@@ -1616,7 +1741,9 @@ platform_service_registry:
     container_name: docker-observability
     needs_openbao: false
     needs_postgres: false
+  # END SERVICE: docker_runtime_observability
 
+  # BEGIN SERVICE: falco
   falco:
     service_type: infrastructure
     image_catalog_key: falco_runtime
@@ -1627,7 +1754,9 @@ platform_service_registry:
     needs_postgres: false
     extra_defaults:
       falco_is_daemonset: true
+  # END SERVICE: falco
 
+  # BEGIN SERVICE: falco_event_bridge
   falco_event_bridge:
     service_type: infrastructure
     image_catalog_key: falco_event_bridge_runtime
@@ -1636,7 +1765,9 @@ platform_service_registry:
     container_name: falco-event-bridge
     needs_openbao: false
     needs_postgres: false
+  # END SERVICE: falco_event_bridge
 
+  # BEGIN SERVICE: librechat
   librechat:
     service_type: docker_compose
     image_catalog_key: librechat_runtime
@@ -1662,7 +1793,9 @@ platform_service_registry:
       domains:
         - "agents.{{ platform_domain }}"
       cert_source: letsencrypt
+  # END SERVICE: librechat
 
+  # BEGIN SERVICE: litellm
   litellm:
     service_type: docker_compose
     image_catalog_key: litellm_runtime
@@ -1671,7 +1804,9 @@ platform_service_registry:
     container_name: litellm
     needs_openbao: true
     needs_postgres: false
+  # END SERVICE: litellm
 
+  # BEGIN SERVICE: neko
   neko:
     service_type: multi_instance
     image_catalog_key: neko_runtime
@@ -1683,7 +1818,9 @@ platform_service_registry:
     extra_defaults:
       neko_multi_instance: true
       neko_instances: {}
+  # END SERVICE: neko
 
+  # BEGIN SERVICE: nginx_runtime
   nginx_runtime:
     service_type: system_package
     image_catalog_key: nginx_runtime
@@ -1699,7 +1836,9 @@ platform_service_registry:
       config: /etc/nginx
       data: /var/cache/nginx
       secrets: /etc/lv3/nginx
+  # END SERVICE: nginx_runtime
 
+  # BEGIN SERVICE: runtime_pool_substrate
   runtime_pool_substrate:
     service_type: infrastructure
     image_catalog_key: runtime_pool_substrate
@@ -1711,3 +1850,4 @@ platform_service_registry:
     extra_defaults:
       runtime_pool_provides_traefik: true
       runtime_pool_provides_dapr: true
+  # END SERVICE: runtime_pool_substrate
