@@ -2,7 +2,7 @@
 control_plane_recovery_store_root: /srv/control-plane-recovery
 control_plane_recovery_store_user: lv3-control-plane-backup
 control_plane_recovery_store_group: "{{ control_plane_recovery_store_user }}"
-control_plane_recovery_store_runtime_root: "{{ control_plane_recovery_store_root }}/runtime/docker-runtime-lv3"
+control_plane_recovery_store_runtime_root: "{{ control_plane_recovery_store_root }}/runtime/{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 control_plane_recovery_store_controller_dir: "{{ control_plane_recovery_store_root }}/controller"
 control_plane_recovery_store_drill_dir: "{{ control_plane_recovery_store_root }}/drills"
 control_plane_recovery_store_tmp_dir: "{{ control_plane_recovery_store_root }}/tmp"

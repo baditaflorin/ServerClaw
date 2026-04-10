@@ -13,7 +13,7 @@ gitea_runner_network_name: gitea_runner_default
 gitea_runner_network_subnet: 172.16.241.0/24
 gitea_runner_instance_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('gitea', 'internal') }}"
 gitea_runner_registration_token_local_file: "{{ repo_shared_local_root }}/gitea/runner-registration-token.txt"
-gitea_runner_name: docker-build-lv3
+gitea_runner_name: "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
 gitea_runner_labels: self-hosted:host,linux:host,amd64:host,docker:docker
 gitea_runner_renovate_enabled: true
 gitea_runner_renovate_username: renovate-bot

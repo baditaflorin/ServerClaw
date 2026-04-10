@@ -66,14 +66,14 @@ openbao_runtime_chain_recheck_retries: 30
 openbao_runtime_chain_recheck_delay_seconds: 2
 openbao_runtime_post_active_settle_seconds: 60
 openbao_migration_enabled: false
-openbao_migration_source_host: docker-runtime-lv3
+openbao_migration_source_host: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
 openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"
 openbao_breakglass_password_local_file: "{{ openbao_local_artifact_dir }}/breakglass-password.txt"
 openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/postgres-rotator-password.txt"
 openbao_legacy_restore_enabled: true
-openbao_legacy_restore_target_host: runtime-control-lv3
-openbao_legacy_restore_source_host: docker-runtime-lv3
+openbao_legacy_restore_target_host: "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
+openbao_legacy_restore_source_host: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 openbao_legacy_restore_source_snapshot_file: /var/tmp/openbao-runtime-control-legacy.snap
 openbao_legacy_restore_target_snapshot_file: /var/tmp/openbao-runtime-control-legacy.snap
 openbao_legacy_restore_temp_init_shares: 1

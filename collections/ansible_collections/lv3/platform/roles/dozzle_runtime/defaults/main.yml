@@ -9,11 +9,11 @@ dozzle_runtime_hub_container_name: dozzle
 dozzle_runtime_agent_container_name: dozzle-agent
 dozzle_runtime_hub_port: "{{ platform_service_topology | platform_service_port('dozzle', 'internal') }}"
 dozzle_runtime_agent_port: "{{ hostvars[platform_topology_host].platform_port_assignments.dozzle_agent_port }}"
-dozzle_runtime_hub_inventory_host: docker-runtime-lv3
+dozzle_runtime_hub_inventory_host: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 dozzle_runtime_agent_inventory_hosts:
-  - docker-runtime-lv3
-  - docker-build-lv3
-  - monitoring-lv3
+  - "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+  - "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
+  - "{{ groups['monitoring'][0] | default('monitoring-lv3') }}"
 dozzle_runtime_is_hub: "{{ inventory_hostname == dozzle_runtime_hub_inventory_host }}"
 dozzle_runtime_release_check_mode: manual
 dozzle_runtime_disable_analytics: true

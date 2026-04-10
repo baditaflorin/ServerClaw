@@ -21,7 +21,7 @@ changedetection_runtime_volume_name: changedetection-datastore
 changedetection_runtime_ntfy_password_local_file: "{{ repo_shared_local_root }}/ntfy/changedetection-password.txt"
 changedetection_runtime_ntfy_username: changedetection
 changedetection_runtime_ntfy_topic: platform-security-warn
-changedetection_runtime_ntfy_host: "{{ hostvars[platform_topology_host].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}"
+changedetection_runtime_ntfy_host: "{{ hostvars[platform_topology_host].platform_guest_catalog.by_name[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ipv4 }}"
 changedetection_runtime_ntfy_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('ntfy', 'internal') }}"
 changedetection_runtime_mattermost_webhooks_remote_file: /etc/lv3/mattermost/incoming-webhooks.json
 changedetection_runtime_notification_channels:

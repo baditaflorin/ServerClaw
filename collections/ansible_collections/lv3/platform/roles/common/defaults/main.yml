@@ -31,8 +31,8 @@ common_docker_daemon_restart_service_name: docker
 common_docker_daemon_restart_reason: ""
 common_docker_daemon_restart_force: false
 common_docker_daemon_restart_protected_hosts:
-  - docker-runtime-lv3
-  - docker-runtime-staging-lv3
+  - "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+  - "{{ playbook_execution_host_patterns.docker_runtime['staging'] }}"
 
 common_wait_port_host: 127.0.0.1
 common_wait_port_port: 0

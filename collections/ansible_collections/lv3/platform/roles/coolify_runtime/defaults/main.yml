@@ -47,7 +47,7 @@ coolify_api_allowed_ips:
   - 10.10.10.1
 coolify_verify_ssl: false
 
-coolify_server_name: coolify-lv3
+coolify_server_name: "coolify-{{ playbook_execution_env | default('production') | regex_replace('^production$', 'lv3') }}"
 coolify_server_description: Repo-managed local deployment target for LV3 application deploys.
 coolify_server_user: root
 coolify_server_host: host.docker.internal

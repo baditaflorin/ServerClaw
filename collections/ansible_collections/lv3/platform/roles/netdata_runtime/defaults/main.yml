@@ -24,7 +24,7 @@
 #
 # Author: LV3 Platform
 # Last Updated: 2026-04-05
-netdata_runtime_parent_inventory_host: monitoring-lv3
+netdata_runtime_parent_inventory_host: "{{ groups['monitoring'][0] | default('monitoring-lv3') }}"
 netdata_runtime_child_inventory_hosts: >-
   {{ (groups['lv3_guests'] + groups['proxmox_hosts'])
      | unique
