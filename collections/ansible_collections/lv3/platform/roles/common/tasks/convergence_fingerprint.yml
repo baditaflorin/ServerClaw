@@ -1,0 +1,104 @@
+# Purpose: Compute and compare a convergence fingerprint to skip unchanged services (ADR 0392 Phase 2.1).
+# Use case: Called before docker_compose_converge to detect no-change runs and skip the full convergence cycle.
+# Inputs:
+#   common_convergence_fingerprint_service (str, required): Service name used as fingerprint key.
+#   common_convergence_fingerprint_compose_file (str, required): Path to docker-compose.yml on the target host.
+#   common_convergence_fingerprint_env_files (list[str], optional): Paths to .env files included in the fingerprint.
+#   common_convergence_fingerprint_extra_files (list[str], optional): Additional config files to include in fingerprint.
+#   common_convergence_fingerprint_enabled (bool, optional): Whether to perform fingerprinting. Default: false.
+#   common_convergence_fingerprint_force (bool, optional): Force convergence even if fingerprint matches. Default: false.
+# Outputs: Sets common_convergence_fingerprint_skip (bool) — true when the fingerprint matches and convergence can be skipped.
+# Idempotency: Fully idempotent; reads files and computes hashes only.
+# Dependencies: ADR 0392.
+---
+- name: Initialize fingerprint skip decision
+  ansible.builtin.set_fact:
+    common_convergence_fingerprint_skip: false
+
+- name: Skip fingerprinting when disabled
+  ansible.builtin.meta: end_play
+  when: not (common_convergence_fingerprint_enabled | default(false) | bool)
+
+- name: Skip fingerprinting when force is set
+  ansible.builtin.debug:
+    msg: "Fingerprinting bypassed — force convergence requested."
+  when: common_convergence_fingerprint_force | default(false) | bool
+
+- name: Compute fingerprint of compose and config files
+  when:
+    - common_convergence_fingerprint_enabled | default(false) | bool
+    - not (common_convergence_fingerprint_force | default(false) | bool)
+  block:
+    - name: Collect all fingerprint input files
+      ansible.builtin.set_fact:
+        _convergence_fp_files: >-
+          {{
+            [common_convergence_fingerprint_compose_file]
+            + (common_convergence_fingerprint_env_files | default([]))
+            + (common_convergence_fingerprint_extra_files | default([]))
+          }}
+
+    - name: Stat fingerprint input files
+      ansible.builtin.stat:
+        path: "{{ item }}"
+        checksum_algorithm: sha256
+      loop: "{{ _convergence_fp_files }}"
+      register: _convergence_fp_stats
+
+    - name: Compute aggregate fingerprint
+      ansible.builtin.set_fact:
+        _convergence_fp_current: >-
+          {{
+            _convergence_fp_stats.results
+            | selectattr('stat.exists', 'defined')
+            | selectattr('stat.exists')
+            | map(attribute='stat.checksum')
+            | sort
+            | join(':')
+            | hash('sha256')
+          }}
+
+    - name: Read stored fingerprint
+      ansible.builtin.slurp:
+        src: "/var/lib/lv3/convergence/{{ common_convergence_fingerprint_service }}.fingerprint"
+      register: _convergence_fp_stored
+      failed_when: false
+
+    - name: Compare fingerprints
+      ansible.builtin.set_fact:
+        common_convergence_fingerprint_skip: >-
+          {{
+            _convergence_fp_stored is not failed
+            and _convergence_fp_stored.content is defined
+            and (_convergence_fp_stored.content | b64decode | trim) == _convergence_fp_current
+          }}
+
+    - name: Report fingerprint comparison
+      ansible.builtin.debug:
+        msg: >-
+          {{ common_convergence_fingerprint_service }} fingerprint
+          {{ 'MATCH — skipping convergence' if common_convergence_fingerprint_skip else 'MISMATCH — converging' }}.
+          Current: {{ _convergence_fp_current[:12] }}...
+          Stored: {{ (_convergence_fp_stored.content | default('') | b64decode | trim)[:12] if _convergence_fp_stored is not failed else 'none' }}...
+
+- name: Store updated fingerprint after convergence decision
+  when:
+    - common_convergence_fingerprint_enabled | default(false) | bool
+    - not (common_convergence_fingerprint_skip | bool)
+    - not (common_convergence_fingerprint_force | default(false) | bool)
+  block:
+    - name: Ensure fingerprint directory exists
+      ansible.builtin.file:
+        path: /var/lib/lv3/convergence
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Write convergence fingerprint
+      ansible.builtin.copy:
+        content: "{{ _convergence_fp_current }}\n"
+        dest: "/var/lib/lv3/convergence/{{ common_convergence_fingerprint_service }}.fingerprint"
+        owner: root
+        group: root
+        mode: "0644"
