@@ -839,10 +839,15 @@ platform_service_registry:
           type: public
           target_host: nginx-lv3
           ttl: 3600
+        - fqdn: "s3.{{ platform_domain }}"
+          type: public
+          target_host: nginx-lv3
+          ttl: 3600
     tls:
       domains:
         - "minio.{{ platform_domain }}"
         - "minio-console.{{ platform_domain }}"
+        - "s3.{{ platform_domain }}"
       cert_source: letsencrypt
       wildcard: false
       cert_validity_days: 90
@@ -1728,21 +1733,6 @@ platform_service_registry:
     extra_defaults:
       neko_multi_instance: true
       neko_instances: {}
-
-  netdata:
-    service_type: system_package
-    image_catalog_key: netdata_runtime
-    internal_port: 19999
-    host_group: monitoring-lv3
-    container_name: netdata
-    needs_openbao: false
-    needs_postgres: false
-    extra_defaults:
-      netdata_parent_child_streaming: true
-    state_dirs:
-      config: /etc/netdata
-      data: /var/lib/netdata
-      secrets: /etc/lv3/netdata
 
   nginx_runtime:
     service_type: system_package
