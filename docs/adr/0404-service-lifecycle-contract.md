@@ -1,4 +1,4 @@
-# ADR 0403: Service Lifecycle Contract — BEGIN/END Markers as Platform Standard
+# ADR 0404: Service Lifecycle Contract — BEGIN/END Markers as Platform Standard
 
 **Status:** Accepted
 **Decision Date:** 2026-04-10

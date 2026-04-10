@@ -1,9 +1,9 @@
-# Release 0.178.96
+# Release 0.178.98
 
 - Date: 2026-04-10
 
 ## Summary
-- [adr-0403] Service lifecycle contract — BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7
+- [adr-0404] Service lifecycle contract — BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7
 - [adr-0402] Remove JupyterHub (notebooks.lv3.org) — zero active users, maintenance overhead eliminated; jupyterhub_runtime role deleted, jupyterhub Keycloak OIDC client removed, 15 catalogs cleaned, ADR 0291 deprecated; postmortem documents 7 new ADR 0396 gaps (platform_services.yml orphaned blocks, keycloak shared role tasks, uptime kuma/workbench IA non-catalog JSONs)
 - [adr-0396 amendments] Close 7 ADR 0396 postmortem gaps — 9 new CATALOG_REGISTRY entries (subdomain-exposure-registry, certificate-catalog, command-catalog, top_level_key, yaml_topology_block); role_name lookup (Amendment 3); inline # SERVICE: marker removal in role defaults/J2 templates (Amendment 4); https_tls Prometheus files regenerated with BEGIN/END SERVICE markers (Amendment 5); post-purge JSON/YAML integrity validation (Amendment 6); --validate-registry self-check (Amendment 1); projected ~95% CPU-only decommissioning
 - [adr-0401] Remove Netdata from the platform — Prometheus + node_exporter cover all host metrics; netdata_runtime role deleted, realtime.lv3.org deprovisioned, 15 catalogs cleaned via decommission script, ADR 0196 deprecated; equivalent browser dashboards via Grafana Node Exporter Full (dashboard 1860)

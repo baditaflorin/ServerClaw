@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.96",
+  "repo_version": "0.178.98",
   "platform_version": "0.178.75",
-  "generated_at": "2026-04-10T14:06:46Z",
-  "next_refresh_at": "2026-04-10T15:06:46Z",
+  "generated_at": "2026-04-10T14:08:17Z",
+  "next_refresh_at": "2026-04-10T15:08:17Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.95",
+    "last_version": "0.178.96",
     "deployed_at": "2026-04-10",
-    "summary": "[adr-0403] Service lifecycle contract \u2014 BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7 [adr-0402] Remove JupyterHub (notebooks.lv3.org) \u2014 zero active users, maintenance overhead eliminated; jupyterhub_runtime role deleted, jupyterhub Keycloak OIDC client removed, 15 catalogs cleaned, ADR 0291 deprecated; postmortem documents 7 new ADR 0396 gaps (platform_services.yml orphaned blocks, keycloak shared role tasks, uptime kuma/workbench IA non-catalog JSONs)",
-    "release_notes_url": "docs/release-notes/0.178.96.md"
+    "summary": "[adr-0404] Service lifecycle contract \u2014 BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7 [adr-0402] Remove JupyterHub (notebooks.lv3.org) \u2014 zero active users, maintenance overhead eliminated; jupyterhub_runtime role deleted, jupyterhub Keycloak OIDC client removed, 15 catalogs cleaned, ADR 0291 deprecated; postmortem documents 7 new ADR 0396 gaps (platform_services.yml orphaned blocks, keycloak shared role tasks, uptime kuma/workbench IA non-catalog JSONs)",
+    "release_notes_url": "docs/release-notes/0.178.98.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
