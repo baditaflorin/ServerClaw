@@ -1,8 +1,9 @@
-# Release 0.178.93
+# Release 0.178.94
 
 - Date: 2026-04-10
 
 ## Summary
+- [adr-0396 amendments] Close 7 ADR 0396 postmortem gaps — 9 new CATALOG_REGISTRY entries (subdomain-exposure-registry, certificate-catalog, command-catalog, top_level_key, yaml_topology_block); role_name lookup (Amendment 3); inline # SERVICE: marker removal in role defaults/J2 templates (Amendment 4); https_tls Prometheus files regenerated with BEGIN/END SERVICE markers (Amendment 5); post-purge JSON/YAML integrity validation (Amendment 6); --validate-registry self-check (Amendment 1); projected ~95% CPU-only decommissioning
 - [adr-0401] Remove Netdata from the platform — Prometheus + node_exporter cover all host metrics; netdata_runtime role deleted, realtime.lv3.org deprovisioned, 15 catalogs cleaned via decommission script, ADR 0196 deprecated; equivalent browser dashboards via Grafana Node Exporter Full (dashboard 1860)
 - [adr-0399] Platform reconciliation daemon implemented (ADR 0399) — Phase 1: reconciliation library + CLI + Makefile targets; Phase 2: Windmill 15-min cron (reconcile-portals.py) + 60-min health sweep (portal-health-sweep.py); Phase 3: Gitea push-validation workflow; Phase 4: Grafana portal-reconciliation dashboard + ops portal widget; ADR 0400 homepage fidelity complete (catalog-driven bookmarks, text selectability CSS, verify fixes)
 - [adr-0392] Convergence timing infrastructure — convergence_timer.py + `make time-converge` records timing receipts to receipts/convergence-timing/; report/trend subcommands for drift detection; baselines: api-gateway 772s, windmill 1257s
