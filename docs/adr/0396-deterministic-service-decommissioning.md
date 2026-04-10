@@ -3,11 +3,12 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.178.90
+- Amended: 0.178.92 (gaps from ADR 0401 Netdata removal postmortem)
 - Implemented In Platform Version: not yet applied
 - Implemented On: 2026-04-10
 - Date: 2026-04-10
 - Concern: Operational Automation, Developer Experience, Decommissioning
-- Depends on: ADR 0389 (Service Decommissioning Procedure), ADR 0393 (One-API Removal postmortem)
+- Depends on: ADR 0389 (Service Decommissioning Procedure), ADR 0393 (One-API Removal postmortem), ADR 0401 (Netdata Removal postmortem)
 - ADR: 0396
 - Tags: automation, cpu-only, decommissioning, catalog, yaml-markers, deterministic, idempotency
 
@@ -211,8 +212,125 @@ number dynamically.
 
 ---
 
+---
+
+## Amendment 0.178.92 — Gaps from ADR 0401 (Netdata Removal)
+
+Postmortem: `docs/postmortems/adr-0401-netdata-removal-2026-04-10.md`
+
+The Netdata removal reduced to **~54% CPU-only** despite ADR 0396 improvements.
+Six new gap categories were identified. The following amendments are tracked for
+implementation:
+
+### Pending Amendment 1: Registry Self-Validation (`--validate-registry`)
+
+Before any mutation, verify each CATALOG_REGISTRY entry actually locates
+at least one entry for the target service (when the service is known to exist).
+Zero matches on a registered id_field is a registry misconfiguration, not
+a clean catalog.
+
+**Fixes:** Gap from wrong `id_field` in subdomain-catalog (used `"service"`
+instead of `"service_id"`) and wrong `list_key` in service-completeness
+(entries were top-level, not nested under `"services"`).
+
+### Pending Amendment 2: Missing Catalog Entries
+
+Add to CATALOG_REGISTRY:
+
+| Catalog | Type | list_key | id_field |
+|---------|------|----------|---------|
+| `config/subdomain-exposure-registry.json` | `array` | `publications` | `service_id` |
+| `config/certificate-catalog.json` | `array` | `certificates` | `service_id` |
+| `config/command-catalog.json` | `nested_dict` | `commands` | key contains variant |
+
+`service-completeness.json` entry: remove `list_key: "services"` — entries
+are at the top level. Handler should be `top_level_key` not `dict_key`.
+
+### Pending Amendment 3: Role Name Registry
+
+Add `"role_name"` and `"ansible_playbook"` fields to
+`config/service-capability-catalog.json` entries. The decommission script
+uses `role_name` to find the role directory and `test_<role_name>_role.py`
+test file. Fallback: `<service_id>_runtime`.
+
+**Fixes:** `netdata_runtime` role was not deleted by the script because the
+script looked for a `realtime_runtime` directory.
+
+### Pending Amendment 4: `# SERVICE: <id>` Inline Markers for Role Defaults
+
+Variables in `roles/*/defaults/main.yml` that belong to a specific service
+get annotated:
+
+```yaml
+# SERVICE: realtime — remove when service is decommissioned
+monitoring_netdata_parent_port: "{{ ... }}"
+```
+
+And in Jinja2 templates (`prometheus.yml.j2`, etc.):
+
+```jinja
+{# BEGIN SERVICE: realtime #}
+  - job_name: netdata
+    ...
+{# END SERVICE: realtime #}
+```
+
+The decommission script extends `_apply_catalog_registry_entry` to scan
+roles for these markers and remove the annotated lines/blocks.
+
+### Pending Amendment 5: Generate `https_tls_alerts.yml` and `https_tls_targets.yml`
+
+Create `scripts/generate_https_tls_config.py` reading from
+`config/certificate-catalog.json`, outputting:
+- `config/prometheus/rules/https_tls_alerts.yml` with `# BEGIN SERVICE:` markers
+- `config/prometheus/file_sd/https_tls_targets.yml` with markers
+
+Identical treatment to `generate_slo_config.py`. Adds `generate-https-tls-config`
+Makefile target. The decommission script then uses `_remove_yaml_block_markers`
+for these files (already implemented) instead of the fragile text-match path.
+
+### Pending Amendment 6: Post-Purge Integrity Validation
+
+Add a mandatory `_validate_modified_files(paths)` call at the end of
+`execute_code_purge`:
+- `json.load(open(path))` for `.json` files
+- `yaml.safe_load(open(path))` for `.yml`/`.yaml` files
+- On failure: print `git checkout HEAD -- <path>` recovery command and abort
+
+**Fixes:** Both JSON corruptions (certificate-catalog, command-catalog) and
+the YAML corruption (https_tls_alerts) would have been caught immediately
+instead of at pre-commit time.
+
+### Pending Amendment 7: Inventory Topology Block as Catalog
+
+Add to CATALOG_REGISTRY:
+
+```python
+{"path": "inventory/host_vars/proxmox_florin.yml",
+ "type": "yaml_topology_block",
+ "list_key": "lv3_service_topology"}
+```
+
+Handler: `data["lv3_service_topology"].pop(service_id, None)`.
+This removes the service's topology entry (private_ip, dns, edge block) without
+requiring agent inspection of the file structure.
+
+---
+
+### Projected impact if all amendments implemented
+
+| Status | CPU-only % |
+|--------|-----------|
+| ADR 0393 baseline (pre-0396) | ~85% |
+| After ADR 0396 (CATALOG_REGISTRY + block markers) | ~72% (ADR 0401 actual) |
+| After all 7 pending amendments | ~95% |
+| Remaining ~5% | Human judgment (coverage gaps) + ADR/runbook prose |
+
+---
+
 ## Related
 
 - ADR 0389 — Service Decommissioning Procedure (general process)
-- ADR 0393 — One-API Removal (postmortem that identified these gaps)
+- ADR 0393 — One-API Removal (postmortem that identified original gaps)
+- ADR 0401 — Netdata Removal (second postmortem; identified gaps above)
 - ADR 0391 — CPU-Only Operational Automation (`platform_ops.py`)
