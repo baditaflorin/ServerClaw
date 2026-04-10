@@ -6,7 +6,7 @@ error_codes:
     category: authentication
     retry_advice: none
     description: Bearer token is required for this endpoint.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [header]
   AUTH_TOKEN_INVALID:
     http_status: 401
@@ -14,7 +14,7 @@ error_codes:
     category: authentication
     retry_advice: none
     description: Bearer token could not be validated.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [reason]
   AUTH_TOKEN_EXPIRED:
     http_status: 401
@@ -22,7 +22,7 @@ error_codes:
     category: authentication
     retry_advice: none
     description: Bearer token has expired.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [reason]
   AUTH_INSUFFICIENT_ROLE:
     http_status: 403
@@ -30,7 +30,7 @@ error_codes:
     category: authentication
     retry_advice: none
     description: Caller identity is authenticated but lacks the required role.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [required_role, subject, service_id]
   INPUT_SCHEMA_INVALID:
     http_status: 422
@@ -38,7 +38,7 @@ error_codes:
     category: input
     retry_advice: none
     description: Request payload or parameters failed validation.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [field_path, error_type, validation_message]
   INPUT_UNKNOWN_SERVICE:
     http_status: 404
@@ -46,7 +46,7 @@ error_codes:
     category: input
     retry_advice: none
     description: Requested platform service is not defined.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id]
   INPUT_UNKNOWN_MEMORY_ENTRY:
     http_status: 404
@@ -54,7 +54,7 @@ error_codes:
     category: input
     retry_advice: none
     description: Requested ServerClaw memory entry is not defined.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [memory_id]
   INPUT_UNKNOWN_WORKFLOW:
     http_status: 404
@@ -62,7 +62,7 @@ error_codes:
     category: input
     retry_advice: none
     description: Requested workflow is not defined.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [workflow_id]
   INPUT_UNKNOWN_COMMAND:
     http_status: 404
@@ -70,7 +70,7 @@ error_codes:
     category: input
     retry_advice: none
     description: Requested command is not defined.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [command_id]
   INPUT_UNKNOWN_GRAPH_NODE:
     http_status: 404
@@ -78,7 +78,7 @@ error_codes:
     category: input
     retry_advice: none
     description: Requested dependency graph node is not defined.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [node_id]
   INPUT_UNKNOWN_GATEWAY_ROUTE:
     http_status: 404
@@ -86,7 +86,7 @@ error_codes:
     category: input
     retry_advice: none
     description: Requested gateway route is not registered.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [path]
   INFRA_RUNTIME_UNAVAILABLE:
     http_status: 503
@@ -95,7 +95,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: Required runtime dependency is unavailable or not configured.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [dependency, detail]
   INFRA_DEPENDENCY_DOWN:
     http_status: 503
@@ -104,7 +104,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: Upstream dependency request failed.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [dependency, detail]
   INFRA_CONFIGURATION_ERROR:
     http_status: 500
@@ -112,7 +112,7 @@ error_codes:
     category: infrastructure
     retry_advice: manual
     description: Runtime configuration is incomplete for the requested operation.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [dependency, detail]
   INTERNAL_UNEXPECTED_ERROR:
     http_status: 500
@@ -120,7 +120,7 @@ error_codes:
     category: internal
     retry_advice: manual
     description: Unexpected internal error.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [detail]
 
   # ── Authorization ────────────────────────────────────────────────────────────
@@ -130,7 +130,7 @@ error_codes:
     category: authorization
     retry_advice: none
     description: Caller is authenticated but lacks the required permission for this resource.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [required_permission, subject, resource_id]
   AUTHZ_SCOPE_INSUFFICIENT:
     http_status: 403
@@ -138,7 +138,7 @@ error_codes:
     category: authorization
     retry_advice: none
     description: Token scope does not cover the requested operation.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [required_scope, token_scopes]
   AUTHZ_RESOURCE_LOCKED:
     http_status: 403
@@ -147,7 +147,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: Resource is locked by another actor and cannot be modified.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [resource_id, locked_by, locked_at]
 
   # ── Platform gates ────────────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 60
     description: Target service health composite score is below the safe_to_act threshold.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id, composite_score, threshold]
   GATE_CAPABILITY_DENY:
     http_status: 403
@@ -166,7 +166,7 @@ error_codes:
     category: platform_gate
     retry_advice: none
     description: Agent capability bounds (ADR 0125) denied the requested operation.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [capability, agent_id]
   GATE_CONFLICT:
     http_status: 409
@@ -174,7 +174,7 @@ error_codes:
     category: platform_gate
     retry_advice: none
     description: Intent conflict detected — another intent already claims this resource.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [conflicting_intent_id, resource_id]
   GATE_BUDGET_EXCEEDED:
     http_status: 429
@@ -183,7 +183,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 300
     description: Workflow budget for this period has been exhausted.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [budget_period, budget_limit, current_spend]
   GATE_CIRCUIT_OPEN:
     http_status: 503
@@ -192,7 +192,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: null
     description: Circuit breaker is open for the required dependency (ADR 0164).
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [circuit_name, opened_at, recovery_window_s]
   GATE_CONCURRENCY_LIMIT:
     http_status: 429
@@ -201,7 +201,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 15
     description: Maximum concurrent instances for this workflow have been reached.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [workflow_id, concurrency_limit, active_instances]
 
   # ── Execution ─────────────────────────────────────────────────────────────────
@@ -211,7 +211,7 @@ error_codes:
     category: execution
     retry_advice: manual
     description: Workflow executed but returned a non-zero exit status.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [workflow_id, windmill_job_id, exit_code, stderr_snippet]
   EXEC_BUDGET_VIOLATION:
     http_status: 500
@@ -219,7 +219,7 @@ error_codes:
     category: execution
     retry_advice: manual
     description: Watchdog terminated the workflow for exceeding its resource budget.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [workflow_id, budget_type, limit, actual]
   EXEC_TIMEOUT:
     http_status: 504
@@ -227,7 +227,7 @@ error_codes:
     category: execution
     retry_advice: manual
     description: Workflow exceeded its configured max_duration_seconds limit.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [workflow_id, max_duration_s, elapsed_s]
   EXEC_INTENT_QUEUED:
     http_status: 202
@@ -235,7 +235,7 @@ error_codes:
     category: execution
     retry_advice: none
     description: Intent accepted and queued for deferred execution.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [intent_id, queue_position, estimated_start_at]
   EXEC_IDEMPOTENT_HIT:
     http_status: 200
@@ -243,7 +243,7 @@ error_codes:
     category: execution
     retry_advice: none
     description: Idempotent request matched a cached result — no new execution performed.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [idempotency_key, cached_at, result_id]
 
   # ── Health / probes ───────────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: Composite health check for the service returned a failing score.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id, composite_score, threshold, failed_checks]
   HEALTH_DEGRADED:
     http_status: 503
@@ -263,7 +263,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 60
     description: Service is in a degraded state — some health checks are failing.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id, composite_score, degraded_checks]
   HEALTH_UNKNOWN:
     http_status: 503
@@ -272,7 +272,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: Health status for the service could not be determined.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id, reason]
   PROBE_TIMEOUT:
     http_status: 504
@@ -281,7 +281,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 15
     description: Health probe timed out before receiving a response from the target.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [probe_name, target_url, timeout_s]
   PROBE_CONNECTION_REFUSED:
     http_status: 503
@@ -290,7 +290,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: Health probe connection refused — target is not listening on the expected port.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [probe_name, target_url]
   PROBE_TLS_ERROR:
     http_status: 503
@@ -298,7 +298,7 @@ error_codes:
     category: health
     retry_advice: manual
     description: Health probe TLS handshake failed — certificate may be expired or misconfigured.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [probe_name, target_url, tls_error]
 
   # ── Deployment ────────────────────────────────────────────────────────────────
@@ -308,7 +308,7 @@ error_codes:
     category: deployment
     retry_advice: manual
     description: Deployment precondition was not met — a required resource or gate check failed.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id, precondition, detail]
   DEPLOY_ROLLBACK_TRIGGERED:
     http_status: 500
@@ -316,7 +316,7 @@ error_codes:
     category: deployment
     retry_advice: manual
     description: Deployment failed post-apply verification and an automatic rollback was triggered.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id, deploy_id, rollback_to_version, failure_reason]
   DEPLOY_IMAGE_NOT_FOUND:
     http_status: 404
@@ -324,7 +324,7 @@ error_codes:
     category: deployment
     retry_advice: manual
     description: Container image referenced in the deploy manifest was not found in the registry.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [image_ref, registry]
   DEPLOY_LOCK_HELD:
     http_status: 503
@@ -333,7 +333,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: Another deployment is in progress for this service — cannot start a concurrent deploy.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id, lock_held_by, lock_acquired_at]
   CONVERGE_TASK_FAILED:
     http_status: 500
@@ -341,7 +341,7 @@ error_codes:
     category: deployment
     retry_advice: manual
     description: An Ansible task failed during convergence — idempotency not achieved.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [playbook, task_name, host, ansible_msg]
   CONVERGE_UNREACHABLE:
     http_status: 503
@@ -350,7 +350,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 60
     description: Convergence target host was unreachable during the Ansible run.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [host, playbook, attempt]
   CONVERGE_DRIFT_DETECTED:
     http_status: 409
@@ -358,7 +358,7 @@ error_codes:
     category: deployment
     retry_advice: manual
     description: Configuration drift detected between the expected and actual state of the host.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [host, drifted_resources]
 
   # ── Configuration ─────────────────────────────────────────────────────────────
@@ -368,7 +368,7 @@ error_codes:
     category: configuration
     retry_advice: manual
     description: A required configuration key is absent from inventory or group_vars.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [config_key, expected_in, service_id]
   CONFIG_TYPE_MISMATCH:
     http_status: 500
@@ -376,7 +376,7 @@ error_codes:
     category: configuration
     retry_advice: manual
     description: Configuration value has an unexpected type.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [config_key, expected_type, actual_type, service_id]
   CONFIG_VALUE_INVALID:
     http_status: 500
@@ -384,7 +384,7 @@ error_codes:
     category: configuration
     retry_advice: manual
     description: Configuration value is present but fails validation constraints.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [config_key, value, constraint, service_id]
   SCHEMA_VALIDATION_FAILED:
     http_status: 422
@@ -392,7 +392,7 @@ error_codes:
     category: configuration
     retry_advice: manual
     description: A catalog or registry file failed JSON Schema validation.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [schema_id, file_path, validation_errors]
   SCHEMA_VERSION_MISMATCH:
     http_status: 422
@@ -400,7 +400,7 @@ error_codes:
     category: configuration
     retry_advice: manual
     description: File schema_version is incompatible with the current validator.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [schema_id, file_path, file_version, supported_versions]
   SCHEMA_UNKNOWN_FIELD:
     http_status: 422
@@ -408,7 +408,7 @@ error_codes:
     category: configuration
     retry_advice: none
     description: Catalog or registry file contains an unrecognised field name.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [schema_id, file_path, unknown_field]
 
   # ── Infrastructure ────────────────────────────────────────────────────────────
@@ -419,7 +419,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 10
     description: Distributed lock is held by another process — operation cannot proceed.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [lock_key, held_by, acquired_at]
   INFRA_DEADLOCK_DETECTED:
     http_status: 500
@@ -427,7 +427,7 @@ error_codes:
     category: infrastructure
     retry_advice: manual
     description: A deadlock cycle was detected in the dependency graph (ADR 0162).
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [cycle_nodes, detected_at]
   INFRA_STORAGE_FULL:
     http_status: 507
@@ -435,7 +435,7 @@ error_codes:
     category: infrastructure
     retry_advice: manual
     description: Storage volume has reached capacity — writes are rejected.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [volume, used_bytes, capacity_bytes]
 
   # ── VM lifecycle ──────────────────────────────────────────────────────────────
@@ -445,7 +445,7 @@ error_codes:
     category: vm
     retry_advice: none
     description: The requested VM or container (VMID) was not found on the Proxmox host.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [vmid, proxmox_host]
   VM_START_FAILED:
     http_status: 500
@@ -453,7 +453,7 @@ error_codes:
     category: vm
     retry_advice: manual
     description: The Proxmox VM or container failed to start.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [vmid, proxmox_host, error_detail]
   VM_SNAPSHOT_FAILED:
     http_status: 500
@@ -461,7 +461,7 @@ error_codes:
     category: vm
     retry_advice: manual
     description: Snapshot creation or deletion on the VM failed.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [vmid, snapshot_name, error_detail]
   VM_MIGRATION_FAILED:
     http_status: 500
@@ -469,7 +469,7 @@ error_codes:
     category: vm
     retry_advice: manual
     description: Live migration of the VM to another Proxmox node failed.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [vmid, source_node, target_node, error_detail]
   VM_RESOURCE_EXHAUSTED:
     http_status: 507
@@ -477,7 +477,7 @@ error_codes:
     category: vm
     retry_advice: manual
     description: Proxmox host has insufficient CPU, RAM, or storage to create or start the VM.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [vmid, proxmox_host, resource_type, available, required]
 
   # ── Network ───────────────────────────────────────────────────────────────────
@@ -488,7 +488,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: DNS lookup failed for the target hostname.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [hostname, resolver, error_detail]
   NETWORK_ROUTE_UNREACHABLE:
     http_status: 503
@@ -497,7 +497,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 30
     description: No route to the target host — network segment may be down.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [target_host, target_port]
   NETWORK_FIREWALL_BLOCKED:
     http_status: 503
@@ -505,7 +505,7 @@ error_codes:
     category: network
     retry_advice: manual
     description: Connection to target was blocked by a firewall or ACL policy.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [target_host, target_port, policy_name]
   NETWORK_CERTIFICATE_EXPIRED:
     http_status: 503
@@ -513,5 +513,5 @@ error_codes:
     category: network
     retry_advice: manual
     description: TLS certificate for the target host has expired.
-    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    docs_url: docs/runbooks/platform-api-error-codes.md
     context_fields: [target_host, expired_at, certificate_cn]

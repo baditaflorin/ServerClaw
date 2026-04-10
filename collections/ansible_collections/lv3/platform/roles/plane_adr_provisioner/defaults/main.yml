@@ -14,4 +14,4 @@ plane_admin_bootstrap_token: ""
 provisioned_plane_env_path: "/root/.local/plane.env"
 
 # Repository root (for finding provision script)
-repo_root: /srv/proxmox_florin_server
+repo_root: "{{ platform_repo_checkout_path }}"

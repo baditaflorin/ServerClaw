@@ -3,5 +3,5 @@ n8n_database_name: n8n
 n8n_database_user: n8n
 n8n_postgres_secret_dir: /etc/lv3/n8n
 n8n_postgres_password_file: "{{ n8n_postgres_secret_dir }}/database-password"
-n8n_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n
-n8n_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/database-password.txt
+n8n_local_artifact_dir: "{{ repo_shared_local_root }}/n8n"
+n8n_database_password_local_file: "{{ repo_shared_local_root }}/n8n/database-password.txt"

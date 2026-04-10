@@ -25,7 +25,9 @@ apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin do
 
 systemctl enable docker containerd
 
-install -d -m 0755 /etc/docker/certs.d/registry.lv3.org
+# Create cert directory for private registry (domain set by platform_domain in identity.yml)
+# Override REGISTRY_DOMAIN at build time or leave as placeholder
+install -d -m 0755 /etc/docker/certs.d/${REGISTRY_DOMAIN:-registry.example.com}
 cat > /etc/docker/daemon.json <<'EOF'
 {
   "features": {

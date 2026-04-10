@@ -44,7 +44,7 @@ platform_context_openbao_secret_path: services/platform-context/runtime-env
 platform_context_openbao_policy_name: lv3-service-platform-context-runtime
 platform_context_openbao_approle_name: platform-context-runtime
 platform_context_api_token_remote_file: "{{ platform_context_secret_dir }}/api-token.txt"
-platform_context_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context
+platform_context_local_artifact_dir: "{{ repo_shared_local_root }}/platform-context"
 platform_context_api_token_local_file: "{{ platform_context_local_artifact_dir }}/api-token.txt"
 platform_context_minio_secret_key_local_file: "{{ platform_context_local_artifact_dir }}/minio-secret-key.txt"
 platform_context_minio_access_key_id: ragstaging

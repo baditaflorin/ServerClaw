@@ -3,7 +3,7 @@ build_server_packages:
   - apt-cacher-ng
 build_server_ops_user: ops
 build_server_ops_group: ops
-build_server_workspace: /opt/builds/proxmox_florin_server
+build_server_workspace: "/opt/builds/{{ platform_repo_name }}"
 build_server_cache_root: /opt/builds
 build_server_packer_plugin_cache: /opt/builds/.packer.d
 build_server_ansible_collection_cache: /opt/builds/.ansible/collections

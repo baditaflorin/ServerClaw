@@ -6,7 +6,7 @@ nomad_oidc_auth_server_url: https://127.0.0.1:4646
 nomad_oidc_auth_ca_cert_file: /etc/lv3/nomad/tls/nomad-agent-ca.pem
 nomad_oidc_auth_bootstrap_token_remote_file: /etc/lv3/nomad/bootstrap-management.token
 nomad_oidc_auth_keycloak_client_id: nomad
-nomad_oidc_auth_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/nomad-client-secret.txt
+nomad_oidc_auth_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/nomad-client-secret.txt"
 nomad_oidc_auth_oidc_discovery_url: "{{ keycloak_oidc_issuer_url }}"
 nomad_oidc_auth_allowed_redirect_uris:
   - https://scheduler.{{ platform_domain }}/ui/settings/tokens

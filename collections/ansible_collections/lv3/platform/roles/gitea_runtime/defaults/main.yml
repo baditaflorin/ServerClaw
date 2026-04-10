@@ -83,5 +83,5 @@ gitea_release_bundle_repo_token_secret_name: RELEASE_BUNDLE_REPO_TOKEN
 gitea_ntfy_token_local_file: "{{ repo_shared_local_root }}/ntfy/gitea-actions-token.txt"
 gitea_ntfy_token_secret_name: NTFY_TOKEN
 gitea_repo_org: ops
-gitea_repo_name: proxmox_florin_server
+gitea_repo_name: "{{ platform_repo_name }}"
 gitea_prereceive_hook_template: "{{ gitea_site_dir }}/pre-receive.validation-hook"

@@ -9,5 +9,5 @@ glitchtip_database_name: glitchtip
 glitchtip_database_user: glitchtip
 glitchtip_postgres_secret_dir: /etc/lv3/glitchtip
 glitchtip_postgres_password_file: "{{ glitchtip_postgres_secret_dir }}/database-password"
-glitchtip_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip
+glitchtip_local_artifact_dir: "{{ repo_shared_local_root }}/glitchtip"
 glitchtip_database_password_local_file: "{{ glitchtip_local_artifact_dir }}/database-password.txt"

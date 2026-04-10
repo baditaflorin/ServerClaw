@@ -1,7 +1,7 @@
 ---
 netbox_controller_url: "{{ platform_service_topology | platform_service_url('netbox', 'controller') }}"
-netbox_superuser_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt
+netbox_superuser_api_token_local_file: "{{ repo_shared_local_root }}/netbox/api-token.txt"
 netbox_sync_script_path: "{{ playbook_dir | dirname }}/scripts/netbox_inventory_sync.py"
-netbox_sync_host_vars_path: "{{ playbook_dir | dirname }}/inventory/host_vars/proxmox_florin.yml"
+netbox_sync_host_vars_path: "{{ playbook_dir | dirname }}/inventory/host_vars/{{ platform_topology_host }}.yml"
 netbox_sync_stack_path: "{{ playbook_dir | dirname }}/versions/stack.yaml"
 netbox_sync_lane_catalog_path: "{{ playbook_dir | dirname }}/config/control-plane-lanes.json"

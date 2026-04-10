@@ -357,9 +357,9 @@
   ansible.builtin.command:
     argv:
       - python3
-      - /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/totp_provision.py
+      - "{{ repo_shared_root }}/scripts/totp_provision.py"
       - --state-file
-      - /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/tfa/proxmox-ops-pam-totp.json
+      - "{{ repo_shared_local_root }}/tfa/proxmox-ops-pam-totp.json"
       - --issuer
       - Proxmox VE
       - --account

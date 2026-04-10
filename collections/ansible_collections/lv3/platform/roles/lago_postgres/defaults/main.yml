@@ -33,5 +33,5 @@ lago_postgres_extension_packages:
   - "postgresql-{{ lago_postgres_server_major_version }}-partman"
 lago_postgres_secret_dir: /etc/lv3/lago
 lago_postgres_password_file: "{{ lago_postgres_secret_dir }}/database-password"
-lago_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago
-lago_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/lago/database-password.txt
+lago_local_artifact_dir: "{{ repo_shared_local_root }}/lago"
+lago_database_password_local_file: "{{ repo_shared_local_root }}/lago/database-password.txt"

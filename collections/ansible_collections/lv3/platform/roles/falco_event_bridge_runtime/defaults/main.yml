@@ -21,11 +21,11 @@ falco_event_bridge_nats_host: >-
   }}
 falco_event_bridge_nats_port: 4222
 falco_event_bridge_nats_username: jetstream-admin
-falco_event_bridge_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
+falco_event_bridge_nats_password_local_file: "{{ repo_shared_local_root }}/nats/jetstream-admin-password.txt"
 falco_event_bridge_ntfy_base_url: "http://127.0.0.1:{{ hostvars[platform_topology_host].platform_port_assignments.ntfy_port }}"
 falco_event_bridge_ntfy_topic: platform-security-critical
 falco_event_bridge_ntfy_username: alertmanager
-falco_event_bridge_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
+falco_event_bridge_ntfy_password_local_file: "{{ repo_shared_local_root }}/ntfy/alertmanager-password.txt"
 falco_event_bridge_mutation_audit_file: /var/log/platform/mutation-audit.jsonl
 falco_event_bridge_http_timeout_seconds: 5
 falco_event_bridge_script_sources:

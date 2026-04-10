@@ -6,6 +6,6 @@ uptime_kuma_service_topology: "{{ platform_service_topology | platform_service('
 uptime_kuma_hostname: "{{ uptime_kuma_service_topology.public_hostname }}"
 uptime_kuma_base_url: "https://{{ uptime_kuma_service_topology.public_hostname }}"
 uptime_kuma_port: "{{ uptime_kuma_service_topology.ports.internal }}"
-uptime_kuma_local_auth_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma/admin-session.json
-uptime_kuma_local_requirements_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/requirements/uptime-kuma-client.txt
-uptime_kuma_local_seed_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json
+uptime_kuma_local_auth_file: "{{ repo_shared_local_root }}/uptime-kuma/admin-session.json"
+uptime_kuma_local_requirements_file: "{{ repo_shared_root }}/requirements/uptime-kuma-client.txt"
+uptime_kuma_local_seed_file: "{{ repo_shared_root }}/config/uptime-kuma/monitors.json"

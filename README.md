@@ -197,7 +197,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 
 ## License
 
-This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
 ## Contributing
 

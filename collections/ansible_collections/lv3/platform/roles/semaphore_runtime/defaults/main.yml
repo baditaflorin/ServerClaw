@@ -55,8 +55,8 @@ semaphore_repository_name: lv3-repo
 semaphore_inventory_name: semaphore-localhost
 semaphore_self_test_template_name: Semaphore Self-Test
 semaphore_repo_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
-semaphore_repo_checkout_host_path: /srv/proxmox_florin_server-semaphore
-semaphore_repo_checkout_container_path: /srv/proxmox_florin_server
+semaphore_repo_checkout_host_path: "{{ platform_repo_checkout_path }}-semaphore"
+semaphore_repo_checkout_container_path: "{{ platform_repo_checkout_path }}"
 semaphore_repo_checkout_sync_paths:
   - ansible.cfg
   - collections

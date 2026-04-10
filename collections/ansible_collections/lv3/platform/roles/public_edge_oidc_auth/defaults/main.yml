@@ -7,10 +7,10 @@ public_edge_oidc_auth_service_name: lv3-ops-portal-oauth2-proxy
 public_edge_oidc_auth_http_address: 127.0.0.1:4180
 public_edge_oidc_auth_config_dir: /etc/lv3/oauth2-proxy
 public_edge_oidc_auth_config_file: "{{ public_edge_oidc_auth_config_dir }}/ops-portal.cfg"
-public_edge_oidc_auth_cookie_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ops-portal/oauth2-proxy-cookie-secret.txt
+public_edge_oidc_auth_cookie_secret_local_file: "{{ repo_shared_local_root }}/ops-portal/oauth2-proxy-cookie-secret.txt"
 public_edge_oidc_auth_cookie_name: _lv3_ops_portal_proxy
 public_edge_oidc_auth_client_id: ops-portal-oauth
-public_edge_oidc_auth_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/ops-portal-client-secret.txt
+public_edge_oidc_auth_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/ops-portal-client-secret.txt"
 public_edge_oidc_auth_issuer_url: "{{ keycloak_oidc_issuer_url }}"
 public_edge_oidc_auth_public_login_url: "{{ keycloak_oidc_auth_url }}"
 public_edge_oidc_auth_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('keycloak', 'internal') }}"

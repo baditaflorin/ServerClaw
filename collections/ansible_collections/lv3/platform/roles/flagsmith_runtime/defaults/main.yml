@@ -37,11 +37,11 @@ flagsmith_task_processor_queue_pop_size: 10
 flagsmith_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 flagsmith_database_name: flagsmith
 flagsmith_database_user: flagsmith
-flagsmith_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith
-flagsmith_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/database-password.txt
-flagsmith_django_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/django-secret-key.txt
-flagsmith_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/admin-password.txt
-flagsmith_environment_keys_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/flagsmith/environment-keys.json
+flagsmith_local_artifact_dir: "{{ repo_shared_local_root }}/flagsmith"
+flagsmith_database_password_local_file: "{{ repo_shared_local_root }}/flagsmith/database-password.txt"
+flagsmith_django_secret_key_local_file: "{{ repo_shared_local_root }}/flagsmith/django-secret-key.txt"
+flagsmith_admin_password_local_file: "{{ repo_shared_local_root }}/flagsmith/admin-password.txt"
+flagsmith_environment_keys_local_file: "{{ repo_shared_local_root }}/flagsmith/environment-keys.json"
 flagsmith_django_secret_key_remote_file: "{{ flagsmith_secret_dir }}/django-secret-key.txt"
 flagsmith_admin_password_remote_file: "{{ flagsmith_secret_dir }}/admin-password.txt"
 flagsmith_seed_script_remote_file: "{{ flagsmith_site_dir }}/flagsmith_seed.py"

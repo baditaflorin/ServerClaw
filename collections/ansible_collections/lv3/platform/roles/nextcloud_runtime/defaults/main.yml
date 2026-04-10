@@ -31,10 +31,10 @@ nextcloud_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_
 nextcloud_database_port: 5432
 nextcloud_database_name: nextcloud
 nextcloud_database_user: nextcloud
-nextcloud_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/database-password.txt
-nextcloud_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud
-nextcloud_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/admin-password.txt
-nextcloud_redis_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/redis-password.txt
+nextcloud_database_password_local_file: "{{ repo_shared_local_root }}/nextcloud/database-password.txt"
+nextcloud_local_artifact_dir: "{{ repo_shared_local_root }}/nextcloud"
+nextcloud_admin_password_local_file: "{{ repo_shared_local_root }}/nextcloud/admin-password.txt"
+nextcloud_redis_password_local_file: "{{ repo_shared_local_root }}/nextcloud/redis-password.txt"
 nextcloud_admin_password_remote_file: "{{ nextcloud_secret_dir }}/admin-password.txt"
 nextcloud_redis_password_remote_file: "{{ nextcloud_secret_dir }}/redis-password.txt"
 nextcloud_admin_user: ops

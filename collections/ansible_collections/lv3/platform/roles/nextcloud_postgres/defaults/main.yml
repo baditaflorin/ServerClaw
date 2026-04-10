@@ -9,5 +9,5 @@ nextcloud_database_name: nextcloud
 nextcloud_database_user: nextcloud
 nextcloud_postgres_secret_dir: /etc/lv3/nextcloud
 nextcloud_postgres_password_file: "{{ nextcloud_postgres_secret_dir }}/database-password"
-nextcloud_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud
-nextcloud_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/database-password.txt
+nextcloud_local_artifact_dir: "{{ repo_shared_local_root }}/nextcloud"
+nextcloud_database_password_local_file: "{{ repo_shared_local_root }}/nextcloud/database-password.txt"

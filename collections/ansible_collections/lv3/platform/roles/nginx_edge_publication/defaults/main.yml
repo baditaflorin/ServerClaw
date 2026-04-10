@@ -40,7 +40,7 @@ public_edge_service_topology: >-
       )
   }}
 public_edge_session_authority: "{{ platform_session_authority }}"
-public_edge_certbot_email: baditaflorin@gmail.com
+public_edge_certbot_email: "{{ platform_operator_email }}"
 public_edge_cert_name: lv3-edge
 public_edge_site_tls_materials: {}
 public_edge_acme_challenge_method: webroot

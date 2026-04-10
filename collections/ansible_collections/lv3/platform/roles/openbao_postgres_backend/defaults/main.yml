@@ -1,6 +1,6 @@
 ---
 openbao_postgres_admin_role: openbao_rotator
 openbao_postgres_connect_role: lv3_openbao_connect_all
-openbao_postgres_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
+openbao_postgres_admin_password_local_file: "{{ repo_shared_local_root }}/openbao/postgres-rotator-password.txt"
 openbao_postgres_database: postgres
 openbao_postgres_reserved_connection_role: pg_use_reserved_connections

@@ -30,7 +30,7 @@ jupyterhub_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtim
 jupyterhub_service_api_token_local_file: "{{ jupyterhub_local_artifact_dir }}/service-api-token.txt"
 jupyterhub_minio_root_password_local_file: "{{ jupyterhub_local_artifact_dir }}/minio-root-password.txt"
 jupyterhub_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/jupyterhub-client-secret.txt"
-jupyterhub_platform_context_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
+jupyterhub_platform_context_api_token_local_file: "{{ repo_shared_local_root }}/platform-context/api-token.txt"
 jupyterhub_service_api_token_remote_file: "{{ jupyterhub_secret_dir }}/service-api-token.txt"
 jupyterhub_proxy_auth_token_remote_file: "{{ jupyterhub_secret_dir }}/proxy-auth-token.txt"
 jupyterhub_minio_root_password_remote_file: "{{ jupyterhub_secret_dir }}/minio-root-password.txt"

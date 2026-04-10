@@ -71,7 +71,7 @@ dify_files_url: "{{ dify_public_base_url }}"
 dify_internal_files_url: http://api:5001
 dify_gateway_tools_endpoint: https://api.{{ platform_domain }}/v1/dify-tools
 dify_langfuse_host: https://langfuse.{{ platform_domain }}
-dify_admin_email: baditaflorin@gmail.com
+dify_admin_email: "{{ platform_operator_email }}"
 dify_admin_name: Florin Badita
 dify_vector_store: qdrant
 dify_ollama_base_url: "http://host.docker.internal:{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('ollama', 'internal') }}"

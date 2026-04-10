@@ -6,7 +6,7 @@ control_plane_recovery_store_runtime_root: "{{ control_plane_recovery_store_root
 control_plane_recovery_store_controller_dir: "{{ control_plane_recovery_store_root }}/controller"
 control_plane_recovery_store_drill_dir: "{{ control_plane_recovery_store_root }}/drills"
 control_plane_recovery_store_tmp_dir: "{{ control_plane_recovery_store_root }}/tmp"
-control_plane_recovery_store_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
+control_plane_recovery_store_runtime_ssh_public_key_local_file: "{{ repo_shared_local_root }}/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub"
 control_plane_recovery_store_restore_drill_script: /usr/local/libexec/lv3-control-plane-restore-drill.sh
 control_plane_recovery_store_restore_drill_service: lv3-control-plane-restore-drill.service
 control_plane_recovery_store_restore_drill_timer: lv3-control-plane-restore-drill.timer

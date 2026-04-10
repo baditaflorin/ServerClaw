@@ -35,7 +35,7 @@ keycloak_recovery_admin_service_secret_remote_file: "{{ keycloak_secret_dir }}/r
 keycloak_operator_username: florin.badita
 keycloak_operator_first_name: Florin
 keycloak_operator_last_name: Badita
-keycloak_operator_email: baditaflorin@gmail.com
+keycloak_operator_email: "{{ platform_operator_email }}"
 keycloak_operator_password_remote_file: "{{ keycloak_secret_dir }}/florin.badita-password"
 keycloak_outline_automation_username: outline.automation
 keycloak_outline_automation_first_name: Outline

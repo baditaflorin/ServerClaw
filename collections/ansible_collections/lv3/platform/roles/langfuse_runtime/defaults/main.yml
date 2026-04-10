@@ -66,7 +66,7 @@ langfuse_init_org_id: lv3
 langfuse_init_org_name: LV3
 langfuse_init_project_id: lv3-agent-observability
 langfuse_init_project_name: LV3 Agent Observability
-langfuse_init_user_email: baditaflorin@gmail.com
+langfuse_init_user_email: "{{ platform_operator_email }}"
 langfuse_init_user_name: Florin Badita
 langfuse_clickhouse_user: clickhouse
 langfuse_minio_access_key_id: langfuseapp

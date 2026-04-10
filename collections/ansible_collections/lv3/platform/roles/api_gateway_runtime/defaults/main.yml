@@ -242,8 +242,8 @@ api_gateway_sources:
     dest: api_gateway/main.py
   - src: "{{ api_gateway_repo_root }}/requirements/api-gateway.txt"
     dest: requirements.txt
-  - src: "{{ api_gateway_repo_root }}/inventory/host_vars/proxmox_florin.yml"
-    dest: inventory/host_vars/proxmox_florin.yml
+  - src: "{{ api_gateway_repo_root }}/inventory/host_vars/{{ platform_topology_host }}.yml"
+    dest: "inventory/host_vars/{{ platform_topology_host }}.yml"
   - src: "{{ api_gateway_repo_root }}/versions/stack.yaml"
     dest: versions/stack.yaml
   - src: "{{ api_gateway_repo_root }}/workstreams.yaml"

@@ -26,7 +26,7 @@ grist_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
 grist_keycloak_scopes: openid profile email
 grist_keycloak_sp_host: "{{ grist_public_base_url }}"
 grist_single_org: lv3
-grist_default_email: "{{ keycloak_operator_email | default('baditaflorin@gmail.com') }}"
+grist_default_email: "{{ platform_operator_email }}"
 grist_force_login: false
 grist_support_anon: true
 grist_anonymous_playground: false

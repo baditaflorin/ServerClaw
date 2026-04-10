@@ -2685,7 +2685,7 @@
 
 - name: Remove the stale ServerClaw operator CLI client secret from the control machine
   ansible.builtin.file:
-    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-operator-client-secret.txt
+    path: "{{ repo_shared_local_root }}/keycloak/serverclaw-operator-client-secret.txt"
     state: absent
   delegate_to: localhost
   become: false

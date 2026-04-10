@@ -10,7 +10,7 @@ repowise_service_dir: "{{ repowise_base_dir }}/service"
 repowise_repo_dir: "{{ repowise_base_dir }}/repo"
 
 # Git repo to index
-repowise_git_repo: "http://{{ gitea_ops_user | default('ops') }}:{{ gitea_ops_token }}@{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:3003/ops/proxmox_florin_server.git"
+repowise_git_repo: "http://{{ gitea_ops_user | default('ops') }}:{{ gitea_ops_token }}@{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:3003/{{ platform_gitea_org }}/{{ platform_repo_name }}.git"
 repowise_git_branch: main
 
 # Service networking
