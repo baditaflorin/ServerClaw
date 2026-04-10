@@ -1143,5 +1143,5 @@ windmill_seed_resources:
     resource_type: "{{ windmill_ntfy_resource_type_name }}"
     value:
       base_url: "{{ windmill_ntfy_base_url }}"
-      bearer_token: "{{ lookup('ansible.builtin.file', windmill_ntfy_token_local_file) | trim }}"
+      bearer_token: "{{ lookup('ansible.builtin.file', windmill_ntfy_token_local_file, errors='ignore') | default('', true) | trim }}"
       publisher: windmill
