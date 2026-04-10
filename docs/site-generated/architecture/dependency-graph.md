@@ -60,9 +60,9 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, LiveKit, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, One-API, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
-| `3` | Homepage, Open WebUI, Platform API Gateway, ServerClaw, Woodpecker CI |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, LiveKit, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
+| `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
 ## Mermaid Diagram
@@ -78,12 +78,10 @@ graph TD
     grist["Grist\nTier 1"]
     harbor["Harbor\nTier 1"]
     headscale["Headscale\nTier 1"]
-    jupyterhub["JupyterHub\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     mailpit["Mailpit\nTier 1"]
     minio["MinIO\nTier 1"]
     nats_jetstream["NATS JetStream\nTier 1"]
-    realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     nomad["Nomad\nTier 1"]
     ntopng["ntopng\nTier 1"]
@@ -129,7 +127,6 @@ graph TD
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
     ntfy["ntfy\nTier 2"]
-    one_api["One-API\nTier 2"]
     openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
     paperless["Paperless-ngx\nTier 2"]
@@ -137,15 +134,14 @@ graph TD
     plausible["Plausible Analytics\nTier 2"]
     status_page["Public Status Page\nTier 2"]
     semaphore["Semaphore\nTier 2"]
+    serverclaw["ServerClaw\nTier 2"]
     temporal["Temporal\nTier 2"]
     tesseract_ocr["Tesseract OCR\nTier 2"]
     typesense["Typesense\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
     windmill["Windmill\nTier 2"]
     homepage["Homepage\nTier 3"]
-    open_webui["Open WebUI\nTier 3"]
     api_gateway["Platform API Gateway\nTier 3"]
-    serverclaw["ServerClaw\nTier 3"]
     woodpecker["Woodpecker CI\nTier 3"]
     ops_portal["Ops Portal\nTier 4"]
     alertmanager -->|soft| mattermost
@@ -215,11 +211,6 @@ graph TD
     headscale -->|soft| nginx_edge
     homepage -->|hard| keycloak
     homepage -->|hard| nginx_edge
-    jupyterhub -->|soft| keycloak
-    jupyterhub -->|soft| nginx_edge
-    jupyterhub -->|soft| ollama
-    jupyterhub -->|startup_only| openbao
-    jupyterhub -->|soft| platform_context_api
     keycloak -->|soft| mailpit
     keycloak -->|soft| nginx_edge
     keycloak -->|startup_only| openbao
@@ -275,12 +266,6 @@ graph TD
     nomad -->|soft| docker_runtime
     ntfy -->|hard| docker_runtime
     ntfy -->|soft| nginx_edge
-    one_api -->|hard| ollama
-    open_webui -->|soft| keycloak
-    open_webui -->|hard| ollama
-    open_webui -->|hard| one_api
-    open_webui -->|startup_only| openbao
-    open_webui -->|soft| searxng
     openfga -->|soft| keycloak
     openfga -->|startup_only| openbao
     openfga -->|hard| postgres
@@ -308,15 +293,12 @@ graph TD
     plausible -->|soft| mail_platform
     plausible -->|soft| nginx_edge
     plausible -->|startup_only| openbao
-    realtime -->|soft| keycloak
-    realtime -->|soft| nginx_edge
     redpanda -->|startup_only| openbao
     semaphore -->|startup_only| openbao
     semaphore -->|hard| postgres
     serverclaw -->|soft| keycloak
     serverclaw -->|soft| nginx_edge
     serverclaw -->|hard| ollama
-    serverclaw -->|hard| one_api
     serverclaw -->|startup_only| openbao
     serverclaw -->|soft| searxng
     status_page -->|hard| nginx_edge

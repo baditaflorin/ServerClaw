@@ -3936,12 +3936,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 56,
-    "active_total": 52,
-    "active_public_total": 48,
+    "catalog_total": 54,
+    "active_total": 50,
+    "active_public_total": 46,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 47,
-    "platform_sso_total": 18
+    "shared_edge_total": 45,
+    "platform_sso_total": 17
   }
 }
