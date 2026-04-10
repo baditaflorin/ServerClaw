@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-10'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 428
+total_adrs: 434
 adr_number_range:
   first: '0001'
-  last: 0395
-  next_available: 0396
+  last: '0400'
+  next_available: '0401'
 implementation_status_summary:
-  Implemented: 337
+  Implemented: 339
   Partial: 3
-  Not Implemented: 32
+  Not Implemented: 34
   Deprecated: 5
   Accepted: 24
-  Proposed: 27
+  Proposed: 29
 decision_status_summary:
-  Accepted: 334
-  Proposed: 33
+  Accepted: 336
+  Proposed: 37
   Deprecated: 12
   Implemented: 49
 facets:
@@ -44,22 +44,27 @@ facets:
       last_adr: 0299
     - label: 0300-0399
       path: docs/adr/index/by-range/0300-0399.yaml
-      count: 109
+      count: 114
       first_adr: '0300'
-      last_adr: 0395
+      last_adr: 0399
+    - label: 0400-0499
+      path: docs/adr/index/by-range/0400-0499.yaml
+      count: 1
+      first_adr: '0400'
+      last_adr: '0400'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
       count: 2
     - concern: agent-discovery
       path: docs/adr/index/by-concern/agent-discovery.yaml
-      count: 25
+      count: 26
     - concern: api
       path: docs/adr/index/by-concern/api.yaml
       count: 12
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 29
+      count: 31
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 6
@@ -77,13 +82,13 @@ facets:
       count: 7
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
-      count: 10
+      count: 11
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
       count: 27
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 140
+      count: 142
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -106,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 337
+      count: 339
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -114,7 +119,7 @@ facets:
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 32
+      count: 34
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -126,24 +131,56 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 27
+      count: 29
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0396
+  next_available_adr: '0401'
 latest_adrs:
-  - adr: 0395
+  - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
     implementation_status: Partial
     concern: api
-    path: docs/adr/0395-homepage-dashboard-fidelity.md
-  - adr: 0394
+    path: docs/adr/0400-homepage-dashboard-fidelity.md
+  - adr: 0399
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
     implementation_status: Not Implemented
     concern: ci-cd
-    path: docs/adr/0394-platform-reconciliation-daemon.md
+    path: docs/adr/0399-platform-reconciliation-daemon.md
+  - adr: 0398
+    title: Outline Shared S3 Migration
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0398-outline-shared-s3-migration.md
+  - adr: 0397
+    title: Remove Netdata (realtime) from the Platform
+    implementation_status: Implemented
+    concern: monitoring
+    path: docs/adr/0397-remove-netdata.md
+    implemented_on: '2026-04-10'
+  - adr: 0397
+    title: Managed S3 Bucket Consumer Pattern
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0397-managed-s3-bucket-consumer-pattern.md
+  - adr: 0396
+    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
+    implementation_status: Implemented
+    concern: automation
+    path: docs/adr/0396-deterministic-service-decommissioning.md
+    implemented_on: '2026-04-10'
+  - adr: 0395
+    title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
+    implementation_status: Not Implemented
+    concern: agent-discovery
+    path: docs/adr/0395-agent-interface-abstraction-layer.md
+  - adr: 0394
+    title: Integrate LibreChat Agents API for Programmatic Agent Access
+    implementation_status: Not Implemented
+    concern: automation
+    path: docs/adr/0394-librechat-agents-api-integration.md
   - adr: 0393
     title: Remove One-API from the Platform
     implementation_status: Implemented
@@ -155,39 +192,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: security
     path: docs/adr/0392-optional-secret-propagation.md
-  - adr: 0392
-    title: Convergence Speed and Incremental Apply
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0392-convergence-speed-and-incremental-apply.md
-  - adr: 0391
-    title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
-    implementation_status: Implemented
-    concern: networking
-    path: docs/adr/0391-cpu-only-operational-automation.md
-    implemented_on: '2026-04-10'
-  - adr: 0390
-    title: Remove Open WebUI from the Platform
-    implementation_status: Implemented
-    concern: platform
-    path: docs/adr/0390-remove-open-webui.md
-    implemented_on: '2026-04-10'
-  - adr: 0389
-    title: Standard Procedure for Decommissioning a Platform Service
-    implementation_status: Implemented
-    concern: automation
-    path: docs/adr/0389-service-decommissioning-procedure.md
-    implemented_on: '2026-04-10'
-  - adr: 0388
-    title: Centralize Keycloak Realm Name and OIDC Issuer URL
-    implementation_status: Proposed
-    concern: security
-    path: docs/adr/0388-keycloak-realm-oidc-centralization.md
-  - adr: 0387
-    title: ServerClaw-in-Docker — Containerized Platform Development Environment
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0387-serverclaw-in-docker.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

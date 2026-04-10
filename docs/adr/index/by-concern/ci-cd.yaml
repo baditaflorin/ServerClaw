@@ -789,7 +789,7 @@ adrs:
       functions. All 43+ catalog/registry scripts must i
     filename: 0369-python-validation-toolkit.md
     path: docs/adr/0369-python-validation-toolkit.md
-  - adr: 0394
+  - adr: 0399
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
     status: Proposed
     implementation_status: Not Implemented
@@ -807,5 +807,5 @@ adrs:
       - daemon
       - continuous
     summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
-    filename: 0394-platform-reconciliation-daemon.md
-    path: docs/adr/0394-platform-reconciliation-daemon.md
+    filename: 0399-platform-reconciliation-daemon.md
+    path: docs/adr/0399-platform-reconciliation-daemon.md

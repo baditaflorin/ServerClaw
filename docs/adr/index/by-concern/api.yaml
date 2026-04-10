@@ -216,7 +216,7 @@ adrs:
     path: docs/adr/0393-remove-one-api.md
     implemented_in_repo_version: 0.178.86
     implemented_on: '2026-04-10'
-  - adr: 0395
+  - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
     status: Proposed
     implementation_status: Partial
@@ -234,5 +234,5 @@ adrs:
       - lifecycle
       - compliance
     summary: 'Add user-select: text overrides to the generated custom.css to ensure'
-    filename: 0395-homepage-dashboard-fidelity.md
-    path: docs/adr/0395-homepage-dashboard-fidelity.md
+    filename: 0400-homepage-dashboard-fidelity.md
+    path: docs/adr/0400-homepage-dashboard-fidelity.md

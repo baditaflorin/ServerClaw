@@ -12,7 +12,7 @@ label: 0300-0399
 range:
   start: '0300'
   end: 0399
-total_adrs: 109
+total_adrs: 114
 adrs:
   - adr: '0300'
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
@@ -2026,6 +2026,119 @@ adrs:
     implemented_in_repo_version: 0.178.86
     implemented_on: '2026-04-10'
   - adr: 0394
+    title: Integrate LibreChat Agents API for Programmatic Agent Access
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - librechat
+      - agents-api
+      - open-responses
+      - openai-compatible
+      - serverclaw
+      - automation
+      - integrate
+      - agents
+      - api
+      - programmatic
+    summary: Integrate the LibreChat Agents API as a first-class platform capability,
+    filename: 0394-librechat-agents-api-integration.md
+    path: docs/adr/0394-librechat-agents-api-integration.md
+  - adr: 0395
+    title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-10'
+    concern: agent-discovery
+    keywords:
+      - dto
+      - abstraction
+      - decoupling
+      - agents
+      - provider-agnostic
+      - librechat
+      - clean-architecture
+      - agent
+      - interface
+      - layer
+    summary: 'Introduce an Agent Interface Abstraction Layer consisting of:'
+    filename: 0395-agent-interface-abstraction-layer.md
+    path: docs/adr/0395-agent-interface-abstraction-layer.md
+  - adr: 0396
+    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - automation
+      - cpu-only
+      - decommissioning
+      - catalog
+      - yaml-markers
+      - deterministic
+      - idempotency
+      - service
+      - schema
+      - registry
+    summary: Maintain a CATALOGREGISTRY constant in decommissionservice.py that
+    filename: 0396-deterministic-service-decommissioning.md
+    path: docs/adr/0396-deterministic-service-decommissioning.md
+    implemented_in_repo_version: 0.178.90
+    implemented_on: '2026-04-10'
+  - adr: 0397
+    title: Managed S3 Bucket Consumer Pattern
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-10'
+    concern: platform
+    keywords:
+      - managed
+      - s3
+      - bucket
+      - consumer
+      - pattern
+    summary: 'We will establish a Managed S3 Bucket Consumer Pattern that allows any service to declaratively request:'
+    filename: 0397-managed-s3-bucket-consumer-pattern.md
+    path: docs/adr/0397-managed-s3-bucket-consumer-pattern.md
+  - adr: 0397
+    title: Remove Netdata (realtime) from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: monitoring
+    keywords:
+      - lifecycle
+      - decommissioning
+      - netdata
+      - realtime
+      - observability
+      - monitoring
+      - remove
+      - from
+      - platform
+    summary: Remove Netdata from the platform. The service is registered as realtime
+    filename: 0397-remove-netdata.md
+    path: docs/adr/0397-remove-netdata.md
+    implemented_in_repo_version: 0.178.91
+    implemented_on: '2026-04-10'
+  - adr: 0398
+    title: Outline Shared S3 Migration
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-10'
+    concern: platform
+    keywords:
+      - outline
+      - shared
+      - s3
+      - migration
+    summary: Outline will migrate from embedded MinIO to the shared platform MinIO (ADR 0274) using the Managed S3 Bucket
+      Consumer Pattern (ADR 0397).
+    filename: 0398-outline-shared-s3-migration.md
+    path: docs/adr/0398-outline-shared-s3-migration.md
+  - adr: 0399
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
     status: Proposed
     implementation_status: Not Implemented
@@ -2043,25 +2156,5 @@ adrs:
       - daemon
       - continuous
     summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
-    filename: 0394-platform-reconciliation-daemon.md
-    path: docs/adr/0394-platform-reconciliation-daemon.md
-  - adr: 0395
-    title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
-    status: Proposed
-    implementation_status: Partial
-    date: '2026-04-10'
-    concern: api
-    keywords:
-      - homepage
-      - dashboard
-      - ux
-      - selectability
-      - catalog-fidelity
-      - iac
-      - fidelity
-      - catalog-driven
-      - lifecycle
-      - compliance
-    summary: 'Add user-select: text overrides to the generated custom.css to ensure'
-    filename: 0395-homepage-dashboard-fidelity.md
-    path: docs/adr/0395-homepage-dashboard-fidelity.md
+    filename: 0399-platform-reconciliation-daemon.md
+    path: docs/adr/0399-platform-reconciliation-daemon.md

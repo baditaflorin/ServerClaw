@@ -1,4 +1,4 @@
-# ADR 0395: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
+# ADR 0400: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
 
 - Status: Proposed
 - Implementation Status: Partial
@@ -7,7 +7,7 @@
 - Implemented On: not yet applied
 - Date: 2026-04-10
 - Concern: Platform, UX, Automation
-- Depends on: ADR 0152 (Homepage Dashboard), ADR 0389 (Service Decommissioning), ADR 0394 (Reconciliation Daemon)
+- Depends on: ADR 0152 (Homepage Dashboard), ADR 0389 (Service Decommissioning), ADR 0399 (Reconciliation Daemon)
 - Tags: homepage, dashboard, ux, selectability, catalog-fidelity, iac
 
 ---
@@ -25,9 +25,9 @@ because:
 1. `generate_homepage_config.py` was not re-run after the catalog changes.
 2. `make converge-homepage` was not invoked to push the new config to the
    runtime.
-3. There is no automated reconciliation loop (addressed in ADR 0394).
+3. There is no automated reconciliation loop (addressed in ADR 0399).
 
-This is the specific incident that motivates ADR 0394's reconciliation daemon,
+This is the specific incident that motivates ADR 0399's reconciliation daemon,
 but it also reveals gaps in the homepage's own fidelity contract.
 
 ### Open WebUI replaced by LibreChat
@@ -88,7 +88,7 @@ The generation pipeline already enforces this:
 - `generate_homepage_config.py --check` validates freshness.
 - The Ansible role copies generated config into the container volume.
 
-What was missing: **automated invocation**. ADR 0394 addresses this with
+What was missing: **automated invocation**. ADR 0399 addresses this with
 the reconciliation daemon.
 
 ### 3. Decommission procedure must trigger homepage reconvergence
@@ -98,7 +98,7 @@ Extend the service decommission checklist (ADR 0389) to include:
 > After removing a service from catalogs, trigger portal reconciliation:
 > `make reconcile-portals` or wait for the next 15-minute reconciliation cycle.
 
-Until ADR 0394 is implemented, the manual step is:
+Until ADR 0399 is implemented, the manual step is:
 
 ```bash
 python scripts/generate_homepage_config.py --output-dir build/homepage-config --write
@@ -169,7 +169,7 @@ the homepage config.
    removed in ADRs 0390/0393).
 3. Document the reconvergence step in the decommission runbook.
 
-### Follow-up (ADR 0394)
+### Follow-up (ADR 0399)
 
 1. Automated reconciliation loop regenerates and deploys homepage config.
 2. Pre-push gate validates homepage config freshness.
@@ -183,4 +183,4 @@ the homepage config.
 - ADR 0389: Standard Procedure for Decommissioning a Platform Service
 - ADR 0390: Remove Open WebUI from the Platform
 - ADR 0393: Remove One-API from the Platform
-- ADR 0394: Platform Reconciliation Daemon (companion ADR)
+- ADR 0399: Platform Reconciliation Daemon (companion ADR)

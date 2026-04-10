@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.90",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T10:37:06Z",
-  "next_refresh_at": "2026-04-10T11:37:06Z",
+  "generated_at": "2026-04-10T11:07:33Z",
+  "next_refresh_at": "2026-04-10T12:07:33Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6308,10 +6308,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.88",
+    "last_version": "0.178.89",
     "deployed_at": "2026-04-10",
-    "summary": "ADR 0394 + 0395: LibreChat Agents API integration plan and provider-agnostic agent abstraction layer \u2014 programmatic agent access via OpenAI-compatible and Open Responses endpoints, decoupled DTOs with AgentProvider ABC for runtime swappability [adr-0393] Remove One-API from the platform \u2014 containers already stopped, 85 file references purged across 9 roles/2 playbooks/27 config catalogs/7 tests, 4 secrets removed from secret catalog, ADR 0294 deprecated; LLM access path simplified to direct Ollama or external APIs",
-    "release_notes_url": "docs/release-notes/0.178.89.md"
+    "summary": "[adr-0396] Deterministic service decommissioning \u2014 comprehensive CATALOG_REGISTRY covering 15 catalog types (7 handler strategies: array/dict_key/dict_key_by_value/workflow_dict/dep_graph/partitions/yaml_dict_key), YAML block markers in generated SLO Prometheus files (generate_slo_config.py, 44 services), decommission-preview subcommand in platform_ops.py, fixed dual-format ADR deprecation; reduces AI-required decommission work to zero ADR 0394 + 0395: LibreChat Agents API integration plan and provider-agnostic agent abstraction layer \u2014 programmatic agent access via OpenAI-compatible and Open Responses endpoints, decoupled DTOs with AgentProvider ABC for runtime swappability",
+    "release_notes_url": "docs/release-notes/0.178.90.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6382,6 +6382,13 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0395-agent-interface-abstraction-layer.md"
+    },
+    {
+      "adr": "0399",
+      "title": "ADR 0394: Platform Reconciliation Daemon \u2014 Continuous Portal and Artifact Regeneration",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0399-platform-reconciliation-daemon.md"
     }
   ]
 }

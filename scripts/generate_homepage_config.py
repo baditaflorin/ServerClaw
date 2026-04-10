@@ -264,7 +264,7 @@ def build_custom_css() -> str:
         ".information-widget {\n"
         "  border-radius: var(--card-radius);\n"
         "}\n\n"
-        "/* ADR 0395: ensure all text is selectable for operator copy-paste */\n"
+        "/* ADR 0400: ensure all text is selectable for operator copy-paste */\n"
         "*, *::before, *::after {\n"
         "  -webkit-user-select: text !important;\n"
         "  user-select: text !important;\n"

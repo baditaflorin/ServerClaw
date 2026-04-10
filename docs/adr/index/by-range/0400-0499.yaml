@@ -1,0 +1,36 @@
+# ============================================================================
+# ADR Range Shard 0400-0499 — ADR 0325
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 2
+generated: '2026-04-10'
+facet: range
+label: 0400-0499
+range:
+  start: '0400'
+  end: 0499
+total_adrs: 1
+adrs:
+  - adr: '0400'
+    title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
+    status: Proposed
+    implementation_status: Partial
+    date: '2026-04-10'
+    concern: api
+    keywords:
+      - homepage
+      - dashboard
+      - ux
+      - selectability
+      - catalog-fidelity
+      - iac
+      - fidelity
+      - catalog-driven
+      - lifecycle
+      - compliance
+    summary: 'Add user-select: text overrides to the generated custom.css to ensure'
+    filename: 0400-homepage-dashboard-fidelity.md
+    path: docs/adr/0400-homepage-dashboard-fidelity.md

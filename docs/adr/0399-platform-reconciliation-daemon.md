@@ -1,4 +1,4 @@
-# ADR 0394: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
+# ADR 0399: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
 
 - Status: Proposed
 - Implementation Status: Not Implemented
@@ -279,4 +279,4 @@ This library is callable from:
 - ADR 0152: Homepage for Unified Service Dashboard
 - ADR 0226: Systemd Units, Timers, and Paths for Host-Resident Control Loops
 - ADR 0389: Standard Procedure for Decommissioning a Platform Service
-- ADR 0395: Homepage Dashboard Fidelity (companion ADR)
+- ADR 0400: Homepage Dashboard Fidelity (companion ADR)
