@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 33
+total_adrs: 32
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -561,42 +561,22 @@ adrs:
     filename: 0377-open-webui-platform-knowledge-integration.md
     path: docs/adr/0377-open-webui-platform-knowledge-integration.md
   - adr: 0394
-    title: Integrate LibreChat Agents API for Programmatic Agent Access
+    title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
     status: Proposed
     implementation_status: Not Implemented
     date: '2026-04-10'
-    concern: automation
+    concern: ci-cd
     keywords:
-      - librechat
-      - agents-api
-      - open-responses
-      - openai-compatible
-      - serverclaw
+      - reconciliation
       - automation
-      - integrate
-      - agents
-      - api
-      - programmatic
-    summary: Integrate the LibreChat Agents API as a first-class platform capability,
-    filename: 0394-librechat-agents-api-integration.md
-    path: docs/adr/0394-librechat-agents-api-integration.md
-  - adr: 0395
-    title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
-    status: Proposed
-    implementation_status: Not Implemented
-    date: '2026-04-10'
-    concern: agent-discovery
-    keywords:
-      - dto
-      - abstraction
-      - decoupling
-      - agents
-      - provider-agnostic
-      - librechat
-      - clean-architecture
-      - agent
-      - interface
-      - layer
-    summary: 'Introduce an Agent Interface Abstraction Layer consisting of:'
-    filename: 0395-agent-interface-abstraction-layer.md
-    path: docs/adr/0395-agent-interface-abstraction-layer.md
+      - cron
+      - heartbeat
+      - portals
+      - iac
+      - drift
+      - platform
+      - daemon
+      - continuous
+    summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
+    filename: 0394-platform-reconciliation-daemon.md
+    path: docs/adr/0394-platform-reconciliation-daemon.md
