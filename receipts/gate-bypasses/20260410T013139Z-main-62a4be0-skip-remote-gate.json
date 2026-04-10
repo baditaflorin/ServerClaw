@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T01:31:39Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "62a4be0358519c7cd8b76806f69dadf671a60b7b",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "pre-existing check-runner python:3.12.10 image pull failure; this commit is a single argument_specs.yml fix",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "meta/argument_specs.yml only: derived vars marked required:false per ADR 0373 pattern"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "docs/adr/0373-service-registry-pattern.md"
+  }
+}
