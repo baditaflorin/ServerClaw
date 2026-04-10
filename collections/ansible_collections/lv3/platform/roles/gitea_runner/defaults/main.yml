@@ -12,12 +12,12 @@ gitea_runner_container_name: lv3-gitea-runner
 gitea_runner_network_name: gitea_runner_default
 gitea_runner_network_subnet: 172.16.241.0/24
 gitea_runner_instance_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('gitea', 'internal') }}"
-gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
+gitea_runner_registration_token_local_file: "{{ repo_shared_local_root }}/gitea/runner-registration-token.txt"
 gitea_runner_name: docker-build-lv3
 gitea_runner_labels: self-hosted:host,linux:host,amd64:host,docker:docker
 gitea_runner_renovate_enabled: true
 gitea_runner_renovate_username: renovate-bot
-gitea_runner_renovate_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/renovate-password.txt
+gitea_runner_renovate_password_local_file: "{{ repo_shared_local_root }}/gitea/renovate-password.txt"
 gitea_runner_renovate_repository: ops/proxmox_florin_server
 gitea_runner_renovate_token_scopes: write:repository,read:user,write:issue,read:organization
 gitea_runner_renovate_clone_host: "{{ gitea_runner_gitea_service_topology.public_hostname }}"

@@ -8,7 +8,7 @@ changedetection_runtime_compose_file: "{{ changedetection_runtime_site_dir }}/do
 changedetection_runtime_watch_catalog_file: "{{ changedetection_runtime_secret_dir }}/watch-catalog.json"
 changedetection_runtime_sync_report_file: "{{ changedetection_runtime_site_dir }}/watch-sync-report.json"
 changedetection_runtime_api_token_file: "{{ changedetection_runtime_secret_dir }}/api-token"
-changedetection_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/changedetection
+changedetection_runtime_local_artifact_dir: "{{ repo_shared_local_root }}/changedetection"
 changedetection_runtime_api_token_local_file: "{{ changedetection_runtime_local_artifact_dir }}/api-token.txt"
 changedetection_runtime_sync_script: "{{ playbook_dir }}/../scripts/changedetection_sync.py"
 changedetection_runtime_image: "{{ container_image_catalog.images.changedetection_runtime.ref }}"

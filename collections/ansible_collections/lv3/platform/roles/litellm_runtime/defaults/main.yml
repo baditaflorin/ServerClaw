@@ -25,7 +25,7 @@ litellm_container_port: 4000
 litellm_healthcheck_path: /health/liveliness
 litellm_image: "{{ container_image_catalog.images.litellm_runtime.ref }}"
 litellm_master_key_remote_file: "{{ litellm_secret_dir }}/master-key"
-litellm_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/litellm
+litellm_local_artifact_dir: "{{ repo_shared_local_root }}/litellm"
 litellm_master_key_local_file: "{{ litellm_local_artifact_dir }}/master-key.txt"
 litellm_database_name: litellm
 litellm_database_user: litellm

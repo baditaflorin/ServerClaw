@@ -27,7 +27,7 @@ def test_defaults_enable_pgaudit_and_repo_managed_sensitive_table_catalog() -> N
         "{{ postgres_vm_repo_root }}/config/pgaudit/sensitive-tables.yaml"
     )
     assert defaults["postgres_vm_pgaudit_log"] == "ddl,role"
-    assert defaults["postgres_vm_repo_root"] == "{{ lookup('env', 'PWD') }}"
+    assert defaults["postgres_vm_repo_root"] == "{{ inventory_dir | dirname }}"
     assert defaults["postgres_vm_shared_preload_libraries"] == ["pgaudit"]
 
 

@@ -41,7 +41,7 @@ monitoring_stack_packages:
   - prometheus
   - prometheus-blackbox-exporter
 monitoring_stack_dir: /etc/lv3/monitoring
-monitoring_repo_root: "{{ lookup('env', 'PWD') }}"
+monitoring_repo_root: "{{ inventory_dir | dirname }}"
 monitoring_grafana_admin_user: admin
 monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password
 monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-password.sha256
@@ -94,7 +94,7 @@ monitoring_loki_port: "{{ hostvars[groups['proxmox_hosts'][0]].platform_port_ass
 monitoring_loki_filesystem_schema_start_date: "2026-03-22"
 monitoring_loki_minio_schema_cutover_date: "2026-03-30"
 monitoring_loki_minio_access_key_id: lokichunks
-monitoring_loki_minio_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/loki-minio-secret-key.txt
+monitoring_loki_minio_secret_key_local_file: "{{ repo_shared_local_root }}/monitoring/loki-minio-secret-key.txt"
 monitoring_loki_minio_bucket_name: loki-chunks
 monitoring_loki_minio_region: us-east-1
 monitoring_loki_minio_endpoint: >-

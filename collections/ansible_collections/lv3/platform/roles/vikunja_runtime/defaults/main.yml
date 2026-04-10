@@ -58,7 +58,7 @@ vikunja_keycloak_logout_uri: >-
   {{ platform_session_authority.keycloak_logout_url }}?client_id={{ vikunja_keycloak_client_id }}&post_logout_redirect_uri={{ vikunja_public_base_url | urlencode }}
 vikunja_event_nats_url: nats://127.0.0.1:4222
 vikunja_event_nats_username: jetstream-admin
-vikunja_event_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
+vikunja_event_nats_password_local_file: "{{ repo_shared_local_root }}/nats/jetstream-admin-password.txt"
 vikunja_event_subject_prefix: platform.task
 vikunja_automation_username: vikunja.automation
 vikunja_automation_email: vikunja.automation@{{ platform_domain }}

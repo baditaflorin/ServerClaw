@@ -160,7 +160,7 @@ windmill_worker_checkout_repo_root_local_dir: >-
   }}
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
-windmill_worker_repo_checkout_compat_root: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+windmill_worker_repo_checkout_compat_root: "{{ inventory_dir | dirname }}"
 windmill_worker_secret_manifest_path: "{{ playbook_execution_controller_secret_manifest_path }}"
 windmill_worker_secret_mirror_ids:
   - bootstrap_ssh_private_key

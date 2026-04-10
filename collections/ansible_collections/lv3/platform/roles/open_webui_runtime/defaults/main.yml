@@ -17,9 +17,9 @@ open_webui_internal_base_url: "{{ platform_service_topology | platform_service_u
 open_webui_controller_url: "{{ platform_service_topology | platform_service_url('open_webui', 'controller') }}"
 open_webui_webui_url: "{{ open_webui_controller_url }}"
 open_webui_webui_name: Open WebUI
-open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt
-open_webui_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/webui-secret-key.txt
-open_webui_provider_env_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/provider.env
+open_webui_admin_password_local_file: "{{ repo_shared_local_root }}/open-webui/admin-password.txt"
+open_webui_secret_key_local_file: "{{ repo_shared_local_root }}/open-webui/webui-secret-key.txt"
+open_webui_provider_env_local_file: "{{ repo_shared_local_root }}/open-webui/provider.env"
 open_webui_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/open-webui-client-secret.txt"
 open_webui_admin_password_remote_file: "{{ open_webui_secret_dir }}/admin-password.txt"
 open_webui_secret_key_remote_file: "{{ open_webui_secret_dir }}/webui-secret-key.txt"

@@ -36,7 +36,7 @@ nomad_cluster_node_meta: {}
 nomad_cluster_server_inventory_host: "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
 nomad_cluster_server_rpc_addresses:
   - "{{ hostvars[nomad_cluster_server_inventory_host].ansible_host }}:{{ platform_port_assignments.nomad_rpc_port }}"
-nomad_cluster_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad
+nomad_cluster_local_dir: "{{ repo_shared_local_root }}/nomad"
 nomad_cluster_local_tls_dir: "{{ nomad_cluster_local_dir }}/tls"
 nomad_cluster_local_ca_cert_file: "{{ nomad_cluster_local_tls_dir }}/nomad-agent-ca.pem"
 nomad_cluster_local_server_cert_file: "{{ nomad_cluster_local_tls_dir }}/server.pem"

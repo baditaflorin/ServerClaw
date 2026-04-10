@@ -13,9 +13,9 @@ alertmanager_runtime_rules_dir: /etc/prometheus/rules
 alertmanager_runtime_platform_rules_source: "{{ inventory_dir | dirname }}/config/alertmanager/rules/platform.yml"
 alertmanager_runtime_ntfy_username: alertmanager
 alertmanager_runtime_ntfy_publish_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('ntfy', 'internal') }}/platform-monitoring-critical"
-alertmanager_runtime_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
+alertmanager_runtime_ntfy_password_local_file: "{{ repo_shared_local_root }}/ntfy/alertmanager-password.txt"
 alertmanager_runtime_ntfy_password_file: /etc/alertmanager/ntfy-password
-alertmanager_runtime_mattermost_webhook_manifest_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json
+alertmanager_runtime_mattermost_webhook_manifest_local_file: "{{ repo_shared_local_root }}/mattermost/incoming-webhooks.json"
 alertmanager_runtime_pgaudit_relay_enabled: true
 alertmanager_runtime_pgaudit_relay_service_name: pgaudit-alert-relay
 alertmanager_runtime_pgaudit_relay_service_file: /etc/systemd/system/pgaudit-alert-relay.service
@@ -29,9 +29,9 @@ alertmanager_runtime_pgaudit_relay_webhook_url: >-
 alertmanager_runtime_pgaudit_relay_health_url: >-
   http://{{ alertmanager_runtime_pgaudit_relay_listen_host }}:{{ alertmanager_runtime_pgaudit_relay_listen_port }}/healthz
 alertmanager_runtime_pgaudit_relay_nats_url: >-
-  nats://{{ hostvars[platform_topology_host].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}:4222
+  nats://{{ hostvars[platform_topology_host].platform_guest_catalog.by_name[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ipv4 }}:4222
 alertmanager_runtime_pgaudit_relay_nats_subject: platform.security.pgaudit_unknown_role
 alertmanager_runtime_pgaudit_relay_nats_username: jetstream-admin
-alertmanager_runtime_pgaudit_relay_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
+alertmanager_runtime_pgaudit_relay_nats_password_local_file: "{{ repo_shared_local_root }}/nats/jetstream-admin-password.txt"
 alertmanager_runtime_pgaudit_relay_actor_id: service/pgaudit-alert-relay
 alertmanager_runtime_pgaudit_relay_event_schema_version: "1.0"

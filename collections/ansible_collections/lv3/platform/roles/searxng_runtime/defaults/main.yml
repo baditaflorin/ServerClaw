@@ -21,7 +21,7 @@ searxng_runtime_controller_url: "{{ platform_service_topology | platform_service
 searxng_runtime_public_base_url: "{{ platform_service_topology.searxng.urls.public | default(searxng_runtime_controller_url) }}"
 searxng_runtime_enable_limiter: false
 searxng_runtime_secret_key_remote_file: "{{ searxng_runtime_secret_dir }}/secret-key.txt"
-searxng_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/searxng
+searxng_runtime_local_artifact_dir: "{{ repo_shared_local_root }}/searxng"
 searxng_runtime_secret_key_local_file: "{{ searxng_local_artifact_dir }}/secret-key.txt"
 searxng_runtime_instance_name: LV3 Search
 searxng_runtime_default_query: proxmox ve

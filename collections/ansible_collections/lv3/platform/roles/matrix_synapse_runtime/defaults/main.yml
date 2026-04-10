@@ -61,22 +61,22 @@ matrix_synapse_mautrix_discord_database_host: "{{ matrix_synapse_database_host }
 matrix_synapse_mautrix_whatsapp_database_name: mautrix_whatsapp
 matrix_synapse_mautrix_whatsapp_database_user: mautrix_whatsapp
 matrix_synapse_mautrix_whatsapp_database_host: "{{ matrix_synapse_database_host }}"
-matrix_synapse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/database-password.txt
-matrix_synapse_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt
-matrix_synapse_ops_access_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-access-token.txt
-matrix_synapse_registration_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/registration-shared-secret.txt
-matrix_synapse_signing_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/server-signing.key
-matrix_synapse_mautrix_discord_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-database-password.txt
-matrix_synapse_mautrix_discord_as_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-as-token.txt
-matrix_synapse_mautrix_discord_hs_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-hs-token.txt
-matrix_synapse_mautrix_discord_provisioning_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-provisioning-shared-secret.txt
-matrix_synapse_mautrix_discord_avatar_proxy_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-avatar-proxy-key.txt
-matrix_synapse_mautrix_whatsapp_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-database-password.txt
-matrix_synapse_mautrix_whatsapp_as_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-as-token.txt
-matrix_synapse_mautrix_whatsapp_hs_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-hs-token.txt
-matrix_synapse_mautrix_whatsapp_provisioning_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-provisioning-shared-secret.txt
-matrix_synapse_mautrix_whatsapp_public_media_signing_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-public-media-signing-key.txt
-matrix_synapse_mautrix_whatsapp_encryption_pickle_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-encryption-pickle-key.txt
+matrix_synapse_database_password_local_file: "{{ repo_shared_local_root }}/matrix-synapse/database-password.txt"
+matrix_synapse_ops_password_local_file: "{{ repo_shared_local_root }}/matrix-synapse/ops-password.txt"
+matrix_synapse_ops_access_token_local_file: "{{ repo_shared_local_root }}/matrix-synapse/ops-access-token.txt"
+matrix_synapse_registration_shared_secret_local_file: "{{ repo_shared_local_root }}/matrix-synapse/registration-shared-secret.txt"
+matrix_synapse_signing_key_local_file: "{{ repo_shared_local_root }}/matrix-synapse/server-signing.key"
+matrix_synapse_mautrix_discord_database_password_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-discord-database-password.txt"
+matrix_synapse_mautrix_discord_as_token_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-discord-as-token.txt"
+matrix_synapse_mautrix_discord_hs_token_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-discord-hs-token.txt"
+matrix_synapse_mautrix_discord_provisioning_shared_secret_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-discord-provisioning-shared-secret.txt"
+matrix_synapse_mautrix_discord_avatar_proxy_key_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-discord-avatar-proxy-key.txt"
+matrix_synapse_mautrix_whatsapp_database_password_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-whatsapp-database-password.txt"
+matrix_synapse_mautrix_whatsapp_as_token_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-whatsapp-as-token.txt"
+matrix_synapse_mautrix_whatsapp_hs_token_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-whatsapp-hs-token.txt"
+matrix_synapse_mautrix_whatsapp_provisioning_shared_secret_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-whatsapp-provisioning-shared-secret.txt"
+matrix_synapse_mautrix_whatsapp_public_media_signing_key_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-whatsapp-public-media-signing-key.txt"
+matrix_synapse_mautrix_whatsapp_encryption_pickle_key_local_file: "{{ repo_shared_local_root }}/matrix-synapse/mautrix-whatsapp-encryption-pickle-key.txt"
 matrix_synapse_ops_password_remote_file: "{{ matrix_synapse_secret_dir }}/ops-password.txt"
 matrix_synapse_registration_shared_secret_remote_file: "{{ matrix_synapse_secret_dir }}/registration-shared-secret.txt"
 matrix_synapse_form_secret_remote_file: "{{ matrix_synapse_secret_dir }}/form-secret.txt"

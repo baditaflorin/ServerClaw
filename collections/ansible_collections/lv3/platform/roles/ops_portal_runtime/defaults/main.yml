@@ -115,7 +115,7 @@ ops_portal_static_api_token: >-
   {{
     lookup(
       'ansible.builtin.file',
-      '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt',
+      repo_shared_local_root ~ '/platform-context/api-token.txt',
       errors='ignore'
     )
     | default('', true)

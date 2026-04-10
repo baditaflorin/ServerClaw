@@ -1,6 +1,6 @@
 ---
 nomad_cluster_bootstrap_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
-nomad_cluster_bootstrap_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad
+nomad_cluster_bootstrap_local_dir: "{{ repo_shared_local_root }}/nomad"
 nomad_cluster_bootstrap_local_tls_dir: "{{ nomad_cluster_bootstrap_local_dir }}/tls"
 nomad_cluster_bootstrap_local_tokens_dir: "{{ nomad_cluster_bootstrap_local_dir }}/tokens"
 nomad_cluster_bootstrap_local_ca_key_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/nomad-agent-ca-key.pem"

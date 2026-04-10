@@ -100,7 +100,7 @@ minio_loki_policy_document:
         - "arn:aws:s3:::{{ minio_loki_bucket_name }}/*"
 minio_platform_context_access_key_id: ragstaging
 minio_platform_context_secret_key_remote_file: "{{ minio_secret_dir }}/platform-context-secret-key.txt"
-minio_platform_context_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/minio-secret-key.txt
+minio_platform_context_secret_key_local_file: "{{ repo_shared_local_root }}/platform-context/minio-secret-key.txt"
 minio_platform_context_bucket_name: rag-staging
 minio_platform_context_policy_name: rag-staging
 minio_platform_context_retention_days: 14

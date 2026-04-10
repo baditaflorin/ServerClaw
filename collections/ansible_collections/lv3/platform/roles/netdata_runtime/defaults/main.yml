@@ -34,7 +34,7 @@ netdata_runtime_is_parent: "{{ inventory_hostname == netdata_runtime_parent_inve
 netdata_runtime_parent_web_port: "{{ hostvars[groups['proxmox_hosts'][0]].platform_port_assignments.netdata_port }}"
 netdata_runtime_parent_private_ip: "{{ hostvars[netdata_runtime_parent_inventory_host].ansible_host }}"
 netdata_runtime_parent_public_url: "https://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.realtime.public_hostname }}"
-netdata_runtime_stream_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/netdata-stream-api-key.txt
+netdata_runtime_stream_api_key_local_file: "{{ repo_shared_local_root }}/monitoring/netdata-stream-api-key.txt"
 netdata_runtime_stream_api_key_remote_file: /etc/lv3/monitoring/netdata-stream-api-key
 netdata_runtime_state_dir: /etc/lv3/netdata
 netdata_runtime_parent_bind_to: "0.0.0.0:{{ netdata_runtime_parent_web_port }}"

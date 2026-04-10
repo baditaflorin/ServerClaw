@@ -31,8 +31,8 @@ glitchtip_valkey_image: "{{ container_image_catalog.images.glitchtip_valkey_runt
 glitchtip_database_name: glitchtip
 glitchtip_database_user: glitchtip
 glitchtip_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
-glitchtip_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/database-password.txt
-glitchtip_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip
+glitchtip_database_password_local_file: "{{ repo_shared_local_root }}/glitchtip/database-password.txt"
+glitchtip_local_artifact_dir: "{{ repo_shared_local_root }}/glitchtip"
 glitchtip_secret_key_local_file: "{{ glitchtip_local_artifact_dir }}/secret-key.txt"
 glitchtip_valkey_password_local_file: "{{ glitchtip_local_artifact_dir }}/valkey-password.txt"
 glitchtip_admin_password_local_file: "{{ glitchtip_local_artifact_dir }}/admin-password.txt"
@@ -41,10 +41,10 @@ glitchtip_projects_local_file: "{{ glitchtip_local_artifact_dir }}/projects.json
 glitchtip_mail_gateway_dsn_local_file: "{{ glitchtip_local_artifact_dir }}/mail-gateway.dsn"
 glitchtip_windmill_jobs_dsn_local_file: "{{ glitchtip_local_artifact_dir }}/windmill-jobs.dsn"
 glitchtip_platform_findings_event_url_local_file: "{{ glitchtip_local_artifact_dir }}/platform-findings-event-url.txt"
-glitchtip_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/glitchtip-client-secret.txt
-glitchtip_mattermost_incoming_webhooks_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json
-glitchtip_ntfy_alertmanager_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
-glitchtip_mail_submission_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
+glitchtip_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/glitchtip-client-secret.txt"
+glitchtip_mattermost_incoming_webhooks_local_file: "{{ repo_shared_local_root }}/mattermost/incoming-webhooks.json"
+glitchtip_ntfy_alertmanager_password_local_file: "{{ repo_shared_local_root }}/ntfy/alertmanager-password.txt"
+glitchtip_mail_submission_password_local_file: "{{ repo_shared_local_root }}/mail-platform/server-mailbox-password.txt"
 glitchtip_secret_key_remote_file: "{{ glitchtip_secret_dir }}/secret-key"
 glitchtip_valkey_password_remote_file: "{{ glitchtip_secret_dir }}/valkey-password"
 glitchtip_keycloak_client_id: glitchtip

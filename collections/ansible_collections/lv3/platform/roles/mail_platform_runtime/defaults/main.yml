@@ -102,10 +102,10 @@ mail_platform_gateway_trace_service_name: mail-gateway
 mail_platform_gateway_trace_service_namespace: lv3
 mail_platform_gateway_trace_environment: lv3
 mail_platform_gateway_trace_otlp_endpoint: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
-mail_platform_gateway_sentry_dsn_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/mail-gateway.dsn
+mail_platform_gateway_sentry_dsn_local_file: "{{ repo_shared_local_root }}/glitchtip/mail-gateway.dsn"
 mail_platform_gateway_sentry_dsn: "{{ lookup('ansible.builtin.file', mail_platform_gateway_sentry_dsn_local_file, errors='ignore') | trim }}"
 mail_platform_gateway_sentry_environment: "{{ env | default('production') }}"
-mail_platform_gateway_sentry_release: "{{ lookup('ansible.builtin.file', '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION') | trim }}"
+mail_platform_gateway_sentry_release: "{{ lookup('ansible.builtin.file', (inventory_dir | dirname) ~ '/VERSION') | trim }}"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated

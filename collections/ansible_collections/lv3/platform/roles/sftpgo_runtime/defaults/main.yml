@@ -51,7 +51,7 @@ sftpgo_event_subject: platform.sftpgo.events
 sftpgo_nats_host: 10.10.10.20
 sftpgo_nats_port: 4222
 sftpgo_nats_username: jetstream-admin
-sftpgo_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
+sftpgo_nats_password_local_file: "{{ repo_shared_local_root }}/nats/jetstream-admin-password.txt"
 sftpgo_plugin_pubsub_url: https://github.com/sftpgo/sftpgo-plugin-pubsub/releases/download/v1.0.16/sftpgo-plugin-pubsub-linux-amd64
 sftpgo_plugin_pubsub_sha256: ca636b4deb335059b2e711a2643f66728c23883e481edb74d8840c035f1d2171
 sftpgo_plugin_binary: "{{ sftpgo_plugin_dir }}/sftpgo-plugin-pubsub"
