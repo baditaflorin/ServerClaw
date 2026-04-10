@@ -1,0 +1,65 @@
+name: reconcile-portals
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-portals:
+    runs-on: self-hosted
+    container:
+      image: ${{ vars.CONTAINER_REGISTRY }}/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+    steps:
+      - name: Checkout
+        env:
+          WORKFLOW_REPOSITORY: ${{ github.repository }}
+          WORKFLOW_SERVER_URL: ${{ github.server_url }}
+          WORKFLOW_REF: ${{ github.ref }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          git config --global --add safe.directory "$PWD"
+          git init .
+          if git remote get-url origin >/dev/null 2>&1; then
+            git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          else
+            git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          fi
+          git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin "${WORKFLOW_REF}"
+          git checkout --force "${WORKFLOW_SHA}"
+          git reset --hard
+          git clean -fdx
+
+      - name: Bootstrap validation toolchain
+        run: |
+          set -euo pipefail
+          if ! command -v uv >/dev/null 2>&1; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y --no-install-recommends python3-venv
+            python3 -m venv /opt/uv
+            /opt/uv/bin/python -m pip install --no-cache-dir --upgrade pip uv
+            ln -sf /opt/uv/bin/uv /usr/local/bin/uv
+          fi
+
+      - name: Validate portal artifacts
+        run: |
+          set -euo pipefail
+          cd scripts
+          python3 -m reconciliation.cli validate
+
+      - name: Notify ntfy on validation failure
+        if: failure()
+        env:
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: |
+          python3 scripts/ntfy_publish.py \
+            --publisher gitea_actions \
+            --topic platform.reconciliation \
+            --base-url https://ntfy.${{ vars.PLATFORM_DOMAIN }} \
+            --token "$NTFY_TOKEN" \
+            --message "Portal artifact validation failed after push to main at ${GITHUB_SHA:-unknown}. Run 'make reconcile-portals' to fix." \
+            --sequence-id "gitea:${GITHUB_SHA:-unknown}:reconcile-portals"

@@ -7,6 +7,7 @@ import json
 import re
 import socket
 import subprocess
+import sys
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
@@ -48,6 +49,7 @@ DRIFT_RECEIPTS_DIR = repo_path("receipts", "drift-reports")
 FIXTURE_RECEIPTS_DIR = repo_path("receipts", "fixtures")
 SECURITY_RECEIPTS_DIR = repo_path("receipts", "security-reports")
 AGENT_COORDINATION_RECEIPTS_DIR = repo_path("receipts", "agent-coordination")
+RECONCILIATION_RECEIPTS_DIR = repo_path("receipts", "reconciliation")
 
 NAV = [
     ("index.html", "Service Map"),
@@ -492,6 +494,128 @@ def render_ephemeral_vm_panel() -> str:
         "<thead><tr><th>VMID</th><th>Profile</th><th>Owner</th><th>Purpose</th><th>Expires</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div>"
         "</section>"
+    )
+
+
+def _latest_reconciliation_receipt() -> tuple[Path | None, dict[str, Any] | None]:
+    """Return the most recent reconciliation receipt JSON, if any."""
+    if not RECONCILIATION_RECEIPTS_DIR.exists():
+        return None, None
+    candidates = sorted(RECONCILIATION_RECEIPTS_DIR.glob("*.json"), reverse=True)
+    for path in candidates:
+        try:
+            payload = load_json(path)
+        except Exception:  # noqa: BLE001
+            continue
+        if isinstance(payload, dict):
+            return path, payload
+    return None, None
+
+
+def _run_reconciliation_validate() -> dict[str, Any] | None:
+    """Run the reconciliation validate command and parse JSON output.
+
+    Returns None if the command is unavailable or fails to produce JSON.
+    """
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "scripts.reconciliation.cli", "validate"],
+            capture_output=True,
+            text=True,
+            cwd=str(repo_path()),
+            timeout=120,
+        )
+        return json.loads(result.stdout)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def render_reconciliation_panel() -> str:
+    """Render the portal reconciliation status panel (ADR 0399 Phase 4)."""
+    # Try live validation first
+    validation = _run_reconciliation_validate()
+
+    # Fall back to receipt if validation unavailable
+    receipt_path, receipt = _latest_reconciliation_receipt()
+
+    if validation is None and receipt is None:
+        return (
+            '<section class="panel">'
+            '<div class="card-head"><div><h2>Portal Reconciliation</h2>'
+            '<p class="muted">No reconciliation data available yet.</p></div>'
+            f"<div>{render_badge('unknown', 'neutral')}</div></div>"
+            "</section>"
+        )
+
+    # Determine overall status from validation results
+    if validation is not None:
+        all_valid = validation.get("all_valid", False)
+        results = validation.get("results", [])
+        badge_tone = "ok" if all_valid else "warn"
+        badge_label = "valid" if all_valid else "stale"
+    else:
+        all_valid = None
+        results = []
+        badge_tone = "neutral"
+        badge_label = "receipt only"
+
+    # Build last-run timestamp from receipt
+    last_run = "Not yet run"
+    if receipt is not None:
+        last_run = str(receipt.get("generated_at", receipt.get("timestamp", "unknown")))
+
+    # Build portal status rows from validation
+    rows = []
+    for r in results:
+        status = "OK" if r.get("valid") else "STALE"
+        tone = "ok" if r.get("valid") else "warn"
+        rows.append(
+            "<tr>"
+            f"<td>{escape(r.get('portal', 'n/a'))}</td>"
+            f"<td>{render_badge(status, tone)}</td>"
+            f"<td>{escape(r.get('detail', ''))}</td>"
+            "</tr>"
+        )
+
+    # Links
+    links = []
+    links.append(render_external_link(
+        "https://grafana.lv3.org/d/lv3-portal-reconciliation/portal-reconciliation",
+        "Grafana Dashboard",
+    ))
+    links.append(render_external_link(
+        "https://windmill.lv3.org",
+        "Windmill Workflows",
+    ))
+    if receipt_path:
+        links.append(render_external_link(repo_view_link(receipt_path), "Latest Receipt"))
+
+    meta = (
+        '<div class="meta-list">'
+        f"<div><strong>Last Run</strong><span>{escape(last_run)}</span></div>"
+        f"<div><strong>Portals Checked</strong><span>{escape(len(results))}</span></div>"
+        f"<div><strong>All Valid</strong><span>{escape('yes' if all_valid else 'no' if all_valid is not None else 'n/a')}</span></div>"
+        "</div>"
+    )
+
+    empty_state_row = '<tr><td colspan="3">No validation results.</td></tr>'
+    table = (
+        '<div class="table-scroll"><table>'
+        "<thead><tr><th>Portal</th><th>Status</th><th>Detail</th></tr></thead>"
+        f"<tbody>{''.join(rows) if rows else empty_state_row}</tbody></table></div>"
+    )
+
+    return (
+        '<section class="panel">'
+        '<div class="card-head">'
+        '<div><h2>Portal Reconciliation</h2>'
+        '<p class="muted">Artifact freshness validation for ADR 0399 managed portals.</p></div>'
+        f"<div>{render_badge(badge_label, badge_tone)}</div>"
+        "</div>"
+        + meta
+        + f'<div class="chip-row">{"".join(links)}</div>'
+        + table
+        + "</section>"
     )
 
 
@@ -986,6 +1110,7 @@ def render_portal(
         render_summary(services, subdomains, tools, environments)
         + render_slo_panel(slo_prometheus_url)
         + render_drift_panel()
+        + render_reconciliation_panel()
         + render_security_panel()
         + render_release_panel()
         + render_ephemeral_vm_panel()

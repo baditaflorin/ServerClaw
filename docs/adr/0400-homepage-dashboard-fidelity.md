@@ -1,10 +1,10 @@
 # ADR 0400: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
 
-- Status: Proposed
-- Implementation Status: Partial
-- Implemented In Repo Version: not yet applied
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.92
 - Implemented In Platform Version: not yet applied
-- Implemented On: not yet applied
+- Implemented On: 2026-04-10
 - Date: 2026-04-10
 - Concern: Platform, UX, Automation
 - Depends on: ADR 0152 (Homepage Dashboard), ADR 0389 (Service Decommissioning), ADR 0399 (Reconciliation Daemon)
