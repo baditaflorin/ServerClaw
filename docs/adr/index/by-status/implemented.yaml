@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 339
+total_adrs: 342
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -3185,7 +3185,7 @@ adrs:
     implemented_on: '2026-03-28'
   - adr: 0196
     title: Netdata Realtime Streaming Metrics
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-27'
     concern: monitoring
@@ -6308,4 +6308,69 @@ adrs:
     filename: 0397-remove-netdata.md
     path: docs/adr/0397-remove-netdata.md
     implemented_in_repo_version: 0.178.91
+    implemented_on: '2026-04-10'
+  - adr: 0399
+    title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: ci-cd
+    keywords:
+      - reconciliation
+      - automation
+      - cron
+      - heartbeat
+      - portals
+      - iac
+      - drift
+      - platform
+      - daemon
+      - continuous
+    summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
+    filename: 0399-platform-reconciliation-daemon.md
+    path: docs/adr/0399-platform-reconciliation-daemon.md
+    implemented_in_repo_version: 0.178.92
+    implemented_on: '2026-04-10'
+  - adr: '0400'
+    title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: api
+    keywords:
+      - homepage
+      - dashboard
+      - ux
+      - selectability
+      - catalog-fidelity
+      - iac
+      - fidelity
+      - catalog-driven
+      - lifecycle
+      - compliance
+    summary: 'Add user-select: text overrides to the generated custom.css to ensure'
+    filename: 0400-homepage-dashboard-fidelity.md
+    path: docs/adr/0400-homepage-dashboard-fidelity.md
+    implemented_in_repo_version: 0.178.92
+    implemented_on: '2026-04-10'
+  - adr: '0401'
+    title: Remove Netdata from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: monitoring
+    keywords:
+      - lifecycle
+      - decommissioning
+      - netdata
+      - realtime
+      - monitoring
+      - removal
+      - remove
+      - from
+      - platform
+    summary: Remove Netdata (realtime service) from the platform following ADR 0389's
+    filename: 0401-remove-netdata.md
+    path: docs/adr/0401-remove-netdata.md
+    implemented_in_repo_version: 0.178.92
     implemented_on: '2026-04-10'

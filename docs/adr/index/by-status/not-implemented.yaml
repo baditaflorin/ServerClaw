@@ -10,7 +10,7 @@ generated: '2026-04-10'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 34
+total_adrs: 33
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -600,23 +600,3 @@ adrs:
     summary: 'Introduce an Agent Interface Abstraction Layer consisting of:'
     filename: 0395-agent-interface-abstraction-layer.md
     path: docs/adr/0395-agent-interface-abstraction-layer.md
-  - adr: 0399
-    title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
-    status: Proposed
-    implementation_status: Not Implemented
-    date: '2026-04-10'
-    concern: ci-cd
-    keywords:
-      - reconciliation
-      - automation
-      - cron
-      - heartbeat
-      - portals
-      - iac
-      - drift
-      - platform
-      - daemon
-      - continuous
-    summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
-    filename: 0399-platform-reconciliation-daemon.md
-    path: docs/adr/0399-platform-reconciliation-daemon.md

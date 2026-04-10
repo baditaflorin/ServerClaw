@@ -791,8 +791,8 @@ adrs:
     path: docs/adr/0369-python-validation-toolkit.md
   - adr: 0399
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-04-10'
     concern: ci-cd
     keywords:
@@ -809,3 +809,5 @@ adrs:
     summary: Implement a Platform Reconciliation Daemon — a set of scheduled workflows
     filename: 0399-platform-reconciliation-daemon.md
     path: docs/adr/0399-platform-reconciliation-daemon.md
+    implemented_in_repo_version: 0.178.92
+    implemented_on: '2026-04-10'

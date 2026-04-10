@@ -1,10 +1,10 @@
 # ADR 0399: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet applied
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.92
 - Implemented In Platform Version: not yet applied
-- Implemented On: not yet applied
+- Implemented On: 2026-04-10
 - Date: 2026-04-10
 - Concern: Automation, Platform, Observability
 - Depends on: ADR 0044 (Windmill), ADR 0091 (Drift Detection), ADR 0119 (Budgeted Workflow Scheduler), ADR 0226 (Systemd Timers for Control Loops), ADR 0152 (Homepage Dashboard)

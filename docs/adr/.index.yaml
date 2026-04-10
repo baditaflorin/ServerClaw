@@ -14,16 +14,16 @@ adr_number_range:
   last: '0401'
   next_available: '0402'
 implementation_status_summary:
-  Implemented: 340
-  Partial: 3
-  Not Implemented: 34
+  Implemented: 342
+  Partial: 2
+  Not Implemented: 33
   Deprecated: 5
   Accepted: 24
   Proposed: 29
 decision_status_summary:
-  Accepted: 336
-  Proposed: 37
-  Deprecated: 12
+  Accepted: 338
+  Proposed: 35
+  Deprecated: 13
   Implemented: 49
 facets:
   by_range:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 1
+      count: 2
       first_adr: '0400'
-      last_adr: '0400'
+      last_adr: '0401'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -82,7 +82,7 @@ facets:
       count: 7
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
-      count: 11
+      count: 12
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
       count: 27
@@ -111,15 +111,15 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 339
+      count: 342
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 3
+      count: 2
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 34
+      count: 33
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -147,19 +147,27 @@ latest_adrs:
     implemented_on: '2026-04-10'
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
-    implementation_status: Partial
+    implementation_status: Implemented
     concern: api
     path: docs/adr/0400-homepage-dashboard-fidelity.md
+    implemented_on: '2026-04-10'
   - adr: 0399
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     concern: ci-cd
     path: docs/adr/0399-platform-reconciliation-daemon.md
+    implemented_on: '2026-04-10'
   - adr: 0398
     title: Outline Shared S3 Migration
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0398-outline-shared-s3-migration.md
+  - adr: 0397
+    title: Remove Netdata (realtime) from the Platform
+    implementation_status: Implemented
+    concern: monitoring
+    path: docs/adr/0397-remove-netdata.md
+    implemented_on: '2026-04-10'
   - adr: 0397
     title: Managed S3 Bucket Consumer Pattern
     implementation_status: Proposed
@@ -187,11 +195,6 @@ latest_adrs:
     concern: api
     path: docs/adr/0393-remove-one-api.md
     implemented_on: '2026-04-10'
-  - adr: 0392
-    title: — Optional Secret Propagation in Role Convergence
-    implementation_status: Proposed
-    concern: security
-    path: docs/adr/0392-optional-secret-propagation.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

@@ -12,12 +12,12 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 1
+total_adrs: 2
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
-    status: Proposed
-    implementation_status: Partial
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-04-10'
     concern: api
     keywords:
@@ -34,3 +34,26 @@ adrs:
     summary: 'Add user-select: text overrides to the generated custom.css to ensure'
     filename: 0400-homepage-dashboard-fidelity.md
     path: docs/adr/0400-homepage-dashboard-fidelity.md
+    implemented_in_repo_version: 0.178.92
+    implemented_on: '2026-04-10'
+  - adr: '0401'
+    title: Remove Netdata from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: monitoring
+    keywords:
+      - lifecycle
+      - decommissioning
+      - netdata
+      - realtime
+      - monitoring
+      - removal
+      - remove
+      - from
+      - platform
+    summary: Remove Netdata (realtime service) from the platform following ADR 0389's
+    filename: 0401-remove-netdata.md
+    path: docs/adr/0401-remove-netdata.md
+    implemented_in_repo_version: 0.178.92
+    implemented_on: '2026-04-10'

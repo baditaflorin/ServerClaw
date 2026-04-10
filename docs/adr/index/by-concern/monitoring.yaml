@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-10'
 facet: concern
 concern: monitoring
-total_adrs: 11
+total_adrs: 12
 adrs:
   - adr: '0041'
     title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
@@ -89,7 +89,7 @@ adrs:
     implemented_on: '2026-03-26'
   - adr: 0196
     title: Netdata Realtime Streaming Metrics
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-27'
     concern: monitoring
@@ -219,4 +219,25 @@ adrs:
     filename: 0397-remove-netdata.md
     path: docs/adr/0397-remove-netdata.md
     implemented_in_repo_version: 0.178.91
+    implemented_on: '2026-04-10'
+  - adr: '0401'
+    title: Remove Netdata from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: monitoring
+    keywords:
+      - lifecycle
+      - decommissioning
+      - netdata
+      - realtime
+      - monitoring
+      - removal
+      - remove
+      - from
+      - platform
+    summary: Remove Netdata (realtime service) from the platform following ADR 0389's
+    filename: 0401-remove-netdata.md
+    path: docs/adr/0401-remove-netdata.md
+    implemented_in_repo_version: 0.178.92
     implemented_on: '2026-04-10'

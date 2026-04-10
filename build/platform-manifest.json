@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.91",
-  "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T11:29:19Z",
-  "next_refresh_at": "2026-04-10T12:29:19Z",
+  "repo_version": "0.178.93",
+  "platform_version": "0.178.75",
+  "generated_at": "2026-04-10T12:40:19Z",
+  "next_refresh_at": "2026-04-10T13:40:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3981,6 +3981,31 @@
         "runbook": "docs/runbooks/configure-portainer.md"
       },
       {
+        "id": "portal-health-sweep",
+        "description": "Health sweep that fetches each portal's live URL, verifies expected content, compares homepage service tiles against service-capability-catalog.json, and posts drift alerts to ntfy.  ADR 0399 Tier 3 heartbeat workflow.",
+        "tags": [
+          "mutation",
+          "portal-health-sweep",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 200,
+          "max_concurrent_instances": 3,
+          "max_touched_hosts": 10,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/adr/0399-platform-reconciliation-daemon.md"
+      },
+      {
         "id": "post-merge-gate",
         "description": "Re-run the ADR 0087 validation manifest after merge to main from the Windmill worker checkout.",
         "tags": [
@@ -4131,6 +4156,31 @@
           "escalation_action": "abort_silently"
         },
         "runbook": "docs/runbooks/operator-offboarding.md"
+      },
+      {
+        "id": "reconcile-portals",
+        "description": "Detect drift across all four operator-facing portals (homepage, ops, docs, changelog), regenerate stale artifacts from canonical catalogs, and post a summary to Mattermost when changes are found.  ADR 0399 Tier 1 cron workflow.",
+        "tags": [
+          "mutation",
+          "reconcile-portals",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 50,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 0,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/adr/0399-platform-reconciliation-daemon.md"
       },
       {
         "id": "refresh-discovery-surfaces",
@@ -4866,6 +4916,17 @@
         "path": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
         "workflow_ids": [
           "converge-neko"
+        ]
+      },
+      {
+        "id": "0399-platform-reconciliation-daemon",
+        "title": "ADR 0399: Platform Reconciliation Daemon \u2014 Continuous Portal and Artifact Regeneration",
+        "agent_trust_required": "T2",
+        "steps": 28,
+        "path": "docs/adr/0399-platform-reconciliation-daemon.md",
+        "workflow_ids": [
+          "portal-health-sweep",
+          "reconcile-portals"
         ]
       },
       {
@@ -6260,10 +6321,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.90",
+    "last_version": "0.178.92",
     "deployed_at": "2026-04-10",
-    "summary": "[adr-0399] Platform reconciliation daemon proposed (ADR 0399) \u2014 continuous portal regeneration via Windmill cron + health sweep, OpenClaw-inspired heartbeat/cron dual model; homepage text selectability CSS fix (ADR 0400) [adr-0392] Convergence timing infrastructure \u2014 convergence_timer.py + `make time-converge` records timing receipts to receipts/convergence-timing/; report/trend subcommands for drift detection; baselines: api-gateway 772s, windmill 1257s",
-    "release_notes_url": "docs/release-notes/0.178.91.md"
+    "summary": "[adr-0401] Remove Netdata from the platform \u2014 Prometheus + node_exporter cover all host metrics; netdata_runtime role deleted, realtime.lv3.org deprovisioned, 15 catalogs cleaned via decommission script, ADR 0196 deprecated; equivalent browser dashboards via Grafana Node Exporter Full (dashboard 1860) [adr-0399] Platform reconciliation daemon implemented (ADR 0399) \u2014 Phase 1: reconciliation library + CLI + Makefile targets; Phase 2: Windmill 15-min cron (reconcile-portals.py) + 60-min health sweep (portal-health-sweep.py); Phase 3: Gitea push-validation workflow; Phase 4: Grafana portal-reconciliation dashboard + ops portal widget; ADR 0400 homepage fidelity complete (catalog-driven bookmarks, text selectability CSS, verify fixes)",
+    "release_notes_url": "docs/release-notes/0.178.93.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6334,13 +6395,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0395-agent-interface-abstraction-layer.md"
-    },
-    {
-      "adr": "0399",
-      "title": "Platform Reconciliation Daemon \u2014 Continuous Portal and Artifact Regeneration",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0399-platform-reconciliation-daemon.md"
     }
   ]
 }

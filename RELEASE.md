@@ -1,10 +1,10 @@
-# Release 0.178.92
+# Release 0.178.93
 
 - Date: 2026-04-10
 
 ## Summary
 - [adr-0401] Remove Netdata from the platform — Prometheus + node_exporter cover all host metrics; netdata_runtime role deleted, realtime.lv3.org deprovisioned, 15 catalogs cleaned via decommission script, ADR 0196 deprecated; equivalent browser dashboards via Grafana Node Exporter Full (dashboard 1860)
-- [adr-0399] Platform reconciliation daemon proposed (ADR 0399) — continuous portal regeneration via Windmill cron + health sweep, OpenClaw-inspired heartbeat/cron dual model; homepage text selectability CSS fix (ADR 0400)
+- [adr-0399] Platform reconciliation daemon implemented (ADR 0399) — Phase 1: reconciliation library + CLI + Makefile targets; Phase 2: Windmill 15-min cron (reconcile-portals.py) + 60-min health sweep (portal-health-sweep.py); Phase 3: Gitea push-validation workflow; Phase 4: Grafana portal-reconciliation dashboard + ops portal widget; ADR 0400 homepage fidelity complete (catalog-driven bookmarks, text selectability CSS, verify fixes)
 - [adr-0392] Convergence timing infrastructure — convergence_timer.py + `make time-converge` records timing receipts to receipts/convergence-timing/; report/trend subcommands for drift detection; baselines: api-gateway 772s, windmill 1257s
 - [adr-0396] Deterministic service decommissioning — comprehensive CATALOG_REGISTRY covering 15 catalog types (7 handler strategies: array/dict_key/dict_key_by_value/workflow_dict/dep_graph/partitions/yaml_dict_key), YAML block markers in generated SLO Prometheus files (generate_slo_config.py, 44 services), decommission-preview subcommand in platform_ops.py, fixed dual-format ADR deprecation; reduces AI-required decommission work to zero
 - ADR 0394 + 0395: LibreChat Agents API integration plan and provider-agnostic agent abstraction layer — programmatic agent access via OpenAI-compatible and Open Responses endpoints, decoupled DTOs with AgentProvider ABC for runtime swappability
