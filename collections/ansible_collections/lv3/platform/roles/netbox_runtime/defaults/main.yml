@@ -14,7 +14,7 @@ netbox_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.
 netbox_database_port: 5432
 netbox_database_password_local_file: "{{ netbox_local_artifact_dir }}/database-password.txt"
 netbox_superuser_name: ops
-netbox_superuser_email: baditaflorin@gmail.com
+netbox_superuser_email: "{{ platform_operator_email }}"
 netbox_superuser_password_local_file: "{{ netbox_local_artifact_dir }}/superuser-password.txt"
 netbox_superuser_api_token_local_file: "{{ netbox_local_artifact_dir }}/api-token.txt"
 netbox_secret_key_file: "{{ netbox_secret_dir }}/secret-key"

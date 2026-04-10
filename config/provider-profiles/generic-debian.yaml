@@ -1,0 +1,56 @@
+# Provider Bootstrap Profile: Generic Debian 13 Server
+# See ADR 0386
+
+provider: generic-debian
+bootstrap_method: existing-debian-13
+description: >
+  Bootstrap any server already running Debian 13 (Trixie).
+  Works with any hosting provider, colocation, or home lab.
+
+prerequisites:
+  - Server running Debian 13 with root SSH access
+  - Stable public or private IP address
+  - Bootstrap SSH key pair generated (make init-local)
+
+hardware_requirements:
+  min_ram_gb: 32
+  min_disk_gb: 500
+  min_cores: 8
+  architecture: x86_64
+  notes: >
+    Proxmox VE requires x86_64. ARM servers are not supported for production.
+    16 GB RAM is the absolute minimum for a reduced service set.
+
+steps:
+  - name: Verify Debian 13
+    command: "ssh root@<SERVER_IP> 'cat /etc/debian_version'"
+    description: Confirm the server is running Debian 13.
+    validation: "Output must start with 13"
+
+  - name: Inject bootstrap SSH key
+    manual: true
+    description: |
+      Ensure the bootstrap public key is in root's authorized_keys:
+        ssh-copy-id -i .local/ssh/bootstrap.id_ed25519.pub root@<SERVER_IP>
+    validation: "ssh -i .local/ssh/bootstrap.id_ed25519 root@<SERVER_IP> 'whoami'"
+
+  - name: Run Proxmox bootstrap via Ansible
+    command: "make install-proxmox HOST=<SERVER_IP>"
+    description: Installs Proxmox VE, configures networking, creates ops user.
+    validation: "make verify-bootstrap-proxmox HOST=<SERVER_IP>"
+
+  - name: Provision guest VMs
+    command: "make provision-guests"
+    description: Creates all guest VMs on the Proxmox host.
+    validation: "make verify-bootstrap-guests"
+
+  - name: Full platform convergence
+    command: "make converge-site"
+    description: Deploys all 73+ services across the guest VMs.
+    validation: "make verify-platform"
+
+post_bootstrap:
+  - Set up DNS records pointing to the server's public IP
+  - Configure TLS certificates
+  - Set up VPN access (Tailscale or Headscale)
+  - Create operator accounts in Keycloak

@@ -23,6 +23,21 @@
     fail_msg: "common.docker_compose_converge requires compose_file, site_dir, and service_name."
     quiet: true
 
+- name: "Check if images exist locally for {{ common_docker_compose_converge_service_name }}"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ common_docker_compose_converge_compose_file }}"
+      - images
+      - --quiet
+  args:
+    chdir: "{{ common_docker_compose_converge_site_dir }}"
+  register: common_dcc_images_check
+  changed_when: false
+  failed_when: false
+
 - name: "Pull images for {{ common_docker_compose_converge_service_name }}"
   ansible.builtin.command:
     argv:
@@ -41,6 +56,10 @@
     'Pulling' in common_dcc_pull.stdout
     or 'Downloaded newer image' in common_dcc_pull.stdout
     or 'Pull complete' in common_dcc_pull.stdout
+  when: >-
+    common_dcc_images_check.rc != 0
+    or common_dcc_images_check.stdout | trim | length == 0
+    or (common_docker_compose_converge_force_pull | default(false) | bool)
 
 - name: "Check Docker NAT chain before {{ common_docker_compose_converge_service_name }} startup"
   ansible.builtin.command:

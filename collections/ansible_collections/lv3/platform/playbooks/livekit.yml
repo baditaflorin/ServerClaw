@@ -1,7 +1,7 @@
 ---
 # Playbook: livekit.yml
 # Purpose: Converge the LiveKit runtime, Proxmox ingress programming, and the shared edge publication for voice-enabled agent sessions.
-# Use case: Run during ADR 0293 rollout, recovery, or replay when livekit.lv3.org and its media listeners must match repo truth.
+# Use case: Run during ADR 0293 rollout, recovery, or replay when livekit.{{ platform_domain }} and its media listeners must match repo truth.
 #
 # Inputs (required):
 #   - env (string, required): Target environment selector used to choose the docker-runtime and nginx guests.
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - LiveKit is running on docker-runtime-lv3 with repo-managed API credentials, the Proxmox host forwards public TCP/UDP media traffic, and livekit.lv3.org is published through the shared NGINX edge.
+#   - LiveKit is running on docker-runtime-lv3 with repo-managed API credentials, the Proxmox host forwards public TCP/UDP media traffic, and livekit.{{ platform_domain }} is published through the shared NGINX edge.
 #
 # Idempotency: Fully idempotent
 #
@@ -30,8 +30,8 @@
   gather_facts: false
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all.yml"
-    subdomain_fqdn: livekit.lv3.org
+    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
+    subdomain_fqdn: "livekit.{{ platform_domain }}"
 
   tasks:
     - name: Load controller defaults
@@ -61,7 +61,7 @@
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
           - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "livekit.lv3.org must exist in config/subdomain-catalog.json before live apply."
+        fail_msg: "livekit.{{ platform_domain }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:
@@ -183,7 +183,7 @@
           - "{{ livekit_tool_script }}"
           - verify-room-lifecycle
           - --url
-          - https://livekit.lv3.org
+          - "https://livekit.{{ platform_domain }}"
           - --api-key-file
           - "{{ livekit_api_key_file }}"
           - --api-secret-file

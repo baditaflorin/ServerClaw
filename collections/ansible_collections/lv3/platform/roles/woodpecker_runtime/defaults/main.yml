@@ -80,7 +80,7 @@ woodpecker_repo_owners:
   - ops
 
 # Seed repository activation
-woodpecker_seed_repo_full_name: ops/proxmox_florin_server
+woodpecker_seed_repo_full_name: ops/platform  # <-- CHANGE to your Gitea org/repo
 woodpecker_seed_repo_branch: main
 
 # Smoke test secret configuration

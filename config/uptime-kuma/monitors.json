@@ -338,19 +338,6 @@
     ]
   },
   {
-    "name": "Open WebUI Private",
-    "type": "http",
-    "url": "http://10.10.10.20:8088",
-    "description": "Private Open WebUI surface on docker-runtime-lv3.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 10,
-    "accepted_statuscodes": [
-      "200-299"
-    ]
-  },
-  {
     "name": "Ops Portal Public",
     "type": "http",
     "url": "https://ops.lv3.org/health",

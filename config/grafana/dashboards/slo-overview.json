@@ -4441,7 +4441,6 @@
     {
       "id": 106,
       "type": "text",
-      "title": "open-webui-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -4449,7 +4448,6 @@
         "y": 147
       },
       "options": {
-        "content": "### open-webui-availability\n\nOpen WebUI remains reachable on the private runtime network.\n\nService: `open_webui`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=open-webui-availability)",
         "mode": "markdown"
       }
     },
@@ -4492,7 +4490,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -4556,7 +4553,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -4600,7 +4596,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -4644,7 +4639,6 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -9728,7 +9722,6 @@
         "name": "slo",
         "label": "SLO",
         "type": "custom",
-        "query": "browser-runner-availability,changedetection-availability,crawl4ai-availability,directus-availability,dozzle-availability,excalidraw-availability,gitea-availability,gotenberg-availability,glitchtip-availability,grafana-availability,harbor-availability,homepage-availability,keycloak-availability,keycloak-latency,langfuse-availability,mailpit-availability,minio-availability,matrix-synapse-availability,netbox-availability,nextcloud-availability,nginx-edge-availability,open-webui-availability,one-api-availability,grist-availability,openfga-availability,openfga-latency,outline-availability,jupyterhub-availability,label-studio-availability,piper-availability,paperless-availability,plane-availability,platform-context-api-availability,plausible-availability,realtime-availability,semaphore-availability,serverclaw-availability,status-page-availability,superset-availability,tika-availability,tesseract-ocr-availability,typesense-availability,uptime-kuma-availability,vaultwarden-availability,windmill-availability,woodpecker-availability",
         "current": {
           "selected": false,
           "text": "all",

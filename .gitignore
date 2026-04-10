@@ -31,8 +31,8 @@ go.work.sum
 .ansible/
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
 
 # Python cache
 __pycache__/

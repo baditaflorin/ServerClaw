@@ -4,7 +4,7 @@
 # Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.{{ platform_domain }}")
 # Usage: import_playbook with -e service_dns_fqdn=data.{{ platform_domain }}, or set in a vars file.
 
-- name: "Ensure Hetzner DNS publication for {{ service_dns_fqdn }}"
+- name: Ensure Hetzner DNS publication for service subdomain
   hosts: localhost
   connection: local
   gather_facts: false

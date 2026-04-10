@@ -21,6 +21,7 @@ from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
 
+from validation_toolkit import require_mapping, require_str, require_string_list
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from mutation_audit import build_event, emit_event
 from platform.operator_access import (
@@ -262,29 +263,8 @@ def generate_bootstrap_password() -> str:
     return "".join(secrets.choice(alphabet) for _ in range(24))
 
 
-def require_string(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise OperatorManagerError(f"{path} must be a non-empty string.")
-    return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    if not isinstance(value, list):
-        raise OperatorManagerError(f"{path} must be a list.")
-    result: list[str] = []
-    for index, item in enumerate(value):
-        result.append(require_string(item, f"{path}[{index}]"))
-    return result
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise OperatorManagerError(f"{path} must be a mapping.")
-    return value
-
-
 def validate_timestamp(value: str, path: str) -> str:
-    require_string(value, path)
+    require_str(value, path)
     if not ISO8601_PATTERN.match(value):
         raise OperatorManagerError(f"{path} must use an ISO-8601 UTC timestamp ending in Z.")
     return value

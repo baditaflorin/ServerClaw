@@ -29,3 +29,10 @@ repos:
         language: system
         pass_filenames: false
         files: ^(receipts/.*\.json|\.local/triage/reports/.*\.json|build/search-index/.*\.json|build/changelog-portal/.*\.(html|json))$
+      - id: enforce-validation-toolkit
+        name: Enforce validation_toolkit pattern for scripts
+        entry: bash -c 'scripts/enforce_validation_toolkit.sh'
+        language: system
+        pass_filenames: false
+        files: ^scripts/.*\.py$
+        always_run: false

@@ -250,7 +250,7 @@
         --auth-file "{{ coolify_admin_auth_local_file }}"
         register-deployment-server
         --host coolify-apps-lv3
-        --ip "{{ hostvars['coolify-apps-lv3']['ansible_host'] }}"
+        --ip "{{ hostvars[playbook_execution_host_patterns.coolify_apps[playbook_execution_env]]['ansible_host'] }}"
       args:
         chdir: "{{ playbook_dir }}/.."
       delegate_to: localhost
@@ -267,7 +267,7 @@
         --auth-file "{{ coolify_admin_auth_local_file }}"
         install-deploy-key
         --proxmox-auth-file "{{ proxmox_api_token_local_file }}"
-        --vmid "{{ hostvars['coolify-apps-lv3']['vmid'] | default(171) }}"
+        --vmid "{{ hostvars[playbook_execution_host_patterns.coolify_apps[playbook_execution_env]]['vmid'] | default(171) }}"
         --pubkey "{{ coolify_deploy_ssh_pubkey }}"
       args:
         chdir: "{{ playbook_dir }}/.."
@@ -286,7 +286,7 @@
         --auth-file "{{ coolify_admin_auth_local_file }}"
         migrate-apps
         --proxmox-auth-file "{{ proxmox_api_token_local_file }}"
-        --vmid "{{ hostvars['coolify-lv3']['vmid'] | default(170) }}"
+        --vmid "{{ hostvars[playbook_execution_host_patterns.coolify[playbook_execution_env]]['vmid'] | default(170) }}"
         --from coolify-lv3
         --to coolify-apps-lv3
       args:

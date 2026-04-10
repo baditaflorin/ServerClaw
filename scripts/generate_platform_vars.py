@@ -109,8 +109,6 @@ PORT_KEYS = (
     "coolify_proxy_port",
     "coolify_proxy_tls_port",
     "coolify_host_proxy_port",
-    "open_webui_port",
-    "open_webui_host_proxy_port",
     "serverclaw_port",
     "api_gateway_internal_port",
     "platform_context_internal_port",
@@ -691,11 +689,6 @@ def build_service_urls(
     elif service_id == "coolify_apps":
         urls["internal"] = service_url("https", private_ip, ports["coolify_proxy_tls_port"])
         port_map["internal"] = ports["coolify_proxy_tls_port"]
-    elif service_id == "open_webui":
-        urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
-        urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
-        port_map["internal"] = ports["open_webui_port"]
-        port_map["controller"] = ports["open_webui_host_proxy_port"]
     elif service_id == "serverclaw":
         urls["internal"] = service_url("http", private_ip, ports["serverclaw_port"])
         port_map["internal"] = ports["serverclaw_port"]
@@ -998,7 +991,6 @@ def build_platform_vars(
     gitea_service = service_topology["gitea"]
     minio_service = service_topology["minio"]
     netbox_service = service_topology["netbox"]
-    open_webui_service = service_topology["open_webui"]
     plane_service = service_topology["plane"]
     woodpecker_service = service_topology["woodpecker"]
     api_gateway_service = service_topology["api_gateway"]
@@ -1111,7 +1103,6 @@ def build_platform_vars(
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["nomad_host_proxy_port"],
-            resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
             resolved_ports["woodpecker_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
@@ -1156,8 +1147,6 @@ def build_platform_vars(
         "typesense_port": resolved_ports["typesense_port"],
         "typesense_host_proxy_port": resolved_ports["typesense_host_proxy_port"],
         "typesense_controller_url": typesense_service["urls"]["controller"],
-        "open_webui_host_proxy_port": resolved_ports["open_webui_host_proxy_port"],
-        "open_webui_controller_url": open_webui_service["urls"]["controller"],
         "plane_port": resolved_ports["plane_port"],
         "plane_host_proxy_port": resolved_ports["plane_host_proxy_port"],
         "plane_private_base_url": plane_service["urls"]["internal"],
@@ -1219,7 +1208,6 @@ def build_platform_vars(
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["nomad_host_proxy_port"],
-            resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
             resolved_ports["woodpecker_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],

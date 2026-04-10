@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-08'
+generated: '2026-04-10'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 1
+total_adrs: 2
 adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
@@ -28,3 +28,22 @@ adrs:
     summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
     filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
     path: docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md
+  - adr: 0386
+    title: Agent Cross-Host Execution and MCP Tool Surface
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-09'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - cross-host
+      - execution
+      - mcp
+      - tool
+      - surface
+    summary: Local commands use nsenter --target 1 --mount --uts --ipc --net --pid inside
+    filename: 0386-agent-cross-host-execution-and-mcp-tool-surface.md
+    path: docs/adr/0386-agent-cross-host-execution-and-mcp-tool-surface.md
+    implemented_in_repo_version: 0.178.70
+    implemented_in_platform_version: 0.178.70
+    implemented_on: '2026-04-09'

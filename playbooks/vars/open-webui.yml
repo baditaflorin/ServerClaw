@@ -1,5 +1,0 @@
----
-service_audit_name: open_webui
-service_needs_dns: false
-service_needs_postgres: false
-service_needs_nginx_edge: false

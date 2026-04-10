@@ -4,9 +4,9 @@
   connection: local
   gather_facts: false
   vars:
-    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-    subdomain_fqdn: cloud.lv3.org
+    subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
+    subdomain_fqdn: "cloud.{{ platform_domain }}"
 
   tasks:
     - name: Load controller defaults
@@ -36,7 +36,7 @@
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
           - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "cloud.lv3.org must exist in config/subdomain-catalog.json before live apply."
+        fail_msg: "cloud.{{ platform_domain }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:
@@ -103,7 +103,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../../../../../inventory/group_vars/platform.yml"
 
   pre_tasks:
     - name: Run shared preflight checks

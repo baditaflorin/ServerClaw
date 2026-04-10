@@ -247,7 +247,6 @@ roles:
   ntfy_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
-  open_webui_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   plausible_runtime:

@@ -37,14 +37,6 @@ extra_nodes:
       source: manifest
 
 extra_edges:
-  - from: service:open_webui
-    to: service:one_api
-    edge_kind: depends_on
-    metadata:
-      source: manifest
-      relationship: unified_llm_api
-      strength: hard
-      description: Open WebUI uses the private One-API runtime for repo-managed local model access.
   - from: service:serverclaw
     to: service:one_api
     edge_kind: depends_on

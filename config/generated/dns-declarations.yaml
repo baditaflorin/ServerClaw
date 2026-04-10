@@ -31,7 +31,6 @@ dns_records:
     ttl: 3600
     type: public
   chat.lv3.org:
-    service: open_webui
     target_host: nginx-lv3
     ttl: 3600
     type: public

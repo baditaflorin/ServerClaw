@@ -2,8 +2,8 @@
 control_plane_recovery_backup_vm_firewall_file: "/etc/pve/firewall/{{ backup_vm_vmid }}.fw"
 control_plane_recovery_backup_vm_ssh_sources:
   - 100.64.0.0/10
-  - 10.10.10.1/32
+  - "{{ hostvars[platform_topology_host].ansible_host }}/32"
   - "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}/32"
 control_plane_recovery_backup_vm_service_rules:
-  - source: 10.10.10.1/32
+  - source: "{{ hostvars[platform_topology_host].ansible_host }}/32"
     port: 8007

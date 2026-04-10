@@ -25,7 +25,7 @@ windmill_extra_image: "{{ container_image_catalog.images.windmill_extra_runtime.
 windmill_uv_version: "0.9.21"
 windmill_uv_download_url: >-
   https://github.com/astral-sh/uv/releases/download/{{ windmill_uv_version }}/uv-x86_64-unknown-linux-gnu.tar.gz
-windmill_uv_archive_path: "{{ windmill_site_dir }}/windmill-uv.tar.gz"
+windmill_uv_archive_path: "{{ (windmill_site_dir | default('')) ~ '/windmill-uv.tar.gz' }}"
 windmill_uv_install_dir: /usr/local/bin
 windmill_uv_binary_path: "{{ windmill_uv_install_dir }}/uv"
 windmill_uvx_binary_path: "{{ windmill_uv_install_dir }}/uvx"
@@ -48,7 +48,7 @@ windmill_controller_repo_common_root: >-
       | dirname
     )
   }}
-windmill_database_password_local_file: "{{ windmill_local_artifact_dir }}/database-password.txt"
+windmill_database_password_local_file: "{{ (windmill_local_artifact_dir | default('')) ~ '/database-password.txt' }}"
 windmill_database_dsn: >-
   postgres://{{ windmill_database_user }}:{{
     (
@@ -98,9 +98,9 @@ windmill_ledger_nats_password: >-
   }}
 windmill_ledger_nats_url: >-
   {%- set password = windmill_ledger_nats_password | trim -%}{%- if password | length > 0 -%}nats://{{ windmill_ledger_nats_username }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_nats_host }}:{{ windmill_ledger_nats_port }}{%- endif -%}
-windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
-windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
-windmill_controller_local_root: "{{ windmill_local_artifact_dir | dirname }}"
+windmill_superadmin_secret_remote_file: "{{ (windmill_secret_dir | default('')) ~ '/superadmin-secret' }}"
+windmill_superadmin_secret_local_file: "{{ (windmill_local_artifact_dir | default('')) ~ '/superadmin-secret.txt' }}"
+windmill_controller_local_root: "{{ (windmill_local_artifact_dir | default('')) | dirname }}"
 windmill_atlas_approle_local_file: "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
 windmill_ntfy_alertmanager_password_local_file: "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
 windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
@@ -150,17 +150,16 @@ windmill_worker_registration_delay_seconds: 5
 windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: >-
   {{
-    (playbook_dir ~ '/..')
-    if (playbook_dir is defined and playbook_dir | length > 0)
+    (inventory_dir ~ '/..')
+    if (inventory_dir is defined and inventory_dir | length > 0)
     else (
-      (inventory_dir ~ '/..')
-      if (inventory_dir is defined and inventory_dir | length > 0)
-      else (lookup('ansible.builtin.env', 'PWD') | default(playbook_dir ~ '/..', true))
+      lookup('ansible.builtin.env', 'PWD')
+      | default(playbook_dir ~ '/..', true)
     )
   }}
-windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
-windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
-windmill_worker_repo_checkout_compat_root: "{{ inventory_dir | dirname }}"
+windmill_worker_repo_checkout_host_path: "{{ platform_repo_checkout_path }}"
+windmill_worker_repo_checkout_container_path: "{{ platform_repo_checkout_path }}"
+windmill_worker_repo_checkout_compat_root: "{{ repo_shared_root }}"
 windmill_worker_secret_manifest_path: "{{ playbook_execution_controller_secret_manifest_path }}"
 windmill_worker_secret_mirror_ids:
   - bootstrap_ssh_private_key
@@ -227,6 +226,7 @@ windmill_worker_repo_secret_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/atlas-approle.json"
     src: "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
     mode: "0600"
+    optional: true
 windmill_worker_seed_job_secret_directories:
   - path: "{{ windmill_worker_seed_job_secret_root }}/openbao"
     owner: root
@@ -247,6 +247,7 @@ windmill_worker_seed_job_secret_files:
     owner: root
     group: root
     mode: "0600"
+    optional: true
   - path: "{{ windmill_worker_seed_job_secret_root }}/ntfy/alertmanager-password.txt"
     src: "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
     owner: root
@@ -393,8 +394,9 @@ windmill_operator_manager_env:
   OPENBAO_INIT_JSON: >-
     {{
       lookup('ansible.builtin.file', windmill_controller_local_root ~ '/openbao/init.json', errors='ignore')
-      | default('', true)
+      | default('{}', true)
       | trim
+      | from_json | to_json
     }}
   TAILSCALE_API_KEY: "{{ lookup('ansible.builtin.env', 'TAILSCALE_API_KEY') | default('', true) }}"
   TAILSCALE_TAILNET: "{{ lookup('ansible.builtin.env', 'TAILSCALE_TAILNET') | default('', true) }}"
@@ -405,7 +407,7 @@ windmill_operator_manager_env:
 windmill_seed_repo_root_local_dir: "{{ windmill_worker_checkout_repo_root_local_dir }}"
 windmill_seed_script_root_local_dir: "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
 windmill_seed_app_repo_root_local_dir: "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
-windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
+windmill_seed_app_sync_dir: "{{ (windmill_site_dir | default('')) ~ '/seed-apps' }}"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
 windmill_mutation_audit_file: "{{ mutation_audit_log_file }}"
 windmill_integration_test_runner_username: test-runner@{{ platform_domain }}
@@ -1142,5 +1144,5 @@ windmill_seed_resources:
     resource_type: "{{ windmill_ntfy_resource_type_name }}"
     value:
       base_url: "{{ windmill_ntfy_base_url }}"
-      bearer_token: "{{ lookup('ansible.builtin.file', windmill_ntfy_token_local_file) | trim }}"
+      bearer_token: "{{ lookup('ansible.builtin.file', windmill_ntfy_token_local_file, errors='ignore') | default('', true) | trim }}"
       publisher: windmill

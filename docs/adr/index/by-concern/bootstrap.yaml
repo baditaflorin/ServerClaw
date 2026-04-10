@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-08'
+generated: '2026-04-10'
 facet: concern
 concern: bootstrap
-total_adrs: 5
+total_adrs: 6
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -102,3 +102,18 @@ adrs:
     implemented_in_repo_version: 0.177.83
     implemented_in_platform_version: 0.130.57
     implemented_on: '2026-03-29'
+  - adr: 0386
+    title: Reproducible Zero-to-Platform Bootstrap for Public Forks
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - reproducible
+      - zero-to-platform
+      - bootstrap
+      - public
+      - forks
+    summary: Implement a four-layer bootstrap system that takes a fork operator from
+    filename: 0386-reproducible-zero-to-platform-bootstrap.md
+    path: docs/adr/0386-reproducible-zero-to-platform-bootstrap.md

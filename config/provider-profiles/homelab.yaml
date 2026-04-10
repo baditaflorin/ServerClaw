@@ -1,0 +1,71 @@
+# Provider Bootstrap Profile: Home Lab / Local Development
+# See ADR 0386 + ADR 0387
+
+provider: homelab
+bootstrap_method: local-or-docker
+description: >
+  For development and testing on local hardware or Docker.
+  Two paths: bare-metal home server with Proxmox, or Docker containers.
+
+prerequisites:
+  - For bare-metal: x86_64 machine with Debian 13 installed
+  - For Docker: Docker Desktop or Docker Engine, 8+ GB free RAM
+  - Bootstrap SSH key pair generated (make init-local)
+
+hardware_requirements:
+  bare_metal:
+    min_ram_gb: 16
+    min_disk_gb: 256
+    min_cores: 4
+    architecture: x86_64
+  docker_minimal:
+    min_ram_gb: 8
+    min_disk_gb: 20
+    min_cores: 4
+    architecture: any  # ARM Macs supported via Tier 1 and 2
+  docker_full:
+    min_ram_gb: 16
+    min_disk_gb: 50
+    min_cores: 8
+    architecture: any
+
+steps:
+  # --- Path A: Docker Development (recommended for getting started) ---
+  - name: "[Docker] Initialize local overlay"
+    command: "make init-local"
+    description: Generate SSH keys and secret scaffold.
+    path: docker
+
+  - name: "[Docker] Start minimal environment"
+    command: "make docker-dev-up"
+    description: Start 4 containers simulating the critical-path VMs.
+    validation: "make docker-dev-verify"
+    path: docker
+
+  - name: "[Docker] Run convergence"
+    command: "make docker-dev-converge"
+    description: Run Ansible against Docker containers.
+    path: docker
+
+  # --- Path B: Bare Metal (for a real home server) ---
+  - name: "[Bare Metal] Install Debian 13"
+    manual: true
+    description: >
+      Install Debian 13 on your server. Use the official Debian installer
+      or your preferred method. Ensure SSH is enabled.
+    path: bare-metal
+
+  - name: "[Bare Metal] Run Proxmox bootstrap"
+    command: "make install-proxmox HOST=<SERVER_IP>"
+    description: Install Proxmox VE on the Debian 13 host.
+    path: bare-metal
+
+  - name: "[Bare Metal] Provision and converge"
+    command: "make provision-guests && make converge-site"
+    description: Create VMs and deploy all services.
+    path: bare-metal
+
+post_bootstrap:
+  - "Docker: Access services at https://localhost:8443"
+  - "Bare metal: Set up DNS or /etc/hosts entries for your domain"
+  - Both paths support incremental service deployment

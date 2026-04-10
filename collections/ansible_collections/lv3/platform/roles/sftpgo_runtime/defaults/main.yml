@@ -17,7 +17,7 @@ sftpgo_database_password_local_file: "{{ sftpgo_local_artifact_dir }}/database-p
 sftpgo_bootstrap_admin_username: lv3-sftpgo-admin
 sftpgo_bootstrap_admin_password_local_file: "{{ sftpgo_local_artifact_dir }}/bootstrap-admin-password.txt"
 sftpgo_oidc_admin_username: florin.badita
-sftpgo_oidc_admin_email: baditaflorin@gmail.com
+sftpgo_oidc_admin_email: "{{ platform_operator_email }}"
 sftpgo_oidc_admin_password_local_file: "{{ sftpgo_local_artifact_dir }}/florin.badita-password.txt"
 sftpgo_api_key_name: lv3-sftpgo-rest-provisioner
 sftpgo_api_key_local_file: "{{ sftpgo_local_artifact_dir }}/admin-api-key.txt"
@@ -32,7 +32,7 @@ sftpgo_smoke_user_quota_files: 100
 sftpgo_keycloak_client_id: sftpgo
 sftpgo_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/sftpgo-client-secret.txt"
 sftpgo_keycloak_config_url: >-
-  https://{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}/realms/lv3/.well-known/openid-configuration
+  https://{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration
 sftpgo_keycloak_username_field: preferred_username
 sftpgo_admin_port: "{{ hostvars[platform_topology_host].platform_port_assignments.sftpgo_admin_port }}"
 sftpgo_webdav_port: "{{ hostvars[platform_topology_host].platform_port_assignments.sftpgo_webdav_port }}"
@@ -48,7 +48,7 @@ sftpgo_public_hostname_overrides:
   - hostname: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak.public_hostname }}"
     address: "{{ sftpgo_public_edge_private_ip }}"
 sftpgo_event_subject: platform.sftpgo.events
-sftpgo_nats_host: 10.10.10.20
+sftpgo_nats_host: "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}"
 sftpgo_nats_port: 4222
 sftpgo_nats_username: jetstream-admin
 sftpgo_nats_password_local_file: "{{ repo_shared_local_root }}/nats/jetstream-admin-password.txt"

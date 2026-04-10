@@ -201,8 +201,6 @@ recover_vm_120() {
         /etc/lv3/n8n/owner-password.txt                   n8n/owner-password.txt \
         /etc/lv3/nextcloud/admin-password.txt             nextcloud/admin-password.txt \
         /etc/lv3/nextcloud/redis-password.txt             nextcloud/redis-password.txt \
-        /etc/lv3/open-webui/admin-password.txt            open-webui/admin-password.txt \
-        /etc/lv3/open-webui/webui-secret-key.txt          open-webui/webui-secret-key.txt \
         /etc/lv3/outline/secret-key.txt                   outline/secret-key.txt \
         /etc/lv3/outline/redis-password.txt               outline/redis-password.txt \
         /etc/lv3/outline/minio-root-password.txt          outline/minio-root-password.txt \

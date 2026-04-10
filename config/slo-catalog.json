@@ -215,16 +215,6 @@
       "description": "The edge reverse proxy remains reachable for published services."
     },
     {
-      "id": "open-webui-availability",
-      "service_id": "open_webui",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "http://10.10.10.20:8088",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "Open WebUI remains reachable on the private runtime network."
-    },
-    {
       "id": "one-api-availability",
       "service_id": "one_api",
       "indicator": "availability",

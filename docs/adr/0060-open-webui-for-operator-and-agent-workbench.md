@@ -1,6 +1,6 @@
 # ADR 0060: Open WebUI For Operator And Agent Workbench
 
-- Status: Accepted
+- Status: Deprecated
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.54.0
 - Implemented In Platform Version: 0.29.0

@@ -30,8 +30,8 @@
   gather_facts: false
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all.yml"
-    subdomain_fqdn: data.lv3.org
+    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
+    subdomain_fqdn: "data.{{ platform_domain }}"
 
   tasks:
     - name: Load controller defaults
@@ -61,7 +61,7 @@
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
           - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "data.lv3.org must exist in config/subdomain-catalog.json before live apply."
+        fail_msg: "data.{{ platform_domain }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:

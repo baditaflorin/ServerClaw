@@ -10,16 +10,12 @@ from typing import Any
 
 import yaml
 
+from validation_toolkit import require_mapping
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RULES_DIR = REPO_ROOT / "config" / "alertmanager" / "rules"
 ALLOWED_SEVERITIES = {"critical", "warning", "info"}
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be a mapping")
-    return value
 
 
 def load_rule_files(rules_dir: Path) -> list[tuple[Path, dict[str, Any]]]:

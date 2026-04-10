@@ -372,7 +372,7 @@ Change your password: https://sso.localhost/realms/lv3/account/
   Gitea    (source code)   https://gitea.localhost
   Outline  (docs/wiki)     https://outline.localhost
   Vikunja  (tasks)         https://vikunja.localhost
-  Open WebUI (AI)          https://chat.localhost
+  ServerClaw (AI)          https://chat.localhost
   Mattermost (chat)        https://mattermost.localhost
   Harbor (registry)        https://harbor.localhost
   Windmill (workflows)     https://windmill.localhost

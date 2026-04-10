@@ -1485,7 +1485,7 @@ _HOST_COMMAND_BLOCKED_PATTERNS: Final[list[str]] = [
     "userdel",
 ]
 
-_HOST_COMMAND_EXEC_IMAGE: Final[str] = "debian:bookworm-slim"
+_HOST_COMMAND_EXEC_IMAGE: Final[str] = "alpine:3.20"
 
 
 def _strip_docker_log_header(raw: bytes) -> str:
@@ -1507,15 +1507,57 @@ def _strip_docker_log_header(raw: bytes) -> str:
     return "".join(lines)
 
 
-def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
-    """Execute a shell command on the Docker host via a temporary container.
+_HOST_COMMAND_LOCAL_HOST: Final[str] = "runtime-control-lv3"
 
-    Uses the Docker Engine API to create a one-shot container with read-only
-    access to the host root filesystem (mounted at /host).  The container is
-    automatically removed after execution.
+
+def _shell_quote(s: str) -> str:
+    """Shell-quote a string for safe embedding in a bash -c argument."""
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
+# Mapping of friendly host names → (transport, detail).
+# transport "local"    → nsenter into host PID 1.
+# transport "ssh"      → SSH directly (only Proxmox host allows this from LAN).
+# transport "qm"       → SSH to Proxmox, then `qm guest exec <vmid>` (VMs block
+#                         inter-VM SSH via nftables; Proxmox API is the only path).
+_HOST_COMMAND_PROXMOX_IP: Final[str] = "10.10.10.1"
+
+_HOST_COMMAND_TARGETS: Final[dict[str, tuple[str, str]]] = {
+    "runtime-control-lv3": ("local", ""),
+    "proxmox":             ("ssh", "10.10.10.1"),
+    "postgres-lv3":        ("qm", "150"),
+    "docker-runtime-lv3":  ("qm", "120"),
+    "build-server":        ("qm", "130"),
+    "coolify-lv3":         ("qm", "170"),
+    "runtime-comms-lv3":   ("qm", "121"),
+}
+
+
+def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Execute a shell command directly on a platform host.
+
+    For local execution (runtime-control-lv3): uses nsenter via a privileged
+    temporary Docker container to run commands in the host's own namespaces —
+    full access to the host's binaries, systemctl, docker, journalctl, etc.
+
+    For remote hosts: SSH from the local host to the target via a privileged
+    container with the host's SSH keys mounted.
     """
     command = require_str(args.get("command"), "arguments.command")
     timeout_secs = require_int(args.get("timeout", 30), "arguments.timeout", minimum=1)
+    host = args.get("host", _HOST_COMMAND_LOCAL_HOST)
+    if not isinstance(host, str) or not host.strip():
+        host = _HOST_COMMAND_LOCAL_HOST
+
+    # Resolve host name
+    if host not in _HOST_COMMAND_TARGETS:
+        return {
+            "status": "error",
+            "command": command,
+            "exit_code": -1,
+            "stdout": "(error)",
+            "stderr": f"Unknown host '{host}'. Available: {', '.join(sorted(_HOST_COMMAND_TARGETS))}",
+            "host": host,
+        }
 
     # Safety filter — block obviously destructive patterns
     cmd_lower = command.lower()
@@ -1527,7 +1569,7 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
                 "exit_code": -1,
                 "stdout": "(blocked)",
                 "stderr": f"Command blocked by safety filter: contains '{pattern}'",
-                "host": "runtime-control-lv3",
+                "host": host,
             }
 
     if not _docker_socket_available():
@@ -1536,18 +1578,70 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
             f"{DOCKER_SOCKET_PATH}. Mount the Docker socket to enable this tool."
         )
 
-    # Create a temporary container with host root mounted read-only
+    transport, detail = _HOST_COMMAND_TARGETS[host]
+
+    _nsenter_prefix = [
+        "nsenter", "--target", "1",
+        "--mount", "--uts", "--ipc", "--net", "--pid", "--",
+    ]
+
+    if transport == "local":
+        # nsenter into host PID 1 namespaces — gives true host shell access
+        container_cmd = _nsenter_prefix + ["bash", "-c", command]
+
+    elif transport == "ssh":
+        # Direct SSH (only works for Proxmox host, which accepts SSH from LAN)
+        container_cmd = _nsenter_prefix + [
+            "ssh", "-o", "StrictHostKeyChecking=no",
+            "-o", "UserKnownHostsFile=/dev/null",
+            "-o", f"ConnectTimeout={min(timeout_secs, 10)}",
+            f"root@{detail}",
+            command,
+        ]
+
+    elif transport == "qm":
+        # SSH to Proxmox, then qm guest exec <vmid> to reach VMs.
+        # qm guest exec returns JSON — pipe through python3 on Proxmox to
+        # extract out-data/err-data and forward the exit code.
+        vmid = detail
+        # Build a shell command that runs on the Proxmox host:
+        #   qm guest exec <vmid> -- bash -c '<command>' | python3 -c '...'
+        qm_cmd = (
+            f"qm guest exec {vmid} -- bash -c {_shell_quote(command)}"
+            f" | python3 -c '"
+            f"import json,sys; d=json.load(sys.stdin);"
+            f" sys.stdout.write(d.get(\"out-data\",\"\"));"
+            f" sys.stderr.write(d.get(\"err-data\",\"\"));"
+            f" sys.exit(d.get(\"exitcode\",1))'"
+        )
+        container_cmd = _nsenter_prefix + [
+            "ssh", "-o", "StrictHostKeyChecking=no",
+            "-o", "UserKnownHostsFile=/dev/null",
+            "-o", f"ConnectTimeout={min(timeout_secs, 10)}",
+            f"root@{_HOST_COMMAND_PROXMOX_IP}",
+            qm_cmd,
+        ]
+
+    else:
+        return {
+            "status": "error",
+            "command": command,
+            "exit_code": -1,
+            "stdout": "(error)",
+            "stderr": f"Unknown transport '{transport}' for host '{host}'",
+            "host": host,
+        }
+
+    # Create a privileged temporary container with host PID namespace
     create_resp = _docker_socket_json("POST", "/containers/create", body={
         "Image": _HOST_COMMAND_EXEC_IMAGE,
-        "Cmd": ["bash", "-c", command],
+        "Cmd": container_cmd,
         "HostConfig": {
             "AutoRemove": False,
+            "Privileged": True,
             "NetworkMode": "host",
             "PidMode": "host",
-            "ReadonlyRootfs": False,
-            "Binds": ["/:/host:ro"],
         },
-        "WorkingDir": "/host",
         "Env": [
             "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
             "TERM=xterm",
@@ -1589,8 +1683,19 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
         "exit_code": exit_code,
         "stdout": output or "(empty)",
         "stderr": "(none)",
-        "host": "runtime-control-lv3",
+        "host": host,
     }
+
+
+def tool_get_disk_usage(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Query disk usage across platform VMs via the shared disk_metrics module."""
+    from disk_metrics import query_disk_usage
+
+    report = query_disk_usage(
+        repo_root=REPO_ROOT,
+        vm_filter=args.get("vm_filter"),
+    )
+    return report.to_dict()
 
 
 HANDLERS: Final[dict[str, Any]] = {
@@ -1631,6 +1736,7 @@ HANDLERS: Final[dict[str, Any]] = {
     "mempalace_wake_up": tool_mempalace_wake_up,
     "mempalace_status": tool_mempalace_status,
     "execute_host_command": tool_execute_host_command,
+    "get_disk_usage": tool_get_disk_usage,
 }
 
 

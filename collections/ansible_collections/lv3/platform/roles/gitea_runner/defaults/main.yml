@@ -18,7 +18,7 @@ gitea_runner_labels: self-hosted:host,linux:host,amd64:host,docker:docker
 gitea_runner_renovate_enabled: true
 gitea_runner_renovate_username: renovate-bot
 gitea_runner_renovate_password_local_file: "{{ repo_shared_local_root }}/gitea/renovate-password.txt"
-gitea_runner_renovate_repository: ops/proxmox_florin_server
+gitea_runner_renovate_repository: "{{ platform_gitea_org }}/{{ platform_repo_name }}"
 gitea_runner_renovate_token_scopes: write:repository,read:user,write:issue,read:organization
 gitea_runner_renovate_clone_host: "{{ gitea_runner_gitea_service_topology.public_hostname }}"
 gitea_runner_renovate_clone_host_address: 127.0.0.1

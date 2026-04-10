@@ -650,19 +650,16 @@
       "notes": "One-API persists channel definitions, consumer token metadata, quotas, and aggregate local LLM usage records in PostgreSQL so the proxy contract and audit trail survive restarts."
     },
     {
-      "id": "open-webui-workbench-state",
-      "service": "open_webui",
-      "name": "Open WebUI workbench state",
+      "name": "ServerClaw workbench state",
       "class": "confidential",
       "retention_days": 90,
       "backup_included": false,
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "/opt/open-webui/data",
         "http://100.64.0.1:8008"
       ],
-      "notes": "Open WebUI persists conversations, workspace artifacts, prompt history, and user-specific workbench settings in its local runtime data volume on docker-runtime-lv3."
+      "notes": "ServerClaw persists conversations, workspace artifacts, prompt history, and user-specific workbench settings in its local runtime data volume on docker-runtime-lv3."
     },
     {
       "id": "outline-attachment-storage",
@@ -878,7 +875,7 @@
         "/opt/serverclaw/data",
         "https://chat.lv3.org"
       ],
-      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its Open WebUI data volume on coolify-lv3."
+      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its ServerClaw data volume on coolify-lv3."
     },
     {
       "id": "tempo-traces",

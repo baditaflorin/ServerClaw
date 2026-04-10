@@ -39,7 +39,6 @@ def test_serverclaw_playbook_refreshes_host_network_runtime_and_edge() -> None:
     guest_roles = [role["role"] for role in playbook[3]["roles"]]
     assert guest_roles == [
         "lv3.platform.linux_guest_firewall",
-        "lv3.platform.open_webui_runtime",
     ]
 
     edge_roles = [role["role"] for role in playbook[4]["roles"]]

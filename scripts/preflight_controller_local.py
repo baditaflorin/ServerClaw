@@ -221,17 +221,18 @@ def run_workflow(secret_manifest: dict, catalog: dict, bootstrap_catalog: dict, 
     if not preflight["required"]:
         print("INFO no controller-local secret preflight required for this workflow")
 
-    for secret_id in preflight.get("required_secret_ids", []):
-        ok, message = check_secret(secret_id, secret_manifest["secrets"][secret_id])
-        print(message)
-        if not ok:
-            failed = True
-
-    for secret_id in preflight.get("blocked_secret_ids", []):
-        ok, message = check_secret(secret_id, secret_manifest["secrets"][secret_id])
-        print(message)
-        if not ok:
-            failed = True
+    all_secret_ids = list(preflight.get("required_secret_ids", [])) + list(preflight.get("blocked_secret_ids", []))
+    if all_secret_ids:
+        with ThreadPoolExecutor(max_workers=min(len(all_secret_ids), 8)) as pool:
+            futures = {
+                pool.submit(check_secret, secret_id, secret_manifest["secrets"][secret_id]): secret_id
+                for secret_id in all_secret_ids
+            }
+            for future in as_completed(futures):
+                ok, message = future.result()
+                print(message)
+                if not ok:
+                    failed = True
 
     health_checks = preflight.get("health_checks", [])
     if health_checks:

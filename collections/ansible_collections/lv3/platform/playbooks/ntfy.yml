@@ -1,7 +1,7 @@
 ---
 # Playbook: ntfy.yml
 # Purpose: Converge the repo-managed ntfy runtime, public DNS publication, and shared edge route for ADR 0299.
-# Use case: Run during ADR 0299 rollout, recovery, or replay when ntfy.lv3.org and its governed publisher contracts must match repo truth.
+# Use case: Run during ADR 0299 rollout, recovery, or replay when ntfy.{{ platform_domain }} and its governed publisher contracts must match repo truth.
 #
 # Inputs (required):
 #   - env (string, required): Target environment selector used to choose the docker-runtime and nginx guests.
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - ntfy is running on docker-runtime-lv3 with repo-managed auth, ntfy.lv3.org resolves through Hetzner DNS, and the shared NGINX edge publishes the public health endpoint.
+#   - ntfy is running on docker-runtime-lv3 with repo-managed auth, ntfy.{{ platform_domain }} resolves through Hetzner DNS, and the shared NGINX edge publishes the public health endpoint.
 #
 # Idempotency: Fully idempotent
 #
@@ -18,7 +18,7 @@
 #   - ADR 0299: ntfy as the self-hosted push notification channel for programmatic alert delivery.
 #   - Requires: the existing Docker runtime baseline on docker-runtime-lv3, linux_guest_firewall, nginx_edge_publication, and Hetzner DNS access for the public hostname.
 #   - Role: lv3.platform.ntfy_runtime - converges the ntfy runtime plus governed topic and credential contracts, including Docker publication self-heal during ntfy startup.
-#   - Role: lv3.platform.nginx_edge_publication - publishes ntfy.lv3.org through the shared edge certificate and proxy path.
+#   - Role: lv3.platform.nginx_edge_publication - publishes ntfy.{{ platform_domain }} through the shared edge certificate and proxy path.
 #
 # Related ADRs: 0068, 0077, 0087, 0095, 0204, 0276, 0280, 0299
 # Related Runbooks: docs/runbooks/configure-ntfy.md docs/runbooks/subdomain-governance.md
@@ -32,8 +32,8 @@
   gather_facts: false
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all.yml"
-    subdomain_fqdn: ntfy.lv3.org
+    inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
+    subdomain_fqdn: "ntfy.{{ platform_domain }}"
   tags:
     - tier-2
     - communication
@@ -67,7 +67,7 @@
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
           - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "ntfy.lv3.org must exist in config/subdomain-catalog.json before live apply."
+        fail_msg: "ntfy.{{ platform_domain }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:
@@ -159,7 +159,7 @@
   tasks:
     - name: Verify the ntfy public health endpoint responds
       ansible.builtin.uri:
-        url: https://ntfy.lv3.org/v1/health
+        url: "https://ntfy.{{ platform_domain }}/v1/health"
         method: GET
         status_code: 200
       register: ntfy_public_health

@@ -390,15 +390,6 @@
       "adr": "0284"
     },
     {
-      "id": "open_webui",
-      "service": "open_webui",
-      "name": "Open WebUI",
-      "vm": "docker-runtime-lv3",
-      "tier": 3,
-      "category": "automation",
-      "adr": "0060"
-    },
-    {
       "id": "one_api",
       "service": "one_api",
       "name": "One-API",
@@ -420,7 +411,7 @@
       "service": "librechat",
       "name": "LibreChat",
       "vm": "coolify-lv3",
-      "tier": 3,
+      "tier": 2,
       "category": "automation"
     },
     {
@@ -1254,34 +1245,29 @@
       "description": "Runtime-targeted batch jobs and internal helper workloads depend on the docker-runtime Nomad client remaining available for placement."
     },
     {
-      "from": "open_webui",
       "to": "keycloak",
       "type": "soft",
-      "description": "Open WebUI can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
+      "description": "ServerClaw can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
     },
     {
-      "from": "open_webui",
       "to": "one_api",
       "type": "hard",
-      "description": "Open WebUI uses the private One-API runtime for repo-managed local model access."
+      "description": "ServerClaw uses the private One-API runtime for repo-managed local model access."
     },
     {
-      "from": "open_webui",
       "to": "ollama",
       "type": "hard",
-      "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
+      "description": "ServerClaw routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
     },
     {
-      "from": "open_webui",
       "to": "openbao",
       "type": "startup_only",
-      "description": "Open WebUI consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
+      "description": "ServerClaw consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
     },
     {
-      "from": "open_webui",
       "to": "searxng",
       "type": "soft",
-      "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+      "description": "ServerClaw delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
     },
     {
       "from": "one_api",

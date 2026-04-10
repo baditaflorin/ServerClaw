@@ -68,10 +68,10 @@ groups:
         for: 15m
         labels:
           severity: warning
-          service: '{{ $labels.service }}'
+          service: '{% raw %}{{ $labels.service }}{% endraw %}'
         annotations:
-          summary: 'The {{ $labels.service }} certificate expires within 14 days.'
-          description: 'The earliest observed TLS certificate for {{ $labels.service }} is approaching expiry.'
+          summary: 'The {% raw %}{{ $labels.service }}{% endraw %} certificate expires within 14 days.'
+          description: 'The earliest observed TLS certificate for {% raw %}{{ $labels.service }}{% endraw %} is approaching expiry.'
           runbook_url: https://docs.{{ platform_domain }}/runbooks/cert-expired/
           dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-platform-overview/lv3-platform-overview
 
@@ -82,10 +82,10 @@ groups:
         for: 5m
         labels:
           severity: critical
-          service: '{{ $labels.service }}'
+          service: '{% raw %}{{ $labels.service }}{% endraw %}'
         annotations:
-          summary: 'The {{ $labels.service }} certificate expires within 4 hours.'
-          description: 'The short-lived TLS certificate for {{ $labels.service }} is expiring imminently. The renewal timer may have failed. Run make converge-openbao immediately.'
+          summary: 'The {% raw %}{{ $labels.service }}{% endraw %} certificate expires within 4 hours.'
+          description: 'The short-lived TLS certificate for {% raw %}{{ $labels.service }}{% endraw %} is expiring imminently. The renewal timer may have failed. Run make converge-openbao immediately.'
           runbook_url: https://docs.{{ platform_domain }}/runbooks/openbao-cert-renewal/
 
   - name: postgres-audit
@@ -101,8 +101,8 @@ groups:
           service: postgres
           component: pgaudit
         annotations:
-          summary: PostgreSQL privilege changes are spiking for {{ $labels.db_role }}.
-          description: The pgaudit pipeline on {{ $labels.host }} observed more than 10 ROLE-class audit events in five minutes for role {{ $labels.db_role }} against database {{ $labels.db }}.
+          summary: PostgreSQL privilege changes are spiking for {% raw %}{{ $labels.db_role }}{% endraw %}.
+          description: The pgaudit pipeline on {% raw %}{{ $labels.host }}{% endraw %} observed more than 10 ROLE-class audit events in five minutes for role {% raw %}{{ $labels.db_role }}{% endraw %} against database {% raw %}{{ $labels.db }}{% endraw %}.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/postgres-audit/
           dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
 
@@ -128,7 +128,7 @@ groups:
           component: pgaudit
         annotations:
           summary: PostgreSQL accepted a connection for an unapproved login role.
-          description: The PostgreSQL audit pipeline on {{ $labels.host }} observed an authorized connection for role {{ $labels.db_role }} against database {{ $labels.db }} outside the approved login-role catalog.
+          description: The PostgreSQL audit pipeline on {% raw %}{{ $labels.host }}{% endraw %} observed an authorized connection for role {% raw %}{{ $labels.db_role }}{% endraw %} against database {% raw %}{{ $labels.db }}{% endraw %} outside the approved login-role catalog.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/postgres-audit/
           dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
 

@@ -21,7 +21,7 @@ import yaml  # noqa: E402 — must come after sys.path adjustment
 from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_services.yml"
+REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
 IMAGE_CATALOG_PATH = REPO_ROOT / "config" / "image-catalog.json"
 ROLES_DIR = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles"
 

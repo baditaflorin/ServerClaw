@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-08'
+generated: '2026-04-10'
 facet: concern
 concern: networking
-total_adrs: 26
+total_adrs: 27
 adrs:
   - adr: '0015'
     title: lv3.org DNS And Subdomain Model
@@ -495,3 +495,25 @@ adrs:
     summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
     filename: 0364-native-build-server-gate-execution.md
     path: docs/adr/0364-native-build-server-gate-execution.md
+  - adr: 0391
+    title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: networking
+    keywords:
+      - automation
+      - cpu-only
+      - operational
+      - cli
+      - contracts
+      - deterministic
+      - eliminate
+      - ai
+      - from
+      - work
+    summary: A single entry point that answers operational questions by querying existing
+    filename: 0391-cpu-only-operational-automation.md
+    path: docs/adr/0391-cpu-only-operational-automation.md
+    implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'

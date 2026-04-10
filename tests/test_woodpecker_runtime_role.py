@@ -21,7 +21,7 @@ def test_woodpecker_runtime_defaults_bind_generated_topology_and_artifacts() -> 
     assert defaults["woodpecker_controller_url"] == "{{ woodpecker_service_topology.urls.controller }}"
     assert defaults["woodpecker_gitea_runtime_url"] == "{{ gitea_private_base_url }}"
     assert defaults["woodpecker_local_artifact_dir"].endswith("/.local/woodpecker")
-    assert defaults["woodpecker_seed_repo_full_name"] == "ops/proxmox_florin_server"
+    assert defaults["woodpecker_seed_repo_full_name"] == "ops/platform"
 
 
 def test_woodpecker_templates_export_gitea_oauth_and_agent_settings() -> None:

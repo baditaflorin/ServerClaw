@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T14:24:59Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "23e6f782b7686df7617e9e9a87c57d0bc83edc2e",
+  "waiver": {
+    "reason_code": "schema_migration_in_progress",
+    "reason_summary": "A structural schema change (new check, renamed lane, catalog format bump) is mid-flight and temporarily breaks the gate contract.",
+    "detail": "ADR document only, no code changes",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "ADR 0386 documents existing implementation from 0.178.70"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "docs/adr/0386-agent-cross-host-execution-and-mcp-tool-surface.md"
+  }
+}

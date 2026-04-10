@@ -1,11 +1,12 @@
 schema_version: 1.0.0
-repo_version: 0.178.66
-platform_version: 0.178.66
+repo_version: 0.178.77
+platform_version: 0.178.74
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-04-09-adr-0373-phase-4-alertmanager-runtime-migration-live-apply
+    platform: 2026-04-09-adr-0373-phases-5-6-100-percent-adoption-live-apply
+    monitoring: 2026-04-10-ioc-monitoring-convergence-validation-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
@@ -13,11 +14,13 @@ live_apply_evidence:
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-04-07-adr-0376-oauth2-stale-session-cookie-auto-clear-live-apply
+    public_edge_publication: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
+    headscale: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
+    vikunja: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     semaphore: 2026-04-08-ws-0362-semaphore-keycloak-oidc-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    identity_core_watchdog: 2026-04-06-adr-0376-identity-core-watchdog-live-apply
-    api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    identity_core_watchdog: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
+    api_gateway: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -63,12 +66,11 @@ live_apply_evidence:
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    keycloak: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     openfga: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply
     remote_build_gateway: 2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply
     iac_policy_scanning: 2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
@@ -146,7 +148,7 @@ live_apply_evidence:
     repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
     vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
     tesseract_ocr: 2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply
-    directus: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    directus: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     temporal: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
@@ -158,11 +160,11 @@ live_apply_evidence:
     k6_load_testing: 2026-03-31-adr-0305-k6-mainline-live-apply
     postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
     typesense: 2026-03-31-adr-0277-typesense-mainline-live-apply
-    superset: 2026-04-01-adr-0292-superset-mainline-live-apply
+    superset: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     one_api: 2026-04-01-adr-0294-one-api-mainline-live-apply
     keycloak_direct_api: 2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply
     journey_analytics: 2026-04-02-adr-0316-journey-analytics-mainline-live-apply
-    glitchtip: 2026-04-03-adr-0281-glitchtip-mainline-live-apply
+    glitchtip: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     command_palette: 2026-04-02-adr-0311-global-command-palette-mainline-live-apply
     database_schema: 2026-04-02-adr-0304-atlas-mainline-live-apply
     ntfy: 2026-04-03-adr-0299-ntfy-mainline-live-apply
@@ -855,7 +857,6 @@ observed_state:
     default_model_present: true
     startup_model_repulled_when_already_present: false
     one_api_connector_verified: true
-    open_webui_connector_verified: false
     generation_latency_ms:
       min: 2357.8
       avg: 3062.2
@@ -980,7 +981,6 @@ observed_state:
     bootstrap_verification_passed: true
     managed_channels_present: true
     approved_provider_envs_present: true
-  open_webui:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.64.0.1:8008
     container_running: true
@@ -1014,7 +1014,6 @@ observed_state:
     container_running: true
     json_search_verified: true
     limiter_config_managed: true
-    open_webui_integration_verified: true
   platform_context_api:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.64.0.1:8010

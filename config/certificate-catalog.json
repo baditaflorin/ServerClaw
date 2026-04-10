@@ -169,6 +169,31 @@
       }
     },
     {
+      "id": "browser-edge",
+      "service_id": "neko",
+      "status": "active",
+      "summary": "Dedicated certificate for browser.lv3.org (Neko remote desktop).",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "browser.lv3.org",
+        "port": 443,
+        "server_name": "browser.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3",
+        "notes": "Neko uses a dedicated NGINX server block with its own certificate, separate from the shared lv3-edge bundle."
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/browser.lv3.org/fullchain.pem"
+      }
+    },
+    {
       "id": "build-edge",
       "service_id": "docker_build",
       "status": "active",

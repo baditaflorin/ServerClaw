@@ -14,7 +14,7 @@ ntopng_interfaces:
   - vmbr10
   - vmbr0
 ntopng_local_networks:
-  - 10.10.10.0/24=vmbr10
-  - 100.64.0.0/10=tailscale
-ntopng_probe_target: 10.10.10.10
+  - "{{ platform_guest_network_cidr }}=vmbr10"
+  - "{{ platform_tailscale_network_cidr }}=tailscale"
+ntopng_probe_target: "{{ hostvars[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ansible_host }}"
 ntopng_operator_url: "{{ platform_service_topology | platform_service_url('ntopng', 'internal') }}"

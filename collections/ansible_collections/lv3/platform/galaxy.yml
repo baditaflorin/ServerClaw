@@ -14,9 +14,9 @@ tags:
   - platform
   - infrastructure
   - linux
-repository: https://github.com/live/proxmox_florin_server
-documentation: https://github.com/live/proxmox_florin_server/blob/main/docs/runbooks/ansible-collection-development.md
-homepage: https://github.com/live/proxmox_florin_server
-issues: https://github.com/live/proxmox_florin_server/issues
+repository: https://github.com/baditaflorin/proxmox_florin_server
+documentation: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/ansible-collection-development.md
+homepage: https://github.com/baditaflorin/proxmox_florin_server
+issues: https://github.com/baditaflorin/proxmox_florin_server/issues
 build_ignore:
   - molecule/.gitkeep

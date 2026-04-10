@@ -105,7 +105,7 @@ mail_platform_gateway_trace_otlp_endpoint: "{{ hostvars[platform_topology_host].
 mail_platform_gateway_sentry_dsn_local_file: "{{ repo_shared_local_root }}/glitchtip/mail-gateway.dsn"
 mail_platform_gateway_sentry_dsn: "{{ lookup('ansible.builtin.file', mail_platform_gateway_sentry_dsn_local_file, errors='ignore') | trim }}"
 mail_platform_gateway_sentry_environment: "{{ env | default('production') }}"
-mail_platform_gateway_sentry_release: "{{ lookup('ansible.builtin.file', (inventory_dir | dirname) ~ '/VERSION') | trim }}"
+mail_platform_gateway_sentry_release: "{{ lookup('ansible.builtin.file', repo_shared_root ~ '/VERSION') | trim }}"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated

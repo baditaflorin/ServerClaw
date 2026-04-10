@@ -90,7 +90,6 @@
       ]
     },
     {
-      "name": "open-webui",
       "status": 1,
       "expired_time": -1,
       "remain_quota": -1,
@@ -103,7 +102,6 @@
         "claude-opus-4-6",
         "claude-haiku-4-5-20251001"
       ],
-      "provider_env_path": ".local/open-webui/provider.env",
       "provider_base_url": "http://host.docker.internal:8101/v1"
     },
     {

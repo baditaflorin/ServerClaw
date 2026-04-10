@@ -727,7 +727,6 @@ class PlatformContextService:
             "platform_version": stack.get("platform_version"),
             "checked_at": checked_at,
             "proxmox_version": observed.get("proxmox", {}).get("version"),
-            "open_webui_url": observed.get("open_webui", {}).get("host_tailscale_proxy_url"),
             "windmill_url": observed.get("windmill", {}).get("host_tailscale_proxy_url"),
             "netbox_url": observed.get("netbox", {}).get("host_tailscale_proxy_url"),
         }
@@ -774,6 +773,15 @@ class PlatformContextService:
             validate_schema=False,
         )
         return compute_impact(service_id, graph).to_dict()
+
+    def disk_usage(self, vm_filter: list[str] | None = None) -> dict[str, Any]:
+        from disk_metrics import query_disk_usage
+
+        report = query_disk_usage(
+            repo_root=self.config.corpus_root,
+            vm_filter=vm_filter,
+        )
+        return report.to_dict()
 
 
 def load_yaml(path: Path) -> Any:
@@ -1010,6 +1018,13 @@ def command_contract(command_id: str, request: Request) -> dict[str, Any]:
 @app.get("/v1/platform/slos", dependencies=[Depends(require_auth)])
 def platform_slos() -> dict[str, Any]:
     return get_service().slo_status()
+
+
+@app.get("/v1/platform/disk-usage", dependencies=[Depends(require_auth)])
+def platform_disk_usage(
+    vm: list[str] | None = Query(default=None),
+) -> dict[str, Any]:
+    return get_service().disk_usage(vm_filter=vm)
 
 
 @app.post("/v1/context/query", dependencies=[Depends(require_auth)])

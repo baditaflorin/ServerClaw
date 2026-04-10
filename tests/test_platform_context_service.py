@@ -98,7 +98,7 @@ error_codes:
     )
     write(
         tmp_path / "versions" / "stack.yaml",
-        "platform_version: 1.2.3\nobserved_state:\n  checked_at: 2026-03-22\n  proxmox:\n    version: 9.1.6\n  monitoring:\n    prometheus_internal_url: http://100.118.189.95:9090\n  open_webui:\n    host_tailscale_proxy_url: http://100.118.189.95:8008\n  windmill:\n    host_tailscale_proxy_url: http://100.118.189.95:8005\n  netbox:\n    host_tailscale_proxy_url: http://100.118.189.95:8004\n",
+        "platform_version: 1.2.3\nobserved_state:\n  checked_at: 2026-03-22\n  proxmox:\n    version: 9.1.6\n  monitoring:\n    prometheus_internal_url: http://100.118.189.95:9090\n  windmill:\n    host_tailscale_proxy_url: http://100.118.189.95:8005\n  netbox:\n    host_tailscale_proxy_url: http://100.118.189.95:8004\n",
     )
     write(tmp_path / "VERSION", "1.2.3\n")
     write(tmp_path / "changelog.md", "# Changelog\n")

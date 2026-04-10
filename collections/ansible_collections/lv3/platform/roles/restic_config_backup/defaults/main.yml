@@ -26,7 +26,7 @@ restic_config_backup_controller_repo_common_root: >-
       | dirname
     )
   }}
-restic_config_backup_repo_checkout_host_path: /srv/proxmox_florin_server
+restic_config_backup_repo_checkout_host_path: "{{ platform_repo_checkout_path }}"
 restic_config_backup_controller_catalog_local_file: "{{ playbook_dir | dirname }}/config/restic-file-backup-catalog.json"
 restic_config_backup_catalog_repo_path: "{{ restic_config_backup_repo_checkout_host_path }}/config/restic-file-backup-catalog.json"
 restic_config_backup_backup_receipts_dir: "{{ restic_config_backup_repo_checkout_host_path }}/receipts/restic-backups"

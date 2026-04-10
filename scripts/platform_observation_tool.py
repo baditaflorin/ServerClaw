@@ -55,7 +55,6 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 DEFAULT_OUTPUT_DIR = repo_path(".local", "platform-observation", "latest")
-DEFAULT_DIGEST_PATH = repo_path(".local", "open-webui", "platform-findings-daily.md")
 
 
 RUNNER_VALUES = {"controller_local", "host_ssh", "guest_jump"}
@@ -1184,7 +1183,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--digest-path",
         default=str(DEFAULT_DIGEST_PATH),
-        help="Markdown digest path written for Open WebUI operator review.",
+        help="Markdown digest path written for operator review.",
     )
     parser.add_argument(
         "--publish-nats",

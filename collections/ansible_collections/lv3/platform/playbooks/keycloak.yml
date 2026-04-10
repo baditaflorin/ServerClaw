@@ -71,4 +71,4 @@
   roles:
     - role: lv3.platform.grafana_sso
       vars:
-        grafana_sso_client_secret: "{{ hostvars['docker-runtime-lv3'].keycloak_grafana_client_secret }}"
+        grafana_sso_client_secret: "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].keycloak_grafana_client_secret }}"

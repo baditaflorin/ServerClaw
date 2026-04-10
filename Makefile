@@ -71,6 +71,8 @@ COLLECTION_SERVER ?= internal_galaxy
 COLLECTION_INSTALL_PATH ?= $(REPO_ROOT)/build/collection-install
 COLLECTION_INSTALL_SOURCE ?= tarball
 CHECKS ?=
+# Fork operators: override this to point to your own container registry.
+# The check-runner images are built by `make build-check-runners`.
 CHECK_RUNNER_REGISTRY ?= registry.lv3.org/check-runner
 CHECK_RUNNER_ANSIBLE_TAG ?= 2.17.10
 CHECK_RUNNER_PYTHON_TAG ?= 3.12.10
@@ -93,8 +95,8 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-one-api syntax-check-piper syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw syntax-check-realtime collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
 .PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-one-api converge-piper converge-label-studio converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
-.PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
-.PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
+.PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
+.PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
 .PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
@@ -104,6 +106,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: syntax-check-matrix-synapse converge-matrix-synapse
 .PHONY: syntax-check-nextcloud converge-nextcloud
 .PHONY: syntax-check-nomad converge-nomad
+.PHONY: init-local bootstrap bootstrap-minimal verify-bootstrap-proxmox verify-bootstrap-guests verify-platform docker-dev-up docker-dev-up-full docker-dev-down docker-dev-verify docker-dev-converge docker-dev-reset generate-local-example
 
 prepare-run-namespace:
 	@$(RUN_ID_ENV) python3 $(REPO_ROOT)/scripts/run_namespace.py --repo-root "$(REPO_ROOT)" --ensure >/dev/null
@@ -122,7 +125,7 @@ push-local:
 	GATE_BYPASS_REASON_CODE=runner_image_pull_failure \
 	GATE_BYPASS_DETAIL="Docker registry registry.lv3.org not reachable from local machine" \
 	GATE_BYPASS_SUBSTITUTE_EVIDENCE="make validate-local passed; pre-commit hooks passed" \
-	GATE_BYPASS_REMEDIATION_REF="docs/adr/0382-convergence-speed-and-incremental-apply.md" \
+	GATE_BYPASS_REMEDIATION_REF="docs/adr/0392-convergence-speed-and-incremental-apply.md" \
 	GATE_BYPASS_OWNER="$$(git config user.name)" \
 	git push origin $$(git rev-parse --abbrev-ref HEAD)
 
@@ -170,6 +173,25 @@ validate-architecture-fitness:
 
 validate-interface-contracts:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --validate
+
+# ADR 0392 Phase 3.1 — Dry-run validation for config-only changes.
+# Runs only checks that work without ansible-playbook or Docker.
+# When ansible-playbook and uvx are available, add validate-yaml, validate-ansible-syntax,
+# validate-interface-contracts to this list.
+validate-integration:
+	@echo "=== Dry-run integration validation (ADR 0392) ==="
+	$(MAKE) validate-json
+	@echo "=== Dry-run validation passed — config is syntactically valid ==="
+
+# ADR 0392 Phase 2.2 — Parallel convergence across independent lanes
+# Usage: make parallel-converge playbooks="playbooks/services/a.yml playbooks/services/b.yml" env=production max_parallel=4
+max_parallel ?= 4
+parallel-converge:
+	@echo "=== Parallel convergence (ADR 0392 Phase 2.2) ==="
+	python3 $(REPO_ROOT)/scripts/ansible_scope_runner.py parallel-run \
+		--playbooks $(playbooks) \
+		--env $(env) \
+		--max-parallel $(max_parallel)
 
 install-hooks:
 	mkdir -p "$$(git rev-parse --git-path hooks)"
@@ -1406,6 +1428,9 @@ capacity-report:
 weekly-capacity-report:
 	uv run --with pyyaml python $(REPO_ROOT)/config/windmill/scripts/weekly-capacity-report.py --repo-path $(REPO_ROOT) $(if $(filter true,$(NO_LIVE_METRICS)),--no-live-metrics,)
 
+disk-space-monitor:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/disk_metrics.py $(if $(JSON),--json,) $(if $(VM),--vm $(VM),) $(if $(THRESHOLD),--threshold $(THRESHOLD),)
+
 k6-smoke:
 	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/k6_load_testing.py --repo-root $(REPO_ROOT) --scenario smoke $(K6_ARGS)
 
@@ -1595,3 +1620,120 @@ provision-adr-governance-dry-run:
 		-i $(ANSIBLE_INVENTORY) \
 		-e "plane_admin_bootstrap_token=$(PLANE_ADMIN_TOKEN)" \
 		--check
+
+# =============================================================================
+# Bootstrap — ADR 0386
+# =============================================================================
+
+init-local: ## Initialize .local/ overlay with SSH keys and secrets
+	@if [ "$(FORCE)" = "true" ]; then \
+		python3 $(REPO_ROOT)/scripts/init_local_overlay.py --force; \
+	else \
+		python3 $(REPO_ROOT)/scripts/init_local_overlay.py; \
+	fi
+
+generate-local-example: ## Regenerate local-overlay-template/ scaffold from secret manifest
+	python3 $(REPO_ROOT)/scripts/init_local_overlay.py --generate-example
+
+bootstrap: ## Full platform bootstrap from bare Debian 13 (ADR 0386)
+	@echo "=== Stage 1: Local overlay initialization ==="
+	@if [ ! -d "$(LOCAL_OVERLAY_ROOT)" ]; then \
+		$(MAKE) init-local; \
+	else \
+		echo "  .local/ exists — skipping init (use FORCE=true to regenerate missing files)"; \
+	fi
+	@echo ""
+	@echo "=== Stage 2: Proxmox VE installation ==="
+	$(MAKE) install-proxmox
+	$(MAKE) verify-bootstrap-proxmox
+	@echo ""
+	@echo "=== Stage 3: Network and access ==="
+	$(MAKE) configure-network
+	$(MAKE) harden-access
+	@echo ""
+	@echo "=== Stage 4: Guest provisioning ==="
+	$(MAKE) provision-guests
+	$(MAKE) verify-bootstrap-guests
+	@echo ""
+	@echo "=== Stage 5: Platform convergence ==="
+	$(MAKE) converge-site
+	$(MAKE) verify-platform
+	@echo ""
+	@echo "=== Bootstrap complete ==="
+
+bootstrap-minimal: ## Bootstrap critical path only (PG + Keycloak + Nginx + OpenBao)
+	@echo "=== Minimal bootstrap: critical path only ==="
+	@if [ ! -d "$(LOCAL_OVERLAY_ROOT)" ]; then \
+		$(MAKE) init-local; \
+	else \
+		echo "  .local/ exists — skipping init"; \
+	fi
+	$(MAKE) install-proxmox
+	$(MAKE) verify-bootstrap-proxmox
+	$(MAKE) configure-network
+	$(MAKE) provision-guests
+	$(MAKE) verify-bootstrap-guests
+	$(MAKE) converge-postgres-vm
+	$(MAKE) converge-keycloak
+	$(MAKE) converge-openbao
+	$(MAKE) converge-api-gateway
+	@echo ""
+	@echo "=== Minimal bootstrap complete (PG, Keycloak, OpenBao, API Gateway) ==="
+
+verify-bootstrap-proxmox: ## Verify Proxmox VE is installed and operational
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-proxmox.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+
+verify-bootstrap-guests: ## Verify all guest VMs are reachable
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-guests.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+
+verify-platform: ## Verify critical platform services are healthy
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-platform.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+
+converge-site: ## Full site convergence (all services)
+	$(MAKE) preflight WORKFLOW=converge-site
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/collections/ansible_collections/lv3/platform/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) $(EXTRA_ARGS)
+
+# =============================================================================
+# Docker Development Environment — ADR 0387
+# =============================================================================
+
+docker-dev-up: ## Start minimal Docker dev environment (Tier 1)
+	@test -f "$(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub" || (echo "Run 'make init-local' first to generate SSH keys"; exit 1)
+	docker compose -f $(REPO_ROOT)/docker-dev/minimal/docker-compose.yml up -d --build
+	@echo "Waiting for containers to initialize..."
+	@sleep 5
+	$(MAKE) docker-dev-verify
+
+docker-dev-up-full: ## Start full-topology Docker dev environment (Tier 2)
+	@test -f "$(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub" || (echo "Run 'make init-local' first to generate SSH keys"; exit 1)
+	docker compose -f $(REPO_ROOT)/docker-dev/full/docker-compose.yml up -d --build
+	@echo "Waiting for containers to initialize..."
+	@sleep 5
+	$(MAKE) docker-dev-verify
+
+docker-dev-down: ## Stop Docker dev environment
+	docker compose -f $(REPO_ROOT)/docker-dev/minimal/docker-compose.yml down 2>/dev/null || true
+	docker compose -f $(REPO_ROOT)/docker-dev/full/docker-compose.yml down 2>/dev/null || true
+
+docker-dev-verify: ## Verify Docker dev containers are SSH-reachable
+	@echo "Checking SSH access to containers..."
+	@for host in 10.10.10.10 10.10.10.50 10.10.10.92; do \
+		if ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 \
+			-i $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519 ops@$$host "echo OK" 2>/dev/null; then \
+			echo "  OK $$host"; \
+		else \
+			echo "  FAIL $$host"; \
+		fi; \
+	done
+
+docker-dev-converge: ## Run Ansible convergence against Docker dev containers
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) \
+		-i $(REPO_ROOT)/inventory/hosts-docker.yml \
+		$(REPO_ROOT)/collections/ansible_collections/lv3/platform/playbooks/site.yml \
+		--private-key $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519 \
+		$(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+docker-dev-reset: ## Destroy and recreate Docker dev environment
+	$(MAKE) docker-dev-down
+	docker volume ls -q --filter name=serverclaw | xargs -r docker volume rm 2>/dev/null || true
+	$(MAKE) docker-dev-up

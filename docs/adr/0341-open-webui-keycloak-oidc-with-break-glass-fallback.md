@@ -1,6 +1,6 @@
 # ADR 0341: Open WebUI Keycloak OIDC With Break-Glass Fallback
 
-- Status: Accepted
+- Status: Deprecated
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.178.3
 - Implemented In Platform Version: 0.130.98

@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-08'
+generated: '2026-04-10'
 facet: concern
 concern: automation
-total_adrs: 28
+total_adrs: 29
 adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
@@ -518,3 +518,24 @@ adrs:
       .lv3.org.
     filename: 0381-login-service-contracts-and-session-recovery-automation.md
     path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+  - adr: 0389
+    title: Standard Procedure for Decommissioning a Platform Service
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - lifecycle
+      - decommissioning
+      - automation
+      - scripts
+      - procedures
+      - standard
+      - procedure
+      - platform
+      - service
+    summary: 1. Create the decommissioning ADR — records why the service is being
+    filename: 0389-service-decommissioning-procedure.md
+    path: docs/adr/0389-service-decommissioning-procedure.md
+    implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'

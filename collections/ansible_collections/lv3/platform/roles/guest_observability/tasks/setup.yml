@@ -93,3 +93,12 @@
     mode: "0640"
   no_log: true
   notify: Restart Telegraf
+
+- name: Deploy base system-level Telegraf inputs (disk, cpu, mem, net)
+  ansible.builtin.template:
+    src: telegraf-base-inputs.conf.j2
+    dest: "{{ guest_observability_base_inputs_config_file }}"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  notify: Restart Telegraf

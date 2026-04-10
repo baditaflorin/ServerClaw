@@ -589,7 +589,6 @@ validate_health_probes() {
     ntfy_runtime
     uptime_kuma_runtime
     netbox_runtime
-    open_webui_runtime
     portainer_runtime
     vaultwarden_runtime
     proxmox_ntopng

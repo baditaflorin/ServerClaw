@@ -1,0 +1,84 @@
+---
+# Verify Proxmox VE bootstrap succeeded — ADR 0386
+#
+# Checks that the Proxmox host is in the expected post-install state
+# before proceeding to guest provisioning.
+#
+# Usage:
+#   make verify-bootstrap-proxmox
+#   ansible-playbook -i inventory/hosts.yml playbooks/verify-bootstrap-proxmox.yml
+
+- name: Verify Proxmox bootstrap
+  hosts: "{{ playbook_execution_host_patterns['proxmox_hosts'][playbook_execution_env] }}"
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Verify Debian version
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_major_version | int >= 13
+        fail_msg: "Expected Debian 13+, got {{ ansible_distribution }} {{ ansible_distribution_version }}"
+        success_msg: "OS: Debian {{ ansible_distribution_version }}"
+
+    - name: Check Proxmox VE packages installed
+      ansible.builtin.command: dpkg -l pve-manager
+      register: pve_check
+      changed_when: false
+      failed_when: pve_check.rc != 0
+
+    - name: Verify Proxmox API is accessible
+      ansible.builtin.uri:
+        url: "https://127.0.0.1:8006/api2/json/version"
+        validate_certs: false
+        method: GET
+        status_code: 200
+      register: pve_api
+
+    - name: Report Proxmox version
+      ansible.builtin.debug:
+        msg: "Proxmox VE {{ pve_api.json.data.version }} ({{ pve_api.json.data.release }})"
+
+    - name: Verify ops user exists
+      ansible.builtin.command: id ops
+      register: ops_user
+      changed_when: false
+      failed_when: ops_user.rc != 0
+
+    - name: Verify SSH is running
+      ansible.builtin.service_facts:
+
+    - name: Assert SSH service is running
+      ansible.builtin.assert:
+        that:
+          - "'ssh.service' in ansible_facts.services or 'sshd.service' in ansible_facts.services"
+        fail_msg: "SSH service not found in running services"
+        success_msg: "SSH service is running"
+
+    - name: Verify kernel supports KVM
+      ansible.builtin.stat:
+        path: /dev/kvm
+      register: kvm_dev
+
+    - name: Assert KVM available
+      ansible.builtin.assert:
+        that: kvm_dev.stat.exists
+        fail_msg: "/dev/kvm not found — nested virtualization may not work"
+        success_msg: "KVM device available"
+
+    - name: Check storage pools
+      ansible.builtin.command: pvesm status
+      register: storage_pools
+      changed_when: false
+
+    - name: Report storage pools
+      ansible.builtin.debug:
+        msg: "{{ storage_pools.stdout_lines }}"
+
+    - name: Bootstrap verification passed
+      ansible.builtin.debug:
+        msg: >-
+          Proxmox bootstrap verified successfully.
+          PVE {{ pve_api.json.data.version }},
+          {{ storage_pools.stdout_lines | length - 1 }} storage pool(s),
+          ops user present, SSH running, KVM available.

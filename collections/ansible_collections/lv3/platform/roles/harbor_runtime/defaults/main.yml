@@ -25,16 +25,20 @@
 #   - Role: harbor_runtime — converges the Harbor stack and verification flow.
 #
 # Related ADRs: 0165, 0201
+harbor_site_dir: /opt/harbor
+harbor_data_dir: /opt/harbor/data
+harbor_secret_dir: /etc/lv3/harbor
+harbor_local_artifact_dir: "{{ repo_shared_local_root }}/harbor"
 harbor_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology.harbor }}"
 harbor_public_hostname: "{{ harbor_service_topology.public_hostname }}"
 harbor_public_base_url: "https://{{ harbor_public_hostname }}"
-harbor_installer_root: "{{ harbor_site_dir }}/installer"
-harbor_installer_dir: "{{ harbor_installer_root }}/harbor"
+harbor_installer_root: /opt/harbor/installer
+harbor_installer_dir: /opt/harbor/installer/harbor
 harbor_installer_version: 2.15.0
-harbor_installer_archive: "{{ harbor_site_dir }}/harbor-online-installer-v{{ harbor_installer_version }}.tgz"
+harbor_installer_archive: "/opt/harbor/harbor-online-installer-v{{ harbor_installer_version }}.tgz"
 harbor_installer_url: "https://github.com/goharbor/harbor/releases/download/v{{ harbor_installer_version }}/harbor-online-installer-v{{ harbor_installer_version }}.tgz"
-harbor_config_file: "{{ harbor_installer_dir }}/harbor.yml"
-harbor_generated_compose_file: "{{ harbor_installer_dir }}/docker-compose.yml"
+harbor_config_file: "/opt/harbor/installer/harbor/harbor.yml"
+harbor_generated_compose_file: "/opt/harbor/installer/harbor/docker-compose.yml"
 harbor_compose_project_name: harbor
 harbor_compose_network_name: "{{ harbor_compose_project_name }}_harbor"
 harbor_log_dir: /var/log/harbor
@@ -56,6 +60,7 @@ harbor_keycloak_bootstrap_admin_password_remote_file: /etc/lv3/keycloak/bootstra
 harbor_keycloak_admin_group: harbor-admins
 harbor_keycloak_client_id: harbor
 harbor_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/harbor-client-secret.txt"
+harbor_keycloak_client_secret: ""
 harbor_oidc_provider_name: Keycloak
 harbor_oidc_scope: openid,profile,email,groups
 harbor_oidc_user_claim: preferred_username

@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-08'
+generated: '2026-04-10'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 333
+total_adrs: 336
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -680,7 +680,7 @@ adrs:
     implemented_on: '2026-03-22'
   - adr: '0060'
     title: Open WebUI For Operator And Agent Workbench
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-03-22'
     concern: agent-discovery
@@ -5888,7 +5888,7 @@ adrs:
     implemented_on: '2026-04-03'
   - adr: '0341'
     title: Open WebUI Keycloak OIDC With Break-Glass Fallback
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-04-03'
     concern: security
@@ -6169,7 +6169,7 @@ adrs:
     implemented_on: '2026-04-06'
   - adr: 0378
     title: ServerClaw Tool Surface In Open WebUI
-    status: Proposed
+    status: Deprecated
     implementation_status: Implemented
     date: '2026-04-06'
     concern: platform
@@ -6182,3 +6182,67 @@ adrs:
     summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
     filename: 0378-serverclaw-tool-surface-in-open-webui.md
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+  - adr: 0389
+    title: Standard Procedure for Decommissioning a Platform Service
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: automation
+    keywords:
+      - lifecycle
+      - decommissioning
+      - automation
+      - scripts
+      - procedures
+      - standard
+      - procedure
+      - platform
+      - service
+    summary: 1. Create the decommissioning ADR — records why the service is being
+    filename: 0389-service-decommissioning-procedure.md
+    path: docs/adr/0389-service-decommissioning-procedure.md
+    implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'
+  - adr: 0390
+    title: Remove Open WebUI from the Platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: platform
+    keywords:
+      - lifecycle
+      - decommissioning
+      - open-webui
+      - removal
+      - remove
+      - open
+      - webui
+      - from
+      - platform
+    summary: Remove Open WebUI from the platform following ADR 0389's phased procedure.
+    filename: 0390-remove-open-webui.md
+    path: docs/adr/0390-remove-open-webui.md
+    implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'
+  - adr: 0391
+    title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-10'
+    concern: networking
+    keywords:
+      - automation
+      - cpu-only
+      - operational
+      - cli
+      - contracts
+      - deterministic
+      - eliminate
+      - ai
+      - from
+      - work
+    summary: A single entry point that answers operational questions by querying existing
+    filename: 0391-cpu-only-operational-automation.md
+    path: docs/adr/0391-cpu-only-operational-automation.md
+    implemented_in_repo_version: 0.178.79
+    implemented_on: '2026-04-10'

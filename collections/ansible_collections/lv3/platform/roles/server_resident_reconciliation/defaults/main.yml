@@ -3,13 +3,13 @@ server_resident_reconciliation_enabled: true
 server_resident_reconciliation_bootstrap_gitea_access: false
 server_resident_reconciliation_gitea_base_url: "{{ gitea_controller_url }}"
 server_resident_reconciliation_repo_owner: ops
-server_resident_reconciliation_repo_name: proxmox_florin_server
+server_resident_reconciliation_repo_name: "{{ platform_repo_name }}"
 server_resident_reconciliation_repo_branch: main
 server_resident_reconciliation_repo_url: >-
   {{ server_resident_reconciliation_gitea_base_url }}/{{ server_resident_reconciliation_repo_owner }}/{{ server_resident_reconciliation_repo_name }}.git
-server_resident_reconciliation_inventory_host: proxmox_florin
+server_resident_reconciliation_inventory_host: "{{ platform_topology_host }}"
 server_resident_reconciliation_playbook_path: playbooks/server-resident-reconciliation.yml
-server_resident_reconciliation_checkout_path: /srv/proxmox_florin_server
+server_resident_reconciliation_checkout_path: "{{ platform_repo_checkout_path }}"
 server_resident_reconciliation_runtime_root: /var/lib/lv3/server-resident-reconciliation
 server_resident_reconciliation_inventory_path: "{{ server_resident_reconciliation_runtime_root }}/ansible-pull-inventory.yml"
 server_resident_reconciliation_receipts_dir: "{{ server_resident_reconciliation_runtime_root }}/receipts"

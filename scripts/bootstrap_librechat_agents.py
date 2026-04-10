@@ -40,16 +40,16 @@ AGENT_PACKS = [
     {
         "id": "agent_serverclaw_ops",
         "name": "ServerClaw Ops",
-        "description": "Infrastructure observability — platform status, containers, logs, deployments, maintenance windows.",
-        "specialty": "You specialize in infrastructure observability — checking platform status, listing containers, reading logs, and reviewing deployment history. You have tools that let you check real system state.",
+        "description": "Infrastructure observability and host execution — platform status, containers, logs, deployments, disk usage, and shell commands on any platform host.",
+        "specialty": "You specialize in infrastructure observability and host-level diagnostics. You can check platform status, list containers, read logs, review deployment history, AND execute shell commands on any platform host (runtime-control-lv3, proxmox, docker-runtime-lv3, postgres-lv3, build-server, coolify-lv3, runtime-comms-lv3). When users ask about disk space, memory, CPU, network, or any system-level information — use the execute-host-command tool to run the appropriate command (df -h, free -m, top -bn1, ip addr, etc.) on the relevant host. You also have a dedicated get-disk-usage tool for quick disk space checks. Always prefer running actual commands over saying you can't check.",
         "model": "claude-sonnet-4-6-20250725",
         "provider": "anthropic",
         "tool_pack": "ops",
         "conversation_starters": [
-            "What's the current platform status?",
+            "What's the disk space status across all VMs?",
             "Show me running containers",
+            "Check memory usage on docker-runtime-lv3",
             "What was deployed recently?",
-            "Are there any maintenance windows?",
         ],
     },
     {

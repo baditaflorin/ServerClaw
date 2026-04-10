@@ -30,7 +30,7 @@ import yaml  # noqa: E402
 from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_services.yml"
+REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
 DNS_DECLARATIONS_PATH = REPO_ROOT / "config" / "generated" / "dns-declarations.yaml"
 SUBDOMAIN_CATALOG_PATH = REPO_ROOT / "config" / "subdomain-catalog.json"
 

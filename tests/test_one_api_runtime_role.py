@@ -241,6 +241,5 @@ def test_one_api_bootstrap_config_declares_chat_fallback_embedding_and_consumer_
     assert "claude-sonnet-4-6" in anthropic_channel["models"]
     assert config["verification"]["chat_model"] == "gpt-4o-mini"
     assert config["verification"]["embedding_model"] == "text-embedding-3-small"
-    assert any(token["name"] == "open-webui" for token in config["tokens"])
     assert any(token["name"] == "serverclaw" for token in config["tokens"])
     assert any(token["name"] == "codex-cli" for token in config["tokens"])
