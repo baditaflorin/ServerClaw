@@ -508,6 +508,12 @@ validate-generated-portals:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --check
 	$(MAKE) docs
 
+reconcile-portals: ## Regenerate all portal artifacts from canonical catalogs
+	python3 -m scripts.reconciliation.cli reconcile-all
+
+check-portal-drift: ## Check if any portal artifacts are stale
+	python3 -m scripts.reconciliation.cli check-drift
+
 receipts:
 	$(REPO_ROOT)/scripts/live_apply_receipts.py --list
 
