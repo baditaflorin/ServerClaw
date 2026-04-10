@@ -11,7 +11,7 @@
 
   pre_tasks:
     - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
+      ansible.builtin.import_tasks: ../tasks/preflight.yml
       vars:
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
