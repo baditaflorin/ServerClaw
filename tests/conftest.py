@@ -11,9 +11,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 SCRIPTS_DIR = REPO_ROOT / "scripts"
+TESTS_DIR = REPO_ROOT / "tests"
 PLATFORM_PACKAGE_DIR = REPO_ROOT / "platform"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
+if str(TESTS_DIR) not in sys.path:
+    sys.path.insert(0, str(TESTS_DIR))
 
 if PLATFORM_PACKAGE_DIR.exists():
     sys.modules.pop("platform", None)

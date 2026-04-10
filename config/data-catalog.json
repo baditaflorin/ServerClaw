@@ -621,6 +621,8 @@
       "notes": "Temporal persists workflow event history, timers, and visibility records for the repo-managed `lv3` namespace using the declared retention window."
     },
     {
+      "id": "serverclaw-workbench-state",
+      "service": "serverclaw",
       "name": "ServerClaw workbench state",
       "class": "confidential",
       "retention_days": 90,

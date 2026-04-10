@@ -572,7 +572,7 @@
       "service": "serverclaw",
       "name": "ServerClaw",
       "vm": "coolify-lv3",
-      "tier": 3,
+      "tier": 2,
       "category": "access",
       "adr": "0254"
     },
@@ -1216,26 +1216,6 @@
       "to": "docker_runtime",
       "type": "soft",
       "description": "Runtime-targeted batch jobs and internal helper workloads depend on the docker-runtime Nomad client remaining available for placement."
-    },
-    {
-      "to": "keycloak",
-      "type": "soft",
-      "description": "ServerClaw can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
-    },
-    {
-      "to": "ollama",
-      "type": "hard",
-      "description": "ServerClaw routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
-    },
-    {
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "ServerClaw consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
-    },
-    {
-      "to": "searxng",
-      "type": "soft",
-      "description": "ServerClaw delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
     },
     {
       "from": "litellm",
