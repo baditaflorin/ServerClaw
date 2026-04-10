@@ -20,4 +20,3 @@ minio_openbao_secret_path: minio/data/root
 minio_openbao_policy_name: minio-runtime
 minio_openbao_approle_name: minio-runtime
 minio_container_name: minio
-minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"

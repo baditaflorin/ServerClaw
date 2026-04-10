@@ -20,4 +20,3 @@ keycloak_openbao_secret_path: keycloak/data/root
 keycloak_openbao_policy_name: keycloak-runtime
 keycloak_openbao_approle_name: keycloak-runtime
 keycloak_container_name: keycloak
-keycloak_image: "{{ container_image_catalog.images.keycloak_runtime.ref }}"
