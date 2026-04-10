@@ -193,6 +193,11 @@ parallel-converge:
 		--env $(env) \
 		--max-parallel $(max_parallel)
 
+# ADR 0399 — Dummy target for portal-health-sweep Windmill workflow (validator compatibility)
+portal-health-sweep:
+	@echo "portal-health-sweep is a Windmill workflow, not a Make target"
+	exit 0
+
 # ADR 0392 — Timed convergence wrapper (records timing receipts to receipts/convergence-timing/)
 # Usage: make time-converge service=api-gateway env=production
 # Usage: make time-converge service=api-gateway env=production capture_summary=1
