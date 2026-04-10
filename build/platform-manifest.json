@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.90",
+  "repo_version": "0.178.91",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T11:07:33Z",
-  "next_refresh_at": "2026-04-10T12:07:33Z",
+  "generated_at": "2026-04-10T11:09:52Z",
+  "next_refresh_at": "2026-04-10T12:09:52Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -706,18 +706,6 @@
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
         "last_live_apply": "2026-04-05T00:00:00Z"
-      },
-      "realtime": {
-        "service_name": "Netdata Realtime Metrics",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
-        "source": "repo_evidence",
-        "reason": "Repository evidence is complete enough for normal automation.",
-        "lifecycle_status": "active",
-        "primary_url": "https://realtime.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
-        "slo_status": "unknown"
       },
       "redpanda": {
         "service_name": "Redpanda",
@@ -2734,32 +2722,6 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/rag-platform-context.md"
-      },
-      {
-        "id": "converge-realtime",
-        "description": "Converge the Netdata parent-plus-children realtime metrics surface across monitoring-lv3, the Proxmox host, and the managed guest nodes, then publish realtime.lv3.org through the shared authenticated edge.",
-        "tags": [
-          "converge-realtime",
-          "host-and-guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "host_and_guest_live",
-        "budget": {
-          "max_duration_seconds": 1800,
-          "max_steps": 350,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 5,
-          "max_restarts": 0,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/configure-netdata.md"
       },
       {
         "id": "converge-redpanda",
@@ -5391,16 +5353,6 @@
         ]
       },
       {
-        "id": "configure-netdata",
-        "title": "Configure Netdata",
-        "agent_trust_required": "T3",
-        "steps": 0,
-        "path": "docs/runbooks/configure-netdata.md",
-        "workflow_ids": [
-          "converge-realtime"
-        ]
-      },
-      {
         "id": "configure-nextcloud",
         "title": "Configure Nextcloud",
         "agent_trust_required": "T3",
@@ -6308,10 +6260,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.89",
+    "last_version": "0.178.90",
     "deployed_at": "2026-04-10",
-    "summary": "[adr-0396] Deterministic service decommissioning \u2014 comprehensive CATALOG_REGISTRY covering 15 catalog types (7 handler strategies: array/dict_key/dict_key_by_value/workflow_dict/dep_graph/partitions/yaml_dict_key), YAML block markers in generated SLO Prometheus files (generate_slo_config.py, 44 services), decommission-preview subcommand in platform_ops.py, fixed dual-format ADR deprecation; reduces AI-required decommission work to zero ADR 0394 + 0395: LibreChat Agents API integration plan and provider-agnostic agent abstraction layer \u2014 programmatic agent access via OpenAI-compatible and Open Responses endpoints, decoupled DTOs with AgentProvider ABC for runtime swappability",
-    "release_notes_url": "docs/release-notes/0.178.90.md"
+    "summary": "[adr-0399] Platform reconciliation daemon proposed (ADR 0399) \u2014 continuous portal regeneration via Windmill cron + health sweep, OpenClaw-inspired heartbeat/cron dual model; homepage text selectability CSS fix (ADR 0400) [adr-0392] Convergence timing infrastructure \u2014 convergence_timer.py + `make time-converge` records timing receipts to receipts/convergence-timing/; report/trend subcommands for drift detection; baselines: api-gateway 772s, windmill 1257s",
+    "release_notes_url": "docs/release-notes/0.178.91.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6385,7 +6337,7 @@
     },
     {
       "adr": "0399",
-      "title": "ADR 0394: Platform Reconciliation Daemon \u2014 Continuous Portal and Artifact Regeneration",
+      "title": "Platform Reconciliation Daemon \u2014 Continuous Portal and Artifact Regeneration",
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0399-platform-reconciliation-daemon.md"
