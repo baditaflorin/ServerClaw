@@ -1,0 +1,23 @@
+---
+service_audit_name: keycloak
+service_runtime_roles:
+  - lv3.platform.linux_guest_firewall
+  - lv3.platform.docker_runtime
+  - lv3.platform.keycloak_runtime
+service_needs_dns: true
+service_needs_postgres: true
+service_needs_nginx_edge: true
+
+# ADR 0373: Conventional service variables derived from platform_service_registry
+keycloak_site_dir: /opt/keycloak
+keycloak_data_dir: /opt/keycloak/data
+keycloak_secret_dir: /etc/lv3/keycloak
+keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
+keycloak_compose_file: "{{ keycloak_site_dir }}/docker-compose.yml"
+keycloak_env_file: "{{ keycloak_site_dir }}/keycloak.env"
+keycloak_openbao_agent_dir: "{{ keycloak_site_dir }}/openbao-agent"
+keycloak_openbao_secret_path: keycloak/data/root
+keycloak_openbao_policy_name: keycloak-runtime
+keycloak_openbao_approle_name: keycloak-runtime
+keycloak_container_name: keycloak
+keycloak_image: "{{ container_image_catalog.images.keycloak_runtime.ref }}"
