@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.85",
+  "repo_version": "0.178.86",
   "platform_version": "0.178.74",
-  "generated_at": "2026-04-10T03:53:16Z",
-  "next_refresh_at": "2026-04-10T04:53:16Z",
+  "generated_at": "2026-04-10T07:05:28Z",
+  "next_refresh_at": "2026-04-10T08:05:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6356,10 +6356,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.84",
+    "last_version": "0.178.85",
     "deployed_at": "2026-04-10",
-    "summary": "[adr-0390] Remove Open WebUI from the platform \u2014 containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged fix: Add missing keycloak service variables to playbook \u2014 ADR 0373 derive_service_defaults compatibility",
-    "release_notes_url": "docs/release-notes/0.178.85.md"
+    "summary": "[adr-0385] Eliminate 122+ hardcoded paths and hostnames from role defaults \u2014 all absolute paths use repo_shared_local_root, all hostnames use playbook_execution_host_patterns or inventory_hostname, all PWD lookups use inventory_dir [adr-0390] Remove Open WebUI from the platform \u2014 containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged",
+    "release_notes_url": "docs/release-notes/0.178.86.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [adr-0385] Eliminate 122+ hardcoded paths and hostnames from role defaults — all absolute paths use repo_shared_local_root, all hostnames use playbook_execution_host_patterns or inventory_hostname, all PWD lookups use inventory_dir
 - [adr-0390] Remove Open WebUI from the platform — containers stopped, 109 files purged, 4 ADRs deprecated, monitoring/DNS/keycloak reconverged
 - fix: Add missing keycloak service variables to playbook — ADR 0373 derive_service_defaults compatibility
 - ADR 0369 implementation: validation_toolkit complete — 100% adoption across 57 scripts, eliminated 1500+ lines of copy-pasted validation code, added pre-commit enforcement
@@ -59,10 +60,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.85 release notes](docs/release-notes/0.178.85.md)
+- [0.178.86 release notes](docs/release-notes/0.178.86.md)
 
 ## Previous Releases
 
+- [0.178.85 release notes](docs/release-notes/0.178.85.md)
 - [0.178.84 release notes](docs/release-notes/0.178.84.md)
 - [0.178.83 release notes](docs/release-notes/0.178.83.md)
 - [0.178.82 release notes](docs/release-notes/0.178.82.md)
@@ -74,9 +76,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.76 release notes](docs/release-notes/0.178.76.md)
 - [0.178.75 release notes](docs/release-notes/0.178.75.md)
 - [0.178.74 release notes](docs/release-notes/0.178.74.md)
-- [0.178.73 release notes](docs/release-notes/0.178.73.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (420 releases)](docs/release-notes/index/2026.md)
+- [2026 (421 releases)](docs/release-notes/index/2026.md)
