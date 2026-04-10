@@ -344,13 +344,15 @@
 
 - name: Provision the NetBox bootstrap API token
   ansible.builtin.uri:
-    url: "{{ netbox_private_base_url }}/api/users/tokens/provision/?write_enabled=true&description=Repo-managed%20bootstrap"
+    url: "{{ netbox_private_base_url }}/api/users/tokens/provision/"
     method: POST
     user: "{{ netbox_superuser_name }}"
     password: "{{ netbox_superuser_password }}"
     force_basic_auth: true
     status_code: [200, 201, 400, 403, 415]
     return_content: true
+    body_format: form-urlencoded
+    body: {}
   register: netbox_token_provision
   when: >-
     not netbox_superuser_api_token_local.stat.exists
