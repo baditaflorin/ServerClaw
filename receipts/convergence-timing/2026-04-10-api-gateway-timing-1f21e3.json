@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-10-api-gateway-timing-1f21e3",
+  "service": "api-gateway",
+  "env": "production",
+  "command": "make converge-api-gateway env=production",
+  "timing": {
+    "started_at": "2026-04-10T10:36:31+00:00",
+    "completed_at": "2026-04-10T10:49:23+00:00",
+    "duration_seconds": 772.53
+  },
+  "outcome": "ok",
+  "returncode": 0,
+  "source_commit": "254e66606d93",
+  "repo_version": "0.178.90",
+  "ansible_summary": {
+    "recap": {},
+    "phases_observed": [],
+    "changed_tasks": [],
+    "failed_tasks": [],
+    "outcome": "ok"
+  }
+}
