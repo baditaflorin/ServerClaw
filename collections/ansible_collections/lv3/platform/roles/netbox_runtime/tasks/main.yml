@@ -335,13 +335,17 @@
       password: "{{ netbox_superuser_password }}"
       write_enabled: true
       description: Repo-managed NetBox bootstrap token
-    status_code: 201
+    status_code: [200, 201, 403]
     return_content: true
   register: netbox_token_provision
   when: >-
     not netbox_superuser_api_token_local.stat.exists
     or not (netbox_existing_token_is_v2 | default(false))
     or (netbox_existing_token_check.stdout | default('000') | trim) != '200'
+  failed_when: false
+  retries: 12
+  delay: 10
+  until: netbox_token_provision.status == 201
   no_log: true
 
 - name: Persist the NetBox bootstrap API token locally
