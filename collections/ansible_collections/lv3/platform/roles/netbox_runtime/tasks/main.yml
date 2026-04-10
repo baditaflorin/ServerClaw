@@ -331,10 +331,11 @@
     method: POST
     body_format: json
     body:
-      username: "{{ netbox_superuser_name }}"
-      password: "{{ netbox_superuser_password }}"
       write_enabled: true
-      description: Repo-managed NetBox bootstrap token
+      description: "Repo-managed NetBox bootstrap token"
+    user: "{{ netbox_superuser_name }}"
+    password: "{{ netbox_superuser_password }}"
+    force_basic_auth: true
     status_code: [200, 201, 403]
     return_content: true
   register: netbox_token_provision
@@ -345,7 +346,7 @@
   failed_when: false
   retries: 30
   delay: 10
-  until: netbox_token_provision.status == 201
+  until: netbox_token_provision.status in [200, 201]
   no_log: true
 
 - name: Persist the NetBox bootstrap API token locally
@@ -355,13 +356,13 @@
     mode: "0600"
   delegate_to: localhost
   become: false
-  when: netbox_token_provision is not skipped and netbox_token_provision.status == 201
+  when: netbox_token_provision is not skipped and netbox_token_provision.status in [200, 201]
   no_log: true
 
 - name: Record the provisioned NetBox bootstrap API token
   ansible.builtin.set_fact:
     netbox_superuser_api_token: "nbt_{{ netbox_token_provision.json.key }}.{{ netbox_token_provision.json.token }}"
-  when: netbox_token_provision is not skipped and netbox_token_provision.status == 201
+  when: netbox_token_provision is not skipped and netbox_token_provision.status in [200, 201]
   no_log: true
 
 - name: Verify the NetBox bootstrap API token
