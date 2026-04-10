@@ -44,6 +44,10 @@
   hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
   become: true
   gather_facts: true
+  vars:
+    # ADR 0373: Conventional service variables (derive_service_defaults compatibility)
+    keycloak_postgres_secret_dir: /etc/lv3/keycloak-postgres
+    keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
 
   pre_tasks:
     - name: Run shared preflight checks
@@ -63,6 +67,13 @@
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
   gather_facts: true
+  vars:
+    # ADR 0373: Conventional service variables (derive_service_defaults compatibility)
+    keycloak_site_dir: /opt/keycloak
+    keycloak_data_dir: /opt/keycloak/data
+    keycloak_secret_dir: /etc/lv3/keycloak
+    keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
+    keycloak_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology.keycloak }}"
 
   pre_tasks:
     - name: Run shared preflight checks
