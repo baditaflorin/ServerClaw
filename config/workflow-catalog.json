@@ -8062,6 +8062,79 @@
       "verification_commands": [
         "make disk-space-monitor JSON=true"
       ]
+    },
+    "reconcile-portals": {
+      "description": "Detect drift across all four operator-facing portals (homepage, ops, docs, changelog), regenerate stale artifacts from canonical catalogs, and post a summary to Mattermost when changes are found.  ADR 0399 Tier 1 cron workflow.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "reconcile-portals",
+        "command": "make reconcile-portals"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-portals"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/adr/0399-platform-reconciliation-daemon.md",
+      "implementation_refs": [
+        "config/windmill/scripts/reconcile-portals.py",
+        "scripts/reconciliation/cli.py",
+        "scripts/reconciliation/core.py",
+        "scripts/generate_homepage_config.py",
+        "scripts/generate_ops_portal.py",
+        "scripts/build_docs_portal.py",
+        "scripts/generate_changelog_portal.py",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json"
+      ],
+      "outputs": [
+        "A JSON payload containing drift detection results, regeneration outcomes, and a markdown summary.  Stale portals are regenerated in place."
+      ],
+      "verification_commands": [
+        "python -m scripts.reconciliation.cli check-drift",
+        "python -m scripts.reconciliation.cli validate"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 600,
+        "max_steps": 50,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 0,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "portal-health-sweep": {
+      "description": "Health sweep that fetches each portal's live URL, verifies expected content, compares homepage service tiles against service-capability-catalog.json, and posts drift alerts to ntfy.  ADR 0399 Tier 3 heartbeat workflow.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "portal-health-sweep",
+        "command": "make portal-health-sweep"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/adr/0399-platform-reconciliation-daemon.md",
+      "implementation_refs": [
+        "config/windmill/scripts/portal-health-sweep.py",
+        "config/service-capability-catalog.json"
+      ],
+      "outputs": [
+        "A JSON payload with per-portal reachability status, homepage content-level drift analysis (missing active services, stale removed services), and a markdown summary for notification channels."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile config/windmill/scripts/portal-health-sweep.py"
+      ]
     }
   }
 }
