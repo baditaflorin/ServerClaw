@@ -1,22 +1,19 @@
-{% from 'compose_macros.j2' import openbao_sidecar %}
+{% from 'compose_macros.j2' import openbao_sidecar, redis_service %}
 services:
 {{ openbao_sidecar("glitchtip") }}
 
-  valkey:
-    image: {{ glitchtip_valkey_image }}
-    container_name: {{ glitchtip_valkey_container_name }}
-    restart: unless-stopped
-    command:
-      - valkey-server
-      - --requirepass
-      - {{ glitchtip_valkey_password }}
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - redis-cli -a "{{ glitchtip_valkey_password }}" ping | grep PONG
-      interval: 5s
-      timeout: 5s
-      retries: 12
+{{ redis_service(
+  "glitchtip",
+  service_name="valkey",
+  image_key="valkey_image",
+  container_name_key="valkey_container_name",
+  password_key="valkey_password",
+  data_dir_key=None,
+  use_valkey=true,
+  append_only=false,
+  healthcheck_retries=12,
+  healthcheck_grep="PONG"
+) }}
 
   glitchtip:
     image: {{ glitchtip_image }}

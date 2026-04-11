@@ -10,7 +10,7 @@ generated: '2026-04-11'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 34
+total_adrs: 33
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -103,22 +103,6 @@ adrs:
     summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
     filename: 0364-native-build-server-gate-execution.md
     path: docs/adr/0364-native-build-server-gate-execution.md
-  - adr: 0368
-    title: Docker Compose Jinja2 Macro Library
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - docker
-      - compose
-      - jinja2
-      - macro
-      - library
-    summary: 'Create a shared Jinja2 macro library at collections/ansiblecollections/lv3/platform/roles/common/templates/composemacros.j2.
-      Each compose template imports from '
-    filename: 0368-docker-compose-jinja2-macro-library.md
-    path: docs/adr/0368-docker-compose-jinja2-macro-library.md
   - adr: 0369
     title: Python Validation Toolkit
     status: Proposed

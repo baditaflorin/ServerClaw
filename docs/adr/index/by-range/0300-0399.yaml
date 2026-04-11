@@ -1525,20 +1525,25 @@ adrs:
     implemented_on: '2026-04-06'
   - adr: 0368
     title: Docker Compose Jinja2 Macro Library
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: vm-topology
     keywords:
       - docker
-      - compose
       - jinja2
+      - templates
+      - dry
+      - macros
+      - compose
       - macro
       - library
     summary: 'Create a shared Jinja2 macro library at collections/ansiblecollections/lv3/platform/roles/common/templates/composemacros.j2.
       Each compose template imports from '
     filename: 0368-docker-compose-jinja2-macro-library.md
     path: docs/adr/0368-docker-compose-jinja2-macro-library.md
+    implemented_in_repo_version: 0.178.116
+    implemented_on: '2026-04-11'
   - adr: 0369
     title: Python Validation Toolkit
     status: Proposed

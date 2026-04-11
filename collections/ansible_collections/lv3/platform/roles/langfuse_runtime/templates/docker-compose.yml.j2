@@ -1,4 +1,4 @@
-{% from 'compose_macros.j2' import openbao_sidecar %}
+{% from 'compose_macros.j2' import openbao_sidecar, redis_service %}
 services:
 {{ openbao_sidecar("langfuse") }}
 
@@ -22,26 +22,14 @@ services:
       - {{ langfuse_clickhouse_data_dir }}:/var/lib/clickhouse
       - {{ langfuse_clickhouse_log_dir }}:/var/log/clickhouse-server
 
-  redis:
-    image: {{ langfuse_redis_image }}
-    container_name: {{ langfuse_redis_container_name }}
-    restart: unless-stopped
-    user: "{{ langfuse_redis_uid }}:{{ langfuse_redis_gid }}"
-    command:
-      - redis-server
-      - --requirepass
-      - {{ langfuse_redis_password }}
-      - --maxmemory-policy
-      - noeviction
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - redis-cli -a "{{ langfuse_redis_password }}" ping | grep PONG
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - {{ langfuse_redis_data_dir }}:/data
+{{ redis_service(
+  "langfuse",
+  user=langfuse_redis_uid ~ ":" ~ langfuse_redis_gid,
+  data_dir_key="redis_data_dir",
+  append_only=false,
+  extra_command_args=["--maxmemory-policy", "noeviction"],
+  healthcheck_grep="PONG"
+) }}
 
   langfuse-worker:
     image: {{ langfuse_worker_image }}

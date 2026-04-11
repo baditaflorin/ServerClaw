@@ -1,24 +1,15 @@
-{% from 'compose_macros.j2' import openbao_sidecar %}
+{% from 'compose_macros.j2' import openbao_sidecar, redis_service %}
 services:
 {{ openbao_sidecar("outline") }}
 
-  redis:
-    image: {{ outline_redis_image }}
-    container_name: {{ outline_redis_container_name }}
-    restart: unless-stopped
-    command:
-      - redis-server
-      - --requirepass
-      - {{ outline_redis_password }}
-      - --maxmemory-policy
-      - noeviction
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - redis-cli -a "{{ outline_redis_password }}" ping | grep PONG
-      interval: 5s
-      timeout: 5s
-      retries: 12
+{{ redis_service(
+  "outline",
+  data_dir_key=None,
+  append_only=false,
+  extra_command_args=["--maxmemory-policy", "noeviction"],
+  healthcheck_retries=12,
+  healthcheck_grep="PONG"
+) }}
 
   outline:
     image: {{ outline_image }}
