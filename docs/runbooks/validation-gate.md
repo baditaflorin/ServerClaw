@@ -106,6 +106,128 @@ The blocking ADR 0306 invariants are repo-managed rule ids `CKV_LV3_1` through `
 When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/remote_exec.sh) now builds one immutable content-addressed repository snapshot, uploads that archive into the active build-server session workspace, and unpacks it into a fresh `.lv3-runs/<run_id>/repo` namespace before running remote checks. The remote gate therefore validates one consistent repository image without depending on mirrored `.git/worktrees/...` metadata.
 [scripts/run_python_with_packages.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_python_with_packages.sh) now keeps Python-based gate checks runnable inside the registry-backed runner images even when those images do not ship `uv`; the helper uses `uv` when present and otherwise falls back to the runner's native Python plus pip-installed dependencies only when imports are missing.
 
+## Static Analysis Gate Checks (Session 2026-04-11)
+
+Three new blocking checks were added to the `repository-structure-and-schema` and `service-syntax-and-unit` lanes. All three run without Docker: they require only Python and (for proofs) `z3-solver`.
+
+---
+
+### cross-catalog-integrity
+
+**Script**: `scripts/validate_cross_catalog_integrity.py`
+**Lane**: `repository-structure-and-schema`
+**Makefile**: `make validate-cross-catalog`
+
+Validates referential integrity _across_ catalog boundaries — catching stale references that single-catalog validators miss. Runs four checks:
+
+| Check | Source | Target |
+|-------|--------|--------|
+| `health-probe→dep-graph` | `config/health-probe-catalog.json` service IDs | `config/dependency-graph.json` nodes |
+| `api-gateway→dep-graph` | `config/api-gateway-catalog.json` route `service_id` values | `config/dependency-graph.json` nodes |
+| `secret-catalog→dep-graph` | `config/controller-local-secrets.json` `owner_service` values | `config/dependency-graph.json` nodes |
+| `gate-bypass→waiver-catalog` | `receipts/gate-bypasses/*.json` `reason_code` values | `config/gate-bypass-waiver-catalog.json` reason codes |
+
+```bash
+# Run manually
+python scripts/validate_cross_catalog_integrity.py
+
+# JSON output for CI consumption
+python scripts/validate_cross_catalog_integrity.py --format json
+
+# Via gate
+make validate-cross-catalog
+```
+
+Exit code 0 when all checks pass; non-zero with a violation list when any cross-reference is broken.
+
+---
+
+### python-type-safety
+
+**Script**: runs pyright + bandit via `scripts/validate_repo.sh python-type-safety`
+**Lane**: `service-syntax-and-unit`
+**Makefile**: `make validate-types`
+**Pre-commit**: ruff lint + ruff-format + bandit on new scripts
+
+Type-checks and security-scans the Python scripts introduced in this session:
+
+- `scripts/validate_cross_catalog_integrity.py`
+- `scripts/verify_waiver_escalation.py`
+- `scripts/gate_bypass_waivers.py`
+- `collections/ansible_collections/lv3/platform/plugins/` (Ansible filter/callback plugins)
+
+Scope is intentionally narrow. Pre-existing scripts contain legacy violations that are tracked separately. As those are remediated, add them to `pyrightconfig.json` `include` and the `files:` patterns in `.pre-commit-config.yaml`.
+
+```bash
+# Type-check + security scan
+make validate-types
+
+# Pre-commit only (new scripts)
+uvx --from pre-commit pre-commit run --all-files
+```
+
+The pyright configuration lives in `pyrightconfig.json`. The bandit skip list (`B101,B603,B607`) excludes assert statements, subprocess without shell, and partial executable paths — all intentional patterns in this codebase.
+
+---
+
+### waiver-escalation-proofs
+
+**Script**: `scripts/verify_waiver_escalation.py`
+**Lane**: `repository-structure-and-schema`
+**Makefile**: `make verify-waiver-escalation`
+**Dependency**: `z3-solver` (installed via `uvx`)
+
+Formally verifies the waiver escalation state machine using Z3 SMT. Two stages run in sequence:
+
+**Stage 1 — Python model test vectors** (19 concrete cases):
+Validates the `_python_repeat_count` and `_python_status` implementations against hand-authored ground-truth vectors before any Z3 is invoked. If the implementation diverges from spec, this stage fails fast without needing a solver.
+
+**Stage 2 — Z3 universal proofs** (6 proofs + 1 meta-proof):
+
+| ID | Property proven |
+|----|-----------------|
+| P1 | `repeat_after_expiry >= 0` for all receipt sequences |
+| P2 | `repeat_after_expiry <= len(receipts) - 1` |
+| P3 | Monotonic escalation — adding a receipt never decreases the counter |
+| P4 | Threshold soundness — `release_blocker` status implies the `warning` threshold was also crossed |
+| P5 | Same-day expiry is NOT a repeat (strict `<` enforced, not `<=`) |
+| P6 | Multiple expired predecessors yield exactly 1 increment per receipt, not N |
+| P4b | Meta-proof that the `release_blocker` constraint is satisfiable (not vacuously true) |
+
+```bash
+# Run proofs
+make verify-waiver-escalation
+
+# Or directly
+uvx --with z3-solver python scripts/verify_waiver_escalation.py
+```
+
+Exit 0 if all 6 proofs pass and all 19 test vectors match; exit 1 with a named failure message otherwise.
+
+**Test coverage**: `tests/test_verify_waiver_escalation.py` provides full branch coverage (31 tests) using a `ControlledSolver` factory that replaces `z3.Solver` at each call-index position to force specific solver outcomes.
+
+---
+
+### Pre-commit hooks (new scripts)
+
+The hooks in `.pre-commit-config.yaml` are scoped to the new scripts only to avoid surfacing pre-existing violations in the broader codebase:
+
+```yaml
+# ruff lint (with --fix --exit-non-zero-on-fix)
+files: ^scripts/(validate_cross_catalog_integrity|verify_waiver_escalation|gate_bypass_waivers)\.py$
+       |^tests/test_verify_waiver_escalation\.py$
+
+# ruff format --check (broader: all scripts/ and tests/)
+files: ^scripts/.*\.py$|^tests/.*\.py$
+
+# bandit security scan
+files: ^scripts/(validate_cross_catalog_integrity|verify_waiver_escalation|gate_bypass_waivers)\.py$
+```
+
+To extend lint/type coverage to an existing script, add it to both the `files:` pattern in `.pre-commit-config.yaml` and the `include` list in `pyrightconfig.json`, then resolve any violations before pushing.
+
+---
+
 ## Bypass Model
 
 The supported audited bypass is:

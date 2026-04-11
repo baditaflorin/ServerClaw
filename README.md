@@ -141,6 +141,11 @@ topology; `make provision-guests` creates VMs via the Proxmox API.
   Pre-commit hooks enforce status transitions.
 - **Verification gates**: `make verify-bootstrap-proxmox`, `make verify-bootstrap-guests`,
   `make verify-platform` validate state between stages.
+- **Static analysis gate**: Three blocking checks run without Docker on every push —
+  cross-catalog referential integrity (`validate_cross_catalog_integrity.py`),
+  Python type-safety + bandit SAST (`make validate-types`), and
+  Z3 formal proofs of the waiver escalation state machine (`verify_waiver_escalation.py`).
+  See [docs/runbooks/validation-gate.md](docs/runbooks/validation-gate.md) for details.
 
 ## Repository Structure
 
@@ -184,6 +189,9 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 | `make converge-<service>` | Deploy a specific service |
 | `make verify-platform` | Health check all critical services |
 | `make validate` | Run full validation suite |
+| `make validate-types` | Pyright + bandit on new Python scripts |
+| `make validate-cross-catalog` | Cross-catalog referential integrity check |
+| `make verify-waiver-escalation` | Z3 formal proofs of waiver escalation state machine |
 
 ## Documentation
 
