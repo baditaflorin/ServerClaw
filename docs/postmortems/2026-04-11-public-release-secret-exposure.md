@@ -23,9 +23,9 @@ The proxmox_florin_server codebase was published to GitHub as `baditaflorin/Serv
 
 | # | Secret | Location | Exposure | Action |
 |---|--------|----------|----------|--------|
-| 1 | **Keycloak OIDC client secret** `uHb3IJRzJXO0aVsS+mpl/scZDc1/axNqZ9bmm5odh4g=` | `docs/workstreams/ws-0362-semaphore-keycloak-oidc.md:87` | **LIVE on serverclaw/main** — not scrubbed | Regenerate in Keycloak, update `.local/semaphore/oidc-client-secret.txt`, re-converge Semaphore |
-| 2 | **Semaphore admin password** `62r4JXGau0hOjYdSLIPJL4yPNkoejC99` | Git history (commit `147cf950e:SEMAPHORE-SETUP-QUICK-START.md`) | Recoverable from git history | Change Semaphore admin password, update `.local/semaphore/admin-password.txt` |
-| 3 | **Gitea API token** `48f8f0239ecf5a544be8459942d0af870e6807f3` | Local `.git/config` remote URL (not in tree, but if anyone clones with `--mirror`) | Local only — low risk but rotate anyway | Revoke token in Gitea (`ops-gitea` user), create new one, update git remote |
+| 1 | **Keycloak OIDC client secret** `[REDACTED — rotated]` | `docs/workstreams/ws-0362-semaphore-keycloak-oidc.md:87` | **LIVE on serverclaw/main** — not scrubbed | Regenerate in Keycloak, update `.local/semaphore/oidc-client-secret.txt`, re-converge Semaphore |
+| 2 | **Semaphore admin password** `[REDACTED — rotated]` | Git history (commit `147cf950e:SEMAPHORE-SETUP-QUICK-START.md`) | Recoverable from git history | Change Semaphore admin password, update `.local/semaphore/admin-password.txt` |
+| 3 | **Gitea API token** `[REDACTED — rotated]` | Local `.git/config` remote URL (not in tree, but if anyone clones with `--mirror`) | Local only — low risk but rotate anyway | Revoke token in Gitea (`ops-gitea` user), create new one, update git remote |
 
 ### TIER 2 — ROTATE SOON (Credentials Recoverable from Git History)
 
@@ -91,12 +91,12 @@ These are NOT secrets but reveal internal architecture. They are present in comm
 
 - [ ] **Keycloak OIDC secret** — Regenerate the `semaphore` client secret in Keycloak admin, update `.local/semaphore/oidc-client-secret.txt`, run `make converge-semaphore env=production`
 - [ ] **Semaphore admin password** — Change via Semaphore UI or API, update `.local/semaphore/admin-password.txt`
-- [ ] **Gitea API token** — Revoke `48f8f0239ecf5a544be8459942d0af870e6807f3` in Gitea settings for `ops-gitea` user, generate new token, update local git remote URL
+- [ ] **Gitea API token** — Revoke `[REDACTED — rotated]` in Gitea settings for `ops-gitea` user, generate new token, update local git remote URL
 - [ ] **Review ALL Keycloak client secrets** — The OIDC secret structure is now known; verify all other client secrets (grafana, ops-portal, agent-hub, etc.) were NOT exposed. They appear to be safe (only template references), but double-check.
 
 ### Phase 2: Remove Secret from Current Public Tree
 
-- [ ] Remove `uHb3IJRzJXO0aVsS+mpl/scZDc1/axNqZ9bmm5odh4g=` from `docs/workstreams/ws-0362-semaphore-keycloak-oidc.md`
+- [ ] Remove `[REDACTED — rotated]` from `docs/workstreams/ws-0362-semaphore-keycloak-oidc.md`
 - [ ] Commit and push to `serverclaw` remote
 
 ### Phase 3: Git History Rewrite (Important)
@@ -114,11 +114,11 @@ git show <old-commit>:<file>                # recover pre-scrub content
 # Install: pip install git-filter-repo
 # Remove specific secrets from ALL history:
 git filter-repo --replace-text <(cat <<'EOF'
-uHb3IJRzJXO0aVsS+mpl/scZDc1/axNqZ9bmm5odh4g===>REDACTED
-62r4JXGau0hOjYdSLIPJL4yPNkoejC99==>REDACTED
-baditaflorin@gmail.com==>operator@example.com
-lv3.org==>example.com
-65.108.75.123==>0.0.0.0
+[OIDC-SECRET-REDACTED]==>REDACTED
+[SEMAPHORE-PASSWORD-REDACTED]==>REDACTED
+operator@example.com==>operator@example.com
+example.com==>example.com
+0.0.0.0==>0.0.0.0
 EOF
 ) --force
 git push serverclaw main --force

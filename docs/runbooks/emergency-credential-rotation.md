@@ -59,7 +59,7 @@ make converge-semaphore env=production
 Separately revoke the Gitea API token:
 1. Log in to Gitea at `https://git.lv3.org` as admin
 2. Go to `ops-gitea` user settings > Applications
-3. Delete the token ending in `...6807f3`
+3. Delete the old/compromised token
 4. Generate a new token
 5. Update the git remote: `git remote set-url gitea https://ops-gitea:<NEW_TOKEN>@git.lv3.org/ops/proxmox_florin_server.git`
 

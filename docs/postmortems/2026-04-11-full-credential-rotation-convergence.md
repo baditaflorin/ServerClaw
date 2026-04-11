@@ -271,7 +271,7 @@ The following self-hosted external tokens were rotated programmatically:
 | 3 | Deploy SSH key to offline VMs when they come online | Pending | 10.10.10.22, 51, 52, 54 |
 | 4 | Investigate VMs at 10.10.10.21, 90, 91 (permission denied) | Pending | Different auth method |
 | 5 | Investigate Windmill secret payload failure | Pending | Censored error, may be format issue |
-| 6 | Revoke Gitea API token ending in `...6807f3` | Pending | Manual action in Gitea admin UI |
+| 6 | Revoke old Gitea API token | Pending | Manual action in Gitea admin UI |
 | 7 | Push OIDC secret removal commit to ServerClaw public remote | Pending | ws-0362 already cleaned |
 | 8 | Complete netbox convergence verification | Pending | Still running at postmortem time |
 | 9 | Verify all OIDC logins work post-rotation | Pending | Keycloak converged, clients updated |
