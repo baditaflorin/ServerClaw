@@ -187,23 +187,44 @@ Branch-local changes to these will be overwritten or conflict on merge.
 
 ---
 
-## 9. Deployment-Specific Values (ADR 0407)
+## 9. Deployment-Specific Values (ADR 0407) — CRITICAL
 
-The committed codebase uses **generic values** (`example.com`, `Platform Operator`,
-`203.0.113.x`). Real deployment values live exclusively in `.local/`:
+The committed codebase is **generic by default**. This means the private repo
+and the public GitHub repo (`baditaflorin/ServerClaw`) stay nearly identical.
+Real deployment values live in `.local/` (gitignored).
 
-| What | Committed (generic) | Real value location |
-|------|---------------------|---------------------|
-| Domain | `example.com` | `.local/identity.yml` → `platform_domain: lv3.org` |
-| Operator | `Platform Operator` | `.local/identity.yml` → `platform_operator_name` |
-| Email | `operator@example.com` | `.local/identity.yml` → `platform_operator_email` |
-| Host IPs | Template placeholders | `.local/hosts.yml` (future) |
+**⚠ Before writing ANY domain, URL, hostname, or operator reference, follow these rules:**
 
-**When you need the actual deployment domain, IP, or operator identity:**
-1. Read `.local/identity.yml` first — it has the real values
-2. The committed `identity.yml` is a structural reference with example values
-3. Ansible automatically loads `.local/identity.yml` as extra-vars (highest precedence)
-4. **Never hardcode values from `.local/` into committed files**
+### What goes WHERE
+
+| Writing in... | Use this | Example |
+|---------------|----------|---------|
+| Ansible roles/templates | `{{ platform_domain }}` | `"https://grafana.{{ platform_domain }}"` |
+| Docs, ADRs, runbooks | `example.com` | `Visit https://grafana.example.com` |
+| Tests, fixtures | `example.com` | `assert url == "https://api.example.com"` |
+| Workstream YAML | `example.com` | `url: https://ops.example.com` |
+| Inventory/config files | Real values OK (publish sanitizes) | `platform_domain: lv3.org` |
+| Commit messages | Generic or real OK (not published) | Either is fine |
+
+### Finding real values
+
+| What | Where to look |
+|------|---------------|
+| Real domain | `.local/identity.yml` → `platform_domain` |
+| Real operator name | `.local/identity.yml` → `platform_operator_name` |
+| Real email | `.local/identity.yml` → `platform_operator_email` |
+| Real host IPs | `inventory/hosts.yml` (runtime file, not generalized) |
+| Service secrets | `.local/<service>/` directories |
+
+### Why this matters
+
+The publish pipeline syncs this repo to the public `ServerClaw` GitHub repo.
+If you write `lv3.org` in a doc or test, the pipeline must regex-replace it.
+If you use `example.com`, the file passes through unchanged — keeping the
+private↔public diff small and reviewable.
+
+**The pipeline currently sanitizes ~588 files per publish (down from 6,482).**
+Every file you write with generic values is one fewer file it needs to touch.
 
 ---
 

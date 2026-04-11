@@ -41,6 +41,62 @@ current deployment.
 - Prefer placeholder, example, or repository-relative values in committed
   documentation and metadata.
 
+## Generic-by-Default Codebase (ADR 0407)
+
+This codebase is designed to be **nearly identical** between the private repo
+and the public `github.com/baditaflorin/ServerClaw` repo. Deployment-specific
+values live in `.local/` (gitignored), not in committed code.
+
+### The Rule: Generic in Git, Specific in .local/
+
+| What to write | In committed files | In `.local/` |
+|--------------|-------------------|--------------|
+| Domain references | `example.com` | `.local/identity.yml` has the real domain |
+| Operator name/email | `Platform Operator` / `operator@example.com` | `.local/identity.yml` has real values |
+| Documentation URLs | `https://grafana.example.com` | Real URLs available via `.local/identity.yml` |
+| Test assertions | Use `example.com` in fixtures | Tests that need real values load from `.local/` |
+| Ansible role defaults | `{{ platform_domain }}` (template vars) | Resolved at runtime from identity.yml |
+| Ansible inventory/config | May use real values (sanitized by publish) | — |
+| Secrets, passwords, keys | NEVER committed | `.local/<service>/` directories |
+
+### How Ansible picks up real values at runtime
+
+`platform/ansible/execution_scopes.py` auto-injects `-e @.local/identity.yml`
+(Ansible extra-vars, highest precedence) into every playbook run. This means:
+- Committed code can use `example.com` or `{{ platform_domain }}`
+- At runtime, `platform_domain` resolves to the real domain from `.local/identity.yml`
+- Fork operators only edit `.local/identity.yml` — everything else derives from it
+
+### When writing new code
+
+**In roles/templates** — Always use template variables:
+```yaml
+# GOOD: uses template variable
+public_url: "https://grafana.{{ platform_domain }}"
+
+# BAD: hardcodes deployment domain
+public_url: "https://grafana.lv3.org"
+```
+
+**In docs/tests/workstreams** — Always use `example.com`:
+```markdown
+# GOOD: generic domain
+Visit https://grafana.example.com to view dashboards.
+
+# BAD: deployment-specific domain
+Visit https://grafana.lv3.org to view dashboards.
+```
+
+**In inventory/config** — Real values are acceptable here (the publish pipeline
+sanitizes these ~76 files). But prefer template variables when possible.
+
+### Finding real deployment values
+
+When you need the actual domain, IPs, or operator identity:
+1. Read `.local/identity.yml` — has `platform_domain`, `platform_operator_email`, etc.
+2. The committed `inventory/group_vars/all/identity.yml` shows the variable structure
+3. Never paste values from `.local/` into committed files
+
 ## Publication Pipeline (ServerClaw)
 
 This private repo publishes a sanitized copy to the public
@@ -49,18 +105,14 @@ never manually edit or push to the public repo.
 
 ### How it works
 
-1. **Drift audit** — `scripts/audit_sanitization_coverage.py` parses the four
-   authoritative inventory sources (identity.yml, hosts.yml, host_vars,
-   operators.yaml), extracts every sensitive value, and verifies
-   `config/publication-sanitization.yaml` covers them. Aborts on CRITICAL gaps.
-2. **Tier A** — Four deployment-specific files are replaced wholesale with
-   fork-ready templates from `publication/templates/`.
+1. **Drift audit** — `scripts/audit_sanitization_coverage.py` verifies all
+   sensitive values have replacement patterns. Aborts on CRITICAL gaps.
+2. **Tier A** — Four deployment-specific files (identity, hosts, operators,
+   host_vars) replaced with fork-ready templates from `publication/templates/`.
 3. **Tier C** — Regex patterns replace domains, VM names, IPs, and PII across
-   all text files (~6400 files).
-4. **Leak check** — Scans the sanitized tree for leak markers (auto-derived
-   from real inventory + manual list). Aborts if any marker is found.
-5. **Force-push** — Commits the sanitized snapshot and force-pushes to
-   `serverclaw/main`.
+   remaining text files (~588 files after ADR 0407 generalization).
+4. **Leak check** — Scans for leak markers. Aborts if any found.
+5. **Force-push** — Commits sanitized snapshot to `serverclaw/main`.
 
 ### Commands
 
@@ -70,25 +122,20 @@ never manually edit or push to the public repo.
 | Sanitize + push to public repo | `make publish-serverclaw-push` |
 | Check sanitization coverage for drift | `make audit-sanitization` |
 | Strict audit (exit 1 on any gap) | `make audit-sanitization-strict` |
+| Generalize docs/tests in-place | `python3 scripts/generalize_committed_files.py --apply` |
 
 ### When to publish
 
 Run `make publish-serverclaw-push` after merging meaningful changes to `main`.
-Not every commit needs publishing — use judgment (new features, new roles,
-documentation improvements, security fixes).
 
 ### When adding new sensitive values
 
 If you add a new VM, operator, public IP, or domain reference:
 
 1. Add the replacement pattern to `config/publication-sanitization.yaml`
-2. If the value belongs in a Tier A file, also update the template in
-   `publication/templates/`
+2. If the value belongs in a Tier A file, update `publication/templates/`
 3. Run `make audit-sanitization` to verify coverage
 4. Add a leak marker if the value is CRITICAL (PII, public IP, secret)
-
-The drift detector will catch omissions automatically on the next publish
-attempt, but fixing gaps proactively avoids blocking the publish pipeline.
 
 ### Key files
 
@@ -96,10 +143,9 @@ attempt, but fixing gaps proactively avoids blocking the publish pipeline.
 |------|---------|
 | `scripts/publish_to_serverclaw.py` | Publication engine |
 | `scripts/audit_sanitization_coverage.py` | Drift detector |
+| `scripts/generalize_committed_files.py` | In-place generalization (ADR 0407) |
 | `config/publication-sanitization.yaml` | Replacement patterns + leak markers |
 | `publication/templates/` | Tier A replacement files (4 files) |
-
-See `docs/runbooks/publish-to-serverclaw.md` for the full operational runbook.
 
 ## Deployment Context
 
