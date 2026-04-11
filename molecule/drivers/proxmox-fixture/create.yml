@@ -69,7 +69,7 @@
                   "ansible_become": true,
                   "ansible_host": "{{ molecule_fixture_payload.ip_address }}",
                   "ansible_python_interpreter": "/usr/bin/python3",
-                  "ansible_ssh_common_args": "-o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i {{ molecule_controller_secrets.secrets.bootstrap_ssh_private_key.path }} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@65.108.75.123 -W %h:%p\"",
+                  "ansible_ssh_common_args": "-o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i {{ molecule_controller_secrets.secrets.bootstrap_ssh_private_key.path }} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@203.0.113.1 -W %h:%p\"",
                   "ansible_ssh_private_key_file": "{{ molecule_controller_secrets.secrets.bootstrap_ssh_private_key.path }}",
                   "ansible_user": "ops"
                 }

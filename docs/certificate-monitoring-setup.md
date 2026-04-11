@@ -109,7 +109,7 @@ ISSUES FOUND:
 ----------------
 
 [CERT_MISMATCH] ci.lv3.org (woodpecker)
-  Target: 65.108.75.123:443
+  Target: 203.0.113.1:443
   CN: lv3-edge
   SANs: *.lv3.org, lv3.org, ...
   Error: Certificate CN=lv3-edge, SANs=[...], but domain is ci.lv3.org
@@ -242,7 +242,7 @@ python3 scripts/certificate_validator.py --fqdn analytics.lv3.org
 #   "fqdn": "my-service.lv3.org",
 #   "service_id": "my-service",
 #   "exposure": "edge-published",
-#   "target": "65.108.75.123",
+#   "target": "203.0.113.1",
 #   "target_port": 443,
 #   "tls": { "provider": "letsencrypt", "auto_renew": true }
 # }

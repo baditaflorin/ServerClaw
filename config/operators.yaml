@@ -1,179 +1,37 @@
 $schema: config/schemas/operators.schema.json
 schema_version: "1.0.0"
 operators:
-  - id: florin-badita
-    name: Florin Badita
-    email: baditaflorin@gmail.com
+  - id: example-admin
+    name: Example Operator
+    email: operator@example.com
     role: admin
     status: active
-    notes: Existing platform owner documented when ADR 0108 was implemented.
+    notes: |
+      Example operator entry. Replace with your actual operator details.
+      See ADR 0108 for the operator onboarding process.
     keycloak:
-      username: florin.badita
+      username: example.operator
       realm_roles:
         - platform-admin
       groups:
-        - lv3-platform-admins
+        - platform-admins
         - grafana-admins
       enabled: true
     ssh:
-      principal: florin.badita
+      principal: example.operator
       certificate_ttl_hours: 24
       public_keys:
         - name: bootstrap-ssh
-          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
-          fingerprint: SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ
+          public_key: ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_KEY operator@example.com
+          fingerprint: SHA256:REPLACE_WITH_YOUR_FINGERPRINT
     openbao:
-      entity_name: florin.badita
+      entity_name: example.operator
       policies:
         - platform-admin
     tailscale:
-      login_email: baditaflorin@gmail.com
+      login_email: operator@example.com
       tags:
         - tag:platform-operator
     audit:
-      onboarded_at: "2026-03-23T00:00:00Z"
-      onboarded_by: adr-0108-bootstrap
-
-  - id: florin-tmp-001
-    name: Florin Badita (Temporary)
-    email: florin@badita.org
-    role: admin
-    status: active
-    notes: |
-      Temporary 72-hour admin account. Expires 2026-04-03T00:00:00Z.
-      Created per ADR 0307. Full service login access (Keycloak SSO, Grafana, OpenBao, Tailscale, SSH).
-      MUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.
-    keycloak:
-      username: florin.badita-tmp
-      realm_roles:
-        - platform-admin
-      groups:
-        - lv3-platform-admins
-        - grafana-admins
-      enabled: true
-    ssh:
-      principal: florin.badita-tmp
-      certificate_ttl_hours: 24
-      public_keys:
-        - name: florin-tmp-001-ephemeral
-          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKP4RglsVhDD1m7PaeSkcePUR7wuJTlni5gsQ9AzNc6V florin-tmp-001@lv3 (expires 2026-04-03)
-          fingerprint: SHA256:KyWoKJK5IdVfFvKcgm0RflTeTnQNhwmYmRZnQNIE6VI
-    openbao:
-      entity_name: florin.badita-tmp
-      policies:
-        - platform-admin
-    tailscale:
-      login_email: florin@badita.org
-      tags:
-        - tag:platform-operator
-    audit:
-      onboarded_at: "2026-03-31T00:00:00Z"
-      onboarded_by: adr-0307-tmp-user
-
-  - id: florin-tmp-002
-    name: Florin Badita Temporary
-    email: baditaflorin+tmp002@gmail.com
-    role: admin
-    status: active
-    notes: |
-      Temporary 1-week admin account for ADR 0318 live-apply verification. Expires 2026-04-10T00:00:00Z.
-      Created through the documented Keycloak direct-API fallback, Headscale bootstrap, and requester-CC onboarding mail replay.
-      MUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.
-    keycloak:
-      username: florin.badita-tmp-002
-      realm_roles:
-        - platform-admin
-      groups:
-        - lv3-platform-admins
-        - grafana-admins
-      enabled: true
-    ssh:
-      principal: florin.badita-tmp-002
-      certificate_ttl_hours: 24
-      public_keys:
-        - name: bootstrap-placeholder
-          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
-          fingerprint: SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ
-    openbao:
-      entity_name: florin.badita-tmp-002
-      policies:
-        - platform-admin
-    tailscale:
-      login_email: baditaflorin+tmp002@gmail.com
-      tags:
-        - tag:platform-operator
-    audit:
-      onboarded_at: "2026-04-03T15:52:45Z"
-      onboarded_by: codex/ws-0318-live-apply
-
-  - id: florin-tmp-003
-    name: Florin Badita (Temporary)
-    email: baditaflorin+tmp003@gmail.com
-    role: admin
-    status: active
-    notes: |
-      Temporary 3-day admin account. Expires 2026-04-11T00:00:00Z.
-      Created per ADR 0318. Full service login access (Keycloak SSO, Grafana, OpenBao, Tailscale, SSH).
-      MUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.
-    keycloak:
-      username: florin.badita-tmp-003
-      realm_roles:
-        - platform-admin
-      groups:
-        - lv3-platform-admins
-        - grafana-admins
-      enabled: true
-    ssh:
-      principal: florin.badita-tmp-003
-      certificate_ttl_hours: 24
-      public_keys:
-        - name: bootstrap-placeholder
-          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
-          fingerprint: SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ
-    openbao:
-      entity_name: florin.badita-tmp-003
-      policies:
-        - platform-admin
-    tailscale:
-      login_email: baditaflorin@gmail.com
-      tags:
-        - tag:platform-operator
-    audit:
-      onboarded_at: "2026-04-08T00:00:00Z"
-      onboarded_by: claude-agent
-
-  - id: matei-busui-tmp-001
-    name: Matei Busui
-    email: busui.matei1994@gmail.com
-    role: admin
-    status: active
-    notes: |
-      Temporary 1-week admin account for programmer onboarding. Expires 2026-04-08T00:00:00Z.
-      Created per ADR 0318. SSH access via step-ca + Tailscale (invite pending from Florin).
-      MUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.
-    keycloak:
-      username: matei.busui-tmp
-      realm_roles:
-        - platform-admin
-      groups:
-        - lv3-platform-admins
-        - grafana-admins
-      enabled: true
-    ssh:
-      principal: matei.busui-tmp
-      certificate_ttl_hours: 24
-      public_keys:
-        - name: bootstrap-placeholder
-          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
-          fingerprint: SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ
-    openbao:
-      entity_name: matei.busui-tmp
-      policies:
-        - platform-admin
-    tailscale:
-      login_email: busui.matei1994@gmail.com
-      tags:
-        - tag:platform-operator
-    audit:
-      onboarded_at: "2026-04-01T00:00:00Z"
-      onboarded_by: claude-agent
+      onboarded_at: "2026-01-01T00:00:00Z"
+      onboarded_by: manual-bootstrap

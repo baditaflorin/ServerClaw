@@ -13,7 +13,7 @@ Before writing any code, in order:
 2. `AGENTS.md` — working rules, conventions, handoff protocol
 3. `workstreams.yaml` — what is in flight, who owns which surfaces
 4. `.repo-structure.yaml` — where everything lives (use instead of `find`)
-5. Check memory (`/Users/live/.claude/projects/.../memory/MEMORY.md`) for any remembered context from prior sessions on this repo
+5. Check Claude Code memory for any remembered context from prior sessions on this repo
 
 If the task touches a specific service, also read:
 - `docs/adr/.index.yaml` — search for the ADR covering that service
@@ -78,7 +78,7 @@ Edit `changelog.md` — add a bullet under `## Unreleased`:
 ```bash
 # The Unreleased section becomes the release notes body.
 # Run after editing changelog.md:
-PATH="$PATH:/Users/live/.local/bin" uv run --with pyyaml \
+uv run --with pyyaml \
   python scripts/generate_release_notes.py \
   --version 0.178.8 \
   --released-on $(date +%Y-%m-%d) \
@@ -86,17 +86,17 @@ PATH="$PATH:/Users/live/.local/bin" uv run --with pyyaml \
 
 # This creates docs/release-notes/0.178.8.md and updates RELEASE.md.
 # Then refresh the index and changelog release sections:
-PATH="$PATH:/Users/live/.local/bin" uv run --with pyyaml \
+uv run --with pyyaml \
   python scripts/generate_release_notes.py --write-root-summaries
 ```
 
 ### 4d. Regenerate platform manifest and discovery artifacts
 ```bash
-PATH="$PATH:/Users/live/.local/bin" uvx --python 3.12 \
+uvx --python 3.12 \
   --with pyyaml --with jsonschema --with requests --with jinja2 \
   python scripts/platform_manifest.py --write
 
-PATH="$PATH:/Users/live/.local/bin" python scripts/generate_discovery_artifacts.py --write
+python scripts/generate_discovery_artifacts.py --write
 ```
 
 ### 4e. Commit everything together
@@ -108,7 +108,7 @@ git commit -m "[release] Bump to 0.178.8 — <one-line summary>"
 
 ### 4f. Push
 ```bash
-PATH="$PATH:/Users/live/.local/bin" git push origin main
+git push origin main
 ```
 
 ---
@@ -188,7 +188,7 @@ Branch-local changes to these will be overwritten or conflict on merge.
 
 **Preflight `.env` scanner** — `roles/preflight` uses `ansible.builtin.find *.env` recursively. It excludes by basename, not path, so `.local/open-webui/provider.env` and `.local/serverclaw/provider.env` are always found. Temporarily rename them to `.bak` before any `make converge-*` run and restore after.
 
-**Dify URL** — `agents.lv3.org` is behind oauth2-proxy. Use `http://10.10.10.20:8094` for API calls from the controller.
+**Dify URL** — The Dify subdomain is behind oauth2-proxy. Use the internal Dify IP and port for API calls from the controller.
 
 **Top-level imports in agent_tool_registry.py** — Any `import` that requires `requests` at module load time breaks `--export-mcp` validation (which runs in a container without `requests`). Always use lazy imports inside handler functions.
 

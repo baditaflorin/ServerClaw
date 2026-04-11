@@ -301,7 +301,7 @@
         {
           "id": "proxmox-host-operator-notifications",
           "kind": "notification_profile",
-          "endpoint": "lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com",
+          "endpoint": "lv3-ops-email sendmail endpoint with catch-all matcher to operator@example.com",
           "auth": "Repo-managed Proxmox notification target and matcher configuration.",
           "owner_refs": [
             "proxmox_florin"

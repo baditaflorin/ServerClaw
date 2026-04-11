@@ -14,7 +14,7 @@
       "repositories": [
         {
           "id": "education-wemeshup",
-          "repo": "github.com/baditaflorin/education_wemeshup",
+          "repo": "github.com/example/example-app",
           "branch": "main",
           "notes": "Derived from the repo's current compose and Dockerfile base-image refs on 2026-03-30."
         }

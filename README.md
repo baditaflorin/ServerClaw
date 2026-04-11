@@ -9,8 +9,8 @@ monitored, and recoverable from a single repository.
 ### Try it locally (Docker, no server needed)
 
 ```bash
-git clone https://github.com/baditaflorin/proxmox_florin_server.git
-cd proxmox_florin_server
+git clone https://github.com/baditaflorin/ServerClaw.git
+cd ServerClaw
 make init-local              # Generate SSH keys and secrets
 make docker-dev-up           # Start 4 containers (8 GB RAM, ARM Mac native)
 make docker-dev-converge     # Deploy services via Ansible
@@ -21,8 +21,8 @@ See [docker-dev/README.md](docker-dev/README.md) for details.
 ### Deploy to a real server
 
 ```bash
-git clone https://github.com/baditaflorin/proxmox_florin_server.git
-cd proxmox_florin_server
+git clone https://github.com/baditaflorin/ServerClaw.git
+cd ServerClaw
 make init-local              # Generate SSH keys and 237 service secrets
 # Edit inventory/hosts.yml and inventory/group_vars/all/identity.yml
 make bootstrap               # Full staged bootstrap with validation gates
@@ -30,6 +30,21 @@ make bootstrap               # Full staged bootstrap with validation gates
 
 See [docs/runbooks/bootstrap-from-scratch.md](docs/runbooks/bootstrap-from-scratch.md)
 for the complete walkthrough.
+
+## AI-Native Infrastructure
+
+This platform is built for AI-assisted operations. Every architectural decision,
+deployment procedure, and operational runbook is written so that AI coding
+assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
+
+- **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
+- **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
+- **420+ ADRs** — Every architectural decision documented and indexed
+- **267 runbooks** — Step-by-step procedures an AI agent can follow
+- **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
+
+Point Claude Code at this repo and it knows how to deploy, debug, and extend
+every service.
 
 ## What This Is
 
