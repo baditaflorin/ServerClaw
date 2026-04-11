@@ -5,13 +5,21 @@ import ipaddress
 import re
 import sys
 from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
-if str(Path(__file__).resolve().parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from validation_toolkit import require_list, require_mapping, require_str
+from validation_toolkit import load_yaml_with_identity, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from shared_policy_packs import load_shared_policy_packs
@@ -229,6 +237,16 @@ def validate_environment_references(
         ): require_mapping(entry, f"subdomains[{index}]")
         for index, entry in enumerate(subdomains)
     }
+    service_ids_by_environment_subdomain: dict[tuple[str, str], set[str]] = {}
+    for service_id, service in service_index.items():
+        bindings = require_mapping(service.get("environments"), f"services.{service_id}.environments")
+        for env_id, binding in bindings.items():
+            binding = require_mapping(binding, f"services.{service_id}.environments.{env_id}")
+            subdomain = binding.get("subdomain")
+            if subdomain is None:
+                continue
+            fqdn = require_str(subdomain, f"services.{service_id}.environments.{env_id}.subdomain")
+            service_ids_by_environment_subdomain.setdefault((env_id, fqdn), set()).add(service_id)
 
     for env_id, environment in environments.items():
         edge_service_id = environment["edge_service_id"]
@@ -277,7 +295,8 @@ def validate_environment_references(
                     f"service '{service_id}' environment '{env_id}' subdomain '{subdomain}' "
                     "is missing from the subdomain catalog"
                 )
-            if entry.get("service_id") != service_id:
+            allowed_service_ids = service_ids_by_environment_subdomain.get((env_id, subdomain), {service_id})
+            if entry.get("service_id") != service_id and entry.get("service_id") not in allowed_service_ids:
                 raise ValueError(f"subdomain '{subdomain}' must reference service_id '{service_id}'")
             if entry.get("status") != status:
                 raise ValueError(
@@ -352,7 +371,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         catalog = load_environment_topology()
-        host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+        host_vars = load_yaml_with_identity(TOPOLOGY_HOST_VARS_PATH)
         validate_environment_topology(catalog, host_vars)
         if args.validate:
             service_catalog = load_json(SERVICE_CATALOG_PATH)
