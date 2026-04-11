@@ -9,7 +9,7 @@ import os
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -177,7 +177,7 @@ def proc_env_override(*names: str, proc_environ_path: Path = Path("/proc/1/envir
     except OSError:
         return None
     for name in names:
-        prefix = f"{name}=".encode("utf-8")
+        prefix = f"{name}=".encode()
         for entry in entries:
             if entry.startswith(prefix):
                 return normalize_url(entry.split(b"=", 1)[1].decode("utf-8", errors="ignore"))
@@ -217,12 +217,9 @@ def resolve_targets(repo_root: Path, environment: str) -> SuiteTargets:
         or resolve_service_url(catalog, "api_gateway", environment),
         keycloak_url=env_override("LV3_INTEGRATION_KEYCLOAK_URL")
         or resolve_service_url(catalog, "keycloak", environment),
-        grafana_url=env_override("LV3_INTEGRATION_GRAFANA_URL")
-        or resolve_service_url(catalog, "grafana", environment),
-        netbox_url=env_override("LV3_INTEGRATION_NETBOX_URL")
-        or resolve_service_url(catalog, "netbox", environment),
-        openbao_url=env_override("LV3_INTEGRATION_OPENBAO_URL")
-        or resolve_service_url(catalog, "openbao", environment),
+        grafana_url=env_override("LV3_INTEGRATION_GRAFANA_URL") or resolve_service_url(catalog, "grafana", environment),
+        netbox_url=env_override("LV3_INTEGRATION_NETBOX_URL") or resolve_service_url(catalog, "netbox", environment),
+        openbao_url=env_override("LV3_INTEGRATION_OPENBAO_URL") or resolve_service_url(catalog, "openbao", environment),
         postgres_dsn=os.environ.get("LV3_INTEGRATION_POSTGRES_DSN")
         or resolve_service_url(catalog, "postgres", environment),
         windmill_url=env_override("LV3_INTEGRATION_WINDMILL_URL")
@@ -243,7 +240,7 @@ def report_path(repo_root: Path, requested: Path | None, mode: str, environment:
 
 
 def iso_now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def write_report(path: Path, payload: dict[str, Any]) -> None:

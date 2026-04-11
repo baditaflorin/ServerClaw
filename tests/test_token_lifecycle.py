@@ -143,7 +143,13 @@ def make_inventory(path: Path, hook_script: Path, log_path: Path) -> Path:
                         },
                         "invalidate_sessions": {
                             "kind": "command",
-                            "command": ["python3", str(hook_script), "invalidate_sessions", "{{ token_id }}", str(log_path)],
+                            "command": [
+                                "python3",
+                                str(hook_script),
+                                "invalidate_sessions",
+                                "{{ token_id }}",
+                                str(log_path),
+                            ],
                         },
                     },
                 },
@@ -222,9 +228,7 @@ def test_exposure_response_executes_revoke_rotate_and_session_invalidation(token
     assert "invalidate_sessions:platform-cli-token" in hook_log
 
 
-def test_exposure_response_blocks_when_revoke_hook_is_missing(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_exposure_response_blocks_when_revoke_hook_is_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     policy_path = make_policy(tmp_path / "config" / "token-policy.yaml")
     hook_script = make_hook_script(tmp_path / "hook.py")
     inventory_path = write_json_yaml(
@@ -246,7 +250,13 @@ def test_exposure_response_blocks_when_revoke_hook_is_missing(
                     "hooks": {
                         "rotate": {
                             "kind": "command",
-                            "command": ["python3", str(hook_script), "rotate", "{{ token_id }}", str(tmp_path / "hook.log")],
+                            "command": [
+                                "python3",
+                                str(hook_script),
+                                "rotate",
+                                "{{ token_id }}",
+                                str(tmp_path / "hook.log"),
+                            ],
                         }
                     },
                 }

@@ -49,8 +49,7 @@ def request_json(
     data = None
     headers = {
         "Accept": "application/json",
-        "Authorization": "Basic "
-        + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
+        "Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
     }
     if payload is not None:
         data = json.dumps(payload).encode("utf-8")
@@ -80,8 +79,7 @@ def delete_token(*, base_url: str, username: str, password: str, token_id_or_nam
     data = None
     headers = {
         "Accept": "application/json",
-        "Authorization": "Basic "
-        + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
+        "Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
     }
     request = urllib.request.Request(url, data=data, headers=headers, method="DELETE")
     try:
@@ -107,11 +105,7 @@ def create_runtime_token(*, state_file: Path, env_file: Path) -> None:
     clone_host_port = os.environ.get("RENOVATE_GIT_CLONE_HOST_PORT", "").strip()
     clone_target_host = os.environ.get("RENOVATE_GIT_CLONE_TARGET_HOST", "").strip()
     clone_target_port = os.environ.get("RENOVATE_GIT_CLONE_TARGET_PORT", "").strip()
-    scope_names = [
-        scope.strip()
-        for scope in require_env("RENOVATE_GITEA_TOKEN_SCOPES").split(",")
-        if scope.strip()
-    ]
+    scope_names = [scope.strip() for scope in require_env("RENOVATE_GITEA_TOKEN_SCOPES").split(",") if scope.strip()]
     token_name = f"renovate-{time.strftime('%Y%m%d%H%M%S', time.gmtime())}"
 
     response = request_json(
@@ -198,9 +192,7 @@ def cleanup_runtime_token(*, state_file: Path) -> None:
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Mint and clean up a short-lived Gitea token for Renovate job runs."
-    )
+    parser = argparse.ArgumentParser(description="Mint and clean up a short-lived Gitea token for Renovate job runs.")
     parser.add_argument("action", choices=("create", "cleanup"))
     parser.add_argument("--state-file", required=True)
     parser.add_argument("--env-file")

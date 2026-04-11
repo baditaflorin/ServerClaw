@@ -39,7 +39,9 @@ def test_openfga_runbook_documents_runtime_and_controller_endpoint_split() -> No
 
 
 def test_openfga_network_policy_allows_controller_build_and_monitoring_access() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8"))
+    host_vars = yaml.safe_load(
+        (REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8")
+    )
     rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
 
     assert any(rule["source"] == "host" and 8098 in rule["ports"] for rule in rules)

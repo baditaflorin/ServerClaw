@@ -15,9 +15,7 @@ class ProvisionSubdomainPlaybookTests(unittest.TestCase):
         self.tasks = self.playbook[0]["tasks"]
 
     def test_controller_defaults_are_loaded_without_namespacing(self) -> None:
-        include_vars_task = next(
-            task for task in self.tasks if task["name"] == "Load controller defaults"
-        )
+        include_vars_task = next(task for task in self.tasks if task["name"] == "Load controller defaults")
 
         self.assertEqual(
             include_vars_task["ansible.builtin.include_vars"]["file"],

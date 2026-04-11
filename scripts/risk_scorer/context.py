@@ -261,8 +261,10 @@ def dependency_graph_descendants(
     if graph_dsn:
         try:
             client = DependencyGraphClient(dsn=graph_dsn)
-            return len([node_id for node_id in client.descendants(f"service:{service_id}") if node_id.startswith("service:")])
-        except Exception as exc:  # noqa: BLE001
+            return len(
+                [node_id for node_id in client.descendants(f"service:{service_id}") if node_id.startswith("service:")]
+            )
+        except Exception as exc:
             stale_reasons.append(f"dependency fanout for {service_id} fell back to repo graph because {exc}")
     base = repo_root or repo_path()
     payload = load_json(base / "config" / "dependency-graph.json", default={})
@@ -362,7 +364,9 @@ def latest_mutation_age_hours(
         except json.JSONDecodeError:
             continue
         candidate_workflow = normalize_identifier(str(payload.get("workflow_id", "")))
-        if candidate_workflow != normalized_workflow and not (service_id and receipt_matches_service(payload, service_id)):
+        if candidate_workflow != normalized_workflow and not (
+            service_id and receipt_matches_service(payload, service_id)
+        ):
             continue
         for key in ("recorded_on", "applied_on"):
             raw = payload.get(key)
@@ -419,7 +423,9 @@ def compile_workflow_intent(
     workflow_defaults = resolve_workflow_defaults(workflow_id, overrides)
     expected_change_count = workflow_defaults.get("expected_change_count")
     if not isinstance(expected_change_count, int):
-        expected_change_count = int(load_risk_scoring_weights(repo_root).get("defaults", {}).get("expected_change_count", 5))
+        expected_change_count = int(
+            load_risk_scoring_weights(repo_root).get("defaults", {}).get("expected_change_count", 5)
+        )
     irreversible_count = int(workflow_defaults.get("irreversible_count", 0))
     unknown_count = int(workflow_defaults.get("unknown_count", 0))
     rollback_verified = bool(workflow_defaults.get("rollback_verified", False))
@@ -440,7 +446,9 @@ def compile_workflow_intent(
     }
     lane_resolution = resolve_lanes(payload, repo_root=repo_root or repo_path())
     payload["required_lanes"] = list(lane_resolution.required_lanes)
-    payload["resource_claims"] = [claim.as_dict() for claim in infer_resource_claims(payload, repo_root=repo_root or repo_path())]
+    payload["resource_claims"] = [
+        claim.as_dict() for claim in infer_resource_claims(payload, repo_root=repo_root or repo_path())
+    ]
     semantic_diff = compute_semantic_diff(payload, repo_root=repo_root)
     if semantic_diff is not None:
         payload["semantic_diff"] = semantic_diff
@@ -453,11 +461,11 @@ def compile_workflow_intent(
 def compute_semantic_diff(payload: dict[str, Any], *, repo_root: Path | None = None) -> Any | None:
     try:
         from platform.diff_engine import DiffEngine
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     try:
         return DiffEngine(repo_root=repo_root or repo_path()).compute(payload)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
 
 
@@ -515,7 +523,9 @@ def assemble_context(
 
     signal_sources = {
         "target_tier": "config/risk-scoring-overrides.yaml"
-        if target_service_id and isinstance(overrides.get("service_tiers"), dict) and target_service_id in overrides["service_tiers"]
+        if target_service_id
+        and isinstance(overrides.get("service_tiers"), dict)
+        and target_service_id in overrides["service_tiers"]
         else "service-capability fallback",
         "downstream_count": "config/dependency-graph.json"
         if downstream_count and not any("fallback" in reason for reason in stale_reasons)

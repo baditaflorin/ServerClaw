@@ -27,12 +27,10 @@ Usage
 
 from __future__ import annotations
 
-import io
 import json
 import re
 import sys
 import uuid
-from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +45,7 @@ from .models import (
     ScoringContext,
 )
 from .resolver import resolve_scope, resolve_target, resolve_workflow_id
+from datetime import UTC
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +71,7 @@ class GoalCompilationError(Exception):
             "details": self.details,
         }
 
-    def __repr__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:
         return f"GoalCompilationError(code={self.code!r}, message={self.message!r})"
 
 
@@ -99,7 +98,7 @@ def _template_to_regex(template: str) -> str:
 
 
 class _RulePattern:
-    __slots__ = ("kind", "value", "_compiled")
+    __slots__ = ("_compiled", "kind", "value")
 
     def __init__(self, kind: str, value: str) -> None:
         self.kind = kind
@@ -120,36 +119,33 @@ class _RulePattern:
 
 class _GoalRule:
     __slots__ = (
-        "rule_id",
-        "patterns",
         "action",
-        "target_kind",
-        "default_risk_class",
         "allowed_tools",
-        "rollback_path",
-        "requires_approval_above",
-        "ttl_seconds",
-        "workflow_id",
-        "workflow_candidates",
-        "success_criteria",
+        "default_risk_class",
+        "patterns",
         "preconditions",
+        "requires_approval_above",
+        "rollback_path",
+        "rule_id",
         "scope_defaults",
+        "success_criteria",
+        "target_kind",
+        "ttl_seconds",
+        "workflow_candidates",
+        "workflow_id",
     )
 
     def __init__(self, data: dict[str, Any]) -> None:
         self.rule_id: str = str(data["id"])
         self.patterns: list[_RulePattern] = [
-            _RulePattern(kind=str(p["type"]), value=str(p["value"]))
-            for p in data.get("patterns", [])
+            _RulePattern(kind=str(p["type"]), value=str(p["value"])) for p in data.get("patterns", [])
         ]
         self.action: str = str(data["action"])
         self.target_kind: str = str(data.get("target_kind", "service"))
         self.default_risk_class: RiskClass = RiskClass(str(data["default_risk_class"]))
         self.allowed_tools: list[str] = [str(t) for t in data.get("allowed_tools", [])]
         self.rollback_path: str | None = data.get("rollback_path")
-        self.requires_approval_above: RiskClass = RiskClass(
-            str(data.get("requires_approval_above", "LOW"))
-        )
+        self.requires_approval_above: RiskClass = RiskClass(str(data.get("requires_approval_above", "LOW")))
         self.ttl_seconds: int = int(data.get("ttl_seconds", 300))
         self.workflow_id: str | None = data.get("workflow_id")
         self.workflow_candidates: list[str] = [str(v) for v in data.get("workflow_candidates", [])]
@@ -179,17 +175,11 @@ def _load_aliases(path: Path) -> dict[str, Any]:
     return {
         "phrase_aliases": dict(payload.get("phrase_aliases") or {}),
         "service_aliases": dict(payload.get("service_aliases") or {}),
-        "groups": {
-            str(name): data
-            for name, data in (payload.get("groups") or {}).items()
-            if isinstance(data, dict)
-        },
+        "groups": {str(name): data for name, data in (payload.get("groups") or {}).items() if isinstance(data, dict)},
     }
 
 
-def _match_rule(
-    text: str, rules: list[_GoalRule]
-) -> tuple[_GoalRule, dict[str, str]] | None:
+def _match_rule(text: str, rules: list[_GoalRule]) -> tuple[_GoalRule, dict[str, str]] | None:
     for rule in rules:
         captures = rule.match(text)
         if captures is not None:
@@ -237,9 +227,7 @@ def _build_scoring_context(
         exposure = str(catalog_entry.get("exposure", "")).strip().lower()
         if target_service_id in {"proxmox_ui", "openbao", "step_ca"}:
             target_tier = "critical"
-        elif category in {"security", "infrastructure"}:
-            target_tier = "high"
-        elif exposure in {"edge-published", "edge-static"}:
+        elif category in {"security", "infrastructure"} or exposure in {"edge-published", "edge-static"}:
             target_tier = "high"
         else:
             target_tier = "medium"
@@ -524,13 +512,9 @@ class GoalCompiler:
     def normalize(self, raw_input: str) -> str:
         """Apply whitespace collapse and alias substitutions."""
         normalized = " ".join(raw_input.strip().lower().split())
-        for source, target in sorted(
-            self._aliases["phrase_aliases"].items(), key=lambda t: len(t[0]), reverse=True
-        ):
+        for source, target in sorted(self._aliases["phrase_aliases"].items(), key=lambda t: len(t[0]), reverse=True):
             normalized = re.sub(rf"\b{re.escape(source)}\b", str(target), normalized)
-        for source, target in sorted(
-            self._aliases["service_aliases"].items(), key=lambda t: len(t[0]), reverse=True
-        ):
+        for source, target in sorted(self._aliases["service_aliases"].items(), key=lambda t: len(t[0]), reverse=True):
             normalized = re.sub(rf"\b{re.escape(source)}\b", str(target), normalized)
         return normalized
 
@@ -611,6 +595,7 @@ class GoalCompiler:
         """Return maintenance-window preconditions (best-effort, never raises)."""
         try:
             from maintenance_window_tool import list_active_windows_best_effort  # type: ignore[import]
+
             windows = list_active_windows_best_effort()
         except Exception:
             windows = {}
@@ -618,11 +603,7 @@ class GoalCompiler:
         if not target.services:
             return ["maintenance window check completed"]
 
-        active = [
-            svc
-            for svc in target.services
-            if f"maintenance/{svc}" in windows or "maintenance/all" in windows
-        ]
+        active = [svc for svc in target.services if f"maintenance/{svc}" in windows or "maintenance/all" in windows]
         if active:
             return [f"maintenance window already active for {', '.join(active)}"]
         return ["no active maintenance window blocks this scope"]
@@ -652,11 +633,7 @@ class GoalCompiler:
         target: IntentTarget,
         workflow_id: str | None,
     ) -> list[str]:
-        return [
-            rendered
-            for value in values
-            if (rendered := self._render(value, captures, target, workflow_id))
-        ]
+        return [rendered for value in values if (rendered := self._render(value, captures, target, workflow_id))]
 
     def _render(
         self,
@@ -685,9 +662,7 @@ class GoalCompiler:
                 payload = json.loads(path.read_text(encoding="utf-8"))
                 services = payload.get("services", [])
                 self._service_catalog = {
-                    item["id"]: item
-                    for item in services
-                    if isinstance(item, dict) and isinstance(item.get("id"), str)
+                    item["id"]: item for item in services if isinstance(item, dict) and isinstance(item.get("id"), str)
                 }
             except (OSError, json.JSONDecodeError):
                 self._service_catalog = {}
@@ -706,5 +681,6 @@ class GoalCompiler:
 
     @staticmethod
     def _utc_now() -> str:
-        from datetime import datetime, timezone
-        return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        from datetime import datetime
+
+        return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")

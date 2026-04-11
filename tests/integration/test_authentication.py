@@ -55,9 +55,7 @@ def test_keycloak_openid_configuration_matches_realm(integration_config) -> None
         and not (integration_config.keycloak_username and integration_config.keycloak_password)
         and os.environ.get("LV3_ALLOW_PUBLIC_DISCOVERY_CHECKS") != "1"
     ):
-        pytest.skip(
-            "Set LV3_ALLOW_PUBLIC_DISCOVERY_CHECKS=1 or provide test-runner credentials to probe discovery"
-        )
+        pytest.skip("Set LV3_ALLOW_PUBLIC_DISCOVERY_CHECKS=1 or provide test-runner credentials to probe discovery")
     keycloak_url = require_url(
         integration_config.keycloak_url,
         "Keycloak URL is not configured for this environment",

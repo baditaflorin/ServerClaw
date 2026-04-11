@@ -44,7 +44,9 @@ def test_argument_spec_requires_core_runtime_inputs() -> None:
 
 def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
     tasks = load_tasks()
-    precheck_task = next(task for task in tasks if task.get("name") == "Check whether Docker nat chain exists before Tika startup")
+    precheck_task = next(
+        task for task in tasks if task.get("name") == "Check whether Docker nat chain exists before Tika startup"
+    )
     assert precheck_task["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
 
     reset_task = next(
@@ -69,12 +71,16 @@ def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
     assert "Restart Docker to restore nat chain before retrying Tika startup" in rescue_names
     assert "Reset stale Tika compose resources after startup failure" in rescue_names
     assert "Retry Tika startup after Docker nat-chain or compose-network recovery" in rescue_names
-    assert "failed to create endpoint" in recovery_fact["ansible.builtin.set_fact"]["tika_runtime_compose_network_missing"]
+    assert (
+        "failed to create endpoint" in recovery_fact["ansible.builtin.set_fact"]["tika_runtime_compose_network_missing"]
+    )
 
 
 def test_role_force_recreates_tika_when_port_binding_is_missing() -> None:
     tasks = load_tasks()
-    port_check = next(task for task in tasks if task.get("name") == "Check whether Tika publishes the expected host port")
+    port_check = next(
+        task for task in tasks if task.get("name") == "Check whether Tika publishes the expected host port"
+    )
     assert port_check["ansible.builtin.command"]["argv"] == [
         "docker",
         "port",
@@ -85,10 +91,13 @@ def test_role_force_recreates_tika_when_port_binding_is_missing() -> None:
     recreate_block = next(
         task
         for task in tasks
-        if task.get("name") == "Force-recreate Tika when the host port binding is missing and recover stale compose-network drift"
+        if task.get("name")
+        == "Force-recreate Tika when the host port binding is missing and recover stale compose-network drift"
     )
     recreate_task = next(
-        task for task in recreate_block["block"] if task.get("name") == "Force-recreate Tika when the host port binding is missing"
+        task
+        for task in recreate_block["block"]
+        if task.get("name") == "Force-recreate Tika when the host port binding is missing"
     )
     rescue_names = [task["name"] for task in recreate_block["rescue"]]
     assert "--force-recreate" in recreate_task["ansible.builtin.command"]["argv"]
@@ -104,15 +113,24 @@ def test_verify_tasks_cover_plaintext_and_metadata_extraction() -> None:
     assert "Verify Apache Tika extracts plaintext from the HTML fixture" in names
     assert "Verify Apache Tika returns JSON metadata for the HTML fixture" in names
 
-    text_task = next(task for task in tasks if task.get("name") == "Verify Apache Tika extracts plaintext from the HTML fixture")
-    meta_task = next(task for task in tasks if task.get("name") == "Verify Apache Tika returns JSON metadata for the HTML fixture")
-    meta_assert_task = next(task for task in tasks if task.get("name") == "Assert Apache Tika returned metadata for the fixture")
+    text_task = next(
+        task for task in tasks if task.get("name") == "Verify Apache Tika extracts plaintext from the HTML fixture"
+    )
+    meta_task = next(
+        task for task in tasks if task.get("name") == "Verify Apache Tika returns JSON metadata for the HTML fixture"
+    )
+    meta_assert_task = next(
+        task for task in tasks if task.get("name") == "Assert Apache Tika returned metadata for the fixture"
+    )
 
     assert text_task["ansible.builtin.uri"]["url"] == "{{ tika_runtime_base_url }}/tika"
     assert text_task["ansible.builtin.uri"]["headers"]["Accept"] == "text/plain"
     assert meta_task["ansible.builtin.uri"]["url"] == "{{ tika_runtime_base_url }}/meta"
     assert meta_task["ansible.builtin.uri"]["headers"]["Accept"] == "application/json"
-    assert "tika_runtime_verify_meta_payload['Content-Type'] is defined" in meta_assert_task["ansible.builtin.assert"]["that"]
+    assert (
+        "tika_runtime_verify_meta_payload['Content-Type'] is defined"
+        in meta_assert_task["ansible.builtin.assert"]["that"]
+    )
     assert (
         "tika_runtime_verify_meta_payload['Content-Type'] is match('^text/html(;.*)?$')"
         in meta_assert_task["ansible.builtin.assert"]["that"]

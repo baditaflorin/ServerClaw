@@ -103,33 +103,25 @@ class OperatorManagerError(RuntimeError):
 
 
 class OperatorBackend(Protocol):
-    def ensure_prerequisites(self) -> dict[str, Any]:
-        ...
+    def ensure_prerequisites(self) -> dict[str, Any]: ...
 
-    def onboard_operator(self, operator: dict[str, Any], bootstrap_password: str) -> dict[str, Any]:
-        ...
+    def onboard_operator(self, operator: dict[str, Any], bootstrap_password: str) -> dict[str, Any]: ...
 
-    def offboard_operator(self, operator: dict[str, Any], reason: str | None) -> dict[str, Any]:
-        ...
+    def offboard_operator(self, operator: dict[str, Any], reason: str | None) -> dict[str, Any]: ...
 
-    def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
-        ...
+    def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]: ...
 
-    def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
-        ...
+    def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]: ...
 
-    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
-        ...
+    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]: ...
 
-    def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
-        ...
+    def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]: ...
 
-    def quarterly_review(self, review: dict[str, Any]) -> dict[str, Any]:
-        ...
+    def quarterly_review(self, review: dict[str, Any]) -> dict[str, Any]: ...
 
 
 def utc_now() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def get_yaml_module():
@@ -303,7 +295,11 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
     ssh = require_mapping(operator.get("ssh"), f"{path}.ssh")
     ssh_principal = require_string(ssh.get("principal"), f"{path}.ssh.principal")
     certificate_ttl_hours = ssh.get("certificate_ttl_hours")
-    if isinstance(certificate_ttl_hours, bool) or not isinstance(certificate_ttl_hours, int) or certificate_ttl_hours < 1:
+    if (
+        isinstance(certificate_ttl_hours, bool)
+        or not isinstance(certificate_ttl_hours, int)
+        or certificate_ttl_hours < 1
+    ):
         raise OperatorManagerError(f"{path}.ssh.certificate_ttl_hours must be an integer >= 1.")
     public_keys_raw = ssh.get("public_keys")
     if not isinstance(public_keys_raw, list):
@@ -312,7 +308,9 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
     for key_index, public_key_raw in enumerate(public_keys_raw):
         key_path = f"{path}.ssh.public_keys[{key_index}]"
         public_key_payload = require_mapping(public_key_raw, key_path)
-        public_key = normalize_ssh_public_key(require_string(public_key_payload.get("public_key"), f"{key_path}.public_key"))
+        public_key = normalize_ssh_public_key(
+            require_string(public_key_payload.get("public_key"), f"{key_path}.public_key")
+        )
         fingerprint = require_string(public_key_payload.get("fingerprint"), f"{key_path}.fingerprint")
         if fingerprint != ssh_public_key_fingerprint(public_key):
             raise OperatorManagerError(f"{key_path}.fingerprint does not match the declared public key.")
@@ -338,7 +336,9 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
 
     audit = require_mapping(operator.get("audit"), f"{path}.audit")
     normalized_audit = {
-        "onboarded_at": validate_timestamp(require_string(audit.get("onboarded_at"), f"{path}.audit.onboarded_at"), f"{path}.audit.onboarded_at"),
+        "onboarded_at": validate_timestamp(
+            require_string(audit.get("onboarded_at"), f"{path}.audit.onboarded_at"), f"{path}.audit.onboarded_at"
+        ),
         "onboarded_by": require_string(audit.get("onboarded_by"), f"{path}.audit.onboarded_by"),
     }
     for field in ("offboarded_at", "offboarded_by", "last_reviewed_at", "last_reviewed_by", "last_seen_at"):
@@ -346,7 +346,9 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
         if value is None:
             continue
         if field.endswith("_at"):
-            normalized_audit[field] = validate_timestamp(require_string(value, f"{path}.audit.{field}"), f"{path}.audit.{field}")
+            normalized_audit[field] = validate_timestamp(
+                require_string(value, f"{path}.audit.{field}"), f"{path}.audit.{field}"
+            )
         else:
             normalized_audit[field] = require_string(value, f"{path}.audit.{field}")
 
@@ -389,7 +391,9 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
 
 def validate_operator_roster(payload: Any) -> dict[str, Any]:
     roster = require_mapping(payload, "config/operators.yaml")
-    ensure_schema_constant(roster.get("$schema"), "config/schemas/operators.schema.json", "config/operators.yaml.$schema")
+    ensure_schema_constant(
+        roster.get("$schema"), "config/schemas/operators.schema.json", "config/operators.yaml.$schema"
+    )
     ensure_schema_constant(roster.get("schema_version"), "1.0.0", "config/operators.yaml.schema_version")
     operators_raw = roster.get("operators")
     if not isinstance(operators_raw, list):
@@ -476,7 +480,9 @@ def create_operator_record(
         raise OperatorManagerError("operator id must use lowercase letters, numbers, and hyphens.")
     username = keycloak_username or default_username(name, email)
     if not KEYCLOAK_USERNAME_PATTERN.match(username):
-        raise OperatorManagerError("keycloak username must use lowercase letters, numbers, dots, underscores, or hyphens.")
+        raise OperatorManagerError(
+            "keycloak username must use lowercase letters, numbers, dots, underscores, or hyphens."
+        )
     derived = role_payload(role)
     public_keys: list[dict[str, str]] = []
     if role_definition.ssh_enabled:
@@ -522,7 +528,9 @@ def create_operator_record(
     }
     if tailscale_device_name:
         record["tailscale"]["device_name"] = tailscale_device_name.strip()
-    return validate_operator_roster({"$schema": "config/schemas/operators.schema.json", "schema_version": "1.0.0", "operators": [record]})["operators"][0]
+    return validate_operator_roster(
+        {"$schema": "config/schemas/operators.schema.json", "schema_version": "1.0.0", "operators": [record]}
+    )["operators"][0]
 
 
 def upsert_operator_in_roster(roster: dict[str, Any], record: dict[str, Any]) -> tuple[dict[str, Any], bool]:
@@ -537,7 +545,9 @@ def upsert_operator_in_roster(roster: dict[str, Any], record: dict[str, Any]) ->
     return validate_operator_roster(updated), True
 
 
-def mark_operator_inactive(roster: dict[str, Any], operator_id: str, offboarded_by: str) -> tuple[dict[str, Any], dict[str, Any]]:
+def mark_operator_inactive(
+    roster: dict[str, Any], operator_id: str, offboarded_by: str
+) -> tuple[dict[str, Any], dict[str, Any]]:
     updated = copy.deepcopy(roster)
     for operator in updated["operators"]:
         if operator["id"] != operator_id:
@@ -833,9 +843,7 @@ class LiveBackend:
         ]
         for entry in review["operators"]:
             suffix = " FLAGGED" if entry["flagged"] else ""
-            markdown_lines.append(
-                f"- {entry['id']} ({entry['role']}) last seen {entry['last_seen']}{suffix}"
-            )
+            markdown_lines.append(f"- {entry['id']} ({entry['role']}) last seen {entry['last_seen']}{suffix}")
         mattermost = self.notifications.post_text("\n".join(markdown_lines))
         return {"mattermost": mattermost}
 
@@ -1072,7 +1080,9 @@ def update_notes(
     dry_run: bool,
 ) -> dict[str, Any]:
     roster = load_operator_roster(roster_path)
-    updated_roster, updated_operator, changed = update_operator_notes_in_roster(roster, operator_id, notes_markdown, actor_id)
+    updated_roster, updated_operator, changed = update_operator_notes_in_roster(
+        roster, operator_id, notes_markdown, actor_id
+    )
     if not dry_run:
         dump_operator_roster(updated_roster, roster_path)
     backend = select_backend(dry_run=dry_run, actor_class=actor_class, actor_id=actor_id)
@@ -1152,7 +1162,7 @@ def quarterly_review(
     inactive_days: int,
 ) -> dict[str, Any]:
     roster = load_operator_roster(roster_path)
-    now = dt.datetime.now(dt.timezone.utc)
+    now = dt.datetime.now(dt.UTC)
     review_entries: list[dict[str, Any]] = []
     flagged_count = 0
     for operator in roster["operators"]:
@@ -1234,7 +1244,9 @@ def build_parser() -> argparse.ArgumentParser:
     onboard_parser.add_argument("--bootstrap-password")
     onboard_parser.add_argument("--dry-run", action="store_true")
 
-    offboard_parser = subparsers.add_parser("offboard", help="Disable one operator everywhere and mark them inactive in the roster.")
+    offboard_parser = subparsers.add_parser(
+        "offboard", help="Disable one operator everywhere and mark them inactive in the roster."
+    )
     offboard_parser.add_argument("--id", required=True)
     offboard_parser.add_argument("--reason")
     offboard_parser.add_argument("--dry-run", action="store_true")
@@ -1274,7 +1286,9 @@ def build_parser() -> argparse.ArgumentParser:
     sync_parser.add_argument("--id")
     sync_parser.add_argument("--dry-run", action="store_true")
 
-    review_parser = subparsers.add_parser("quarterly-review", help="Build and optionally publish the quarterly access review.")
+    review_parser = subparsers.add_parser(
+        "quarterly-review", help="Build and optionally publish the quarterly access review."
+    )
     review_parser.add_argument("--warning-days", type=int, default=45)
     review_parser.add_argument("--inactive-days", type=int, default=60)
     review_parser.add_argument("--dry-run", action="store_true")

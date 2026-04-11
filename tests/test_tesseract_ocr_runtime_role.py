@@ -14,14 +14,18 @@ COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "templates" /
 DOCKERFILE_TEMPLATE = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "templates" / "Dockerfile.j2"
 ROLE_FILES = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "files"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "tesseract-ocr.yml"
-COLLECTION_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "tesseract-ocr.yml"
+COLLECTION_PLAYBOOK_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "tesseract-ocr.yml"
+)
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "tesseract-ocr.yml"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 HEALTH_PROBE_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
-RUNTIME_AI_HOSTS = "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
+RUNTIME_AI_HOSTS = (
+    "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
+)
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -55,7 +59,8 @@ def test_main_tasks_render_build_start_and_verify_tesseract_ocr() -> None:
     start_block = next(
         task
         for task in tasks
-        if task["name"] == "Start the Tesseract OCR runtime and recover Docker nat-chain or stale compose-network failures"
+        if task["name"]
+        == "Start the Tesseract OCR runtime and recover Docker nat-chain or stale compose-network failures"
     )
     rescue_names = [task["name"] for task in start_block["rescue"]]
     assert "Restart Docker to restore bridge networking before retrying Tesseract OCR startup" in rescue_names
@@ -68,11 +73,18 @@ def test_main_tasks_render_build_start_and_verify_tesseract_ocr() -> None:
     force_recreate_block = next(
         task
         for task in tasks
-        if task["name"] == "Force-recreate Tesseract OCR when the host port binding is missing and recover stale Docker networking drift"
+        if task["name"]
+        == "Force-recreate Tesseract OCR when the host port binding is missing and recover stale Docker networking drift"
     )
     force_recreate_rescue_names = [task["name"] for task in force_recreate_block["rescue"]]
-    assert "Restart Docker to restore bridge networking before retrying Tesseract OCR force-recreate" in force_recreate_rescue_names
-    assert "Ensure Docker bridge networking chains are present before retrying Tesseract OCR force-recreate" in force_recreate_rescue_names
+    assert (
+        "Restart Docker to restore bridge networking before retrying Tesseract OCR force-recreate"
+        in force_recreate_rescue_names
+    )
+    assert (
+        "Ensure Docker bridge networking chains are present before retrying Tesseract OCR force-recreate"
+        in force_recreate_rescue_names
+    )
     assert "Retry Tesseract OCR force-recreate after Docker networking recovery" in force_recreate_rescue_names
 
 
@@ -83,9 +95,13 @@ def test_verify_tasks_cover_health_and_deterministic_ocr_probe() -> None:
     assert "Verify the Tesseract OCR health endpoint responds locally" in names
     assert "Verify Tesseract OCR extracts text from the deterministic image fixture" in names
     probe_task = next(
-        task for task in tasks if task["name"] == "Verify Tesseract OCR extracts text from the deterministic image fixture"
+        task
+        for task in tasks
+        if task["name"] == "Verify Tesseract OCR extracts text from the deterministic image fixture"
     )
-    stage_task = next(task for task in tasks if task["name"] == "Stage the deterministic Tesseract OCR verification image")
+    stage_task = next(
+        task for task in tasks if task["name"] == "Stage the deterministic Tesseract OCR verification image"
+    )
     cleanup_task = next(task for task in tasks if task["name"] == "Remove the staged Tesseract OCR verification image")
     assert stage_task["ansible.builtin.copy"]["src"] == "ocr-ok.png"
     assert stage_task["ansible.builtin.copy"]["dest"] == "{{ tesseract_ocr_runtime_verify_image_tempfile.path }}"
@@ -140,7 +156,9 @@ def test_playbook_and_service_wrapper_import_the_tesseract_ocr_runtime() -> None
         "lv3.platform.docker_runtime",
         "lv3.platform.tesseract_ocr_runtime",
     ]
-    assert root_wrapper == [{"import_playbook": "../collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml"}]
+    assert root_wrapper == [
+        {"import_playbook": "../collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml"}
+    ]
     assert wrapper == [{"import_playbook": "../tesseract-ocr.yml"}]
 
 
@@ -149,10 +167,25 @@ def test_inventory_opens_private_tesseract_ocr_access_to_host_guest_and_monitori
 
     assert host_vars["platform_port_assignments"]["tesseract_ocr_port"] == 3008
     runtime_ai_rules = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
-    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "host" and 3008 in rule["ports"])["ports"]
-    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 3008 in rule["ports"])["ports"]
-    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "172.16.0.0/12" and 3008 in rule["ports"])["ports"]
-    assert 3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "monitoring-lv3" and 3008 in rule["ports"])["ports"]
+    assert (
+        3008 in next(rule for rule in runtime_ai_rules if rule["source"] == "host" and 3008 in rule["ports"])["ports"]
+    )
+    assert (
+        3008
+        in next(rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 3008 in rule["ports"])["ports"]
+    )
+    assert (
+        3008
+        in next(rule for rule in runtime_ai_rules if rule["source"] == "172.16.0.0/12" and 3008 in rule["ports"])[
+            "ports"
+        ]
+    )
+    assert (
+        3008
+        in next(rule for rule in runtime_ai_rules if rule["source"] == "monitoring-lv3" and 3008 in rule["ports"])[
+            "ports"
+        ]
+    )
 
 
 def test_workflow_and_command_catalogs_declare_converge_tesseract_ocr_entrypoint() -> None:

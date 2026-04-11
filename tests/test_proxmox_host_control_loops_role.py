@@ -51,11 +51,11 @@ def test_role_renders_service_timer_and_path_units() -> None:
         REPO_ROOT / "roles" / "proxmox_host_control_loops" / "templates" / "lv3-host-control-loop-reconcile.py.j2"
     ).read_text(encoding="utf-8")
 
-    assert "proxmox_host_control_loops_timer_on_calendar: \"*:0/30\"" in defaults
+    assert 'proxmox_host_control_loops_timer_on_calendar: "*:0/30"' in defaults
     assert "Render the host control-loop systemd path unit" in tasks
     assert "Clear any stale failed state for the host control-loop service" in tasks
     assert "reset-failed" in tasks
-    assert "common_systemd_unit_name: \"{{ proxmox_host_control_loops_timer_name }}\"" in tasks
+    assert 'common_systemd_unit_name: "{{ proxmox_host_control_loops_timer_name }}"' in tasks
     assert "Type=oneshot" in service
     assert "Restart=no" in service
     assert "RestartSec=" not in service

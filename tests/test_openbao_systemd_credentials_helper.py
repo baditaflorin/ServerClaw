@@ -63,11 +63,14 @@ def test_openbao_systemd_credentials_helper_supports_remote_api_targets() -> Non
     assert "Wait for the configured OpenBao API to answer before host-native secret delivery" in tasks
     assert "common_openbao_systemd_credentials_manage_local_openbao_runtime | bool" in tasks
     assert "include_tasks: unseal_openbao_api.yml" in tasks
-    assert "common_openbao_unseal_api_url: \"{{ common_openbao_systemd_credentials_api_url }}\"" in tasks
+    assert 'common_openbao_unseal_api_url: "{{ common_openbao_systemd_credentials_api_url }}"' in tasks
     assert "register: common_openbao_systemd_credentials_unsealed_status" in tasks
     assert "common_openbao_systemd_credentials_unsealed_status.status == 200" in tasks
     assert "not (common_openbao_systemd_credentials_unsealed_status.json.sealed | bool)" in tasks
-    assert "{{ common_openbao_systemd_credentials_api_url }}/v1/auth/approle/role/{{ common_openbao_systemd_credentials_approle_name }}/secret-id" in tasks
+    assert (
+        "{{ common_openbao_systemd_credentials_api_url }}/v1/auth/approle/role/{{ common_openbao_systemd_credentials_approle_name }}/secret-id"
+        in tasks
+    )
     assert 'retries: "{{ common_openbao_api_operation_retries }}"' in tasks
     assert 'delay: "{{ common_openbao_api_operation_delay }}"' in tasks
 
@@ -83,6 +86,9 @@ def test_openbao_systemd_credentials_restarts_and_rechecks_when_secret_payload_c
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "register: common_openbao_systemd_credentials_secret_write" in tasks
-    assert "common_openbao_systemd_credentials_secret_write is defined and common_openbao_systemd_credentials_secret_write.changed" in tasks
+    assert (
+        "common_openbao_systemd_credentials_secret_write is defined and common_openbao_systemd_credentials_secret_write.changed"
+        in tasks
+    )
     assert "Wait for the refreshed host-native credential file after OpenBao secret changes" in tasks
     assert "common_openbao_systemd_credentials_refreshed_credential_file" in tasks

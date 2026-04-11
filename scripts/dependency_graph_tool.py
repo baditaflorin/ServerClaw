@@ -23,6 +23,7 @@ Examples
   python scripts/dependency_graph_tool.py path --from gitea --to keycloak
   python scripts/dependency_graph_tool.py summary
 """
+
 from __future__ import annotations
 
 import argparse
@@ -65,6 +66,7 @@ def _find_node(nodes: list[dict], node_id: str) -> dict | None:
 # commands
 # ---------------------------------------------------------------------------
 
+
 def cmd_nodes(args: argparse.Namespace) -> int:
     data = _load()
     nodes = data.get("nodes", [])
@@ -73,10 +75,7 @@ def cmd_nodes(args: argparse.Namespace) -> int:
     print(f"{'ID':<35}  {'TYPE':<20}  {'VM':<25}  TIER")
     print("-" * 100)
     for n in sorted(results, key=lambda x: x["id"]):
-        print(
-            f"{n['id']:<35}  {n.get('type',''):<20}  "
-            f"{n.get('vm',''):<25}  {n.get('tier','')}"
-        )
+        print(f"{n['id']:<35}  {n.get('type', ''):<20}  {n.get('vm', ''):<25}  {n.get('tier', '')}")
     print(f"\n{len(results)} node(s)")
     return 0
 
@@ -89,7 +88,7 @@ def cmd_edges(args: argparse.Namespace) -> int:
     print(f"{'SOURCE':<30}  {'TARGET':<30}  TYPE")
     print("-" * 80)
     for e in sorted(results, key=lambda x: (x["source"], x["target"])):
-        print(f"{e['source']:<30}  {e['target']:<30}  {e.get('type','')}")
+        print(f"{e['source']:<30}  {e['target']:<30}  {e.get('type', '')}")
     print(f"\n{len(results)} edge(s)")
     return 0
 
@@ -111,7 +110,7 @@ def cmd_depends_on(args: argparse.Namespace) -> int:
     print(f"  {'TARGET':<35}  {'TYPE':<20}  NOTES")
     print("  " + "-" * 75)
     for e in sorted(deps, key=lambda x: x["target"]):
-        print(f"  {e['target']:<35}  {e.get('type',''):<20}  {e.get('notes','')}")
+        print(f"  {e['target']:<35}  {e.get('type', ''):<20}  {e.get('notes', '')}")
     return 0
 
 
@@ -132,7 +131,7 @@ def cmd_depended_by(args: argparse.Namespace) -> int:
     print(f"  {'SOURCE':<35}  {'TYPE':<20}  NOTES")
     print("  " + "-" * 75)
     for e in sorted(dependents, key=lambda x: x["source"]):
-        print(f"  {e['source']:<35}  {e.get('type',''):<20}  {e.get('notes','')}")
+        print(f"  {e['source']:<35}  {e.get('type', ''):<20}  {e.get('notes', '')}")
     return 0
 
 
@@ -175,7 +174,7 @@ def cmd_blast_radius(args: argparse.Namespace) -> int:
     print("  " + "-" * 80)
     for nid2, depth in sorted(impacted.items(), key=lambda x: (x[1], x[0])):
         n2 = node_by_id.get(nid2, {})
-        print(f"  {nid2:<35}  {depth:>5}  {n2.get('type',''):<20}  {n2.get('tier','')}")
+        print(f"  {nid2:<35}  {depth:>5}  {n2.get('type', ''):<20}  {n2.get('tier', '')}")
     print(f"\n{len(impacted)} node(s) in blast radius")
 
     # Risk assessment
@@ -247,11 +246,11 @@ def cmd_summary(args: argparse.Namespace) -> int:
     for e in edges:
         edge_types[e.get("type", "unknown")] += 1
 
-    print(f"Dependency Graph Summary\n")
+    print("Dependency Graph Summary\n")
     print(f"  Nodes: {len(nodes)}")
     for t, cnt in sorted(types.items(), key=lambda x: -x[1]):
         print(f"    {t:<25}  {cnt}")
-    print(f"\n  By tier:")
+    print("\n  By tier:")
     for t, cnt in sorted(tiers.items()):
         print(f"    tier {t:<20}  {cnt}")
     print(f"\n  Edges: {len(edges)}")
@@ -263,6 +262,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

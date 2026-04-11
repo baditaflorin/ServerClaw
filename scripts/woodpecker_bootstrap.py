@@ -109,31 +109,48 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Bootstrap and manage the repo-owned Woodpecker CI control plane.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    prepare = subparsers.add_parser("prepare-oauth", help="Create or reconcile the Gitea OAuth application used by Woodpecker.")
+    prepare = subparsers.add_parser(
+        "prepare-oauth", help="Create or reconcile the Gitea OAuth application used by Woodpecker."
+    )
     prepare.add_argument("--gitea-url", required=True, help="Gitea API base URL.")
     prepare.add_argument("--token-file", required=True, help="Path to the Gitea admin API token file.")
     prepare.add_argument("--app-name", required=True, help="Gitea OAuth application name.")
     prepare.add_argument("--redirect-uri", required=True, help="Redirect URI registered for Woodpecker.")
     prepare.add_argument("--client-id-output", required=True, help="Path to write the OAuth client id.")
     prepare.add_argument("--client-secret-output", required=True, help="Path to write the OAuth client secret.")
-    prepare.add_argument("--existing-client-id-file", help="Optional existing local client id file to preserve when possible.")
-    prepare.add_argument("--existing-client-secret-file", help="Optional existing local client secret file to preserve when possible.")
+    prepare.add_argument(
+        "--existing-client-id-file", help="Optional existing local client id file to preserve when possible."
+    )
+    prepare.add_argument(
+        "--existing-client-secret-file", help="Optional existing local client secret file to preserve when possible."
+    )
     prepare.add_argument("--verify-ssl", action="store_true", help="Verify TLS certificates for the Gitea API.")
     prepare.set_defaults(func=command_prepare_oauth)
 
-    apply_cmd = subparsers.add_parser("apply", help="Login to Woodpecker through Gitea, create the governed API token, and activate the seed repository.")
+    apply_cmd = subparsers.add_parser(
+        "apply",
+        help="Login to Woodpecker through Gitea, create the governed API token, and activate the seed repository.",
+    )
     apply_cmd.add_argument("--base-url", required=True, help="Controller-facing Woodpecker base URL.")
-    apply_cmd.add_argument("--login-base-url", required=True, help="User-facing Woodpecker base URL used for the Gitea login flow.")
+    apply_cmd.add_argument(
+        "--login-base-url", required=True, help="User-facing Woodpecker base URL used for the Gitea login flow."
+    )
     apply_cmd.add_argument("--gitea-url", required=True, help="Gitea API base URL.")
     apply_cmd.add_argument("--username", required=True, help="Gitea username to log into Woodpecker.")
     apply_cmd.add_argument("--password-file", required=True, help="Path to the Gitea password file.")
     apply_cmd.add_argument("--gitea-token-file", required=True, help="Path to the Gitea admin API token file.")
     apply_cmd.add_argument("--spec-file", required=True, help="Path to the JSON bootstrap specification.")
-    apply_cmd.add_argument("--existing-token-file", help="Optional existing Woodpecker API token file to reuse when valid.")
+    apply_cmd.add_argument(
+        "--existing-token-file", help="Optional existing Woodpecker API token file to reuse when valid."
+    )
     apply_cmd.add_argument("--auth-json-output", required=True, help="Path to the persisted Woodpecker auth JSON file.")
     apply_cmd.add_argument("--api-token-output", required=True, help="Path to the persisted Woodpecker API token file.")
-    apply_cmd.add_argument("--verify-ssl", action="store_true", help="Verify TLS certificates for the controller-facing Woodpecker API.")
-    apply_cmd.add_argument("--login-verify-ssl", action="store_true", help="Verify TLS certificates for the public Woodpecker login flow.")
+    apply_cmd.add_argument(
+        "--verify-ssl", action="store_true", help="Verify TLS certificates for the controller-facing Woodpecker API."
+    )
+    apply_cmd.add_argument(
+        "--login-verify-ssl", action="store_true", help="Verify TLS certificates for the public Woodpecker login flow."
+    )
     apply_cmd.set_defaults(func=command_apply)
 
     return parser

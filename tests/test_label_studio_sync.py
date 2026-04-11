@@ -67,12 +67,8 @@ def test_apply_sync_plan_issues_post_and_patch_requests(monkeypatch) -> None:
 
     monkeypatch.setattr(label_studio_sync, "request_json", fake_request_json)
     plan = {
-        "creates": [
-            {"id": "alpha", "payload": {"title": "Alpha", "description": "Create", "label_config": "<View/>"}}
-        ],
-        "updates": [
-            {"id": 17, "catalog_id": "beta", "payload": {"description": "Update"}}
-        ],
+        "creates": [{"id": "alpha", "payload": {"title": "Alpha", "description": "Create", "label_config": "<View/>"}}],
+        "updates": [{"id": 17, "catalog_id": "beta", "payload": {"description": "Update"}}],
     }
 
     applied = label_studio_sync.apply_sync_plan("http://label-studio.internal", "token", plan)

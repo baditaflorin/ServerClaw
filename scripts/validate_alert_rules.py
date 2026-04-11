@@ -46,9 +46,7 @@ def validate_rule_files(rules_dir: Path) -> list[str]:
                 alert_name = rule.get("alert")
                 if not isinstance(alert_name, str) or not alert_name:
                     continue
-                labels = require_mapping(
-                    rule.get("labels"), f"{path}.groups[{group_index}].rules[{rule_index}].labels"
-                )
+                labels = require_mapping(rule.get("labels"), f"{path}.groups[{group_index}].rules[{rule_index}].labels")
                 annotations = require_mapping(
                     rule.get("annotations"),
                     f"{path}.groups[{group_index}].rules[{rule_index}].annotations",

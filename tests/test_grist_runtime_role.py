@@ -23,7 +23,10 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     assert defaults["grist_session_authority"] == "{{ platform_session_authority }}"
     assert defaults["grist_public_edge_private_ip"] == "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
     assert defaults["grist_public_hostname_overrides"][0]["hostname"] == "{{ grist_service_topology.public_hostname }}"
-    assert defaults["grist_public_hostname_overrides"][1]["hostname"] == "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+    assert (
+        defaults["grist_public_hostname_overrides"][1]["hostname"]
+        == "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+    )
     assert defaults["grist_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.grist_port }}"
     assert defaults["grist_internal_base_url"] == "http://127.0.0.1:{{ grist_internal_port }}"
     assert defaults["grist_static_env_file"] == "{{ grist_site_dir }}/grist.env"
@@ -56,75 +59,168 @@ def test_runtime_role_requires_only_the_keycloak_client_secret_before_startup() 
 
 def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     tasks = load_yaml(TASKS_PATH)
-    nat_check = next(task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before Grist startup")
+    nat_check = next(
+        task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before Grist startup"
+    )
     pre_restart_ids = next(
-        task for task in tasks if task.get("name") == "Record container ids that are running before the Grist-triggered Docker restart"
+        task
+        for task in tasks
+        if task.get("name") == "Record container ids that are running before the Grist-triggered Docker restart"
     )
     pre_restart_inspect = next(
-        task for task in tasks if task.get("name") == "Inspect running containers before the Grist-triggered Docker restart"
+        task
+        for task in tasks
+        if task.get("name") == "Inspect running containers before the Grist-triggered Docker restart"
     )
     pre_restart_record = next(
-        task for task in tasks if task.get("name") == "Record containers that were running before the Grist-triggered Docker restart"
+        task
+        for task in tasks
+        if task.get("name") == "Record containers that were running before the Grist-triggered Docker restart"
     )
-    nat_restore = next(task for task in tasks if task.get("name") == "Restore Docker networking when the nat chain is missing before Grist startup")
-    nat_recheck = next(task for task in tasks if task.get("name") == "Recheck the Docker nat chain before Grist startup")
-    docker_info = next(task for task in tasks if task.get("name") == "Wait for the Docker daemon to answer after networking recovery")
+    nat_restore = next(
+        task
+        for task in tasks
+        if task.get("name") == "Restore Docker networking when the nat chain is missing before Grist startup"
+    )
+    nat_recheck = next(
+        task for task in tasks if task.get("name") == "Recheck the Docker nat chain before Grist startup"
+    )
+    docker_info = next(
+        task for task in tasks if task.get("name") == "Wait for the Docker daemon to answer after networking recovery"
+    )
     post_restart_inspect = next(
-        task for task in tasks if task.get("name") == "Re-inspect pre-restart containers after the Grist-triggered Docker restart"
+        task
+        for task in tasks
+        if task.get("name") == "Re-inspect pre-restart containers after the Grist-triggered Docker restart"
     )
     stopped_record = next(
-        task for task in tasks if task.get("name") == "Record pre-restart containers that remained stopped after the Grist-triggered Docker restart"
+        task
+        for task in tasks
+        if task.get("name")
+        == "Record pre-restart containers that remained stopped after the Grist-triggered Docker restart"
     )
     recover_containers = next(
-        task for task in tasks if task.get("name") == "Recover pre-restart containers that remained stopped after the Grist-triggered Docker restart"
+        task
+        for task in tasks
+        if task.get("name")
+        == "Recover pre-restart containers that remained stopped after the Grist-triggered Docker restart"
     )
     confirm_recovery = next(
-        task for task in tasks if task.get("name") == "Confirm pre-restart containers recovered after the Grist-triggered Docker restart"
+        task
+        for task in tasks
+        if task.get("name") == "Confirm pre-restart containers recovered after the Grist-triggered Docker restart"
     )
-    persist_dir = next(task for task in tasks if task.get("name") == "Ensure the Grist persist directory is writable by the runtime user")
-    persist_recurse = next(task for task in tasks if task.get("name") == "Ensure existing Grist persist content is owned by the runtime user")
+    persist_dir = next(
+        task
+        for task in tasks
+        if task.get("name") == "Ensure the Grist persist directory is writable by the runtime user"
+    )
+    persist_recurse = next(
+        task
+        for task in tasks
+        if task.get("name") == "Ensure existing Grist persist content is owned by the runtime user"
+    )
     env_render = next(task for task in tasks if task.get("name") == "Render the Grist environment file")
     compose_render = next(task for task in tasks if task.get("name") == "Render the Grist compose file")
     keycloak_discovery = next(
-        task for task in tasks
-        if task.get("name") == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup"
+        task
+        for task in tasks
+        if task.get("name")
+        == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup"
     )
-    local_port_probe = next(task for task in tasks if task.get("name") == "Check whether the Grist local port is already published")
-    status_probe = next(task for task in tasks if task.get("name") == "Check whether the current Grist local status endpoint is healthy before startup")
-    force_recreate_fact = next(task for task in tasks if task.get("name") == "Record whether the Grist startup needs a force recreate")
-    replace_cleanup = next(task for task in tasks if task.get("name") == "Remove stale Grist compose replacement containers before recovery")
-    openbao_recreate = next(task for task in tasks if task.get("name") == "Force-recreate the Grist OpenBao agent after Docker networking recovery")
-    runtime_env_contract = next(task for task in tasks if task.get("name") == "Wait for the Grist runtime env file after OpenBao agent recovery")
-    force_recreate = next(task for task in tasks if task.get("name") == "Force-recreate the Grist runtime stack after Docker networking recovery")
-    network_flag = next(task for task in tasks if task.get("name") == "Flag stale Grist compose-network failures during force-recreate")
-    network_reset = next(task for task in tasks if task.get("name") == "Reset stale Grist compose resources before retrying force-recreate")
-    network_cleanup = next(task for task in tasks if task.get("name") == "Remove the stale Grist compose network before retrying force-recreate")
+    local_port_probe = next(
+        task for task in tasks if task.get("name") == "Check whether the Grist local port is already published"
+    )
+    status_probe = next(
+        task
+        for task in tasks
+        if task.get("name") == "Check whether the current Grist local status endpoint is healthy before startup"
+    )
+    force_recreate_fact = next(
+        task for task in tasks if task.get("name") == "Record whether the Grist startup needs a force recreate"
+    )
+    replace_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale Grist compose replacement containers before recovery"
+    )
+    openbao_recreate = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Grist OpenBao agent after Docker networking recovery"
+    )
+    runtime_env_contract = next(
+        task for task in tasks if task.get("name") == "Wait for the Grist runtime env file after OpenBao agent recovery"
+    )
+    force_recreate = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Grist runtime stack after Docker networking recovery"
+    )
+    network_flag = next(
+        task for task in tasks if task.get("name") == "Flag stale Grist compose-network failures during force-recreate"
+    )
+    network_reset = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reset stale Grist compose resources before retrying force-recreate"
+    )
+    network_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove the stale Grist compose network before retrying force-recreate"
+    )
     bridge_chain_helper = next(
-        task for task in tasks if task.get("name") == "Ensure Docker bridge networking chains are present before retrying Grist force-recreate"
+        task
+        for task in tasks
+        if task.get("name") == "Ensure Docker bridge networking chains are present before retrying Grist force-recreate"
     )
-    network_retry = next(task for task in tasks if task.get("name") == "Retry Grist force-recreate after Docker networking recovery")
-    auth_surface_probe = next(task for task in tasks if task.get("name") == "Probe the Grist local auth surface before final verification")
-    auth_recovery_fact = next(task for task in tasks if task.get("name") == "Record whether the Grist login middleware needs recovery")
+    network_retry = next(
+        task for task in tasks if task.get("name") == "Retry Grist force-recreate after Docker networking recovery"
+    )
+    auth_surface_probe = next(
+        task for task in tasks if task.get("name") == "Probe the Grist local auth surface before final verification"
+    )
+    auth_recovery_fact = next(
+        task for task in tasks if task.get("name") == "Record whether the Grist login middleware needs recovery"
+    )
     auth_recovery_discovery = next(
-        task for task in tasks
-        if task.get("name") == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist login middleware recovery"
+        task
+        for task in tasks
+        if task.get("name")
+        == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist login middleware recovery"
     )
-    auth_recovery_up = next(task for task in tasks if task.get("name") == "Force-recreate the Grist runtime after OIDC bootstrap recovery")
-    auth_recovery_wait = next(task for task in tasks if task.get("name") == "Wait for Grist to listen locally after login middleware recovery")
+    auth_recovery_up = next(
+        task for task in tasks if task.get("name") == "Force-recreate the Grist runtime after OIDC bootstrap recovery"
+    )
+    auth_recovery_wait = next(
+        task for task in tasks if task.get("name") == "Wait for Grist to listen locally after login middleware recovery"
+    )
     task_names = [task.get("name") for task in tasks]
 
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
-    assert task_names.index("Record container ids that are running before the Grist-triggered Docker restart") < task_names.index(
-        "Restore Docker networking when the nat chain is missing before Grist startup"
-    )
+    assert task_names.index(
+        "Record container ids that are running before the Grist-triggered Docker restart"
+    ) < task_names.index("Restore Docker networking when the nat chain is missing before Grist startup")
     assert pre_restart_ids["ansible.builtin.command"]["argv"] == ["docker", "ps", "-q", "--no-trunc"]
-    assert pre_restart_inspect["ansible.builtin.command"]["stdin"] == "{{ grist_pre_restart_container_ids.stdout_lines | to_json }}"
+    assert (
+        pre_restart_inspect["ansible.builtin.command"]["stdin"]
+        == "{{ grist_pre_restart_container_ids.stdout_lines | to_json }}"
+    )
     assert '["docker", "inspect", container_id]' in pre_restart_inspect["ansible.builtin.command"]["argv"][2]
     assert "grist_pre_restart_container_details" in pre_restart_record["ansible.builtin.set_fact"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert nat_recheck["until"] == "grist_docker_nat_chain_recheck.rc == 0"
-    assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
-    assert post_restart_inspect["ansible.builtin.command"]["stdin"] == "{{ grist_pre_restart_container_names | default([]) | to_json }}"
+    assert docker_info["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "info",
+        "--format",
+        '{{ "{{.ServerVersion}}" }}',
+    ]
+    assert (
+        post_restart_inspect["ansible.builtin.command"]["stdin"]
+        == "{{ grist_pre_restart_container_names | default([]) | to_json }}"
+    )
     assert "grist_stopped_pre_restart_container_details" in stopped_record["ansible.builtin.set_fact"]
     assert recover_containers["ansible.builtin.command"]["stdin"] == (
         "{{ (grist_stopped_pre_restart_container_details | default([])) | to_json }}"
@@ -140,24 +236,40 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "retry_on_any_error=True" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'attempts=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'delay_seconds=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "attempts=5," in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "delay_seconds=5," in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "run_with_retry(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "cwd=working_dir or None," in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def is_local_openbao_group(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'normalized_working_dir == "/opt/openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"lv3-openbao" in container_names' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'if "openbao-agent" in services and not local_openbao_group:' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'final_up_command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'if "openbao-agent" in services and not local_openbao_group:'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'remove_command = ["docker", "rm", "-f", *container_names]'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'recovery_command.extend(["up", "-d", "--force-recreate", *services])'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'final_up_command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert "docker_compose_down_remove_orphans" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up_after_down" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert "NONPERSISTENT_RESTART_POLICIES = {\"\", \"no\"}" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert (
+        'command.extend(["up", "-d", "--force-recreate", *services])'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert 'NONPERSISTENT_RESTART_POLICIES = {"", "no"}' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["until"] == "grist_recovered_container_inspect.rc == 0"
     assert confirm_recovery["retries"] == 12
     assert confirm_recovery["delay"] == 5
@@ -172,8 +284,14 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert "--max-time 10" in keycloak_discovery["ansible.builtin.shell"]
     assert "{{ grist_public_edge_private_ip }}" in keycloak_discovery["ansible.builtin.shell"]
     assert "{{ grist_keycloak_issuer }}/.well-known/openid-configuration" in keycloak_discovery["ansible.builtin.shell"]
-    assert "{{ hostvars[\"proxmox_florin\"].lv3_service_topology.keycloak.public_hostname }}" in keycloak_discovery["ansible.builtin.shell"]
-    assert 'DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<\'PY\'' in keycloak_discovery["ansible.builtin.shell"]
+    assert (
+        '{{ hostvars["proxmox_florin"].lv3_service_topology.keycloak.public_hostname }}'
+        in keycloak_discovery["ansible.builtin.shell"]
+    )
+    assert (
+        'DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<\'PY\''
+        in keycloak_discovery["ansible.builtin.shell"]
+    )
     assert 'payload = json.loads(os.environ["DISCOVERY_JSON"])' in keycloak_discovery["ansible.builtin.shell"]
     assert keycloak_discovery["until"] == "grist_keycloak_discovery.rc == 0"
     assert local_port_probe["ansible.builtin.wait_for"]["port"] == "{{ grist_internal_port }}"
@@ -186,7 +304,9 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert "--force-recreate --no-deps grist" in force_recreate["ansible.builtin.shell"]
     assert force_recreate["register"] == "grist_force_recreate_up"
     assert force_recreate["failed_when"] is False
-    assert "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["grist_force_recreate_network_missing"]
+    assert (
+        "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["grist_force_recreate_network_missing"]
+    )
     assert network_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert "grist_site_dir | basename" in network_cleanup["ansible.builtin.shell"]
     assert bridge_chain_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
@@ -194,7 +314,9 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
     assert network_retry["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "--remove-orphans"]
     assert auth_surface_probe["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/o/docs/"
-    assert auth_surface_probe["ansible.builtin.uri"]["headers"]["Host"] == "{{ grist_service_topology.public_hostname }}"
+    assert (
+        auth_surface_probe["ansible.builtin.uri"]["headers"]["Host"] == "{{ grist_service_topology.public_hostname }}"
+    )
     auth_recovery_expression = auth_recovery_fact["ansible.builtin.set_fact"]["grist_oidc_login_recovery_needed"]
     assert "(grist_pre_verify_auth_surface.status | int) in [200, 400]" in auth_recovery_expression
     assert '"errMessage":"No login system is configured"' in auth_recovery_expression
@@ -217,8 +339,14 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
 def test_publish_tasks_wait_for_public_status_and_verify_login_gating() -> None:
     tasks = load_yaml(PUBLISH_PATH)
     status_task = next(task for task in tasks if task.get("name") == "Wait for the Grist public status endpoint")
-    redirect_task = next(task for task in tasks if task.get("name") == "Verify the Grist public document route reaches the auth-controlled surface")
-    assert_task = next(task for task in tasks if task.get("name") == "Assert the Grist public document route is login-gated")
+    redirect_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Verify the Grist public document route reaches the auth-controlled surface"
+    )
+    assert_task = next(
+        task for task in tasks if task.get("name") == "Assert the Grist public document route is login-gated"
+    )
 
     assert status_task["ansible.builtin.uri"]["url"] == "{{ grist_public_base_url }}/status"
     assert redirect_task["ansible.builtin.uri"]["url"] == "{{ grist_public_base_url }}/o/docs/"
@@ -231,15 +359,21 @@ def test_publish_tasks_wait_for_public_status_and_verify_login_gating() -> None:
     assert "grist_publish_auth_redirect.location is defined" in login_gate_expression
     assert "(grist_publish_auth_redirect.status | int) in [200, 400]" in login_gate_expression
     assert "'Loading... - Grist'" in login_gate_expression
-    assert '\'"supportAnon":false\'' in login_gate_expression
+    assert "'\"supportAnon\":false'" in login_gate_expression
     assert '"errMessage":"No login system is configured"' in login_gate_expression
 
 
 def test_verify_task_checks_the_local_status_endpoint() -> None:
     verify = load_yaml(VERIFY_PATH)
     health_task = next(task for task in verify if task.get("name") == "Verify the Grist local status endpoint")
-    auth_tasks = [task for task in verify if task.get("name") == "Verify the Grist local document route reaches the auth-controlled surface"]
-    assert_tasks = [task for task in verify if task.get("name") == "Assert the Grist local document route is login-gated"]
+    auth_tasks = [
+        task
+        for task in verify
+        if task.get("name") == "Verify the Grist local document route reaches the auth-controlled surface"
+    ]
+    assert_tasks = [
+        task for task in verify if task.get("name") == "Assert the Grist local document route is login-gated"
+    ]
     assert len(auth_tasks) == 1
     assert len(assert_tasks) == 1
     auth_task = auth_tasks[0]
@@ -261,8 +395,14 @@ def test_grist_templates_enable_persistent_oidc_runtime() -> None:
     assert "APP_HOME_URL={{ grist_public_base_url }}" in env_template
     assert "GRIST_FORCE_LOGIN={{ 'true' if grist_force_login else 'false' }}" in env_template
     assert "GRIST_OIDC_SP_HOST={{ grist_keycloak_sp_host }}" in env_template
-    assert 'GRIST_SESSION_SECRET=[[ with secret "kv/data/{{ grist_openbao_secret_path }}" ]][[ .Data.data.GRIST_SESSION_SECRET ]][[ end ]]' in env_ctemplate
-    assert 'GRIST_OIDC_IDP_CLIENT_SECRET=[[ with secret "kv/data/{{ grist_openbao_secret_path }}" ]][[ .Data.data.GRIST_OIDC_IDP_CLIENT_SECRET ]][[ end ]]' in env_ctemplate
+    assert (
+        'GRIST_SESSION_SECRET=[[ with secret "kv/data/{{ grist_openbao_secret_path }}" ]][[ .Data.data.GRIST_SESSION_SECRET ]][[ end ]]'
+        in env_ctemplate
+    )
+    assert (
+        'GRIST_OIDC_IDP_CLIENT_SECRET=[[ with secret "kv/data/{{ grist_openbao_secret_path }}" ]][[ .Data.data.GRIST_OIDC_IDP_CLIENT_SECRET ]][[ end ]]'
+        in env_ctemplate
+    )
     assert "      - {{ grist_static_env_file }}" in compose_template
     assert "      - {{ grist_persist_dir }}:/persist" in compose_template
     assert '      - "{{ ansible_host }}:{{ grist_internal_port }}:8484"' in compose_template

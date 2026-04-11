@@ -11,7 +11,6 @@ import subprocess
 import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
 
 try:
     import tomllib
@@ -287,9 +286,7 @@ def scan_published_artifacts(
 
 def print_summary(result: ScanResult) -> None:
     if not result.findings:
-        print(
-            f"Published artifact secret scan passed: {result.scanned_files} file(s) checked with {result.mode}."
-        )
+        print(f"Published artifact secret scan passed: {result.scanned_files} file(s) checked with {result.mode}.")
         return
     print(
         "Published artifact secret scan failed: "

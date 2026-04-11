@@ -109,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
                 blocking_images.append(scanned_images[-1])
         print(json.dumps({"changed_images": scanned_images, "blocking_images": blocking_images}, indent=2))
         return 2 if blocking_images else 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Managed image gate", exc)
 
 

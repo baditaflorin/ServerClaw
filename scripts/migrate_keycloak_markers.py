@@ -20,15 +20,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ROLE_ROOT = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "roles"
-    / "keycloak_runtime"
-)
+ROLE_ROOT = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "keycloak_runtime"
 DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
 
@@ -36,25 +28,25 @@ TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
 # Order matters: more-specific prefixes must come before shorter ones
 # (e.g., keycloak_ops_portal_ before keycloak_ops_).
 KEYCLOAK_SERVICE_PREFIXES: list[tuple[str, str]] = [
-    ("keycloak_api_gateway_",       "api_gateway"),
-    ("keycloak_ops_portal_",        "ops_portal"),
-    ("keycloak_grafana_",           "grafana"),
-    ("keycloak_gitea_",             "gitea"),
-    ("keycloak_agent_",             "agent"),
-    ("keycloak_serverclaw_runtime_","serverclaw_runtime"),
-    ("keycloak_langfuse_",          "langfuse"),
-    ("keycloak_grist_",             "grist"),
-    ("keycloak_directus_",          "directus"),
-    ("keycloak_superset_",          "superset"),
-    ("keycloak_glitchtip_",         "glitchtip"),
-    ("keycloak_outline_",           "outline"),
-    ("keycloak_paperless_",         "paperless"),
-    ("keycloak_serverclaw_",        "serverclaw"),
-    ("keycloak_dify_",              "dify"),
-    ("keycloak_nomad_",             "nomad"),
-    ("keycloak_plane_",             "plane"),
+    ("keycloak_api_gateway_", "api_gateway"),
+    ("keycloak_ops_portal_", "ops_portal"),
+    ("keycloak_grafana_", "grafana"),
+    ("keycloak_gitea_", "gitea"),
+    ("keycloak_agent_", "agent"),
+    ("keycloak_serverclaw_runtime_", "serverclaw_runtime"),
+    ("keycloak_langfuse_", "langfuse"),
+    ("keycloak_grist_", "grist"),
+    ("keycloak_directus_", "directus"),
+    ("keycloak_superset_", "superset"),
+    ("keycloak_glitchtip_", "glitchtip"),
+    ("keycloak_outline_", "outline"),
+    ("keycloak_paperless_", "paperless"),
+    ("keycloak_serverclaw_", "serverclaw"),
+    ("keycloak_dify_", "dify"),
+    ("keycloak_nomad_", "nomad"),
+    ("keycloak_plane_", "plane"),
     # plane_oidc_* also belongs to plane
-    ("plane_oidc_",                 "plane"),
+    ("plane_oidc_", "plane"),
 ]
 
 
@@ -180,7 +172,7 @@ def _get_task_service(lines: list[str], idx: int) -> str | None:
     line = lines[idx].strip()
     if not line.startswith("- name:"):
         return None
-    name = line[len("- name:"):].strip().strip("\"'")
+    name = line[len("- name:") :].strip().strip("\"'")
     name_lower = name.lower()
 
     # Match patterns: "Ensure the X OAuth client", "Read the X client secret",
@@ -230,7 +222,7 @@ def migrate_tasks(text: str) -> str:
                 service = sid
                 break
             # try: keycloak_<service_id>_client_secret
-            expected = f"keycloak_{sid.replace('-','_')}_client_secret"
+            expected = f"keycloak_{sid.replace('-', '_')}_client_secret"
             if key == expected:
                 service = sid
                 break
@@ -325,6 +317,7 @@ def main() -> int:
             print(f"tasks/main.yml: {begin_count} BEGIN, {end_count} END markers")
             try:
                 import yaml
+
                 yaml.safe_load(migrated)
                 print("tasks/main.yml YAML parse: OK")
             except Exception as e:

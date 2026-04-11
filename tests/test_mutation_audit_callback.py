@@ -8,7 +8,16 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "plugins" / "callback" / "mutation_audit.py"
+PLUGIN_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "plugins"
+    / "callback"
+    / "mutation_audit.py"
+)
 
 
 def test_callback_loads_mutation_audit_helpers_from_repo_root() -> None:
@@ -158,8 +167,8 @@ def test_callback_emits_ntfy_notification_for_mutation_failures() -> None:
             "evidence_ref": kwargs["evidence_ref"],
         }
         module.emit_event_best_effort = lambda event, **kwargs: emitted.append({"event": event, **kwargs}) or True
-        module.publish_ntfy_failure_best_effort = (
-            lambda event, **kwargs: published.append({"event": event, **kwargs}) or True
+        module.publish_ntfy_failure_best_effort = lambda event, **kwargs: (
+            published.append({"event": event, **kwargs}) or True
         )
 
         callback = module.CallbackModule()

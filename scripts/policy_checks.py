@@ -50,9 +50,7 @@ def _run(command: list[str], *, cwd: Path, input_text: str | None = None) -> Non
         return
     stdout = result.stdout.decode("utf-8", errors="replace").strip()
     stderr = result.stderr.decode("utf-8", errors="replace").strip()
-    details = "\n".join(
-        part for part in [stdout, stderr] if part
-    ).strip()
+    details = "\n".join(part for part in [stdout, stderr] if part).strip()
     if not details:
         details = f"command exited with status {result.returncode}"
     raise RuntimeError(f"{' '.join(command)} failed:\n{details}")

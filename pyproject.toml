@@ -19,3 +19,37 @@ include = ["platform*", "scripts*"]
 [[tool.mypy.overrides]]
 module = "validation_toolkit"
 ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes (unused imports, undefined names)
+  "B",    # flake8-bugbear (common bug patterns)
+  "C4",   # flake8-comprehensions (needless list/dict/set comprehensions)
+  "UP",   # pyupgrade (use modern Python idioms)
+  "SIM",  # flake8-simplify
+  "RUF",  # ruff-specific rules
+]
+ignore = [
+  "E402",   # module-level import not at top of file — intentional in scripts that prepend REPO_ROOT to sys.path
+  "E501",   # line too long (handled by formatter)
+  "B008",   # do not perform function calls in argument defaults
+  "B904",   # raise from within except (too noisy in validation scripts)
+  "SIM105", # use contextlib.suppress (stylistic preference)
+  "UP007",  # X | Y union syntax (keep Optional[] for clarity)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# validate_repository_data_models.py uses intentional star-import pattern from catalog loaders
+"scripts/validate_repository_data_models.py" = ["F401", "E402"]
+# agent_tool_registry.py uses mutable defaults intentionally for registry accumulation
+"scripts/agent_tool_registry.py" = ["B006"]
+
+[tool.bandit]
+skips = ["B101", "B603", "B607"]
+severity = "medium"

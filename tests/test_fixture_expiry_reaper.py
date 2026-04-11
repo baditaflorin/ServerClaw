@@ -145,6 +145,7 @@ def test_reaper_uses_fixture_manager_for_existing_repo(monkeypatch, tmp_path: Pa
         HOST_VARS_PATH = None
         CAPACITY_MODEL_PATH = None
         proxmox_api_credentials = None
+
         class vmid_allocator:  # noqa: N801 - mirrors imported module attribute
             read_api_credentials = None
 

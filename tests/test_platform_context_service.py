@@ -4,7 +4,13 @@ import httpx
 from fastapi.testclient import TestClient
 
 import platform_context_service
-from platform_context_service import OLLAMA_EMBED_BATCH_SIZE, OllamaEmbedder, PlatformContextService, ServiceConfig, TokenHashEmbedder
+from platform_context_service import (
+    OLLAMA_EMBED_BATCH_SIZE,
+    OllamaEmbedder,
+    PlatformContextService,
+    ServiceConfig,
+    TokenHashEmbedder,
+)
 
 
 def write(path: Path, content: str) -> None:
@@ -17,8 +23,14 @@ def make_repo(tmp_path: Path) -> Path:
         tmp_path / "docs" / "adr" / "0042-step-ca.md",
         "# ADR 0042\n\n## Decision\nstep-ca issues SSH certificates for humans, agents, services, and hosts.\n",
     )
-    write(tmp_path / "docs" / "runbooks" / "configure-step-ca.md", "# Step CA\n\n## Verify\nCheck SSH certificate issuance.\n")
-    write(tmp_path / "receipts" / "live-applies" / "2026-03-22-test.json", '{"receipt_id":"r1","workflow_id":"converge-step-ca","summary":"ok","applied_on":"2026-03-22"}')
+    write(
+        tmp_path / "docs" / "runbooks" / "configure-step-ca.md",
+        "# Step CA\n\n## Verify\nCheck SSH certificate issuance.\n",
+    )
+    write(
+        tmp_path / "receipts" / "live-applies" / "2026-03-22-test.json",
+        '{"receipt_id":"r1","workflow_id":"converge-step-ca","summary":"ok","applied_on":"2026-03-22"}',
+    )
     write(tmp_path / "config" / "workflow-catalog.json", '{"workflows":{"converge-step-ca":{"description":"d"}}}')
     write(tmp_path / "config" / "command-catalog.json", '{"commands":{"converge-step-ca":{"description":"d"}}}')
     write(
@@ -282,6 +294,7 @@ def test_platform_context_http_sets_trace_header(tmp_path: Path) -> None:
 
     previous_service = platform_context_service.service
     platform_context_service.service = service
+
     async def run() -> None:
         try:
             transport = httpx.ASGITransport(app=platform_context_service.app)

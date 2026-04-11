@@ -71,6 +71,7 @@ def require_identifier(value: Any, path: str) -> str:
     if "{{" in s:
         return s  # Jinja2 template — resolved at Ansible runtime
     import re
+
     if not re.fullmatch(r"[a-z][a-z0-9_-]*", s):
         raise ValueError(
             f"{path} must be a lowercase identifier (letters, digits, hyphens, underscores; must start with a letter)"
@@ -92,6 +93,7 @@ def require_semver(value: Any, path: str) -> str:
     """Validate that value looks like a semantic version (e.g., 1.2.3, v1.2.3)."""
     s = require_str(value, path)
     import re
+
     if not re.fullmatch(r"v?\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?", s):
         raise ValueError(f"{path} must be a semantic version (e.g., 1.2.3 or v1.2.3)")
     return s
@@ -128,7 +130,7 @@ def optional(value: Any, path: str, validator, **kwargs):
 _IDENTITY_PATH: str | None = None
 
 
-def _find_identity_path() -> "Path":
+def _find_identity_path() -> Path:
     """Locate inventory/group_vars/all/identity.yml relative to this script."""
     from pathlib import Path
 
@@ -141,7 +143,6 @@ def load_identity_vars() -> dict[str, str]:
     Only returns variables whose values are plain strings (no Jinja2 expressions),
     suitable for resolving ``{{ var }}`` placeholders in other YAML files.
     """
-    from pathlib import Path
 
     import yaml
 
@@ -166,7 +167,7 @@ def resolve_jinja2_vars(text: str, variables: dict[str, str] | None = None) -> s
     return text
 
 
-def load_yaml_with_identity(path: "Path") -> Any:
+def load_yaml_with_identity(path: Path) -> Any:
     """Load a YAML file, resolving ``{{ platform_domain }}`` and friends first."""
     import yaml
 

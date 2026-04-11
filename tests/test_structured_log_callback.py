@@ -10,7 +10,14 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_PATHS = [
     REPO_ROOT / "callback_plugins" / "structured_log.py",
-    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "plugins" / "callback" / "structured_log.py",
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "plugins"
+    / "callback"
+    / "structured_log.py",
 ]
 
 

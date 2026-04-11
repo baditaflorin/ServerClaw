@@ -26,7 +26,9 @@ def test_extract_document_returns_tika_result_when_text_is_present(tmp_path, mon
     path = tmp_path / "document.pdf"
     path.write_bytes(b"fake-pdf")
 
-    monkeypatch.setattr(document_extraction, "call_tika_metadata", lambda *_args, **_kwargs: {"Content-Type": "application/pdf"})
+    monkeypatch.setattr(
+        document_extraction, "call_tika_metadata", lambda *_args, **_kwargs: {"Content-Type": "application/pdf"}
+    )
     monkeypatch.setattr(document_extraction, "call_tika_text", lambda *_args, **_kwargs: "embedded text")
     called = {"ocr": False}
 
@@ -52,7 +54,9 @@ def test_extract_document_falls_back_to_tesseract_when_tika_returns_no_text(tmp_
     path = tmp_path / "scan.pdf"
     path.write_bytes(b"fake-pdf")
 
-    monkeypatch.setattr(document_extraction, "call_tika_metadata", lambda *_args, **_kwargs: {"Content-Type": "application/pdf"})
+    monkeypatch.setattr(
+        document_extraction, "call_tika_metadata", lambda *_args, **_kwargs: {"Content-Type": "application/pdf"}
+    )
     monkeypatch.setattr(document_extraction, "call_tika_text", lambda *_args, **_kwargs: "")
     monkeypatch.setattr(
         document_extraction,

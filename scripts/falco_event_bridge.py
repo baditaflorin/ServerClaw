@@ -53,7 +53,7 @@ class BridgeConfig:
 
 
 def utc_now_iso() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_priority(priority: Any) -> str:
@@ -175,8 +175,8 @@ def parse_retry_after_seconds(value: str | None) -> float | None:
         except (TypeError, ValueError, IndexError):
             return None
         if retry_at.tzinfo is None:
-            retry_at = retry_at.replace(tzinfo=dt.timezone.utc)
-        return max((retry_at - dt.datetime.now(dt.timezone.utc)).total_seconds(), 0.0)
+            retry_at = retry_at.replace(tzinfo=dt.UTC)
+        return max((retry_at - dt.datetime.now(dt.UTC)).total_seconds(), 0.0)
 
 
 def is_retryable_ntfy_error(exc: BaseException) -> bool:
@@ -255,23 +255,25 @@ def publish_nats_message(*, subject: str, payload: dict[str, Any], config: Bridg
         "user": config.nats_username,
         "pass": config.nats_password,
     }
-    with socket.create_connection((config.nats_host, config.nats_port), timeout=config.http_timeout_seconds) as connection:
+    with socket.create_connection(
+        (config.nats_host, config.nats_port), timeout=config.http_timeout_seconds
+    ) as connection:
         connection.settimeout(config.http_timeout_seconds)
         initial = _read_control_line(connection)
         if not initial.startswith("INFO"):
             raise RuntimeError(f"Unexpected NATS greeting: {initial}")
-        connection.sendall(f"CONNECT {json.dumps(connect_payload, separators=(',', ':'))}\r\nPING\r\n".encode("utf-8"))
+        connection.sendall(f"CONNECT {json.dumps(connect_payload, separators=(',', ':'))}\r\nPING\r\n".encode())
         _await_pong(connection)
-        connection.sendall(f"PUB {subject} {len(body)}\r\n".encode("utf-8") + body + b"\r\nPING\r\n")
+        connection.sendall(f"PUB {subject} {len(body)}\r\n".encode() + body + b"\r\nPING\r\n")
         _await_pong(connection)
 
 
 def publish_ntfy_message(*, event: dict[str, Any], source_host: str, config: BridgeConfig) -> None:
     title = f"Falco critical alert on {source_host}"
     output = str(event.get("output") or event.get("rule") or "Falco critical event")
-    body = f"[{normalize_priority(event.get('priority'))}] {source_host}: {output}".encode("utf-8")
+    body = f"[{normalize_priority(event.get('priority'))}] {source_host}: {output}".encode()
     url = f"{config.ntfy_base_url.rstrip('/')}/{config.ntfy_topic}"
-    credentials = base64.b64encode(f"{config.ntfy_username}:{config.ntfy_password}".encode("utf-8")).decode("ascii")
+    credentials = base64.b64encode(f"{config.ntfy_username}:{config.ntfy_password}".encode()).decode("ascii")
     request = urllib.request.Request(
         url,
         data=body,

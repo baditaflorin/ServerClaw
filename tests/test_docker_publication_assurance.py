@@ -296,7 +296,10 @@ def test_assure_docker_publication_allows_listener_warmup_after_partial_compose_
 
     assert result["ok"] is True
     assert result["compose_recreated"] is False
-    assert result["summary"] == "docker publication primitives recovered; listener warm-up deferred to readiness verification"
+    assert (
+        result["summary"]
+        == "docker publication primitives recovered; listener warm-up deferred to readiness verification"
+    )
 
 
 def test_assure_docker_publication_tolerates_missing_iptables_binary() -> None:
@@ -973,7 +976,9 @@ class ComposeEofProjectResetRunner:
             if "down" in argv:
                 self.compose_downs += 1
                 self.project_reset_completed = True
-                return tool.CommandResult(argv=argv, returncode=0, stdout="Removing network harbor_harbor", stderr="", cwd=cwd)
+                return tool.CommandResult(
+                    argv=argv, returncode=0, stdout="Removing network harbor_harbor", stderr="", cwd=cwd
+                )
             self.compose_up_attempts += 1
             if self.compose_up_attempts == 1:
                 return tool.CommandResult(
@@ -1030,7 +1035,9 @@ class ComposeEofProjectResetRunner:
         raise AssertionError(f"Unexpected command: {argv}")
 
 
-def test_assure_docker_publication_resets_project_after_compose_eof_when_retry_recreate_leaves_bindings_missing() -> None:
+def test_assure_docker_publication_resets_project_after_compose_eof_when_retry_recreate_leaves_bindings_missing() -> (
+    None
+):
     runner = ComposeEofProjectResetRunner()
     service_probe = {
         "liveness": {
@@ -1054,10 +1061,15 @@ def test_assure_docker_publication_resets_project_after_compose_eof_when_retry_r
 
     def listener_checker(host: str, port: int, timeout: float) -> bool:
         del timeout
-        return runner.project_reset_completed and runner.compose_up_attempts > 1 and (host, port) in {
-            ("127.0.0.1", 8095),
-            ("10.10.10.20", 8095),
-        }
+        return (
+            runner.project_reset_completed
+            and runner.compose_up_attempts > 1
+            and (host, port)
+            in {
+                ("127.0.0.1", 8095),
+                ("10.10.10.20", 8095),
+            }
+        )
 
     result = tool.assure_docker_publication(
         service_id="harbor",
@@ -1113,7 +1125,9 @@ class ComposeZombieConflictRunner:
         if argv[:2] == ["docker", "compose"]:
             if "down" in argv:
                 self.compose_downs += 1
-                return tool.CommandResult(argv=argv, returncode=0, stdout="Removing network harbor_harbor", stderr="", cwd=cwd)
+                return tool.CommandResult(
+                    argv=argv, returncode=0, stdout="Removing network harbor_harbor", stderr="", cwd=cwd
+                )
             self.compose_up_attempts += 1
             if self.compose_up_attempts == 1:
                 return tool.CommandResult(
@@ -1257,7 +1271,9 @@ class ComposeRestartingContainerRunner:
         if argv[:2] == ["docker", "compose"]:
             if "down" in argv:
                 self.compose_downs += 1
-                return tool.CommandResult(argv=argv, returncode=0, stdout="Removing network harbor_harbor", stderr="", cwd=cwd)
+                return tool.CommandResult(
+                    argv=argv, returncode=0, stdout="Removing network harbor_harbor", stderr="", cwd=cwd
+                )
             self.compose_up_attempts += 1
             if self.compose_up_attempts == 1:
                 return tool.CommandResult(
@@ -1265,7 +1281,7 @@ class ComposeRestartingContainerRunner:
                     returncode=1,
                     stdout="",
                     stderr=(
-                        'Container harbor-portal Error response from daemon: cannot remove container '
+                        "Container harbor-portal Error response from daemon: cannot remove container "
                         '"3e00c293dc365cc9fe6904e478c6565f6675149e1428fcf118cfc93f48684ae9": '
                         "container is restarting: stop the container before removing or force remove"
                     ),
@@ -1274,7 +1290,9 @@ class ComposeRestartingContainerRunner:
             return tool.CommandResult(argv=argv, returncode=0, stdout="recreated", stderr="", cwd=cwd)
         if argv[:4] == ["docker", "ps", "-aq", "--filter"]:
             self.project_cleanup_lists += 1
-            return tool.CommandResult(argv=argv, returncode=0, stdout="harbor-portal-id harbor-nginx-id", stderr="", cwd=cwd)
+            return tool.CommandResult(
+                argv=argv, returncode=0, stdout="harbor-portal-id harbor-nginx-id", stderr="", cwd=cwd
+            )
         if argv[:3] == ["docker", "rm", "-f"]:
             self.container_removals += 1
             return tool.CommandResult(argv=argv, returncode=0, stdout="removed", stderr="", cwd=cwd)
@@ -1395,7 +1413,9 @@ class ComposeDnatRuleRunner:
         if argv[:2] == ["docker", "compose"]:
             if "down" in argv:
                 self.compose_downs += 1
-                return tool.CommandResult(argv=argv, returncode=0, stdout="Removing network langfuse_default", stderr="", cwd=cwd)
+                return tool.CommandResult(
+                    argv=argv, returncode=0, stdout="Removing network langfuse_default", stderr="", cwd=cwd
+                )
             self.compose_up_attempts += 1
             if self.compose_up_attempts == 1:
                 return tool.CommandResult(
@@ -1445,11 +1465,7 @@ class ComposeDnatRuleRunner:
                             if self.compose_up_attempts > 1
                             else {}
                         ),
-                        "Networks": (
-                            {"langfuse_default": {}}
-                            if self.compose_up_attempts > 1
-                            else {}
-                        ),
+                        "Networks": ({"langfuse_default": {}} if self.compose_up_attempts > 1 else {}),
                     },
                 }
             ]

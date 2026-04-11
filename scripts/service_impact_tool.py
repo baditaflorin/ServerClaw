@@ -41,16 +41,19 @@ GRAPH_PATH = REPO_ROOT / "config" / "dependency-graph.json"
 # Loader + index builders
 # ---------------------------------------------------------------------------
 
+
 def _load_graph() -> dict[str, Any]:
     if not GRAPH_PATH.exists():
         raise SystemExit(f"Dependency graph not found: {GRAPH_PATH}")
     return json.loads(GRAPH_PATH.read_text(encoding="utf-8"))
 
 
-def _build_indexes(graph: dict[str, Any]) -> tuple[
-    dict[str, dict],   # id → node
-    dict[str, list],   # id → outgoing edges (what it depends on)
-    dict[str, list],   # id → incoming edges (what depends on it)
+def _build_indexes(
+    graph: dict[str, Any],
+) -> tuple[
+    dict[str, dict],  # id → node
+    dict[str, list],  # id → outgoing edges (what it depends on)
+    dict[str, list],  # id → incoming edges (what depends on it)
 ]:
     nodes: dict[str, dict] = {n["id"]: n for n in graph.get("nodes", [])}
     out_edges: dict[str, list] = {nid: [] for nid in nodes}
@@ -72,9 +75,7 @@ def _resolve_id(nodes: dict[str, dict], query: str) -> str | None:
         return query
     q = query.lower()
     for nid, node in nodes.items():
-        if (node.get("service", "").lower() == q
-                or node.get("name", "").lower() == q
-                or node.get("vm", "").lower() == q):
+        if node.get("service", "").lower() == q or node.get("name", "").lower() == q or node.get("vm", "").lower() == q:
             return nid
     return None
 
@@ -97,14 +98,16 @@ def _bfs_dependents(
             n = nodes.get(nid, {})
             # collect the edge that brought us here
             edge_types = [e["type"] for e in in_edges.get(nid, []) if e.get("from") in visited]
-            result.append({
-                "id": nid,
-                "name": n.get("name", nid),
-                "vm": n.get("vm", ""),
-                "tier": n.get("tier"),
-                "hops": hops,
-                "dependency_types": edge_types,
-            })
+            result.append(
+                {
+                    "id": nid,
+                    "name": n.get("name", nid),
+                    "vm": n.get("vm", ""),
+                    "tier": n.get("tier"),
+                    "hops": hops,
+                    "dependency_types": edge_types,
+                }
+            )
         for edge in in_edges.get(nid, []):
             frm = edge.get("from", "")
             if frm and frm not in visited:
@@ -128,13 +131,15 @@ def _bfs_dependencies(
         visited.add(nid)
         if nid != root:
             n = nodes.get(nid, {})
-            result.append({
-                "id": nid,
-                "name": n.get("name", nid),
-                "vm": n.get("vm", ""),
-                "tier": n.get("tier"),
-                "hops": hops,
-            })
+            result.append(
+                {
+                    "id": nid,
+                    "name": n.get("name", nid),
+                    "vm": n.get("vm", ""),
+                    "tier": n.get("tier"),
+                    "hops": hops,
+                }
+            )
         for edge in out_edges.get(nid, []):
             to = edge.get("to", "")
             if to and to not in visited:
@@ -157,6 +162,7 @@ def _risk_level(affected_nodes: list[dict], nodes: dict[str, dict]) -> str:
 # sub-command: impact
 # ---------------------------------------------------------------------------
 
+
 def cmd_impact(args: argparse.Namespace) -> int:
     graph = _load_graph()
     nodes, out_edges, in_edges = _build_indexes(graph)
@@ -170,27 +176,33 @@ def cmd_impact(args: argparse.Namespace) -> int:
     hard = [d for d in dependents if "hard" in d.get("dependency_types", [])]
     soft = [d for d in dependents if "soft" in d.get("dependency_types", [])]
 
-    print(json.dumps({
-        "target": nid,
-        "name": nodes[nid].get("name"),
-        "vm": nodes[nid].get("vm"),
-        "tier": nodes[nid].get("tier"),
-        "direct_dependents": direct,
-        "transitive_dependents": dependents,
-        "hard_dependents": hard,
-        "soft_dependents": soft,
-        "impact_summary": (
-            f"{len(direct)} direct, {len(dependents)} transitive dependents"
-            f" ({len(hard)} hard, {len(soft)} soft)"
-        ),
-        "risk_level": _risk_level(dependents, nodes),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "target": nid,
+                "name": nodes[nid].get("name"),
+                "vm": nodes[nid].get("vm"),
+                "tier": nodes[nid].get("tier"),
+                "direct_dependents": direct,
+                "transitive_dependents": dependents,
+                "hard_dependents": hard,
+                "soft_dependents": soft,
+                "impact_summary": (
+                    f"{len(direct)} direct, {len(dependents)} transitive dependents"
+                    f" ({len(hard)} hard, {len(soft)} soft)"
+                ),
+                "risk_level": _risk_level(dependents, nodes),
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
 # ---------------------------------------------------------------------------
 # sub-command: depends-on
 # ---------------------------------------------------------------------------
+
 
 def cmd_depends_on(args: argparse.Namespace) -> int:
     graph = _load_graph()
@@ -203,19 +215,25 @@ def cmd_depends_on(args: argparse.Namespace) -> int:
     deps = _bfs_dependencies(nid, out_edges, nodes)
     direct = [d for d in deps if d["hops"] == 1]
 
-    print(json.dumps({
-        "service": nid,
-        "name": nodes[nid].get("name"),
-        "direct_dependencies": direct,
-        "transitive_dependencies": deps,
-        "total_deps": len(deps),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "service": nid,
+                "name": nodes[nid].get("name"),
+                "direct_dependencies": direct,
+                "transitive_dependencies": deps,
+                "total_deps": len(deps),
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
 # ---------------------------------------------------------------------------
 # sub-command: vm-impact
 # ---------------------------------------------------------------------------
+
 
 def cmd_vm_impact(args: argparse.Namespace) -> int:
     graph = _load_graph()
@@ -236,23 +254,29 @@ def cmd_vm_impact(args: argparse.Namespace) -> int:
     affected = sorted(all_affected.values(), key=lambda x: x.get("tier", 99))
     hard_count = sum(1 for d in affected if "hard" in d.get("dependency_types", []))
 
-    print(json.dumps({
-        "vm": args.vm,
-        "services_on_vm": [{"id": s, "name": nodes[s].get("name")} for s in services_on_vm],
-        "total_impact": {
-            "direct_count": sum(1 for d in affected if d.get("hops") == 1),
-            "transitive_count": len(affected),
-            "hard_count": hard_count,
-        },
-        "affected_services": affected,
-        "risk_level": _risk_level(affected, nodes),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "vm": args.vm,
+                "services_on_vm": [{"id": s, "name": nodes[s].get("name")} for s in services_on_vm],
+                "total_impact": {
+                    "direct_count": sum(1 for d in affected if d.get("hops") == 1),
+                    "transitive_count": len(affected),
+                    "hard_count": hard_count,
+                },
+                "affected_services": affected,
+                "risk_level": _risk_level(affected, nodes),
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
 # ---------------------------------------------------------------------------
 # sub-command: path
 # ---------------------------------------------------------------------------
+
 
 def cmd_path(args: argparse.Namespace) -> int:
     graph = _load_graph()
@@ -272,12 +296,18 @@ def cmd_path(args: argparse.Namespace) -> int:
         path = queue.popleft()
         cur = path[-1]
         if cur == dst:
-            print(json.dumps({
-                "from": src, "to": dst,
-                "path": path,
-                "hops": len(path) - 1,
-                "found": True,
-            }, indent=2))
+            print(
+                json.dumps(
+                    {
+                        "from": src,
+                        "to": dst,
+                        "path": path,
+                        "hops": len(path) - 1,
+                        "found": True,
+                    },
+                    indent=2,
+                )
+            )
             return 0
         if cur in visited:
             continue
@@ -295,6 +325,7 @@ def cmd_path(args: argparse.Namespace) -> int:
 # sub-command: graph-summary
 # ---------------------------------------------------------------------------
 
+
 def cmd_graph_summary(args: argparse.Namespace) -> int:
     graph = _load_graph()
     nodes, out_edges, in_edges = _build_indexes(graph)
@@ -308,36 +339,37 @@ def cmd_graph_summary(args: argparse.Namespace) -> int:
         by_vm[vm] = by_vm.get(vm, 0) + 1
 
     # most depended-on = most incoming edges (transitive)
-    dependent_counts = {
-        nid: len(_bfs_dependents(nid, in_edges, nodes)) for nid in nodes
-    }
-    dep_counts = {
-        nid: len(_bfs_dependencies(nid, out_edges, nodes)) for nid in nodes
-    }
+    dependent_counts = {nid: len(_bfs_dependents(nid, in_edges, nodes)) for nid in nodes}
+    dep_counts = {nid: len(_bfs_dependencies(nid, out_edges, nodes)) for nid in nodes}
 
     top_depended = sorted(dependent_counts.items(), key=lambda x: -x[1])[:5]
     top_deps = sorted(dep_counts.items(), key=lambda x: -x[1])[:5]
 
-    print(json.dumps({
-        "total_nodes": len(nodes),
-        "total_edges": len(graph.get("edges", [])),
-        "by_tier": {str(k): v for k, v in sorted(by_tier.items())},
-        "by_vm": dict(sorted(by_vm.items(), key=lambda x: -x[1])),
-        "most_depended_on": [
-            {"service": nid, "name": nodes[nid].get("name"), "dependent_count": cnt}
-            for nid, cnt in top_depended
-        ],
-        "most_dependencies": [
-            {"service": nid, "name": nodes[nid].get("name"), "dependency_count": cnt}
-            for nid, cnt in top_deps
-        ],
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "total_nodes": len(nodes),
+                "total_edges": len(graph.get("edges", [])),
+                "by_tier": {str(k): v for k, v in sorted(by_tier.items())},
+                "by_vm": dict(sorted(by_vm.items(), key=lambda x: -x[1])),
+                "most_depended_on": [
+                    {"service": nid, "name": nodes[nid].get("name"), "dependent_count": cnt}
+                    for nid, cnt in top_depended
+                ],
+                "most_dependencies": [
+                    {"service": nid, "name": nodes[nid].get("name"), "dependency_count": cnt} for nid, cnt in top_deps
+                ],
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
 # ---------------------------------------------------------------------------
 # Parser + main
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

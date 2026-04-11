@@ -13,7 +13,9 @@ class FakeRunner:
         self.handler = handler
         self.calls: list[tuple[str, dict[str, object], int | None]] = []
 
-    def run_workflow(self, workflow_id: str, payload: dict[str, object], *, timeout_seconds: int | None = None) -> object:
+    def run_workflow(
+        self, workflow_id: str, payload: dict[str, object], *, timeout_seconds: int | None = None
+    ) -> object:
         self.calls.append((workflow_id, payload, timeout_seconds))
         return self.handler(workflow_id, payload, timeout_seconds)
 

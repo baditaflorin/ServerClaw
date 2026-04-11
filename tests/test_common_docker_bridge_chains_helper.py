@@ -25,13 +25,21 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     tasks = load_tasks()
     task_names = {task["name"] for task in tasks}
     initial_forward = next(task for task in tasks if task["name"] == "Check whether Docker forward chain exists")
-    expect_forward = next(task for task in tasks if task["name"] == "Decide whether Docker forward-chain enforcement is required")
-    wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
+    expect_forward = next(
+        task for task in tasks if task["name"] == "Decide whether Docker forward-chain enforcement is required"
+    )
+    wait_for_ssh = next(
+        task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks"
+    )
     nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
     forward_verify = next(task for task in tasks if task["name"] == "Verify Docker forward chain after retry loop")
     nat_final = next(task for task in tasks if task["name"] == "Capture final Docker nat chain state after retry loop")
-    forward_final = next(task for task in tasks if task["name"] == "Capture final Docker forward chain state after retry loop")
-    nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation")
+    forward_final = next(
+        task for task in tasks if task["name"] == "Capture final Docker forward chain state after retry loop"
+    )
+    nat_assert = next(
+        task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation"
+    )
     forward_assert = next(
         task for task in tasks if task["name"] == "Assert Docker forward chain is present after health evaluation"
     )

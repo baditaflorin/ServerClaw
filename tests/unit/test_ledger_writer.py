@@ -39,8 +39,10 @@ class FakeCursor:
     def execute(self, sql: str, params: tuple[Any, ...] | None = None) -> None:
         normalized = " ".join(sql.split())
         self.connection.queries.append((normalized, params))
-        if "ALTER TABLE audit_log RENAME TO audit_log_legacy" in normalized or normalized.startswith("DO $$") or normalized.startswith(
-            "CREATE OR REPLACE VIEW audit_log AS"
+        if (
+            "ALTER TABLE audit_log RENAME TO audit_log_legacy" in normalized
+            or normalized.startswith("DO $$")
+            or normalized.startswith("CREATE OR REPLACE VIEW audit_log AS")
         ):
             self.connection.view_statements.append(normalized)
             self._results = []
@@ -56,7 +58,9 @@ class FakeCursor:
             return
         if normalized == "SELECT * FROM audit_log ORDER BY id ASC":
             self._mode = "audit_log"
-            self.description = [(key,) for key in self.connection.audit_rows[0].keys()] if self.connection.audit_rows else []
+            self.description = (
+                [(key,) for key in self.connection.audit_rows[0].keys()] if self.connection.audit_rows else []
+            )
             self._results = [dict(row) for row in self.connection.audit_rows]
             self._index = 0
             return
@@ -121,7 +125,13 @@ class FakeCursor:
             rows = rows[:limit]
         else:
             raise AssertionError(f"unexpected ledger SELECT in test fake: {normalized}")
-        self.description = [(key,) for key in rows[0].keys()] if rows else [(key,) for key in self._decode_row(self.connection.rows[0]).keys()] if self.connection.rows else []
+        self.description = (
+            [(key,) for key in rows[0].keys()]
+            if rows
+            else [(key,) for key in self._decode_row(self.connection.rows[0]).keys()]
+            if self.connection.rows
+            else []
+        )
         self._results = rows
         self._index = 0
 

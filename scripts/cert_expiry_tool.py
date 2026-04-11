@@ -39,17 +39,37 @@ import socket
 import ssl
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CERT_CATALOG_PATH = REPO_ROOT / "config" / "certificate-catalog.json"
 
-_PRIVATE_PREFIXES = ("10.", "192.168.", "172.16.", "172.17.", "172.18.", "172.19.",
-                     "172.20.", "172.21.", "172.22.", "172.23.", "172.24.", "172.25.",
-                     "172.26.", "172.27.", "172.28.", "172.29.", "172.30.", "172.31.",
-                     "100.", "127.", "fd", "::1")
+_PRIVATE_PREFIXES = (
+    "10.",
+    "192.168.",
+    "172.16.",
+    "172.17.",
+    "172.18.",
+    "172.19.",
+    "172.20.",
+    "172.21.",
+    "172.22.",
+    "172.23.",
+    "172.24.",
+    "172.25.",
+    "172.26.",
+    "172.27.",
+    "172.28.",
+    "172.29.",
+    "172.30.",
+    "172.31.",
+    "100.",
+    "127.",
+    "fd",
+    "::1",
+)
 
 
 def _is_private(host: str) -> bool:
@@ -77,8 +97,8 @@ def _probe_cert(host: str, port: int, server_name: str, timeout: int = 5) -> dic
             with ctx.wrap_socket(sock, server_hostname=server_name) as ssock:
                 cert = ssock.getpeercert()
                 not_after = cert.get("notAfter", "")
-                expiry = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=timezone.utc)
-                days_left = (expiry - datetime.now(timezone.utc)).days
+                expiry = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=UTC)
+                days_left = (expiry - datetime.now(UTC)).days
                 subject = dict(x[0] for x in cert.get("subject", []) if len(x[0]) == 2)
                 issuer = dict(x[0] for x in cert.get("issuer", []) if len(x[0]) == 2)
                 return {
@@ -88,7 +108,7 @@ def _probe_cert(host: str, port: int, server_name: str, timeout: int = 5) -> dic
                     "subject": subject,
                     "issuer_cn": issuer.get("commonName", ""),
                 }
-    except socket.timeout:
+    except TimeoutError:
         return {"reachable": False, "reason": "timeout"}
     except ConnectionRefusedError:
         return {"reachable": False, "reason": "connection_refused"}
@@ -142,13 +162,18 @@ def cmd_scan(args: argparse.Namespace) -> int:
         for fut in as_completed(futures):
             results.append(fut.result())
 
-    results.sort(key=lambda x: (x.get("days_left") or 9999))
+    results.sort(key=lambda x: x.get("days_left") or 9999)
     summary = {s: sum(1 for r in results if r["status"] == s) for s in ("ok", "warn", "critical", "unknown")}
-    print(json.dumps({
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "results": results,
-        "summary": summary,
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "results": results,
+                "summary": summary,
+            },
+            indent=2,
+        )
+    )
     return 2 if summary["warn"] + summary["critical"] > 0 else 0
 
 
@@ -161,24 +186,31 @@ def cmd_report(args: argparse.Namespace) -> int:
         futures = {pool.submit(_scan_one, c, 5): c["id"] for c in certs}
         for fut in as_completed(futures):
             results.append(fut.result())
-    results.sort(key=lambda x: (x.get("days_left") or 9999))
+    results.sort(key=lambda x: x.get("days_left") or 9999)
     critical = [r for r in results if r["status"] == "critical"]
     warn = [r for r in results if r["status"] == "warn"]
     summary = {s: sum(1 for r in results if r["status"] == s) for s in ("ok", "warn", "critical", "unknown")}
     lines = []
     if critical:
-        lines.append(f"CRITICAL ({len(critical)}): " + ", ".join(f"{r['id']} ({r.get('days_left','?')}d)" for r in critical))
+        lines.append(
+            f"CRITICAL ({len(critical)}): " + ", ".join(f"{r['id']} ({r.get('days_left', '?')}d)" for r in critical)
+        )
     if warn:
-        lines.append(f"WARN ({len(warn)}): " + ", ".join(f"{r['id']} ({r.get('days_left','?')}d)" for r in warn))
+        lines.append(f"WARN ({len(warn)}): " + ", ".join(f"{r['id']} ({r.get('days_left', '?')}d)" for r in warn))
     if not critical and not warn:
         reachable_ok = [r for r in results if r["status"] == "ok"]
         lines.append(f"All {len(reachable_ok)} reachable certs OK.")
-    print(json.dumps({
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "results": results,
-        "summary": summary,
-        "human_summary": " | ".join(lines) if lines else "No reachable certs found.",
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "results": results,
+                "summary": summary,
+                "human_summary": " | ".join(lines) if lines else "No reachable certs found.",
+            },
+            indent=2,
+        )
+    )
     return 2 if summary["warn"] + summary["critical"] > 0 else 0
 
 
@@ -189,13 +221,17 @@ def cmd_show(args: argparse.Namespace) -> int:
         raise SystemExit(f"Certificate '{args.id}' not found.")
     cert = matches[0]
     ep = cert.get("endpoint", {})
-    probe = _probe_cert(ep.get("host", ""), ep.get("port", 443),
-                        ep.get("server_name", ep.get("host", "")), timeout=5)
+    probe = _probe_cert(ep.get("host", ""), ep.get("port", 443), ep.get("server_name", ep.get("host", "")), timeout=5)
     policy = cert.get("policy", {"warn_days": 21, "critical_days": 14})
-    print(json.dumps({
-        "catalog_entry": cert,
-        "live_probe": {**probe, "status": _classify(probe, policy)},
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "catalog_entry": cert,
+                "live_probe": {**probe, "status": _classify(probe, policy)},
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

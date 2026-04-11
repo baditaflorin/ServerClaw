@@ -16,6 +16,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from validation_toolkit import require_int, require_list, require_mapping, require_str
+
 CATALOG_PATH = REPO_ROOT / "config" / "repo-deploy-base-image-profiles.json"
 SCHEMA_PATH = REPO_ROOT / "docs" / "schema" / "repo-deploy-base-image-profiles.schema.json"
 SUPPORTED_SCHEMA_VERSION = "1.0.0"
@@ -30,15 +31,15 @@ SUPPORTED_BUNDLE_CONCERNS = {
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def isoformat(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return value.astimezone(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def parse_timestamp(value: str) -> dt.datetime:
-    return dt.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    return dt.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.UTC)
 
 
 def load_json(path: Path) -> Any:
@@ -94,9 +95,7 @@ def validate_profile_catalog(payload: dict[str, Any], *, path: Path = CATALOG_PA
 
         deployment_lane = require_str(profile.get("deployment_lane"), f"{profile_path}.deployment_lane")
         if deployment_lane not in SUPPORTED_DEPLOYMENT_LANES:
-            raise ValueError(
-                f"{profile_path}.deployment_lane must be one of {sorted(SUPPORTED_DEPLOYMENT_LANES)}"
-            )
+            raise ValueError(f"{profile_path}.deployment_lane must be one of {sorted(SUPPORTED_DEPLOYMENT_LANES)}")
 
         build_packs = require_list(profile.get("allowed_build_packs"), f"{profile_path}.allowed_build_packs")
         if not build_packs:
@@ -140,9 +139,7 @@ def validate_profile_catalog(payload: dict[str, Any], *, path: Path = CATALOG_PA
 
             concern = require_str(bundle.get("concern"), f"{bundle_path}.concern")
             if concern not in SUPPORTED_BUNDLE_CONCERNS:
-                raise ValueError(
-                    f"{bundle_path}.concern must be one of {sorted(SUPPORTED_BUNDLE_CONCERNS)}"
-                )
+                raise ValueError(f"{bundle_path}.concern must be one of {sorted(SUPPORTED_BUNDLE_CONCERNS)}")
 
             images = require_list(bundle.get("images"), f"{bundle_path}.images")
             if not images:
@@ -244,9 +241,7 @@ def pull_image(ref: str) -> tuple[subprocess.CompletedProcess[str], bool]:
         check=False,
     )
     combined_output = "\n".join(
-        line.strip()
-        for line in (completed.stdout + "\n" + completed.stderr).splitlines()
-        if line.strip()
+        line.strip() for line in (completed.stdout + "\n" + completed.stderr).splitlines() if line.strip()
     )
     changed = any(
         marker in combined_output
@@ -273,9 +268,7 @@ def warm_plan(plan: dict[str, Any], *, plan_file: Path, receipt_file: Path, requ
         ref = require_str(image.get("ref"), f"{plan_file}.seed_images[].ref")
         completed, changed = pull_image(ref)
         combined_output = "\n".join(
-            line.strip()
-            for line in (completed.stdout + "\n" + completed.stderr).splitlines()
-            if line.strip()
+            line.strip() for line in (completed.stdout + "\n" + completed.stderr).splitlines() if line.strip()
         )
         detail = combined_output.splitlines()[-1] if combined_output else "docker pull returned no output"
         status = "pass" if completed.returncode == 0 else "fail"
@@ -339,9 +332,7 @@ def verify_receipt(
     if max_age_seconds is not None:
         age_seconds = int((utc_now() - warmed_at).total_seconds())
         if age_seconds > max_age_seconds:
-            raise ValueError(
-                f"warm receipt is stale: age {age_seconds}s exceeds allowed max-age {max_age_seconds}s"
-            )
+            raise ValueError(f"warm receipt is stale: age {age_seconds}s exceeds allowed max-age {max_age_seconds}s")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -351,7 +342,9 @@ def build_parser() -> argparse.ArgumentParser:
     validate_parser = subparsers.add_parser("validate", help="Validate the repo-deploy base-image profile catalog.")
     validate_parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
 
-    plan_parser = subparsers.add_parser("plan", help="Render a warm plan from the repo-deploy base-image profile catalog.")
+    plan_parser = subparsers.add_parser(
+        "plan", help="Render a warm plan from the repo-deploy base-image profile catalog."
+    )
     plan_parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
 
     warm_parser = subparsers.add_parser("warm", help="Warm the images declared in a rendered plan and write a receipt.")

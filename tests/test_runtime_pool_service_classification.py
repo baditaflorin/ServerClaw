@@ -35,9 +35,7 @@ def test_partition_catalog_and_service_catalog_stay_in_sync() -> None:
 
     service_ids = {service["id"] for service in catalog["services"]}
     partition_members = {
-        service_id
-        for partition in partition_catalog["partitions"].values()
-        for service_id in partition["services"]
+        service_id for partition in partition_catalog["partitions"].values() for service_id in partition["services"]
     }
 
     assert partition_members == service_ids

@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json
+from controller_automation_toolkit import emit_cli_error
 from platform.ansible.vikunja import (
     VikunjaClient,
     VikunjaError,

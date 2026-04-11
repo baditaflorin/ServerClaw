@@ -24,7 +24,6 @@ from __future__ import annotations
 from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from pathlib import Path
-import json
 import re
 import subprocess
 import sys
@@ -44,9 +43,11 @@ PLAYBOOKS_DIR = REPO_ROOT / "playbooks"
 # Data Models
 # ==============================================================================
 
+
 @dataclass
 class ADRMetadata:
     """Canonical ADR metadata from the index."""
+
     adr_number: str
     title: str
     filename: str
@@ -63,6 +64,7 @@ class ADRMetadata:
 @dataclass
 class ImplementationMarker:
     """Detected implementation marker in the repository."""
+
     marker_type: str  # "git-commit", "ansible-role", "playbook", "compose-file", "config-file"
     adr_number: str
     location: str
@@ -74,6 +76,7 @@ class ImplementationMarker:
 @dataclass
 class ADRImplementationReport:
     """Full implementation report for an ADR."""
+
     adr_number: str
     title: str
     canonical_status: str
@@ -99,6 +102,7 @@ class ADRImplementationReport:
 # ==============================================================================
 # ADR Index Loader
 # ==============================================================================
+
 
 def load_adr_index() -> dict[str, ADRMetadata]:
     """Load ADR metadata from the generated index shards."""
@@ -138,6 +142,7 @@ def load_adr_index() -> dict[str, ADRMetadata]:
 # ==============================================================================
 # Git History Scanner
 # ==============================================================================
+
 
 def scan_git_history(adr_number: str) -> list[ImplementationMarker]:
     """Scan git history for commits referencing an ADR number."""
@@ -191,6 +196,7 @@ def scan_git_history(adr_number: str) -> list[ImplementationMarker]:
 # Repository Structure Scanner
 # ==============================================================================
 
+
 def scan_ansible_roles(adr_number: str) -> list[ImplementationMarker]:
     """Detect Ansible roles with ADR-derived names."""
     markers: list[ImplementationMarker] = []
@@ -241,7 +247,7 @@ def scan_ansible_roles(adr_number: str) -> list[ImplementationMarker]:
                             marker_type="ansible-role",
                             adr_number=adr_number,
                             location=str(meta_file.relative_to(REPO_ROOT)),
-                            evidence=f"ADR reference found in role metadata",
+                            evidence="ADR reference found in role metadata",
                             confidence=0.85,
                         )
                     )
@@ -272,7 +278,7 @@ def scan_playbooks(adr_number: str) -> list[ImplementationMarker]:
                         marker_type="playbook",
                         adr_number=adr_number,
                         location=str(playbook_file.relative_to(REPO_ROOT)),
-                        evidence=f"ADR reference found in playbook",
+                        evidence="ADR reference found in playbook",
                         confidence=0.9,
                     )
                 )
@@ -357,6 +363,7 @@ def scan_config_files(adr_number: str) -> list[ImplementationMarker]:
 # Infer Implementation Status
 # ==============================================================================
 
+
 def infer_implementation_status(markers: list[ImplementationMarker]) -> str:
     """Infer implementation status from detected markers."""
     if not markers:
@@ -387,6 +394,7 @@ def infer_implementation_status(markers: list[ImplementationMarker]) -> str:
 # ==============================================================================
 # Report Generation
 # ==============================================================================
+
 
 def generate_report(
     adr_metadata: ADRMetadata,
@@ -436,6 +444,7 @@ def generate_report(
 # Output Generation
 # ==============================================================================
 
+
 def generate_markdown_report(report: ADRImplementationReport) -> str:
     """Generate a human-readable markdown report."""
     lines = [
@@ -443,8 +452,8 @@ def generate_markdown_report(report: ADRImplementationReport) -> str:
         "",
         "## Implementation Status Summary",
         "",
-        f"| Field | Value |",
-        f"| --- | --- |",
+        "| Field | Value |",
+        "| --- | --- |",
         f"| Canonical Status | {report.canonical_implementation_status} |",
         f"| Inferred Status | {report.inferred_implementation_status} |",
         f"| Status Match | {'✓' if report.status_match else '✗'} |",
@@ -453,10 +462,12 @@ def generate_markdown_report(report: ADRImplementationReport) -> str:
     ]
 
     if report.detected_markers:
-        lines.extend([
-            "## Detected Implementation Markers",
-            "",
-        ])
+        lines.extend(
+            [
+                "## Detected Implementation Markers",
+                "",
+            ]
+        )
 
         # Group by marker type
         by_type = {}
@@ -476,12 +487,14 @@ def generate_markdown_report(report: ADRImplementationReport) -> str:
                 lines.append("")
 
     else:
-        lines.extend([
-            "## Detected Implementation Markers",
-            "",
-            "No implementation markers detected.",
-            "",
-        ])
+        lines.extend(
+            [
+                "## Detected Implementation Markers",
+                "",
+                "No implementation markers detected.",
+                "",
+            ]
+        )
 
     lines.append("---")
     lines.append("")
@@ -509,6 +522,7 @@ def write_markdown_report(report: ADRImplementationReport, output_dir: Path) -> 
 # ==============================================================================
 # Main Entry Point
 # ==============================================================================
+
 
 def main():
     import argparse
@@ -600,7 +614,9 @@ def main():
         "generated": datetime.now().isoformat(),
         "total_adrs": len(reports),
         "scan_summary": {
-            "fully_matching": len([r for r in reports if r.status_match and r.inferred_implementation_status == "Likely Implemented"]),
+            "fully_matching": len(
+                [r for r in reports if r.status_match and r.inferred_implementation_status == "Likely Implemented"]
+            ),
             "partial_matching": len([r for r in reports if r.detected_markers]),
             "no_evidence": len([r for r in reports if not r.detected_markers]),
         },

@@ -10,7 +10,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def test_windmill_defaults_seed_world_state_scripts_and_schedules() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
     for package in ("make", "python3-psycopg"):
         assert package in defaults["windmill_runtime_packages"]
@@ -58,10 +60,12 @@ def test_world_state_migration_declares_unique_current_view_index() -> None:
 
 def test_windmill_runtime_templates_export_world_state_and_nats_env() -> None:
     env_template = (
-        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2"
+        REPO_ROOT
+        / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2"
     ).read_text()
     env_ctmpl = (
-        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
+        REPO_ROOT
+        / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
     ).read_text()
 
     for token in (
@@ -117,16 +121,18 @@ def test_windmill_postgres_support_role_enforces_bypassrls() -> None:
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/main.yml"
     ).read_text()
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_postgres/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_postgres/defaults/main.yml"
+        ).read_text()
     )
 
     assert "ansible.builtin.meta: flush_handlers" in tasks
     assert "CREATE ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
     assert "ALTER ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
     assert "Wait for local PostgreSQL SQL readiness before Windmill role reconciliation" in tasks
-    assert "windmill_postgres_local_sql_probe.stdout | trim == \"1\"" in tasks
+    assert 'windmill_postgres_local_sql_probe.stdout | trim == "1"' in tasks
     assert "Recheck local PostgreSQL SQL readiness before world_state reconciliation" in tasks
-    assert "windmill_postgres_world_state_sql_probe.stdout | trim == \"1\"" in tasks
+    assert 'windmill_postgres_world_state_sql_probe.stdout | trim == "1"' in tasks
     assert "windmill_postgres_writable_check.rc == 0" in tasks
     assert "SHOW shared_preload_libraries" in tasks
     assert "SELECT 1 FROM pg_extension WHERE extname = 'pgaudit'" in tasks

@@ -224,11 +224,7 @@ def _load_index_entries(
 
     results = [entry for entry in entries if isinstance(entry, dict)]
     if decision_status:
-        results = [
-            entry
-            for entry in results
-            if str(entry.get("status", "")).lower() == decision_status.lower()
-        ]
+        results = [entry for entry in results if str(entry.get("status", "")).lower() == decision_status.lower()]
     if implementation_status:
         results = [
             entry
@@ -236,17 +232,9 @@ def _load_index_entries(
             if str(entry.get("implementation_status", "")).lower() == implementation_status.lower()
         ]
     if concern:
-        results = [
-            entry
-            for entry in results
-            if str(entry.get("concern", "")).lower() == concern.lower()
-        ]
+        results = [entry for entry in results if str(entry.get("concern", "")).lower() == concern.lower()]
     if range_label:
-        results = [
-            entry
-            for entry in results
-            if range_label[:4] <= str(entry.get("adr", "")) <= range_label[-4:]
-        ]
+        results = [entry for entry in results if range_label[:4] <= str(entry.get("adr", "")) <= range_label[-4:]]
     results.sort(key=lambda entry: int(str(entry.get("adr", "0"))))
     return results
 
@@ -340,7 +328,7 @@ def command_affecting(args) -> int:
     return 0
 
 
-def command_status_summary(args) -> int:  # noqa: ARG001
+def command_status_summary(args) -> int:
     root_manifest = load_root_index(INDEX_FILE)
     if root_manifest:
         result = {
@@ -456,7 +444,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     list_parser = subparsers.add_parser("list", help="List ADRs, optionally filtered by discovery facets.")
     list_parser.add_argument("--status", help="Filter by decision status, for example accepted or proposed.")
-    list_parser.add_argument("--implementation-status", help="Filter by implementation status, for example Implemented.")
+    list_parser.add_argument(
+        "--implementation-status", help="Filter by implementation status, for example Implemented."
+    )
     list_parser.add_argument("--concern", help="Filter by concern shard, for example documentation.")
     list_parser.add_argument("--range", help="Filter by a range shard label, for example 0300-0399.")
     list_parser.add_argument("--limit", type=int, help="Maximum number of results to return.")

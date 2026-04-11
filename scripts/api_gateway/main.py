@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import base64
 import hmac
-import hashlib
 import importlib.util
 import json
 import os
@@ -71,6 +70,7 @@ _load_repo_platform_package()
 from api_gateway_catalog import load_api_gateway_catalog
 from agent_tool_registry import call_tool, load_agent_tool_registry
 from canonical_errors import ErrorRegistry
+
 GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
 
 try:
@@ -81,7 +81,7 @@ try:
         should_count_httpx_exception,
         should_count_socket_exception,
     )
-except Exception as exc:  # noqa: BLE001
+except Exception as exc:
     CircuitOpenError = RuntimeError  # type: ignore[assignment]
     CircuitRegistry = Any  # type: ignore[assignment]
     MemoryCircuitStateBackend = Any  # type: ignore[assignment]
@@ -96,7 +96,7 @@ except Exception as exc:  # noqa: BLE001
 
 try:
     from platform.graph import DependencyGraphClient, NodeNotFoundError
-except Exception as exc:  # noqa: BLE001
+except Exception as exc:
     DependencyGraphClient = Any  # type: ignore[assignment]
 
     class NodeNotFoundError(RuntimeError):
@@ -115,10 +115,14 @@ from platform.runtime_assurance import (
     collect_declared_live_service_attestation,
 )
 from platform.timeouts import TimeoutContext, resolve_timeout_seconds
-from platform.use_cases.runbooks import RunbookRunStore, RunbookSurfaceError, RunbookUseCaseService, WindmillWorkflowRunner
-from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
+from platform.use_cases.runbooks import (
+    RunbookRunStore,
+    RunbookSurfaceError,
+    RunbookUseCaseService,
+    WindmillWorkflowRunner,
+)
+from platform.world_state.client import WorldStateClient
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
-from platform.world_state.workers import collect_service_health
 
 try:
     from search_fabric import SearchClient
@@ -305,9 +309,7 @@ class TypesenseStructuredSearchClient:
         if profile is None:
             raise HTTPException(status_code=404, detail=f"unknown structured-search collection '{collection}'")
         filter_parts = [
-            f"{field}:={self._quoted_filter_value(value)}"
-            for field, value in sorted(filters.items())
-            if value.strip()
+            f"{field}:={self._quoted_filter_value(value)}" for field, value in sorted(filters.items()) if value.strip()
         ]
         params = {
             "q": query,
@@ -443,7 +445,7 @@ class KeycloakJWTVerifier:
                 return self._jwks_cache
             self._activate_degradation(str(exc))
             raise self._dependency_unavailable(exc.retry_after) from exc
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             cached_valid = self._jwks_cache is not None and now < self._jwks_cache_expiry
             if allow_stale and cached_valid:
                 self._activate_degradation(str(exc), stale_until=self._jwks_cache_expiry)
@@ -506,7 +508,7 @@ class KeycloakJWTVerifier:
                 padding.PKCS1v15(),
                 hashes.SHA256(),
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise HTTPException(status_code=401, detail="invalid bearer token signature") from exc
 
         now = int(time.time())
@@ -566,7 +568,7 @@ class NatsEventEmitter:
         try:
             await self._flush_outbox(host, port)
             await self._publish_live(host, port, subject, encoded)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             self._append_outbox(subject, encoded)
             self._activate_degradation(str(exc))
             return
@@ -611,7 +613,7 @@ class NatsEventEmitter:
                 continue
             try:
                 await self._publish_live(host, port, subject, payload)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 remaining = lines[index:]
                 break
         if remaining:
@@ -786,6 +788,7 @@ class GatewayRuntime:
             service_id,
             exception_classifier=should_count_httpx_exception,
         )
+
     @staticmethod
     def api_call_context(requested_seconds: int | float | None = None) -> TimeoutContext:
         return TimeoutContext.for_layer("api_call_chain", requested_seconds)
@@ -815,7 +818,9 @@ class GatewayRuntime:
     def runbook_service(self) -> RunbookUseCaseService:
         if self._runbook_service is None:
             if not self.config.windmill_base_url or not self.config.windmill_token:
-                raise RuntimeError("runbook execution requires LV3_GATEWAY_WINDMILL_BASE_URL and LV3_GATEWAY_WINDMILL_TOKEN")
+                raise RuntimeError(
+                    "runbook execution requires LV3_GATEWAY_WINDMILL_BASE_URL and LV3_GATEWAY_WINDMILL_TOKEN"
+                )
             self._runbook_service = RunbookUseCaseService(
                 repo_root=self.config.repo_root,
                 workflow_runner=WindmillWorkflowRunner(
@@ -859,7 +864,9 @@ class GatewayRuntime:
         return next((service for service in self.services if service.id == "lago"), None)
 
     def billing_enabled(self) -> bool:
-        return bool((self.config.billing_api_base_url or "").strip()) and bool((self.config.billing_org_api_key or "").strip())
+        return bool((self.config.billing_api_base_url or "").strip()) and bool(
+            (self.config.billing_org_api_key or "").strip()
+        )
 
     def find_billing_producer(self, token: str) -> BillingProducer | None:
         for producer in self.billing_producers:
@@ -887,6 +894,7 @@ class GatewayRuntime:
         if token:
             headers["Authorization"] = f"Bearer {token}"
         try:
+
             async def fetch() -> httpx.Response:
                 response = await async_with_retry(
                     lambda: self.http_client.get(
@@ -913,7 +921,7 @@ class GatewayRuntime:
             body: Any
             try:
                 body = response.json()
-            except Exception:  # noqa: BLE001
+            except Exception:
                 body = response.text[:500]
             return {
                 "service_id": service.id,
@@ -932,7 +940,7 @@ class GatewayRuntime:
                 "error": f"circuit open for {exc.retry_after}s",
                 "retry_after": exc.retry_after,
             }
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return {
                 "service_id": service.id,
                 "gateway_prefix": service.gateway_prefix,
@@ -943,10 +951,7 @@ class GatewayRuntime:
 
     def collect_platform_health(self) -> dict[str, Any]:
         catalog = self.primary_service_catalog()
-        services_by_id = {
-            entry.service_id: entry.as_dict()
-            for entry in self.health_client.get_all(allow_stale=True)
-        }
+        services_by_id = {entry.service_id: entry.as_dict() for entry in self.health_client.get_all(allow_stale=True)}
         active_degradations = self.active_degradations()
 
         services: list[dict[str, Any]] = []
@@ -985,9 +990,7 @@ class GatewayRuntime:
 
         statuses = {item["composite_status"] for item in services}
         overall = "healthy"
-        if any(status == "critical" for status in statuses):
-            overall = "degraded"
-        elif any(status == "degraded" for status in statuses):
+        if any(status == "critical" for status in statuses) or any(status == "degraded" for status in statuses):
             overall = "degraded"
         elif statuses and statuses <= {"unknown"}:
             overall = "unknown"
@@ -1042,7 +1045,9 @@ def build_config() -> GatewayConfig:
     repo_root = Path(os.environ.get("LV3_GATEWAY_REPO_ROOT", REPO_ROOT))
     return GatewayConfig(
         repo_root=repo_root,
-        catalog_path=Path(os.environ.get("LV3_GATEWAY_CATALOG_PATH", repo_root / "config" / "api-gateway-catalog.json")),
+        catalog_path=Path(
+            os.environ.get("LV3_GATEWAY_CATALOG_PATH", repo_root / "config" / "api-gateway-catalog.json")
+        ),
         service_catalog_path=Path(
             os.environ.get("LV3_GATEWAY_SERVICE_CATALOG_PATH", repo_root / "config" / "service-capability-catalog.json")
         ),
@@ -1078,9 +1083,7 @@ def build_config() -> GatewayConfig:
         degradation_state_path=Path(
             os.environ.get("LV3_GATEWAY_DEGRADATION_STATE_PATH", "/data/degradation-state.json")
         ),
-        nats_outbox_path=Path(
-            os.environ.get("LV3_GATEWAY_NATS_OUTBOX_PATH", "/data/nats-outbox.jsonl")
-        ),
+        nats_outbox_path=Path(os.environ.get("LV3_GATEWAY_NATS_OUTBOX_PATH", "/data/nats-outbox.jsonl")),
         graph_dsn=os.environ.get("LV3_GATEWAY_GRAPH_DSN")
         or os.environ.get("LV3_GRAPH_DSN")
         or os.environ.get("WORLD_STATE_DSN")
@@ -1088,9 +1091,7 @@ def build_config() -> GatewayConfig:
         circuit_policy_path=Path(
             os.environ.get("LV3_GATEWAY_CIRCUIT_POLICY_PATH", repo_root / "config" / "circuit-policies.yaml")
         ),
-        world_state_dsn=os.environ.get("LV3_GATEWAY_WORLD_STATE_DSN")
-        or os.environ.get("WORLD_STATE_DSN")
-        or None,
+        world_state_dsn=os.environ.get("LV3_GATEWAY_WORLD_STATE_DSN") or os.environ.get("WORLD_STATE_DSN") or None,
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
         keycloak_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_KEYCLOAK_RETRY_AFTER_SECONDS", "30")),
@@ -1231,7 +1232,7 @@ async def emit_request_event(
             runtime.event_emitter.emit("platform.api.request", payload),
             timeout=REQUEST_EVENT_TIMEOUT_SECONDS,
         )
-    except Exception:  # noqa: BLE001
+    except Exception:
         return
 
 
@@ -1292,7 +1293,7 @@ async def emit_billing_rejection(
             runtime.event_emitter.emit(runtime.config.billing_rejection_subject, envelope),
             timeout=REQUEST_EVENT_TIMEOUT_SECONDS,
         )
-    except Exception:  # noqa: BLE001
+    except Exception:
         return
 
 
@@ -1308,7 +1309,9 @@ def validation_error_context(exc: RequestValidationError) -> dict[str, Any]:
     }
 
 
-def canonical_error_from_http_exception(request: Request, exc: HTTPException) -> tuple[str, str | None, dict[str, Any], int | None]:
+def canonical_error_from_http_exception(
+    request: Request, exc: HTTPException
+) -> tuple[str, str | None, dict[str, Any], int | None]:
     raw_detail = exc.detail
     detail = raw_detail if isinstance(raw_detail, str) else str(raw_detail)
     detail_lower = detail.lower()
@@ -1610,9 +1613,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         if not has_required_role(identity, "platform-read"):
             raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
         runtime: GatewayRuntime = request.app.state.runtime
-        health = await asyncio.gather(
-            *(runtime.aggregate_service_health(service) for service in runtime.services)
-        )
+        health = await asyncio.gather(*(runtime.aggregate_service_health(service) for service in runtime.services))
         overall = "healthy" if all(item["status"] == "healthy" for item in health) else "degraded"
         await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
         return {
@@ -2493,6 +2494,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 if token:
                     headers["Authorization"] = f"Bearer {token}"
                 try:
+
                     async def fetch() -> httpx.Response:
                         response = await async_with_retry(
                             lambda: runtime.http_client.get(
@@ -2517,7 +2519,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                         response = await fetch()
                     if response.status_code == 200:
                         upstream_schemas[service.id] = response.json()
-                except Exception:  # noqa: BLE001
+                except Exception:
                     continue
             schema["x-lv3-upstream-openapi"] = upstream_schemas
 
@@ -2578,6 +2580,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
 
         url = urljoin(service.upstream + "/", upstream_path.lstrip("/"))
         body = await request.body()
+
         async def forward_request() -> httpx.Response:
             return await runtime.http_client.request(
                 request.method,

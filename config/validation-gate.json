@@ -230,5 +230,32 @@
       "ansible_collections"
     ],
     "native_command": "./scripts/validate_repo.sh yaml"
+  },
+  "python-type-safety": {
+    "description": "Run pyright type-checking on scripts/ and Ansible plugins, bandit security SAST on scripts/, and crosshair symbolic contract verification on validation_toolkit. Catches None-dereferences, missing dict keys, and dangerous patterns before they reach production.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/validate_repo.sh python-type-safety",
+    "working_dir": "/workspace",
+    "timeout_seconds": 300,
+    "native_command": "./scripts/validate_repo.sh python-type-safety"
+  },
+  "cross-catalog-integrity": {
+    "description": "Validate referential integrity across all platform catalogs: service IDs in the manifest exist in the service catalog, tool references in agent_tool_registry exist in command_catalog, health probe service IDs exist in the dependency graph, and gate bypass waiver reason codes are not expired release-blockers.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/validate_repo.sh cross-catalog",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120,
+    "native_command": "./scripts/validate_repo.sh cross-catalog"
+  },
+  "waiver-escalation-proofs": {
+    "description": "Z3 formal verification of the gate bypass waiver escalation state machine. Proves four universal properties: non-negativity, upper bound, monotonic escalation (adding a receipt never decreases the repeat counter), and threshold soundness (release_blocker implies warning threshold was crossed). Also proves the catalog constraint blocker_after >= warning_after is load-bearing. Fails if the algorithm in gate_bypass_waivers.py changes in a way that violates any property.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/validate_repo.sh waiver-escalation-proofs",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120,
+    "native_command": "./scripts/validate_repo.sh waiver-escalation-proofs"
   }
 }

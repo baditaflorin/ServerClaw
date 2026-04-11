@@ -50,7 +50,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -64,7 +64,7 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from platform.locking import LockType, ResourceLockRegistry  # noqa: E402
+from platform.locking import LockType, ResourceLockRegistry
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -108,7 +108,7 @@ def _jump_user() -> str:
 
 
 def _now_utc() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 # ---------------------------------------------------------------------------
@@ -122,12 +122,18 @@ def _ssh_to_host(remote_script: str, *, timeout: int = 120) -> subprocess.Comple
     host = _proxmox_host()
     cmd = [
         "ssh",
-        "-i", key,
-        "-o", "IdentitiesOnly=yes",
-        "-o", "BatchMode=yes",
-        "-o", f"ConnectTimeout={timeout}",
-        "-o", "StrictHostKeyChecking=accept-new",
-        "-o", "UserKnownHostsFile=/dev/null",
+        "-i",
+        key,
+        "-o",
+        "IdentitiesOnly=yes",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        f"ConnectTimeout={timeout}",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=/dev/null",
         f"{user}@{host}",
         remote_script,
     ]
@@ -154,6 +160,7 @@ def load_vm_catalog() -> list[dict[str, Any]]:
     text = HOST_VARS_PATH.read_text(encoding="utf-8")
     try:
         import yaml  # type: ignore[import]
+
         data = yaml.safe_load(text)
         return data.get("proxmox_guests", [])
     except ImportError:
@@ -220,7 +227,7 @@ def _release_lock(vmid: int, holder: str) -> int:
 
 def _write_receipt(vmid: int, snapname: str, payload: dict[str, Any]) -> Path:
     RECEIPTS_DIR.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     fname = f"{vmid}-{snapname}-{ts}.json"
     path = RECEIPTS_DIR / fname
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
@@ -260,7 +267,11 @@ def _parse_listsnapshot(output: str) -> list[dict[str, Any]]:
             "is_current": is_current,
         }
         # If "time" looks like part of a date-time pair, join with next token
-        if len(parts) >= 3 and re.match(r"^\d{4}-\d{2}-\d{2}$", parts[1]) and re.match(r"^\d{2}:\d{2}:\d{2}$", parts[2]):
+        if (
+            len(parts) >= 3
+            and re.match(r"^\d{4}-\d{2}-\d{2}$", parts[1])
+            and re.match(r"^\d{2}:\d{2}:\d{2}$", parts[2])
+        ):
             snap["time"] = f"{parts[1]} {parts[2]}"
             snap["description"] = parts[3].strip() if len(parts) > 3 else ""
         snapshots.append(snap)
@@ -296,12 +307,17 @@ def cmd_list(args: argparse.Namespace) -> int:
     _require_ok(result, f"qm listsnapshot {args.vmid}")
 
     snapshots = _parse_listsnapshot(result.stdout)
-    print(json.dumps({
-        "vmid": args.vmid,
-        "name": vm.get("name", ""),
-        "snapshots": snapshots,
-        "count": len(snapshots),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "vmid": args.vmid,
+                "name": vm.get("name", ""),
+                "snapshots": snapshots,
+                "count": len(snapshots),
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
@@ -380,7 +396,7 @@ def cmd_auto_snapshot(args: argparse.Namespace) -> int:
     Output: {status, vmid, snapshot_name, timestamp, receipt_path}
     """
     prefix = (args.prefix or "pre-apply").replace(" ", "-")
-    ts_compact = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    ts_compact = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
     auto_name = f"{prefix}-{ts_compact}"
     # Proxmox snapshot names max ~40 chars; truncate prefix if needed
     if len(auto_name) > 40:
@@ -406,10 +422,7 @@ def cmd_delete(args: argparse.Namespace) -> int:
     Output: {status, vmid, snapshot_name, timestamp}
     """
     if not args.force:
-        raise SystemExit(
-            f"Deleting snapshot '{args.name}' on vm {args.vmid} is destructive. "
-            f"Pass --force to confirm."
-        )
+        raise SystemExit(f"Deleting snapshot '{args.name}' on vm {args.vmid} is destructive. Pass --force to confirm.")
 
     vm = get_vm(args.vmid)
 
@@ -587,7 +600,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_rollback = sub.add_parser("rollback", help="Roll back VM to a snapshot (--force required; VM must be stopped).")
     p_rollback.add_argument("--vmid", type=int, required=True, help="Proxmox VMID.")
     p_rollback.add_argument("--name", required=True, help="Snapshot name to roll back to.")
-    p_rollback.add_argument("--force", action="store_true", help="Required safety flag (confirms destructive rollback).")
+    p_rollback.add_argument(
+        "--force", action="store_true", help="Required safety flag (confirms destructive rollback)."
+    )
 
     # list-vms
     sub.add_parser("list-vms", help="List all VMs from inventory (no SSH needed).")

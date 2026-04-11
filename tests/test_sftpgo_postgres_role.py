@@ -27,7 +27,10 @@ def test_postgres_role_provisions_named_database_and_role() -> None:
     create_role = next(task for task in tasks if task.get("name") == "Create the SFTPGo database role")
     create_db = next(task for task in tasks if task.get("name") == "Create the SFTPGo PostgreSQL database")
     assert "CREATE ROLE {{ sftpgo_database_user }} LOGIN PASSWORD" in create_role["ansible.builtin.command"]["argv"][-1]
-    assert create_db["ansible.builtin.command"]["argv"][-1] == "CREATE DATABASE {{ sftpgo_database_name }} OWNER {{ sftpgo_database_user }}"
+    assert (
+        create_db["ansible.builtin.command"]["argv"][-1]
+        == "CREATE DATABASE {{ sftpgo_database_name }} OWNER {{ sftpgo_database_user }}"
+    )
 
 
 def test_argument_specs_require_the_password_paths() -> None:

@@ -113,12 +113,8 @@ def parse_report_text(
     resolved_host = host or scalar_values.get("hostname") or scalar_values.get("host") or "unknown"
     hardening_index = extract_hardening_index(scalar_values)
 
-    findings = [
-        parse_finding_entry(entry, "warning", suppressions)
-        for entry in list_values.get("warning", [])
-    ] + [
-        parse_finding_entry(entry, "suggestion", suppressions)
-        for entry in list_values.get("suggestion", [])
+    findings = [parse_finding_entry(entry, "warning", suppressions) for entry in list_values.get("warning", [])] + [
+        parse_finding_entry(entry, "suggestion", suppressions) for entry in list_values.get("suggestion", [])
     ]
 
     visible_findings = findings if include_suppressed else [item for item in findings if not item["suppressed"]]
@@ -129,9 +125,9 @@ def parse_report_text(
         "host": resolved_host,
         "hardening_index": hardening_index,
         "finding_counts": {
-          "warning": warning_count,
-          "suggestion": suggestion_count,
-          "suppressed": sum(1 for item in findings if item["suppressed"]),
+            "warning": warning_count,
+            "suggestion": suggestion_count,
+            "suppressed": sum(1 for item in findings if item["suppressed"]),
         },
         "findings": visible_findings,
         "suppressed_findings": [item for item in findings if item["suppressed"]],
@@ -197,7 +193,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         print(json.dumps(reports[0] if len(reports) == 1 else reports, indent=2, sort_keys=True))
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("parse_lynis_report", exc)
 
 

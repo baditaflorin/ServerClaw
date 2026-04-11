@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import yaml  # noqa: E402 — must come after sys.path adjustment
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TLS_CERTS_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_tls_certs.yml"
@@ -77,11 +77,7 @@ def _load_subdomain_catalog() -> dict[str, dict]:
         return {}
     with SUBDOMAIN_CATALOG_PATH.open() as f:
         data = json.load(f)
-    return {
-        sd["fqdn"]: sd
-        for sd in data.get("subdomains", [])
-        if isinstance(sd, dict) and "fqdn" in sd
-    }
+    return {sd["fqdn"]: sd for sd in data.get("subdomains", []) if isinstance(sd, dict) and "fqdn" in sd}
 
 
 def _load_cert_catalog() -> dict[str, dict]:
@@ -135,9 +131,7 @@ def validate(verbose: bool = False) -> int:
 
         # --- Duplicate domain check ---
         if fqdn in seen_domains:
-            errors.append(
-                f"{path}: duplicate domain — also claimed by '{seen_domains[fqdn]}'"
-            )
+            errors.append(f"{path}: duplicate domain — also claimed by '{seen_domains[fqdn]}'")
         else:
             seen_domains[fqdn] = service
 
@@ -152,10 +146,7 @@ def validate(verbose: bool = False) -> int:
         else:
             # dns-declarations.yaml doesn't exist yet (Phase 2 not run)
             if verbose:
-                print(
-                    f"  NOTE: {DNS_DECLARATIONS_PATH.relative_to(REPO_ROOT)} not found; "
-                    "skipping DNS cross-check"
-                )
+                print(f"  NOTE: {DNS_DECLARATIONS_PATH.relative_to(REPO_ROOT)} not found; skipping DNS cross-check")
 
         # --- Subdomain catalog provider consistency check ---
         if fqdn in subdomain_catalog:
@@ -180,9 +171,7 @@ def validate(verbose: bool = False) -> int:
                     )
 
         # --- letsencrypt on internal domains ---
-        if source == "letsencrypt" and (
-            ".internal" in fqdn or fqdn.endswith(".local")
-        ):
+        if source == "letsencrypt" and (".internal" in fqdn or fqdn.endswith(".local")):
             errors.append(
                 f"{path}: cert_source=letsencrypt declared for domain '{fqdn}' "
                 "which appears to be internal (.internal or .local). "

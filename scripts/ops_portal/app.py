@@ -9,7 +9,7 @@ import uuid
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, UTC
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -23,7 +23,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 
-UTC = timezone.utc
+UTC = UTC
 
 try:
     from publication_contract import registry_entries
@@ -64,7 +64,6 @@ try:
     )
 except ImportError:  # pragma: no cover - repo checkout import path
     from scripts.workbench_information_architecture import (
-        DEFAULT_PERSONAS_BY_TASK_LANE,
         TASK_LANE_IDS,
         TASK_LANE_LABELS,
         TASK_LANE_ORDER,
@@ -750,9 +749,7 @@ def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
         seen_ids.add(persona_id)
         focus_lanes = normalize_task_lane_list(item.get("focus_lanes", item.get("focus_purposes", [])))
         default_favorites = [
-            favorite
-            for favorite in item.get("default_favorites", [])
-            if isinstance(favorite, str) and favorite.strip()
+            favorite for favorite in item.get("default_favorites", []) if isinstance(favorite, str) and favorite.strip()
         ]
         personas.append(
             {
@@ -1003,11 +1000,7 @@ def build_activation_context(
         if stage["id"] == advanced_stage_id:
             stage["status"] = "completed" if advanced_unlocked else "todo"
             stage["status_label"] = (
-                "Revealed for this session"
-                if advanced_override
-                else "Ready"
-                if advanced_unlocked
-                else "Locked"
+                "Revealed for this session" if advanced_override else "Ready" if advanced_unlocked else "Locked"
             )
             break
 
@@ -1019,12 +1012,8 @@ def build_activation_context(
         "advanced_unlocked": advanced_unlocked,
         "advanced_override": advanced_override,
         "advanced_override_updated_at": state.get("advanced_override_updated_at", ""),
-        "locked_launcher_purposes": set(
-            catalog.get("progressive_reveal", {}).get("locked_launcher_purposes", [])
-        ),
-        "locked_service_actions": set(
-            catalog.get("progressive_reveal", {}).get("locked_service_actions", [])
-        ),
+        "locked_launcher_purposes": set(catalog.get("progressive_reveal", {}).get("locked_launcher_purposes", [])),
+        "locked_service_actions": set(catalog.get("progressive_reveal", {}).get("locked_service_actions", [])),
         "locked_runbook_execution_classes": set(
             catalog.get("progressive_reveal", {}).get("locked_runbook_execution_classes", [])
         ),
@@ -1455,14 +1444,15 @@ def split_launcher_entries(
 
 
 def runbook_locked(runbook: dict[str, Any], activation: dict[str, Any]) -> bool:
-    return (
-        not activation.get("advanced_unlocked", True)
-        and str(runbook.get("execution_class", "workflow")) in activation.get("locked_runbook_execution_classes", set())
-    )
+    return not activation.get("advanced_unlocked", True) and str(
+        runbook.get("execution_class", "workflow")
+    ) in activation.get("locked_runbook_execution_classes", set())
 
 
 def action_locked(action_id: str, activation: dict[str, Any]) -> bool:
-    return not activation.get("advanced_unlocked", True) and action_id in activation.get("locked_service_actions", set())
+    return not activation.get("advanced_unlocked", True) and action_id in activation.get(
+        "locked_service_actions", set()
+    )
 
 
 @dataclass(frozen=True)
@@ -1514,12 +1504,8 @@ class PortalSettings:
                 os.getenv("OPS_PORTAL_WORKFLOW_CATALOG", data_root / "config" / "workflow-catalog.json")
             ),
             changelog_path=Path(os.getenv("OPS_PORTAL_CHANGELOG_FILE", data_root / "changelog.md")),
-            live_applies_dir=Path(
-                os.getenv("OPS_PORTAL_LIVE_APPLIES_DIR", data_root / "receipts" / "live-applies")
-            ),
-            promotions_dir=Path(
-                os.getenv("OPS_PORTAL_PROMOTIONS_DIR", data_root / "receipts" / "promotions")
-            ),
+            live_applies_dir=Path(os.getenv("OPS_PORTAL_LIVE_APPLIES_DIR", data_root / "receipts" / "live-applies")),
+            promotions_dir=Path(os.getenv("OPS_PORTAL_PROMOTIONS_DIR", data_root / "receipts" / "promotions")),
             drift_receipts_dir=Path(
                 os.getenv("OPS_PORTAL_DRIFT_RECEIPTS_DIR", data_root / "receipts" / "drift-reports")
             ),
@@ -1820,9 +1806,8 @@ class PortalRepository:
                 receipt["_outcome"] = "partial"
             else:
                 receipt["_outcome"] = "success"
-            receipt["_environment"] = (
-                str(receipt.get("environment", "")).strip().lower()
-                or ("staging" if "staging" in receipt_path.parts else "production")
+            receipt["_environment"] = str(receipt.get("environment", "")).strip().lower() or (
+                "staging" if "staging" in receipt_path.parts else "production"
             )
             receipts.append(receipt)
         return receipts
@@ -2160,7 +2145,8 @@ def build_attention_notifications(
                 "id": item_id,
                 "title": str(receipt.get("summary") or "Live apply needs review"),
                 "summary": f"Latest recorded outcome: {receipt.get('_outcome', 'unknown')}.",
-                "detail": ", ".join(str(service_id) for service_id in matched_services) or "Affected services not inferred.",
+                "detail": ", ".join(str(service_id) for service_id in matched_services)
+                or "Affected services not inferred.",
                 "occurred_at": receipt.get("recorded_on") or receipt.get("applied_on"),
                 "tone": "danger" if receipt.get("_outcome") == "failure" else "warn",
                 "source_label": "Live apply receipt",
@@ -2215,7 +2201,9 @@ def build_activity_items(
                 "title": str(deployment.get("summary") or deployment.get("id") or "Live apply"),
                 "summary": ", ".join(str(service_id) for service_id in services) or "Service inference unavailable.",
                 "occurred_at": deployment.get("recorded_on"),
-                "tone": "danger" if deployment.get("outcome") == "failure" else status_tone(str(deployment.get("outcome", "success"))),
+                "tone": "danger"
+                if deployment.get("outcome") == "failure"
+                else status_tone(str(deployment.get("outcome", "success"))),
                 "source_label": "Live apply",
                 "meta": str(deployment.get("recorded_by", "unknown")),
                 "links": [{"label": "Open activity timeline", "href": "#changelog"}],
@@ -2246,7 +2234,9 @@ def build_activity_items(
             {
                 "id": str(history.get("id")),
                 "title": f"{title} was {action}",
-                "summary": str(snapshot.get("summary") or "Notification center state changed without deleting the source event."),
+                "summary": str(
+                    snapshot.get("summary") or "Notification center state changed without deleting the source event."
+                ),
                 "occurred_at": history.get("occurred_at"),
                 "tone": "warn" if action == "dismissed" else "ok" if action == "acknowledged" else "neutral",
                 "source_label": "Notification center",
@@ -2328,7 +2318,9 @@ def normalize_runtime_assurance(payload: dict[str, Any] | None, services: list[d
             for dimension in dimensions
             if isinstance(dimension, dict) and dimension.get("status") not in {"pass", "n_a"}
         ]
-        exception_titles = [str(dimension.get("title", dimension.get("id", "dimension"))) for dimension in exceptions[:3]]
+        exception_titles = [
+            str(dimension.get("title", dimension.get("id", "dimension"))) for dimension in exceptions[:3]
+        ]
         normalized_entries.append(
             {
                 "service_id": service_id,
@@ -2547,9 +2539,7 @@ def build_live_apply_timeline_chart(deployments: list[dict[str, Any]], *, days: 
             continue
         timeline[current]["receipts"] += 1
         timeline[current]["services"].update(
-            service_id
-            for service_id in deployment.get("services", [])
-            if isinstance(service_id, str) and service_id
+            service_id for service_id in deployment.get("services", []) if isinstance(service_id, str) and service_id
         )
 
     labels = [current.strftime("%m-%d") for current in timeline]
@@ -2621,9 +2611,7 @@ def build_dependency_focus_chart(
     nodes = dependency_graph.get("nodes", []) if isinstance(dependency_graph, dict) else []
     edges = dependency_graph.get("edges", []) if isinstance(dependency_graph, dict) else []
     node_index = {
-        str(node.get("id")): node
-        for node in nodes
-        if isinstance(node, dict) and isinstance(node.get("id"), str)
+        str(node.get("id")): node for node in nodes if isinstance(node, dict) and isinstance(node.get("id"), str)
     }
     if focus_service not in node_index:
         return {}
@@ -3274,33 +3262,33 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         health_payload = await gateway.fetch_platform_health(
             token=read_api_token(session, request.app.state.settings),
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         health_payload = {"warning": str(exc)}
     try:
         runbook_payload = await gateway.fetch_runbooks(
             token=read_api_token(session, request.app.state.settings),
             delivery_surface="ops_portal",
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         runbook_payload = {"warning": str(exc), "runbooks": []}
     try:
         task_payload = await gateway.fetch_runbook_tasks(
             token=read_api_token(session, request.app.state.settings),
             delivery_surface="ops_portal",
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         task_payload = {"warning": str(exc), "tasks": []}
     try:
         runtime_assurance_payload = await gateway.fetch_runtime_assurance(
             token=read_api_token(session, request.app.state.settings),
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         runtime_assurance_payload = {"warning": str(exc), "entries": []}
     try:
         coordination_payload = await gateway.fetch_agent_coordination(
             token=read_api_token(session, request.app.state.settings),
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         coordination_payload = {"warning": str(exc)}
 
     health = normalize_health(health_payload, services)
@@ -3384,9 +3372,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "runbooks": visible_runbooks,
         "locked_runbooks": locked_runbooks,
         "attention": attention_notifications,
-        "attention_notification_index": {
-            item["id"]: item for item in attention_notifications["all"]
-        },
+        "attention_notification_index": {item["id"]: item for item in attention_notifications["all"]},
         "attention_summary": {
             **attention_notifications["summary"],
             "activity_count": len(activity_items),
@@ -3452,7 +3438,7 @@ async def build_task_detail_context(
     except httpx.HTTPStatusError as exc:
         detail = exc.response.text.strip() or f"task {run_id} is unavailable"
         raise HTTPException(status_code=exc.response.status_code, detail=detail) from exc
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(status_code=502, detail=f"unable to load task {run_id}: {exc}") from exc
 
     task = payload.get("reentry") if isinstance(payload, dict) else None
@@ -3532,11 +3518,15 @@ def create_app(
 
         if invalid_requested_url:
             journey["invalid_requested_url"] = True
-            return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
+            return templates.TemplateResponse(
+                request=request, name="entry.html", context={**context, "journey": journey}
+            )
 
         if not neutral and not journey["activation_ready"]:
             journey["invalid_requested_url"] = invalid_requested_url
-            return templates.TemplateResponse(request=request, name="entry.html", context={**context, "journey": journey})
+            return templates.TemplateResponse(
+                request=request, name="entry.html", context={**context, "journey": journey}
+            )
 
         if not neutral and journey["saved_home"] is not None:
             saved_home = journey["saved_home"]
@@ -3790,7 +3780,7 @@ def create_app(
             status = result.get("status", "unknown")
             detail = result.get("detail") or result.get("message") or "Health check completed."
             tone = status_tone(status)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             status = "error"
             detail = str(exc)
             tone = "danger"
@@ -3808,7 +3798,9 @@ def create_app(
         return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
 
     @app.post("/actions/services/{service_id}/deploy", response_class=HTMLResponse)
-    async def deploy_action(request: Request, service_id: str, restart_only: bool = Form(default=False)) -> HTMLResponse:
+    async def deploy_action(
+        request: Request, service_id: str, restart_only: bool = Form(default=False)
+    ) -> HTMLResponse:
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
@@ -3841,7 +3833,7 @@ def create_app(
             )
             tone = "ok"
             status = "queued"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             job_id = ""
             summary = str(exc)
             tone = "danger"
@@ -3888,7 +3880,7 @@ def create_app(
             tone = "ok"
             status = "queued"
             await broker.publish(f"{service_id}: {summary}", event_type="secret", metadata={"service": service_id})
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             summary = str(exc)
             tone = "danger"
             status = "failed"
@@ -3950,7 +3942,7 @@ def create_app(
                 metadata={"runbook_id": runbook_id, "status": status},
             )
             task_link = str(result.get("task_path") or f"/tasks/runbooks/{result.get('run_id', '')}").strip()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             detail = str(exc)
             tone = "danger"
             status = "failed"
@@ -3987,7 +3979,7 @@ def create_app(
             )
             notice = str(result.get("message") or f"Runbook task {run_id} resumed successfully.")
             notice_tone = "ok" if str(result.get("status") or "") == "completed" else "warn"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             notice = str(exc)
             notice_tone = "danger"
         query = httpx.QueryParams({"notice": notice, "notice_tone": notice_tone})
@@ -4011,7 +4003,7 @@ def create_app(
         try:
             data = json.loads(catalog_path.read_text())
             return data.get("profiles", []) if isinstance(data, dict) else []
-        except Exception:  # noqa: BLE001
+        except Exception:
             return []
 
     @app.get("/partials/repo-intake", response_class=HTMLResponse)
@@ -4054,15 +4046,20 @@ def create_app(
             }
             return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
-            import subprocess  # noqa: PLC0415 - lazy import
+            import subprocess
+
             compose_domain_args: list[str] = []
             for cd in profile.get("compose_domains") or []:
                 compose_domain_args.extend(["--compose-domain", f"{cd['service']}:{cd['domain']}"])
             args = [
-                "python3", "-m", "scripts.lv3_cli", "deploy-repo-profile",
-                "--profile-id", profile_id,
+                "python3",
+                "-m",
+                "scripts.lv3_cli",
+                "deploy-repo-profile",
+                "--profile-id",
+                profile_id,
             ]
-            result = subprocess.run(  # noqa: S603
+            result = subprocess.run(
                 args,
                 capture_output=True,
                 text=True,
@@ -4077,7 +4074,7 @@ def create_app(
                 status = "failed"
                 detail = result.stderr.strip() or result.stdout.strip() or "Deploy command exited non-zero."
                 tone = "danger"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             status = "failed"
             detail = str(exc)
             tone = "danger"
@@ -4158,23 +4155,35 @@ def create_app(
             }
             return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
         try:
-            import subprocess  # noqa: PLC0415
+            import subprocess
+
             args = [
-                "python3", "-m", "scripts.lv3_cli", "deploy-repo",
-                "--repo", repo,
-                "--branch", branch.strip() or "main",
-                "--source", source,
-                "--app-name", app_name,
-                "--project", project.strip() or "LV3 Apps",
-                "--environment", environment.strip() or "production",
-                "--build-pack", build_pack,
-                "--ports", ports.strip() or "80",
+                "python3",
+                "-m",
+                "scripts.lv3_cli",
+                "deploy-repo",
+                "--repo",
+                repo,
+                "--branch",
+                branch.strip() or "main",
+                "--source",
+                source,
+                "--app-name",
+                app_name,
+                "--project",
+                project.strip() or "LV3 Apps",
+                "--environment",
+                environment.strip() or "production",
+                "--build-pack",
+                build_pack,
+                "--ports",
+                ports.strip() or "80",
             ]
             if domain.strip():
                 args.extend(["--domain", domain.strip()])
             if docker_compose_location.strip():
                 args.extend(["--docker-compose-location", docker_compose_location.strip()])
-            result = subprocess.run(  # noqa: S603
+            result = subprocess.run(
                 args,
                 capture_output=True,
                 text=True,
@@ -4189,7 +4198,7 @@ def create_app(
                 status = "failed"
                 detail = result.stderr.strip() or result.stdout.strip() or "Deploy command exited non-zero."
                 tone = "danger"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             status = "failed"
             detail = str(exc)
             tone = "danger"
@@ -4235,7 +4244,7 @@ def create_app(
                 return JSONResponse({"ok": False, "error": "Invalid token."}, status_code=403)
         try:
             body = await request.json()
-        except Exception:  # noqa: BLE001
+        except Exception:
             return JSONResponse({"ok": False, "error": "Request body must be valid JSON."}, status_code=400)
         if not isinstance(body, dict):
             return JSONResponse({"ok": False, "error": "Request body must be a JSON object."}, status_code=400)
@@ -4259,19 +4268,32 @@ def create_app(
             if profile is None:
                 return JSONResponse({"ok": False, "error": f"Profile '{profile_id}' not found."}, status_code=404)
             try:
-                import subprocess  # noqa: PLC0415
+                import subprocess
+
                 args = [
-                    "python3", "-m", "scripts.lv3_cli", "deploy-repo-profile",
-                    "--profile-id", profile_id,
+                    "python3",
+                    "-m",
+                    "scripts.lv3_cli",
+                    "deploy-repo-profile",
+                    "--profile-id",
+                    profile_id,
                 ]
-                result = subprocess.run(  # noqa: S603
-                    args, capture_output=True, text=True, timeout=30,
+                result = subprocess.run(
+                    args,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
                     cwd=str(Path(__file__).resolve().parents[2]),
                 )
                 if result.returncode == 0:
-                    return JSONResponse({"ok": True, "status": "queued", "detail": result.stdout.strip() or "Deploy queued."})
-                return JSONResponse({"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."}, status_code=502)
-            except Exception as exc:  # noqa: BLE001
+                    return JSONResponse(
+                        {"ok": True, "status": "queued", "detail": result.stdout.strip() or "Deploy queued."}
+                    )
+                return JSONResponse(
+                    {"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."},
+                    status_code=502,
+                )
+            except Exception as exc:
                 return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
         valid_sources = {"auto", "public", "private-deploy-key"}
@@ -4288,26 +4310,49 @@ def create_app(
         if errors:
             return JSONResponse({"ok": False, "error": " ".join(errors)}, status_code=422)
         try:
-            import subprocess  # noqa: PLC0415
+            import subprocess
+
             args = [
-                "python3", "-m", "scripts.lv3_cli", "deploy-repo",
-                "--repo", repo, "--branch", branch,
-                "--source", source, "--app-name", app_name,
-                "--project", project, "--environment", environment,
-                "--build-pack", build_pack, "--ports", ports,
+                "python3",
+                "-m",
+                "scripts.lv3_cli",
+                "deploy-repo",
+                "--repo",
+                repo,
+                "--branch",
+                branch,
+                "--source",
+                source,
+                "--app-name",
+                app_name,
+                "--project",
+                project,
+                "--environment",
+                environment,
+                "--build-pack",
+                build_pack,
+                "--ports",
+                ports,
             ]
             if domain:
                 args.extend(["--domain", domain])
             if docker_compose_location:
                 args.extend(["--docker-compose-location", docker_compose_location])
-            result = subprocess.run(  # noqa: S603
-                args, capture_output=True, text=True, timeout=30,
+            result = subprocess.run(
+                args,
+                capture_output=True,
+                text=True,
+                timeout=30,
                 cwd=str(Path(__file__).resolve().parents[2]),
             )
             if result.returncode == 0:
-                return JSONResponse({"ok": True, "status": "queued", "detail": result.stdout.strip() or "Deploy queued."})
-            return JSONResponse({"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."}, status_code=502)
-        except Exception as exc:  # noqa: BLE001
+                return JSONResponse(
+                    {"ok": True, "status": "queued", "detail": result.stdout.strip() or "Deploy queued."}
+                )
+            return JSONResponse(
+                {"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."}, status_code=502
+            )
+        except Exception as exc:
             return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
     # ---------------------------------------------------------------------------
@@ -4337,7 +4382,7 @@ def create_app(
             )
             context["search_results"] = payload.get("results", [])
             context["search_expanded_query"] = payload.get("expanded_query", query)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             context["search_error"] = str(exc)
         return templates.TemplateResponse(request=request, name="partials/search.html", context=context)
 

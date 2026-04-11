@@ -17,7 +17,12 @@ from controller_automation_toolkit import (
     load_json,
 )
 from environment_catalog import receipt_environment_ids, receipt_subdirectory_environments
-from workflow_catalog import load_workflow_catalog, load_secret_manifest, validate_secret_manifest, validate_workflow_catalog
+from workflow_catalog import (
+    load_workflow_catalog,
+    load_secret_manifest,
+    validate_secret_manifest,
+    validate_workflow_catalog,
+)
 
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
@@ -46,9 +51,7 @@ def git_commit_exists(commit: str) -> bool:
 
 
 def git_metadata_available() -> bool:
-    return (REPO_ROOT / ".git").exists() and command_succeeds(
-        ["git", "rev-parse", "--is-inside-work-tree"]
-    )
+    return (REPO_ROOT / ".git").exists() and command_succeeds(["git", "rev-parse", "--is-inside-work-tree"])
 
 
 def git_commit_lookup_available() -> bool:
@@ -79,9 +82,7 @@ def validate_source_commit(commit: str, path: Path) -> None:
         return
 
     if strict_source_commit_object_validation_enabled():
-        raise ValueError(
-            f"{path.name}: source_commit '{commit}' is not available in the current git object database"
-        )
+        raise ValueError(f"{path.name}: source_commit '{commit}' is not available in the current git object database")
 
 
 def iter_receipt_paths(receipts_dir: Path = RECEIPTS_DIR) -> list[Path]:
@@ -100,7 +101,11 @@ def iter_receipt_paths(receipts_dir: Path = RECEIPTS_DIR) -> list[Path]:
 
 def receipt_environment_for_path(path: Path) -> str:
     relative = path.relative_to(RECEIPTS_DIR)
-    return relative.parts[0] if relative.parts and relative.parts[0] in receipt_subdirectory_environments() else "production"
+    return (
+        relative.parts[0]
+        if relative.parts and relative.parts[0] in receipt_subdirectory_environments()
+        else "production"
+    )
 
 
 def receipt_relative_path(path: Path) -> Path:
@@ -169,13 +174,10 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
             f"{path.name}: environment '{environment}' does not match receipt path environment '{derived_environment}'"
         )
 
-    if (
-        receipt["workflow_id"] not in workflow_catalog["workflows"]
-        and not LEGACY_WORKFLOW_ID_PATTERN.fullmatch(receipt["workflow_id"])
+    if receipt["workflow_id"] not in workflow_catalog["workflows"] and not LEGACY_WORKFLOW_ID_PATTERN.fullmatch(
+        receipt["workflow_id"]
     ):
-        raise ValueError(
-            f"{path.name}: workflow_id '{receipt['workflow_id']}' is not in {WORKFLOW_CATALOG_PATH.name}"
-        )
+        raise ValueError(f"{path.name}: workflow_id '{receipt['workflow_id']}' is not in {WORKFLOW_CATALOG_PATH.name}")
 
     validate_source_commit(receipt["source_commit"], path)
 
@@ -314,8 +316,7 @@ def show_receipt(receipt_id: str) -> int:
         return 2
     if len(matches) > 1:
         print(
-            f"Ambiguous receipt id '{receipt_id}': "
-            + ", ".join(str(receipt_relative_path(path)) for path in matches),
+            f"Ambiguous receipt id '{receipt_id}': " + ", ".join(str(receipt_relative_path(path)) for path in matches),
             file=sys.stderr,
         )
         return 2
@@ -376,9 +377,7 @@ def show_receipt(receipt_id: str) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Inspect or validate structured live-apply receipts."
-    )
+    parser = argparse.ArgumentParser(description="Inspect or validate structured live-apply receipts.")
     parser.add_argument("--validate", action="store_true", help="Validate all receipts.")
     parser.add_argument("--list", action="store_true", help="List receipts.")
     parser.add_argument("--receipt", help="Show one receipt by receipt_id.")

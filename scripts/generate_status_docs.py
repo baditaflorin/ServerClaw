@@ -5,7 +5,6 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
 
 from api_publication import ALLOWED_PUBLICATION_TIERS, load_api_publication_catalog
 from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog
@@ -58,6 +57,7 @@ def read_heading(path: Path) -> str:
             return line[2:].strip()
     return path.stem
 
+
 def repo_relative_link(label: str, path: Path) -> str:
     resolved_path = path if path.is_absolute() else REPO_ROOT / path
     relative = resolved_path.relative_to(REPO_ROOT).as_posix()
@@ -96,7 +96,10 @@ def render_platform_status() -> str:
 
     topology_rows = [
         ["Managed guest count", str(len(stack["observed_state"]["guests"]["instances"]))],
-        ["Running guest count", str(sum(1 for guest in stack["observed_state"]["guests"]["instances"] if guest["running"]))],
+        [
+            "Running guest count",
+            str(sum(1 for guest in stack["observed_state"]["guests"]["instances"] if guest["running"])),
+        ],
         ["Template VM present", "`true`" if stack["observed_state"]["guests"]["template"]["vmid"] else "`false`"],
         ["Declared services", str(len(topology))],
         ["Publicly published services", str(sum(1 for service in topology.values() if service.get("public_hostname")))],
@@ -274,7 +277,9 @@ def render_merged_workstream_history() -> str:
             f"`{record.adr}`",
             record.title,
             f"`{record.status}`",
-            relative_markdown_link(record.doc_path.name, from_path=history_path, target_path=REPO_ROOT / record.doc_path),
+            relative_markdown_link(
+                record.doc_path.name, from_path=history_path, target_path=REPO_ROOT / record.doc_path
+            ),
         ]
         for record in collect_merged_workstream_records(workstreams)
     ]

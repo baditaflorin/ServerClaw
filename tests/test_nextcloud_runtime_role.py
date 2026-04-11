@@ -19,9 +19,14 @@ def load_tasks(path: Path) -> list[dict]:
 
 def test_runtime_defaults_pin_public_hostname_and_local_artifacts() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
-    assert defaults["nextcloud_port"] == "{{ platform_service_topology | platform_service_port('nextcloud', 'internal') }}"
+    assert (
+        defaults["nextcloud_port"] == "{{ platform_service_topology | platform_service_port('nextcloud', 'internal') }}"
+    )
     assert defaults["nextcloud_public_hostname"] == "{{ platform_service_topology.nextcloud.public_hostname }}"
-    assert defaults["nextcloud_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+    assert (
+        defaults["nextcloud_database_host"]
+        == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+    )
     assert defaults["nextcloud_admin_password_local_file"].endswith("/.local/nextcloud/admin-password.txt")
     assert defaults["nextcloud_redis_password_local_file"].endswith("/.local/nextcloud/redis-password.txt")
     assert defaults["nextcloud_occ_command_retries"] == 5
@@ -30,7 +35,7 @@ def test_runtime_defaults_pin_public_hostname_and_local_artifacts() -> None:
 
 def test_runtime_uses_openbao_secret_injection_for_database_admin_and_redis_passwords() -> None:
     template = ENV_TEMPLATE.read_text()
-    assert 'kv/data/{{ nextcloud_openbao_secret_path }}' in template
+    assert "kv/data/{{ nextcloud_openbao_secret_path }}" in template
     assert "POSTGRES_PASSWORD" in template
     assert "NEXTCLOUD_ADMIN_PASSWORD" in template
     assert "REDIS_HOST_PASSWORD" in template
@@ -48,7 +53,9 @@ def test_verify_tasks_check_status_admin_and_background_job_mode() -> None:
     tasks = load_tasks(VERIFY_TASKS)
     status_task = next(task for task in tasks if task.get("name") == "Verify the Nextcloud local status endpoint")
     admin_task = next(task for task in tasks if task.get("name") == "Verify the bootstrap Nextcloud admin exists")
-    background_task = next(task for task in tasks if task.get("name") == "Verify Nextcloud background jobs run in cron mode")
+    background_task = next(
+        task for task in tasks if task.get("name") == "Verify Nextcloud background jobs run in cron mode"
+    )
 
     assert status_task["ansible.builtin.uri"]["url"] == "{{ nextcloud_internal_base_url }}/status.php"
     assert admin_task["ansible.builtin.command"]["argv"][-3:] == [
@@ -75,17 +82,27 @@ def test_runtime_occ_mutations_retry_when_docker_exec_is_transiently_unavailable
     trusted_domains_task = next(
         task for task in tasks if task.get("name") == "Ensure Nextcloud trusted domains include the public hostname"
     )
-    redis_password_task = next(task for task in tasks if task.get("name") == "Ensure Nextcloud Redis password is configured")
+    redis_password_task = next(
+        task for task in tasks if task.get("name") == "Ensure Nextcloud Redis password is configured"
+    )
     occ_helper_tasks = load_tasks(OCC_COMMAND_TASKS)
-    run_command_task = next(task for task in occ_helper_tasks if task.get("name") == "{{ nextcloud_occ_command_description }}")
+    run_command_task = next(
+        task for task in occ_helper_tasks if task.get("name") == "{{ nextcloud_occ_command_description }}"
+    )
     recovery_fact = next(
-        task for task in occ_helper_tasks if task.get("name") == "Detect whether the Nextcloud OCC command needs runtime recovery"
+        task
+        for task in occ_helper_tasks
+        if task.get("name") == "Detect whether the Nextcloud OCC command needs runtime recovery"
     )
     recover_block = next(
-        task for task in occ_helper_tasks if task.get("name") == "Recover the Nextcloud runtime after a concurrent interruption"
+        task
+        for task in occ_helper_tasks
+        if task.get("name") == "Recover the Nextcloud runtime after a concurrent interruption"
     )
     retry_after_recovery = next(
-        task for task in recover_block["block"] if task.get("name") == "Retry the Nextcloud OCC command after runtime recovery"
+        task
+        for task in recover_block["block"]
+        if task.get("name") == "Retry the Nextcloud OCC command after runtime recovery"
     )
 
     assert trusted_domains_task["ansible.builtin.include_tasks"] == "occ_command.yml"
@@ -138,7 +155,11 @@ def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None
     )
 
     assert network_inspect["ansible.builtin.command"]["argv"] == ["docker", "network", "inspect", "nextcloud_default"]
-    assert container_inspect["ansible.builtin.command"]["argv"] == ["docker", "inspect", "{{ nextcloud_container_name }}"]
+    assert container_inspect["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "inspect",
+        "{{ nextcloud_container_name }}",
+    ]
     assert reset_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert reset_task["when"] == [
         "nextcloud_container_inspect.rc == 0",
@@ -149,7 +170,8 @@ def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None
     recovery_fact = next(
         task
         for task in startup["rescue"]
-        if task.get("name") == "Flag Docker bridge-chain and stale Nextcloud compose network failures after startup failure"
+        if task.get("name")
+        == "Flag Docker bridge-chain and stale Nextcloud compose network failures after startup failure"
     )
     unexpected_failure = next(
         task for task in startup["rescue"] if task.get("name") == "Surface unexpected Nextcloud startup failures"
@@ -162,7 +184,8 @@ def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None
     restart_docker = next(
         task
         for task in startup["rescue"]
-        if task.get("name") == "Fail closed before an unsafe Docker daemon restart while repairing Nextcloud bridge chains"
+        if task.get("name")
+        == "Fail closed before an unsafe Docker daemon restart while repairing Nextcloud bridge chains"
     )
     reassert_chains = next(
         task
@@ -170,12 +193,20 @@ def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None
         if task.get("name") == "Ensure Docker bridge networking chains are present before retrying Nextcloud startup"
     )
     retry_start = next(
-        task for task in startup["rescue"] if task.get("name") == "Retry Nextcloud startup after resetting stale compose resources"
+        task
+        for task in startup["rescue"]
+        if task.get("name") == "Retry Nextcloud startup after resetting stale compose resources"
     )
 
     assert start_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
-    assert "No chain/target/match by that name" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_docker_bridge_chain_missing"]
-    assert "Unable to enable ACCEPT OUTGOING rule" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_docker_bridge_chain_missing"]
+    assert (
+        "No chain/target/match by that name"
+        in recovery_fact["ansible.builtin.set_fact"]["nextcloud_docker_bridge_chain_missing"]
+    )
+    assert (
+        "Unable to enable ACCEPT OUTGOING rule"
+        in recovery_fact["ansible.builtin.set_fact"]["nextcloud_docker_bridge_chain_missing"]
+    )
     assert "failed to create endpoint" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
     assert "does not exist" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
     assert unexpected_failure["when"] == (
@@ -206,7 +237,9 @@ def test_runtime_force_recreates_nextcloud_when_network_attachment_is_missing() 
         task for task in tasks if task.get("name") == "Check whether Nextcloud has an attached Docker network"
     )
     recovery_block = next(
-        task for task in tasks if task.get("name") == "Force-recreate Nextcloud when Docker network attachment is missing"
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate Nextcloud when Docker network attachment is missing"
     )
     network_cleanup = next(
         task
@@ -218,9 +251,7 @@ def test_runtime_force_recreates_nextcloud_when_network_attachment_is_missing() 
         for task in recovery_block["block"]
         if task.get("name") == "Force-recreate Nextcloud after local network attachment recovery"
     )
-    network_recheck = next(
-        task for task in tasks if task.get("name") == "Recheck Nextcloud Docker network attachment"
-    )
+    network_recheck = next(task for task in tasks if task.get("name") == "Recheck Nextcloud Docker network attachment")
 
     assert "{{json .NetworkSettings.Networks}}" in network_check["ansible.builtin.shell"]
     assert recovery_block["when"] == "nextcloud_network_attachment_check.stdout | trim in ['', '{}', 'null']"
@@ -233,8 +264,13 @@ def test_postgres_role_provisions_named_database_and_role() -> None:
     tasks = load_tasks(POSTGRES_TASKS)
     create_role = next(task for task in tasks if task.get("name") == "Create the Nextcloud database role")
     create_db = next(task for task in tasks if task.get("name") == "Create the Nextcloud PostgreSQL database")
-    assert "CREATE ROLE {{ nextcloud_database_user }} LOGIN PASSWORD" in create_role["ansible.builtin.command"]["argv"][-1]
-    assert create_db["ansible.builtin.command"]["argv"][-1] == "CREATE DATABASE {{ nextcloud_database_name }} OWNER {{ nextcloud_database_user }}"
+    assert (
+        "CREATE ROLE {{ nextcloud_database_user }} LOGIN PASSWORD" in create_role["ansible.builtin.command"]["argv"][-1]
+    )
+    assert (
+        create_db["ansible.builtin.command"]["argv"][-1]
+        == "CREATE DATABASE {{ nextcloud_database_name }} OWNER {{ nextcloud_database_user }}"
+    )
 
 
 def test_host_network_policy_allows_edge_and_private_nextcloud_access() -> None:

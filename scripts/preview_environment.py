@@ -53,9 +53,7 @@ import vmid_allocator
 try:
     import jsonschema
 except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
-    raise RuntimeError(
-        "Missing dependency: jsonschema. Run via 'uv run --with jsonschema python ...'."
-    ) from exc
+    raise RuntimeError("Missing dependency: jsonschema. Run via 'uv run --with jsonschema python ...'.") from exc
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -363,7 +361,9 @@ def run_named_checks(receipt: dict[str, Any], checks: list[dict[str, Any]], *, p
             result = fixture_manager.verify_tcp(receipt["ip_address"], int(check["port"]), timeout_seconds)
             label = f"{phase}:{receipt['member_id']}:port:{index + 1}"
         else:
-            result = fixture_manager.verify_http(str(check["url"]), int(check.get("expected_status", 200)), timeout_seconds)
+            result = fixture_manager.verify_http(
+                str(check["url"]), int(check.get("expected_status", 200)), timeout_seconds
+            )
             label = f"{phase}:{receipt['member_id']}:url:{index + 1}"
         results.append(
             {
@@ -603,7 +603,9 @@ def create_preview(
                 policy=resolved_policy,
             )
             receipt["lifetime_minutes"] = ttl_minutes
-            receipt["expires_at"] = isoformat(parse_timestamp(receipt["created_at"]) + dt.timedelta(minutes=ttl_minutes))
+            receipt["expires_at"] = isoformat(
+                parse_timestamp(receipt["created_at"]) + dt.timedelta(minutes=ttl_minutes)
+            )
             receipt["expires_epoch"] = int(parse_timestamp(receipt["expires_at"]).timestamp())
             receipt["ephemeral_tags"] = build_ephemeral_tags(
                 build_ephemeral_tag_metadata(
@@ -705,9 +707,13 @@ def validate_preview(preview_id: str) -> dict[str, Any]:
     synthetic_results = []
     smoke_results = []
     for member in state.get("members", []):
-        smoke_results.extend(run_named_checks(member, list(member["definition"].get("smoke_checks", [])), phase="smoke")["results"])
+        smoke_results.extend(
+            run_named_checks(member, list(member["definition"].get("smoke_checks", [])), phase="smoke")["results"]
+        )
         synthetic_results.extend(
-            run_named_checks(member, list(member["definition"].get("synthetic_checks", [])), phase="synthetic")["results"]
+            run_named_checks(member, list(member["definition"].get("synthetic_checks", [])), phase="synthetic")[
+                "results"
+            ]
         )
     state["validation"]["smoke"] = {
         "phase": "smoke",
@@ -850,7 +856,11 @@ def main(argv: list[str] | None = None) -> int:
                 policy=args.policy,
             )
             payload = render_preview(state)
-            print(json.dumps(payload, indent=2) if args.json else f"Created preview {payload['preview_id']} {payload['preview_domain']}")
+            print(
+                json.dumps(payload, indent=2)
+                if args.json
+                else f"Created preview {payload['preview_id']} {payload['preview_domain']}"
+            )
             return 0
         if args.action == "validate":
             state = validate_preview(args.preview_id)
@@ -875,9 +885,13 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         state = load_state(args.preview_id, allow_archived=args.archived)
         payload = render_preview(state)
-        print(json.dumps(payload, indent=2) if args.json else f"{payload['preview_id']}  {payload['status']}  {payload['preview_domain']}")
+        print(
+            json.dumps(payload, indent=2)
+            if args.json
+            else f"{payload['preview_id']}  {payload['status']}  {payload['preview_domain']}"
+        )
         return 0
-    except Exception as exc:  # noqa: BLE001 - CLI entrypoint
+    except Exception as exc:
         print(f"preview-environment error: {exc}", file=sys.stderr)
         return 2
 

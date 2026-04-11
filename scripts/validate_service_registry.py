@@ -17,8 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import yaml  # noqa: E402 — must come after sys.path adjustment
-from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str  # noqa: E402
+from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
@@ -76,10 +75,7 @@ def validate_entry(service_name: str, entry: object, image_catalog: dict | None)
     else:
         if image_catalog_key and image_catalog is not None:
             if image_catalog_key not in image_catalog:
-                errors.append(
-                    f"{path}.image_catalog_key '{image_catalog_key}' not found in"
-                    f" config/image-catalog.json"
-                )
+                errors.append(f"{path}.image_catalog_key '{image_catalog_key}' not found in config/image-catalog.json")
 
     # internal_port: must be a positive integer
     if "internal_port" in entry:
@@ -150,8 +146,7 @@ def check(registry: dict, image_catalog: dict | None, runtime_roles: list[str]) 
         service_key = role_name[: -len("_runtime")]
         if service_key not in registered_names:
             warnings.append(
-                f"Runtime role '{role_name}' has no entry in platform_service_registry"
-                f" (expected key: '{service_key}')"
+                f"Runtime role '{role_name}' has no entry in platform_service_registry (expected key: '{service_key}')"
             )
 
     return errors, warnings
@@ -209,9 +204,7 @@ def cmd_list(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate the platform service registry (ADR 0373)."
-    )
+    parser = argparse.ArgumentParser(description="Validate the platform service registry (ADR 0373).")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         "--check",

@@ -26,8 +26,8 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import yaml  # noqa: E402
-from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str  # noqa: E402
+import yaml
+from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
@@ -99,9 +99,7 @@ def derive_expected_declarations(registry: dict[str, Any]) -> dict[str, dict[str
     expected: dict[str, dict[str, Any]] = {}
 
     for service_name, service_config in registry.items():
-        service_config = require_mapping(
-            service_config, f"platform_service_registry.{service_name}"
-        )
+        service_config = require_mapping(service_config, f"platform_service_registry.{service_name}")
         dns_config = service_config.get("dns")
         if not dns_config:
             continue
@@ -127,9 +125,7 @@ def derive_expected_declarations(registry: dict[str, Any]) -> dict[str, dict[str
 
             if fqdn in expected:
                 existing = expected[fqdn]["service"]
-                raise ValueError(
-                    f"Duplicate FQDN '{fqdn}': claimed by '{existing}' and '{service_name}'"
-                )
+                raise ValueError(f"Duplicate FQDN '{fqdn}': claimed by '{existing}' and '{service_name}'")
 
             expected[fqdn] = {
                 "service": service_name,
@@ -181,15 +177,11 @@ def check_declarations_structure(
         if not service:
             errors.append(f"{path}: missing 'service' field")
         elif service not in registry_services:
-            errors.append(
-                f"{path}: service '{service}' is not in platform_service_registry"
-            )
+            errors.append(f"{path}: service '{service}' is not in platform_service_registry")
 
         dns_type = decl.get("type")
         if dns_type not in ("public", "internal"):
-            errors.append(
-                f"{path}: type must be 'public' or 'internal', got '{dns_type}'"
-            )
+            errors.append(f"{path}: type must be 'public' or 'internal', got '{dns_type}'")
 
         target_host = decl.get("target_host")
         if not target_host or not isinstance(target_host, str):
@@ -249,11 +241,7 @@ def check_catalog_coverage(
     Returns a list of warning strings (not errors — catalog may be updated separately).
     """
     warnings: list[str] = []
-    catalog_fqdns = {
-        str(e.get("fqdn", "")): e
-        for e in catalog.get("subdomains", [])
-        if e.get("fqdn")
-    }
+    catalog_fqdns = {str(e.get("fqdn", "")): e for e in catalog.get("subdomains", []) if e.get("fqdn")}
 
     for fqdn, decl in declarations.items():
         if fqdn not in catalog_fqdns:
@@ -265,8 +253,7 @@ def check_catalog_coverage(
             status = catalog_fqdns[fqdn].get("status", "")
             if status != "active":
                 warnings.append(
-                    f"WARN: {fqdn} is in subdomain-catalog.json with "
-                    f"status='{status}' (expected 'active')."
+                    f"WARN: {fqdn} is in subdomain-catalog.json with status='{status}' (expected 'active')."
                 )
 
     return warnings
@@ -354,9 +341,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    print(
-        f"OK: {len(declarations)} DNS declarations valid. {len(warnings)} warning(s)."
-    )
+    print(f"OK: {len(declarations)} DNS declarations valid. {len(warnings)} warning(s).")
     return 0
 
 

@@ -125,8 +125,10 @@ def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) 
     monkeypatch.setattr(
         scanner,
         "run_command",
-        lambda command, env=None: recorded.update({"command": command, "env": env})
-        or type("Result", (), {"stdout": json.dumps(expected_payload)})(),
+        lambda command, env=None: (
+            recorded.update({"command": command, "env": env})
+            or type("Result", (), {"stdout": json.dumps(expected_payload)})()
+        ),
     )
 
     sbom_path = tmp_path / "receipts" / "image.cdx.json"
@@ -178,8 +180,10 @@ def test_syft_scan_image_falls_back_to_container_when_native_syft_missing(monkey
     monkeypatch.setattr(
         scanner,
         "run_command",
-        lambda command, env=None: recorded.update({"command": command, "env": env})
-        or type("Result", (), {"stdout": json.dumps(expected_payload)})(),
+        lambda command, env=None: (
+            recorded.update({"command": command, "env": env})
+            or type("Result", (), {"stdout": json.dumps(expected_payload)})()
+        ),
     )
 
     sbom_path = tmp_path / "receipts" / "image.cdx.json"
@@ -267,8 +271,10 @@ def test_grype_scan_sbom_uses_native_grype_on_linux(monkeypatch, tmp_path: Path)
     monkeypatch.setattr(
         scanner,
         "run_command",
-        lambda command, env=None: recorded.update({"command": command, "env": env})
-        or type("Result", (), {"stdout": json.dumps(expected_payload)})(),
+        lambda command, env=None: (
+            recorded.update({"command": command, "env": env})
+            or type("Result", (), {"stdout": json.dumps(expected_payload)})()
+        ),
     )
 
     sbom_path = tmp_path / "receipts" / "image.cdx.json"
@@ -313,8 +319,10 @@ def test_grype_scan_sbom_falls_back_to_container_when_native_grype_missing(monke
     monkeypatch.setattr(
         scanner,
         "run_command",
-        lambda command, env=None: recorded.update({"command": command, "env": env})
-        or type("Result", (), {"stdout": json.dumps(expected_payload)})(),
+        lambda command, env=None: (
+            recorded.update({"command": command, "env": env})
+            or type("Result", (), {"stdout": json.dumps(expected_payload)})()
+        ),
     )
 
     sbom_path = tmp_path / "receipts" / "image.cdx.json"

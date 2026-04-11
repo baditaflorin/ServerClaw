@@ -61,7 +61,7 @@ def _pattern_matches(pattern: str, path: str) -> bool:
     path_parts = _path_segments(path)
     if len(pattern_parts) != len(path_parts):
         return False
-    for expected, actual in zip(pattern_parts, path_parts):
+    for expected, actual in zip(pattern_parts, path_parts, strict=False):
         if expected != "*" and expected != actual:
             return False
     return True
@@ -236,10 +236,7 @@ class ChangelogRedactor:
                 value = self.mask_fns[rule.mask_fn](value)
 
         if isinstance(value, dict):
-            return {
-                key: self._redact_value(item, f"{path}.{key}" if path else key)
-                for key, item in value.items()
-            }
+            return {key: self._redact_value(item, f"{path}.{key}" if path else key) for key, item in value.items()}
         if isinstance(value, list):
             return [self._redact_value(item, f"{path}.*" if path else "*") for item in value]
         if isinstance(value, str):

@@ -115,12 +115,12 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
     assert "openbao_postgres_host:" in defaults
-    assert 'openbao_controller_url | urlsplit(\'hostname\')' in defaults
+    assert "openbao_controller_url | urlsplit('hostname')" in defaults
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
     assert "creation_statements: !unsafe |-" in defaults
-    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
+    assert "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';" in defaults
     assert 'GRANT lv3_openbao_connect_all TO "{{name}}";' in defaults
     assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
     assert 'GRANT pg_use_reserved_connections TO "{{name}}";' in defaults
@@ -143,7 +143,7 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
         / "policy-lv3-agent-atlas.hcl.j2"
     ).read_text(encoding="utf-8")
     assert "  - name: postgres-atlas-readonly\n" in defaults
-    assert '  - postgres-atlas-readonly' in defaults
+    assert "  - postgres-atlas-readonly" in defaults
 
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
@@ -182,8 +182,8 @@ def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
 
     expected = "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 
-    assert f"mattermost_database_host: \"{expected}\"" in mattermost_defaults
-    assert f"netbox_database_host: \"{expected}\"" in netbox_defaults
+    assert f'mattermost_database_host: "{expected}"' in mattermost_defaults
+    assert f'netbox_database_host: "{expected}"' in netbox_defaults
 
 
 def test_openbao_rotation_catalog_is_loaded_before_derived_facts() -> None:
@@ -191,7 +191,10 @@ def test_openbao_rotation_catalog_is_loaded_before_derived_facts() -> None:
 
     assert "- name: Load the rotatable secret catalog and controller secret manifest" in tasks
     assert "- name: Derive OpenBao secret rotation facts from the loaded catalog" in tasks
-    assert "openbao_rotatable_secret_catalog: \"{{ lookup('ansible.builtin.file', openbao_secret_catalog_file) | from_json }}\"" in tasks
+    assert (
+        "openbao_rotatable_secret_catalog: \"{{ lookup('ansible.builtin.file', openbao_secret_catalog_file) | from_json }}\""
+        in tasks
+    )
     assert "openbao_rotation_metadata: >-" in tasks
 
 
@@ -213,7 +216,7 @@ def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_
     assert "Remove the detached managed OpenBao default network before compose up" in tasks
     assert "openbao_default_network_inspect.stdout | from_json | first" in tasks
     assert ".Containers | default({})" in tasks
-    assert '      - network\n      - rm' in tasks
+    assert "      - network\n      - rm" in tasks
 
 
 def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
@@ -304,12 +307,18 @@ def test_openbao_runtime_recovers_docker_daemon_failures_during_image_pull() -> 
 
 def test_openbao_runtime_uses_the_shared_docker_restart_guard_for_bridge_chain_recovery() -> None:
     tasks = load_openbao_runtime_tasks()
-    pull_restart = next(task for task in tasks if task.get("name") == "Restart Docker before retrying OpenBao image pull")
+    pull_restart = next(
+        task for task in tasks if task.get("name") == "Restart Docker before retrying OpenBao image pull"
+    )
     startup_restart = next(
-        task for task in tasks if task.get("name") == "Restart Docker when required chains are missing before OpenBao startup"
+        task
+        for task in tasks
+        if task.get("name") == "Restart Docker when required chains are missing before OpenBao startup"
     )
     retry_restart = next(
-        task for task in tasks if task.get("name") == "Restart Docker to restore bridge chains before retrying OpenBao startup"
+        task
+        for task in tasks
+        if task.get("name") == "Restart Docker to restore bridge chains before retrying OpenBao startup"
     )
 
     assert pull_restart["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
@@ -349,7 +358,10 @@ def test_openbao_postgres_backend_grants_reserved_connection_admin_option() -> N
     assert "GRANT {{ openbao_postgres_connect_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION" in tasks
     assert "Grant pg_read_all_data with admin option to the OpenBao rotator role" in tasks
     assert "Grant reserved PostgreSQL connection capability to the OpenBao rotator role" in tasks
-    assert "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION" in tasks
+    assert (
+        "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION"
+        in tasks
+    )
 
 
 def test_openbao_runtime_verifies_the_atlas_approle_path() -> None:
@@ -366,7 +378,9 @@ def test_openbao_runtime_reconciles_allowed_roles_after_database_role_upserts() 
     tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
     task_names = [task["name"] for task in tasks]
 
-    backend_index = task_names.index("Configure the PostgreSQL dynamic credential backend through recovery-aware retries")
+    backend_index = task_names.index(
+        "Configure the PostgreSQL dynamic credential backend through recovery-aware retries"
+    )
     roles_index = task_names.index("Configure OpenBao database roles")
     reconcile_index = task_names.index(
         "Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts"
@@ -403,10 +417,7 @@ def test_openbao_runtime_reconciles_allowed_roles_after_database_role_upserts() 
         reconcile_task["block"][1]["name"]
         == "Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts"
     )
-    assert (
-        reconcile_task["block"][1]["until"]
-        == "openbao_database_backend_allowed_roles_result.status == 204"
-    )
+    assert reconcile_task["block"][1]["until"] == "openbao_database_backend_allowed_roles_result.status == 204"
     assert (
         reconcile_task["rescue"][0]["name"]
         == "Ensure OpenBao remains unsealed before retrying PostgreSQL dynamic credential backend allowed role reconciliation"
@@ -458,13 +469,15 @@ def test_openbao_runtime_sends_database_role_statements_to_openbao_as_lists() ->
     assert "openbao_database_role_renew_statements" in tasks
     assert "item.creation_statements is not string" in tasks
     assert "(item.rollback_statements | default([])) is not string" in tasks
-    assert "creation_statements: \"{{ openbao_database_role_creation_statements }}\"" in tasks
-    assert "revocation_statements: \"{{ openbao_database_role_revocation_statements }}\"" in tasks
+    assert 'creation_statements: "{{ openbao_database_role_creation_statements }}"' in tasks
+    assert 'revocation_statements: "{{ openbao_database_role_revocation_statements }}"' in tasks
 
 
 def test_openbao_runtime_waits_out_background_apt_maintenance() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
-    apt_task = next(task for task in tasks if task["name"] == "Ensure OpenBao runtime prerequisite packages are present")
+    apt_task = next(
+        task for task in tasks if task["name"] == "Ensure OpenBao runtime prerequisite packages are present"
+    )
     apt_module = apt_task["ansible.builtin.apt"]
 
     assert apt_module["name"] == ["curl"]
@@ -484,22 +497,30 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "(item.value.openbao_field):" in tasks
     assert "register: openbao_seed_rotatable_secret_result" in tasks
     assert "until: openbao_seed_rotatable_secret_result.status == 200" in tasks
-    assert "- name: Seed rotation metadata for dedicated rotatable secrets one at a time through recovery-aware retries" in tasks
+    assert (
+        "- name: Seed rotation metadata for dedicated rotatable secrets one at a time through recovery-aware retries"
+        in tasks
+    )
     assert "ansible.builtin.include_tasks: seed_rotation_metadata.yml" in tasks
     assert "loop_var: openbao_rotation_contract" in tasks
     assert "repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true)" in tasks
     assert "openbao_rotatable_secret_repo_local_root:" in tasks
     assert "openbao_rotatable_secret_seed_path.startswith('.local/')" in tasks
-    assert "openbao_rotatable_secret_seed_path: \"{{ openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path }}\"" in tasks
+    assert (
+        'openbao_rotatable_secret_seed_path: "{{ openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path }}"'
+        in tasks
+    )
     assert "| ternary(" in tasks
     assert "| replace('.local/', '', 1)" in tasks
     assert "openbao_rotatable_secret_seed_files.results" in tasks
-    assert "\"{{ item.value.openbao_field }}\":" not in tasks
-    assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(
-        encoding="utf-8"
+    assert '"{{ item.value.openbao_field }}":' not in tasks
+    assert (
+        "(openbao_rotation_metadata.last_rotated_metadata_key):"
+        in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(encoding="utf-8")
     )
-    assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(
-        encoding="utf-8"
+    assert (
+        "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'"
+        in PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH.read_text(encoding="utf-8")
     )
 
 
@@ -541,7 +562,9 @@ def test_openbao_seed_rotation_metadata_task_recovers_each_secret_through_unseal
     assert "Seed rotation metadata for {{ openbao_rotation_contract.key }}" in task_names
 
     seed_task = next(
-        task for task in metadata_tasks if task["name"] == "Seed rotation metadata for {{ openbao_rotation_contract.key }}"
+        task
+        for task in metadata_tasks
+        if task["name"] == "Seed rotation metadata for {{ openbao_rotation_contract.key }}"
     )
     update_task = seed_task["block"][0]
     update_module = update_task["ansible.builtin.uri"]
@@ -715,7 +738,8 @@ def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_chec
     request_task = next(
         task
         for task in refresh_tasks
-        if task["name"] == "Generate the refreshed AppRole secret ID after end-to-end verification for {{ openbao_refresh_approle.name }}"
+        if task["name"]
+        == "Generate the refreshed AppRole secret ID after end-to-end verification for {{ openbao_refresh_approle.name }}"
     )
     request_block = request_task["block"][0]
     request_module = request_block["ansible.builtin.uri"]
@@ -731,7 +755,8 @@ def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_chec
     persist_task = next(
         task
         for task in refresh_tasks
-        if task["name"] == "Persist the refreshed AppRole artifact locally after end-to-end verification for {{ openbao_refresh_approle.name }}"
+        if task["name"]
+        == "Persist the refreshed AppRole artifact locally after end-to-end verification for {{ openbao_refresh_approle.name }}"
     )
     assert (
         "openbao_refresh_existing_artifacts[openbao_refresh_approle.name].role_id"
@@ -741,17 +766,18 @@ def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_chec
 
 def test_openbao_playbook_verifies_dynamic_credentials_with_env_and_retries() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
-    verify_play = next(
-        play
-        for play in plays
-        if play["name"] == "Verify PostgreSQL dynamic credentials end to end"
-    )
+    verify_play = next(play for play in plays if play["name"] == "Verify PostgreSQL dynamic credentials end to end")
     verify_task = next(
-        task for task in verify_play["tasks"] if task["name"] == "Verify the issued PostgreSQL credential against the local database"
+        task
+        for task in verify_play["tasks"]
+        if task["name"] == "Verify the issued PostgreSQL credential against the local database"
     )
 
     assert "PGPASSWORD='" not in verify_task["ansible.builtin.shell"]
-    assert verify_task["environment"]["PGPASSWORD"] == "{{ openbao_verify_postgres_dynamic_credential.json.data.password }}"
+    assert (
+        verify_task["environment"]["PGPASSWORD"]
+        == "{{ openbao_verify_postgres_dynamic_credential.json.data.password }}"
+    )
     assert verify_task["retries"] == 6
     assert verify_task["delay"] == 5
     assert verify_task["failed_when"] is False
@@ -765,10 +791,7 @@ def test_openbao_inventory_exports_controller_local_artifact_paths_used_outside_
         group_vars["openbao_controller_approle_local_file"]
         == "{{ repo_shared_local_root }}/openbao/controller-automation-approle.json"
     )
-    assert (
-        group_vars["openbao_atlas_approle_local_file"]
-        == "{{ repo_shared_local_root }}/openbao/atlas-approle.json"
-    )
+    assert group_vars["openbao_atlas_approle_local_file"] == "{{ repo_shared_local_root }}/openbao/atlas-approle.json"
     assert (
         group_vars["openbao_mail_platform_approle_local_file"]
         == "{{ repo_shared_local_root }}/openbao/mail-platform-approle.json"

@@ -1,9 +1,7 @@
 from pathlib import Path
 
 
-ROLE_TASKS = Path(
-    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml"
-)
+ROLE_TASKS = Path("collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml")
 
 
 def test_single_record_role_translates_provider_payloads_before_matching() -> None:

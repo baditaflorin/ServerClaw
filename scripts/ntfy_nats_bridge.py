@@ -23,7 +23,7 @@ REPO_ROOT = resolve_repo_root()
 if str(REPO_ROOT / "scripts") not in os.sys.path:
     os.sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from controller_automation_toolkit import emit_cli_error, load_yaml  # noqa: E402
+from controller_automation_toolkit import emit_cli_error, load_yaml
 
 
 TOPIC_REGISTRY_PATH = REPO_ROOT / "config" / "ntfy" / "topics.yaml"
@@ -66,7 +66,7 @@ async def connect_jetstream(nats_url: str, username: str, password: str):
 
     nc = NATS()
     recorded_errors: list[Exception] = []
-    setattr(nc, "_lv3_recorded_errors", recorded_errors)
+    nc._lv3_recorded_errors = recorded_errors
     await nc.connect(
         servers=[nats_url],
         user=username,

@@ -52,6 +52,7 @@ CONTROLLER_SECRETS_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 # SSH / Proxmox helpers (same pattern as vm_disk_resize_tool.py)
 # ---------------------------------------------------------------------------
 
+
 def _yaml_scalar(path: Path, key: str, default: str = "") -> str:
     pattern = re.compile(rf"^{re.escape(key)}:\s*(.+?)\s*$", flags=re.MULTILINE)
     m = pattern.search(path.read_text(encoding="utf-8"))
@@ -78,11 +79,26 @@ def _jump_user() -> str:
 def _ssh_to_host(cmd: str, timeout: int = 30) -> subprocess.CompletedProcess:
     key = str(_bootstrap_private_key())
     return subprocess.run(
-        ["ssh", "-i", key, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes",
-         "-o", f"ConnectTimeout={timeout}", "-o", "StrictHostKeyChecking=accept-new",
-         "-o", "UserKnownHostsFile=/dev/null",
-         f"{_jump_user()}@{_proxmox_host()}", cmd],
-        capture_output=True, text=True, timeout=timeout + 5,
+        [
+            "ssh",
+            "-i",
+            key,
+            "-o",
+            "IdentitiesOnly=yes",
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            f"ConnectTimeout={timeout}",
+            "-o",
+            "StrictHostKeyChecking=accept-new",
+            "-o",
+            "UserKnownHostsFile=/dev/null",
+            f"{_jump_user()}@{_proxmox_host()}",
+            cmd,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=timeout + 5,
     )
 
 
@@ -90,9 +106,11 @@ def _ssh_to_host(cmd: str, timeout: int = 30) -> subprocess.CompletedProcess:
 # Inventory loader
 # ---------------------------------------------------------------------------
 
+
 def _load_inventory_vms() -> list[dict[str, Any]]:
     try:
         import yaml  # type: ignore[import]
+
         data = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
         return data.get("proxmox_vms", [])
     except ImportError:
@@ -129,6 +147,7 @@ def _load_inventory_vms() -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Proxmox live state fetchers
 # ---------------------------------------------------------------------------
+
 
 def _fetch_qm_list() -> list[dict[str, Any]]:
     result = _ssh_to_host("sudo qm list")
@@ -176,6 +195,7 @@ def _parse_tags(config: dict[str, Any]) -> list[str]:
 # Diff engine
 # ---------------------------------------------------------------------------
 
+
 def _diff_vm(inv_vm: dict[str, Any], qm_config: dict[str, Any], qm_status: str) -> list[dict[str, Any]]:
     diffs = []
 
@@ -216,6 +236,7 @@ def _diff_vm(inv_vm: dict[str, Any], qm_config: dict[str, Any], qm_status: str) 
 # sub-command: diff
 # ---------------------------------------------------------------------------
 
+
 def cmd_diff(args: argparse.Namespace) -> int:
     inv_vms = _load_inventory_vms()
     if args.vmid:
@@ -236,19 +257,23 @@ def cmd_diff(args: argparse.Namespace) -> int:
         try:
             qm_config = _fetch_qm_config(vmid)
         except RuntimeError as e:
-            results.append({"vmid": vmid, "name": inv_vm.get("name"), "status": "config_error", "error": str(e), "diffs": []})
+            results.append(
+                {"vmid": vmid, "name": inv_vm.get("name"), "status": "config_error", "error": str(e), "diffs": []}
+            )
             continue
         diffs = _diff_vm(inv_vm, qm_config, qm_vm_map[vmid].get("status", ""))
         drifted = [d for d in diffs if d.get("drift")]
         if drifted:
             any_drift = True
-        results.append({
-            "vmid": vmid,
-            "name": inv_vm.get("name"),
-            "proxmox_status": qm_vm_map[vmid].get("status"),
-            "drifted_fields": len(drifted),
-            "diffs": diffs,
-        })
+        results.append(
+            {
+                "vmid": vmid,
+                "name": inv_vm.get("name"),
+                "proxmox_status": qm_vm_map[vmid].get("status"),
+                "drifted_fields": len(drifted),
+                "diffs": diffs,
+            }
+        )
 
     print(json.dumps({"results": results, "any_drift": any_drift}, indent=2))
     return 2 if any_drift else 0
@@ -257,6 +282,7 @@ def cmd_diff(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # sub-command: check
 # ---------------------------------------------------------------------------
+
 
 def cmd_check(args: argparse.Namespace) -> int:
     inv_vms = _load_inventory_vms()
@@ -277,17 +303,23 @@ def cmd_check(args: argparse.Namespace) -> int:
             pass
 
     status = "drifted" if drifted_vmids else "clean"
-    print(json.dumps({
-        "status": status,
-        "drifted_vms": drifted_vmids,
-        "total_diffs": len(drifted_vmids),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "status": status,
+                "drifted_vms": drifted_vmids,
+                "total_diffs": len(drifted_vmids),
+            },
+            indent=2,
+        )
+    )
     return 2 if drifted_vmids else 0
 
 
 # ---------------------------------------------------------------------------
 # sub-command: sync-inventory
 # ---------------------------------------------------------------------------
+
 
 def cmd_sync_inventory(args: argparse.Namespace) -> int:
     inv_vms = _load_inventory_vms()
@@ -344,6 +376,7 @@ def cmd_sync_inventory(args: argparse.Namespace) -> int:
 # Parser + main
 # ---------------------------------------------------------------------------
 
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="inventory_diff_tool.py",
@@ -358,8 +391,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_sync = subs.add_parser("sync-inventory", help="Patch inventory to match live state.")
     p_sync.add_argument("--vmid", type=int, required=True)
-    p_sync.add_argument("--apply", action="store_true", default=False,
-                        help="Write changes (default is dry-run).")
+    p_sync.add_argument("--apply", action="store_true", default=False, help="Write changes (default is dry-run).")
 
     return p
 

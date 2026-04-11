@@ -50,30 +50,12 @@ def run_command(cmd: List[str], timeout: int = 60) -> Dict[str, any]:
         Dictionary with 'stdout', 'stderr', 'returncode'
     """
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            shell=False
-        )
-        return {
-            'stdout': result.stdout,
-            'stderr': result.stderr,
-            'returncode': result.returncode
-        }
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, shell=False)
+        return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
     except subprocess.TimeoutExpired:
-        return {
-            'stdout': '',
-            'stderr': f'Command timed out after {timeout}s',
-            'returncode': 124
-        }
+        return {"stdout": "", "stderr": f"Command timed out after {timeout}s", "returncode": 124}
     except Exception as e:
-        return {
-            'stdout': '',
-            'stderr': str(e),
-            'returncode': 1
-        }
+        return {"stdout": "", "stderr": str(e), "returncode": 1}
 
 
 def get_nftables_rules(vm_hostname: str) -> Set[str]:
@@ -87,20 +69,14 @@ def get_nftables_rules(vm_hostname: str) -> Set[str]:
         Set of nftables rule lines (normalized)
     """
     # SSH to VM and retrieve nft rules
-    cmd = [
-        'ssh',
-        '-o', 'StrictHostKeyChecking=no',
-        '-o', 'ConnectTimeout=10',
-        vm_hostname,
-        'sudo nft list ruleset'
-    ]
+    cmd = ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10", vm_hostname, "sudo nft list ruleset"]
 
     result = run_command(cmd, timeout=30)
 
-    if result['returncode'] != 0:
+    if result["returncode"] != 0:
         raise RuntimeError(f"Failed to get nftables rules: {result['stderr']}")
 
-    return set(result['stdout'].split('\n'))
+    return set(result["stdout"].split("\n"))
 
 
 def extract_neko_rules(nftables_output: Set[str]) -> Dict[str, Set[str]]:
@@ -119,24 +95,20 @@ def extract_neko_rules(nftables_output: Set[str]) -> Dict[str, Set[str]]:
         Dictionary mapping rule type -> set of rules
         Example: {'tcp_8080': {...}, 'udp_media': {...}}
     """
-    neko_rules = {
-        'tcp_8080': set(),
-        'udp_media': set(),
-        'allow_nginx': set()
-    }
+    neko_rules = {"tcp_8080": set(), "udp_media": set(), "allow_nginx": set()}
 
     for line in nftables_output:
         # Match TCP 8080 rules
-        if '8080' in line and 'tcp' in line.lower():
-            neko_rules['tcp_8080'].add(line.strip())
+        if "8080" in line and "tcp" in line.lower():
+            neko_rules["tcp_8080"].add(line.strip())
 
         # Match UDP media rules (50000-60000)
-        if re.search(r'50000|60000|udp.*media', line, re.IGNORECASE):
-            neko_rules['udp_media'].add(line.strip())
+        if re.search(r"50000|60000|udp.*media", line, re.IGNORECASE):
+            neko_rules["udp_media"].add(line.strip())
 
         # Match allow rules from nginx-lv3
-        if 'nginx' in line.lower() or '10.10.10.10' in line:
-            neko_rules['allow_nginx'].add(line.strip())
+        if "nginx" in line.lower() or "10.10.10.10" in line:
+            neko_rules["allow_nginx"].add(line.strip())
 
     return neko_rules
 
@@ -155,8 +127,8 @@ def test_neko_firewall_persists_under_concurrent_apply():
     5. Assert rules are identical (no clobbering)
     """
     # Configuration
-    neko_vm = 'runtime-comms-lv3'
-    sibling_vm = 'docker-runtime-lv3'
+    neko_vm = "runtime-comms-lv3"
+    sibling_vm = "docker-runtime-lv3"
     timeout = 120
 
     print(f"\n=== Neko Firewall Concurrency Test ===")
@@ -181,11 +153,13 @@ def test_neko_firewall_persists_under_concurrent_apply():
         # Step 2: Start concurrent apply on sibling VM
         print(f"\nStep 2: Starting concurrent Ansible apply on {sibling_vm}...")
         apply_cmd = [
-            'ansible-playbook',
-            '-i', 'inventory/',
-            'collections/ansible_collections/lv3/platform/playbooks/common.yml',
-            '-l', sibling_vm,
-            '-v'
+            "ansible-playbook",
+            "-i",
+            "inventory/",
+            "collections/ansible_collections/lv3/platform/playbooks/common.yml",
+            "-l",
+            sibling_vm,
+            "-v",
         ]
 
         # This would run in a real test environment
@@ -205,7 +179,7 @@ def test_neko_firewall_persists_under_concurrent_apply():
         print("\nStep 4: Verifying rule integrity...")
 
         # Assert TCP 8080 rules unchanged
-        tcp_diff = baseline_rules['tcp_8080'].symmetric_difference(post_apply_rules['tcp_8080'])
+        tcp_diff = baseline_rules["tcp_8080"].symmetric_difference(post_apply_rules["tcp_8080"])
         if tcp_diff:
             print(f"  ERROR: TCP 8080 rules changed!")
             print(f"    Added: {tcp_diff}")
@@ -214,7 +188,7 @@ def test_neko_firewall_persists_under_concurrent_apply():
             print(f"  ✓ TCP 8080 rules unchanged")
 
         # Assert UDP media rules unchanged
-        udp_diff = baseline_rules['udp_media'].symmetric_difference(post_apply_rules['udp_media'])
+        udp_diff = baseline_rules["udp_media"].symmetric_difference(post_apply_rules["udp_media"])
         if udp_diff:
             print(f"  ERROR: UDP media rules changed!")
             print(f"    Diff: {udp_diff}")
@@ -223,7 +197,7 @@ def test_neko_firewall_persists_under_concurrent_apply():
             print(f"  ✓ UDP media rules unchanged")
 
         # Assert nginx allow rules unchanged
-        nginx_diff = baseline_rules['allow_nginx'].symmetric_difference(post_apply_rules['allow_nginx'])
+        nginx_diff = baseline_rules["allow_nginx"].symmetric_difference(post_apply_rules["allow_nginx"])
         if nginx_diff:
             print(f"  WARNING: nginx allow rules differ (may be expected if docker-runtime apply touched them)")
             # This is a warning, not a failure, because docker-runtime rules are separate
@@ -244,7 +218,7 @@ def test_neko_firewall_rules_present():
 
     Sanity check that Neko firewall rules exist and contain expected ports.
     """
-    neko_vm = 'runtime-comms-lv3'
+    neko_vm = "runtime-comms-lv3"
 
     print(f"\n=== Neko Firewall Rules Presence Test ===")
 
@@ -253,9 +227,9 @@ def test_neko_firewall_rules_present():
         rules = extract_neko_rules(rules_raw)
 
         # Assert each rule type has at least one rule
-        assert rules['tcp_8080'], "No TCP 8080 rules found (signalling port)"
-        assert rules['udp_media'], "No UDP media rules found"
-        assert rules['allow_nginx'], "No nginx allow rules found"
+        assert rules["tcp_8080"], "No TCP 8080 rules found (signalling port)"
+        assert rules["udp_media"], "No UDP media rules found"
+        assert rules["allow_nginx"], "No nginx allow rules found"
 
         print(f"✓ TCP 8080 (signalling): {len(rules['tcp_8080'])} rules")
         print(f"✓ UDP media (50000-60000): {len(rules['udp_media'])} rules")
@@ -269,7 +243,7 @@ def test_neko_firewall_rules_present():
         return False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run tests
     success = True
 

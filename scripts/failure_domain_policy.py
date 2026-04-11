@@ -78,14 +78,12 @@ def validate_domain_registry(host_vars: dict[str, Any]) -> dict[str, dict[str, A
         kind = require_str(domain.get("kind"), f"host_vars.platform_failure_domains[{index}].kind")
         if kind not in ALLOWED_DOMAIN_KINDS:
             raise ValueError(
-                "host_vars.platform_failure_domains["
-                f"{index}].kind must be one of {sorted(ALLOWED_DOMAIN_KINDS)}"
+                f"host_vars.platform_failure_domains[{index}].kind must be one of {sorted(ALLOWED_DOMAIN_KINDS)}"
             )
         status = require_str(domain.get("status"), f"host_vars.platform_failure_domains[{index}].status")
         if status not in ALLOWED_DOMAIN_STATUSES:
             raise ValueError(
-                "host_vars.platform_failure_domains["
-                f"{index}].status must be one of {sorted(ALLOWED_DOMAIN_STATUSES)}"
+                f"host_vars.platform_failure_domains[{index}].status must be one of {sorted(ALLOWED_DOMAIN_STATUSES)}"
             )
         live_label = require_str(
             domain.get("live_label"),
@@ -129,9 +127,7 @@ def validate_guest_placement(
         raise ValueError(f"{path}.placement.failure_domain references unknown domain '{failure_domain}'")
     placement_class = require_str(placement.get("placement_class"), f"{path}.placement.placement_class")
     if placement_class not in ALLOWED_GUEST_PLACEMENT_CLASSES:
-        raise ValueError(
-            f"{path}.placement.placement_class must be one of {sorted(ALLOWED_GUEST_PLACEMENT_CLASSES)}"
-        )
+        raise ValueError(f"{path}.placement.placement_class must be one of {sorted(ALLOWED_GUEST_PLACEMENT_CLASSES)}")
     anti_affinity_group = require_str(
         placement.get("anti_affinity_group"),
         f"{path}.placement.anti_affinity_group",
@@ -175,8 +171,7 @@ def validate_environment_placement(
     invalid_exclusions = sorted(set(exclusions) - ALLOWED_RESERVED_CAPACITY_EXCLUSIONS)
     if invalid_exclusions:
         raise ValueError(
-            f"{path}.placement.reserved_capacity_exclusions contains unknown values: "
-            + ", ".join(invalid_exclusions)
+            f"{path}.placement.reserved_capacity_exclusions contains unknown values: " + ", ".join(invalid_exclusions)
         )
     if "standby" not in exclusions:
         raise ValueError(
@@ -195,11 +190,7 @@ def validate_environment_placement(
 
 
 def active_failure_domain_ids(domain_index: dict[str, dict[str, Any]]) -> set[str]:
-    return {
-        domain_id
-        for domain_id, domain in domain_index.items()
-        if domain["status"] == "active"
-    }
+    return {domain_id for domain_id, domain in domain_index.items() if domain["status"] == "active"}
 
 
 def placement_live_tags(placement: dict[str, Any], domain_index: dict[str, dict[str, Any]]) -> list[str]:
@@ -296,17 +287,11 @@ def validate_service_alignment(
         primary = guest_index[primary_vm]["placement"]
         replica = guest_index[standby_vm]["placement"]
         if primary["placement_class"] != "primary":
-            raise ValueError(
-                f"service '{service_id}' primary vm '{primary_vm}' must use placement_class 'primary'"
-            )
+            raise ValueError(f"service '{service_id}' primary vm '{primary_vm}' must use placement_class 'primary'")
         if replica["placement_class"] != "standby":
-            raise ValueError(
-                f"service '{service_id}' standby vm '{standby_vm}' must use placement_class 'standby'"
-            )
+            raise ValueError(f"service '{service_id}' standby vm '{standby_vm}' must use placement_class 'standby'")
         if primary["anti_affinity_group"] != replica["anti_affinity_group"]:
-            raise ValueError(
-                f"service '{service_id}' primary and standby must share one anti_affinity_group"
-            )
+            raise ValueError(f"service '{service_id}' primary and standby must share one anti_affinity_group")
         if primary["failure_domain"] == replica["failure_domain"]:
             if len(active_domains) > 1:
                 raise ValueError(
@@ -329,9 +314,7 @@ def validate_service_alignment(
         standby_guests.add(standby_vm)
 
     declared_standby_guests = {
-        guest_name
-        for guest_name, guest in guest_index.items()
-        if guest["placement"]["placement_class"] == "standby"
+        guest_name for guest_name, guest in guest_index.items() if guest["placement"]["placement_class"] == "standby"
     }
     if declared_standby_guests != standby_guests:
         missing = sorted(declared_standby_guests - standby_guests)
@@ -406,9 +389,7 @@ def validate_failure_domain_policy(
 def render_text(report: dict[str, Any]) -> str:
     lines = ["Failure Domains:"]
     for domain in report["failure_domains"]:
-        lines.append(
-            f"- {domain['id']} [{domain['status']}] kind={domain['kind']} label={domain['live_label']}"
-        )
+        lines.append(f"- {domain['id']} [{domain['status']}] kind={domain['kind']} label={domain['live_label']}")
     lines.append("Guests:")
     for guest in report["guests"]:
         placement = guest["placement"]

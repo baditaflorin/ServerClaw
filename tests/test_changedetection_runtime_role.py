@@ -126,7 +126,9 @@ def test_inventory_exposes_changedetection_to_host_monitoring_and_local_docker_c
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     assert 5000 in host_rule["ports"]
-    docker_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 5000 in rule["ports"])
+    docker_rule = next(
+        rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 5000 in rule["ports"]
+    )
     assert 5000 in docker_rule["ports"]
     monitoring_rule = next(
         rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 5000 in rule["ports"]

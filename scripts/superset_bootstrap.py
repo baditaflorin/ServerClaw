@@ -302,9 +302,7 @@ def bootstrap_local(args: argparse.Namespace) -> int:
         db.session.commit()
 
         landing = definition["landing"]
-        landing_database = (
-            db.session.query(Database).filter_by(database_name=landing["database_name"]).one_or_none()
-        )
+        landing_database = db.session.query(Database).filter_by(database_name=landing["database_name"]).one_or_none()
         if landing_database is None:
             raise SupersetBootstrapError(f"Landing database {landing['database_name']} does not exist")
 
@@ -418,10 +416,7 @@ def verify_local(args: argparse.Namespace) -> int:
 
     with app.app_context():
         db, Database, SqlaTable, _TableColumn, _SqlMetric, Slice, Dashboard = ensure_local_runtime()
-        actual_databases = {
-            str(name)
-            for (name,) in db.session.query(Database.database_name).all()
-        }
+        actual_databases = {str(name) for (name,) in db.session.query(Database.database_name).all()}
         expected_databases = {str(item["name"]) for item in definition["databases"]}
         missing_databases = sorted(expected_databases - actual_databases)
 
@@ -494,13 +489,13 @@ def verify_public(args: argparse.Namespace) -> int:
         password = read_secret(args.admin_password_file)
         token = login(args.base_url, args.admin_username, password)
         expected_postgres = json.loads(Path(args.expected_postgres_databases_file).read_text(encoding="utf-8"))
-        expected_database_names = {
-            f"{args.database_prefix}: {database_name}" for database_name in expected_postgres
-        }
+        expected_database_names = {f"{args.database_prefix}: {database_name}" for database_name in expected_postgres}
         expected_database_names.update(args.expected_extra_database)
 
         databases = list_api_names(args.base_url, token, "/api/v1/database/?q=(page:0,page_size:500)", "database_name")
-        dashboards = list_api_names(args.base_url, token, "/api/v1/dashboard/?q=(page:0,page_size:500)", "dashboard_title")
+        dashboards = list_api_names(
+            args.base_url, token, "/api/v1/dashboard/?q=(page:0,page_size:500)", "dashboard_title"
+        )
         charts = list_api_names(args.base_url, token, "/api/v1/chart/?q=(page:0,page_size:500)", "slice_name")
 
         missing_databases = sorted(expected_database_names - databases)
@@ -533,17 +528,23 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    bootstrap_parser = subparsers.add_parser("bootstrap-local", help="Create or reconcile the managed Superset datasources and landing dashboard.")
+    bootstrap_parser = subparsers.add_parser(
+        "bootstrap-local", help="Create or reconcile the managed Superset datasources and landing dashboard."
+    )
     bootstrap_parser.add_argument("--definition-file", required=True)
     bootstrap_parser.set_defaults(func=bootstrap_local)
 
-    verify_local_parser = subparsers.add_parser("verify-local", help="Verify the managed Superset datasources and landing dashboard locally.")
+    verify_local_parser = subparsers.add_parser(
+        "verify-local", help="Verify the managed Superset datasources and landing dashboard locally."
+    )
     verify_local_parser.add_argument("--base-url", required=True)
     verify_local_parser.add_argument("--definition-file", required=True)
     verify_local_parser.add_argument("--report-file")
     verify_local_parser.set_defaults(func=verify_local)
 
-    verify_public_parser = subparsers.add_parser("verify-public", help="Verify the public Superset health, SSO redirect, and managed metadata objects.")
+    verify_public_parser = subparsers.add_parser(
+        "verify-public", help="Verify the public Superset health, SSO redirect, and managed metadata objects."
+    )
     verify_public_parser.add_argument("--base-url", required=True)
     verify_public_parser.add_argument("--expected-postgres-databases-file", required=True)
     verify_public_parser.add_argument("--database-prefix", required=True)

@@ -25,7 +25,6 @@ import sys
 import argparse
 import logging
 from datetime import datetime
-from typing import Optional
 
 try:
     import websockets
@@ -34,10 +33,7 @@ except ImportError:
     sys.exit(2)
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -57,11 +53,11 @@ def generate_minimal_sdp_answer(offer_sdp: str) -> str:
         Minimal SDP answer string
     """
     # Extract key information from offer
-    lines = offer_sdp.split('\n')
+    lines = offer_sdp.split("\n")
 
     # Find media sections (audio, video)
-    has_audio = any('m=audio' in line for line in lines)
-    has_video = any('m=video' in line for line in lines)
+    has_audio = any("m=audio" in line for line in lines)
+    has_video = any("m=video" in line for line in lines)
 
     # Build minimal answer
     answer_lines = [
@@ -74,27 +70,27 @@ def generate_minimal_sdp_answer(offer_sdp: str) -> str:
 
     # Echo media sections
     if has_audio:
-        answer_lines.extend([
-            "m=audio 9 UDP/TLS/RTP/SAVPF 111",
-            "a=rtpmap:111 OPUS/48000/2",
-            "a=fmtp:111 minptime=10;useinbandfec=1",
-        ])
+        answer_lines.extend(
+            [
+                "m=audio 9 UDP/TLS/RTP/SAVPF 111",
+                "a=rtpmap:111 OPUS/48000/2",
+                "a=fmtp:111 minptime=10;useinbandfec=1",
+            ]
+        )
 
     if has_video:
-        answer_lines.extend([
-            "m=video 9 UDP/TLS/RTP/SAVPF 96",
-            "a=rtpmap:96 VP8/90000",
-            "a=rtcp-fb:96 transport-cc",
-        ])
+        answer_lines.extend(
+            [
+                "m=video 9 UDP/TLS/RTP/SAVPF 96",
+                "a=rtpmap:96 VP8/90000",
+                "a=rtcp-fb:96 transport-cc",
+            ]
+        )
 
-    return '\n'.join(answer_lines)
+    return "\n".join(answer_lines)
 
 
-async def verify_webrtc_session(
-    url: str,
-    timeout_seconds: int = 30,
-    verify_ice_candidates: int = 3
-) -> bool:
+async def verify_webrtc_session(url: str, timeout_seconds: int = 30, verify_ice_candidates: int = 3) -> bool:
     """
     Verify Neko WebRTC session can complete handshake.
 
@@ -126,7 +122,7 @@ async def verify_webrtc_session(
                 logger.info("Sending Neko init handshake...")
                 init_msg = {
                     "event": "init",
-                    "password": ""  # Empty password (public session)
+                    "password": "",  # Empty password (public session)
                 }
                 await ws.send(json.dumps(init_msg))
 
@@ -156,10 +152,7 @@ async def verify_webrtc_session(
                 # Step 4: Generate and send answer
                 logger.info("Generating and sending SDP answer...")
                 answer_sdp = generate_minimal_sdp_answer(offer_sdp)
-                answer_msg = {
-                    "event": "answer",
-                    "data": answer_sdp
-                }
+                answer_msg = {"event": "answer", "data": answer_sdp}
                 await ws.send(json.dumps(answer_msg))
                 logger.info("SDP answer sent")
 
@@ -183,7 +176,7 @@ async def verify_webrtc_session(
                         else:
                             logger.debug(f"Received message: {msg.get('event')}")
 
-                    except asyncio.TimeoutError:
+                    except TimeoutError:
                         # No more candidates available, that's OK
                         logger.info(f"ICE candidate reception timeout (got {ice_count} so far)")
                         break
@@ -199,7 +192,7 @@ async def verify_webrtc_session(
                     logger.warning("No ICE candidates received (may indicate firewall/network issue)")
                     return False
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.error(f"WebRTC handshake timed out after {timeout_seconds}s")
         return False
 
@@ -221,47 +214,29 @@ Examples:
   python3 verify_neko_webrtc_session.py --url localhost:8080
   python3 verify_neko_webrtc_session.py --url 10.10.10.41:8080 --timeout 30
   python3 verify_neko_webrtc_session.py --url runtime-comms-lv3:8080 --verify-candidates 5
-        """
+        """,
     )
 
-    parser.add_argument(
-        '--url',
-        required=True,
-        help='Neko signalling endpoint (host:port)'
-    )
+    parser.add_argument("--url", required=True, help="Neko signalling endpoint (host:port)")
+
+    parser.add_argument("--timeout", type=int, default=30, help="Maximum time to complete handshake (default: 30s)")
 
     parser.add_argument(
-        '--timeout',
-        type=int,
-        default=30,
-        help='Maximum time to complete handshake (default: 30s)'
+        "--verify-candidates", type=int, default=3, help="Number of ICE candidates to verify (default: 3)"
     )
 
-    parser.add_argument(
-        '--verify-candidates',
-        type=int,
-        default=3,
-        help='Number of ICE candidates to verify (default: 3)'
-    )
-
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose debug logging'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose debug logging")
 
     args = parser.parse_args()
 
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
-    logger.info(f"Starting Neko WebRTC verification")
+    logger.info("Starting Neko WebRTC verification")
     logger.info(f"URL: {args.url}, Timeout: {args.timeout}s, ICE candidates: {args.verify_candidates}")
 
     success = await verify_webrtc_session(
-        url=args.url,
-        timeout_seconds=args.timeout,
-        verify_ice_candidates=args.verify_candidates
+        url=args.url, timeout_seconds=args.timeout, verify_ice_candidates=args.verify_candidates
     )
 
     if success:
@@ -272,6 +247,6 @@ Examples:
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit_code = asyncio.run(main())
     sys.exit(exit_code)

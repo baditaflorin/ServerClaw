@@ -108,7 +108,9 @@ def test_main_tasks_render_config_compose_and_verify_runtime() -> None:
         if task["name"] == "Remove the broken Crawl4AI container before retrying startup"
     )
     retry_task = next(
-        task for task in startup_task["rescue"] if task["name"] == "Retry Crawl4AI startup after stale bridge-network cleanup"
+        task
+        for task in startup_task["rescue"]
+        if task["name"] == "Retry Crawl4AI startup after stale bridge-network cleanup"
     )
     assert start_command["ansible.builtin.command"]["argv"] == "{{ crawl4ai_runtime_compose_up_argv }}"
     assert "Flag stale Crawl4AI Docker bridge-network startup failures" in rescue_names
@@ -119,10 +121,19 @@ def test_main_tasks_render_config_compose_and_verify_runtime() -> None:
     assert "Wait for the Docker daemon to answer after Crawl4AI bridge-network recovery" in rescue_names
     assert "Remove the broken Crawl4AI container before retrying startup" in rescue_names
     assert "Retry Crawl4AI startup after stale bridge-network cleanup" in rescue_names
-    assert "failed to set up container networking" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
-    assert "failed to create endpoint" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
+    assert (
+        "failed to set up container networking"
+        in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
+    )
+    assert (
+        "failed to create endpoint"
+        in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
+    )
     assert "does not exist" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
-    assert "No chain/target/match by that name" in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
+    assert (
+        "No chain/target/match by that name"
+        in recovery_fact["ansible.builtin.set_fact"]["crawl4ai_runtime_bridge_network_missing"]
+    )
     assert reset_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert reset_task["failed_when"] is False
     assert restart_docker["ansible.builtin.service"] == {"name": "docker", "state": "restarted"}
@@ -131,7 +142,12 @@ def test_main_tasks_render_config_compose_and_verify_runtime() -> None:
     assert include_role["tasks_from"] == "docker_bridge_chains"
     assert reassert_chains["vars"]["common_docker_bridge_chains_service_name"] == "docker"
     assert reassert_chains["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
-    assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
+    assert docker_info["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "info",
+        "--format",
+        '{{ "{{.ServerVersion}}" }}',
+    ]
     assert docker_info["until"] == "crawl4ai_runtime_docker_info.rc == 0"
     assert remove_broken_container["ansible.builtin.command"]["argv"] == [
         "docker",
@@ -141,7 +157,9 @@ def test_main_tasks_render_config_compose_and_verify_runtime() -> None:
     ]
     assert remove_broken_container["failed_when"] is False
     assert retry_task["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "--remove-orphans"]
-    port_check = next(task for task in tasks if task["name"] == "Check whether Crawl4AI publishes the expected host port")
+    port_check = next(
+        task for task in tasks if task["name"] == "Check whether Crawl4AI publishes the expected host port"
+    )
     assert port_check["ansible.builtin.command"]["argv"] == [
         "docker",
         "port",
@@ -159,7 +177,8 @@ def test_verify_tasks_cover_health_monitor_playground_and_markdown_smoke() -> No
     assert "Verify the Crawl4AI playground responds locally" in names
     assert "Verify the Crawl4AI markdown endpoint returns cleaned content for the runbook smoke URL" in names
     markdown_task = next(
-        task for task in verify
+        task
+        for task in verify
         if task["name"] == "Verify the Crawl4AI markdown endpoint returns cleaned content for the runbook smoke URL"
     )
     assert markdown_task["ansible.builtin.uri"]["url"] == "{{ crawl4ai_runtime_local_base_url }}/md"

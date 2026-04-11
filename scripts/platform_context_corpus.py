@@ -257,9 +257,8 @@ def source_path_matches(source_path: str, selected_paths: list[str] | tuple[str,
         normalized_selected_path = selected_path.strip("/")
         if not normalized_selected_path:
             continue
-        if (
-            normalized_source_path == normalized_selected_path
-            or normalized_source_path.startswith(f"{normalized_selected_path}/")
+        if normalized_source_path == normalized_selected_path or normalized_source_path.startswith(
+            f"{normalized_selected_path}/"
         ):
             return True
     return False
@@ -297,5 +296,5 @@ def build_manifest_from_chunks(
 
 
 def chunk_identifier(relative_path: str, chunk_index: int, content: str) -> str:
-    digest = hashlib.sha1(f"{relative_path}:{chunk_index}:{content}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha1(f"{relative_path}:{chunk_index}:{content}".encode()).hexdigest()
     return str(uuid.uuid5(uuid.NAMESPACE_URL, digest))

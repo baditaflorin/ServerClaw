@@ -14,7 +14,10 @@ COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "mailpit_runtime" / "templates" / "dock
 def test_defaults_define_private_mailpit_runtime_contract() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
-    assert defaults["mailpit_service_topology"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('mailpit') }}"
+    assert (
+        defaults["mailpit_service_topology"]
+        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('mailpit') }}"
+    )
     assert defaults["mailpit_site_dir"] == "/opt/dev-tools/mailpit"
     assert defaults["mailpit_compose_file"] == "{{ mailpit_site_dir }}/docker-compose.yml"
     assert defaults["mailpit_container_name"] == "mailpit"
@@ -53,17 +56,22 @@ def test_main_tasks_render_pull_wait_and_verify_mailpit() -> None:
     assert "Verify the Mailpit runtime" in names
 
     info_probe = next(
-        task for task in tasks if task["name"] == "Check whether the current Mailpit info endpoint is healthy before startup"
+        task
+        for task in tasks
+        if task["name"] == "Check whether the current Mailpit info endpoint is healthy before startup"
     )
     assert info_probe["ansible.builtin.uri"]["url"] == "{{ mailpit_api_url }}/info"
 
-    startup_block = next(task for task in tasks if task["name"] == "Start the Mailpit stack with stale-network recovery")
+    startup_block = next(
+        task for task in tasks if task["name"] == "Start the Mailpit stack with stale-network recovery"
+    )
     rescue_names = [task["name"] for task in startup_block["rescue"]]
     assert "Detect stale Mailpit compose-network startup failures" in rescue_names
     assert "Reset the stale Mailpit compose network before retrying startup" in rescue_names
 
     reset_task = next(
-        task for task in startup_block["rescue"]
+        task
+        for task in startup_block["rescue"]
         if task["name"] == "Reset the stale Mailpit compose network before retrying startup"
     )
     assert 'docker network rm "{{ mailpit_docker_network_name }}"' in reset_task["ansible.builtin.shell"]

@@ -108,7 +108,9 @@ def ensure_project(client: VikunjaClient, project_spec: dict[str, Any], actions:
     }
     if existing is None:
         created = client.create_project(payload)
-        actions.append(Action("project", "created", project_spec["identifier"], f"Created project '{project_spec['title']}'"))
+        actions.append(
+            Action("project", "created", project_spec["identifier"], f"Created project '{project_spec['title']}'")
+        )
         return created
     changed = False
     for key, value in payload.items():
@@ -117,11 +119,15 @@ def ensure_project(client: VikunjaClient, project_spec: dict[str, Any], actions:
             break
     if changed:
         existing = client.update_project(int(existing["id"]), {**existing, **payload})
-        actions.append(Action("project", "updated", project_spec["identifier"], f"Updated project '{project_spec['title']}'"))
+        actions.append(
+            Action("project", "updated", project_spec["identifier"], f"Updated project '{project_spec['title']}'")
+        )
     return existing
 
 
-def ensure_project_members(client: VikunjaClient, project_id: int, members: list[dict[str, Any]], actions: list[Action]) -> None:
+def ensure_project_members(
+    client: VikunjaClient, project_id: int, members: list[dict[str, Any]], actions: list[Action]
+) -> None:
     current_members = client.list_project_users(project_id)
     by_username = {member.get("username"): member for member in current_members}
     for member in members:
@@ -135,10 +141,14 @@ def ensure_project_members(client: VikunjaClient, project_id: int, members: list
         if int(current.get("permission", -1)) != permission:
             user_id = resolve_user_id(client, username)
             client.update_project_user(project_id, user_id, username, permission)
-            actions.append(Action("membership", "updated", username, f"Updated {username} permission on project {project_id}"))
+            actions.append(
+                Action("membership", "updated", username, f"Updated {username} permission on project {project_id}")
+            )
 
 
-def ensure_project_webhooks(client: VikunjaClient, project_id: int, webhooks: list[dict[str, Any]], actions: list[Action]) -> None:
+def ensure_project_webhooks(
+    client: VikunjaClient, project_id: int, webhooks: list[dict[str, Any]], actions: list[Action]
+) -> None:
     current = client.list_webhooks(project_id)
     by_target = {webhook.get("target_url"): webhook for webhook in current}
     for webhook in webhooks:

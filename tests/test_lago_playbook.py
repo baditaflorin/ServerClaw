@@ -19,7 +19,9 @@ def test_lago_playbook_converges_dns_postgres_runtime_edge_and_public_verify() -
     dns_play = plays[0]
     postgres_play = next(play for play in plays if play["name"] == "Prepare PostgreSQL for Lago")
     runtime_play = next(
-        play for play in plays if play["name"] == "Converge Lago and the billing ingest adapter on the Docker runtime VM"
+        play
+        for play in plays
+        if play["name"] == "Converge Lago and the billing ingest adapter on the Docker runtime VM"
     )
     nginx_play = next(play for play in plays if play["name"] == "Publish Lago through the NGINX edge")
     verify_play = next(play for play in plays if play["name"] == "Verify Lago end to end after edge publication")
@@ -51,10 +53,14 @@ def test_lago_playbook_converges_dns_postgres_runtime_edge_and_public_verify() -
     assert verify_play["vars"]["lago_smoke_producer_token_local_file"].endswith("/.local/lago/smoke-producer-token.txt")
 
     public_smoke_task = next(
-        task for task in verify_play["tasks"] if task["name"] == "Submit a public Lago smoke event through the API gateway adapter"
+        task
+        for task in verify_play["tasks"]
+        if task["name"] == "Submit a public Lago smoke event through the API gateway adapter"
     )
     usage_task = next(
-        task for task in verify_play["tasks"] if task["name"] == "Verify Lago current usage reflects the public smoke event"
+        task
+        for task in verify_play["tasks"]
+        if task["name"] == "Verify Lago current usage reflects the public smoke event"
     )
 
     assert public_smoke_task["ansible.builtin.uri"]["url"] == "{{ lago_public_ingest_url }}"
@@ -65,9 +71,10 @@ def test_lago_playbook_converges_dns_postgres_runtime_edge_and_public_verify() -
         "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage"
         in usage_task["ansible.builtin.uri"]["url"]
     )
-    assert "?external_subscription_id={{ lago_smoke_external_subscription_id | urlencode }}" in usage_task[
-        "ansible.builtin.uri"
-    ]["url"]
+    assert (
+        "?external_subscription_id={{ lago_smoke_external_subscription_id | urlencode }}"
+        in usage_task["ansible.builtin.uri"]["url"]
+    )
 
 
 def test_root_lago_playbook_imports_the_collection_entrypoint() -> None:

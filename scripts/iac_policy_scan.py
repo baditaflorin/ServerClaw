@@ -9,7 +9,7 @@ import os
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any
@@ -687,8 +687,7 @@ def run_scan_group(
             path=group.path,
             group_id=group.group_id,
             message=(
-                f"Checkov did not emit JSON for {group.path}. stderr: "
-                f"{(completed.stderr or 'no stderr').strip()}"
+                f"Checkov did not emit JSON for {group.path}. stderr: {(completed.stderr or 'no stderr').strip()}"
             ),
         )
         return {
@@ -795,23 +794,15 @@ def build_summary_report(
     source_commit: str,
     group_reports: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    active_findings = [
-        finding
-        for group_report in group_reports
-        for finding in group_report["findings"]
-    ]
-    suppressed_findings = [
-        finding
-        for group_report in group_reports
-        for finding in group_report["suppressed_findings"]
-    ]
+    active_findings = [finding for group_report in group_reports for finding in group_report["findings"]]
+    suppressed_findings = [finding for group_report in group_reports for finding in group_report["suppressed_findings"]]
     counts = {level: 0 for level in LEVELS}
     for finding in active_findings:
         counts[finding.level] += 1
 
     compose_notes = compose_surface_notes(repo_root, policy)
     status = "failed" if any(counts[level] for level in policy.blocking_levels) else "passed"
-    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     tool_version = next(
         (
             str(group_report["summary"].get("checkov_version", "")).strip()
@@ -850,9 +841,7 @@ def build_summary_report(
                 "summary": group_report["summary"],
                 "notes": group_report["notes"],
                 "active_findings": [finding.to_summary_dict() for finding in group_report["findings"]],
-                "suppressed_findings": [
-                    finding.to_summary_dict() for finding in group_report["suppressed_findings"]
-                ],
+                "suppressed_findings": [finding.to_summary_dict() for finding in group_report["suppressed_findings"]],
             }
             for group_report in group_reports
         ],

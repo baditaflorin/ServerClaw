@@ -199,9 +199,7 @@ def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
         == "development"
     )
     assert (
-        live_apply_receipts.receipt_environment_for_path(
-            live_apply_receipts.RECEIPTS_DIR / "2026-03-27-test.json"
-        )
+        live_apply_receipts.receipt_environment_for_path(live_apply_receipts.RECEIPTS_DIR / "2026-03-27-test.json")
         == "production"
     )
     assert (
@@ -224,6 +222,7 @@ def test_iter_receipt_paths_skips_nested_evidence_json(monkeypatch: pytest.Monke
     monkeypatch.setattr(live_apply_receipts, "RECEIPTS_DIR", receipts_dir)
 
     assert live_apply_receipts.iter_receipt_paths(receipts_dir) == [tracked_receipt]
+
 
 def test_iter_receipt_paths_skips_evidence_artifacts(
     tmp_path: Path,

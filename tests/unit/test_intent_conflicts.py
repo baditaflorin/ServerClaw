@@ -238,7 +238,9 @@ def test_scheduler_rejects_overlapping_service_writes(tmp_path: Path) -> None:
 
     def run_first() -> None:
         first_result["result"] = scheduler_one.submit(
-            SimpleNamespace(intent_id="intent-a", workflow_id="converge-netbox", arguments={}, target_service_id="netbox")
+            SimpleNamespace(
+                intent_id="intent-a", workflow_id="converge-netbox", arguments={}, target_service_id="netbox"
+            )
         )
 
     thread = threading.Thread(target=run_first)
@@ -296,7 +298,11 @@ def test_registry_can_register_speculative_conflict_without_rejecting(tmp_path: 
         ttl_seconds=120,
     )
     second = registry.register_intent(
-        {"workflow_id": "rotate-netbox-db-password", "arguments": {"secret_id": "netbox/db"}, "target_service_id": "netbox"},
+        {
+            "workflow_id": "rotate-netbox-db-password",
+            "arguments": {"secret_id": "netbox/db"},
+            "target_service_id": "netbox",
+        },
         actor_intent_id="intent-b",
         actor="agent:test",
         ttl_seconds=120,

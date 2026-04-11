@@ -24,7 +24,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--workspace-id")
     parser.add_argument("--skill-id")
     parser.add_argument("--validate", action="store_true")
-    parser.add_argument("--no-imported", action="store_true", help="Hide mirrored third-party packs from the JSON output.")
+    parser.add_argument(
+        "--no-imported", action="store_true", help="Hide mirrored third-party packs from the JSON output."
+    )
     parser.add_argument(
         "--include-prompt-manifest",
         action="store_true",

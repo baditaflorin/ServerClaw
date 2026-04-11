@@ -28,7 +28,10 @@ def test_gitea_defaults_reference_private_service_topology() -> None:
     assert "playbook_execution_host_patterns.postgres[playbook_execution_env]" in defaults
     assert ".local/gitea/minio-secret-key.txt" in defaults
     assert "gitea_minio_bucket_name: gitea-lfs" in defaults
-    assert 'gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"' in defaults
+    assert (
+        'gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"'
+        in defaults
+    )
 
 
 def test_gitea_compose_mounts_data_volume_and_openbao_env() -> None:
@@ -45,7 +48,7 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     template = BOOTSTRAP_TEMPLATE.read_text()
     assert 'oidc_internal_discovery="{{ gitea_oidc_internal_discovery_url }}"' in template
     assert '--auto-discover-url "${oidc_internal_discovery}"' in template
-    assert 'gitea admin auth list' in template
+    assert "gitea admin auth list" in template
     assert "generate-access-token" in template
     assert "--raw" in template
     assert "generate-runner-token" in template
@@ -53,8 +56,8 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     assert "RELEASE_BUNDLE_REPO_TOKEN" in template
     assert "/actions/secrets/" in template
     assert 'renovate_user="{{ gitea_renovate_username }}"' in template
-    assert 'GITEA_RENOVATE_PASSWORD' in template
-    assert '/collaborators/${renovate_user}' in template
+    assert "GITEA_RENOVATE_PASSWORD" in template
+    assert "/collaborators/${renovate_user}" in template
     assert '\\"permission\\":\\"${renovate_repo_permission}\\"' in template
 
 
@@ -197,7 +200,9 @@ def test_gitea_waits_on_the_published_service_address() -> None:
 
 def test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap() -> None:
     tasks = load_tasks()
-    minio_wait_task = next(task for task in tasks if task["name"] == "Wait for the shared MinIO API endpoint used by Gitea LFS")
+    minio_wait_task = next(
+        task for task in tasks if task["name"] == "Wait for the shared MinIO API endpoint used by Gitea LFS"
+    )
     wait_task = next(
         task
         for task in tasks
@@ -222,7 +227,9 @@ def test_gitea_runtime_recovers_stale_docker_networking() -> None:
     assert "Remove stale Gitea containers before recovery" in names
     assert "Force-recreate the Gitea stack after Docker networking recovery" in names
 
-    network_cleanup_task = next(task for task in tasks if task["name"] == "Remove stale Gitea compose networks after the reset")
+    network_cleanup_task = next(
+        task for task in tasks if task["name"] == "Remove stale Gitea compose networks after the reset"
+    )
     network_cleanup_script = network_cleanup_task["ansible.builtin.shell"]
     assert 'docker network inspect "${network_id}"' in network_cleanup_script
     assert 'payload[0].get("Containers")' in network_cleanup_script

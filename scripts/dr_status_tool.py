@@ -21,6 +21,7 @@ Examples
   python scripts/dr_status_tool.py restore-history
   python scripts/dr_status_tool.py rto-check
 """
+
 from __future__ import annotations
 
 import argparse
@@ -57,6 +58,7 @@ def _restore_receipts() -> list[dict]:
 # ---------------------------------------------------------------------------
 # commands
 # ---------------------------------------------------------------------------
+
 
 def cmd_report(args: argparse.Namespace) -> int:
     data = _load_targets()
@@ -138,10 +140,9 @@ def cmd_restore_history(args: argparse.Namespace) -> int:
     for r in receipts:
         print(f"  File: {r['_file']}")
         if "_error" in r:
-            print(f"    [parse error]")
+            print("    [parse error]")
         else:
-            for key in ("result", "outcome", "status", "vmid", "target_vmid",
-                        "snapshot", "verified_at", "notes"):
+            for key in ("result", "outcome", "status", "vmid", "target_vmid", "snapshot", "verified_at", "notes"):
                 if key in r:
                     print(f"    {key}: {r[key]}")
         print()
@@ -153,8 +154,7 @@ def cmd_rto_check(args: argparse.Namespace) -> int:
     platform = data.get("platform_target", {})
     platform_rto = platform.get("rto_minutes", 240)
     scenarios = data.get("scenarios", [])
-    breaches = [s for s in scenarios
-                if s.get("rto_minutes") is not None and s["rto_minutes"] > platform_rto]
+    breaches = [s for s in scenarios if s.get("rto_minutes") is not None and s["rto_minutes"] > platform_rto]
     if not breaches:
         print(f"All scenarios within platform RTO of {platform_rto} minutes")
         return 0
@@ -169,6 +169,7 @@ def cmd_rto_check(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

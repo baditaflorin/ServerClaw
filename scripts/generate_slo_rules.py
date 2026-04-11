@@ -90,9 +90,7 @@ def build_recording_rules(catalog: dict[str, Any]) -> dict[str, Any]:
                 },
                 {
                     "record": queries["budget_remaining"],
-                    "expr": (
-                        f"clamp_min(1 - ({queries['error_30d']} / {error_budget_ratio(slo):.6f}), 0)"
-                    ),
+                    "expr": (f"clamp_min(1 - ({queries['error_30d']} / {error_budget_ratio(slo):.6f}), 0)"),
                     "labels": {
                         "slo_id": slo["id"],
                         "service_id": slo["service_id"],
@@ -214,7 +212,9 @@ def build_targets(catalog: dict[str, Any]) -> list[dict[str, Any]]:
     return targets
 
 
-def stat_panel(panel_id: int, title: str, expr: str, x: int, y: int, *, unit: str, thresholds: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+def stat_panel(
+    panel_id: int, title: str, expr: str, x: int, y: int, *, unit: str, thresholds: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     panel: dict[str, Any] = {
         "id": panel_id,
         "type": "stat",
@@ -283,7 +283,9 @@ def build_dashboard(catalog: dict[str, Any]) -> dict[str, Any]:
         heading = f"### {slo['id']}\n\n{slo['description']}\n\nService: `{slo['service_id']}`"
         if slo["indicator"] == "latency":
             heading += f"\n\nLatency threshold: `{int(slo['latency_threshold_ms'])}ms`"
-        heading += f"\n\n[Open Grafana]({grafana_url}/d/{GRAFANA_DASHBOARD_UID}/{GRAFANA_DASHBOARD_UID}?var-slo={slo['id']})"
+        heading += (
+            f"\n\n[Open Grafana]({grafana_url}/d/{GRAFANA_DASHBOARD_UID}/{GRAFANA_DASHBOARD_UID}?var-slo={slo['id']})"
+        )
         panels.append(text_panel(panel_id, slo["id"], heading, y))
         panel_id += 1
         y += 3
@@ -405,7 +407,9 @@ def generate() -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Generate Prometheus and Grafana SLO assets from config/slo-catalog.json.")
+    parser = argparse.ArgumentParser(
+        description="Generate Prometheus and Grafana SLO assets from config/slo-catalog.json."
+    )
     parser.add_argument("--write", action="store_true", help="Write generated assets to the repository.")
     parser.add_argument("--check", action="store_true", help="Verify that committed generated assets are up to date.")
     return parser
@@ -425,7 +429,7 @@ def main(argv: list[str] | None = None) -> int:
         if not outputs_match(catalog):
             raise ValueError("generated SLO assets are out of date; run scripts/generate_slo_rules.py --write")
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("generate-slo-rules", exc)
 
 

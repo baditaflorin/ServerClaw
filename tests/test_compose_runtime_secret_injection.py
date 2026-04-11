@@ -19,7 +19,7 @@ def test_common_openbao_agent_helper_exists() -> None:
     template = (REPO_ROOT / "roles" / "common" / "templates" / "openbao-agent.hcl.j2").read_text()
     assert "kv/data/" in helper
     assert 'static_secret_render_interval = "5m"' in template
-    assert '{{ common_openbao_compose_env_agent_template_file | basename }}' in template
+    assert "{{ common_openbao_compose_env_agent_template_file | basename }}" in template
     assert 'destination          = "{{ common_openbao_compose_env_env_file }}"' in template
     assert "Render the bootstrap runtime env file from the managed secret payload" in helper
     assert "common_openbao_compose_env_secret_payload | dictsort" in helper
@@ -42,10 +42,7 @@ def test_migrated_role_defaults_use_tmpfs_runtime_env_paths() -> None:
         defaults_text = (REPO_ROOT / "roles" / role_name / "defaults" / "main.yml").read_text()
         assert expected_path.endswith("/runtime.env")
         assert "runtime.env" in defaults_text
-        assert (
-            expected_path in defaults_text
-            or "{{ compose_runtime_secret_root }}" in defaults_text
-        )
+        assert expected_path in defaults_text or "{{ compose_runtime_secret_root }}" in defaults_text
 
 
 def test_migrated_role_tasks_no_longer_shell_out_with_env_file_flag() -> None:
@@ -57,8 +54,12 @@ def test_migrated_role_tasks_no_longer_shell_out_with_env_file_flag() -> None:
 def test_runtime_secret_payloads_are_built_in_follow_up_tasks() -> None:
     windmill_defaults = (REPO_ROOT / "roles" / "windmill_runtime" / "defaults" / "main.yml").read_text()
     windmill_tasks = (REPO_ROOT / "roles" / "windmill_runtime" / "tasks" / "main.yml").read_text()
-    windmill_env_template = (REPO_ROOT / "roles" / "windmill_runtime" / "templates" / "windmill-runtime.env.j2").read_text()
-    windmill_template = (REPO_ROOT / "roles" / "windmill_runtime" / "templates" / "windmill-runtime.env.ctmpl.j2").read_text()
+    windmill_env_template = (
+        REPO_ROOT / "roles" / "windmill_runtime" / "templates" / "windmill-runtime.env.j2"
+    ).read_text()
+    windmill_template = (
+        REPO_ROOT / "roles" / "windmill_runtime" / "templates" / "windmill-runtime.env.ctmpl.j2"
+    ).read_text()
     mattermost_tasks = (REPO_ROOT / "roles" / "mattermost_runtime" / "tasks" / "main.yml").read_text()
     assert "windmill_ledger_postgres_user: patroni" in windmill_defaults
     assert "windmill_ledger_dsn" in windmill_defaults
@@ -75,7 +76,7 @@ def test_runtime_secret_payloads_are_built_in_follow_up_tasks() -> None:
 
 def test_windmill_runtime_env_file_is_left_to_openbao() -> None:
     windmill_tasks = (REPO_ROOT / "roles" / "windmill_runtime" / "tasks" / "main.yml").read_text()
-    assert 'src: windmill-runtime.env.j2' not in windmill_tasks
+    assert "src: windmill-runtime.env.j2" not in windmill_tasks
     assert 'dest: "{{ windmill_env_file }}"' not in windmill_tasks
 
 
@@ -109,8 +110,12 @@ def test_control_plane_recovery_no_longer_requires_windmill_env_file() -> None:
 
 def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     defaults_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "defaults" / "main.yml").read_text()
-    script_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.sh.j2").read_text()
-    service_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.service.j2").read_text()
+    script_text = (
+        REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.sh.j2"
+    ).read_text()
+    service_text = (
+        REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.service.j2"
+    ).read_text()
     tasks_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "tasks" / "main.yml").read_text()
     helper_text = (REPO_ROOT / "roles" / "common" / "tasks" / "openbao_systemd_credentials.yml").read_text()
     helper_config_text = (
@@ -127,10 +132,10 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert "CREDENTIALS_DIRECTORY" in script_text
     assert "postgresql://" not in script_text
     assert "openbao-backup-token.json" not in script_text
-    assert 'LoadCredential=openbao-token:' in service_text
-    assert 'LoadCredential=windmill-db-dsn:' in service_text
+    assert "LoadCredential=openbao-token:" in service_text
+    assert "LoadCredential=windmill-db-dsn:" in service_text
     assert "openbao_systemd_credentials" in tasks_text
-    assert 'systemctl\n      - start' in tasks_text
+    assert "systemctl\n      - start" in tasks_text
     assert 'command: "{{ control_plane_recovery_runtime_backup_script }}"' not in tasks_text
     assert 'sink "file"' in helper_config_text
     assert "docker run --rm --name" in helper_service_text
@@ -145,7 +150,9 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
 
 
 def test_mail_gateway_image_includes_telemetry_module() -> None:
-    dockerfile_text = (REPO_ROOT / "roles" / "mail_platform_runtime" / "templates" / "mail-gateway.Dockerfile.j2").read_text()
+    dockerfile_text = (
+        REPO_ROOT / "roles" / "mail_platform_runtime" / "templates" / "mail-gateway.Dockerfile.j2"
+    ).read_text()
     app_text = (REPO_ROOT / "roles" / "mail_platform_runtime" / "files" / "mail-gateway" / "app.py").read_text()
     assert "from telemetry import configure_telemetry" in app_text
     assert "COPY telemetry.py ./" in dockerfile_text

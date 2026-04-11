@@ -252,6 +252,7 @@ def test_compile_parse_error_is_explicit(compiler_repo: Path) -> None:
 
     assert excinfo.value.code == "PARSE_ERROR"
 
+
 def test_compile_rejects_unsafe_health(compiler_repo: Path) -> None:
     snapshot_dir = compiler_repo / ".local" / "state" / "world-state"
     snapshot_dir.mkdir(parents=True, exist_ok=True)
@@ -301,6 +302,7 @@ def test_compile_batch_preserves_instruction_order(compiler_repo: Path) -> None:
     assert batch.actor_id == "operator:lv3-cli"
     assert batch.instructions == ("deploy netbox", "deploy grafana")
     assert [item.dispatch_workflow_id for item in batch.results] == ["converge-netbox", "converge-grafana"]
+
 
 def test_compile_uses_llm_fallback_for_unmatched_instruction(compiler_repo: Path) -> None:
     class FakeLLMClient:

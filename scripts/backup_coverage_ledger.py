@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -242,9 +241,7 @@ def load_restore_evidence(restore_dir: Path = RESTORE_RECEIPTS_DIR) -> dict[int,
 
     for path in sorted(restore_dir.glob("*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        recorded_at = parse_recorded_datetime(
-            str(payload.get("recorded_at") or payload.get("recorded_on") or "")
-        )
+        recorded_at = parse_recorded_datetime(str(payload.get("recorded_at") or payload.get("recorded_on") or ""))
         for result in payload.get("results", []):
             if not isinstance(result, dict):
                 continue
@@ -397,9 +394,7 @@ def evaluate_asset(
         )
 
     if coverage_state == "protected" and latest_backup is not None:
-        state_reasons.append(
-            f"Fresh backup evidence is present on {asset.storage_id} for VM {asset.vmid}."
-        )
+        state_reasons.append(f"Fresh backup evidence is present on {asset.storage_id} for VM {asset.vmid}.")
 
     observed_job = matching_jobs[0] if matching_jobs else fallback_job
     restore_entry = restore_evidence.get(asset.vmid)
@@ -489,10 +484,7 @@ def build_backup_coverage_report(
     context = load_controller_context()
     jobs = load_backup_jobs(context)
     storage_ids = sorted({asset.storage_id for asset in assets})
-    storage_listings = {
-        storage_id: load_storage_listing(context, storage_id)
-        for storage_id in storage_ids
-    }
+    storage_listings = {storage_id: load_storage_listing(context, storage_id) for storage_id in storage_ids}
     restore_evidence = load_restore_evidence(restore_dir)
     restic_latest_sources = index_restic_latest_sources(restic_latest)
 
@@ -508,8 +500,7 @@ def build_backup_coverage_report(
         for asset in assets
     ]
     evaluated_assets.extend(
-        evaluate_restic_asset(asset, restic_latest_sources.get(asset.source_id))
-        for asset in restic_assets
+        evaluate_restic_asset(asset, restic_latest_sources.get(asset.source_id)) for asset in restic_assets
     )
 
     counts = defaultdict(int)
@@ -628,8 +619,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--restore-dir", type=Path, default=RESTORE_RECEIPTS_DIR)
     parser.add_argument("--receipts-dir", type=Path, default=DEFAULT_RECEIPTS_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
-    parser.add_argument("--write-receipt", action="store_true", help="Write one dated receipt under receipts/backup-coverage.")
-    parser.add_argument("--print-report-json", action="store_true", help="Emit a final REPORT_JSON=<json> line for wrappers.")
+    parser.add_argument(
+        "--write-receipt", action="store_true", help="Write one dated receipt under receipts/backup-coverage."
+    )
+    parser.add_argument(
+        "--print-report-json", action="store_true", help="Emit a final REPORT_JSON=<json> line for wrappers."
+    )
     parser.add_argument("--strict", action="store_true", help="Exit non-zero if any asset is degraded or uncovered.")
     return parser.parse_args(argv)
 
@@ -661,7 +656,10 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import subprocess, sys as _sys, os as _os
+    import subprocess
+    import sys as _sys
+    import os as _os
+
     token = _os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -675,7 +673,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         subprocess.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**_os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

@@ -141,9 +141,7 @@ def validate_capability_contract_catalog(
         selection = require_mapping(selection, f"{path}.current_selection")
         service_id = require_str(selection.get("service_id"), f"{path}.current_selection.service_id")
         if service_id not in service_index:
-            raise ValueError(
-                f"{path}.current_selection.service_id references unknown service '{service_id}'"
-            )
+            raise ValueError(f"{path}.current_selection.service_id references unknown service '{service_id}'")
         adr_id = require_str(selection.get("selection_adr"), f"{path}.current_selection.selection_adr")
         resolve_adr_path(adr_id)
         runbook_path = REPO_ROOT / require_str(selection.get("runbook"), f"{path}.current_selection.runbook")
@@ -301,7 +299,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.contract:
             return show_capability(catalog, args.contract)
         return list_capabilities(catalog)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Capability contract catalog", exc)
 
 

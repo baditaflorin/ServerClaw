@@ -12,15 +12,7 @@ repo_deploy_image_cache = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(repo_deploy_image_cache)
 
-ROLE_ROOT = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "roles"
-    / "repo_deploy_image_cache"
-)
+ROLE_ROOT = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "repo_deploy_image_cache"
 
 
 def test_current_profile_catalog_validates_and_builds_a_plan() -> None:

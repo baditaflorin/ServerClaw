@@ -62,11 +62,11 @@ def test_collection_publish_script_supports_dry_run(tmp_path: Path) -> None:
     fake_ansible_galaxy.write_text(
         "#!/usr/bin/env bash\n"
         "set -euo pipefail\n"
-        "printf '%s\\n' \"$*\" >> \"$ANSIBLE_GALAXY_LOG\"\n"
-        "if [[ \"$2\" == \"build\" ]]; then\n"
-        "  out_dir=\"$5\"\n"
-        "  mkdir -p \"$out_dir\"\n"
-        "  touch \"$out_dir/lv3-platform-1.0.0.tar.gz\"\n"
+        'printf \'%s\\n\' "$*" >> "$ANSIBLE_GALAXY_LOG"\n'
+        'if [[ "$2" == "build" ]]; then\n'
+        '  out_dir="$5"\n'
+        '  mkdir -p "$out_dir"\n'
+        '  touch "$out_dir/lv3-platform-1.0.0.tar.gz"\n'
         "fi\n"
     )
     fake_ansible_galaxy.chmod(0o755)

@@ -107,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         parser.print_help()
         return 1
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("runbook executor", exc)
 
 

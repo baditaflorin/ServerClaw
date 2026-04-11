@@ -27,9 +27,7 @@ import argparse
 import base64
 import json
 import subprocess
-import sys
 from pathlib import Path
-from typing import Any
 
 # LibreChat internal constants (from packages/data-provider/src/types/assistants.ts)
 ACTION_DELIMITER = "_action_"
@@ -136,12 +134,7 @@ def build_mongosh_script(
 ) -> str:
     """Build a mongosh script that seeds agents and actions idempotently."""
     # Escape for JS string literal
-    prompt_escaped = (
-        system_prompt.replace("\\", "\\\\")
-        .replace('"', '\\"')
-        .replace("\n", "\\n")
-        .replace("\r", "")
-    )
+    prompt_escaped = system_prompt.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "")
 
     # Compute encoded domain for tool name references
     encoded_domain = encode_domain(gateway_base_url)
@@ -170,19 +163,12 @@ def build_mongosh_script(
 
         operation_ids = extract_operation_ids(spec_file)
         raw_spec = spec_file.read_text()
-        raw_spec_escaped = (
-            raw_spec.replace("\\", "\\\\")
-            .replace('"', '\\"')
-            .replace("\n", "\\n")
-            .replace("\r", "")
-        )
+        raw_spec_escaped = raw_spec.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "")
 
         action_id = f"action_{pack['tool_pack']}_tools"
 
         # Build tool name strings: {operationId}_action_{encodedDomain}
-        tool_names = [
-            f"{op_id}{ACTION_DELIMITER}{encoded_domain}" for op_id in operation_ids
-        ]
+        tool_names = [f"{op_id}{ACTION_DELIMITER}{encoded_domain}" for op_id in operation_ids]
         tool_names_js = json.dumps(tool_names)
 
         starters = json.dumps(pack["conversation_starters"])
@@ -191,8 +177,8 @@ def build_mongosh_script(
         # and by assistant_id for assistants endpoint. Set both for compatibility.
         actions_js_parts.append(f"""  {{
     action_id: "{action_id}",
-    agent_id: "{pack['id']}",
-    assistant_id: "{pack['id']}",
+    agent_id: "{pack["id"]}",
+    assistant_id: "{pack["id"]}",
     type: "action_prototype",
     metadata: {{
       domain: "{raw_domain}",
@@ -209,13 +195,13 @@ def build_mongosh_script(
         # Missing fields (versions, model_parameters, category, etc.) cause agents
         # to be invisible in the UI even though they exist in MongoDB.
         agents_js_parts.append(f"""  {{
-    id: "{pack['id']}",
+    id: "{pack["id"]}",
     author: userId,
-    name: "{pack['name']}",
-    description: "{pack['description']}",
-    instructions: systemPrompt + "\\n\\n## Your Specialty\\n\\n{pack['specialty']}",
-    model: "{pack['model']}",
-    provider: "{pack['provider']}",
+    name: "{pack["name"]}",
+    description: "{pack["description"]}",
+    instructions: systemPrompt + "\\n\\n## Your Specialty\\n\\n{pack["specialty"]}",
+    model: "{pack["model"]}",
+    provider: "{pack["provider"]}",
     model_parameters: {{}},
     artifacts: "",
     tools: {tool_names_js},
@@ -234,17 +220,17 @@ def build_mongosh_script(
     tool_options: {{}},
     version: 1,
     versions: [{{
-      name: "{pack['name']}",
-      description: "{pack['description']}",
+      name: "{pack["name"]}",
+      description: "{pack["description"]}",
       model_parameters: {{}},
       agent_ids: [],
       edges: [],
       artifacts: "",
       support_contact: {{name: "", email: ""}},
       category: "general",
-      provider: "{pack['provider']}",
-      model: "{pack['model']}",
-      id: "{pack['id']}",
+      provider: "{pack["provider"]}",
+      model: "{pack["model"]}",
+      id: "{pack["id"]}",
       tools: {tool_names_js},
       createdAt: now,
       updatedAt: now
@@ -465,37 +451,19 @@ def run_mongosh(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     # All values supplied by the Ansible task — no hardcoded defaults for
     # IPs, paths, or credentials.  The role defaults in
     # librechat_runtime/defaults/main.yml are the single source of truth.
-    parser.add_argument(
-        "--ssh-target", required=True, help="SSH target, e.g. root@<host>"
-    )
+    parser.add_argument("--ssh-target", required=True, help="SSH target, e.g. root@<host>")
     parser.add_argument("--ssh-key", required=True, help="SSH private key path")
-    parser.add_argument(
-        "--ssh-proxy", default="", help="SSH proxy jump host"
-    )
-    parser.add_argument(
-        "--admin-email", required=True, help="Admin email in LibreChat"
-    )
-    parser.add_argument(
-        "--system-prompt-file", required=True, help="System prompt markdown file"
-    )
-    parser.add_argument(
-        "--specs-dir", required=True, help="Directory with tool pack OpenAPI spec files"
-    )
-    parser.add_argument(
-        "--gateway-base-url", required=True, help="API gateway base URL for tool calls"
-    )
-    parser.add_argument(
-        "--tools-api-key-file", required=True, help="Path to tools API key file"
-    )
-    parser.add_argument(
-        "--mongo-container", required=True, help="MongoDB container name"
-    )
+    parser.add_argument("--ssh-proxy", default="", help="SSH proxy jump host")
+    parser.add_argument("--admin-email", required=True, help="Admin email in LibreChat")
+    parser.add_argument("--system-prompt-file", required=True, help="System prompt markdown file")
+    parser.add_argument("--specs-dir", required=True, help="Directory with tool pack OpenAPI spec files")
+    parser.add_argument("--gateway-base-url", required=True, help="API gateway base URL for tool calls")
+    parser.add_argument("--tools-api-key-file", required=True, help="Path to tools API key file")
+    parser.add_argument("--mongo-container", required=True, help="MongoDB container name")
     parser.add_argument(
         "--dry-run",
         action="store_true",

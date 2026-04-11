@@ -166,7 +166,9 @@ def test_smoke_upload_creates_then_cleans_up_document(monkeypatch) -> None:
         ("title", f"LV3 Paperless Smoke {report['archive_serial_number']}"),
         ("archive_serial_number", str(report["archive_serial_number"])),
     ]
-    assert captured["content"] == paperless_sync.tiny_pdf_bytes(f"LV3 Paperless Smoke {report['archive_serial_number']}")
+    assert captured["content"] == paperless_sync.tiny_pdf_bytes(
+        f"LV3 Paperless Smoke {report['archive_serial_number']}"
+    )
 
 
 def test_main_reads_api_token_file_and_writes_report(tmp_path: Path, monkeypatch) -> None:

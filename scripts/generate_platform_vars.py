@@ -149,9 +149,7 @@ def yaml_dump(payload: Any) -> str:
     try:
         import yaml
     except ModuleNotFoundError as exc:  # pragma: no cover - direct runtime guard
-        raise RuntimeError(
-            "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...'."
-        ) from exc
+        raise RuntimeError("Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...'.") from exc
 
     class IndentedSafeDumper(yaml.SafeDumper):
         def increase_indent(self, flow=False, indentless=False):
@@ -191,9 +189,7 @@ def resolve_dns_target(target: str, host_vars: dict[str, Any]) -> str:
     if target == MANAGEMENT_IPV4_TOKEN:
         return require_string(host_vars.get("management_ipv4"), "host_vars.management_ipv4")
     if target == MANAGEMENT_TAILSCALE_IPV4_TOKEN:
-        return require_string(
-            host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4"
-        )
+        return require_string(host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4")
     resolved = resolve_host_var_template(target, host_vars, "dns target")
     if resolved is target:
         return target
@@ -378,7 +374,7 @@ def build_dns_records(
                 "type": dns["type"],
                 "value": dns["target"],
                 "ttl": dns["ttl"],
-            }
+            },
         )
         additional_records = require_list(
             dns.get("additional_records", []),
@@ -422,7 +418,9 @@ def build_dns_records(
             append_record(
                 visibility,
                 {
-                    "name": relative_record_name(alias, zone_name, f"service_topology.{service_id}.edge.aliases[{index}]"),
+                    "name": relative_record_name(
+                        alias, zone_name, f"service_topology.{service_id}.edge.aliases[{index}]"
+                    ),
                     "type": dns["type"],
                     "value": dns["target"],
                     "ttl": dns["ttl"],
@@ -444,7 +442,7 @@ def build_dns_records(
                     host_vars,
                 ),
                 "ttl": require_int(record.get("ttl"), f"host_vars.mail_platform_dns_records[{index}].ttl"),
-            }
+            },
         )
     return records
 
@@ -458,9 +456,7 @@ def build_service_urls(
     stack: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, str]]:
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
-    tailscale_ipv4 = require_string(
-        host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4"
-    )
+    tailscale_ipv4 = require_string(host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4")
     owning_vm = service["owning_vm"]
     private_ip = tailscale_ipv4 if owning_vm == host_id else guest_ipv4_by_name[owning_vm]
     urls: dict[str, str] = {}
@@ -477,15 +473,11 @@ def build_service_urls(
     elif service_id == "grafana":
         urls["internal"] = service_url("http", private_ip, ports["monitoring_grafana_port"])
         urls["influxdb"] = service_url("http", private_ip, ports["monitoring_influxdb_port"])
-        urls["loki_push"] = service_url(
-            "http", private_ip, ports["monitoring_loki_port"], "/loki/api/v1/push"
-        )
+        urls["loki_push"] = service_url("http", private_ip, ports["monitoring_loki_port"], "/loki/api/v1/push")
         urls["prometheus"] = service_url("http", private_ip, ports["monitoring_prometheus_port"])
         urls["tempo"] = service_url("http", private_ip, ports["monitoring_tempo_http_port"])
         urls["otlp_grpc"] = service_url("http", private_ip, ports["monitoring_otlp_grpc_port"])
-        urls["otlp_http"] = service_url(
-            "http", private_ip, ports["monitoring_otlp_http_port"], "/v1/traces"
-        )
+        urls["otlp_http"] = service_url("http", private_ip, ports["monitoring_otlp_http_port"], "/v1/traces")
         port_map["internal"] = ports["monitoring_grafana_port"]
     elif service_id == "uptime_kuma":
         urls["internal"] = service_url("http", private_ip, extract_port(service["edge"]["upstream"], "edge.upstream"))
@@ -607,10 +599,7 @@ def build_service_urls(
         port_map["admin"] = ports["redpanda_admin_port"]
         port_map["http_proxy"] = ports["redpanda_http_proxy_port"]
         port_map["schema_registry"] = ports["redpanda_schema_registry_port"]
-    elif service_id == "glitchtip":
-        urls["internal"] = service_url("http", private_ip, ports["glitchtip_port"])
-        port_map["internal"] = ports["glitchtip_port"]
-    elif service_id == "glitchtip":
+    elif service_id == "glitchtip" or service_id == "glitchtip":
         urls["internal"] = service_url("http", private_ip, ports["glitchtip_port"])
         port_map["internal"] = ports["glitchtip_port"]
     elif service_id == "dify":
@@ -759,13 +748,9 @@ def build_service_topology(
     ports: dict[str, int],
     service_classification_by_id: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    raw_topology = require_mapping(
-        host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology"
-    )
+    raw_topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
-    tailscale_ipv4 = require_string(
-        host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4"
-    )
+    tailscale_ipv4 = require_string(host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4")
 
     resolved: dict[str, Any] = {}
     for service_id, raw_service in raw_topology.items():
@@ -861,9 +846,7 @@ def build_tcp_proxies(host_vars: dict[str, Any], ports: dict[str, int]) -> list[
         proxy = require_mapping(proxy, f"host_vars.proxmox_tailscale_tcp_proxies[{index}]")
         resolved.append(
             {
-                "name": require_string(
-                    proxy.get("name"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].name"
-                ),
+                "name": require_string(proxy.get("name"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].name"),
                 "listen_address": require_string(
                     resolve_host_var_template(
                         proxy.get("listen_address"),
@@ -932,16 +915,13 @@ def _assert_no_host_proxy_port_collisions(resolved_ports: dict[str, int]) -> Non
         if not key.endswith("_host_proxy_port"):
             continue
         if value in proxy_ports:
-            collisions.append(
-                f"  port {value}: {proxy_ports[value]!r} and {key!r}"
-            )
+            collisions.append(f"  port {value}: {proxy_ports[value]!r} and {key!r}")
         else:
             proxy_ports[value] = key
     if collisions:
         raise ValueError(
             "Duplicate _host_proxy_port values found in platform_port_assignments "
-            "(all host-proxy ports share one controller interface):\n"
-            + "\n".join(collisions)
+            "(all host-proxy ports share one controller interface):\n" + "\n".join(collisions)
         )
 
 
@@ -953,7 +933,9 @@ def build_platform_vars(
         stack, host_vars = load_sources()
 
     ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
-    resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+    resolved_ports = {
+        key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS
+    }
     _assert_no_host_proxy_port_collisions(resolved_ports)
     guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
     service_classification_by_id = load_service_classification_map()
@@ -992,7 +974,9 @@ def build_platform_vars(
     nomad_service = service_topology["nomad"]
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
     postgres_ha = require_mapping(host_vars.get("postgres_ha"), "host_vars.postgres_ha")
-    postgres_primary_inventory_host = require_string(postgres_ha.get("initial_primary"), "host_vars.postgres_ha.initial_primary")
+    postgres_primary_inventory_host = require_string(
+        postgres_ha.get("initial_primary"), "host_vars.postgres_ha.initial_primary"
+    )
     postgres_primary_ip = require_string(
         guest_by_name.get(postgres_primary_inventory_host, {}).get("ipv4"),
         f"host_vars.proxmox_guests[{postgres_primary_inventory_host}].ipv4",

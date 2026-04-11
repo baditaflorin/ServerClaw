@@ -115,7 +115,9 @@ lv3_service_topology:
     monkeypatch.setattr(generate_status_docs, "REPO_ROOT", tmp_path)
     monkeypatch.setattr(generate_status_docs, "README_PATH", tmp_path / "README.md")
     monkeypatch.setattr(generate_status_docs, "STACK_PATH", tmp_path / "versions" / "stack.yaml")
-    monkeypatch.setattr(generate_status_docs, "HOST_VARS_PATH", tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml")
+    monkeypatch.setattr(
+        generate_status_docs, "HOST_VARS_PATH", tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml"
+    )
     monkeypatch.setattr(generate_status_docs, "WORKSTREAMS_PATH", tmp_path / "workstreams.yaml")
     monkeypatch.setattr(generate_status_docs, "RUNBOOKS_DIR", tmp_path / "docs" / "runbooks")
     monkeypatch.setattr(generate_status_docs, "ADR_DIR", tmp_path / "docs" / "adr")

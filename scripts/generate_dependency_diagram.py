@@ -54,12 +54,10 @@ def main(argv: list[str] | None = None) -> int:
         if current != rendered:
             with tempfile.NamedTemporaryFile("w", delete=False, suffix=".md") as handle:
                 handle.write(rendered)
-            raise ValueError(
-                f"{args.output} is stale. Run 'python3 scripts/generate_dependency_diagram.py --write'."
-            )
+            raise ValueError(f"{args.output} is stale. Run 'python3 scripts/generate_dependency_diagram.py --write'.")
         print("Dependency diagram OK")
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("dependency diagram", exc)
 
 

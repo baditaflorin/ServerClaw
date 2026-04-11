@@ -65,7 +65,9 @@ def outputs_match(*, output_path: Path = UPTIME_MONITORS_PATH, catalog_path: Pat
     return output_path.read_text(encoding="utf-8") == expected
 
 
-def write_uptime_monitors(*, output_path: Path = UPTIME_MONITORS_PATH, catalog_path: Path = HEALTH_PROBE_CATALOG_PATH) -> None:
+def write_uptime_monitors(
+    *, output_path: Path = UPTIME_MONITORS_PATH, catalog_path: Path = HEALTH_PROBE_CATALOG_PATH
+) -> None:
     catalog = load_health_probe_catalog(catalog_path)
     monitors = build_uptime_monitors(catalog)
     write_json(output_path, monitors, indent=2, sort_keys=False)
@@ -105,10 +107,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if outputs_match(output_path=args.output, catalog_path=args.catalog):
             return 0
-        raise ValueError(
-            f"{args.output} is stale; run 'python3 scripts/uptime_contract.py --write' to regenerate it"
-        )
-    except Exception as exc:  # noqa: BLE001
+        raise ValueError(f"{args.output} is stale; run 'python3 scripts/uptime_contract.py --write' to regenerate it")
+    except Exception as exc:
         return emit_cli_error("uptime contract", exc)
 
 

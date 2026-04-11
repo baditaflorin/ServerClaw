@@ -153,13 +153,13 @@ def collect_live_observations(catalog: dict[str, Any]) -> dict[str, Any]:
             table_count_command = (
                 "sudo -u postgres psql "
                 f"-d {shlex.quote(db_name)} -Atqc "
-                "\"SELECT count(*) FROM information_schema.tables "
+                '"SELECT count(*) FROM information_schema.tables '
                 "WHERE table_schema NOT IN ('pg_catalog','information_schema');\""
             )
             row_count_command = (
                 "sudo -u postgres psql "
                 f"-d {shlex.quote(db_name)} -Atqc "
-                "\"SELECT COALESCE(sum(n_live_tup),0)::bigint FROM pg_stat_user_tables;\""
+                '"SELECT COALESCE(sum(n_live_tup),0)::bigint FROM pg_stat_user_tables;"'
             )
             table_count_result = run_command(build_guest_ssh_command(context, "postgres-lv3", table_count_command))
             row_count_result = run_command(build_guest_ssh_command(context, "postgres-lv3", row_count_command))
@@ -181,7 +181,7 @@ def collect_live_observations(catalog: dict[str, Any]) -> dict[str, Any]:
             "total_table_count": sum(item["table_count"] for item in db_entries),
             "estimated_total_rows": sum(item["estimated_row_count"] for item in db_entries),
         }
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         observations["postgres"] = {
             "status": "unavailable",
             "error": str(exc),
@@ -236,7 +236,7 @@ def resolve_local_snapshot_dir(
 def deterministic_token(secret_value: str, namespace: str, index: int, *, length: int = 12) -> str:
     digest = hmac.new(
         secret_value.encode("utf-8"),
-        f"{namespace}:{index}".encode("utf-8"),
+        f"{namespace}:{index}".encode(),
         hashlib.sha256,
     ).hexdigest()
     return digest[:length]
@@ -616,7 +616,9 @@ def main(argv: list[str] | None = None) -> int:
             if args.remote:
                 result = verify_remote_snapshot(args.seed_class, snapshot_name=args.snapshot_id, catalog=catalog)
             else:
-                snapshot_path = resolve_local_snapshot_dir(args.seed_class, snapshot_name=args.snapshot_id, catalog=catalog)
+                snapshot_path = resolve_local_snapshot_dir(
+                    args.seed_class, snapshot_name=args.snapshot_id, catalog=catalog
+                )
                 result = verify_local_snapshot(snapshot_path)
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
@@ -624,7 +626,7 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(list_snapshots(seed_class=args.seed_class, catalog=catalog), indent=2, sort_keys=True))
             return 0
         raise ValueError(f"Unsupported action '{args.action}'")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("seed snapshots", exc)
 
 

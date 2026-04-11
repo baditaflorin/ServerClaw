@@ -149,7 +149,9 @@ def describe_artifact(path: Path, *, artifact_root: Path, kind: str, content_typ
     }
 
 
-async def capture_screenshot(page: Any, artifact_root: Path, run_dir: Path, *, name: str, full_page: bool) -> dict[str, Any]:
+async def capture_screenshot(
+    page: Any, artifact_root: Path, run_dir: Path, *, name: str, full_page: bool
+) -> dict[str, Any]:
     target = run_dir / f"{slugify(name)}.png"
     await page.screenshot(path=str(target), full_page=full_page)
     return describe_artifact(target, artifact_root=artifact_root, kind="screenshot", content_type="image/png")
@@ -318,7 +320,7 @@ async def run_browser_session(
                 if request.capture_pdf:
                     try:
                         artifacts.append(await capture_pdf(page, artifact_root, run_dir, name="final-page"))
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         warnings.append(f"pdf capture skipped: {exc}")
 
                 for index, download in enumerate(downloads, start=1):
@@ -334,7 +336,7 @@ async def run_browser_session(
         raise BrowserRunnerError(f"browser session timed out: {exc}") from exc
     except ValueError:
         raise
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise BrowserRunnerError(f"browser session failed: {exc}") from exc
 
     return {

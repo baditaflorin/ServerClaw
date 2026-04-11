@@ -24,7 +24,10 @@ def load_yaml(path: Path) -> list[dict] | dict:
 def test_defaults_define_private_piper_runtime_contract() -> None:
     defaults = load_yaml(ROLE_DEFAULTS)
 
-    assert defaults["piper_service_topology"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('piper') }}"
+    assert (
+        defaults["piper_service_topology"]
+        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('piper') }}"
+    )
     assert defaults["piper_runtime_site_dir"] == "/opt/piper"
     assert defaults["piper_runtime_compose_file"] == "{{ piper_runtime_site_dir }}/docker-compose.yml"
     assert defaults["piper_runtime_compose_project_name"] == "{{ piper_runtime_site_dir | basename }}"
@@ -64,7 +67,11 @@ def test_main_tasks_render_build_wait_and_verify_piper() -> None:
     assert "Wait for the Piper listener" in names
     assert "Verify the Piper runtime" in names
 
-    health_probe = next(task for task in tasks if task["name"] == "Check whether the current Piper health endpoint is healthy before startup")
+    health_probe = next(
+        task
+        for task in tasks
+        if task["name"] == "Check whether the current Piper health endpoint is healthy before startup"
+    )
     assert health_probe["ansible.builtin.uri"]["url"] == "{{ piper_runtime_health_url }}"
 
     build_shell_task = next(task for task in tasks if task["name"] == "Define the Piper image build shell")
@@ -76,7 +83,9 @@ def test_main_tasks_render_build_wait_and_verify_piper() -> None:
     build_task = next(
         task
         for task in next(
-            task for task in tasks if task["name"] == "Build the Piper runtime image and recover stale Docker build-network drift"
+            task
+            for task in tasks
+            if task["name"] == "Build the Piper runtime image and recover stale Docker build-network drift"
         )["block"]
         if task["name"] == "Build the Piper runtime image"
     )
@@ -84,18 +93,24 @@ def test_main_tasks_render_build_wait_and_verify_piper() -> None:
     build_rescue_names = [
         task["name"]
         for task in next(
-            task for task in tasks if task["name"] == "Build the Piper runtime image and recover stale Docker build-network drift"
+            task
+            for task in tasks
+            if task["name"] == "Build the Piper runtime image and recover stale Docker build-network drift"
         )["rescue"]
     ]
     assert "Restart Docker to restore bridge networking before retrying the Piper image build" in build_rescue_names
-    assert "Ensure Docker bridge networking chains are present before retrying the Piper image build" in build_rescue_names
+    assert (
+        "Ensure Docker bridge networking chains are present before retrying the Piper image build" in build_rescue_names
+    )
     assert "Retry the Piper runtime image build after Docker networking recovery" in build_rescue_names
 
     compose_up_task = next(task for task in tasks if task["name"] == "Build the Piper compose startup command")
     assert "--no-build" in compose_up_task["ansible.builtin.set_fact"]["piper_runtime_compose_up_argv"]
 
     startup_block = next(
-        task for task in tasks if task["name"] == "Start the Piper runtime and recover Docker nat-chain or stale compose-network failures"
+        task
+        for task in tasks
+        if task["name"] == "Start the Piper runtime and recover Docker nat-chain or stale compose-network failures"
     )
     rescue_names = [task["name"] for task in startup_block["rescue"]]
     assert "Reset stale Piper compose resources after startup failure" in rescue_names
@@ -112,7 +127,9 @@ def test_verify_tasks_assert_health_voice_catalog_and_wav_contract() -> None:
     assert "Verify the Piper health endpoint responds locally" in names
     assert "Verify the Piper voices endpoint reports the declared voices" in names
     assert "Verify Piper synthesizes WAV audio from the ADR contract" in names
-    tts_verify = next(task for task in tasks if task["name"] == "Verify Piper synthesizes WAV audio from the ADR contract")
+    tts_verify = next(
+        task for task in tasks if task["name"] == "Verify Piper synthesizes WAV audio from the ADR contract"
+    )
     assert "/api/tts?voice={{ piper_runtime_default_voice | urlencode }}" in tts_verify["ansible.builtin.shell"]
     assert 'payload[:4] == b"RIFF"' in tts_verify["ansible.builtin.shell"]
 
@@ -121,9 +138,12 @@ def test_compose_and_dockerfile_templates_pin_the_private_runtime() -> None:
     compose = COMPOSE_TEMPLATE.read_text(encoding="utf-8")
     dockerfile = DOCKERFILE_TEMPLATE.read_text(encoding="utf-8")
 
-    assert 'context: {{ piper_runtime_service_dir }}' in compose
+    assert "context: {{ piper_runtime_service_dir }}" in compose
     assert '"{{ piper_runtime_bind_host }}:{{ piper_runtime_port }}:{{ piper_runtime_container_port }}"' in compose
-    assert '"{{ piper_runtime_loopback_bind_host }}:{{ piper_runtime_port }}:{{ piper_runtime_container_port }}"' in compose
+    assert (
+        '"{{ piper_runtime_loopback_bind_host }}:{{ piper_runtime_port }}:{{ piper_runtime_container_port }}"'
+        in compose
+    )
     assert "{{ piper_runtime_model_volume_name }}:{{ piper_runtime_model_dir }}" in compose
     assert "FROM {{ piper_runtime_base_image }}" in dockerfile
     assert 'CMD ["python3", "/app/piper_service.py"]' in dockerfile

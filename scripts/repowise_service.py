@@ -33,7 +33,6 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
@@ -56,7 +55,7 @@ class OllamaEmbedder:
             data=json.dumps(payload).encode(),
             headers={"Content-Type": "application/json"},
         )
-        with urllib.request.urlopen(req, timeout=300) as resp:  # noqa: S310
+        with urllib.request.urlopen(req, timeout=300) as resp:
             return json.loads(resp.read().decode())
 
     @staticmethod
@@ -80,11 +79,13 @@ class OllamaEmbedder:
         if len(texts) == 1:
             for attempt in range(3):
                 try:
-                    return self._extract(self._request("/api/embeddings", {"model": self.model_name, "prompt": texts[0]}))
+                    return self._extract(
+                        self._request("/api/embeddings", {"model": self.model_name, "prompt": texts[0]})
+                    )
                 except Exception:
                     if attempt < 2:
                         time.sleep(15)
-            raise RuntimeError(f"Ollama embed failed after retries for single text")
+            raise RuntimeError("Ollama embed failed after retries for single text")
         mid = max(1, len(texts) // 2)
         return self._embed_batch(texts[:mid]) + self._embed_batch(texts[mid:])
 
@@ -121,7 +122,7 @@ class QdrantHTTP:
             headers={"Content-Type": "application/json"} if data else {},
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 return json.loads(resp.read().decode())
         except urllib.error.HTTPError as exc:
             body = exc.read().decode(errors="replace")
@@ -135,9 +136,13 @@ class QdrantHTTP:
             return False
 
     def create_collection(self, name: str, dimension: int) -> None:
-        self._request("PUT", f"/collections/{name}", {
-            "vectors": {"size": dimension, "distance": "Cosine"},
-        })
+        self._request(
+            "PUT",
+            f"/collections/{name}",
+            {
+                "vectors": {"size": dimension, "distance": "Cosine"},
+            },
+        )
 
     def delete_collection(self, name: str) -> None:
         self._request("DELETE", f"/collections/{name}")
@@ -422,4 +427,4 @@ if __name__ == "__main__":
     import uvicorn
 
     port = int(os.environ.get("REPOWISE_PORT", "8080"))
-    uvicorn.run("repowise_service:app", host="0.0.0.0", port=port, reload=False)  # noqa: S104
+    uvicorn.run("repowise_service:app", host="0.0.0.0", port=port, reload=False)

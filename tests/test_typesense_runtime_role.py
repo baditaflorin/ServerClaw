@@ -95,9 +95,7 @@ def test_playbook_converges_proxy_runtime_and_catalog_sync() -> None:
         "lv3.platform.proxmox_security",
     ]
     assert guest_play["hosts"] == "docker-runtime-lv3"
-    assert guest_play["roles"][0]["vars"] == {
-        "linux_guest_firewall_recover_missing_docker_bridge_chains": True
-    }
+    assert guest_play["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
     assert [role["role"] for role in guest_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",

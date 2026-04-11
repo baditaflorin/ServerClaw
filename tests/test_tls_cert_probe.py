@@ -134,8 +134,6 @@ def test_evaluate_certificate_warns_on_issuer_mismatch(monkeypatch) -> None:
 
 def test_step_ca_proxy_catalog_entry_uses_hour_policy() -> None:
     catalog = json.loads((REPO_ROOT / "config" / "certificate-catalog.json").read_text())
-    certificate = next(
-        item for item in catalog["certificates"] if item["id"] == "step-ca-proxy"
-    )
+    certificate = next(item for item in catalog["certificates"] if item["id"] == "step-ca-proxy")
 
     assert certificate["policy"] == {"warn_hours": 6, "critical_hours": 2}

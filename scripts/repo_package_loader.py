@@ -14,4 +14,4 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.package_loader import *  # noqa: F401,F403
+from platform.package_loader import *  # noqa: F403

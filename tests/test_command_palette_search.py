@@ -26,9 +26,9 @@ def test_docs_href_for_source_path_maps_to_published_portal_routes() -> None:
     assert module.docs_href_for_source_path("docs/runbooks/operator-onboarding.md") == (
         "https://docs.lv3.org/runbooks/operator-onboarding/"
     )
-    assert module.docs_href_for_source_path("docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md") == (
-        "https://docs.lv3.org/architecture/decisions/0311-global-command-palette-and-universal-open-dialog-via-cmdk/"
-    )
+    assert module.docs_href_for_source_path(
+        "docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md"
+    ) == ("https://docs.lv3.org/architecture/decisions/0311-global-command-palette-and-universal-open-dialog-via-cmdk/")
 
 
 def test_main_queries_runbooks_and_adrs_from_search_fabric(tmp_path: Path) -> None:

@@ -105,7 +105,9 @@ def validate_against_base(base_ref: str) -> None:
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Guard stack version changes that require an image-catalog digest update.")
+    parser = argparse.ArgumentParser(
+        description="Guard stack version changes that require an image-catalog digest update."
+    )
     parser.add_argument("--base-ref", default="origin/main")
     return parser.parse_args(argv)
 

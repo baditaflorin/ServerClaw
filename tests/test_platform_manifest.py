@@ -177,18 +177,8 @@ data_sources:
                         "review_cadence": "quarterly",
                         "required_outcomes": ["Track topology."],
                         "service_guarantees": ["Stable sync contract."],
-                        "canonical_inputs": [
-                            {
-                                "name": "topology",
-                                "description": "Canonical topology input."
-                            }
-                        ],
-                        "canonical_outputs": [
-                            {
-                                "name": "inventory",
-                                "description": "Queryable inventory output."
-                            }
-                        ],
+                        "canonical_inputs": [{"name": "topology", "description": "Canonical topology input."}],
+                        "canonical_outputs": [{"name": "inventory", "description": "Queryable inventory output."}],
                         "security_expectations": ["Scoped automation access."],
                         "audit_expectations": ["Sync activity is attributable."],
                         "observability_requirements": ["Health endpoint."],
@@ -196,13 +186,13 @@ data_sources:
                         "migration_expectations": {
                             "export_formats": ["inventory export"],
                             "import_requirements": ["Replacement can import topology."],
-                            "fallback_behaviour": "The repo remains canonical during migration."
+                            "fallback_behaviour": "The repo remains canonical during migration.",
                         },
                         "failure_modes": [
                             {
                                 "mode": "inventory unavailable",
                                 "acceptable_degradation": "Browsable UI is unavailable.",
-                                "operator_response": "Use repo topology until recovery."
+                                "operator_response": "Use repo topology until recovery.",
                             }
                         ],
                         "current_selection": {
@@ -210,10 +200,10 @@ data_sources:
                             "service_id": "netbox",
                             "selection_adr": "0054",
                             "runbook": "docs/runbooks/configure-netbox.md",
-                            "notes": "Selected for browsable IPAM."
-                        }
+                            "notes": "Selected for browsable IPAM.",
+                        },
                     }
-                ]
+                ],
             },
             indent=2,
         )

@@ -22,7 +22,9 @@ def test_fault_injection_workflow_is_cataloged() -> None:
 
 def test_fault_injection_windmill_surfaces_are_seeded() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
     schedule_paths = {entry["path"] for entry in defaults["windmill_seed_schedules"]}
@@ -33,7 +35,9 @@ def test_fault_injection_windmill_surfaces_are_seeded() -> None:
 
 def test_fault_injection_windmill_runtime_manages_uv() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
 
     assert defaults["windmill_uv_download_url"].endswith("/uv-x86_64-unknown-linux-gnu.tar.gz")

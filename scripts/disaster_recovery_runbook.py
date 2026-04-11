@@ -26,12 +26,10 @@ def _repo_key_path(repo_root: Path) -> Path:
 
 def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
     key_path = _repo_key_path(repo_root)
-    host_ssh = (
-        f"ssh -i {key_path} -o IdentitiesOnly=yes ops@100.118.189.95"
-    )
+    host_ssh = f"ssh -i {key_path} -o IdentitiesOnly=yes ops@100.118.189.95"
     guest_jump = (
         f"ssh -i {key_path} -o IdentitiesOnly=yes "
-        f"-o ProxyCommand=\"ssh -i {key_path} -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\""
+        f'-o ProxyCommand="ssh -i {key_path} -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p"'
     )
     targets = load_targets(DEFAULT_TARGETS_PATH)
 
@@ -81,8 +79,8 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "kind": "manual",
                     "summary": "Restore the backup-lv3 PBS VM from the off-site backup target.",
                     "command": (
-                        f"{host_ssh} 'latest=$(sudo pvesm list lv3-backup-offsite --vmid 160 | awk \"NR==2 {{print $1}}\"); "
-                        "sudo qmrestore \"$latest\" 160 --storage local --unique 0'"
+                        f'{host_ssh} \'latest=$(sudo pvesm list lv3-backup-offsite --vmid 160 | awk "NR==2 {{print $1}}"); '
+                        'sudo qmrestore "$latest" 160 --storage local --unique 0\''
                     ),
                 },
                 {
@@ -106,8 +104,8 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "kind": "manual",
                     "summary": "Restore postgres-lv3 from PBS.",
                     "command": (
-                        f"{host_ssh} 'latest=$(sudo pvesm list lv3-backup-pbs --vmid 150 | awk \"NR==2 {{print $1}}\"); "
-                        "sudo qmrestore \"$latest\" 150 --storage local --unique 0'"
+                        f'{host_ssh} \'latest=$(sudo pvesm list lv3-backup-pbs --vmid 150 | awk "NR==2 {{print $1}}"); '
+                        'sudo qmrestore "$latest" 150 --storage local --unique 0\''
                     ),
                 },
                 {
@@ -115,8 +113,8 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "kind": "manual",
                     "summary": "Restore docker-runtime-lv3 from PBS.",
                     "command": (
-                        f"{host_ssh} 'latest=$(sudo pvesm list lv3-backup-pbs --vmid 120 | awk \"NR==2 {{print $1}}\"); "
-                        "sudo qmrestore \"$latest\" 120 --storage local --unique 0'"
+                        f'{host_ssh} \'latest=$(sudo pvesm list lv3-backup-pbs --vmid 120 | awk "NR==2 {{print $1}}"); '
+                        'sudo qmrestore "$latest" 120 --storage local --unique 0\''
                     ),
                 },
                 {
@@ -143,8 +141,8 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "kind": "manual",
                     "summary": "Restore monitoring-lv3 from PBS.",
                     "command": (
-                        f"{host_ssh} 'latest=$(sudo pvesm list lv3-backup-pbs --vmid 140 | awk \"NR==2 {{print $1}}\"); "
-                        "sudo qmrestore \"$latest\" 140 --storage local --unique 0'"
+                        f'{host_ssh} \'latest=$(sudo pvesm list lv3-backup-pbs --vmid 140 | awk "NR==2 {{print $1}}"); '
+                        'sudo qmrestore "$latest" 140 --storage local --unique 0\''
                     ),
                 },
                 {
@@ -152,8 +150,8 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "kind": "manual",
                     "summary": "Restore nginx-lv3 from PBS.",
                     "command": (
-                        f"{host_ssh} 'latest=$(sudo pvesm list lv3-backup-pbs --vmid 110 | awk \"NR==2 {{print $1}}\"); "
-                        "sudo qmrestore \"$latest\" 110 --storage local --unique 0'"
+                        f'{host_ssh} \'latest=$(sudo pvesm list lv3-backup-pbs --vmid 110 | awk "NR==2 {{print $1}}"); '
+                        'sudo qmrestore "$latest" 110 --storage local --unique 0\''
                     ),
                 },
                 {
@@ -180,8 +178,8 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "kind": "manual",
                     "summary": "Restore docker-build-lv3 from PBS.",
                     "command": (
-                        f"{host_ssh} 'latest=$(sudo pvesm list lv3-backup-pbs --vmid 130 | awk \"NR==2 {{print $1}}\"); "
-                        "sudo qmrestore \"$latest\" 130 --storage local --unique 0'"
+                        f'{host_ssh} \'latest=$(sudo pvesm list lv3-backup-pbs --vmid 130 | awk "NR==2 {{print $1}}"); '
+                        'sudo qmrestore "$latest" 130 --storage local --unique 0\''
                     ),
                 },
                 {

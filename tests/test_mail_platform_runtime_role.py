@@ -33,12 +33,15 @@ def test_stalwart_template_adds_private_submission_listener() -> None:
     assert 'bind = "[::]:{{ mail_platform_internal_submission_port }}"' in template
     assert "tls.enable = false" in template
     assert """{ if = "listener == 'internal_submission'", then = "[plain, login]" }""" in template
-    assert 'allow-plain-text = true' in template
+    assert "allow-plain-text = true" in template
 
 
 def test_compose_template_publishes_private_submission_port_on_vm_ip() -> None:
     template = COMPOSE_TEMPLATE_PATH.read_text()
-    assert '"{{ ansible_host }}:{{ mail_platform_internal_submission_port }}:{{ mail_platform_internal_submission_port }}"' in template
+    assert (
+        '"{{ ansible_host }}:{{ mail_platform_internal_submission_port }}:{{ mail_platform_internal_submission_port }}"'
+        in template
+    )
 
 
 def test_host_firewall_only_opens_private_submission_for_local_docker_networks() -> None:
@@ -71,8 +74,8 @@ def test_mail_platform_runtime_verifies_plaintext_private_submission_auth() -> N
     )
     shell = verify_task["ansible.builtin.shell"]
     assert "starttls" in shell
-    assert 'mail_platform_mailbox_password_file' in shell
-    assert 'mail_platform_mailbox_login' in shell
+    assert "mail_platform_mailbox_password_file" in shell
+    assert "mail_platform_mailbox_login" in shell
     assert verify_task["register"] == "mail_platform_submission_auth_check"
     assert verify_task["retries"] == "{{ mail_platform_submission_auth_retries }}"
     assert verify_task["delay"] == "{{ mail_platform_submission_auth_delay_seconds }}"
@@ -88,7 +91,7 @@ def test_mail_platform_verify_role_checks_plaintext_private_submission_auth() ->
     )
     shell = verify_task["ansible.builtin.shell"]
     assert "starttls" in shell
-    assert 'mail_platform_mailbox_password_file' in shell
+    assert "mail_platform_mailbox_password_file" in shell
     assert verify_task["register"] == "mail_platform_verify_submission_auth"
     assert verify_task["retries"] == "{{ mail_platform_submission_auth_retries }}"
     assert verify_task["delay"] == "{{ mail_platform_submission_auth_delay_seconds }}"
@@ -103,16 +106,16 @@ def test_mail_platform_runtime_bootstraps_mail_principals_through_gateway_crud_a
         if task.get("name") == "Wait for the mail gateway CRUD API to answer before bootstrapping mail principals"
     )
     domain_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Upsert the managed mail domain through the mail gateway CRUD API"
+        task for task in tasks if task.get("name") == "Upsert the managed mail domain through the mail gateway CRUD API"
     )
     mailbox_task = next(
         task
         for task in tasks
         if task.get("name") == "Upsert the managed mailbox accounts through the mail gateway CRUD API"
     )
-    assert readiness_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"
+    assert (
+        readiness_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"
+    )
     assert readiness_task["retries"] == "{{ mail_platform_submission_auth_retries }}"
     assert readiness_task["delay"] == "{{ mail_platform_submission_auth_delay_seconds }}"
     assert readiness_task["until"] == "mail_platform_gateway_catalog_ready.status == 200"
@@ -130,13 +133,15 @@ def test_mail_platform_runtime_bootstraps_mail_principals_through_gateway_crud_a
 def test_mail_platform_runtime_verifies_managed_catalog_through_gateway_crud_api() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text())
     mailboxes_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Verify the mail gateway CRUD API can list managed mailboxes"
+        task for task in tasks if task.get("name") == "Verify the mail gateway CRUD API can list managed mailboxes"
     )
     domain_assert = next(task for task in tasks if task.get("name") == "Assert the managed mail domain is present")
-    mailbox_assert = next(task for task in tasks if task.get("name") == "Assert the managed mailbox accounts are present")
-    assert mailboxes_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    mailbox_assert = next(
+        task for task in tasks if task.get("name") == "Assert the managed mailbox accounts are present"
+    )
+    assert (
+        mailboxes_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    )
     assert "mail_platform_gateway_domains.json['items']" in domain_assert["ansible.builtin.assert"]["that"][0]
     assert "mail_platform_gateway_mailboxes.json['items']" in mailbox_assert["ansible.builtin.assert"]["that"][0]
 
@@ -148,9 +153,15 @@ def test_mail_platform_verify_role_checks_managed_catalog_through_gateway_crud_a
         for task in verify_tasks
         if task.get("name") == "Verify the mail gateway CRUD API can list managed mailboxes"
     )
-    domain_assert = next(task for task in verify_tasks if task.get("name") == "Assert the managed mail domain is present")
-    mailbox_assert = next(task for task in verify_tasks if task.get("name") == "Assert the managed mailbox accounts are present")
-    assert mailboxes_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    domain_assert = next(
+        task for task in verify_tasks if task.get("name") == "Assert the managed mail domain is present"
+    )
+    mailbox_assert = next(
+        task for task in verify_tasks if task.get("name") == "Assert the managed mailbox accounts are present"
+    )
+    assert (
+        mailboxes_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/mailboxes"
+    )
     assert "mail_platform_verify_gateway_domains.json['items']" in domain_assert["ansible.builtin.assert"]["that"][0]
     assert "mail_platform_verify_gateway_mailboxes.json['items']" in mailbox_assert["ansible.builtin.assert"]["that"][0]
 
@@ -158,14 +169,10 @@ def test_mail_platform_verify_role_checks_managed_catalog_through_gateway_crud_a
 def test_mail_platform_runtime_recovers_gateway_publication_after_bridge_chain_loss() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text())
     inspect_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Inspect the mail gateway startup state before waiting on the API"
+        task for task in tasks if task.get("name") == "Inspect the mail gateway startup state before waiting on the API"
     )
     detect_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Detect Docker bridge-chain loss during the mail gateway startup"
+        task for task in tasks if task.get("name") == "Detect Docker bridge-chain loss during the mail gateway startup"
     )
     remove_task = next(
         task
@@ -180,12 +187,11 @@ def test_mail_platform_runtime_recovers_gateway_publication_after_bridge_chain_l
     bridge_task = next(
         task
         for task in tasks
-        if task.get("name") == "Ensure Docker bridge networking chains are present before retrying the mail gateway startup"
+        if task.get("name")
+        == "Ensure Docker bridge networking chains are present before retrying the mail gateway startup"
     )
     retry_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Retry the mail gateway startup after Docker networking recovery"
+        task for task in tasks if task.get("name") == "Retry the mail gateway startup after Docker networking recovery"
     )
     assert inspect_task["ansible.builtin.command"]["argv"] == [
         "docker",
@@ -195,26 +201,30 @@ def test_mail_platform_runtime_recovers_gateway_publication_after_bridge_chain_l
         "{{ mail_platform_gateway_container_name }}",
     ]
     assert inspect_task["register"] == "mail_platform_gateway_start_state"
-    assert "failed programming external connectivity" in detect_task["ansible.builtin.set_fact"][
-        "mail_platform_gateway_bridge_chains_missing"
-    ]
-    assert "No chain/target/match by that name" in detect_task["ansible.builtin.set_fact"][
-        "mail_platform_gateway_bridge_chains_missing"
-    ]
+    assert (
+        "failed programming external connectivity"
+        in detect_task["ansible.builtin.set_fact"]["mail_platform_gateway_bridge_chains_missing"]
+    )
+    assert (
+        "No chain/target/match by that name"
+        in detect_task["ansible.builtin.set_fact"]["mail_platform_gateway_bridge_chains_missing"]
+    )
     assert remove_task["ansible.builtin.command"]["argv"][-2:] == ["-f", "{{ mail_platform_gateway_container_name }}"]
     assert restart_task["ansible.builtin.service"]["name"] == "docker"
     assert bridge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
-    assert retry_task["ansible.builtin.command"]["argv"][-5:] == ["up", "-d", "--force-recreate", "--no-deps", "mail-gateway"]
+    assert retry_task["ansible.builtin.command"]["argv"][-5:] == [
+        "up",
+        "-d",
+        "--force-recreate",
+        "--no-deps",
+        "mail-gateway",
+    ]
     assert retry_task["until"] == "mail_platform_gateway_retry.rc == 0"
 
 
 def test_mail_platform_runtime_allows_blank_error_created_gateway_state_before_api_wait() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text())
-    fail_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Surface unexpected mail gateway startup failures"
-    )
+    fail_task = next(task for task in tasks if task.get("name") == "Surface unexpected mail gateway startup failures")
     when_clause = fail_task["when"][0]
     assert "search('^(exited|dead)\\\\|')" in when_clause
     assert "search('^created\\\\|.+')" in when_clause
@@ -226,7 +236,8 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     nat_check = next(
         task
         for task in tasks
-        if task.get("name") == "Check whether the Docker nat chain exists before recreating mail-platform published ports"
+        if task.get("name")
+        == "Check whether the Docker nat chain exists before recreating mail-platform published ports"
     )
     nat_restore = next(
         task
@@ -234,14 +245,10 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
         if task.get("name") == "Restore Docker networking when bridge chains are missing before mail-platform startup"
     )
     force_recreate_down = next(
-        task
-        for task in tasks
-        if task.get("name") == "Reset the mail platform stack before a force recreate"
+        task for task in tasks if task.get("name") == "Reset the mail platform stack before a force recreate"
     )
     force_recreate_network_cleanup = next(
-        task
-        for task in tasks
-        if task.get("name") == "Remove stale mail platform compose networks before recovery"
+        task for task in tasks if task.get("name") == "Remove stale mail platform compose networks before recovery"
     )
     force_recreate = next(
         task
@@ -251,7 +258,8 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     rotate_nat_check = next(
         task
         for task in rotate_tasks
-        if task.get("name") == "Check whether the Docker nat chain exists before mail-platform rotation recreates published ports"
+        if task.get("name")
+        == "Check whether the Docker nat chain exists before mail-platform rotation recreates published ports"
     )
     rotate_nat_restore = next(
         task
@@ -261,12 +269,11 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     rotate_force_recreate = next(
         task
         for task in rotate_tasks
-        if task.get("name") == "Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery"
+        if task.get("name")
+        == "Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery"
     )
     network_flag = next(
-        task
-        for task in tasks
-        if task.get("name") == "Flag stale mail platform compose-network failures during startup"
+        task for task in tasks if task.get("name") == "Flag stale mail platform compose-network failures during startup"
     )
     network_reset = next(
         task
@@ -279,9 +286,7 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
         if task.get("name") == "Remove the stale mail-platform compose network before retrying startup"
     )
     network_retry = next(
-        task
-        for task in tasks
-        if task.get("name") == "Retry mail platform stack startup after compose-network recovery"
+        task for task in tasks if task.get("name") == "Retry mail platform stack startup after compose-network recovery"
     )
     rotate_network_flag = next(
         task
@@ -313,7 +318,9 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     assert "active_endpoints=" in force_recreate_network_cleanup["ansible.builtin.shell"]
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["failed_when"] is False
-    assert "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["mail_platform_docker_network_missing"]
+    assert (
+        "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["mail_platform_docker_network_missing"]
+    )
     assert network_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert "{{ mail_platform_docker_network_name }}" in network_cleanup["ansible.builtin.shell"]
     assert network_cleanup["args"]["executable"] == "/bin/bash"
@@ -324,9 +331,10 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
     assert rotate_nat_restore["failed_when"] is False
     assert "--force-recreate" in rotate_force_recreate["ansible.builtin.shell"]
     assert rotate_force_recreate["failed_when"] is False
-    assert "failed to create endpoint" in rotate_network_flag["ansible.builtin.set_fact"][
-        "mail_platform_rotation_docker_network_missing"
-    ]
+    assert (
+        "failed to create endpoint"
+        in rotate_network_flag["ansible.builtin.set_fact"]["mail_platform_rotation_docker_network_missing"]
+    )
     assert rotate_network_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert "{{ mail_platform_docker_network_name }}" in rotate_network_cleanup["ansible.builtin.shell"]
     assert "docker network inspect --format" in rotate_network_cleanup["ansible.builtin.shell"]
@@ -338,9 +346,7 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
 def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text())
     force_recreate_fact = next(
-        task
-        for task in tasks
-        if task.get("name") == "Record whether the mail platform startup needs a force recreate"
+        task for task in tasks if task.get("name") == "Record whether the mail platform startup needs a force recreate"
     )
     expression = force_recreate_fact["ansible.builtin.set_fact"]["mail_platform_force_recreate"]
     assert "mail_platform_stalwart_config.changed" in expression
@@ -352,13 +358,18 @@ def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> N
 
 def test_mail_platform_runtime_stages_openbao_env_template_locally_before_helper_include() -> None:
     tasks_text = TASKS_PATH.read_text()
-    assert "Create a controller-local staging path for the mail platform OpenBao agent runtime env template" in tasks_text
+    assert (
+        "Create a controller-local staging path for the mail platform OpenBao agent runtime env template" in tasks_text
+    )
     assert "mail_platform_openbao_agent_template_local" in tasks_text
     assert "Resolve the mail gateway OTLP endpoint before delegating the OpenBao env template render" in tasks_text
     assert "mail_platform_gateway_trace_otlp_endpoint_resolved" in tasks_text
     assert "mail-gateway.env.ctmpl.j2" in tasks_text
     assert "common_openbao_compose_env_agent_template_local_file" in tasks_text
-    assert 'common_openbao_compose_env_agent_template_local_file: "{{ mail_platform_openbao_agent_template_local.path }}"' in tasks_text
+    assert (
+        'common_openbao_compose_env_agent_template_local_file: "{{ mail_platform_openbao_agent_template_local.path }}"'
+        in tasks_text
+    )
     assert "Remove the controller-local mail platform OpenBao agent runtime env template staging file" in tasks_text
     assert "common_openbao_compose_env_agent_template_content" not in tasks_text
     assert "common_openbao_compose_env_agent_template_src: mail-gateway.env.ctmpl.j2" not in tasks_text

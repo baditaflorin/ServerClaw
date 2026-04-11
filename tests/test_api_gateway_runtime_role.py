@@ -119,7 +119,10 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_windmill_service_topology.private_ip" in defaults
     assert "windmill_server_port" in defaults
     assert "rev-parse --path-format=absolute --git-common-dir" in defaults
-    assert 'api_gateway_database_password_local_file: "{{ api_gateway_shared_local_root }}/windmill/database-password.txt"' in defaults
+    assert (
+        'api_gateway_database_password_local_file: "{{ api_gateway_shared_local_root }}/windmill/database-password.txt"'
+        in defaults
+    )
     assert "api_gateway_graph_dsn" in defaults
     assert 'api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"' in defaults
     assert "/.local/dify/tools-api-key.txt" in defaults
@@ -127,7 +130,10 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "/.local/lago/producer-catalog.json" in defaults
     assert "/.local/lago/org-api-key.txt" in defaults
     assert "hostvars['proxmox_florin'].platform_service_topology.lago" in defaults
-    assert 'api_gateway_billing_api_base_url: "{{ api_gateway_lago_service_topology.urls.api | default(\'\') }}"' in defaults
+    assert (
+        "api_gateway_billing_api_base_url: \"{{ api_gateway_lago_service_topology.urls.api | default('') }}\""
+        in defaults
+    )
     assert "api_gateway_billing_ingest_producers_path: /config/billing-ingest-producers.json" in defaults
     assert "api_gateway_billing_rejection_subject: billing.events.rejected" in defaults
 
@@ -195,8 +201,14 @@ def test_windmill_runtime_templates_export_graph_world_state_and_ledger_dsns() -
         assert "LV3_LEDGER_DSN" in text
     assert "Create a controller-local staging path for the Windmill OpenBao agent runtime env template" in runtime_tasks
     assert "Render the Windmill OpenBao agent runtime env template to a controller-local file" in runtime_tasks
-    assert "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2" in runtime_tasks
-    assert 'common_openbao_compose_env_agent_template_local_file: "{{ windmill_openbao_agent_template_local.path }}"' in runtime_tasks
+    assert (
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
+        in runtime_tasks
+    )
+    assert (
+        'common_openbao_compose_env_agent_template_local_file: "{{ windmill_openbao_agent_template_local.path }}"'
+        in runtime_tasks
+    )
     assert "Remove the controller-local Windmill OpenBao agent runtime env template staging file" in runtime_tasks
 
 
@@ -259,12 +271,15 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
     assert "COPYFILE_DISABLE=1" in sync_tree_tasks
     assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" in sync_tree_tasks
-    assert 'apple_double="{{ api_gateway_tree_sync_spec.dest_parent }}/._{{ api_gateway_tree_sync_spec.source | basename }}"' in sync_tree_tasks
+    assert (
+        'apple_double="{{ api_gateway_tree_sync_spec.dest_parent }}/._{{ api_gateway_tree_sync_spec.source | basename }}"'
+        in sync_tree_tasks
+    )
     assert "api_gateway_tree_remove_destination" in sync_tree_tasks
-    assert 'tar --no-same-owner --no-same-permissions \\' in sync_tree_tasks
+    assert "tar --no-same-owner --no-same-permissions \\" in sync_tree_tasks
     assert "--no-same-owner" in sync_tree_tasks
-    assert 'export COPYFILE_DISABLE=1' in sync_tree_tasks
-    assert 'export COPY_EXTENDED_ATTRIBUTES_DISABLE=1' in sync_tree_tasks
+    assert "export COPYFILE_DISABLE=1" in sync_tree_tasks
+    assert "export COPY_EXTENDED_ATTRIBUTES_DISABLE=1" in sync_tree_tasks
     assert "Render the API gateway build-context ignore file" in tasks
     assert "Remove stale API gateway nested build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
@@ -401,5 +416,8 @@ def test_api_gateway_role_syncs_the_typesense_platform_catalog() -> None:
     assert "--typesense-url" in tasks
     assert "LV3_GATEWAY_TYPESENSE_BASE_URL={{ api_gateway_resolved_typesense_base_url }}" in env_template
     assert "LV3_GATEWAY_TYPESENSE_API_KEY={{ api_gateway_resolved_typesense_api_key }}" in env_template
-    assert "/v1/platform/search/structured?q=api&collection={{ api_gateway_typesense_collection | urlencode }}" in verify_tasks
+    assert (
+        "/v1/platform/search/structured?q=api&collection={{ api_gateway_typesense_collection | urlencode }}"
+        in verify_tasks
+    )
     assert "Assert the structured search endpoint returns Typesense-backed platform catalog results" in verify_tasks

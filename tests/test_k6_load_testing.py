@@ -331,10 +331,16 @@ def test_main_resolves_relative_repo_root_before_running_k6(monkeypatch, tmp_pat
     monkeypatch.setattr(k6_load_testing, "utc_now", lambda: recorded_at)
     monkeypatch.setattr(k6_load_testing, "build_targets", fake_build_targets)
     monkeypatch.setattr(k6_load_testing, "write_run_config", fake_write_run_config)
-    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(
+        k6_load_testing,
+        "default_prometheus_remote_write_url",
+        lambda _repo_root: "http://10.10.10.40:9090/api/v1/write",
+    )
     monkeypatch.setattr(k6_load_testing, "run_k6", fake_run_k6)
     monkeypatch.setattr(k6_load_testing, "load_json", lambda _path: {})
-    monkeypatch.setattr(k6_load_testing, "build_receipts", lambda **_kwargs: [output_dir / "load-openfga-20260331T060000Z.json"])
+    monkeypatch.setattr(
+        k6_load_testing, "build_receipts", lambda **_kwargs: [output_dir / "load-openfga-20260331T060000Z.json"]
+    )
 
     exit_code = k6_load_testing.main(
         [
@@ -385,7 +391,11 @@ def test_main_writes_receipts_when_k6_returns_nonzero_but_summary_exists(monkeyp
     monkeypatch.setattr(k6_load_testing, "utc_now", lambda: recorded_at)
     monkeypatch.setattr(k6_load_testing, "build_targets", lambda **_kwargs: [{"service_id": "openfga"}])
     monkeypatch.setattr(k6_load_testing, "write_run_config", fake_write_run_config)
-    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(
+        k6_load_testing,
+        "default_prometheus_remote_write_url",
+        lambda _repo_root: "http://10.10.10.40:9090/api/v1/write",
+    )
     monkeypatch.setattr(k6_load_testing, "run_k6", fake_run_k6)
     monkeypatch.setattr(k6_load_testing, "load_json", lambda _path: {})
     monkeypatch.setattr(k6_load_testing, "build_receipts", fake_build_receipts)
@@ -425,8 +435,24 @@ def test_build_receipts_uses_service_checks_and_top_level_metric_fields(monkeypa
     )
     monkeypatch.setattr(k6_load_testing, "current_commit", lambda _repo_root: "deadbeef")
     monkeypatch.setattr(k6_load_testing, "current_repo_version", lambda _repo_root: "0.1.0")
-    monkeypatch.setattr(k6_load_testing, "build_regression_payload", lambda **_kwargs: {"checked": False, "baseline_receipt": None, "baseline_p95_ms": None, "current_p95_ms": 5.79, "regression_ratio": None, "threshold_ratio": 0.2, "regressed": False})
-    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(
+        k6_load_testing,
+        "build_regression_payload",
+        lambda **_kwargs: {
+            "checked": False,
+            "baseline_receipt": None,
+            "baseline_p95_ms": None,
+            "current_p95_ms": 5.79,
+            "regression_ratio": None,
+            "threshold_ratio": 0.2,
+            "regressed": False,
+        },
+    )
+    monkeypatch.setattr(
+        k6_load_testing,
+        "default_prometheus_remote_write_url",
+        lambda _repo_root: "http://10.10.10.40:9090/api/v1/write",
+    )
 
     summary = {
         "metrics": {
@@ -484,7 +510,9 @@ def test_build_receipts_uses_service_checks_and_top_level_metric_fields(monkeypa
     assert payload["metrics"]["http_req_duration_max_ms"] == 35.630874
 
 
-def test_build_receipts_keeps_failed_receipt_when_ntfy_warning_delivery_fails(monkeypatch, tmp_path: Path, capsys) -> None:
+def test_build_receipts_keeps_failed_receipt_when_ntfy_warning_delivery_fails(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
     recorded_at = k6_load_testing.dt.datetime(2026, 3, 31, 10, 47, 16, tzinfo=k6_load_testing.dt.timezone.utc)
     summary_path = tmp_path / "receipts" / "k6" / "raw" / "20260331T104716Z-load-summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
@@ -497,9 +525,27 @@ def test_build_receipts_keeps_failed_receipt_when_ntfy_warning_delivery_fails(mo
     )
     monkeypatch.setattr(k6_load_testing, "current_commit", lambda _repo_root: "deadbeef")
     monkeypatch.setattr(k6_load_testing, "current_repo_version", lambda _repo_root: "0.1.0")
-    monkeypatch.setattr(k6_load_testing, "build_regression_payload", lambda **_kwargs: {"checked": False, "baseline_receipt": None, "baseline_p95_ms": None, "current_p95_ms": 900.0, "regression_ratio": None, "threshold_ratio": 0.2, "regressed": False})
-    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
-    monkeypatch.setattr(k6_load_testing, "notify_ntfy", lambda **_kwargs: (_ for _ in ()).throw(ValueError("missing secret")))
+    monkeypatch.setattr(
+        k6_load_testing,
+        "build_regression_payload",
+        lambda **_kwargs: {
+            "checked": False,
+            "baseline_receipt": None,
+            "baseline_p95_ms": None,
+            "current_p95_ms": 900.0,
+            "regression_ratio": None,
+            "threshold_ratio": 0.2,
+            "regressed": False,
+        },
+    )
+    monkeypatch.setattr(
+        k6_load_testing,
+        "default_prometheus_remote_write_url",
+        lambda _repo_root: "http://10.10.10.40:9090/api/v1/write",
+    )
+    monkeypatch.setattr(
+        k6_load_testing, "notify_ntfy", lambda **_kwargs: (_ for _ in ()).throw(ValueError("missing secret"))
+    )
 
     summary = {
         "metrics": {
@@ -681,7 +727,11 @@ def test_build_receipts_keeps_passed_result_when_only_nats_regression_notificati
     )
     monkeypatch.setattr(k6_load_testing, "current_commit", lambda _repo_root: "deadbeef")
     monkeypatch.setattr(k6_load_testing, "current_repo_version", lambda _repo_root: "0.1.0")
-    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(
+        k6_load_testing,
+        "default_prometheus_remote_write_url",
+        lambda _repo_root: "http://10.10.10.40:9090/api/v1/write",
+    )
     monkeypatch.setattr(
         k6_load_testing,
         "build_regression_payload",
@@ -757,7 +807,4 @@ def test_build_receipts_keeps_passed_result_when_only_nats_regression_notificati
     payload = json.loads(receipts[0].read_text(encoding="utf-8"))
     assert payload["result"] == "passed"
     assert payload["notifications"]["nats_event_published"] is False
-    assert any(
-        reason.startswith("nats regression notification unavailable:")
-        for reason in payload["failure_reasons"]
-    )
+    assert any(reason.startswith("nats regression notification unavailable:") for reason in payload["failure_reasons"])

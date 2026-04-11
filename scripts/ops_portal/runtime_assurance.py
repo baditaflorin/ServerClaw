@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import Any
 from urllib.parse import urlparse
 
 from stage_smoke import declared_smoke_suites, latest_matching_smoke_receipt, receipt_passed as smoke_receipt_passed
 
 
-UTC = timezone.utc
+UTC = UTC
 
 
 DEFAULT_OWNER_TEAM = "lv3-platform"
@@ -85,7 +85,9 @@ def tone_for_state(state: str) -> str:
 def _active_environments(service: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     environments = service.get("environments")
     if not isinstance(environments, dict):
-        return [("production", {"status": "active", "url": service.get("public_url") or service.get("internal_url") or ""})]
+        return [
+            ("production", {"status": "active", "url": service.get("public_url") or service.get("internal_url") or ""})
+        ]
     result: list[tuple[str, dict[str, Any]]] = []
     for environment, binding in environments.items():
         if not isinstance(binding, dict):
@@ -121,22 +123,14 @@ def _health_entry_map(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     services = payload.get("services") if isinstance(payload, dict) else None
     if not isinstance(services, list):
         return {}
-    return {
-        str(item.get("service_id")): item
-        for item in services
-        if isinstance(item, dict) and item.get("service_id")
-    }
+    return {str(item.get("service_id")): item for item in services if isinstance(item, dict) and item.get("service_id")}
 
 
 def _signal_map(entry: dict[str, Any]) -> dict[str, dict[str, Any]]:
     signals = entry.get("signals") if isinstance(entry, dict) else None
     if not isinstance(signals, list):
         return {}
-    return {
-        str(item.get("name")): item
-        for item in signals
-        if isinstance(item, dict) and item.get("name")
-    }
+    return {str(item.get("name")): item for item in signals if isinstance(item, dict) and item.get("name")}
 
 
 def _has_positive_health(entry: dict[str, Any] | None) -> bool:
@@ -172,16 +166,18 @@ def _receipt_passed(receipt: dict[str, Any]) -> bool:
     verification = receipt.get("verification")
     if not isinstance(verification, list):
         return True
-    return all(str(item.get("result", "pass")).strip().lower() == "pass" for item in verification if isinstance(item, dict))
+    return all(
+        str(item.get("result", "pass")).strip().lower() == "pass" for item in verification if isinstance(item, dict)
+    )
 
 
 def _latest_receipt(receipts: list[dict[str, Any]]) -> dict[str, Any] | None:
     ordered = sorted(
         receipts,
-        key=lambda item: parse_timestamp(
-            str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or "")
-        )
-        or datetime(1970, 1, 1, tzinfo=UTC),
+        key=lambda item: (
+            parse_timestamp(str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or ""))
+            or datetime(1970, 1, 1, tzinfo=UTC)
+        ),
         reverse=True,
     )
     return ordered[0] if ordered else None
@@ -190,10 +186,10 @@ def _latest_receipt(receipts: list[dict[str, Any]]) -> dict[str, Any] | None:
 def _latest_keyword_receipt(receipts: list[dict[str, Any]], keywords: tuple[str, ...]) -> dict[str, Any] | None:
     for receipt in sorted(
         receipts,
-        key=lambda item: parse_timestamp(
-            str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or "")
-        )
-        or datetime(1970, 1, 1, tzinfo=UTC),
+        key=lambda item: (
+            parse_timestamp(str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or ""))
+            or datetime(1970, 1, 1, tzinfo=UTC)
+        ),
         reverse=True,
     ):
         text = str(receipt.get("_normalized_text", ""))
@@ -258,7 +254,9 @@ def _next_action(dimensions: list[dict[str, Any]]) -> tuple[str, str]:
 
 
 def _latest_verified_timestamp(dimensions: list[dict[str, Any]]) -> str | None:
-    timestamps = [parse_timestamp(dimension.get("last_verified")) for dimension in dimensions if dimension.get("required")]
+    timestamps = [
+        parse_timestamp(dimension.get("last_verified")) for dimension in dimensions if dimension.get("required")
+    ]
     filtered = [value for value in timestamps if value is not None]
     if not filtered:
         return None
@@ -335,7 +333,9 @@ def build_runtime_assurance_models(
                     label="Existence",
                     state="unknown",
                     detail="No current runtime witness is available for this service and environment.",
-                    last_verified=str(latest_receipt.get("recorded_on") or latest_receipt.get("applied_on") or "") if latest_receipt else None,
+                    last_verified=str(latest_receipt.get("recorded_on") or latest_receipt.get("applied_on") or "")
+                    if latest_receipt
+                    else None,
                     next_action="Converge the service or refresh the live health witness before trusting the declared runtime.",
                     required=True,
                 )
@@ -383,9 +383,11 @@ def build_runtime_assurance_models(
                     required=True,
                 )
             else:
-                composite_status = str(
-                    health_entry_data.get("composite_status") or health_entry_data.get("status") or "unknown"
-                ).strip().lower()
+                composite_status = (
+                    str(health_entry_data.get("composite_status") or health_entry_data.get("status") or "unknown")
+                    .strip()
+                    .lower()
+                )
                 if composite_status == "healthy":
                     runtime_health = _dimension(
                         dimension_id="runtime_health",
@@ -438,7 +440,11 @@ def build_runtime_assurance_models(
                     required=False,
                 )
             else:
-                active_publications = [item for item in publications_for_env if str(item.get("status", "active")).strip().lower() == "active"]
+                active_publications = [
+                    item
+                    for item in publications_for_env
+                    if str(item.get("status", "active")).strip().lower() == "active"
+                ]
                 route_mismatch = any(
                     isinstance(item.get("adapter"), dict)
                     and item["adapter"].get("repo_route_service_id") not in {None, service_id}
@@ -627,7 +633,12 @@ def build_runtime_assurance_models(
                     required=True,
                 )
             elif not smoke_receipt_passed(smoke_receipt):
-                recorded_on = str(smoke_receipt.get("recorded_at") or smoke_receipt.get("recorded_on") or smoke_receipt.get("applied_on") or "")
+                recorded_on = str(
+                    smoke_receipt.get("recorded_at")
+                    or smoke_receipt.get("recorded_on")
+                    or smoke_receipt.get("applied_on")
+                    or ""
+                )
                 smoke = _dimension(
                     dimension_id="smoke",
                     label="Smoke",
@@ -643,10 +654,17 @@ def build_runtime_assurance_models(
                 )
             else:
                 recorded_on = str(
-                    smoke_receipt.get("recorded_at") or smoke_receipt.get("recorded_on") or smoke_receipt.get("applied_on") or ""
+                    smoke_receipt.get("recorded_at")
+                    or smoke_receipt.get("recorded_on")
+                    or smoke_receipt.get("applied_on")
+                    or ""
                 )
                 recorded_at = parse_timestamp(recorded_on)
-                age_days = None if recorded_at is None else max(0, int((datetime.now(UTC) - recorded_at).total_seconds() // 86400))
+                age_days = (
+                    None
+                    if recorded_at is None
+                    else max(0, int((datetime.now(UTC) - recorded_at).total_seconds() // 86400))
+                )
                 if age_days is not None and age_days <= RECEIPT_FRESHNESS_DAYS:
                     smoke = _dimension(
                         dimension_id="smoke",
@@ -685,7 +703,9 @@ def build_runtime_assurance_models(
             ]
             overall_state = _overall_state(dimensions)
             next_action, next_action_dimension = _next_action(dimensions)
-            row_url = http_url or str(binding.get("url") or service.get("public_url") or service.get("internal_url") or "")
+            row_url = http_url or str(
+                binding.get("url") or service.get("public_url") or service.get("internal_url") or ""
+            )
 
             rows.append(
                 {
@@ -709,7 +729,13 @@ def build_runtime_assurance_models(
             )
 
     state_priority = {"failed": 0, "degraded": 1, "unknown": 2, "pass": 3}
-    rows.sort(key=lambda row: (state_priority.get(str(row["overall_state"]), 99), str(row["service_name"]), str(row["environment"])))
+    rows.sort(
+        key=lambda row: (
+            state_priority.get(str(row["overall_state"]), 99),
+            str(row["service_name"]),
+            str(row["environment"]),
+        )
+    )
 
     summary = {
         "row_count": len(rows),
@@ -721,7 +747,16 @@ def build_runtime_assurance_models(
     summary["attention_count"] = summary["degraded_count"] + summary["failed_count"] + summary["unknown_count"]
     summary["portfolio_state"] = _overall_state(
         [
-            {"state": "failed" if summary["failed_count"] else "degraded" if summary["degraded_count"] else "unknown" if summary["unknown_count"] else "pass", "required": True}
+            {
+                "state": "failed"
+                if summary["failed_count"]
+                else "degraded"
+                if summary["degraded_count"]
+                else "unknown"
+                if summary["unknown_count"]
+                else "pass",
+                "required": True,
+            }
         ]
         if rows
         else []

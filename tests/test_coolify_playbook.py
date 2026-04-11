@@ -84,8 +84,7 @@ def test_coolify_apps_vm_provisioning_play_uses_correct_role_filter() -> None:
     """ADR 0340: The apps VM provisioning play must select by role 'coolify-apps', not 'coolify'."""
     playbook = load_yaml(PLAYBOOK_PATH)
     apps_provision_play = next(
-        p for p in playbook
-        if p["name"] == "Ensure the Coolify apps runtime VM is provisioned on the Proxmox host"
+        p for p in playbook if p["name"] == "Ensure the Coolify apps runtime VM is provisioned on the Proxmox host"
     )
     guests_active_expr = apps_provision_play["vars"]["proxmox_guests_active"]
     assert "coolify-apps" in guests_active_expr
@@ -95,8 +94,7 @@ def test_coolify_apps_convergence_play_excludes_coolify_runtime_role() -> None:
     """ADR 0340: The apps VM must not run coolify_runtime — it is only a deployment target."""
     playbook = load_yaml(PLAYBOOK_PATH)
     apps_convergence_play = next(
-        p for p in playbook
-        if p["name"] == "Converge the Coolify apps runtime on the dedicated apps guest"
+        p for p in playbook if p["name"] == "Converge the Coolify apps runtime on the dedicated apps guest"
     )
     role_names = [r["role"] for r in apps_convergence_play["roles"]]
     assert "lv3.platform.coolify_runtime" not in role_names

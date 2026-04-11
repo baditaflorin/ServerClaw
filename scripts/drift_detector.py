@@ -9,12 +9,10 @@ import shlex
 import socket
 import ssl
 import subprocess
-import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 from collections import Counter
-from datetime import timedelta
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -117,7 +115,9 @@ def run_tofu_drift(environment: str, *, command: str | None = None) -> list[dict
     return records
 
 
-def run_ansible_drift(environment: str, *, playbook: str, inventory: str, limit: str | None = None) -> list[dict[str, Any]]:
+def run_ansible_drift(
+    environment: str, *, playbook: str, inventory: str, limit: str | None = None
+) -> list[dict[str, Any]]:
     del environment
     run_namespace = ensure_run_namespace(
         resolve_run_namespace(
@@ -212,12 +212,12 @@ def service_is_healthy(service: dict[str, Any], health_probes: dict[str, Any], *
                 return http_probe(url, timeout=timeout, validate_tls=validate_tls)
             if parsed.scheme == "ssh":
                 return tcp_probe(parsed.hostname or "127.0.0.1", parsed.port or 22, timeout=timeout)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return False
     if isinstance(readiness, dict) and readiness.get("kind") == "tcp":
         try:
             return tcp_probe(str(readiness.get("host")), int(readiness.get("port")), timeout=timeout)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return False
     return True
 
@@ -232,7 +232,9 @@ def backoff_health(service_id: str, service_map: dict[str, dict[str, Any]], heal
     return False
 
 
-def enrich_records(records: list[dict[str, Any]], *, service_map: dict[str, dict[str, Any]], health_probes: dict[str, Any]) -> list[dict[str, Any]]:
+def enrich_records(
+    records: list[dict[str, Any]], *, service_map: dict[str, dict[str, Any]], health_probes: dict[str, Any]
+) -> list[dict[str, Any]]:
     enriched: list[dict[str, Any]] = []
     detected_at = isoformat(utc_now())
     for record in records:
@@ -286,7 +288,7 @@ def print_summary_table(records: list[dict[str, Any]]) -> None:
         print(
             f"{str(record.get('source', ''))[:20]:<20} "
             f"{str(record.get('resource') or record.get('service') or '')[:32]:<32} "
-            f"{str(record.get('severity', '')):<9} "
+            f"{record.get('severity', '')!s:<9} "
             f"{'yes' if record.get('workstream_suppressed') else 'no':<11} "
             f"{str(record.get('detail', ''))[:120]}"
         )
@@ -298,8 +300,7 @@ def maybe_publish_nats(records: list[dict[str, Any]], *, publish: bool, context:
     events = [
         record
         for record in records
-        if record.get("event", "").startswith("platform.drift.")
-        and record.get("severity") in {"warn", "critical"}
+        if record.get("event", "").startswith("platform.drift.") and record.get("severity") in {"warn", "critical"}
     ]
     if not events:
         return
@@ -384,7 +385,9 @@ def main(argv: list[str] | None = None) -> int:
         if not args.skip_tofu:
             records.extend(run_tofu_drift(args.env))
         if not args.skip_ansible:
-            records.extend(run_ansible_drift(args.env, playbook=args.playbook, inventory=args.inventory, limit=args.limit))
+            records.extend(
+                run_ansible_drift(args.env, playbook=args.playbook, inventory=args.inventory, limit=args.limit)
+            )
         if not args.skip_docker:
             context = load_controller_context()
             records.extend(collect_docker_image_drift(context))
@@ -412,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
         if status == "warn":
             return 2
         return 1
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("drift detector", exc)
 
 

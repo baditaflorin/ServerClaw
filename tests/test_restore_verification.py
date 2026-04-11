@@ -292,16 +292,12 @@ def test_build_report_counts_highest_completed_stages() -> None:
             {
                 "vm": "postgres-lv3",
                 "overall": "pass",
-                "readiness_ladder": {
-                    "highest_completed_stage": {"id": "service_specific_warm_up_completed"}
-                },
+                "readiness_ladder": {"highest_completed_stage": {"id": "service_specific_warm_up_completed"}},
             },
             {
                 "vm": "docker-runtime-lv3",
                 "overall": "fail",
-                "readiness_ladder": {
-                    "highest_completed_stage": {"id": "network_and_dependency_path_ready"}
-                },
+                "readiness_ladder": {"highest_completed_stage": {"id": "network_and_dependency_path_ready"}},
             },
         ],
         triggered_by="manual",
@@ -415,13 +411,13 @@ def test_main_records_failure_receipt_and_cleans_up(monkeypatch, tmp_path: Path)
         lambda context, source_vmid: [
             {
                 "volid": "lv3-backup-pbs:backup/qemu/150/2026-03-22T02:30:00Z",
-                "timestamp": rv.extract_backup_timestamp(
-                    "lv3-backup-pbs:backup/qemu/150/2026-03-22T02:30:00Z"
-                ),
+                "timestamp": rv.extract_backup_timestamp("lv3-backup-pbs:backup/qemu/150/2026-03-22T02:30:00Z"),
             }
         ],
     )
-    monkeypatch.setattr(rv, "restore_backup", lambda context, target, backup: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr(
+        rv, "restore_backup", lambda context, target, backup: (_ for _ in ()).throw(RuntimeError("boom"))
+    )
     destroyed: list[int] = []
     monkeypatch.setattr(rv, "destroy_restored_vm", lambda context, target_vmid: destroyed.append(target_vmid))
     monkeypatch.setattr(rv, "maybe_write_metrics", lambda *args, **kwargs: None)

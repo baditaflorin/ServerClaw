@@ -30,7 +30,9 @@ def _require_mapping(value: Any, path: str) -> dict[str, Any]:
 
 
 def _validate_workflow_budgets() -> None:
-    workflow_defaults = _require_mapping(load_yaml(repo_path("config", "workflow-defaults.yaml")), "workflow-defaults.yaml")
+    workflow_defaults = _require_mapping(
+        load_yaml(repo_path("config", "workflow-defaults.yaml")), "workflow-defaults.yaml"
+    )
     default_budget = _require_mapping(workflow_defaults.get("default_budget"), "workflow-defaults.yaml.default_budget")
     workflow_limit = timeout_limit("workflow_execution")
     default_timeout = default_budget.get("max_duration_seconds")
@@ -39,7 +41,9 @@ def _validate_workflow_budgets() -> None:
             f"config/workflow-defaults.yaml.default_budget.max_duration_seconds must be <= {workflow_limit}"
         )
 
-    workflow_catalog = _require_mapping(load_json(repo_path("config", "workflow-catalog.json")), "workflow-catalog.json")
+    workflow_catalog = _require_mapping(
+        load_json(repo_path("config", "workflow-catalog.json")), "workflow-catalog.json"
+    )
     workflows = _require_mapping(workflow_catalog.get("workflows"), "workflow-catalog.json.workflows")
     for workflow_id, raw in workflows.items():
         if not isinstance(raw, dict):
@@ -139,7 +143,9 @@ def _validate_script_timeout_catalogs() -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate the platform timeout hierarchy and its bound config surfaces.")
+    parser = argparse.ArgumentParser(
+        description="Validate the platform timeout hierarchy and its bound config surfaces."
+    )
     parser.add_argument("path", nargs="?", default=str(TIMEOUT_HIERARCHY_PATH))
     args = parser.parse_args()
 

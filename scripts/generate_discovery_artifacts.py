@@ -244,7 +244,7 @@ def generated_date() -> str:
             generated_on = result.stdout.strip()
             if generated_on:
                 return generated_on
-    return dt.datetime.now(dt.timezone.utc).date().isoformat()
+    return dt.datetime.now(dt.UTC).date().isoformat()
 
 
 def build_repo_structure_root(
@@ -336,7 +336,9 @@ def build_onboarding_pack(
     *,
     generated_on: str,
 ) -> dict[str, Any]:
-    missing_repo_sections = [section_id for section_id in pack.repo_structure_sections if section_id not in repo_section_map]
+    missing_repo_sections = [
+        section_id for section_id in pack.repo_structure_sections if section_id not in repo_section_map
+    ]
     missing_config_sections = [
         section_id for section_id in pack.config_location_sections if section_id not in config_section_map
     ]
@@ -449,9 +451,7 @@ def check_outputs(outputs: dict[Path, str]) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Generate ADR 0327 discovery entrypoints and onboarding packs."
-    )
+    parser = argparse.ArgumentParser(description="Generate ADR 0327 discovery entrypoints and onboarding packs.")
     parser.add_argument("--write", action="store_true", help="Write the generated outputs to disk.")
     parser.add_argument("--check", action="store_true", help="Exit non-zero if generated outputs are stale.")
     args = parser.parse_args(argv)

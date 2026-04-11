@@ -50,10 +50,7 @@ def collect_release_versions(include_version: str | None = None) -> list[str]:
 
 
 def collect_changelog_release_versions(changelog_text: str) -> set[str]:
-    return {
-        match.group(1)
-        for match in re.finditer(r"\[(\d+\.\d+\.\d+) release notes\]\(", changelog_text)
-    }
+    return {match.group(1) for match in re.finditer(r"\[(\d+\.\d+\.\d+) release notes\]\(", changelog_text)}
 
 
 def render_release_note_link(version: str, *, from_release_index: bool) -> str:
@@ -468,7 +465,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(rendered)
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("release notes", exc)
 
 

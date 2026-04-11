@@ -160,9 +160,7 @@ workstreams:
 
 
 def test_assemble_changelog_from_pending_workstreams(canonical_repo: Path) -> None:
-    updated = canonical_truth.assemble_changelog_text(
-        (canonical_repo / "changelog.md").read_text(encoding="utf-8")
-    )
+    updated = canonical_truth.assemble_changelog_text((canonical_repo / "changelog.md").read_text(encoding="utf-8"))
 
     expected_entry = (
         "implemented ADR 0174 integration-only canonical truth assembly, "
@@ -267,9 +265,13 @@ def test_mark_pending_workstreams_released_inserts_version_without_touching_next
 
 
 def test_invalid_release_bump_is_rejected(canonical_repo: Path) -> None:
-    broken = (canonical_repo / "workstreams.yaml").read_text(encoding="utf-8").replace(
-        "release_bump: patch",
-        "release_bump: hotfix",
+    broken = (
+        (canonical_repo / "workstreams.yaml")
+        .read_text(encoding="utf-8")
+        .replace(
+            "release_bump: patch",
+            "release_bump: hotfix",
+        )
     )
     write(canonical_repo / "workstreams.yaml", broken)
 
@@ -321,7 +323,9 @@ canonical_truth:
 
     monkeypatch.setattr(canonical_truth, "WORKSTREAMS_PATH", tmp_path / "workstreams.yaml")
 
-    changed = canonical_truth.mark_pending_workstreams_released("0.10.1", workstreams_path=tmp_path / "workstreams.yaml")
+    changed = canonical_truth.mark_pending_workstreams_released(
+        "0.10.1", workstreams_path=tmp_path / "workstreams.yaml"
+    )
 
     assert changed == ["adr-0174-canonical-truth-assembly"]
     assert not (tmp_path / "workstreams" / "active" / "adr-0174-canonical-truth-assembly.yaml").exists()

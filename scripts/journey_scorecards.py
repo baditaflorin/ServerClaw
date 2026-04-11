@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
-import math
 import os
 import statistics
 import subprocess
@@ -15,7 +14,8 @@ import urllib.parse
 import urllib.request
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any
+from collections.abc import Callable, Iterable
 
 
 SURFACE_ID = "windmill.operator_access_admin"
@@ -59,7 +59,7 @@ SubprocessRunner = Callable[..., subprocess.CompletedProcess[str]]
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
+    return dt.datetime.now(dt.UTC).replace(microsecond=0)
 
 
 def utc_now_iso() -> str:
@@ -72,8 +72,8 @@ def parse_timestamp(value: str | None) -> dt.datetime:
     normalized = value.replace("Z", "+00:00")
     parsed = dt.datetime.fromisoformat(normalized)
     if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=dt.timezone.utc)
-    return parsed.astimezone(dt.timezone.utc)
+        return parsed.replace(tzinfo=dt.UTC)
+    return parsed.astimezone(dt.UTC)
 
 
 def resolve_repo_root(repo_root: str | Path | None = None) -> Path:
@@ -348,7 +348,7 @@ def percent(numerator: int, denominator: int) -> float:
 
 def filter_recent_events(events: list[dict[str, Any]], *, now: dt.datetime, window_days: int) -> list[dict[str, Any]]:
     cutoff = now - dt.timedelta(days=window_days)
-    return [event for event in events if parse_timestamp(event.get("occurred_at")).astimezone(dt.timezone.utc) >= cutoff]
+    return [event for event in events if parse_timestamp(event.get("occurred_at")).astimezone(dt.UTC) >= cutoff]
 
 
 def build_population(events: list[dict[str, Any]]) -> dict[str, int]:
@@ -407,9 +407,7 @@ def score_checklist_completion(events: list[dict[str, Any]]) -> dict[str, Any]:
         if any(item_id not in items for item_id in CHECKLIST_ITEM_IDS):
             continue
         completed_visitors += 1
-        completion_durations.append(
-            int((max(items.values()) - min(items.values())).total_seconds())
-        )
+        completion_durations.append(int((max(items.values()) - min(items.values())).total_seconds()))
     return {
         "status": "ok",
         "started_visitors": len(started_visitors),
@@ -458,9 +456,7 @@ def score_alert_handoffs(events: list[dict[str, Any]]) -> dict[str, Any]:
             resolutions.setdefault(flow_id, occurred_at)
 
     ack_durations = [
-        int((acks[flow_id] - started_at).total_seconds())
-        for flow_id, started_at in alerts.items()
-        if flow_id in acks
+        int((acks[flow_id] - started_at).total_seconds()) for flow_id, started_at in alerts.items() if flow_id in acks
     ]
     resolution_durations = [
         int((resolutions[flow_id] - started_at).total_seconds())
@@ -532,11 +528,11 @@ def query_plausible_route_counts(
     since_seconds = window_days * 24 * 60 * 60
     query = (
         "import Ecto.Query\n"
-        f"site = Plausible.Sites.get_by_domain!(\"{site_domain}\")\n"
+        f'site = Plausible.Sites.get_by_domain!("{site_domain}")\n'
         f"routes = {routes_json}\n"
         f"since = DateTime.utc_now() |> DateTime.add(-{since_seconds}, :second)\n"
-        "results = from(e in \"events_v2\", "
-        "where: e.site_id == ^site.id and e.name == \"pageview\" and e.pathname in ^routes and e.timestamp >= ^since, "
+        'results = from(e in "events_v2", '
+        'where: e.site_id == ^site.id and e.name == "pageview" and e.pathname in ^routes and e.timestamp >= ^since, '
         "group_by: e.pathname, "
         "select: %{pathname: e.pathname, count: count()}) "
         "|> Plausible.ClickhouseRepo.all()\n"
@@ -576,9 +572,7 @@ def build_scorecard_report(
     current_time = now or utc_now()
     events = filter_recent_events(load_events(root), now=current_time, window_days=window_days)
     glitchtip_count = sum(
-        1
-        for event in events
-        if isinstance(event.get("glitchtip"), dict) and bool(event["glitchtip"].get("emitted"))
+        1 for event in events if isinstance(event.get("glitchtip"), dict) and bool(event["glitchtip"].get("emitted"))
     )
     return {
         "status": "ok",

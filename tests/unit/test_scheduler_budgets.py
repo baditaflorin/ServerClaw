@@ -164,11 +164,7 @@ class FakeWindmillClient:
     def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
         if running is None:
             return list(self.remote_jobs)
-        return [
-            job
-            for job in self.remote_jobs
-            if job.get("running") is running or "running" not in job
-        ]
+        return [job for job in self.remote_jobs if job.get("running") is running or "running" not in job]
 
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any]:
         self.cancel_calls.append((job_id, reason))
@@ -176,7 +172,9 @@ class FakeWindmillClient:
 
 
 class SequencedWindmillClient:
-    def __init__(self, *, submit_responses: list[dict[str, Any]], statuses_by_job: dict[str, list[dict[str, Any]]]) -> None:
+    def __init__(
+        self, *, submit_responses: list[dict[str, Any]], statuses_by_job: dict[str, list[dict[str, Any]]]
+    ) -> None:
         self.submit_responses = list(submit_responses)
         self.statuses_by_job = {key: list(value) for key, value in statuses_by_job.items()}
         self.submit_calls: list[tuple[str, dict[str, Any], int | None]] = []
@@ -501,7 +499,9 @@ def test_scheduler_blocks_rollback_chain_beyond_budget(tmp_path: Path) -> None:
 
 def test_watchdog_cancels_duration_budget_violations(tmp_path: Path) -> None:
     store = SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json")
-    write_scheduler_repo(tmp_path, workflows={"converge-netbox": {"description": "Deploy", "live_impact": "guest_live"}})
+    write_scheduler_repo(
+        tmp_path, workflows={"converge-netbox": {"description": "Deploy", "live_impact": "guest_live"}}
+    )
     policy = load_workflow_policy("converge-netbox", repo_root=tmp_path)
     started_at = (datetime.now(UTC) - timedelta(seconds=45)).isoformat()
     store.upsert(

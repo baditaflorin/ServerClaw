@@ -31,7 +31,7 @@ SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from controller_automation_toolkit import emit_cli_error, load_yaml, resolve_repo_local_path  # noqa: E402
+from controller_automation_toolkit import emit_cli_error, load_yaml, resolve_repo_local_path
 
 from validation_toolkit import require_mapping
 
@@ -78,7 +78,9 @@ def read_secret_file(path: str | None) -> str:
 def resolve_secret_path(secret_manifest: dict[str, Any], secret_id: str | None) -> str | None:
     if not secret_id:
         return None
-    payload = require_mapping(secret_manifest.get(secret_id), f"config/controller-local-secrets.json.secrets.{secret_id}")
+    payload = require_mapping(
+        secret_manifest.get(secret_id), f"config/controller-local-secrets.json.secrets.{secret_id}"
+    )
     return require_string(payload.get("path"), f"config/controller-local-secrets.json.secrets.{secret_id}.path")
 
 
@@ -138,7 +140,9 @@ def resolve_auth(
 
     user = lookup_registry_user(registry, publisher)
     if user is not None:
-        explicit_username = explicit_username or require_string(user.get("username"), f"publisher '{publisher}'.username")
+        explicit_username = explicit_username or require_string(
+            user.get("username"), f"publisher '{publisher}'.username"
+        )
         if not explicit_token and not explicit_token_file:
             registry_token_file = resolve_secret_path(secret_manifest, user.get("token_secret_id"))
             explicit_token = read_secret_file(registry_token_file)
@@ -155,14 +159,14 @@ def resolve_auth(
         return {"Authorization": f"Bearer {explicit_token}"}, "token"
 
     if explicit_username and explicit_password:
-        payload = base64.b64encode(f"{explicit_username}:{explicit_password}".encode("utf-8")).decode("ascii")
+        payload = base64.b64encode(f"{explicit_username}:{explicit_password}".encode()).decode("ascii")
         return {"Authorization": f"Basic {payload}"}, "basic"
 
     raise ValueError("No ntfy authentication material was available")
 
 
 def now_utc() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def normalize_sequence_id(value: str) -> str:

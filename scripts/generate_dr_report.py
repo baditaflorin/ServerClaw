@@ -19,7 +19,7 @@ DEFAULT_RESTORE_DIR = repo_path("receipts", "restore-verifications")
 DEFAULT_WITNESS_DIR = repo_path("receipts", "witness-replication")
 DEFAULT_BACKUP_COVERAGE_DIR = repo_path("receipts", "backup-coverage")
 DEFAULT_ADR_DIR = repo_path("docs", "adr")
-UTC = dt.timezone.utc
+UTC = dt.UTC
 
 
 def _parse_datetime(value: str) -> dt.datetime:
@@ -74,7 +74,9 @@ def _load_restore_evidence(stack: dict[str, Any], restore_dir: Path) -> dict[str
 
     observed_state = stack.get("observed_state", {}) if isinstance(stack, dict) else {}
     backups = observed_state.get("backups", stack.get("backups", {})) if isinstance(observed_state, dict) else {}
-    control_plane = backups.get("control_plane_recovery", {}).get("latest_restore_drill", {}) if isinstance(backups, dict) else {}
+    control_plane = (
+        backups.get("control_plane_recovery", {}).get("latest_restore_drill", {}) if isinstance(backups, dict) else {}
+    )
     checked_at = control_plane.get("checked_at")
     result = control_plane.get("result")
     if isinstance(checked_at, dt.datetime):
@@ -440,7 +442,10 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _publish_dr_report_to_outline(report: dict) -> None:
-    import os, subprocess, sys as _sys
+    import os
+    import subprocess
+    import sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -452,6 +457,7 @@ def _publish_dr_report_to_outline(report: dict) -> None:
     if not outline_tool.exists():
         return
     import datetime
+
     date = datetime.date.today().isoformat()
     status = report.get("overall_status", "unknown")
     icon = "✅" if status == "pass" else "❌"
@@ -460,8 +466,8 @@ def _publish_dr_report_to_outline(report: dict) -> None:
     md_lines = [
         f"# DR Status: {date}",
         "",
-        f"| Field | Value |",
-        f"|---|---|",
+        "| Field | Value |",
+        "|---|---|",
         f"| Status | {icon} {status} |",
     ]
     if isinstance(summary, dict):
@@ -471,9 +477,20 @@ def _publish_dr_report_to_outline(report: dict) -> None:
     content = "\n".join(md_lines)
     try:
         subprocess.run(
-            [_sys.executable, str(outline_tool), "document.publish",
-             "--collection", "DR & Backup Status", "--title", title, "--stdin"],
-            input=content, text=True, capture_output=True, check=False,
+            [
+                _sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "DR & Backup Status",
+                "--title",
+                title,
+                "--stdin",
+            ],
+            input=content,
+            text=True,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

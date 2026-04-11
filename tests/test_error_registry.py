@@ -67,10 +67,7 @@ def minimal_yaml(extra_codes: str = "") -> str:
         # Dedent so we can re-indent uniformly under error_codes (2 spaces)
         stripped = textwrap.dedent(extra_codes)
         # Re-indent each non-blank line by 2 spaces so they sit under error_codes
-        indented = "\n".join(
-            ("  " + line if line.strip() else line)
-            for line in stripped.splitlines()
-        )
+        indented = "\n".join(("  " + line if line.strip() else line) for line in stripped.splitlines())
         return base + indented.strip("\n") + "\n"
     return base
 
@@ -84,9 +81,7 @@ class TestCanonicalRegistryFile:
     """Tests that verify the actual config/error-codes.yaml in the repo."""
 
     def test_canonical_registry_exists(self) -> None:
-        assert CANONICAL_REGISTRY_PATH.exists(), (
-            f"config/error-codes.yaml not found at {CANONICAL_REGISTRY_PATH}"
-        )
+        assert CANONICAL_REGISTRY_PATH.exists(), f"config/error-codes.yaml not found at {CANONICAL_REGISTRY_PATH}"
 
     def test_canonical_registry_is_valid_yaml(self) -> None:
         data = yaml.safe_load(CANONICAL_REGISTRY_PATH.read_text(encoding="utf-8"))
@@ -187,30 +182,26 @@ class TestCanonicalRegistryFile:
 
     def test_all_retry_advice_values_are_valid(self) -> None:
         from error_registry import VALID_RETRY_ADVICE
+
         registry = load_registry(CANONICAL_REGISTRY_PATH)
         fragment = registry.openapi_fragment()
         for code, meta in fragment.items():
-            assert meta["retry_advice"] in VALID_RETRY_ADVICE, (
-                f"{code}: invalid retry_advice {meta['retry_advice']!r}"
-            )
+            assert meta["retry_advice"] in VALID_RETRY_ADVICE, f"{code}: invalid retry_advice {meta['retry_advice']!r}"
 
     def test_all_severity_values_are_valid(self) -> None:
         from error_registry import VALID_SEVERITIES
+
         registry = load_registry(CANONICAL_REGISTRY_PATH)
         fragment = registry.openapi_fragment()
         for code, meta in fragment.items():
-            assert meta["severity"] in VALID_SEVERITIES, (
-                f"{code}: invalid severity {meta['severity']!r}"
-            )
+            assert meta["severity"] in VALID_SEVERITIES, f"{code}: invalid severity {meta['severity']!r}"
 
     def test_backoff_codes_with_retry_after_have_non_negative_value(self) -> None:
         registry = load_registry(CANONICAL_REGISTRY_PATH)
         fragment = registry.openapi_fragment()
         for code, meta in fragment.items():
             if meta["retry_advice"] == "backoff" and meta.get("retry_after_s") is not None:
-                assert meta["retry_after_s"] >= 0, (
-                    f"{code}: retry_after_s must be >= 0, got {meta['retry_after_s']}"
-                )
+                assert meta["retry_after_s"] >= 0, f"{code}: retry_after_s must be >= 0, got {meta['retry_after_s']}"
 
     def test_codes_by_category_covers_expected_categories(self) -> None:
         grouped = codes_by_category(registry_path=CANONICAL_REGISTRY_PATH)
@@ -254,7 +245,6 @@ class TestCanonicalRegistryFile:
 
 
 class TestValidateRegistry:
-
     def test_valid_minimal_registry(self) -> None:
         data = yaml.safe_load(minimal_yaml())
         result = validate_registry(data)
@@ -435,7 +425,8 @@ class TestValidateRegistry:
         assert "AUTH_OLD" in result
 
     def test_accepts_multiple_valid_codes(self) -> None:
-        data = yaml.safe_load(textwrap.dedent("""\
+        data = yaml.safe_load(
+            textwrap.dedent("""\
             schema_version: 1.0.0
             error_codes:
               AUTH_TOKEN_MISSING:
@@ -453,7 +444,8 @@ class TestValidateRegistry:
                 retry_after_s: 30
                 description: Upstream dependency request failed.
                 context_fields: [dependency, detail]
-        """))
+        """)
+        )
         result = validate_registry(data)
         assert "AUTH_TOKEN_MISSING" in result
         assert "INFRA_DEPENDENCY_DOWN" in result
@@ -465,7 +457,6 @@ class TestValidateRegistry:
 
 
 class TestLoadRegistry:
-
     def test_loads_valid_file(self, tmp_path: Path) -> None:
         path = make_registry(tmp_path, minimal_yaml())
         registry = load_registry(path)
@@ -502,7 +493,6 @@ class TestLoadRegistry:
 
 
 class TestErrorRegistryCreate:
-
     def _make_registry(self, tmp_path: Path) -> ErrorRegistry:
         yaml_content = textwrap.dedent("""\
             schema_version: 1.0.0
@@ -595,7 +585,6 @@ class TestErrorRegistryCreate:
 
 
 class TestCanonicalErrorToResponse:
-
     def _make_error(self, **kwargs) -> CanonicalError:
         defaults = dict(
             code="AUTH_TOKEN_MISSING",
@@ -659,10 +648,10 @@ class TestCanonicalErrorToResponse:
 
 
 class TestConvenienceFunctions:
-
     def test_list_codes_is_sorted(self, tmp_path: Path) -> None:
         path = tmp_path / "error-codes.yaml"
-        path.write_text(textwrap.dedent("""\
+        path.write_text(
+            textwrap.dedent("""\
             schema_version: 1.0.0
             error_codes:
               AUTH_TOKEN_MISSING:
@@ -678,7 +667,9 @@ class TestConvenienceFunctions:
                 category: infrastructure
                 retry_advice: backoff
                 description: Service down.
-        """), encoding="utf-8")
+        """),
+            encoding="utf-8",
+        )
         codes = list_codes(registry_path=path)
         assert codes == sorted(codes)
         assert "AUTH_TOKEN_MISSING" in codes
@@ -686,7 +677,8 @@ class TestConvenienceFunctions:
 
     def test_codes_by_category_groups_correctly(self, tmp_path: Path) -> None:
         path = tmp_path / "error-codes.yaml"
-        path.write_text(textwrap.dedent("""\
+        path.write_text(
+            textwrap.dedent("""\
             schema_version: 1.0.0
             error_codes:
               AUTH_TOKEN_MISSING:
@@ -708,7 +700,9 @@ class TestConvenienceFunctions:
                 category: infrastructure
                 retry_advice: backoff
                 description: Lock held.
-        """), encoding="utf-8")
+        """),
+            encoding="utf-8",
+        )
         grouped = codes_by_category(registry_path=path)
         assert "authentication" in grouped
         assert "infrastructure" in grouped
@@ -728,7 +722,6 @@ class TestConvenienceFunctions:
 
 
 class TestUnknownErrorCode:
-
     def test_is_key_error_subclass(self) -> None:
         exc = UnknownErrorCode("MY_CODE")
         assert isinstance(exc, KeyError)

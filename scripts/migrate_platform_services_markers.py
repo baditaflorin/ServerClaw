@@ -115,6 +115,7 @@ def validate_markers(text: str, original: str) -> list[str]:
 
     # Count original service keys (2-space indent keys under platform_service_registry)
     import re
+
     service_keys = re.findall(r"^  ([a-z][a-z0-9_]+):", original, re.MULTILINE)
     # Filter out keys that are inside registry content (they'd be at indent >2 in original)
     # The 2-space keys in original that appear after platform_service_registry
@@ -126,13 +127,12 @@ def validate_markers(text: str, original: str) -> list[str]:
         expected_services.append(key)
 
     if begin_count < len(expected_services) - 5:
-        errors.append(
-            f"Too few markers ({begin_count}) for {len(expected_services)} candidate service keys"
-        )
+        errors.append(f"Too few markers ({begin_count}) for {len(expected_services)} candidate service keys")
 
     # Try YAML parse
     try:
         import yaml
+
         yaml.safe_load(text)
     except Exception as e:
         errors.append(f"YAML parse failed after migration: {e}")

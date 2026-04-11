@@ -61,11 +61,11 @@ def require_number(value: Any, path: str, *, minimum: float | None = None) -> fl
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
+    return dt.datetime.now(dt.UTC).replace(microsecond=0)
 
 
 def isoformat(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    return value.astimezone(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def current_commit(repo_root: Path) -> str:
@@ -103,7 +103,9 @@ def load_service_index(repo_root: Path) -> dict[str, dict[str, Any]]:
 
 def load_capacity_load_profiles(repo_root: Path) -> dict[str, dict[str, Any]]:
     payload = load_json(repo_root / "config" / "capacity-model.json")
-    profiles = require_list(payload.get("service_load_profiles", []), "config/capacity-model.json.service_load_profiles")
+    profiles = require_list(
+        payload.get("service_load_profiles", []), "config/capacity-model.json.service_load_profiles"
+    )
     profile_index: dict[str, dict[str, Any]] = {}
     for index, raw_profile in enumerate(profiles):
         path = f"config/capacity-model.json.service_load_profiles[{index}]"
@@ -112,7 +114,9 @@ def load_capacity_load_profiles(repo_root: Path) -> dict[str, dict[str, Any]]:
         if service_id in profile_index:
             raise ValueError(f"duplicate load profile for service '{service_id}'")
         profile_index[service_id] = {
-            "typical_concurrency": require_int(profile.get("typical_concurrency"), f"{path}.typical_concurrency", minimum=1),
+            "typical_concurrency": require_int(
+                profile.get("typical_concurrency"), f"{path}.typical_concurrency", minimum=1
+            ),
             "smoke_vus": int(profile.get("smoke_vus", min(max(int(profile["typical_concurrency"]), 1), 3))),
             "request_timeout_seconds": float(profile.get("request_timeout_seconds", DEFAULT_REQUEST_TIMEOUT_SECONDS)),
             "think_time_seconds": float(profile.get("think_time_seconds", DEFAULT_THINK_TIME_SECONDS)),
@@ -171,7 +175,7 @@ def load_target_url_overrides() -> dict[str, str]:
         return {}
     try:
         parsed = json.loads(raw)
-    except json.JSONDecodeError as exc:  # noqa: PERF203
+    except json.JSONDecodeError as exc:
         raise ValueError("LV3_K6_TARGET_URL_OVERRIDES must be valid JSON") from exc
     if not isinstance(parsed, dict):
         raise ValueError("LV3_K6_TARGET_URL_OVERRIDES must be a JSON object")
@@ -201,15 +205,9 @@ def build_targets(
     requested = set(service_ids or [])
 
     availability_slos = {
-        entry["service_id"]: entry
-        for entry in slo_catalog["slos"]
-        if entry["indicator"] == "availability"
+        entry["service_id"]: entry for entry in slo_catalog["slos"] if entry["indicator"] == "availability"
     }
-    latency_slos = {
-        entry["service_id"]: entry
-        for entry in slo_catalog["slos"]
-        if entry["indicator"] == "latency"
-    }
+    latency_slos = {entry["service_id"]: entry for entry in slo_catalog["slos"] if entry["indicator"] == "latency"}
 
     deduped_smoke_targets: dict[tuple[str, str], dict[str, Any]] = {}
     for entry in slo_catalog["slos"]:
@@ -329,7 +327,9 @@ def run_k6(
     prometheus_remote_write_url: str,
 ) -> tuple[int, str]:
     image_catalog = load_image_catalog()
-    image_entry = require_mapping(image_catalog["images"].get("k6_runtime"), "config/image-catalog.json.images.k6_runtime")
+    image_entry = require_mapping(
+        image_catalog["images"].get("k6_runtime"), "config/image-catalog.json.images.k6_runtime"
+    )
     image_ref = require_str(image_entry.get("ref"), "config/image-catalog.json.images.k6_runtime.ref")
     workspace_mount_source = docker_workspace_mount_source(repo_root)
     command = [
@@ -423,11 +423,7 @@ def build_regression_payload(
     service_id: str,
     current_p95_ms: float,
 ) -> dict[str, Any]:
-    candidates = sorted(
-        path
-        for path in receipts_dir.glob(f"{scenario}-{service_id}-*.json")
-        if path.is_file()
-    )
+    candidates = sorted(path for path in receipts_dir.glob(f"{scenario}-{service_id}-*.json") if path.is_file())
     if not candidates:
         return {
             "checked": False,
@@ -588,13 +584,9 @@ def build_receipts(
         metric_failures: list[str] = []
         failure_reasons: list[str] = []
         if error_rate > DEFAULT_MAX_ERROR_RATE:
-            metric_failures.append(
-                f"error rate {error_rate:.4f} exceeded {DEFAULT_MAX_ERROR_RATE:.4f}"
-            )
+            metric_failures.append(f"error rate {error_rate:.4f} exceeded {DEFAULT_MAX_ERROR_RATE:.4f}")
         if not latency_passed and latency_threshold_ms is not None:
-            metric_failures.append(
-                f"p95 latency {p95_ms:.2f}ms exceeded {float(latency_threshold_ms):.2f}ms"
-            )
+            metric_failures.append(f"p95 latency {p95_ms:.2f}ms exceeded {float(latency_threshold_ms):.2f}ms")
         failure_reasons.extend(metric_failures)
 
         regression = build_regression_payload(
@@ -618,7 +610,7 @@ def build_receipts(
                     receipt_path=receipt_path,
                     regression=regression,
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 failure_reasons.append(f"nats regression notification unavailable: {exc}")
                 print(
                     f"k6 receipt warning for {service_id}: failed to publish NATS regression event: {exc}",
@@ -633,7 +625,7 @@ def build_receipts(
                     budget_remaining_pct=error_budget_remaining_pct,
                     receipt_path=receipt_path,
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 failure_reasons.append(f"ntfy notification unavailable: {exc}")
                 print(
                     f"k6 receipt warning for {service_id}: failed to deliver ntfy warning: {exc}",
@@ -758,10 +750,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", default=str(K6_RECEIPTS_DIR), help="Receipt output directory.")
     parser.add_argument("--runner-context", default="manual", help="Runner context label.")
     parser.add_argument("--environment", default="production", help="Target environment label.")
-    parser.add_argument("--publish-nats", action="store_true", help="Publish platform.slo.k6_regression when a load regression is detected.")
-    parser.add_argument("--notify-ntfy", action="store_true", help="Notify the ntfy warning topic when error budget remaining drops below 20 percent.")
+    parser.add_argument(
+        "--publish-nats",
+        action="store_true",
+        help="Publish platform.slo.k6_regression when a load regression is detected.",
+    )
+    parser.add_argument(
+        "--notify-ntfy",
+        action="store_true",
+        help="Notify the ntfy warning topic when error budget remaining drops below 20 percent.",
+    )
     parser.add_argument("--smoke-duration", default=DEFAULT_SMOKE_DURATION, help="Smoke duration override.")
-    parser.add_argument("--load-ramp-up-duration", default=DEFAULT_LOAD_RAMP_UP_DURATION, help="Load ramp-up duration override.")
+    parser.add_argument(
+        "--load-ramp-up-duration", default=DEFAULT_LOAD_RAMP_UP_DURATION, help="Load ramp-up duration override."
+    )
     parser.add_argument("--load-hold-duration", default=DEFAULT_LOAD_HOLD_DURATION, help="Load hold duration override.")
     parser.add_argument("--soak-duration", default=DEFAULT_SOAK_DURATION, help="Soak duration override.")
     return parser

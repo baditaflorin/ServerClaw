@@ -9,7 +9,7 @@ def test_validation_gate_runs_data_catalog_check() -> None:
     validate_script = (REPO_ROOT / "scripts" / "validate_repo.sh").read_text(encoding="utf-8")
 
     assert "scripts/data_catalog.py --validate" in validate_gate
-    assert "scripts/data_catalog.py\" --validate" in validate_script
+    assert 'scripts/data_catalog.py" --validate' in validate_script
 
 
 def test_data_retention_role_deploys_systemd_timer() -> None:
@@ -27,9 +27,7 @@ def test_data_retention_role_deploys_systemd_timer() -> None:
 
 
 def test_monitoring_and_runtime_roles_expose_retention_settings() -> None:
-    monitoring_defaults = (REPO_ROOT / "roles" / "monitoring_vm" / "defaults" / "main.yml").read_text(
-        encoding="utf-8"
-    )
+    monitoring_defaults = (REPO_ROOT / "roles" / "monitoring_vm" / "defaults" / "main.yml").read_text(encoding="utf-8")
     monitoring_tasks = (REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "main.yml").read_text(encoding="utf-8")
     mattermost_env = (REPO_ROOT / "roles" / "mattermost_runtime" / "templates" / "mattermost.env.j2").read_text(
         encoding="utf-8"
@@ -37,9 +35,7 @@ def test_monitoring_and_runtime_roles_expose_retention_settings() -> None:
     mattermost_env_ctmpl = (
         REPO_ROOT / "roles" / "mattermost_runtime" / "templates" / "mattermost.env.ctmpl.j2"
     ).read_text(encoding="utf-8")
-    netbox_env = (REPO_ROOT / "roles" / "netbox_runtime" / "templates" / "netbox.env.j2").read_text(
-        encoding="utf-8"
-    )
+    netbox_env = (REPO_ROOT / "roles" / "netbox_runtime" / "templates" / "netbox.env.j2").read_text(encoding="utf-8")
     netbox_tasks = (REPO_ROOT / "roles" / "netbox_runtime" / "tasks" / "main.yml").read_text(encoding="utf-8")
     preflight_tasks = (REPO_ROOT / "roles" / "preflight" / "tasks" / "main.yml").read_text(encoding="utf-8")
 
@@ -53,7 +49,10 @@ def test_monitoring_and_runtime_roles_expose_retention_settings() -> None:
     assert "MM_DATARETENTIONSETTINGS_FILERETENTIONHOURS={{ mattermost_file_retention_hours }}" in mattermost_env
     assert "MM_DATARETENTIONSETTINGS_MESSAGERETENTIONDAYS=0" in mattermost_env_ctmpl
     assert "MM_DATARETENTIONSETTINGS_FILERETENTIONDAYS=0" in mattermost_env_ctmpl
-    assert "MM_DATARETENTIONSETTINGS_MESSAGERETENTIONHOURS={{ mattermost_message_retention_hours }}" in mattermost_env_ctmpl
+    assert (
+        "MM_DATARETENTIONSETTINGS_MESSAGERETENTIONHOURS={{ mattermost_message_retention_hours }}"
+        in mattermost_env_ctmpl
+    )
     assert "MM_DATARETENTIONSETTINGS_FILERETENTIONHOURS={{ mattermost_file_retention_hours }}" in mattermost_env_ctmpl
     assert "CHANGELOG_RETENTION={{ netbox_changelog_retention_days }}" in netbox_env
     assert "Enable the NetBox housekeeping timer" in netbox_tasks

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from typing import Any, Final
 
@@ -73,16 +73,14 @@ def load_shared_policy_payload(path: Path = SHARED_POLICY_PACKS_PATH) -> dict[st
     return require_mapping(load_json(path), str(path))
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPolicyPacks:
     payload = load_shared_policy_payload(path)
     path_str = str(path)
 
     require_str(payload.get("$schema"), f"{path_str}.$schema")
     if payload["$schema"] != "docs/schema/shared-policy-packs.schema.json":
-        raise ValueError(
-            f"{path_str}.$schema must reference docs/schema/shared-policy-packs.schema.json"
-        )
+        raise ValueError(f"{path_str}.$schema must reference docs/schema/shared-policy-packs.schema.json")
     if require_str(payload.get("schema_version"), f"{path_str}.schema_version") != "1.0.0":
         raise ValueError(f"{path_str}.schema_version must be 1.0.0")
 
@@ -125,9 +123,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
             enforced_redundancy_tiers.add(tier_id)
 
     if sorted(seen_orders) != list(range(len(tier_entries))):
-        raise ValueError(
-            f"{path_str}.packs.service_redundancy.tiers orders must be contiguous starting at 0"
-        )
+        raise ValueError(f"{path_str}.packs.service_redundancy.tiers orders must be contiguous starting at 0")
 
     rehearsal_gate = require_mapping(
         redundancy.get("rehearsal_gate"),
@@ -249,9 +245,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
                 f"{path_str}.packs.capacity_classes.classes[{index}].aliases must include requester_class '{requester_class}'"
             )
         if class_id not in aliases:
-            raise ValueError(
-                f"{path_str}.packs.capacity_classes.classes[{index}].aliases must include id '{class_id}'"
-            )
+            raise ValueError(f"{path_str}.packs.capacity_classes.classes[{index}].aliases must include id '{class_id}'")
         for alias in aliases:
             existing = requester_class_aliases.get(alias)
             if existing is not None and existing != requester_class:
@@ -323,10 +317,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
     )
 
     return SharedPolicyPacks(
-        allowed_redundancy_tiers=tuple(
-            tier_id
-            for tier_id, _ in sorted(tier_order.items(), key=lambda item: item[1])
-        ),
+        allowed_redundancy_tiers=tuple(tier_id for tier_id, _ in sorted(tier_order.items(), key=lambda item: item[1])),
         tier_order=tier_order,
         standby_kind_by_tier=standby_kind_by_tier,
         live_apply_mode_by_tier=live_apply_mode_by_tier,

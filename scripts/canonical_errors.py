@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -9,7 +9,7 @@ import yaml
 
 
 def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 @dataclass(frozen=True)
@@ -69,7 +69,7 @@ class ErrorRegistry:
         self._definitions = definitions
 
     @classmethod
-    def load(cls, path: Path) -> "ErrorRegistry":
+    def load(cls, path: Path) -> ErrorRegistry:
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise ValueError(f"{path} must contain a YAML mapping")

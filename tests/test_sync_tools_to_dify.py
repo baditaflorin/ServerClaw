@@ -34,6 +34,8 @@ def test_build_openapi_spec_creates_one_path_per_governed_tool() -> None:
     assert "/v1/dify-tools/list-recent-receipts" in spec["paths"]
     assert spec["paths"]["/v1/dify-tools/list-recent-receipts"]["post"]["operationId"] == "list-recent-receipts"
     assert (
-        spec["paths"]["/v1/dify-tools/list-recent-receipts"]["post"]["requestBody"]["content"]["application/json"]["schema"]["properties"]["limit"]["minimum"]
+        spec["paths"]["/v1/dify-tools/list-recent-receipts"]["post"]["requestBody"]["content"]["application/json"][
+            "schema"
+        ]["properties"]["limit"]["minimum"]
         == 1
     )

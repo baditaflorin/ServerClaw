@@ -11,6 +11,7 @@ Usage:
     # Invalidate cache for current tree:
     python scripts/gate_result_cache.py invalidate
 """
+
 from __future__ import annotations
 
 import argparse

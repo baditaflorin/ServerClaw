@@ -231,7 +231,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-url", required=True, help="Matrix base URL, for example https://matrix.localhost")
     parser.add_argument("--username", required=True)
     parser.add_argument("--password-file", required=True, type=Path)
-    parser.add_argument("--access-token-file", type=Path, help="Optional local file used to reuse or persist a verified Matrix access token")
+    parser.add_argument(
+        "--access-token-file",
+        type=Path,
+        help="Optional local file used to reuse or persist a verified Matrix access token",
+    )
     parser.add_argument("--bot-user-id", action="append", required=True, dest="bot_user_ids")
     parser.add_argument("--timeout-seconds", type=int, default=90)
     return parser.parse_args()

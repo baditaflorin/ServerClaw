@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
 
 from dify_api import DifyClient, DifyApiError, read_secret
 
@@ -29,15 +28,17 @@ def _sso_matches(current: dict, client_id: str, issuer_url: str) -> bool:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Bootstrap Dify workspace SSO to use a Keycloak OIDC provider."
-    )
+    parser = argparse.ArgumentParser(description="Bootstrap Dify workspace SSO to use a Keycloak OIDC provider.")
     parser.add_argument("--base-url", required=True, help="Public Dify base URL (e.g. https://agents.localhost)")
     parser.add_argument("--admin-email", required=True, help="Dify admin email used to log in")
     parser.add_argument("--admin-password-file", required=True, help="Path to the Dify admin password file")
     parser.add_argument("--keycloak-client-id", required=True, help="Keycloak client ID registered for Dify")
     parser.add_argument("--keycloak-client-secret-file", required=True, help="Path to the Keycloak client secret file")
-    parser.add_argument("--keycloak-issuer-url", required=True, help="Keycloak issuer URL (realm URL, e.g. https://sso.localhost/realms/lv3)")
+    parser.add_argument(
+        "--keycloak-issuer-url",
+        required=True,
+        help="Keycloak issuer URL (realm URL, e.g. https://sso.localhost/realms/lv3)",
+    )
     args = parser.parse_args()
 
     admin_password = read_secret(args.admin_password_file)

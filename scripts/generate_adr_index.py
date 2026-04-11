@@ -54,7 +54,7 @@ def generated_date() -> dt.date:
             generated_on = result.stdout.strip()
             if generated_on:
                 return dt.date.fromisoformat(generated_on)
-    return dt.datetime.now(dt.timezone.utc).date()
+    return dt.datetime.now(dt.UTC).date()
 
 
 def _load_inputs(today: dt.date) -> tuple[list, object, list[str]]:
@@ -94,22 +94,16 @@ def main(argv: list[str] | None = None) -> int:
         if drift:
             for issue in drift:
                 print(f"ERROR: {issue}", file=sys.stderr)
-            print(f"Run: python scripts/generate_adr_index.py --write", file=sys.stderr)
+            print("Run: python scripts/generate_adr_index.py --write", file=sys.stderr)
             return 1
-        print(
-            f"OK: {INDEX_PATH} and {len(documents) - 1} ADR shard files are current "
-            f"({len(adrs)} ADRs indexed)"
-        )
+        print(f"OK: {INDEX_PATH} and {len(documents) - 1} ADR shard files are current ({len(adrs)} ADRs indexed)")
         return 0
 
     if args.write:
         write_generated_index_documents(documents, adr_dir=ADR_DIR)
         if created_reservations_file:
             print(f"Created {RESERVATIONS_PATH}")
-        print(
-            f"Written {INDEX_PATH} and {len(documents) - 1} ADR shard files "
-            f"({len(adrs)} ADRs indexed)"
-        )
+        print(f"Written {INDEX_PATH} and {len(documents) - 1} ADR shard files ({len(adrs)} ADRs indexed)")
         return 0
 
     print(documents[INDEX_PATH])

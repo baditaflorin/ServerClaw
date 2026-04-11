@@ -54,11 +54,11 @@ def current_repo_root() -> Path:
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def isoformat(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return value.astimezone(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def parse_datetime(value: str | None) -> dt.datetime | None:
@@ -74,8 +74,8 @@ def parse_datetime(value: str | None) -> dt.datetime | None:
     except ValueError:
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=dt.timezone.utc)
-    return parsed.astimezone(dt.timezone.utc)
+        parsed = parsed.replace(tzinfo=dt.UTC)
+    return parsed.astimezone(dt.UTC)
 
 
 def parse_semver(value: str) -> tuple[int, int, int]:
@@ -165,6 +165,7 @@ def build_recent_changes(current_version: str) -> dict[str, str]:
 
 def load_static_config() -> dict[str, Any]:
     from validation_toolkit import load_yaml_with_identity
+
     payload = load_yaml_with_identity(STATIC_CONFIG_PATH)
     if not isinstance(payload, dict):
         raise ValueError(f"{STATIC_CONFIG_PATH} must be a mapping")
@@ -290,15 +291,9 @@ def build_registered_agents(static_config: dict[str, Any], stack: dict[str, Any]
         for entry in static_config.get("registered_agents", [])
         if isinstance(entry, dict) and entry.get("agent_id")
     }
-    identities = (
-        stack.get("desired_state", {})
-        .get("identity_taxonomy", {})
-        .get("managed_identities", [])
-    )
+    identities = stack.get("desired_state", {}).get("identity_taxonomy", {}).get("managed_identities", [])
     by_identity = {
-        identity.get("id"): identity
-        for identity in identities
-        if isinstance(identity, dict) and identity.get("id")
+        identity.get("id"): identity for identity in identities if isinstance(identity, dict) and identity.get("id")
     }
     result = []
     for agent_id, entry in sorted(configured.items()):
@@ -408,7 +403,11 @@ def build_health_section(
             "reason": reason,
             "lifecycle_status": service["lifecycle_status"],
             **({"primary_url": service["public_url"]} if service.get("public_url") else {}),
-            **({"primary_url": service["internal_url"]} if not service.get("public_url") and service.get("internal_url") else {}),
+            **(
+                {"primary_url": service["internal_url"]}
+                if not service.get("public_url") and service.get("internal_url")
+                else {}
+            ),
             **({"maintenance_active": True} if maintenance_active else {}),
             **({"last_live_apply": live_apply_by_service[service_id]} if service_id in live_apply_by_service else {}),
             **({"slo_status": slo_entry.get("status", "unknown")} if slo_entry else {}),
@@ -551,7 +550,9 @@ def build_manifest(
         "repo_version": VERSION_PATH.read_text().strip(),
         "platform_version": str(stack["platform_version"]),
         "generated_at": isoformat(generated_at),
-        "next_refresh_at": isoformat(generated_at + dt.timedelta(minutes=int(static_config["refresh_interval_minutes"]))),
+        "next_refresh_at": isoformat(
+            generated_at + dt.timedelta(minutes=int(static_config["refresh_interval_minutes"]))
+        ),
         "environment": static_config["environment"],
         "identity": build_identity(static_config, stack),
         "health": build_health_section(
@@ -633,8 +634,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--print", action="store_true", help="Print the manifest as JSON.")
     parser.add_argument("--summary", action="store_true", help="Print a short human summary.")
     parser.add_argument("--prometheus-url", help="Optional Prometheus base URL for live SLO lookups.")
-    parser.add_argument("--incident-dir", default=str(DEFAULT_INCIDENT_DIR), help="Directory containing triage reports.")
-    parser.add_argument("--generated-at", help="Override generated_at with an ISO-8601 timestamp for deterministic tests.")
+    parser.add_argument(
+        "--incident-dir", default=str(DEFAULT_INCIDENT_DIR), help="Directory containing triage reports."
+    )
+    parser.add_argument(
+        "--generated-at", help="Override generated_at with an ISO-8601 timestamp for deterministic tests."
+    )
     return parser
 
 

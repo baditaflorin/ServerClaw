@@ -128,8 +128,12 @@ allowed_check_types:
         encoding="utf-8",
     )
     monkeypatch.setattr(incident_triage, "RULES_PATH", tmp_path / "config" / "triage-rules.yaml")
-    monkeypatch.setattr(incident_triage, "AUTO_CHECK_ALLOWLIST_PATH", tmp_path / "config" / "triage-auto-check-allowlist.yaml")
-    monkeypatch.setattr(incident_triage, "SERVICE_CATALOG_PATH", tmp_path / "config" / "service-capability-catalog.json")
+    monkeypatch.setattr(
+        incident_triage, "AUTO_CHECK_ALLOWLIST_PATH", tmp_path / "config" / "triage-auto-check-allowlist.yaml"
+    )
+    monkeypatch.setattr(
+        incident_triage, "SERVICE_CATALOG_PATH", tmp_path / "config" / "service-capability-catalog.json"
+    )
     monkeypatch.setattr(incident_triage, "CERTIFICATE_CATALOG_PATH", tmp_path / "config" / "certificate-catalog.json")
     monkeypatch.setattr(incident_triage, "DEPENDENCY_GRAPH_PATH", tmp_path / "config" / "dependency-graph.json")
     monkeypatch.setattr(incident_triage, "LIVE_APPLY_RECEIPTS_DIR", tmp_path / "receipts" / "live-applies")
@@ -217,7 +221,9 @@ def test_emit_triage_report_writes_report_and_audit(monkeypatch, tmp_path: Path)
         return True
 
     monkeypatch.setattr(incident_triage, "emit_event_best_effort", fake_emit)
-    result = incident_triage.emit_triage_report(report, emit_audit=True, mattermost_webhook_url=None, report_dir=tmp_path / "reports")
+    result = incident_triage.emit_triage_report(
+        report, emit_audit=True, mattermost_webhook_url=None, report_dir=tmp_path / "reports"
+    )
 
     written = Path(result["report_path"])
     assert written.exists()

@@ -22,13 +22,21 @@ def load_tasks(path: Path) -> list[dict]:
 def test_lago_runtime_defaults_reference_service_topology_images_and_local_secrets() -> None:
     defaults = yaml.safe_load(RUNTIME_DEFAULTS_PATH.read_text(encoding="utf-8"))
 
-    assert defaults["lago_service_topology"] == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago') }}"
+    assert (
+        defaults["lago_service_topology"]
+        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago') }}"
+    )
     assert defaults["lago_api_image"] == "{{ container_image_catalog.images.lago_api_runtime.ref }}"
     assert defaults["lago_front_image"] == "{{ container_image_catalog.images.lago_front_runtime.ref }}"
     assert defaults["lago_pdf_image"] == "{{ container_image_catalog.images.lago_pdf_runtime.ref }}"
     assert defaults["lago_redis_image"] == "{{ container_image_catalog.images.lago_redis_runtime.ref }}"
-    assert defaults["lago_redis_url"] == "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_sidekiq_db }}"
-    assert defaults["lago_redis_cache_url"] == "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cache_db }}"
+    assert (
+        defaults["lago_redis_url"] == "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_sidekiq_db }}"
+    )
+    assert (
+        defaults["lago_redis_cache_url"]
+        == "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cache_db }}"
+    )
     assert defaults["lago_redis_cable_url"] == (
         "redis://:{{ lago_redis_password | urlencode }}@{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cable_db }}"
     )
@@ -39,8 +47,13 @@ def test_lago_runtime_defaults_reference_service_topology_images_and_local_secre
     assert defaults["lago_public_base_url"] == "{{ platform_service_topology.lago.urls.public }}"
     assert defaults["lago_public_api_base_url"] == "{{ platform_service_topology.lago.urls.public }}/api"
     assert defaults["lago_api_local_base_url"] == "{{ platform_service_topology.lago.urls.api }}"
-    assert defaults["lago_direct_api_local_base_url"] == "http://127.0.0.1:{{ platform_service_topology.lago.ports.api }}"
-    assert defaults["lago_direct_front_local_base_url"] == "http://127.0.0.1:{{ platform_service_topology.lago.ports.internal }}"
+    assert (
+        defaults["lago_direct_api_local_base_url"] == "http://127.0.0.1:{{ platform_service_topology.lago.ports.api }}"
+    )
+    assert (
+        defaults["lago_direct_front_local_base_url"]
+        == "http://127.0.0.1:{{ platform_service_topology.lago.ports.internal }}"
+    )
     assert defaults["lago_rails_env"] == "production"
     assert defaults["lago_rack_env"] == "{{ lago_rails_env }}"
     assert defaults["lago_annotaterb_skip_on_db_tasks"] == "1"
@@ -70,14 +83,22 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     packages_task = next(task for task in tasks if task["name"] == "Ensure the Lago runtime packages are present")
     directories_task = next(task for task in tasks if task["name"] == "Ensure the Lago runtime directories exist")
     secret_task = next(task for task in tasks if task["name"] == "Generate the Lago runtime secrets")
-    mirror_task = next(task for task in tasks if task["name"] == "Mirror the Lago runtime secrets to the control machine")
-    producer_catalog_task = next(task for task in tasks if task["name"] == "Render the controller-local Lago producer catalog")
+    mirror_task = next(
+        task for task in tasks if task["name"] == "Mirror the Lago runtime secrets to the control machine"
+    )
+    producer_catalog_task = next(
+        task for task in tasks if task["name"] == "Render the controller-local Lago producer catalog"
+    )
     postgres_wait_task = next(
         task for task in tasks if task["name"] == "Wait for the Lago PostgreSQL endpoint to accept TCP connections"
     )
-    startup_task = next(task for task in tasks if task["name"] == "Start the Lago runtime and recover Docker bridge-chain failures")
+    startup_task = next(
+        task for task in tasks if task["name"] == "Start the Lago runtime and recover Docker bridge-chain failures"
+    )
     redis_bgsave_task = next(task for task in tasks if task["name"] == "Trigger a Lago Redis background save")
-    redis_persistence_task = next(task for task in tasks if task["name"] == "Wait for Lago Redis background save to succeed")
+    redis_persistence_task = next(
+        task for task in tasks if task["name"] == "Wait for Lago Redis background save to succeed"
+    )
     metric_task = next(task for task in tasks if task["name"] == "Create the Lago smoke billable metric")
     plan_task = next(task for task in tasks if task["name"] == "Create the Lago smoke plan")
     customer_task = next(task for task in tasks if task["name"] == "Upsert the Lago smoke customer")
@@ -107,13 +128,17 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
         task for task in startup_task["rescue"] if task["name"] == "Capture Lago migrate logs after startup failure"
     )
     migrate_race_fact_task = next(
-        task for task in startup_task["rescue"] if task["name"] == "Flag Lago migrate database-race failures during startup"
+        task
+        for task in startup_task["rescue"]
+        if task["name"] == "Flag Lago migrate database-race failures during startup"
     )
     unexpected_failure_task = next(
         task for task in startup_task["rescue"] if task["name"] == "Surface unexpected Lago startup failures"
     )
     bridge_retry_task = next(
-        task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after Docker bridge-chain recovery"
+        task
+        for task in startup_task["rescue"]
+        if task["name"] == "Retry Lago startup after Docker bridge-chain recovery"
     )
     dependency_retry_task = next(
         task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after compose dependency failure"
@@ -124,29 +149,41 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
         if task["name"] == "Wait for the Lago PostgreSQL endpoint before retrying startup after migrate failure"
     )
     migrate_remove_task = next(
-        task for task in startup_task["rescue"] if task["name"] == "Remove the failed Lago migrate container before retrying startup"
+        task
+        for task in startup_task["rescue"]
+        if task["name"] == "Remove the failed Lago migrate container before retrying startup"
     )
     migrate_retry_task = next(
         task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after migrate database race"
     )
-    assert "No chain/target/match by that name" in recovery_fact_task["ansible.builtin.set_fact"][
-        "lago_docker_bridge_chain_missing"
-    ]
-    assert "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
+    assert (
+        "No chain/target/match by that name"
+        in recovery_fact_task["ansible.builtin.set_fact"]["lago_docker_bridge_chain_missing"]
+    )
+    assert (
+        "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
+    )
     assert "No such container:" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
-    assert "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"][
-        "lago_compose_dependency_api_restart"
-    ]
-    assert "'container ' ~ lago_api_container_name ~ ' exited (1)'" in recovery_fact_task["ansible.builtin.set_fact"][
-        "lago_compose_dependency_api_restart"
-    ]
+    assert (
+        "dependency failed to start"
+        in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_api_restart"]
+    )
+    assert (
+        "'container ' ~ lago_api_container_name ~ ' exited (1)'"
+        in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_api_restart"]
+    )
     assert 'service "migrate"' in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_migrate_failed"]
     assert "complete successfully" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_migrate_failed"]
     assert migrate_logs_task["when"] == "lago_compose_migrate_failed"
     assert "exit 137" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
     assert "connection to server at" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
-    assert "failed: Connection timed out" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
-    assert "failed: Connection refused" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
+    assert (
+        "failed: Connection timed out"
+        in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
+    )
+    assert (
+        "failed: Connection refused" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
+    )
     assert "not lago_docker_bridge_chain_missing" in unexpected_failure_task["when"]
     assert "not lago_compose_dependency_race" in unexpected_failure_task["when"]
     assert "not lago_compose_dependency_api_restart" in unexpected_failure_task["when"]
@@ -167,7 +204,9 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
         "{{ lago_migrate_container_name }}",
     ]
     assert migrate_remove_task["when"] == "lago_migrate_database_race | default(false)"
-    assert "'No such container:' not in (lago_migrate_remove.stderr | default(''))" in migrate_remove_task["failed_when"]
+    assert (
+        "'No such container:' not in (lago_migrate_remove.stderr | default(''))" in migrate_remove_task["failed_when"]
+    )
     assert migrate_retry_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
     assert migrate_retry_task["retries"] == 3
     assert migrate_retry_task["delay"] == 5
@@ -201,7 +240,9 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     assert customer_task["retries"] == 12
     assert customer_task["delay"] == 5
     assert customer_task["until"] == "lago_customer_upsert.status | default(0) == 200"
-    assert subscription_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/subscriptions"
+    assert (
+        subscription_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/subscriptions"
+    )
     assert subscription_task["retries"] == 12
     assert subscription_task["delay"] == 5
     assert subscription_task["until"] == "lago_subscription_upsert.status | default(0) == 200"
@@ -216,15 +257,20 @@ def test_lago_verify_tasks_cover_local_health_front_and_current_usage() -> None:
     tasks = load_tasks(VERIFY_TASKS_PATH)
 
     health_task = next(task for task in tasks if task["name"] == "Verify the Lago local health endpoint")
-    usage_task = next(task for task in tasks if task["name"] == "Verify the Lago direct current usage endpoint returns the smoke metric")
+    usage_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Verify the Lago direct current usage endpoint returns the smoke metric"
+    )
     front_task = next(task for task in tasks if task["name"] == "Verify the Lago front surface listens locally")
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/health"
-    assert "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage" in (
-        usage_task["ansible.builtin.shell"]
+    assert (
+        "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage"
+        in (usage_task["ansible.builtin.shell"])
     )
     assert "external_subscription_id={{ lago_smoke_external_subscription_id }}" in usage_task["ansible.builtin.shell"]
-    assert "grep -q \"{{ lago_smoke_metric_code | lower }}\"" in usage_task["ansible.builtin.shell"]
+    assert 'grep -q "{{ lago_smoke_metric_code | lower }}"' in usage_task["ansible.builtin.shell"]
     assert front_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_front_local_base_url }}/"
 
 
@@ -261,17 +307,23 @@ def test_lago_postgres_defaults_and_tasks_manage_the_shared_database_password() 
     assert defaults["lago_database_password_local_file"].endswith("/.local/lago/database-password.txt")
     assert defaults["lago_database_user_createdb"] is True
     assert defaults["lago_postgres_required_extensions"] == ["pg_partman"]
-    assert defaults["lago_postgres_extension_packages"] == ["postgresql-{{ lago_postgres_server_major_version }}-partman"]
+    assert defaults["lago_postgres_extension_packages"] == [
+        "postgresql-{{ lago_postgres_server_major_version }}-partman"
+    ]
     assert defaults["lago_postgres_password_file"] == "{{ lago_postgres_secret_dir }}/database-password"
     assert next(task for task in tasks if task["name"] == "Generate the Lago database password")
     version_task = next(task for task in tasks if task["name"] == "Record PostgreSQL server version number")
-    extension_package_task = next(task for task in tasks if task["name"] == "Install the Lago PostgreSQL extension packages")
+    extension_package_task = next(
+        task for task in tasks if task["name"] == "Install the Lago PostgreSQL extension packages"
+    )
     extension_check_task = next(
         task for task in tasks if task["name"] == "Check whether required Lago PostgreSQL extensions are available"
     )
     create_role_task = next(task for task in tasks if task["name"] == "Create the Lago database role")
     ensure_createdb_task = next(
-        task for task in tasks if task["name"] == "Ensure the Lago database role can create databases for upstream migrations"
+        task
+        for task in tasks
+        if task["name"] == "Ensure the Lago database role can create databases for upstream migrations"
     )
     assert next(task for task in tasks if task["name"] == "Create the Lago PostgreSQL database")
     assert version_task["ansible.builtin.command"]["argv"][-1] == "SHOW server_version_num"

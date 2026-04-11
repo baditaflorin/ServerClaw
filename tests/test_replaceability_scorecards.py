@@ -48,9 +48,7 @@ def build_repo(root: Path) -> None:
                     "capability_id": "internal_trust_authority",
                     "product_id": "step_ca",
                     "critical_surface": "ssh_and_internal_tls_issuance",
-                    "capability_definition_refs": [
-                        "docs/adr/0205-capability-contracts-before-product-selection.md"
-                    ],
+                    "capability_definition_refs": ["docs/adr/0205-capability-contracts-before-product-selection.md"],
                 }
             ],
         },

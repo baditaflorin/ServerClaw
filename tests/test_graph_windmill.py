@@ -240,20 +240,28 @@ def test_graph_import_wrapper_bootstraps_repo_scripts_directory(tmp_path: Path) 
     graph_dsn = prepare_graph_db(tmp_path / "graph-scripts-bootstrap.sqlite3")
     world_state_dsn = prepare_world_state_db(tmp_path / "world-state-scripts-bootstrap.sqlite3")
 
-    module = load_module("graph_import_catalog_scripts_bootstrap", "config/windmill/scripts/graph/import-from-catalog.py")
+    module = load_module(
+        "graph_import_catalog_scripts_bootstrap", "config/windmill/scripts/graph/import-from-catalog.py"
+    )
     result = module.main(repo_path=str(repo_root), dsn=graph_dsn, world_state_dsn=world_state_dsn)
 
     assert result["status"] == "ok"
     assert str(repo_root / "scripts") in sys.path
 
 
-def test_graph_import_wrapper_falls_back_to_uv_when_psycopg_is_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_graph_import_wrapper_falls_back_to_uv_when_psycopg_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     repo_root = prepare_repo(tmp_path)
-    module = load_module("graph_import_catalog_runtime_fallback", "config/windmill/scripts/graph/import-from-catalog.py")
+    module = load_module(
+        "graph_import_catalog_runtime_fallback", "config/windmill/scripts/graph/import-from-catalog.py"
+    )
 
     def fake_loader(_repo_root: Path):
         def fake_rebuild(**_kwargs):
-            raise RuntimeError("psycopg is required for postgres WORLD_STATE_DSN values; install it or use sqlite:/// for tests.")
+            raise RuntimeError(
+                "psycopg is required for postgres WORLD_STATE_DSN values; install it or use sqlite:/// for tests."
+            )
 
         return fake_rebuild
 
@@ -278,13 +286,17 @@ def test_graph_import_wrapper_falls_back_to_uv_when_psycopg_is_missing(tmp_path:
     assert result["world_state_dsn"] == "postgres://world-state"
 
 
-def test_graph_import_wrapper_falls_back_to_uv_when_pyyaml_is_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_graph_import_wrapper_falls_back_to_uv_when_pyyaml_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     repo_root = prepare_repo(tmp_path)
     module = load_module("graph_import_catalog_yaml_fallback", "config/windmill/scripts/graph/import-from-catalog.py")
 
     def fake_loader(_repo_root: Path):
         def fake_rebuild(**_kwargs):
-            raise RuntimeError("Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'.")
+            raise RuntimeError(
+                "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'."
+            )
 
         return fake_rebuild
 
@@ -307,7 +319,9 @@ def test_graph_import_wrapper_falls_back_to_uv_when_pyyaml_is_missing(tmp_path: 
     assert result["repo_root"] == str(repo_root)
 
 
-def test_graph_import_wrapper_uv_fallback_avoids_repo_project_discovery(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_graph_import_wrapper_uv_fallback_avoids_repo_project_discovery(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     repo_root = prepare_repo(tmp_path)
     module = load_module("graph_import_catalog_uv_command", "config/windmill/scripts/graph/import-from-catalog.py")
     script_path = repo_root / "config" / "windmill" / "scripts" / "graph" / "import-from-catalog.py"

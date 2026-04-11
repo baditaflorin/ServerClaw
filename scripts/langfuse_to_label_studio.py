@@ -29,8 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from typing import Any
 from urllib import error, parse, request
@@ -51,6 +50,7 @@ DEFAULT_PAGE_SIZE = 50
 # HTTP helpers (stdlib only, no third-party deps)
 # ---------------------------------------------------------------------------
 
+
 def _http(
     method: str,
     url: str,
@@ -69,6 +69,7 @@ def _http(
         hdrs["Content-Type"] = "application/json"
     if basic_auth:
         import base64
+
         creds = base64.b64encode(f"{basic_auth[0]}:{basic_auth[1]}".encode()).decode()
         hdrs["Authorization"] = f"Basic {creds}"
     req = request.Request(url, data=encoded, headers=hdrs, method=method)
@@ -89,7 +90,9 @@ def ls_get(base: str, path: str, token: str) -> Any:
 
 
 def ls_post(base: str, path: str, token: str, body: Any, expected: tuple[int, ...] = (200, 201)) -> Any:
-    return _http("POST", f"{base}{path}", headers={"Authorization": f"Token {token}"}, body=body, expected_status=expected)
+    return _http(
+        "POST", f"{base}{path}", headers={"Authorization": f"Token {token}"}, body=body, expected_status=expected
+    )
 
 
 def lf_get(base: str, path: str, public_key: str, secret_key: str) -> Any:
@@ -99,6 +102,7 @@ def lf_get(base: str, path: str, public_key: str, secret_key: str) -> Any:
 # ---------------------------------------------------------------------------
 # Langfuse helpers
 # ---------------------------------------------------------------------------
+
 
 def fetch_langfuse_traces(
     base_url: str,
@@ -112,12 +116,14 @@ def fetch_langfuse_traces(
     page = 1
     from_str = from_timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
     while True:
-        params = parse.urlencode({
-            "page": page,
-            "limit": page_size,
-            "fromTimestamp": from_str,
-            "orderBy": "timestamp.desc",
-        })
+        params = parse.urlencode(
+            {
+                "page": page,
+                "limit": page_size,
+                "fromTimestamp": from_str,
+                "orderBy": "timestamp.desc",
+            }
+        )
         payload = lf_get(base_url, f"/api/public/traces?{params}", public_key, secret_key)
         if not isinstance(payload, dict):
             break
@@ -208,6 +214,7 @@ def build_label_studio_task(
 # Label Studio helpers
 # ---------------------------------------------------------------------------
 
+
 def find_ls_project(base_url: str, token: str, title: str) -> dict[str, Any] | None:
     page = 1
     while True:
@@ -257,6 +264,7 @@ def import_tasks(base_url: str, token: str, project_id: int, tasks: list[dict[st
 # Main sync logic
 # ---------------------------------------------------------------------------
 
+
 def run_sync(
     ls_base_url: str,
     ls_token: str,
@@ -268,7 +276,7 @@ def run_sync(
     lookback_hours: int,
     min_score: float,
 ) -> dict[str, Any]:
-    from_ts = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
+    from_ts = datetime.now(UTC) - timedelta(hours=lookback_hours)
 
     # 1. Find target Label Studio project
     project = find_ls_project(ls_base_url, ls_token, ls_project_title)
@@ -290,10 +298,7 @@ def run_sync(
     new_traces = [t for t in review_traces if t.get("id", "") not in existing_ids]
 
     # 5. Build and import tasks
-    tasks = [
-        build_label_studio_task(t, langfuse_base_url, langfuse_project_id)
-        for t in new_traces
-    ]
+    tasks = [build_label_studio_task(t, langfuse_base_url, langfuse_project_id) for t in new_traces]
     imported = 0
     if tasks:
         result = import_tasks(ls_base_url, ls_token, project_id, tasks)
@@ -316,6 +321,7 @@ def run_sync(
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Sync Langfuse traces to Label Studio for human review.")
@@ -353,6 +359,7 @@ def main(argv: list[str]) -> int:
             if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
                 del sys.modules["platform"]
             from platform.llm.observability import load_langfuse_config  # type: ignore[import]
+
             cfg = load_langfuse_config(REPO_ROOT)
             public_key = public_key or cfg.public_key
             secret_key = secret_key or cfg.secret_key

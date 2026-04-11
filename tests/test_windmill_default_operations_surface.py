@@ -24,7 +24,9 @@ def _normalize_seed_local_file(path: str) -> str:
 
 def test_all_workflow_catalog_windmill_wrappers_are_seeded() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
     catalog = json.loads((REPO_ROOT / "config/workflow-catalog.json").read_text())
 
@@ -48,7 +50,9 @@ def test_all_workflow_catalog_windmill_wrappers_are_seeded() -> None:
 
 def test_default_operations_surface_verification_paths_are_declared() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
     verify_tasks = (
         REPO_ROOT
@@ -95,10 +99,14 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
 
 def test_default_operations_surface_preserves_token_lifecycle_runtime_root() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
     mutable_paths = {entry["path"]: entry["mode"] for entry in defaults["windmill_worker_repo_mutable_directories"]}
-    writable_paths = {entry["path"]: entry["mode"] for entry in defaults["windmill_worker_runtime_writable_directories"]}
+    writable_paths = {
+        entry["path"]: entry["mode"] for entry in defaults["windmill_worker_runtime_writable_directories"]
+    }
 
     assert mutable_paths["{{ windmill_worker_repo_checkout_host_path }}/.local/token-lifecycle"] == "0777"
     assert "{{ windmill_worker_repo_checkout_host_path }}/receipts/token-lifecycle" not in writable_paths

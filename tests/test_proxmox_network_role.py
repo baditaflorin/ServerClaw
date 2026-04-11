@@ -23,7 +23,9 @@ HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 def test_proxmox_network_renders_vm_firewall_from_active_role_path() -> None:
     tasks = yaml.safe_load(ROLE_TASKS.read_text(encoding="utf-8"))
-    render_task = next(task for task in tasks if task["name"] == "Render per-guest Proxmox firewall policy to staging files")
+    render_task = next(
+        task for task in tasks if task["name"] == "Render per-guest Proxmox firewall policy to staging files"
+    )
     template_module = render_task["ansible.builtin.template"]
 
     assert template_module["src"] == "vm.fw.j2"
@@ -51,7 +53,9 @@ def test_proxmox_network_template_renders_udp_filter_and_nat_rules() -> None:
 
     assert "proxmox_public_ingress_udp_forwards | default([]) | length > 0" in template
     assert "udp dport {{ forward.target_port }} accept" in template
-    assert "udp dport {{ forward.listen_port }} dnat ip to {{ forward.target_host }}:{{ forward.target_port }}" in template
+    assert (
+        "udp dport {{ forward.listen_port }} dnat ip to {{ forward.target_host }}:{{ forward.target_port }}" in template
+    )
 
 
 def test_host_vars_define_livekit_public_tcp_and_udp_forwards() -> None:

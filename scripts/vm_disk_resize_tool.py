@@ -55,7 +55,7 @@ import re
 import subprocess
 import sys
 import textwrap
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -69,7 +69,7 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from platform.locking import LockType, ResourceLockRegistry  # noqa: E402
+from platform.locking import LockType, ResourceLockRegistry
 
 # ---------------------------------------------------------------------------
 # Paths (mirrors fixture_manager.py conventions)
@@ -139,6 +139,7 @@ def load_vm_catalog() -> list[dict[str, Any]]:
     # We do simple regex parsing — avoids a hard PyYAML dep in a CLI tool.
     try:
         import yaml  # type: ignore[import]
+
         data = yaml.safe_load(text)
         return data.get("proxmox_vms", [])
     except ImportError:
@@ -229,12 +230,18 @@ def _ssh_to_host(remote_script: str, *, timeout: int = 120) -> subprocess.Comple
     host = _proxmox_host()
     cmd = [
         "ssh",
-        "-i", key,
-        "-o", "IdentitiesOnly=yes",
-        "-o", "BatchMode=yes",
-        "-o", f"ConnectTimeout={timeout}",
-        "-o", "StrictHostKeyChecking=accept-new",
-        "-o", "UserKnownHostsFile=/dev/null",
+        "-i",
+        key,
+        "-o",
+        "IdentitiesOnly=yes",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        f"ConnectTimeout={timeout}",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=/dev/null",
         f"{user}@{host}",
         remote_script,
     ]
@@ -255,13 +262,20 @@ def _ssh_to_guest(guest_ip: str, remote_script: str, *, timeout: int = 120) -> s
     )
     cmd = [
         "ssh",
-        "-i", key,
-        "-o", "IdentitiesOnly=yes",
-        "-o", "BatchMode=yes",
-        "-o", f"ConnectTimeout={timeout}",
-        "-o", "StrictHostKeyChecking=accept-new",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-o", f"ProxyCommand={proxy}",
+        "-i",
+        key,
+        "-o",
+        "IdentitiesOnly=yes",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        f"ConnectTimeout={timeout}",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=/dev/null",
+        "-o",
+        f"ProxyCommand={proxy}",
         f"{guest_user}@{guest_ip}",
         remote_script,
     ]
@@ -446,17 +460,19 @@ def cmd_list(args: argparse.Namespace) -> int:
     for vm in vms:
         vmid = vm.get("vmid")
         lock_info = lock_map.get(f"vm:{vmid}", {})
-        rows.append({
-            "vmid": vmid,
-            "name": vm.get("name", ""),
-            "role": vm.get("role", ""),
-            "ipv4": vm.get("ipv4", ""),
-            "disk_gb": vm.get("disk_gb", "?"),
-            "memory_mb": vm.get("memory_mb", "?"),
-            "locked": bool(lock_info),
-            "lock_holder": lock_info.get("holder", ""),
-            "lock_expires_at": lock_info.get("expires_at", ""),
-        })
+        rows.append(
+            {
+                "vmid": vmid,
+                "name": vm.get("name", ""),
+                "role": vm.get("role", ""),
+                "ipv4": vm.get("ipv4", ""),
+                "disk_gb": vm.get("disk_gb", "?"),
+                "memory_mb": vm.get("memory_mb", "?"),
+                "locked": bool(lock_info),
+                "lock_holder": lock_info.get("holder", ""),
+                "lock_expires_at": lock_info.get("expires_at", ""),
+            }
+        )
 
     print(json.dumps({"vms": rows, "lock_count": len(lock_map)}, indent=2))
     return 0
@@ -511,17 +527,14 @@ def cmd_resize(args: argparse.Namespace) -> int:
         delta_gb = args.add_gb
     elif args.target_gb:
         if args.target_gb <= current_gb:
-            raise SystemExit(
-                f"--target-gb {args.target_gb} must be larger than current {current_gb} GB."
-            )
+            raise SystemExit(f"--target-gb {args.target_gb} must be larger than current {current_gb} GB.")
         new_gb = args.target_gb
         delta_gb = new_gb - current_gb
     else:
         raise SystemExit("Specify --add-gb or --target-gb.")
 
     print(
-        f"[resize] vm:{args.vmid} ({vm['name']})  "
-        f"{current_gb} GB → {new_gb} GB  (+{delta_gb} GB on {disk})",
+        f"[resize] vm:{args.vmid} ({vm['name']})  {current_gb} GB → {new_gb} GB  (+{delta_gb} GB on {disk})",
         file=sys.stderr,
     )
 
@@ -624,7 +637,7 @@ def cmd_resize(args: argparse.Namespace) -> int:
         # ---------------------------------------------------------------- #
         receipt = {
             "tool": "vm_disk_resize_tool",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "vmid": args.vmid,
             "name": vm["name"],
             "disk": disk,
@@ -693,10 +706,7 @@ def cmd_release_lock(args: argparse.Namespace) -> int:
     registry = _build_registry()
     locks = registry.read_all()
     resource = f"vm:{args.vmid}"
-    target_locks = [
-        lk for lk in locks
-        if lk.resource_path == resource and lk.lock_type == LockType.EXCLUSIVE
-    ]
+    target_locks = [lk for lk in locks if lk.resource_path == resource and lk.lock_type == LockType.EXCLUSIVE]
     if not target_locks:
         print(json.dumps({"status": "nothing_to_release", "resource": resource}))
         return 0
@@ -704,12 +714,14 @@ def cmd_release_lock(args: argparse.Namespace) -> int:
     released_list = []
     for lk in target_locks:
         count = registry.release(lock_id=lk.lock_id)
-        released_list.append({
-            "lock_id": lk.lock_id,
-            "holder": lk.holder,
-            "expires_at": lk.expires_at,
-            "released": count,
-        })
+        released_list.append(
+            {
+                "lock_id": lk.lock_id,
+                "holder": lk.holder,
+                "expires_at": lk.expires_at,
+                "released": count,
+            }
+        )
     print(json.dumps({"status": "released", "resource": resource, "locks": released_list}, indent=2))
     return 0
 
@@ -747,7 +759,7 @@ def _update_inventory_disk_gb(vmid: int, new_gb: int) -> None:
 
 def _write_receipt(receipt: dict) -> None:
     RECEIPTS_DIR.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     path = RECEIPTS_DIR / f"{ts}-vmid-{receipt['vmid']}.json"
     path.write_text(json.dumps(receipt, indent=2, sort_keys=True), encoding="utf-8")
     print(f"[receipt] Written to {path.relative_to(REPO_ROOT)}", file=sys.stderr)
@@ -786,7 +798,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_resize.add_argument("--vmid", type=int, required=True, help="Proxmox VM ID.")
     size_group = p_resize.add_mutually_exclusive_group(required=True)
     size_group.add_argument("--add-gb", type=int, metavar="N", help="Add N GB to the current disk size.")
-    size_group.add_argument("--target-gb", type=int, metavar="N", help="Set the disk to exactly N GB (must be larger than current).")
+    size_group.add_argument(
+        "--target-gb", type=int, metavar="N", help="Set the disk to exactly N GB (must be larger than current)."
+    )
     p_resize.add_argument("--disk", default="scsi0", help="Proxmox disk device name (default: scsi0).")
     p_resize.add_argument(
         "--apply",
@@ -854,7 +868,7 @@ def main() -> int:
             return cmd_release_lock(args)
     except SystemExit:
         raise
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(json.dumps({"error": str(exc), "type": type(exc).__name__}), file=sys.stderr)
         return 1
     return 0

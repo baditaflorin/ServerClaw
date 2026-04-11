@@ -231,7 +231,9 @@ def test_ansible_adapter_parses_changed_tasks(diff_repo: Path, monkeypatch: pyte
         captured_env.update(kwargs["env"])
         return subprocess.CompletedProcess(["ansible-playbook"], 2, stdout=stdout, stderr="")
 
-    monkeypatch.setattr("platform.diff_engine.adapters.ansible_adapter.shutil.which", lambda command: "/usr/bin/ansible-playbook")
+    monkeypatch.setattr(
+        "platform.diff_engine.adapters.ansible_adapter.shutil.which", lambda command: "/usr/bin/ansible-playbook"
+    )
 
     adapter = AnsibleAdapter(
         repo_root=diff_repo,

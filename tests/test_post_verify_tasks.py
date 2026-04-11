@@ -6,14 +6,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TOP_LEVEL_POST_VERIFY_TASKS = REPO_ROOT / "playbooks" / "tasks" / "post-verify.yml"
 COLLECTION_POST_VERIFY_TASKS = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "playbooks"
-    / "tasks"
-    / "post-verify.yml"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "tasks" / "post-verify.yml"
 )
 TOP_LEVEL_DOCKER_PUBLICATION_ASSERT_TASKS = REPO_ROOT / "playbooks" / "tasks" / "docker-publication-assert.yml"
 COLLECTION_DOCKER_PUBLICATION_ASSERT_TASKS = (
@@ -37,7 +30,9 @@ def test_post_verify_task_copies_stay_in_sync() -> None:
 
 
 def test_docker_publication_assert_task_copies_stay_in_sync() -> None:
-    assert load_tasks(TOP_LEVEL_DOCKER_PUBLICATION_ASSERT_TASKS) == load_tasks(COLLECTION_DOCKER_PUBLICATION_ASSERT_TASKS)
+    assert load_tasks(TOP_LEVEL_DOCKER_PUBLICATION_ASSERT_TASKS) == load_tasks(
+        COLLECTION_DOCKER_PUBLICATION_ASSERT_TASKS
+    )
 
 
 def test_post_verify_probes_run_on_service_owner_only() -> None:
@@ -60,7 +55,9 @@ def test_post_verify_probes_run_on_service_owner_only() -> None:
 def test_post_verify_repairs_docker_publication_before_readiness() -> None:
     tasks = load_tasks(COLLECTION_POST_VERIFY_TASKS)
     task_names = [task["name"] for task in tasks]
-    repair_task = next(task for task in tasks if task["name"] == "Repair Docker publication before readiness verification")
+    repair_task = next(
+        task for task in tasks if task["name"] == "Repair Docker publication before readiness verification"
+    )
 
     assert task_names.index("Repair Docker publication before readiness verification") < task_names.index(
         "Run readiness verification"
@@ -99,7 +96,9 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
         task for task in tasks if task["name"] == "Create a transient Docker publication assurance helper path"
     )
     stage_task = next(
-        task for task in tasks if task["name"] == "Stage the repo-managed Docker publication assurance helper for verification"
+        task
+        for task in tasks
+        if task["name"] == "Stage the repo-managed Docker publication assurance helper for verification"
     )
     select_command_task = next(
         task for task in tasks if task["name"] == "Select the Docker publication assurance helper command"
@@ -108,7 +107,9 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
         task for task in tasks if task["name"] == "Run Docker publication assurance before final readiness verification"
     )
     record_task = next(task for task in tasks if task["name"] == "Record the Docker publication assurance result")
-    cleanup_task = next(task for task in tasks if task["name"] == "Remove the transient Docker publication assurance helper")
+    cleanup_task = next(
+        task for task in tasks if task["name"] == "Remove the transient Docker publication assurance helper"
+    )
 
     assert helper_path_task["when"] == "playbook_execution_docker_publication_command is not defined"
     assert helper_path_task["changed_when"] is False
@@ -118,7 +119,9 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
     assert "git -C " in stage_content
     assert "rev-parse --show-toplevel" in stage_content
     assert "/scripts/docker_publication_assurance.py" in stage_content
-    assert stage_task["ansible.builtin.copy"]["dest"] == "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
+    assert (
+        stage_task["ansible.builtin.copy"]["dest"] == "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
+    )
     assert stage_task["when"] == "playbook_execution_docker_publication_command is not defined"
     assert stage_task["changed_when"] is False
     effective_command = select_command_task["ansible.builtin.set_fact"][
@@ -127,13 +130,21 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
     assert "playbook_execution_docker_publication_command" in effective_command
     assert "playbook_execution_docker_publication_helper_tempfile.path" in effective_command
     assert select_command_task["changed_when"] is False
-    assert run_task["ansible.builtin.command"]["argv"][0] == "{{ playbook_execution_docker_publication_effective_command }}"
+    assert (
+        run_task["ansible.builtin.command"]["argv"][0]
+        == "{{ playbook_execution_docker_publication_effective_command }}"
+    )
     assert run_task["retries"] == 6
     assert run_task["delay"] == 2
     assert "default('', true)" in run_task["until"]
     assert "default('{}', true)" in run_task["changed_when"]
-    assert "default('{}', true)" in record_task["ansible.builtin.set_fact"]["playbook_execution_docker_publication_result"]
-    assert cleanup_task["ansible.builtin.file"]["path"] == "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
+    assert (
+        "default('{}', true)" in record_task["ansible.builtin.set_fact"]["playbook_execution_docker_publication_result"]
+    )
+    assert (
+        cleanup_task["ansible.builtin.file"]["path"]
+        == "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
+    )
     assert cleanup_task["when"] == "playbook_execution_docker_publication_command is not defined"
     assert cleanup_task["changed_when"] is False
 
@@ -141,7 +152,9 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
 def test_docker_publication_assert_resolves_helper_from_active_worktree_root() -> None:
     tasks = load_tasks(COLLECTION_DOCKER_PUBLICATION_ASSERT_TASKS)
     stage_task = next(
-        task for task in tasks if task["name"] == "Stage the repo-managed Docker publication assurance helper for verification"
+        task
+        for task in tasks
+        if task["name"] == "Stage the repo-managed Docker publication assurance helper for verification"
     )
 
     content = stage_task["ansible.builtin.copy"]["content"]

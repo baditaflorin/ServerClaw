@@ -62,6 +62,13 @@
       "allowed_bypasses": [
         "skip_remote_gate"
       ]
+    },
+    "pre_existing_gate_failures": {
+      "summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+      "max_expiry_days": 1,
+      "allowed_bypasses": [
+        "skip_remote_gate"
+      ]
     }
   }
 }

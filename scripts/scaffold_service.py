@@ -12,8 +12,6 @@ from typing import Any
 
 import yaml
 
-from service_completeness import CHECKLIST_IDS
-
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ADR_FILENAME_PATTERN = re.compile(r"^(\d{4})-")
@@ -279,8 +277,14 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
         uptime_kuma_monitors_path=repo_root / "config" / "uptime-kuma" / "monitors.json",
         keycloak_runtime_defaults_path=(
             repo_root
-            / "collections" / "ansible_collections" / "lv3" / "platform"
-            / "roles" / "keycloak_runtime" / "defaults" / "main.yml"
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "keycloak_runtime"
+            / "defaults"
+            / "main.yml"
         ),
     )
 
@@ -442,9 +446,7 @@ def ensure_new_paths(spec: ServiceSpec, repo_paths: RepoPaths) -> None:
             service["id"] for service in load_json(repo_paths.service_catalog_path)["services"]
         ],
         "health probe catalog": list(load_json(repo_paths.health_probe_catalog_path)["services"].keys()),
-        "secret catalog": [
-            secret["id"] for secret in load_json(repo_paths.secret_catalog_path)["secrets"]
-        ],
+        "secret catalog": [secret["id"] for secret in load_json(repo_paths.secret_catalog_path)["secrets"]],
         "image catalog": list(load_json(repo_paths.image_catalog_path)["images"].keys()),
         "controller-local secret manifest": list(load_json(repo_paths.secret_manifest_path)["secrets"].keys()),
         "service completeness catalog": list(load_json(repo_paths.service_completeness_path)["services"].keys()),
@@ -563,7 +565,7 @@ def insert_topology_block(host_vars_path: Path, spec: ServiceSpec) -> None:
         lines.append('    private_ip: "{{ management_tailscale_ipv4 }}"')
     else:
         lines.append(
-            f'    private_ip: "{{{{ (proxmox_guests | selectattr(\'name\', \'equalto\', \'{spec.vm}\') | map(attribute=\'ipv4\') | first) }}}}"'
+            f"    private_ip: \"{{{{ (proxmox_guests | selectattr('name', 'equalto', '{spec.vm}') | map(attribute='ipv4') | first) }}}}\""
         )
     if spec.public_hostname:
         lines.append(f"    public_hostname: {spec.public_hostname}")
@@ -583,7 +585,7 @@ def insert_topology_block(host_vars_path: Path, spec: ServiceSpec) -> None:
                 f"      visibility: {'tailnet' if spec.exposure == 'private-only' else 'public'}",
                 f"      name: {spec.public_dns_label}",
                 "      type: A",
-                f"      target: \"{{{{ {'management_tailscale_ipv4' if spec.exposure == 'private-only' else 'management_ipv4'} }}}}\"",
+                f'      target: "{{{{ {"management_tailscale_ipv4" if spec.exposure == "private-only" else "management_ipv4"} }}}}"',
                 "      ttl: 60",
             ]
         )
@@ -624,7 +626,12 @@ def update_workstreams_registry(path: Path, spec: ServiceSpec) -> None:
             "branch": spec.branch_name,
             "worktree_path": spec.worktree_path,
             "doc": (Path("docs") / "workstreams" / spec.workstream_filename).as_posix(),
-            "depends_on": ["adr-0062-role-composability", "adr-0075-service-capability-catalog", "adr-0076-subdomain-governance", "adr-0077-compose-secrets-injection"],
+            "depends_on": [
+                "adr-0062-role-composability",
+                "adr-0075-service-capability-catalog",
+                "adr-0076-subdomain-governance",
+                "adr-0077-compose-secrets-injection",
+            ],
             "conflicts_with": [],
             "shared_surfaces": [
                 repo_path.as_posix()
@@ -956,7 +963,7 @@ def update_platform_services_registry(path: Path, spec: ServiceSpec) -> None:
         dns_section = (
             f"    dns:\n"
             f"      records:\n"
-            f"        - fqdn: \"{hostname_var}\"\n"
+            f'        - fqdn: "{hostname_var}"\n'
             f"          type: public\n"
             f"          target_host: nginx-lv3\n"
             f"          ttl: 60\n"
@@ -1041,9 +1048,9 @@ def update_keycloak_role_defaults(path: Path, spec: ServiceSpec) -> None:
         f"\n# BEGIN SERVICE: {spec.service_id}\n"
         f"keycloak_{spec.service_id}_client_id: {spec.service_id}\n"
         f"keycloak_{spec.service_id}_redirect_uris:\n"
-        f"  - \"{spec.public_url or spec.internal_url}/*\"\n"
-        f"keycloak_{spec.service_id}_root_url: \"{spec.public_url or spec.internal_url}\"\n"
-        f"keycloak_{spec.service_id}_client_secret: \"\"\n"
+        f'  - "{spec.public_url or spec.internal_url}/*"\n'
+        f'keycloak_{spec.service_id}_root_url: "{spec.public_url or spec.internal_url}"\n'
+        f'keycloak_{spec.service_id}_client_secret: ""\n'
         f"# END SERVICE: {spec.service_id}\n"
     )
     content = path.read_text()
@@ -1054,15 +1061,14 @@ def print_checklist(spec: ServiceSpec) -> None:
     print(f"Scaffold created for '{spec.name_slug}'.")
     print("Required next steps:")
     print(f"  [ ] Fill in the ADR decision, consequences, and status fields: {spec.adr_path.as_posix()}")
-    print(
-        "  [ ] Replace every scaffold TODO marker and confirm `make validate-data-models` passes "
-        "before merging."
-    )
+    print("  [ ] Replace every scaffold TODO marker and confirm `make validate-data-models` passes before merging.")
     print(f"  [ ] Run the ADR 0107 completeness check: lv3 validate --service {spec.service_id}")
     print(f"  [ ] Pin the requested image digest: make pin-image IMAGE={spec.image.requested_ref}")
     print(f"  [ ] Review the generated role and runtime env contract: {spec.role_path.as_posix()}")
     print(f"  [ ] Review the generated playbook entry points: {spec.playbook_path.as_posix()}")
-    print(f"  [ ] Complete the runbook and workstream metadata: {spec.runbook_path.as_posix()} {spec.workstream_path.as_posix()}")
+    print(
+        f"  [ ] Complete the runbook and workstream metadata: {spec.runbook_path.as_posix()} {spec.workstream_path.as_posix()}"
+    )
     if spec.requires_oidc:
         print(
             f"  [ ] KEYCLOAK: add task blocks to keycloak_runtime/tasks/main.yml — "
@@ -1071,12 +1077,16 @@ def print_checklist(spec: ServiceSpec) -> None:
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate a new service scaffold across docs, roles, playbooks, and catalogs.")
+    parser = argparse.ArgumentParser(
+        description="Generate a new service scaffold across docs, roles, playbooks, and catalogs."
+    )
     parser.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[1]))
     parser.add_argument("--name", required=True)
     parser.add_argument("--description", default="")
     parser.add_argument("--category", default="automation")
-    parser.add_argument("--type", dest="service_type", choices=["compose", "vm-service", "nginx-plugin"], default="compose")
+    parser.add_argument(
+        "--type", dest="service_type", choices=["compose", "vm-service", "nginx-plugin"], default="compose"
+    )
     parser.add_argument("--vm", default="docker-runtime-lv3")
     parser.add_argument("--vmid", type=int)
     parser.add_argument("--depends-on", default="")

@@ -102,7 +102,9 @@ def load_context() -> dict[str, Any]:
     service_catalog = require_mapping(load_json(SERVICE_CATALOG_PATH), str(SERVICE_CATALOG_PATH))
     services = require_list(service_catalog.get("services"), "config/service-capability-catalog.json.services")
     service_map = {
-        require_string(service.get("id"), f"config/service-capability-catalog.json.services[{index}].id"): require_mapping(
+        require_string(
+            service.get("id"), f"config/service-capability-catalog.json.services[{index}].id"
+        ): require_mapping(
             service,
             f"config/service-capability-catalog.json.services[{index}]",
         )
@@ -124,7 +126,9 @@ def load_context() -> dict[str, Any]:
             problems.append(f"missing profiles for {', '.join(missing)}")
         if extra:
             problems.append(f"unexpected profiles for {', '.join(extra)}")
-        raise ValueError("config/service-completeness.json.services must match the service catalog: " + "; ".join(problems))
+        raise ValueError(
+            "config/service-completeness.json.services must match the service catalog: " + "; ".join(problems)
+        )
 
     for preset_name, preset in suppression_presets.items():
         preset = require_mapping(preset, f"config/service-completeness.json.suppression_presets.{preset_name}")
@@ -137,10 +141,19 @@ def load_context() -> dict[str, Any]:
 
     for service_id, profile in service_profiles.items():
         profile = require_mapping(profile, f"config/service-completeness.json.services.{service_id}")
-        require_string(profile.get("service_type"), f"config/service-completeness.json.services.{service_id}.service_type")
-        require_bool(profile.get("requires_subdomain"), f"config/service-completeness.json.services.{service_id}.requires_subdomain")
-        require_bool(profile.get("requires_oidc"), f"config/service-completeness.json.services.{service_id}.requires_oidc")
-        require_bool(profile.get("requires_secrets"), f"config/service-completeness.json.services.{service_id}.requires_secrets")
+        require_string(
+            profile.get("service_type"), f"config/service-completeness.json.services.{service_id}.service_type"
+        )
+        require_bool(
+            profile.get("requires_subdomain"),
+            f"config/service-completeness.json.services.{service_id}.requires_subdomain",
+        )
+        require_bool(
+            profile.get("requires_oidc"), f"config/service-completeness.json.services.{service_id}.requires_oidc"
+        )
+        require_bool(
+            profile.get("requires_secrets"), f"config/service-completeness.json.services.{service_id}.requires_secrets"
+        )
         require_bool(
             profile.get("requires_compose_secrets"),
             f"config/service-completeness.json.services.{service_id}.requires_compose_secrets",
@@ -169,9 +182,14 @@ def load_context() -> dict[str, Any]:
                 f"config/service-completeness.json.services.{service_id}.suppressed_checks.{item_id}",
             )
         if "dashboard_file" in profile:
-            require_string(profile.get("dashboard_file"), f"config/service-completeness.json.services.{service_id}.dashboard_file")
+            require_string(
+                profile.get("dashboard_file"), f"config/service-completeness.json.services.{service_id}.dashboard_file"
+            )
         if "alert_rule_file" in profile:
-            require_string(profile.get("alert_rule_file"), f"config/service-completeness.json.services.{service_id}.alert_rule_file")
+            require_string(
+                profile.get("alert_rule_file"),
+                f"config/service-completeness.json.services.{service_id}.alert_rule_file",
+            )
         if "keycloak_client_generated" in profile:
             require_bool(
                 profile.get("keycloak_client_generated"),
@@ -325,13 +343,7 @@ def role_dir_for(service_id: str, context: dict[str, Any], profile: dict[str, An
             return REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / role_name
     if profile.get("service_type") == "compose":
         return (
-            REPO_ROOT
-            / "collections"
-            / "ansible_collections"
-            / "lv3"
-            / "platform"
-            / "roles"
-            / f"{service_id}_runtime"
+            REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / f"{service_id}_runtime"
         )
     return None
 
@@ -362,7 +374,9 @@ def item_result(
     )
 
 
-def evaluate_service(service_id: str, *, today: dt.date | None = None, context: dict[str, Any] | None = None) -> ServiceResult:
+def evaluate_service(
+    service_id: str, *, today: dt.date | None = None, context: dict[str, Any] | None = None
+) -> ServiceResult:
     context = context or load_context()
     today = today or dt.date.today()
     service = context["service_map"].get(service_id)
@@ -568,7 +582,9 @@ def format_service_result(result: ServiceResult) -> str:
     return "\n".join(lines)
 
 
-def validate_services(service_ids: list[str] | None = None, *, today: dt.date | None = None) -> tuple[list[ServiceResult], list[str]]:
+def validate_services(
+    service_ids: list[str] | None = None, *, today: dt.date | None = None
+) -> tuple[list[ServiceResult], list[str]]:
     context = load_context()
     today = today or dt.date.today()
     requested = service_ids or sorted(context["service_map"])

@@ -67,13 +67,13 @@ LOG_KEYWORDS = ("grafana logs", "loki", "log query", "query logs", "dozzle", "lo
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def isoformat(value: dt.datetime | None) -> str | None:
     if value is None:
         return None
-    return value.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return value.astimezone(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_text(value: str) -> str:
@@ -156,10 +156,7 @@ def validate_runtime_assurance_catalog(
     )
 
     if set(dimensions) != set(DIMENSION_IDS):
-        raise ValueError(
-            "runtime-assurance.dimensions must define exactly "
-            + ", ".join(DIMENSION_IDS)
-        )
+        raise ValueError("runtime-assurance.dimensions must define exactly " + ", ".join(DIMENSION_IDS))
 
     for dimension_id, dimension in dimensions.items():
         dimension = require_mapping(dimension, f"runtime-assurance.dimensions.{dimension_id}")
@@ -206,9 +203,13 @@ def validate_runtime_assurance_catalog(
         "runtime-assurance.service_overrides",
     ).items():
         override = require_mapping(override, f"runtime-assurance.service_overrides.{service_id}")
-        profile_id = require_string(override.get("profile"), f"runtime-assurance.service_overrides.{service_id}.profile")
+        profile_id = require_string(
+            override.get("profile"), f"runtime-assurance.service_overrides.{service_id}.profile"
+        )
         if profile_id not in profiles:
-            raise ValueError(f"runtime-assurance.service_overrides.{service_id}.profile references unknown profile '{profile_id}'")
+            raise ValueError(
+                f"runtime-assurance.service_overrides.{service_id}.profile references unknown profile '{profile_id}'"
+            )
 
     freshness = require_mapping(
         catalog.get("freshness_days_by_dimension", {}),
@@ -329,11 +330,7 @@ def collect_receipt_evidence(repo_root: Path, service_catalog: dict[str, Any]) -
             outcome = "degraded"
         else:
             outcome = "pass"
-        recorded_value = (
-            payload.get("recorded_at")
-            or payload.get("recorded_on")
-            or payload.get("applied_on")
-        )
+        recorded_value = payload.get("recorded_at") or payload.get("recorded_on") or payload.get("applied_on")
         recorded_at = parse_timestamp(str(recorded_value), default_to_start_of_day=True) if recorded_value else None
         receipts.append(
             {
@@ -411,15 +408,25 @@ def health_dimension_status(item: dict[str, Any]) -> tuple[str, str, str | None]
     return "unknown", reason, computed_at
 
 
-def declared_runtime_dimension(service: dict[str, Any], health_item: dict[str, Any] | None, receipt: dict[str, Any] | None) -> tuple[str, str, str | None]:
+def declared_runtime_dimension(
+    service: dict[str, Any], health_item: dict[str, Any] | None, receipt: dict[str, Any] | None
+) -> tuple[str, str, str | None]:
     if health_item:
         health_status, reason, last_verified = health_dimension_status(health_item)
         if health_status in {"pass", "degraded", "failed"}:
             return "pass", f"Runtime witness present through health composite: {reason}", last_verified
     if receipt is not None:
         recorded_at = receipt.get("recorded_at")
-        return "pass", f"Recent governed receipt {receipt['receipt_id']} proves the service was applied and verified.", isoformat(recorded_at)
-    return "unknown", "No current runtime witness was found in the health composite or recent live-apply receipts.", None
+        return (
+            "pass",
+            f"Recent governed receipt {receipt['receipt_id']} proves the service was applied and verified.",
+            isoformat(recorded_at),
+        )
+    return (
+        "unknown",
+        "No current runtime witness was found in the health composite or recent live-apply receipts.",
+        None,
+    )
 
 
 def route_dimension(
@@ -438,33 +445,71 @@ def route_dimension(
         if not url_meta["hostname"]:
             return "unknown", "The private route is not declared in the service binding URL.", last_verified
         if health_status == "failed":
-            return "failed", f"The private route host {url_meta['hostname']} is declared but the current health evidence is failing.", last_verified
+            return (
+                "failed",
+                f"The private route host {url_meta['hostname']} is declared but the current health evidence is failing.",
+                last_verified,
+            )
         if health_status == "degraded":
-            return "degraded", f"The private route host {url_meta['hostname']} is declared and reachable but degraded.", last_verified
+            return (
+                "degraded",
+                f"The private route host {url_meta['hostname']} is declared and reachable but degraded.",
+                last_verified,
+            )
         if health_status == "pass":
-            return "pass", f"The private route host {url_meta['hostname']} is declared and currently reachable.", last_verified
-        return "unknown", f"The private route host {url_meta['hostname']} is declared, but no fresh reachability evidence is available.", last_verified
+            return (
+                "pass",
+                f"The private route host {url_meta['hostname']} is declared and currently reachable.",
+                last_verified,
+            )
+        return (
+            "unknown",
+            f"The private route host {url_meta['hostname']} is declared, but no fresh reachability evidence is available.",
+            last_verified,
+        )
 
     if not publications:
-        return "failed", "The service requires a publication entry, but no active route was found in the publication registry.", last_verified
+        return (
+            "failed",
+            "The service requires a publication entry, but no active route was found in the publication registry.",
+            last_verified,
+        )
 
     expected_host = str(binding.get("subdomain") or url_meta["hostname"] or "")
     matching = [
-        publication
-        for publication in publications
-        if not expected_host or publication.get("fqdn") == expected_host
+        publication for publication in publications if not expected_host or publication.get("fqdn") == expected_host
     ]
     if expected_host and not matching:
-        return "failed", f"The declared host {expected_host} does not match any active publication entry for this service and environment.", last_verified
+        return (
+            "failed",
+            f"The declared host {expected_host} does not match any active publication entry for this service and environment.",
+            last_verified,
+        )
 
     fqdn = str((matching or publications)[0].get("fqdn") or expected_host or "unknown")
     if health_status == "failed":
-        return "failed", f"The route {fqdn} is declared, but the current health evidence shows the published path failing.", last_verified
+        return (
+            "failed",
+            f"The route {fqdn} is declared, but the current health evidence shows the published path failing.",
+            last_verified,
+        )
     if health_status == "degraded":
-        return "degraded", f"The route {fqdn} is declared and resolves to the correct surface, but the live path is degraded.", last_verified
+        return (
+            "degraded",
+            f"The route {fqdn} is declared and resolves to the correct surface, but the live path is degraded.",
+            last_verified,
+        )
     if health_status == "pass":
-        return "pass", f"The active publication for {fqdn} matches the declared environment and is currently reachable.", last_verified
-    return "unknown", f"The active publication for {fqdn} is declared, but no fresh live reachability evidence is available.", last_verified
+        return (
+            "pass",
+            f"The active publication for {fqdn} matches the declared environment and is currently reachable.",
+            last_verified,
+        )
+    return (
+        "unknown",
+        f"The active publication for {fqdn} is declared, but no fresh live reachability evidence is available.",
+        last_verified,
+    )
 
 
 def tls_dimension(
@@ -477,21 +522,48 @@ def tls_dimension(
 ) -> tuple[str, str, str | None]:
     url = str(binding.get("url") or service.get("public_url") or service.get("internal_url") or "")
     url_meta = parse_url_metadata(url)
-    publication_tls = any(isinstance(publication.get("adapter"), dict) and publication["adapter"].get("tls") for publication in publications)
+    publication_tls = any(
+        isinstance(publication.get("adapter"), dict) and publication["adapter"].get("tls")
+        for publication in publications
+    )
     health_status, _reason, last_verified = health_dimension_status(health_item or {})
 
     if url_meta["scheme"] != "https" and not publication_tls:
         if assurance_class == "required":
-            return "failed", "The profile requires TLS proof, but the declared surface is not HTTPS-bearing.", last_verified
-        return "n_a", "The declared surface does not currently expose HTTPS, so TLS posture is not applicable to this binding.", last_verified
+            return (
+                "failed",
+                "The profile requires TLS proof, but the declared surface is not HTTPS-bearing.",
+                last_verified,
+            )
+        return (
+            "n_a",
+            "The declared surface does not currently expose HTTPS, so TLS posture is not applicable to this binding.",
+            last_verified,
+        )
 
     if health_status == "failed":
-        return "failed", "The HTTPS surface is declared, but the current live health evidence is failing.", last_verified
+        return (
+            "failed",
+            "The HTTPS surface is declared, but the current live health evidence is failing.",
+            last_verified,
+        )
     if health_status == "degraded":
-        return "degraded", "The HTTPS surface is declared and negotiates enough to answer probes, but the live path is degraded.", last_verified
+        return (
+            "degraded",
+            "The HTTPS surface is declared and negotiates enough to answer probes, but the live path is degraded.",
+            last_verified,
+        )
     if health_status == "pass":
-        return "pass", "The declared HTTPS surface is currently reachable and negotiating successfully on the live path.", last_verified
-    return "unknown", "The surface is declared as HTTPS-bearing, but no fresh live TLS evidence is available.", last_verified
+        return (
+            "pass",
+            "The declared HTTPS surface is currently reachable and negotiating successfully on the live path.",
+            last_verified,
+        )
+    return (
+        "unknown",
+        "The surface is declared as HTTPS-bearing, but no fresh live TLS evidence is available.",
+        last_verified,
+    )
 
 
 def receipt_dimension(
@@ -525,10 +597,22 @@ def receipt_dimension(
         return "unknown", "No recent governed smoke receipt is available for this service and environment.", None
     recorded_at = receipt.get("recorded_at")
     if receipt["outcome"] == "pass":
-        return "pass", f"Receipt {receipt['receipt_id']} contains recent {dimension_id.replace('_', ' ')} evidence.", isoformat(recorded_at)
+        return (
+            "pass",
+            f"Receipt {receipt['receipt_id']} contains recent {dimension_id.replace('_', ' ')} evidence.",
+            isoformat(recorded_at),
+        )
     if receipt["outcome"] == "degraded":
-        return "degraded", f"Receipt {receipt['receipt_id']} recorded a partial verification result for this dimension.", isoformat(recorded_at)
-    return "failed", f"Receipt {receipt['receipt_id']} recorded a failed verification result for this dimension.", isoformat(recorded_at)
+        return (
+            "degraded",
+            f"Receipt {receipt['receipt_id']} recorded a partial verification result for this dimension.",
+            isoformat(recorded_at),
+        )
+    return (
+        "failed",
+        f"Receipt {receipt['receipt_id']} recorded a failed verification result for this dimension.",
+        isoformat(recorded_at),
+    )
 
 
 def evaluate_dimension(
@@ -658,9 +742,15 @@ def build_runtime_assurance_report(
     observed_now = now or utc_now()
     catalog = catalog or load_runtime_assurance_catalog(repo_root / "config" / "runtime-assurance-matrix.json")
     service_catalog = service_catalog or load_service_catalog(repo_root / "config" / "service-capability-catalog.json")
-    environment_topology = environment_topology or load_environment_topology(repo_root / "config" / "environment-topology.json")
-    publication_registry = publication_registry or load_publication_registry(repo_root / "config" / "subdomain-exposure-registry.json")
-    validate_runtime_assurance_catalog(catalog, service_catalog=service_catalog, environment_topology=environment_topology)
+    environment_topology = environment_topology or load_environment_topology(
+        repo_root / "config" / "environment-topology.json"
+    )
+    publication_registry = publication_registry or load_publication_registry(
+        repo_root / "config" / "subdomain-exposure-registry.json"
+    )
+    validate_runtime_assurance_catalog(
+        catalog, service_catalog=service_catalog, environment_topology=environment_topology
+    )
     health_payload = health_payload or load_health_payload(repo_root)
     health_map = build_health_map(health_payload)
     publications_by_key = active_publications_by_key(publication_registry)
@@ -790,5 +880,5 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         emit_cli_error(str(exc))

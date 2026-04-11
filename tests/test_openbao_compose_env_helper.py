@@ -66,7 +66,7 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
 
     assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
     assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
-    assert 'path: "{{ lookup(\'ansible.builtin.env\', \'ANSIBLE_SSH_CONTROL_PATH_DIR\') }}"' in tasks
+    assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
     assert "- name: Record whether the local OpenBao runtime needed recovery for compose env injection" in tasks
     assert "common_openbao_compose_env_runtime_needs_recovery" in tasks
     assert "- name: Wait for the Docker daemon to answer after networking recovery" in tasks
@@ -76,7 +76,10 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "- name: Wait for the local OpenBao API to become active" in tasks
     assert "- name: Ensure the local OpenBao API is unsealed before runtime secret injection" in tasks
     assert "include_tasks: unseal_openbao_api.yml" in tasks
-    assert 'common_openbao_unseal_context: "runtime secret injection for {{ common_openbao_compose_env_service_name }}"' in tasks
+    assert (
+        'common_openbao_unseal_context: "runtime secret injection for {{ common_openbao_compose_env_service_name }}"'
+        in tasks
+    )
     assert 'common_openbao_unseal_api_url: "http://127.0.0.1:{{ openbao_http_port }}"' in tasks
     assert "Read OpenBao seal status before" in unseal_tasks
     assert "common_openbao_unseal_completed" in unseal_tasks
@@ -129,7 +132,9 @@ def test_systemd_helper_reuses_local_openbao_recovery() -> None:
     assert "common_openbao_systemd_credentials_unsealed_status.status == 200" in tasks
     assert "not (common_openbao_systemd_credentials_unsealed_status.json.sealed | bool)" in tasks
     assert "- name: Probe the current host-native secret payload from OpenBao" in tasks
-    assert "- name: Read the local OpenBao seal status after a transient host-native secret payload read failure" in tasks
+    assert (
+        "- name: Read the local OpenBao seal status after a transient host-native secret payload read failure" in tasks
+    )
     assert "- name: Unseal the local OpenBao API when host-native secret payload reads catch it sealed" in tasks
     assert "- name: Wait for the local OpenBao API to become active after host-native secret payload recovery" in tasks
 

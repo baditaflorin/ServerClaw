@@ -177,8 +177,7 @@ def test_run_workflow_materialize_command_uses_current_path(
     helper_dir.mkdir()
     helper = helper_dir / "materialize-docs-portal"
     helper.write_text(
-        "#!/bin/sh\n"
-        "mkdir -p build/docs-portal\n",
+        "#!/bin/sh\nmkdir -p build/docs-portal\n",
         encoding="utf-8",
     )
     helper.chmod(0o755)

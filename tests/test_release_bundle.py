@@ -35,7 +35,7 @@ def test_write_bundle_archive_embeds_manifest_and_selected_files(tmp_path: Path,
     (tmp_path / "scripts").mkdir()
     (tmp_path / "scripts" / "tool.py").write_text("print('ok')\n")
     (tmp_path / "config").mkdir()
-    (tmp_path / "config" / "example.json").write_text("{\"ok\": true}\n")
+    (tmp_path / "config" / "example.json").write_text('{"ok": true}\n')
     files = [tmp_path / "scripts" / "tool.py", tmp_path / "config" / "example.json"]
     identity = release_bundle.determine_release_identity(
         ref_name="main",
@@ -64,7 +64,10 @@ def test_write_bundle_archive_embeds_manifest_and_selected_files(tmp_path: Path,
         manifest_payload = json.loads(archive.extractfile("release-bundle-manifest.json").read().decode("utf-8"))
     assert manifest_payload["contents"]["file_count"] == 2
     assert manifest_payload["bundle"]["verification_public_key"] == "keys/gitea-release-bundle-cosign.pub"
-    assert manifest_payload["bundle"]["sigstore_bundle_asset"] == "lv3-control-bundle-branch-main-0123456789ab.tar.gz.sigstore.json"
+    assert (
+        manifest_payload["bundle"]["sigstore_bundle_asset"]
+        == "lv3-control-bundle-branch-main-0123456789ab.tar.gz.sigstore.json"
+    )
     assert (
         manifest_payload["bundle"]["optional_detached_signature_asset"]
         == "lv3-control-bundle-branch-main-0123456789ab.tar.gz.sig"
@@ -238,9 +241,21 @@ def test_fetch_release_assets_prefers_attachment_detail_download_urls_with_relea
     release = {
         "id": 7,
         "assets": [
-            {"id": 19, "name": "bundle.tar.gz", "browser_download_url": "http://git.lv3.org:3009/releases/download/bad"},
-            {"id": 20, "name": "bundle.tar.gz.sigstore.json", "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sigstore"},
-            {"id": 21, "name": "bundle.tar.gz.sha256", "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sha"},
+            {
+                "id": 19,
+                "name": "bundle.tar.gz",
+                "browser_download_url": "http://git.lv3.org:3009/releases/download/bad",
+            },
+            {
+                "id": 20,
+                "name": "bundle.tar.gz.sigstore.json",
+                "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sigstore",
+            },
+            {
+                "id": 21,
+                "name": "bundle.tar.gz.sha256",
+                "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sha",
+            },
         ],
     }
     downloaded_urls: list[str] = []

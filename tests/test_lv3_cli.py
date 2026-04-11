@@ -222,8 +222,16 @@ all:
             {
                 "workflows": {
                     "windmill_healthcheck": {"description": "Healthcheck", "execution_class": "diagnostic"},
-                    "operator-onboard": {"description": "Operator onboarding", "live_impact": "guest_live", "execution_class": "mutation"},
-                    "operator-offboard": {"description": "Operator offboarding", "live_impact": "guest_live", "execution_class": "mutation"},
+                    "operator-onboard": {
+                        "description": "Operator onboarding",
+                        "live_impact": "guest_live",
+                        "execution_class": "mutation",
+                    },
+                    "operator-offboard": {
+                        "description": "Operator offboarding",
+                        "live_impact": "guest_live",
+                        "execution_class": "mutation",
+                    },
                     "converge-netbox": {
                         "description": "NetBox converge",
                         "live_impact": "guest_live",
@@ -426,7 +434,9 @@ def test_help_lists_command_groups(capsys: pytest.CaptureFixture[str], minimal_r
     assert "handoff" in captured.out
 
 
-def test_handoff_cli_round_trip(capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_handoff_cli_round_trip(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     handoff_dsn = f"sqlite:///{minimal_repo / '.local' / 'state' / 'handoffs.sqlite3'}"
     monkeypatch.setenv("LV3_HANDOFF_DSN", handoff_dsn)
 
@@ -455,7 +465,9 @@ def test_handoff_cli_round_trip(capsys: pytest.CaptureFixture[str], minimal_repo
     sent_payload = json.loads(capsys.readouterr().out)
     assert sent_payload["status"] == "pending"
 
-    accept_exit = lv3_cli.main(["handoff", "accept", "handoff-cli-001", "--actor", "operator", "--estimate-seconds", "120"])
+    accept_exit = lv3_cli.main(
+        ["handoff", "accept", "handoff-cli-001", "--actor", "operator", "--estimate-seconds", "120"]
+    )
     assert accept_exit == 0
     accepted_payload = json.loads(capsys.readouterr().out)
     assert accepted_payload["status"] == "accepted"
@@ -468,9 +480,7 @@ def test_handoff_cli_round_trip(capsys: pytest.CaptureFixture[str], minimal_repo
     assert viewed_payload["estimated_completion_seconds"] == 120
 
 
-def test_deploy_dry_run_prints_remote_exec_route(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_deploy_dry_run_prints_remote_exec_route(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["deploy", "grafana", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -600,18 +610,14 @@ def test_deploy_repo_profile_dry_run_prints_override_args(
     assert "--timeout 1800" in captured.out
 
 
-def test_open_dry_run_uses_catalog_url(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_open_dry_run_uses_catalog_url(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["open", "ops_portal", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "https://ops.lv3.org" in captured.out
 
 
-def test_windmill_url_prefers_runtime_environment_override(
-    minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_windmill_url_prefers_runtime_environment_override(minimal_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("LV3_WINDMILL_BASE_URL", "http://127.0.0.1:8000/")
 
     assert lv3_cli.windmill_url(lv3_cli.load_service_map()) == "http://127.0.0.1:8000"
@@ -775,9 +781,7 @@ def test_memory_query_command_prints_matches(
     assert "backends=semantic,keyword" in captured.out
 
 
-def test_run_dry_run_redacts_token(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_run_dry_run_redacts_token(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["run", "windmill_healthcheck", "--args", "probe=manual", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -802,9 +806,7 @@ def test_run_dry_run_compiles_natural_language_instruction(
     assert events[-1]["event_type"] == "intent.compiled"
 
 
-def test_run_parse_error_is_clean(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_run_parse_error_is_clean(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["run", "dploy", "netbox"])
     captured = capsys.readouterr()
 
@@ -815,9 +817,7 @@ def test_run_parse_error_is_clean(
     assert events[-1]["event_type"] == "intent.rejected"
 
 
-def test_health_command_prints_composite_summary(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_health_command_prints_composite_summary(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     snapshot_dir = minimal_repo / ".local" / "state" / "world-state"
     snapshot_dir.mkdir(parents=True)
     (snapshot_dir / "service_health.json").write_text(
@@ -842,9 +842,7 @@ def test_health_command_prints_composite_summary(
     assert "windmill" in captured.out
 
 
-def test_run_force_unsafe_health_bypasses_health_gate(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_run_force_unsafe_health_bypasses_health_gate(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     snapshot_dir = minimal_repo / ".local" / "state" / "world-state"
     snapshot_dir.mkdir(parents=True)
     (snapshot_dir / "service_health.json").write_text(
@@ -864,9 +862,7 @@ def test_run_force_unsafe_health_bypasses_health_gate(
     assert "Dispatch Workflow: converge-netbox" in captured.out
 
 
-def test_run_requires_approval_and_writes_lifecycle_events(
-    minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_run_requires_approval_and_writes_lifecycle_events(minimal_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[tuple[str, dict[str, str]]] = []
 
     monkeypatch.setattr(lv3_cli, "prompt_for_intent_approval", lambda: True)
@@ -885,9 +881,7 @@ def test_run_requires_approval_and_writes_lifecycle_events(
     assert event_types == ["intent.compiled", "intent.approved"]
 
 
-def test_intent_check_reports_clear_status(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_intent_check_reports_clear_status(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["intent", "check", "deploy", "netbox"])
     captured = capsys.readouterr()
 
@@ -896,9 +890,7 @@ def test_intent_check_reports_clear_status(
     assert "Conflict check: CLEAR" in captured.out
 
 
-def test_intent_check_reports_conflict(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_intent_check_reports_conflict(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     registry = IntentConflictRegistry(repo_root=minimal_repo)
     registry.register_intent(
         {"workflow_id": "converge-netbox", "arguments": {"service": "netbox"}, "target_service_id": "netbox"},
@@ -914,9 +906,8 @@ def test_intent_check_reports_conflict(
     assert "Conflict check: CONFLICT" in captured.out
     assert "intent-existing" in captured.out
 
-def test_intent_batch_renders_plan_and_writes_ledger(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+
+def test_intent_batch_renders_plan_and_writes_ledger(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(
         [
             "intent",
@@ -937,9 +928,8 @@ def test_intent_batch_renders_plan_and_writes_ledger(
     event_types = [json.loads(line)["event_type"] for line in ledger_path.read_text().splitlines()]
     assert event_types == ["intent.batch_plan"]
 
-def test_intent_status_reports_idempotent_hit(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+
+def test_intent_status_reports_idempotent_hit(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
     ledger_path.write_text(
@@ -970,9 +960,8 @@ def test_intent_status_reports_idempotent_hit(
     assert "Original execution: job-1" in captured.out
     assert "No action taken." in captured.out
 
-def test_runbook_execute_dry_run_renders_steps(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+
+def test_runbook_execute_dry_run_renders_steps(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["runbook", "execute", "renew-certificate", "--args", "service=grafana", "--dry-run"])
     captured = capsys.readouterr()
 
@@ -986,7 +975,9 @@ def test_load_secret_file_maps_controller_style_path_into_repo_local(
     minimal_repo: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    controller_style_path = "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt"
+    controller_style_path = (
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt"
+    )
     repo_local_secret = minimal_repo / ".local" / "windmill" / "superadmin-secret.txt"
     repo_local_secret.parent.mkdir(parents=True, exist_ok=True)
     repo_local_secret.write_text("runtime-token", encoding="utf-8")
@@ -998,7 +989,9 @@ def test_load_secret_file_maps_controller_style_path_into_repo_local(
     monkeypatch.setattr(
         lv3_cli,
         "resolve_repo_local_path",
-        lambda path, *, repo_root: repo_local_secret if path == controller_style_path and repo_root == minimal_repo else Path(path),
+        lambda path, *, repo_root: (
+            repo_local_secret if path == controller_style_path and repo_root == minimal_repo else Path(path)
+        ),
     )
 
     assert lv3_cli.load_secret_file("windmill_superadmin_secret") == "runtime-token"
@@ -1008,9 +1001,8 @@ def test_runbook_completion_suggests_runbooks(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "runbook", "execute", "renew"], "renew")
     assert candidates == ["renew-certificate"]
 
-def test_run_rejects_autonomous_out_of_bounds_action(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+
+def test_run_rejects_autonomous_out_of_bounds_action(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["run", "deploy", "netbox", "--actor-id", "agent/triage-loop", "--autonomous"])
     captured = capsys.readouterr()
 
@@ -1021,9 +1013,7 @@ def test_run_rejects_autonomous_out_of_bounds_action(
     assert events[-1]["event_type"] == "intent.rejected"
 
 
-def test_vm_list_uses_inventory(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_vm_list_uses_inventory(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["vm", "list"])
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -1062,27 +1052,21 @@ def test_loop_start_outputs_resolved_run(capsys: pytest.CaptureFixture[str], min
     assert payload["current_state"] == "RESOLVED"
 
 
-def test_diff_dry_run_uses_drift_report_target(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_diff_dry_run_uses_drift_report_target(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["diff", "--env", "production", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "make drift-report ENV=production" in captured.out
 
 
-def test_fixture_list_dry_run_prints_make_target(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_fixture_list_dry_run_prints_make_target(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["fixture", "list", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "make fixture-list" in captured.out
 
 
-def test_capacity_dry_run_prints_make_target(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_capacity_dry_run_prints_make_target(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["capacity", "--format", "json", "--no-live-metrics", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -1106,9 +1090,7 @@ def test_search_command_returns_catalog_match(capsys: pytest.CaptureFixture[str]
     assert "converge-netbox" in captured.out
 
 
-def test_impact_command_prints_dependency_summary(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_impact_command_prints_dependency_summary(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["impact", "windmill"])
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -1150,9 +1132,7 @@ def test_fixture_create_dry_run_passes_lifecycle_parameters(
     assert "EPHEMERAL_POLICY=integration-test" in captured.out
 
 
-def test_fixture_destroy_dry_run_accepts_vmid(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_fixture_destroy_dry_run_accepts_vmid(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(["fixture", "destroy", "--vmid", "910", "--dry-run"])
     captured = capsys.readouterr()
 
@@ -1160,9 +1140,8 @@ def test_fixture_destroy_dry_run_accepts_vmid(
     assert "make fixture-down" in captured.out
     assert "VMID=910" in captured.out
 
-def test_release_status_is_forwarded_to_release_manager(
-    minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+
+def test_release_status_is_forwarded_to_release_manager(minimal_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[list[str]] = []
 
     fake_module = types.SimpleNamespace(main=lambda argv: calls.append(argv) or 0)
@@ -1225,9 +1204,7 @@ def test_manifest_refresh_runs_local_generator(
     assert "scripts/platform_manifest.py" in captured.out
 
 
-def test_operator_add_dry_run_uses_windmill_workflow(
-    capsys: pytest.CaptureFixture[str], minimal_repo: Path
-) -> None:
+def test_operator_add_dry_run_uses_windmill_workflow(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
     exit_code = lv3_cli.main(
         [
             "operator",
@@ -1280,6 +1257,7 @@ def test_operator_add_viewer_dry_run_does_not_require_ssh_key(
     assert exit_code == 0
     assert "operator-onboard" in captured.out
     assert "viewer@example.com" in captured.out
+
 
 def test_validate_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "validate", "--service"], "g")

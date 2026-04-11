@@ -10,7 +10,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import tarfile
 import tempfile
 import time
@@ -283,7 +282,7 @@ def api_request(
         headers["Content-Type"] = content_type
     request = urllib.request.Request(url, data=payload, method=method, headers=headers)
     try:
-        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:  # noqa: S310
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
             body = response.read()
             status = response.getcode()
     except urllib.error.HTTPError as exc:
@@ -408,9 +407,7 @@ def prune_release_bundles(
     if retain_count < 1:
         return []
     releases = fetch_all_releases(gitea_url=gitea_url, repository=repository, token=token)
-    bundle_releases = [
-        release for release in releases if str(release.get("tag_name", "")).startswith("bundle-")
-    ]
+    bundle_releases = [release for release in releases if str(release.get("tag_name", "")).startswith("bundle-")]
     bundle_releases.sort(key=parse_release_timestamp, reverse=True)
     preserved = []
     removed = []
@@ -549,7 +546,7 @@ def sign_bundle(
     ensure_cosign_installed(cosign_path)
     env = os.environ.copy()
     env["COSIGN_PASSWORD"] = password_file.read_text().strip()
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         [
             cosign_path,
             "sign-blob",
@@ -598,9 +595,11 @@ def verify_bundle(
     elif signature_path is not None and signature_path.exists():
         command.extend(["--signature", str(signature_path)])
     else:
-        raise FileNotFoundError("missing Cosign verification material; expected a Sigstore bundle or detached signature")
+        raise FileNotFoundError(
+            "missing Cosign verification material; expected a Sigstore bundle or detached signature"
+        )
     command.append(str(bundle_path))
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         command,
         cwd=REPO_ROOT,
         text=True,
@@ -856,7 +855,7 @@ def init_signing_material(
             "--output-key-prefix",
             "/out/cosign",
         ]
-        result = subprocess.run(  # noqa: S603
+        result = subprocess.run(
             command,
             cwd=REPO_ROOT,
             text=True,
@@ -1061,9 +1060,7 @@ def command_verify_release(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Build, sign, publish, and verify ADR 0233 signed release bundles."
-    )
+    parser = argparse.ArgumentParser(description="Build, sign, publish, and verify ADR 0233 signed release bundles.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     validate_parser = subparsers.add_parser("validate", help="Validate the bundle selection and signing inputs.")
@@ -1090,7 +1087,9 @@ def build_parser() -> argparse.ArgumentParser:
         ("publish", "Build, sign, and publish a bundle to a Gitea Release.", command_publish),
     ):
         command_parser = subparsers.add_parser(name, help=help_text)
-        command_parser.add_argument("--repository", default=os.environ.get("GITHUB_REPOSITORY", "ops/proxmox_florin_server"))
+        command_parser.add_argument(
+            "--repository", default=os.environ.get("GITHUB_REPOSITORY", "ops/proxmox_florin_server")
+        )
         command_parser.add_argument("--ref-name", default=os.environ.get("GITHUB_REF_NAME", "main"))
         command_parser.add_argument("--ref-type", default=os.environ.get("GITHUB_REF_TYPE", "branch"))
         command_parser.add_argument("--commit", default=os.environ.get("GITHUB_SHA", "unknown"))
@@ -1105,7 +1104,9 @@ def build_parser() -> argparse.ArgumentParser:
         else:
             command_parser.set_defaults(sign=True)
         if name == "publish":
-            command_parser.add_argument("--gitea-url", default=os.environ.get("GITHUB_SERVER_URL", "http://100.64.0.1:3009"))
+            command_parser.add_argument(
+                "--gitea-url", default=os.environ.get("GITHUB_SERVER_URL", "http://100.64.0.1:3009")
+            )
             command_parser.add_argument("--api-token")
             command_parser.add_argument("--retain-count", type=int, default=DEFAULT_RELEASE_BUNDLE_RETAIN_COUNT)
         command_parser.set_defaults(func=func)
@@ -1131,7 +1132,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return args.func(args)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("release-bundle", exc)
 
 

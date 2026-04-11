@@ -87,9 +87,7 @@ def validate_exception_metadata(exception: dict, path: str) -> None:
 
 def validate_image_catalog(catalog: dict) -> None:
     if catalog.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
-        raise ValueError(
-            f"image catalog must declare schema_version '{SUPPORTED_SCHEMA_VERSION}'"
-        )
+        raise ValueError(f"image catalog must declare schema_version '{SUPPORTED_SCHEMA_VERSION}'")
 
     images = require_mapping(catalog.get("images"), "images")
     if not images:
@@ -129,9 +127,7 @@ def validate_image_catalog(catalog: dict) -> None:
         require_date(entry.get("pinned_on"), f"images.{image_id}.pinned_on")
         scan_status = require_str(entry.get("scan_status"), f"images.{image_id}.scan_status")
         if scan_status not in ALLOWED_SCAN_STATUSES:
-            raise ValueError(
-                f"images.{image_id}.scan_status must be one of {sorted(ALLOWED_SCAN_STATUSES)}"
-            )
+            raise ValueError(f"images.{image_id}.scan_status must be one of {sorted(ALLOWED_SCAN_STATUSES)}")
 
         receipt_rel = require_str(entry.get("scan_receipt"), f"images.{image_id}.scan_receipt")
         receipt_path = repo_path(*Path(receipt_rel).parts)
@@ -144,9 +140,7 @@ def validate_image_catalog(catalog: dict) -> None:
         for index, consumer in enumerate(consumers):
             consumer = require_str(consumer, f"images.{image_id}.consumers[{index}]")
             if not repo_path(*Path(consumer).parts).exists():
-                raise ValueError(
-                    f"images.{image_id}.consumers[{index}] references missing path '{consumer}'"
-                )
+                raise ValueError(f"images.{image_id}.consumers[{index}] references missing path '{consumer}'")
 
         apply_targets = require_list(entry.get("apply_targets"), f"images.{image_id}.apply_targets")
         if not apply_targets:
@@ -170,9 +164,7 @@ def validate_image_catalog(catalog: dict) -> None:
 
         validate_exception_metadata(exception, f"images.{image_id}.exception")
         if scan_status != "exception_open":
-            raise ValueError(
-                f"images.{image_id}.scan_status must be 'exception_open' when an exception is recorded"
-            )
+            raise ValueError(f"images.{image_id}.scan_status must be 'exception_open' when an exception is recorded")
 
 
 def validate_scan_receipt(receipt: dict, path: Path, image_id: str, ref: str) -> None:
@@ -229,9 +221,7 @@ def fetch_bearer_token(registry: str, repository: str) -> str | None:
     if registry == "ghcr.io":
         url = f"https://ghcr.io/token?scope=repository:{repository}:pull"
     elif registry == "registry-1.docker.io":
-        query = urllib.parse.urlencode(
-            {"service": "registry.docker.io", "scope": f"repository:{repository}:pull"}
-        )
+        query = urllib.parse.urlencode({"service": "registry.docker.io", "scope": f"repository:{repository}:pull"})
         url = f"https://auth.docker.io/token?{query}"
     else:
         return None
@@ -307,9 +297,7 @@ def check_freshness(catalog: dict) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate and inspect the managed container image policy catalog."
-    )
+    parser = argparse.ArgumentParser(description="Validate and inspect the managed container image policy catalog.")
     parser.add_argument("--validate", action="store_true", help="Validate the catalog and receipts.")
     parser.add_argument(
         "--check-freshness",

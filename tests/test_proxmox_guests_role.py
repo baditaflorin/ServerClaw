@@ -25,7 +25,10 @@ def test_role_clones_from_declared_template_catalog() -> None:
     assert "Download official Debian 13 cloud image" not in task_names
 
     clone_task = next(task for task in tasks if task["name"] == "Clone guest VMs from template")
-    assert clone_task["ansible.builtin.command"]["argv"][2] == "{{ proxmox_vm_templates[item.item.template_key].vmid | string }}"
+    assert (
+        clone_task["ansible.builtin.command"]["argv"][2]
+        == "{{ proxmox_vm_templates[item.item.template_key].vmid | string }}"
+    )
 
 
 def test_cloud_init_template_does_not_start_docker_early() -> None:

@@ -45,8 +45,12 @@ def test_openfga_postgres_role_generates_and_mirrors_password() -> None:
     tasks = load_tasks()
 
     generate_task = next(task for task in tasks if task.get("name") == "Generate the OpenFGA database password")
-    mirror_task = next(task for task in tasks if task.get("name") == "Mirror the OpenFGA database password to the control machine")
-    persist_task = next(task for task in tasks if task.get("name") == "Persist the OpenFGA database password on the current guest")
+    mirror_task = next(
+        task for task in tasks if task.get("name") == "Mirror the OpenFGA database password to the control machine"
+    )
+    persist_task = next(
+        task for task in tasks if task.get("name") == "Persist the OpenFGA database password on the current guest"
+    )
 
     assert generate_task["delegate_to"] == "localhost"
     assert mirror_task["ansible.builtin.copy"]["dest"] == "{{ openfga_database_password_local_file }}"

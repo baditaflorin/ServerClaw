@@ -104,9 +104,7 @@ def test_missing_dependency_health_gate_blocks_non_grandfathered_service(
     assert any(item.item_id == "dependency_health_gate" for item in result.failing_items)
 
 
-def test_legacy_service_uses_grandfathered_suppressions(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_legacy_service_uses_grandfathered_suppressions(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     build_repo(tmp_path)
     service_completeness = load_service_completeness(monkeypatch, tmp_path)
     completeness_path = tmp_path / "config" / "service-completeness.json"
@@ -137,8 +135,11 @@ def test_find_adr_path_prefers_service_specific_match_when_ids_are_duplicated(
 
     service_completeness = load_service_completeness(monkeypatch, tmp_path)
 
-    assert service_completeness.find_adr_path(
-        "0288",
-        service_id="flagsmith",
-        service_name="Flagsmith",
-    ) == specific
+    assert (
+        service_completeness.find_adr_path(
+            "0288",
+            service_id="flagsmith",
+            service_name="Flagsmith",
+        )
+        == specific
+    )

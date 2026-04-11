@@ -142,9 +142,7 @@ def test_landing_docs_render_repo_indexes_from_canonical_files(tmp_path: Path) -
     assert "README.md" in landing["architecture"]
 
 
-def test_verify_confirms_expected_collections_and_titles(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_verify_confirms_expected_collections_and_titles(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     build_repo(tmp_path)
     token_file = tmp_path / ".local" / "outline" / "api-token.txt"
     write(token_file, "outline-api-token\n")

@@ -9,12 +9,12 @@ import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 
 try:
     from datetime import UTC  # Python 3.11+
 except ImportError:
-    UTC = timezone.utc  # type: ignore[assignment]
+    UTC = UTC  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
 
@@ -167,9 +167,7 @@ def validate_catalog(catalog: dict[str, Any], *, path: Path | None = None) -> No
         f"{prefix}.repeat_after_expiry.blocker_after_occurrences",
     )
     if blocker_after < warning_after:
-        raise ValueError(
-            f"{prefix}.repeat_after_expiry.blocker_after_occurrences must be >= warning_after_occurrences"
-        )
+        raise ValueError(f"{prefix}.repeat_after_expiry.blocker_after_occurrences must be >= warning_after_occurrences")
     if expiring_soon_days > 30:
         raise ValueError(f"{prefix}.expiring_soon_days must stay within a short-lived waiver window")
 
@@ -195,10 +193,15 @@ def validate_jsonschema(instance: Any, schema_path: Path) -> None:
 
 def max_expiry_days_for_reason(catalog: dict[str, Any], reason_code: str) -> int:
     reason = require_mapping(
-        require_mapping(catalog.get("reason_codes"), "config/gate-bypass-waiver-catalog.json.reason_codes").get(reason_code),
+        require_mapping(catalog.get("reason_codes"), "config/gate-bypass-waiver-catalog.json.reason_codes").get(
+            reason_code
+        ),
         f"config/gate-bypass-waiver-catalog.json.reason_codes.{reason_code}",
     )
-    return require_int(reason.get("max_expiry_days"), f"config/gate-bypass-waiver-catalog.json.reason_codes.{reason_code}.max_expiry_days")
+    return require_int(
+        reason.get("max_expiry_days"),
+        f"config/gate-bypass-waiver-catalog.json.reason_codes.{reason_code}.max_expiry_days",
+    )
 
 
 def default_expiry_date(*, created_at: datetime, catalog: dict[str, Any], reason_code: str) -> date:
@@ -222,7 +225,9 @@ def build_receipt_payload(
     catalog: dict[str, Any],
 ) -> dict[str, Any]:
     reasons = require_mapping(catalog.get("reason_codes"), "config/gate-bypass-waiver-catalog.json.reason_codes")
-    reason = require_mapping(reasons.get(reason_code), f"config/gate-bypass-waiver-catalog.json.reason_codes.{reason_code}")
+    reason = require_mapping(
+        reasons.get(reason_code), f"config/gate-bypass-waiver-catalog.json.reason_codes.{reason_code}"
+    )
     return {
         "schema_version": SUPPORTED_RECEIPT_SCHEMA_VERSION,
         "created_at": created_at.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -287,7 +292,9 @@ def validate_receipt(
         raise ValueError(f"{path}.waiver.expires_on must not be earlier than {path}.created_at")
     max_expiry_days = require_int(reason.get("max_expiry_days"), f"{path}.waiver.max_expiry_days")
     if (expires_on - created_at.date()).days > max_expiry_days:
-        raise ValueError(f"{path}.waiver.expires_on exceeds the {max_expiry_days}-day policy window for '{reason_code}'")
+        raise ValueError(
+            f"{path}.waiver.expires_on exceeds the {max_expiry_days}-day policy window for '{reason_code}'"
+        )
 
     return ValidatedWaiverReceipt(
         path=path,
@@ -359,7 +366,9 @@ def summarize_receipts(
     legacy_receipts = [item for item in receipts if item.is_legacy]
     open_waivers = [item for item in compliant_receipts if item.status_on(reference_date) == "open"]
     expired_waivers = [item for item in compliant_receipts if item.status_on(reference_date) == "expired"]
-    expiring_soon_days = require_int(catalog.get("expiring_soon_days"), "config/gate-bypass-waiver-catalog.json.expiring_soon_days")
+    expiring_soon_days = require_int(
+        catalog.get("expiring_soon_days"), "config/gate-bypass-waiver-catalog.json.expiring_soon_days"
+    )
     expiring_soon = [
         item
         for item in open_waivers
@@ -490,8 +499,7 @@ def render_summary(summary: dict[str, Any]) -> str:
         lines.append("- Open waiver details:")
         for item in summary["open_waivers"]:
             lines.append(
-                f"  {item['reason_code']} until {item['expires_on']} "
-                f"({item['owner']}; {item['remediation_ref']})"
+                f"  {item['reason_code']} until {item['expires_on']} ({item['owner']}; {item['remediation_ref']})"
             )
     if summary["release_blockers"] or summary["warnings"]:
         lines.append("- Repeated reasons:")
@@ -533,6 +541,16 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print(render_summary(summary))
         if args.validate:
+            # Fail the gate if any reason codes have reached release-blocker status.
+            # This means a bypass has been re-used after its waiver expired enough times
+            # that the policy considers it a systemic problem requiring remediation.
+            release_blockers = summary.get("release_blockers", [])
+            if release_blockers:
+                blocker_codes = ", ".join(item["reason_code"] for item in release_blockers)
+                raise ValueError(
+                    f"gate-bypass waiver release-blockers detected for reason codes: {blocker_codes} — "
+                    "repeated use of expired waivers requires remediation before the gate can pass"
+                )
             print("Gate bypass waivers OK")
         return 0
     except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:

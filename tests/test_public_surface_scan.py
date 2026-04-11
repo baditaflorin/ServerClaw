@@ -135,10 +135,18 @@ def test_build_report_and_events_summarize_high_and_critical_findings() -> None:
     report = scan.build_report(
         scan_id="20260324T000000Z",
         environment="production",
-        targets=[{"fqdn": "grafana.lv3.org", "service_id": "grafana", "exposure": "edge-published", "requires_auth": False}],
+        targets=[
+            {"fqdn": "grafana.lv3.org", "service_id": "grafana", "exposure": "edge-published", "requires_auth": False}
+        ],
         http_observations={"grafana.lv3.org": {"status": 200, "final_url": "https://grafana.lv3.org", "headers": {}}},
         tls_results={},
-        nuclei_result={"artifact": "", "returncode": 0, "duration_seconds": 0, "raw_findings": 0, "target": "https://lv3.org"},
+        nuclei_result={
+            "artifact": "",
+            "returncode": 0,
+            "duration_seconds": 0,
+            "raw_findings": 0,
+            "target": "https://lv3.org",
+        },
         findings=[
             scan.build_finding(
                 scan_id="20260324T000000Z",

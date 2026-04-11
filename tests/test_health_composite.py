@@ -50,7 +50,9 @@ def test_health_client_refresh_persists_sqlite_entries(tmp_path: Path) -> None:
         json.dumps({"services": [{"id": "netbox", "name": "NetBox", "lifecycle_status": "active"}]}) + "\n",
         encoding="utf-8",
     )
-    (repo_root / "versions" / "stack.yaml").write_text("repo_version: 0.1.0\nplatform_version: 0.1.0\n", encoding="utf-8")
+    (repo_root / "versions" / "stack.yaml").write_text(
+        "repo_version: 0.1.0\nplatform_version: 0.1.0\n", encoding="utf-8"
+    )
 
     db_path = tmp_path / "health.sqlite3"
     connection = sqlite3.connect(db_path)
@@ -85,6 +87,7 @@ def test_health_client_refresh_persists_sqlite_entries(tmp_path: Path) -> None:
     assert entry.composite_status == "degraded"
     assert entry.composite_score == 0.8
 
+
 def test_compute_health_entries_marks_active_degradation_as_degraded() -> None:
     entries = compute_health_entries(
         [{"id": "api_gateway", "lifecycle_status": "active"}],
@@ -113,7 +116,9 @@ def test_compute_health_entries_marks_active_degradation_as_degraded() -> None:
 def test_compute_health_entries_treats_startup_runtime_state_as_non_critical() -> None:
     entries = compute_health_entries(
         [{"id": "api_gateway", "lifecycle_status": "active"}],
-        service_health_snapshot={"services": [{"service_id": "api_gateway", "status": "starting", "runtime_state": "startup"}]},
+        service_health_snapshot={
+            "services": [{"service_id": "api_gateway", "status": "starting", "runtime_state": "startup"}]
+        },
         slo_entries=[],
         drift_report={},
         triage_reports=[],

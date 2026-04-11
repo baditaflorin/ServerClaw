@@ -137,9 +137,7 @@ def resolve_semgrep_command() -> list[str]:
         return ["semgrep"]
     if shutil.which("uv"):
         return ["uv", "tool", "run", "--from", f"semgrep=={SEMGREP_VERSION}", "semgrep"]
-    raise RuntimeError(
-        "Semgrep is not available. Install semgrep or provide LV3_SEMGREP_BIN."
-    )
+    raise RuntimeError("Semgrep is not available. Install semgrep or provide LV3_SEMGREP_BIN.")
 
 
 def run_ruleset(
@@ -216,12 +214,7 @@ def _extract_result_identity(result: dict[str, Any]) -> str:
     uri = ""
     start_line = 0
     if locations:
-        physical = (
-            locations[0]
-            .get("physicalLocation", {})
-            if isinstance(locations[0], dict)
-            else {}
-        )
+        physical = locations[0].get("physicalLocation", {}) if isinstance(locations[0], dict) else {}
         artifact = physical.get("artifactLocation", {}) if isinstance(physical, dict) else {}
         region = physical.get("region", {}) if isinstance(physical, dict) else {}
         if isinstance(artifact, dict):
@@ -343,11 +336,7 @@ def net_new_results(
     baseline_results: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     baseline_keys = {_extract_result_identity(result) for result in baseline_results}
-    return [
-        result
-        for result in current_results
-        if _extract_result_identity(result) not in baseline_keys
-    ]
+    return [result for result in current_results if _extract_result_identity(result) not in baseline_keys]
 
 
 def maybe_emit_mutation_audit(
@@ -462,8 +451,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  source sha: {source_sha}")
     print(f"  sarif: {output_path}")
     print(
-        "  findings: "
-        f"error={counts['error']} warning={counts['warning']} note={counts['note']} total={counts['total']}"
+        f"  findings: error={counts['error']} warning={counts['warning']} note={counts['note']} total={counts['total']}"
     )
     if baseline_requested:
         print(f"  net new findings: {len(new_results)}")

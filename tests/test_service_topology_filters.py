@@ -7,7 +7,16 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "plugins" / "filter" / "service_topology.py"
+MODULE_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "plugins"
+    / "filter"
+    / "service_topology.py"
+)
 PLATFORM_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
 HEADSCALE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "headscale.yml"
 
@@ -142,11 +151,7 @@ def test_platform_inventory_points_headscale_edge_at_proxmox_internal_bridge() -
 def test_root_headscale_playbook_does_not_duplicate_edge_site_overrides() -> None:
     playbook = yaml.safe_load(HEADSCALE_PLAYBOOK_PATH.read_text())
 
-    edge_publish_play = next(
-        play
-        for play in playbook
-        if play.get("name") == "Publish Headscale on the NGINX edge"
-    )
+    edge_publish_play = next(play for play in playbook if play.get("name") == "Publish Headscale on the NGINX edge")
 
     assert "vars" not in edge_publish_play
 

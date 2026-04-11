@@ -28,6 +28,7 @@ What it does:
 re-sending onboarding email or generating a fresh Headscale auth key. Use it when
 re-verifying an already onboarded operator from exact `main`.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -493,13 +494,13 @@ def send_email_via_ssh_proxy(
     """Send email through the SSH proxy host (SMTP is on the internal network)."""
     script = f"""
 import smtplib
-msg_str = {repr(msg.as_string())}
+msg_str = {msg.as_string()!r}
 with smtplib.SMTP("{SMTP_HOST}", {SMTP_PORT}, timeout=15) as s:
     s.ehlo()
     if s.has_extn("STARTTLS"):
         s.starttls(); s.ehlo()
-    s.login("{SMTP_USER}", {repr(smtp_pass)})
-    s.sendmail("platform@localhost", {repr(recipients)}, msg_str)
+    s.login("{SMTP_USER}", {smtp_pass!r})
+    s.sendmail("platform@localhost", {recipients!r}, msg_str)
     print("sent")
 """
     result = subprocess.run(
@@ -543,8 +544,7 @@ def _verify_assignments(user_id: str, role_def: dict[str, list[str]], bootstrap_
     missing_groups = sorted(expected_groups - observed_groups)
     if missing_roles or missing_groups:
         raise RuntimeError(
-            "Keycloak assignment verification failed: "
-            f"missing roles={missing_roles}, missing groups={missing_groups}"
+            f"Keycloak assignment verification failed: missing roles={missing_roles}, missing groups={missing_groups}"
         )
 
     print(f"[5] Roles:  {sorted(observed_roles)}")
@@ -582,10 +582,7 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
     user_id, user_exists = _fetch_keycloak_user(args.username, bootstrap_pass)
     if user_exists:
         if not existing_password:
-            raise RuntimeError(
-                "Keycloak user already exists but the local password file is missing: "
-                f"{pw_file}"
-            )
+            raise RuntimeError(f"Keycloak user already exists but the local password file is missing: {pw_file}")
         assert user_id is not None
         print(f"[1] Keycloak user already exists: {user_id}")
     else:
@@ -605,7 +602,7 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
         if status != 201:
             raise RuntimeError(f"Keycloak user creation failed: HTTP {status}: {body}")
         pw_file.write_text(password + "\n", encoding="utf-8")
-        print(f"[2] Keycloak user created")
+        print("[2] Keycloak user created")
         print(f"[2] Generated password -> {pw_file}")
         user_id, user_exists = _fetch_keycloak_user(args.username, bootstrap_pass)
         if not user_exists or user_id is None:

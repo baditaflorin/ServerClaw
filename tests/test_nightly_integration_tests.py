@@ -61,7 +61,14 @@ def test_workflow_loads_environment_catalog_from_repo_path(monkeypatch, tmp_path
     monkeypatch.setattr(
         nightly_integration_tests,
         "execute_suite",
-        lambda repo_root, environment, report_file: {"status": "passed", "environment": environment, "mode": "nightly", "summary": {"passed": 1, "failed": 0, "skipped": 0}, "tests": [], "duration_seconds": 0.1},
+        lambda repo_root, environment, report_file: {
+            "status": "passed",
+            "environment": environment,
+            "mode": "nightly",
+            "summary": {"passed": 1, "failed": 0, "skipped": 0},
+            "tests": [],
+            "duration_seconds": 0.1,
+        },
     )
     sys.modules.pop("environment_catalog", None)
 

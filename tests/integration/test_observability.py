@@ -17,7 +17,7 @@ def test_loki_query_returns_success(integration_config) -> None:
         integration_config.loki_query_url,
         "LV3_INTEGRATION_LOKI_QUERY_URL is required for Loki integration checks",
     )
-    query_url = f"{loki_query_url}?{urllib.parse.urlencode({'query': '{service=~\".+\"}', 'limit': 1})}"
+    query_url = f"{loki_query_url}?{urllib.parse.urlencode({'query': '{service=~".+"}', 'limit': 1})}"
     response = http_request(
         "GET",
         query_url,

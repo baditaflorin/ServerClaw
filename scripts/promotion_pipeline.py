@@ -87,7 +87,7 @@ def iso_to_datetime(value: str) -> dt.datetime:
 
 
 def today_utc() -> str:
-    return dt.datetime.now(dt.timezone.utc).date().isoformat()
+    return dt.datetime.now(dt.UTC).date().isoformat()
 
 
 def current_repo_version() -> str:
@@ -210,9 +210,7 @@ def build_stage_smoke_gate(
 ) -> dict[str, Any]:
     binding = service_environment_binding(service, environment) or {}
     declared_suite_ids = [
-        str(item).strip()
-        for item in binding.get("smoke_suite_ids", [])
-        if isinstance(item, str) and item.strip()
+        str(item).strip() for item in binding.get("smoke_suite_ids", []) if isinstance(item, str) and item.strip()
     ]
     enforced = bool(binding.get("stage_ready")) and bool(declared_suite_ids)
 
@@ -291,10 +289,7 @@ def evaluate_slo_gate(prometheus_url: str | None = None, *, service_id: str | No
 
     entries = build_slo_status_entries(prometheus_url=effective_prometheus_url)
     metric_errors = [entry for entry in entries if entry.get("metrics_error")]
-    metric_gaps = [
-        entry for entry in entries
-        if not entry.get("metrics_error") and not entry.get("metrics_available")
-    ]
+    metric_gaps = [entry for entry in entries if not entry.get("metrics_error") and not entry.get("metrics_available")]
     if metric_errors:
         return {
             "checked": False,
@@ -317,10 +312,7 @@ def evaluate_slo_gate(prometheus_url: str | None = None, *, service_id: str | No
             "reason": "missing SLO metric samples for: " + ", ".join(entry["id"] for entry in metric_gaps),
         }
     blocking = find_budget_breaches(entries, threshold=0.10)
-    blocking_messages = [
-        f"{entry['id']} ({entry['metrics']['budget_remaining']:.2%} remaining)"
-        for entry in blocking
-    ]
+    blocking_messages = [f"{entry['id']} ({entry['metrics']['budget_remaining']:.2%} remaining)" for entry in blocking]
     blocking_k6_messages: list[str] = []
     if service_id:
         matching_entries = [entry for entry in entries if entry["service_id"] == service_id]
@@ -382,7 +374,7 @@ def check_promotion_gate(
         raise ValueError("staging receipt must declare environment 'staging'")
 
     recorded_at = recorded_at_for_receipt(stage_receipt)
-    age = dt.datetime.now(dt.timezone.utc) - recorded_at
+    age = dt.datetime.now(dt.UTC) - recorded_at
     stage_health = build_stage_health_summary(stage_receipt)
 
     approval = evaluate_approval(
@@ -424,7 +416,9 @@ def check_promotion_gate(
     vulnerability_gate = evaluate_service_vulnerability_gate(service_id)
     capacity_model = load_capacity_model()
     capacity_approved, capacity_reasons = check_capacity_gate(capacity_model)
-    standby_gate = evaluate_service_standby(service_id, catalog={"services": list(service_index.values())}, model=capacity_model)
+    standby_gate = evaluate_service_standby(
+        service_id, catalog={"services": list(service_index.values())}, model=capacity_model
+    )
 
     slo_gate = evaluate_slo_gate(service_id=service_id)
     policy_input = {
@@ -794,8 +788,7 @@ def promote_service(
                 "observed": (
                     f"The staged receipt `{gate['staging_receipt']}` was recent, clean, and "
                     + (
-                        "its required stage smoke suites passed: "
-                        + ", ".join(gate["smoke_gate"]["passed_suite_ids"])
+                        "its required stage smoke suites passed: " + ", ".join(gate["smoke_gate"]["passed_suite_ids"])
                         if gate["smoke_gate"]["enforced"]
                         else "no enforced stage smoke suites were required for this promotion."
                     )
@@ -883,12 +876,20 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Validate and execute the ADR 0073 promotion pipeline.")
     parser.add_argument("--validate", action="store_true", help="Validate all promotion receipts.")
     parser.add_argument("--check-gate", action="store_true", help="Evaluate the promotion gate for a staged receipt.")
-    parser.add_argument("--promote", action="store_true", help="Run repository validation, evaluate the gate, and promote a service to production.")
-    parser.add_argument("--emit-bypass-event", action="store_true", help="Emit the break-glass promotion bypass audit event.")
+    parser.add_argument(
+        "--promote",
+        action="store_true",
+        help="Run repository validation, evaluate the gate, and promote a service to production.",
+    )
+    parser.add_argument(
+        "--emit-bypass-event", action="store_true", help="Emit the break-glass promotion bypass audit event."
+    )
     parser.add_argument("--service", help="Service id from config/service-capability-catalog.json.")
     parser.add_argument("--staging-receipt", help="Path to a staging live-apply receipt.")
     parser.add_argument("--branch", help="Source branch for the promotion request.")
-    parser.add_argument("--requester-class", default="human_operator", help="Requester identity class for the command gate.")
+    parser.add_argument(
+        "--requester-class", default="human_operator", help="Requester identity class for the command gate."
+    )
     parser.add_argument(
         "--approver-classes",
         default="human_operator",

@@ -29,6 +29,7 @@ DEFAULT_AUDIT_QUERY_LIMIT = 500
 MUTATION_AUDIT_QUERY_URL_ENV = "LV3_MUTATION_AUDIT_LOKI_QUERY_URL"
 MUTATION_AUDIT_QUERY_FILE_ENV = "LV3_MUTATION_AUDIT_QUERY_FILE"
 
+
 @dataclass(frozen=True)
 class ServiceMatcher:
     service_id: str
@@ -52,7 +53,7 @@ def load_service_catalog_data() -> dict[str, Any]:
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def parse_timestamp(value: str | None, *, default_to_start_of_day: bool = False) -> dt.datetime:
@@ -68,15 +69,15 @@ def parse_timestamp(value: str | None, *, default_to_start_of_day: bool = False)
     except ValueError:
         parsed_date = dt.date.fromisoformat(value)
         hour = 0 if default_to_start_of_day else 12
-        return dt.datetime.combine(parsed_date, dt.time(hour=hour, tzinfo=dt.timezone.utc))
+        return dt.datetime.combine(parsed_date, dt.time(hour=hour, tzinfo=dt.UTC))
 
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=dt.timezone.utc)
-    return parsed.astimezone(dt.timezone.utc)
+        parsed = parsed.replace(tzinfo=dt.UTC)
+    return parsed.astimezone(dt.UTC)
 
 
 def timestamp_to_iso(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return value.astimezone(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def slugify_value(value: str) -> str:
@@ -228,7 +229,9 @@ def collect_live_apply_entries(
             receipt.get("summary", ""),
             " ".join(target_labels),
             " ".join(str(item.get("check", "")) for item in receipt.get("verification", []) if isinstance(item, dict)),
-            " ".join(str(item.get("observed", "")) for item in receipt.get("verification", []) if isinstance(item, dict)),
+            " ".join(
+                str(item.get("observed", "")) for item in receipt.get("verification", []) if isinstance(item, dict)
+            ),
             " ".join(str(note) for note in receipt.get("notes", [])),
             " ".join(str(ref) for ref in receipt.get("evidence_refs", [])),
         ]
@@ -461,9 +464,7 @@ def collect_mutation_audit_entries(
         else:
             source_events = query_loki_mutation_audit(lookback_days=lookback_days, loki_query_url=loki_query_url)
     except RuntimeError as exc:
-        warnings.append(
-            f"Mutation audit events are unavailable; the portal is showing receipts-only history ({exc})."
-        )
+        warnings.append(f"Mutation audit events are unavailable; the portal is showing receipts-only history ({exc}).")
         return [], warnings
 
     entries = []
@@ -479,7 +480,9 @@ def collect_mutation_audit_entries(
         action = str(event.get("action", "")).strip() or "mutation"
         target = str(event.get("target", "")).strip() or "unknown target"
         surface = str(event.get("surface", "")).strip() or "manual"
-        change_type = "manual" if surface == "manual" else "command-catalog" if surface == "command-catalog" else surface
+        change_type = (
+            "manual" if surface == "manual" else "command-catalog" if surface == "command-catalog" else surface
+        )
         text_parts = [action, target, str(event.get("evidence_ref", ""))]
         service_ids = infer_service_ids(text_parts, matchers)
         entries.append(
@@ -537,9 +540,7 @@ def filter_history_entries(
     if days is not None:
         cutoff = utc_now() - dt.timedelta(days=days)
         filtered = [
-            item
-            for item in filtered
-            if parse_timestamp(item["timestamp"], default_to_start_of_day=False) >= cutoff
+            item for item in filtered if parse_timestamp(item["timestamp"], default_to_start_of_day=False) >= cutoff
         ]
     return filtered
 

@@ -140,9 +140,7 @@ def test_run_gate_fallback_ignores_stale_local_status_and_runs_requested_checks(
             {
                 "status": "failed",
                 "source": "local-fallback",
-                "checks": [
-                    {"id": "artifact-secret-scan", "status": "timed_out", "returncode": 124}
-                ],
+                "checks": [{"id": "artifact-secret-scan", "status": "timed_out", "returncode": 124}],
             }
         )
         + "\n",

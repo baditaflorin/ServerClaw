@@ -76,9 +76,7 @@ def validate_identity_class_list(value: object, path: str) -> list[str]:
 
 def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secret_manifest: dict) -> None:
     if command_catalog.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
-        raise ValueError(
-            f"command catalog must declare schema_version '{SUPPORTED_SCHEMA_VERSION}'"
-        )
+        raise ValueError(f"command catalog must declare schema_version '{SUPPORTED_SCHEMA_VERSION}'")
 
     workflows = workflow_catalog["workflows"]
     secret_ids = set(secret_manifest["secrets"].keys())
@@ -103,9 +101,7 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
         require_str(profile.get("working_directory"), f"execution_profiles.{profile_id}.working_directory")
         kill_mode = require_str(profile.get("kill_mode"), f"execution_profiles.{profile_id}.kill_mode")
         if kill_mode not in ALLOWED_KILL_MODES:
-            raise ValueError(
-                f"execution_profiles.{profile_id}.kill_mode must be one of {sorted(ALLOWED_KILL_MODES)}"
-            )
+            raise ValueError(f"execution_profiles.{profile_id}.kill_mode must be one of {sorted(ALLOWED_KILL_MODES)}")
         require_str(profile.get("log_directory"), f"execution_profiles.{profile_id}.log_directory")
         require_str(profile.get("receipt_directory"), f"execution_profiles.{profile_id}.receipt_directory")
         if profile.get("env") is not None:
@@ -144,28 +140,20 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
         require_str(contract.get("description"), f"commands.{command_id}.description")
         workflow_id = require_str(contract.get("workflow_id"), f"commands.{command_id}.workflow_id")
         if workflow_id not in workflows:
-            raise ValueError(
-                f"commands.{command_id}.workflow_id references unknown workflow '{workflow_id}'"
-            )
+            raise ValueError(f"commands.{command_id}.workflow_id references unknown workflow '{workflow_id}'")
         workflow = workflows[workflow_id]
         covered_workflow_ids.add(workflow_id)
         live_impact = workflow["live_impact"]
         if live_impact not in ALLOWED_LIVE_IMPACTS or live_impact == "repo_only":
-            raise ValueError(
-                f"commands.{command_id}.workflow_id must reference a mutating non-repo-only workflow"
-            )
+            raise ValueError(f"commands.{command_id}.workflow_id must reference a mutating non-repo-only workflow")
 
         scope = require_str(contract.get("scope"), f"commands.{command_id}.scope")
         if scope not in ALLOWED_SCOPES:
             raise ValueError(f"commands.{command_id}.scope must be one of {sorted(ALLOWED_SCOPES)}")
 
-        approval_policy = require_str(
-            contract.get("approval_policy"), f"commands.{command_id}.approval_policy"
-        )
+        approval_policy = require_str(contract.get("approval_policy"), f"commands.{command_id}.approval_policy")
         if approval_policy not in policies:
-            raise ValueError(
-                f"commands.{command_id}.approval_policy references unknown policy '{approval_policy}'"
-            )
+            raise ValueError(f"commands.{command_id}.approval_policy references unknown policy '{approval_policy}'")
 
         inputs = require_list(contract.get("inputs"), f"commands.{command_id}.inputs")
         if not inputs:
@@ -176,9 +164,7 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
             kind = require_str(item.get("kind"), f"commands.{command_id}.inputs[{index}].kind")
             require_bool(item.get("required"), f"commands.{command_id}.inputs[{index}].required")
             require_str(item.get("source"), f"commands.{command_id}.inputs[{index}].source")
-            require_str(
-                item.get("description"), f"commands.{command_id}.inputs[{index}].description"
-            )
+            require_str(item.get("description"), f"commands.{command_id}.inputs[{index}].description")
             if kind == "controller_secret" and item["name"] not in secret_ids:
                 raise ValueError(
                     f"commands.{command_id}.inputs[{index}].name references unknown secret '{item['name']}'"
@@ -203,13 +189,9 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
             )
         require_str(evidence.get("notes"), f"commands.{command_id}.evidence.notes")
 
-        failure_guidance = require_mapping(
-            contract.get("failure_guidance"), f"commands.{command_id}.failure_guidance"
-        )
+        failure_guidance = require_mapping(contract.get("failure_guidance"), f"commands.{command_id}.failure_guidance")
         for field in ("stop_conditions", "rollback_guidance"):
-            items = require_list(
-                failure_guidance.get(field), f"commands.{command_id}.failure_guidance.{field}"
-            )
+            items = require_list(failure_guidance.get(field), f"commands.{command_id}.failure_guidance.{field}")
             if not items:
                 raise ValueError(f"commands.{command_id}.failure_guidance.{field} must not be empty")
             for index, item in enumerate(items):
@@ -233,10 +215,7 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
         if workflow["live_impact"] != "repo_only" and workflow_id not in covered_workflow_ids
     )
     if missing_contracts:
-        raise ValueError(
-            "command catalog is missing contracts for mutating workflows: "
-            + ", ".join(missing_contracts)
-        )
+        raise ValueError("command catalog is missing contracts for mutating workflows: " + ", ".join(missing_contracts))
 
 
 def list_commands(command_catalog: dict, workflow_catalog: dict) -> int:
@@ -476,9 +455,7 @@ def check_approval(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Inspect, validate, or evaluate approval for the command catalog."
-    )
+    parser = argparse.ArgumentParser(description="Inspect, validate, or evaluate approval for the command catalog.")
     parser.add_argument("--list", action="store_true", help="List available command contracts.")
     parser.add_argument("--command", help="Show one command contract.")
     parser.add_argument("--validate", action="store_true", help="Validate the command catalog.")

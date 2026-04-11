@@ -22,7 +22,11 @@ def test_parse_process_table_reads_pid_ppid_and_command() -> None:
     )
 
     assert [(entry.pid, entry.ppid, entry.command) for entry in entries] == [
-        (100, 1, "/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime-lv3"),
+        (
+            100,
+            1,
+            "/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime-lv3",
+        ),
         (200, 100, "/usr/bin/python /tmp/ansible-module.py"),
     ]
 

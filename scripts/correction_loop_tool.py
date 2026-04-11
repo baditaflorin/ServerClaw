@@ -15,6 +15,7 @@ Examples
   python scripts/correction_loop_tool.py applicable --workflow converge-gitea
   python scripts/correction_loop_tool.py repair-actions ansible_reconcile
 """
+
 from __future__ import annotations
 
 import argparse
@@ -48,6 +49,7 @@ def _loop_applies(loop: dict, workflow_id: str) -> bool:
 # ---------------------------------------------------------------------------
 # commands
 # ---------------------------------------------------------------------------
+
 
 def cmd_list(args: argparse.Namespace) -> int:
     data = _load()
@@ -88,10 +90,9 @@ def cmd_applicable(args: argparse.Namespace) -> int:
     print(f"Correction loops applicable to '{wf}':\n")
     for loop in matches:
         print(f"  [{loop['id']}]")
-        print(f"  Invariant: {loop.get('invariant','')}")
+        print(f"  Invariant: {loop.get('invariant', '')}")
         actions = loop.get("repair_actions", [])
-        print(f"  Repair actions ({len(actions)}): " +
-              ", ".join(a["kind"] for a in actions))
+        print(f"  Repair actions ({len(actions)}): " + ", ".join(a["kind"] for a in actions))
         print()
     return 0
 
@@ -121,6 +122,7 @@ def cmd_repair_actions(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

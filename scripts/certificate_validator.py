@@ -54,14 +54,13 @@ def _parse_der_cert(der_bytes: bytes) -> dict:
     try:
         from cryptography import x509
         from cryptography.hazmat.backends import default_backend
+
         cert = x509.load_der_x509_certificate(der_bytes, default_backend())
         # Build a dict in the same format as ssl.getpeercert()
         result: dict = {}
         # subject CN
         cn_attrs = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
-        result["subject"] = tuple(
-            (("commonName", a.value),) for a in cn_attrs
-        )
+        result["subject"] = tuple((("commonName", a.value),) for a in cn_attrs)
         # SANs
         try:
             san_ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
@@ -105,7 +104,7 @@ def get_certificate(fqdn: str, target: str, port: int, timeout: int = 10):
 
 
 def domain_in_cert(fqdn: str, cn: str, sans: list) -> bool:
-    for pattern in ([cn] + sans):
+    for pattern in [cn] + sans:
         if pattern == fqdn:
             return True
         if pattern.startswith("*.") and fqdn.endswith(pattern[2:]) and fqdn.count(".") == pattern.count("."):
@@ -113,10 +112,12 @@ def domain_in_cert(fqdn: str, cn: str, sans: list) -> bool:
     return False
 
 
-def validate(fqdn: str, target: str, port: int, service_id: str,
-             warn_days: float = 21, timeout: int = 10) -> CertValidationResult:
-    r = CertValidationResult(fqdn=fqdn, target=target, target_port=port,
-                             status=CertStatus.UNKNOWN, service_id=service_id)
+def validate(
+    fqdn: str, target: str, port: int, service_id: str, warn_days: float = 21, timeout: int = 10
+) -> CertValidationResult:
+    r = CertValidationResult(
+        fqdn=fqdn, target=target, target_port=port, status=CertStatus.UNKNOWN, service_id=service_id
+    )
 
     cert, error = get_certificate(fqdn, target, port, timeout)
     if not cert:
@@ -171,14 +172,16 @@ def load_catalog(path: str) -> list:
                 warn_days = policy["warn_hours"] / 24
             else:
                 warn_days = policy.get("warn_days", 21)
-            entries.append({
-                "fqdn": ep.get("server_name", ep["host"]),
-                "target": ep["host"],
-                "target_port": ep["port"],
-                "service_id": cert.get("service_id", ""),
-                "warn_days": warn_days,
-                "status": cert.get("status", "active"),
-            })
+            entries.append(
+                {
+                    "fqdn": ep.get("server_name", ep["host"]),
+                    "target": ep["host"],
+                    "target_port": ep["port"],
+                    "service_id": cert.get("service_id", ""),
+                    "warn_days": warn_days,
+                    "status": cert.get("status", "active"),
+                }
+            )
         return [e for e in entries if e["status"] == "active"]
     except FileNotFoundError:
         return []
@@ -195,14 +198,16 @@ def load_subdomain_catalog(path: str) -> list:
                 continue
             if not sub.get("target"):
                 continue
-            entries.append({
-                "fqdn": sub["fqdn"],
-                "target": sub["target"],
-                "target_port": sub.get("target_port", 443),
-                "service_id": sub.get("service_id", ""),
-                "warn_days": 21,
-                "status": "active",
-            })
+            entries.append(
+                {
+                    "fqdn": sub["fqdn"],
+                    "target": sub["target"],
+                    "target_port": sub.get("target_port", 443),
+                    "service_id": sub.get("service_id", ""),
+                    "warn_days": 21,
+                    "status": "active",
+                }
+            )
         return entries
     except FileNotFoundError:
         return []
@@ -245,26 +250,24 @@ def format_text(results: list) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate SSL certificates for platform domains (ADR 0375)"
+    parser = argparse.ArgumentParser(description="Validate SSL certificates for platform domains (ADR 0375)")
+    parser.add_argument(
+        "--config",
+        default="config/certificate-catalog.json",
+        help="Certificate catalog (default: config/certificate-catalog.json, ADR 0101)",
     )
-    parser.add_argument("--config", default="config/certificate-catalog.json",
-                        help="Certificate catalog (default: config/certificate-catalog.json, ADR 0101)")
-    parser.add_argument("--subdomain-config", default="config/subdomain-catalog.json",
-                        help="Subdomain catalog fallback")
-    parser.add_argument("--check-all", action="store_true",
-                        help="Check all active entries (implied when no --fqdn)")
+    parser.add_argument(
+        "--subdomain-config", default="config/subdomain-catalog.json", help="Subdomain catalog fallback"
+    )
+    parser.add_argument("--check-all", action="store_true", help="Check all active entries (implied when no --fqdn)")
     parser.add_argument("--fqdn", help="Check only this FQDN")
-    parser.add_argument("--json", action="store_true", dest="json_out",
-                        help="Output results as JSON")
-    parser.add_argument("--timeout", type=int, default=10,
-                        help="Connection timeout in seconds (default: 10)")
+    parser.add_argument("--json", action="store_true", dest="json_out", help="Output results as JSON")
+    parser.add_argument("--timeout", type=int, default=10, help="Connection timeout in seconds (default: 10)")
     args = parser.parse_args()
 
     entries = load_catalog(args.config)
     if not entries:
-        print(f"[warn] {args.config} empty or missing — using {args.subdomain_config}",
-              file=sys.stderr)
+        print(f"[warn] {args.config} empty or missing — using {args.subdomain_config}", file=sys.stderr)
         entries = load_subdomain_catalog(args.subdomain_config)
 
     if not entries:
@@ -280,22 +283,36 @@ def main():
     results = []
     for e in entries:
         print(f"Checking {e['fqdn']}...", file=sys.stderr)
-        results.append(validate(
-            fqdn=e["fqdn"],
-            target=e["target"],
-            port=e["target_port"],
-            service_id=e["service_id"],
-            warn_days=e.get("warn_days", 21),
-            timeout=args.timeout,
-        ))
+        results.append(
+            validate(
+                fqdn=e["fqdn"],
+                target=e["target"],
+                port=e["target_port"],
+                service_id=e["service_id"],
+                warn_days=e.get("warn_days", 21),
+                timeout=args.timeout,
+            )
+        )
 
     if args.json_out:
-        print(json.dumps([{
-            "fqdn": r.fqdn, "service": r.service_id, "status": r.status.value,
-            "cn": r.common_name, "sans": r.subject_alt_names or [],
-            "expires": r.not_after, "days_until_expiry": r.days_until_expiry,
-            "error": r.error_message,
-        } for r in results], indent=2))
+        print(
+            json.dumps(
+                [
+                    {
+                        "fqdn": r.fqdn,
+                        "service": r.service_id,
+                        "status": r.status.value,
+                        "cn": r.common_name,
+                        "sans": r.subject_alt_names or [],
+                        "expires": r.not_after,
+                        "days_until_expiry": r.days_until_expiry,
+                        "error": r.error_message,
+                    }
+                    for r in results
+                ],
+                indent=2,
+            )
+        )
     else:
         print(format_text(results))
 

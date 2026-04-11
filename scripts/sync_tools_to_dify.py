@@ -114,7 +114,9 @@ def main() -> int:
     parser.add_argument("--tools-api-key-file", required=True, help="Path to the Dify tools gateway API key file")
     parser.add_argument("--provider-name", default=DEFAULT_PROVIDER_NAME, help="Dify provider name")
     parser.add_argument("--gateway-base-url", default=DEFAULT_GATEWAY_BASE_URL, help="Platform API gateway base URL")
-    parser.add_argument("--tools-api-key-header", default=DEFAULT_TOOLS_HEADER, help="Gateway header name for the Dify API key")
+    parser.add_argument(
+        "--tools-api-key-header", default=DEFAULT_TOOLS_HEADER, help="Gateway header name for the Dify API key"
+    )
     parser.add_argument("--output-openapi", help="Optional path to write the generated OpenAPI schema")
     args = parser.parse_args()
 

@@ -20,9 +20,18 @@ def test_plane_runtime_defaults_list_trusted_proxies() -> None:
         "10.10.10.10",
         "100.64.0.1",
     ]
-    assert defaults["plane_internal_port"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('plane', 'internal') }}"
-    assert defaults["plane_internal_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'internal') }}"
-    assert defaults["plane_controller_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'controller') }}"
+    assert (
+        defaults["plane_internal_port"]
+        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('plane', 'internal') }}"
+    )
+    assert (
+        defaults["plane_internal_base_url"]
+        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'internal') }}"
+    )
+    assert (
+        defaults["plane_controller_url"]
+        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'controller') }}"
+    )
 
 
 def test_plane_env_templates_render_trusted_proxies_as_caddy_arguments() -> None:
@@ -52,7 +61,7 @@ def test_plane_compose_template_runs_migrator_before_the_api_path() -> None:
     assert "command: ./bin/docker-entrypoint-migrator.sh" in compose_template
     assert "- {{ plane_migrator_log_dir }}:/code/plane/logs" in compose_template
     assert "migrator:\n        condition: service_started" in compose_template
-    assert '  plane-redis:\n    image: {{ plane_valkey_image }}' in compose_template
+    assert "  plane-redis:\n    image: {{ plane_valkey_image }}" in compose_template
     assert '      - --save\n      - ""' in compose_template
 
 

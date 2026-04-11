@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -58,8 +58,7 @@ def load_service_and_owner_refs() -> tuple[set[str], set[str]]:
     host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     service_refs = {
-        require_identifier(service_id, f"host_vars.lv3_service_topology.{service_id}")
-        for service_id in topology
+        require_identifier(service_id, f"host_vars.lv3_service_topology.{service_id}") for service_id in topology
     }
 
     owners = {require_identifier(HOST_VARS_PATH.stem, "host_vars host id")}
@@ -193,9 +192,7 @@ def list_lanes(normalized_lanes: dict[str, dict[str, Any]]) -> int:
     print("Available lanes:")
     for lane_id in ALLOWED_LANE_IDS:
         lane = normalized_lanes[lane_id]
-        print(
-            f"  - {lane_id}: {lane['title']} [{lane['transport']}, {len(lane['current_surfaces'])} surfaces]"
-        )
+        print(f"  - {lane_id}: {lane['title']} [{lane['transport']}, {len(lane['current_surfaces'])} surfaces]")
     return 0
 
 

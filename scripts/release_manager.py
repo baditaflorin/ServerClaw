@@ -215,14 +215,14 @@ def probe_url(url: str, timeout: float) -> tuple[bool, str]:
     for method in ("HEAD", "GET"):
         request = urllib.request.Request(url, method=method)
         try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
+            with urllib.request.urlopen(request, timeout=timeout) as response:
                 code = response.getcode()
             return 200 <= code < 400, f"HTTP {code}"
         except urllib.error.HTTPError as exc:
             if method == "HEAD" and exc.code == 405:
                 continue
             return False, f"HTTP {exc.code}"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return False, str(exc)
     return False, "probe failed"
 
@@ -268,9 +268,7 @@ def release_blockers_result(semantics: dict[str, Any]) -> CriterionResult:
     registry = load_yaml(WORKSTREAMS_PATH)
     blocking_statuses = set(semantics["release_gates"]["blocking_workstream_statuses"])
     blocked = [
-        workstream["id"]
-        for workstream in registry["workstreams"]
-        if workstream.get("status") in blocking_statuses
+        workstream["id"] for workstream in registry["workstreams"] if workstream.get("status") in blocking_statuses
     ]
     waiver_summary = gate_bypass_waivers.summarize_receipts()
     waiver_blockers = waiver_summary["release_blockers"]
@@ -282,10 +280,7 @@ def release_blockers_result(semantics: dict[str, Any]) -> CriterionResult:
     if waiver_blockers:
         detail_parts.append(
             "waiver blockers: "
-            + ", ".join(
-                f"{item['reason_code']} x{item['repeat_after_expiry_occurrences']}"
-                for item in waiver_blockers
-            )
+            + ", ".join(f"{item['reason_code']} x{item['repeat_after_expiry_occurrences']}" for item in waiver_blockers)
         )
     return CriterionResult(
         id="release-blockers",
@@ -444,16 +439,21 @@ def publish_release_to_outline(version: str) -> None:
     release_notes_path = REPO_ROOT / "docs" / "release-notes" / f"{version}.md"
     if release_notes_path.exists():
         import subprocess
+
         with open(release_notes_path, encoding="utf-8") as fh:
             content = fh.read()
         proc = subprocess.run(
-            _outline_tool_cmd([
-                "document.publish",
-                "--collection", "Changelogs",
-                "--title", f"Release Notes {version}",
-                "--rewrite-links",
-                "--stdin",
-            ]),
+            _outline_tool_cmd(
+                [
+                    "document.publish",
+                    "--collection",
+                    "Changelogs",
+                    "--title",
+                    f"Release Notes {version}",
+                    "--rewrite-links",
+                    "--stdin",
+                ]
+            ),
             input=content,
             capture_output=True,
             text=True,
@@ -598,7 +598,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Prepare LV3 repository releases and report product readiness.")
     parser.add_argument("--version", help="Explicit release version to cut.")
     parser.add_argument("--bump", choices=["major", "minor", "patch"], help="Semantic bump to apply to VERSION.")
-    parser.add_argument("--platform-impact", default=default_platform_impact(), help="One-line platform impact summary.")
+    parser.add_argument(
+        "--platform-impact", default=default_platform_impact(), help="One-line platform impact summary."
+    )
     parser.add_argument("--released-on", help="Release date in YYYY-MM-DD format.")
     parser.add_argument("--dry-run", action="store_true", help="Show the planned release without writing files.")
 
@@ -651,7 +653,7 @@ def main(argv: list[str] | None = None) -> int:
         result = write_release(next_version, platform_impact=args.platform_impact, released_on=args.released_on)
         print(f"Prepared release {result['version']} with {len(result['notes'])} changelog note(s).")
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("release manager", exc)
 
 

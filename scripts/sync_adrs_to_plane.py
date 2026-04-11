@@ -14,13 +14,9 @@ Exit codes:
   2 = auth or connection failure
 """
 
-import os
 import sys
-import json
-import yaml
 from pathlib import Path
-from typing import Dict, Optional, List
-from datetime import datetime
+from typing import Optional
 
 # Import PlaneClient from existing codebase
 repo_root = Path(__file__).parent.parent
@@ -29,7 +25,7 @@ sys.path.insert(0, str(repo_root / "platform" / "ansible"))
 try:
     # Try to import PlaneClient
     from plane import PlaneClient
-except ImportError as e:
+except ImportError:
     # If import fails, provide useful error but don't exit immediately
     # (allows --dry-run to work without PlaneClient being available)
     PlaneClient = None
@@ -51,7 +47,7 @@ IMPLEMENTATION_STATUS_HIERARCHY = {
 }
 
 
-def parse_adr_frontmatter(adr_path: Path) -> Dict[str, str]:
+def parse_adr_frontmatter(adr_path: Path) -> dict[str, str]:
     """Parse ADR markdown frontmatter."""
     try:
         with open(adr_path) as f:
@@ -85,6 +81,7 @@ def parse_adr_frontmatter(adr_path: Path) -> Dict[str, str]:
 def get_adr_number_from_path(path: Path) -> Optional[str]:
     """Extract ADR number from path."""
     import re
+
     match = re.match(r"(\d{4})-", path.name)
     return match.group(1) if match else None
 
@@ -114,7 +111,7 @@ def get_adr_summary(adr_path: Path) -> str:
         return ""
 
 
-def build_plane_issue_body(adr_num: str, metadata: Dict[str, str], adr_path: Path) -> str:
+def build_plane_issue_body(adr_num: str, metadata: dict[str, str], adr_path: Path) -> str:
     """Build HTML description for Plane issue."""
     summary = get_adr_summary(adr_path)
     status = metadata.get("status", "Unknown")
@@ -143,7 +140,7 @@ def determine_plane_status(impl_status: str) -> str:
     return IMPLEMENTATION_STATUS_HIERARCHY.get(impl_status, "Backlog")
 
 
-def build_issue_labels(adr_num: str, metadata: Dict[str, str]) -> List[str]:
+def build_issue_labels(adr_num: str, metadata: dict[str, str]) -> list[str]:
     """Build labels for Plane issue."""
     labels = ["adr"]
 

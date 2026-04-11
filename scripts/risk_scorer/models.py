@@ -70,7 +70,7 @@ class ExecutionIntent:
     unknown_count: int
     scoring_context: dict[str, Any]
     risk_score: RiskScore
-    semantic_diff: "SemanticDiff | None" = None
+    semantic_diff: SemanticDiff | None = None
     required_lanes: list[str] | None = None
     resource_claims: list[dict[str, Any]] | None = None
     conflict_warnings: list[dict[str, Any]] | None = None

@@ -43,10 +43,14 @@ def test_role_only_pulls_missing_startup_models_inside_container() -> None:
         task for task in tasks if task.get("name") == "Check whether declared startup Ollama models are already present"
     )
     partial_find_task = next(
-        task for task in tasks if task.get("name") == "Find stale Ollama partial blobs before pulling missing startup models"
+        task
+        for task in tasks
+        if task.get("name") == "Find stale Ollama partial blobs before pulling missing startup models"
     )
     partial_remove_task = next(
-        task for task in tasks if task.get("name") == "Remove stale Ollama partial blobs before pulling missing startup models"
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale Ollama partial blobs before pulling missing startup models"
     )
     pull_task = next(
         task for task in tasks if task.get("name") == "Pull the missing startup Ollama models from inside the container"
@@ -75,7 +79,9 @@ def test_role_verifies_default_model_inside_container() -> None:
 
 def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
     tasks = load_tasks()
-    precheck_task = next(task for task in tasks if task.get("name") == "Check whether Docker nat chain exists before Ollama startup")
+    precheck_task = next(
+        task for task in tasks if task.get("name") == "Check whether Docker nat chain exists before Ollama startup"
+    )
     assert precheck_task["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
 
     start_block = next(
@@ -92,7 +98,9 @@ def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
 
 def test_role_force_recreates_ollama_when_port_binding_is_missing() -> None:
     tasks = load_tasks()
-    port_check = next(task for task in tasks if task.get("name") == "Check whether Ollama publishes the expected host port")
+    port_check = next(
+        task for task in tasks if task.get("name") == "Check whether Ollama publishes the expected host port"
+    )
     assert port_check["ansible.builtin.command"]["argv"] == [
         "docker",
         "port",
@@ -101,10 +109,15 @@ def test_role_force_recreates_ollama_when_port_binding_is_missing() -> None:
     ]
 
     recreate_block = next(
-        task for task in tasks if task.get("name") == "Force-recreate Ollama when the host port binding is missing and recover stale Docker networking drift"
+        task
+        for task in tasks
+        if task.get("name")
+        == "Force-recreate Ollama when the host port binding is missing and recover stale Docker networking drift"
     )
     recreate_task = next(
-        task for task in recreate_block["block"] if task.get("name") == "Force-recreate Ollama when the host port binding is missing"
+        task
+        for task in recreate_block["block"]
+        if task.get("name") == "Force-recreate Ollama when the host port binding is missing"
     )
     rescue_names = [task["name"] for task in recreate_block["rescue"]]
 
@@ -124,8 +137,6 @@ def test_host_network_policy_allows_private_ollama_access() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
     guest_rule = next(
-        rule
-        for rule in docker_runtime_rules
-        if rule["source"] == "all_guests" and 11434 in rule["ports"]
+        rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 11434 in rule["ports"]
     )
     assert 11434 in guest_rule["ports"]

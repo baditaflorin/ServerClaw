@@ -7,14 +7,13 @@ import html
 import json
 from pathlib import Path
 import sys
-from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json, load_operator_auth
-from platform.ansible.plane import PlaneClient, PlaneError, PlaneSessionClient, bootstrap_plane, ensure_issue_for_adr, parse_adr
+from controller_automation_toolkit import emit_cli_error, load_operator_auth
+from platform.ansible.plane import PlaneClient, PlaneError, PlaneSessionClient, bootstrap_plane
 
 
 DEFAULT_AUTH_FILE = REPO_ROOT / ".local" / "plane" / "admin-auth.json"
@@ -161,7 +160,9 @@ def build_parser() -> argparse.ArgumentParser:
     create_issue.add_argument("--description", help="Plain-text issue description.")
     create_issue.add_argument("--state", help="Optional state name.")
     create_issue.add_argument("--external-id", help="Optional external identifier.")
-    create_issue.add_argument("--external-source", default="repo_manual", help="External source when external-id is set.")
+    create_issue.add_argument(
+        "--external-source", default="repo_manual", help="External source when external-id is set."
+    )
     create_issue.set_defaults(func=command_create_issue)
 
     sync_adrs = subparsers.add_parser("sync-adrs", help="Synchronize ADR markdown into Plane issues.")

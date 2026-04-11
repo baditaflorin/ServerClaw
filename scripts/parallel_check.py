@@ -13,7 +13,7 @@ import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from collections.abc import Iterable
 
 
 DEFAULT_MANIFEST = Path("config/check-runner-manifest.json")
@@ -120,15 +120,9 @@ def load_manifest(manifest_path: Path) -> dict[str, CheckDefinition]:
             working_dir=str(config.get("working_dir", "/workspace")),
             timeout_seconds=int(config.get("timeout_seconds", 300)),
             local_fallback_command=(
-                str(config["local_fallback_command"])
-                if config.get("local_fallback_command")
-                else None
+                str(config["local_fallback_command"]) if config.get("local_fallback_command") else None
             ),
-            native_command=(
-                str(config["native_command"])
-                if config.get("native_command")
-                else None
-            ),
+            native_command=(str(config["native_command"]) if config.get("native_command") else None),
             cache_mounts=tuple(str(item) for item in config.get("cache_mounts", [])),
         )
     return checks
@@ -148,9 +142,7 @@ def resolve_checks(
     missing = [label for label in requested_labels if label not in manifest]
     if missing:
         available = ", ".join(sorted(manifest))
-        raise ValueError(
-            f"unknown check(s): {', '.join(missing)}. Available checks: {available}"
-        )
+        raise ValueError(f"unknown check(s): {', '.join(missing)}. Available checks: {available}")
     return [manifest[label] for label in requested_labels]
 
 
@@ -294,10 +286,7 @@ def should_use_native_command(check: CheckDefinition) -> bool:
     and is intended for the build server where all gate tools are pre-installed
     and pinned via Ansible (ADR 0362).
     """
-    return bool(
-        os.environ.get("LV3_NATIVE_EXECUTION") == "1"
-        and check.native_command
-    )
+    return bool(os.environ.get("LV3_NATIVE_EXECUTION") == "1" and check.native_command)
 
 
 def execute_check(
@@ -354,9 +343,7 @@ def execute_check(
         )
     except subprocess.TimeoutExpired as exc:
         cleanup_details = (
-            cleanup_timed_out_container(docker_binary, workspace, cidfile_path)
-            if cidfile_path is not None
-            else ""
+            cleanup_timed_out_container(docker_binary, workspace, cidfile_path) if cidfile_path is not None else ""
         )
         stderr = normalize_process_output(exc.stderr)
         if cleanup_details:
@@ -436,8 +423,7 @@ def run_checks(
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures: dict[Future[CheckResult], str] = {
-            executor.submit(execute_check, check, workspace, docker_binary): check.label
-            for check in checks
+            executor.submit(execute_check, check, workspace, docker_binary): check.label for check in checks
         }
         frame_index = 0
         while futures:

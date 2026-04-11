@@ -46,7 +46,7 @@ def prepare_graph_db(path: Path) -> Path:
             ("service:windmill", "service", "Windmill", 2, '{"service_id":"windmill"}'),
             ("service:api_gateway", "service", "Platform API Gateway", 3, '{"service_id":"api_gateway"}'),
             ("service:ops_portal", "service", "Ops Portal", 4, '{"service_id":"ops_portal"}'),
-            ("host:docker-runtime-lv3", "host", "docker-runtime-lv3", None, '{}'),
+            ("host:docker-runtime-lv3", "host", "docker-runtime-lv3", None, "{}"),
         ],
     )
     connection.executemany(
@@ -171,22 +171,24 @@ def test_node_health_uses_upstream_graph_and_world_state(graph_client: Dependenc
 def test_cycle_detection_logs_and_returns_partial_result(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     graph_path = tmp_path / "graph-cycle.sqlite3"
     connection = sqlite3.connect(graph_path)
-    connection.execute("CREATE TABLE graph_nodes (id TEXT PRIMARY KEY, kind TEXT, label TEXT, tier INTEGER, metadata TEXT)")
+    connection.execute(
+        "CREATE TABLE graph_nodes (id TEXT PRIMARY KEY, kind TEXT, label TEXT, tier INTEGER, metadata TEXT)"
+    )
     connection.execute(
         "CREATE TABLE graph_edges (id INTEGER PRIMARY KEY AUTOINCREMENT, from_node TEXT, to_node TEXT, edge_kind TEXT, metadata TEXT)"
     )
     connection.executemany(
         "INSERT INTO graph_nodes (id, kind, label, tier, metadata) VALUES (?, ?, ?, ?, ?)",
         [
-            ("service:a", "service", "A", 1, '{}'),
-            ("service:b", "service", "B", 1, '{}'),
+            ("service:a", "service", "A", 1, "{}"),
+            ("service:b", "service", "B", 1, "{}"),
         ],
     )
     connection.executemany(
         "INSERT INTO graph_edges (from_node, to_node, edge_kind, metadata) VALUES (?, ?, ?, ?)",
         [
-            ("service:a", "service:b", "depends_on", '{}'),
-            ("service:b", "service:a", "depends_on", '{}'),
+            ("service:a", "service:b", "depends_on", "{}"),
+            ("service:b", "service:a", "depends_on", "{}"),
         ],
     )
     connection.commit()
@@ -205,11 +207,16 @@ def test_cycle_detection_logs_and_returns_partial_result(tmp_path: Path, caplog:
 def test_empty_and_single_node_graphs_are_safe(tmp_path: Path) -> None:
     empty_path = tmp_path / "graph-empty.sqlite3"
     connection = sqlite3.connect(empty_path)
-    connection.execute("CREATE TABLE graph_nodes (id TEXT PRIMARY KEY, kind TEXT, label TEXT, tier INTEGER, metadata TEXT)")
+    connection.execute(
+        "CREATE TABLE graph_nodes (id TEXT PRIMARY KEY, kind TEXT, label TEXT, tier INTEGER, metadata TEXT)"
+    )
     connection.execute(
         "CREATE TABLE graph_edges (id INTEGER PRIMARY KEY AUTOINCREMENT, from_node TEXT, to_node TEXT, edge_kind TEXT, metadata TEXT)"
     )
-    connection.execute("INSERT INTO graph_nodes (id, kind, label, tier, metadata) VALUES (?, ?, ?, ?, ?)", ("service:solo", "service", "Solo", 1, '{}'))
+    connection.execute(
+        "INSERT INTO graph_nodes (id, kind, label, tier, metadata) VALUES (?, ?, ?, ?, ?)",
+        ("service:solo", "service", "Solo", 1, "{}"),
+    )
     connection.commit()
     connection.close()
     client = DependencyGraphClient(

@@ -35,24 +35,16 @@ def case_document(case: dict[str, Any]) -> str:
     ]
     correlated_signals = case.get("correlated_signals", {})
     if isinstance(correlated_signals, dict):
-        fields.append(
-            " ".join(f"{key} {value}" for key, value in correlated_signals.items())
-        )
+        fields.append(" ".join(f"{key} {value}" for key, value in correlated_signals.items()))
     return " ".join(str(field) for field in fields if field)
 
 
 def signal_weight(name: str) -> float:
     """Higher weight for semantically meaningful signal names."""
     lowered = name.lower()
-    if any(
-        token in lowered
-        for token in ("certificate", "deploy", "error", "dependency", "drift", "health")
-    ):
+    if any(token in lowered for token in ("certificate", "deploy", "error", "dependency", "drift", "health")):
         return 2.5
-    if any(
-        token in lowered
-        for token in ("cpu", "memory", "disk", "latency", "duration")
-    ):
+    if any(token in lowered for token in ("cpu", "memory", "disk", "latency", "duration")):
         return 1.5
     return 1.0
 
@@ -86,9 +78,7 @@ class CaseRetriever:
         self.k1 = k1
         self.b = b
 
-    def _bm25_scores(
-        self, cases: list[dict[str, Any]], query: str
-    ) -> dict[str, float]:
+    def _bm25_scores(self, cases: list[dict[str, Any]], query: str) -> dict[str, float]:
         query_tokens = tokenize(query)
         if not query_tokens or not cases:
             return {str(case["case_id"]): 0.0 for case in cases}
@@ -100,7 +90,7 @@ class CaseRetriever:
             document_frequency.update(set(doc))
 
         scores: dict[str, float] = {}
-        for case, tokens in zip(cases, documents):
+        for case, tokens in zip(cases, documents, strict=False):
             token_counts = Counter(tokens)
             score = 0.0
             doc_length = len(tokens) or 1
@@ -109,17 +99,9 @@ class CaseRetriever:
                 if frequency == 0:
                     continue
                 docs_with_term = document_frequency.get(term, 0)
-                idf = math.log(
-                    1
-                    + (
-                        (len(cases) - docs_with_term + 0.5)
-                        / (docs_with_term + 0.5)
-                    )
-                )
+                idf = math.log(1 + ((len(cases) - docs_with_term + 0.5) / (docs_with_term + 0.5)))
                 numerator = frequency * (self.k1 + 1)
-                denominator = frequency + self.k1 * (
-                    1 - self.b + self.b * (doc_length / max(avg_doc_length, 1))
-                )
+                denominator = frequency + self.k1 * (1 - self.b + self.b * (doc_length / max(avg_doc_length, 1)))
                 score += idf * (numerator / denominator)
             scores[str(case["case_id"])] = round(score, 6)
         return scores
@@ -138,9 +120,7 @@ class CaseRetriever:
         for key, current_value in current_signals.items():
             weight = signal_weight(key)
             max_score += weight
-            if key in case_signals and comparable_signal_match(
-                current_value, case_signals[key]
-            ):
+            if key in case_signals and comparable_signal_match(current_value, case_signals[key]):
                 overlap += weight
                 matched += 1
         return round(overlap / max(max_score, 1.0), 6), matched
@@ -162,21 +142,14 @@ class CaseRetriever:
         for case in cases:
             case_id = str(case["case_id"])
             service_boost = 1.0 if case.get("affected_service") == affected_service else 0.0
-            category_boost = (
-                0.5 if case.get("root_cause_category") in category_hints else 0.0
-            )
+            category_boost = 0.5 if case.get("root_cause_category") in category_hints else 0.0
             signal_overlap, matched_signal_count = self._signal_overlap(
                 current_signals or {},
-                case.get("correlated_signals", {})
-                if isinstance(case.get("correlated_signals"), dict)
-                else {},
+                case.get("correlated_signals", {}) if isinstance(case.get("correlated_signals"), dict) else {},
             )
             lexical_score = scores.get(case_id, 0.0)
             composite = round(
-                (lexical_score * 0.65)
-                + (signal_overlap * 3.0)
-                + service_boost
-                + category_boost,
+                (lexical_score * 0.65) + (signal_overlap * 3.0) + service_boost + category_boost,
                 6,
             )
             enriched = dict(case)

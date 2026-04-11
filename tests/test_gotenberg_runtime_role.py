@@ -17,7 +17,9 @@ WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
-RUNTIME_AI_HOSTS = "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
+RUNTIME_AI_HOSTS = (
+    "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
+)
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -56,7 +58,9 @@ def test_main_tasks_render_compose_and_verify_runtime() -> None:
     assert "Pull the Gotenberg image" in names
     assert "Wait for the Gotenberg health endpoint" in names
     assert "Verify the Gotenberg runtime" in names
-    port_check = next(task for task in tasks if task["name"] == "Check whether Gotenberg publishes the expected host port")
+    port_check = next(
+        task for task in tasks if task["name"] == "Check whether Gotenberg publishes the expected host port"
+    )
     assert port_check["ansible.builtin.command"]["argv"] == [
         "docker",
         "port",
@@ -118,13 +122,9 @@ def test_inventory_opens_the_private_rendering_port_to_guest_and_docker_callers(
 
     assert host_vars["platform_port_assignments"]["gotenberg_port"] == 3007
     runtime_ai_rules = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
-    guest_rule = next(
-        rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 3007 in rule["ports"]
-    )
+    guest_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 3007 in rule["ports"])
     assert 3007 in guest_rule["ports"]
-    docker_rule = next(
-        rule for rule in runtime_ai_rules if rule["source"] == "172.16.0.0/12" and 3007 in rule["ports"]
-    )
+    docker_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "172.16.0.0/12" and 3007 in rule["ports"])
     assert 3007 in docker_rule["ports"]
     host_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "host" and 3007 in rule["ports"])
     assert 3007 in host_rule["ports"]

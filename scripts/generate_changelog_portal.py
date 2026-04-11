@@ -114,7 +114,7 @@ def render_entry_rows(entries: list[dict[str, Any]]) -> str:
             "<tr>"
             f"<td>{escape(entry['date_label'])}</td>"
             f"<td>{render_badge(entry['change_type'], type_tone)}</td>"
-            f"<td>{escape(entry['actor'])}<div class=\"muted\">{escape(entry['actor_class'])}</div></td>"
+            f'<td>{escape(entry["actor"])}<div class="muted">{escape(entry["actor_class"])}</div></td>'
             f"<td>{escape(services)}</td>"
             f"<td>{escape(targets)}</td>"
             f"<td>{render_badge(entry['outcome'], tone)}</td>"
@@ -148,7 +148,7 @@ def render_service_index(service_catalog: dict[str, Any], entries: list[dict[str
         cards.append(
             '<article class="card">'
             '<div class="card-head">'
-            f"<div><h3>{escape(service['name'])}</h3><p class=\"muted\">{escape(service['description'])}</p></div>"
+            f'<div><h3>{escape(service["name"])}</h3><p class="muted">{escape(service["description"])}</p></div>'
             f"<div>{render_badge(service['lifecycle_status'], 'neutral')}{render_badge(f'{count} changes', 'ok' if count else 'neutral')}</div>"
             "</div>"
             '<div class="meta-list">'
@@ -176,16 +176,14 @@ def render_service_page(service: dict[str, Any], entries: list[dict[str, Any]]) 
     header = (
         '<section class="panel">'
         '<div class="card-head">'
-        f"<div><h2>{escape(service['name'])}</h2><p class=\"muted\">{escape(service['description'])}</p></div>"
+        f'<div><h2>{escape(service["name"])}</h2><p class="muted">{escape(service["description"])}</p></div>'
         f"<div>{render_badge(service['lifecycle_status'], 'neutral')}{render_badge(service['exposure'], 'neutral')}</div>"
         "</div>"
         '<div class="meta-list">'
         f"<div><strong>Service ID</strong><span>{escape(service['id'])}</span></div>"
         f"<div><strong>VM</strong><span>{escape(service['vm'])}</span></div>"
         f"<div><strong>Primary URL</strong><span>{escape(service.get('public_url') or service.get('internal_url') or 'n/a')}</span></div>"
-        "</div>"
-        + (f'<div class="chip-row">{"".join(links)}</div>' if links else "")
-        + "</section>"
+        "</div>" + (f'<div class="chip-row">{"".join(links)}</div>' if links else "") + "</section>"
     )
     return header + render_timeline(entries)
 
@@ -250,12 +248,15 @@ def render_portal(
     )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    styles = PORTAL_STYLES + """
+    styles = (
+        PORTAL_STYLES
+        + """
 .warning-banner {
   border-color: rgba(155, 91, 22, 0.35);
   background: var(--warn-soft);
 }
 """
+    )
     (output_dir / "styles.css").write_text(styles, encoding="utf-8")
 
     warning_banner = render_warning_banner(history["warnings"])
@@ -376,7 +377,7 @@ def main(argv: list[str] | None = None) -> int:
             audit_lookback_days=args.audit_lookback_days,
         )
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("changelog portal", exc)
 
 

@@ -76,9 +76,7 @@ class SubdomainCatalogTests(unittest.TestCase):
     def test_missing_edge_route_entry_fails(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
         broken_catalog["subdomains"] = [
-            entry
-            for entry in broken_catalog["subdomains"]
-            if entry["fqdn"] != "grafana.lv3.org"
+            entry for entry in broken_catalog["subdomains"] if entry["fqdn"] != "grafana.lv3.org"
         ]
 
         with self.assertRaisesRegex(

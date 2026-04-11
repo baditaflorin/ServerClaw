@@ -6,7 +6,11 @@ from types import SimpleNamespace
 
 from platform.intent_queue import SchedulerIntentQueueStore
 from platform.scheduler import BudgetedWorkflowScheduler
-from tests.unit.test_intent_conflicts import BlockingWindmillClient, FakeLockManager as ConflictLockManager, write_conflict_repo
+from tests.unit.test_intent_conflicts import (
+    BlockingWindmillClient,
+    FakeLockManager as ConflictLockManager,
+    write_conflict_repo,
+)
 from tests.unit.test_scheduler_budgets import FakeLockManager, RecordingLedgerWriter, write_scheduler_repo
 
 
@@ -98,7 +102,9 @@ def test_drain_queued_intents_requeues_until_conflict_clears(tmp_path: Path) -> 
 
     def run_first() -> None:
         first["result"] = scheduler_one.submit(
-            SimpleNamespace(intent_id="intent-a", workflow_id="converge-netbox", arguments={}, target_service_id="netbox")
+            SimpleNamespace(
+                intent_id="intent-a", workflow_id="converge-netbox", arguments={}, target_service_id="netbox"
+            )
         )
 
     thread = threading.Thread(target=run_first)

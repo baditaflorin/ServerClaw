@@ -68,9 +68,7 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
         environment = require_mapping(environment, f"environments[{index}]")
         env_id = require_str(environment.get("id"), f"environments[{index}].id")
         if not ENVIRONMENT_ID_PATTERN.fullmatch(env_id):
-            raise ValueError(
-                f"environments[{index}].id must match {ENVIRONMENT_ID_PATTERN.pattern}"
-            )
+            raise ValueError(f"environments[{index}].id must match {ENVIRONMENT_ID_PATTERN.pattern}")
         if env_id in seen_ids:
             raise ValueError(f"duplicate environment id: {env_id}")
         seen_ids.add(env_id)
@@ -78,9 +76,7 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
         require_str(environment.get("name"), f"environments[{index}].name")
         status = require_str(environment.get("status"), f"environments[{index}].status")
         if status not in ALLOWED_ENVIRONMENT_STATUSES:
-            raise ValueError(
-                f"environments[{index}].status must be one of {sorted(ALLOWED_ENVIRONMENT_STATUSES)}"
-            )
+            raise ValueError(f"environments[{index}].status must be one of {sorted(ALLOWED_ENVIRONMENT_STATUSES)}")
 
         require_str(environment.get("purpose"), f"environments[{index}].purpose")
         base_domain = require_str(environment.get("base_domain"), f"environments[{index}].base_domain")
@@ -94,9 +90,7 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
         )
         edge_vm = require_str(environment.get("edge_vm"), f"environments[{index}].edge_vm")
         if edge_vm not in guest_names:
-            raise ValueError(
-                f"environments[{index}].edge_vm must reference a known guest or host id"
-            )
+            raise ValueError(f"environments[{index}].edge_vm must reference a known guest or host id")
         ingress_ipv4 = require_str(
             environment.get("ingress_ipv4"),
             f"environments[{index}].ingress_ipv4",
@@ -111,9 +105,7 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
             f"environments[{index}].topology_model",
         )
         if topology_model not in ALLOWED_TOPOLOGY_MODELS:
-            raise ValueError(
-                f"environments[{index}].topology_model must be one of {sorted(ALLOWED_TOPOLOGY_MODELS)}"
-            )
+            raise ValueError(f"environments[{index}].topology_model must be one of {sorted(ALLOWED_TOPOLOGY_MODELS)}")
 
         require_str(
             environment.get("isolation_model"),
@@ -199,17 +191,11 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
             try:
                 parsed_network = ipaddress.IPv4Network(network, strict=True)
             except ipaddress.AddressValueError as exc:
-                raise ValueError(
-                    f"environments[{index}].private_network.network must be a valid IPv4 CIDR"
-                ) from exc
+                raise ValueError(f"environments[{index}].private_network.network must be a valid IPv4 CIDR") from exc
             if parsed_network.prefixlen != cidr:
-                raise ValueError(
-                    f"environments[{index}].private_network.network prefix length must match cidr {cidr}"
-                )
+                raise ValueError(f"environments[{index}].private_network.network prefix length must match cidr {cidr}")
             if ipaddress.IPv4Address(gateway_ipv4) not in parsed_network:
-                raise ValueError(
-                    f"environments[{index}].private_network.gateway_ipv4 must be inside {parsed_network}"
-                )
+                raise ValueError(f"environments[{index}].private_network.gateway_ipv4 must be inside {parsed_network}")
 
         if env_id == "production" and not base_domain:
             raise ValueError("production.base_domain must be set")
@@ -233,9 +219,7 @@ def validate_environment_references(
     subdomains = require_list(subdomain_catalog.get("subdomains"), "subdomains")
 
     service_index = {
-        require_str(service.get("id"), f"services[{index}].id"): require_mapping(
-            service, f"services[{index}]"
-        )
+        require_str(service.get("id"), f"services[{index}].id"): require_mapping(service, f"services[{index}]")
         for index, service in enumerate(services)
     }
     subdomain_index = {
@@ -249,9 +233,7 @@ def validate_environment_references(
     for env_id, environment in environments.items():
         edge_service_id = environment["edge_service_id"]
         if edge_service_id not in service_index:
-            raise ValueError(
-                f"environment '{env_id}' references unknown edge service '{edge_service_id}'"
-            )
+            raise ValueError(f"environment '{env_id}' references unknown edge service '{edge_service_id}'")
         if service_index[edge_service_id]["vm"] != environment["edge_vm"]:
             raise ValueError(
                 f"environment '{env_id}' edge_vm '{environment['edge_vm']}' does not match "
@@ -262,9 +244,7 @@ def validate_environment_references(
         bindings = require_mapping(service.get("environments"), f"services.{service_id}.environments")
         for env_id, binding in bindings.items():
             if env_id not in environments:
-                raise ValueError(
-                    f"service '{service_id}' references unknown environment '{env_id}'"
-                )
+                raise ValueError(f"service '{service_id}' references unknown environment '{env_id}'")
             binding = require_mapping(binding, f"services.{service_id}.environments.{env_id}")
             status = require_str(
                 binding.get("status"),
@@ -298,9 +278,7 @@ def validate_environment_references(
                     "is missing from the subdomain catalog"
                 )
             if entry.get("service_id") != service_id:
-                raise ValueError(
-                    f"subdomain '{subdomain}' must reference service_id '{service_id}'"
-                )
+                raise ValueError(f"subdomain '{subdomain}' must reference service_id '{service_id}'")
             if entry.get("status") != status:
                 raise ValueError(
                     f"service '{service_id}' environment '{env_id}' status '{status}' "
@@ -312,8 +290,7 @@ def validate_environment_references(
             raise ValueError(f"subdomain '{fqdn}' references unknown environment '{env_id}'")
         if not fqdn.endswith(environments[env_id]["base_domain"]):
             raise ValueError(
-                f"subdomain '{fqdn}' does not fit the '{env_id}' base domain "
-                f"'{environments[env_id]['base_domain']}'"
+                f"subdomain '{fqdn}' does not fit the '{env_id}' base domain '{environments[env_id]['base_domain']}'"
             )
         service_id = entry.get("service_id")
         if service_id is None:
@@ -327,18 +304,14 @@ def validate_environment_references(
         binding = bindings.get(env_id)
         if binding is None:
             raise ValueError(
-                f"subdomain '{fqdn}' environment '{env_id}' has no matching service binding "
-                f"for service '{service_id}'"
+                f"subdomain '{fqdn}' environment '{env_id}' has no matching service binding for service '{service_id}'"
             )
 
 
 def list_environments(catalog: dict[str, Any]) -> int:
     environments = catalog["environments"]
     for environment in sorted(environments, key=lambda item: item["id"]):
-        print(
-            f"{environment['id']}: {environment['name']} "
-            f"[{environment['status']}] {environment['hostname_pattern']}"
-        )
+        print(f"{environment['id']}: {environment['name']} [{environment['status']}] {environment['hostname_pattern']}")
     return 0
 
 
@@ -393,7 +366,7 @@ def main(argv: list[str] | None = None) -> int:
         if not args.environment:
             return list_environments(catalog)
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("environment topology", exc)
 
 

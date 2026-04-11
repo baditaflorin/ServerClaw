@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import secrets
 import string
 import subprocess
@@ -71,10 +70,14 @@ def generate_ssh_keypair(target_dir: Path, dry_run: bool = False) -> None:
     subprocess.run(
         [
             "ssh-keygen",
-            "-t", "ed25519",
-            "-f", str(private_key),
-            "-N", "",
-            "-C", "serverclaw-bootstrap",
+            "-t",
+            "ed25519",
+            "-f",
+            str(private_key),
+            "-N",
+            "",
+            "-C",
+            "serverclaw-bootstrap",
         ],
         check=True,
         capture_output=True,
@@ -115,7 +118,9 @@ def infer_file_content(secret_name: str, info: dict) -> str | None:
     return None
 
 
-def create_scaffold(local_root: Path, manifest: dict, *, dry_run: bool = False, force: bool = False, scaffold_only: bool = False) -> tuple[list[str], list[str]]:
+def create_scaffold(
+    local_root: Path, manifest: dict, *, dry_run: bool = False, force: bool = False, scaffold_only: bool = False
+) -> tuple[list[str], list[str]]:
     """Create the .local/ directory tree and populate files.
 
     Returns (created_files, external_secrets_needed).
@@ -132,7 +137,7 @@ def create_scaffold(local_root: Path, manifest: dict, *, dry_run: bool = False, 
             continue
 
         # Compute target path relative to .local/
-        rel = path_str[len(".local/"):]
+        rel = path_str[len(".local/") :]
         target = local_root / rel
         target_dir = target.parent
 
@@ -235,7 +240,7 @@ def generate_example_scaffold(manifest: dict) -> None:
         path_str = info.get("path", "")
         if not path_str.startswith(".local/"):
             continue
-        rel = path_str[len(".local/"):]
+        rel = path_str[len(".local/") :]
         d = EXAMPLE_DIR / Path(rel).parent
         dkey = str(d)
         if dkey not in seen_dirs:
@@ -287,7 +292,7 @@ def main() -> None:
     )
 
     # Stage 3: Report
-    print(f"\n=== Summary ===")
+    print("\n=== Summary ===")
     print(f"  Files created: {len(created)}")
     print(f"  External secrets needed: {len(external)}")
 

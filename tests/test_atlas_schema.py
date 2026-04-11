@@ -341,7 +341,9 @@ def test_run_drift_does_not_create_receipt_dir_when_schema_is_clean(monkeypatch,
 
     monkeypatch.setattr(atlas_schema, "load_catalog", lambda _path: catalog)
     monkeypatch.setattr(atlas_schema, "validate_catalog", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(atlas_schema, "load_docker_sdk", lambda: type("Docker", (), {"from_env": staticmethod(lambda: object())}))
+    monkeypatch.setattr(
+        atlas_schema, "load_docker_sdk", lambda: type("Docker", (), {"from_env": staticmethod(lambda: object())})
+    )
     monkeypatch.setattr(atlas_schema, "load_controller_context", lambda: {"guests": {}})
     monkeypatch.setattr(atlas_schema, "resolve_openbao_url", fake_openbao_url)
     monkeypatch.setattr(atlas_schema, "resolve_postgres_endpoint", fake_postgres_endpoint)
@@ -508,9 +510,11 @@ def test_ensure_openbao_unsealed_uses_managed_init_payload_when_health_reports_s
     monkeypatch.setattr(
         atlas_schema,
         "controller_secret_path",
-        lambda _context, secret_id: init_payload_path
-        if secret_id == "openbao_init_payload"
-        else (_ for _ in ()).throw(AssertionError(f"unexpected secret id {secret_id}")),
+        lambda _context, secret_id: (
+            init_payload_path
+            if secret_id == "openbao_init_payload"
+            else (_ for _ in ()).throw(AssertionError(f"unexpected secret id {secret_id}"))
+        ),
     )
     monkeypatch.setattr(atlas_schema.urllib.request, "urlopen", fake_urlopen)
 
@@ -623,7 +627,7 @@ def test_inspect_live_schema_uses_default_community_compatible_output(monkeypatc
     def fake_run_atlas(client, *, image_ref, command, host_repo_root=None):
         captured["image_ref"] = image_ref
         captured["command"] = command
-        return "table \"users\" {}\n"
+        return 'table "users" {}\n'
 
     monkeypatch.setattr(atlas_schema, "run_atlas", fake_run_atlas)
 
@@ -633,7 +637,7 @@ def test_inspect_live_schema_uses_default_community_compatible_output(monkeypatc
         database_url="postgres://example",
     )
 
-    assert result == "table \"users\" {}\n"
+    assert result == 'table "users" {}\n'
     assert captured["image_ref"] == "docker.io/arigaio/atlas:test"
     assert captured["command"] == [
         "schema",
@@ -746,18 +750,12 @@ def test_run_atlas_falls_back_to_exception_class_names_when_docker_errors_is_mis
 def test_replace_loopback_host_rewrites_local_openbao_url_to_guest_ip() -> None:
     atlas_schema = load_module()
 
-    assert (
-        atlas_schema.replace_loopback_host("http://127.0.0.1:8201", "10.10.10.20")
-        == "http://10.10.10.20:8201"
-    )
+    assert atlas_schema.replace_loopback_host("http://127.0.0.1:8201", "10.10.10.20") == "http://10.10.10.20:8201"
     assert (
         atlas_schema.replace_loopback_host("http://localhost:8201/v1/sys/health", "10.10.10.20")
         == "http://10.10.10.20:8201/v1/sys/health"
     )
-    assert (
-        atlas_schema.replace_loopback_host("https://10.10.10.20:8200", "10.10.10.20")
-        == "https://10.10.10.20:8200"
-    )
+    assert atlas_schema.replace_loopback_host("https://10.10.10.20:8200", "10.10.10.20") == "https://10.10.10.20:8200"
 
 
 def test_resolve_openbao_url_prefers_direct_guest_ip_before_ssh_tunnel(monkeypatch) -> None:

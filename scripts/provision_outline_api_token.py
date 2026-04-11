@@ -20,6 +20,7 @@ Environment overrides (all optional):
     LV3_BOOTSTRAP_SSH_PRIVATE_KEY - Path to bootstrap SSH key
     LV3_OUTLINE_HOST_IP         - docker-runtime-lv3 IP (default: 10.10.10.20)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -59,8 +60,7 @@ def _ssh_key_path() -> str:
     if default.is_file():
         return str(default)
     raise RuntimeError(
-        "No SSH key found. Set LV3_BOOTSTRAP_SSH_PRIVATE_KEY or ensure "
-        ".local/ssh/bootstrap.id_ed25519 exists."
+        "No SSH key found. Set LV3_BOOTSTRAP_SSH_PRIVATE_KEY or ensure .local/ssh/bootstrap.id_ed25519 exists."
     )
 
 
@@ -76,15 +76,20 @@ def _run_psql(sql: str, db_password: str, dry_run: bool = False) -> str:
         f"-U {DEFAULT_OUTLINE_DB_USER} "
         f"-d {DEFAULT_OUTLINE_DB} "
         f"-t -A "
-        f"-c \"{sql}\""
+        f'-c "{sql}"'
     )
     ssh_cmd = [
         "ssh",
-        "-i", ssh_key,
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-o", "ConnectTimeout=15",
-        "-J", f"root@{proxmox_host}",
+        "-i",
+        ssh_key,
+        "-o",
+        "StrictHostKeyChecking=no",
+        "-o",
+        "UserKnownHostsFile=/dev/null",
+        "-o",
+        "ConnectTimeout=15",
+        "-J",
+        f"root@{proxmox_host}",
         f"ops@{outline_host}",
         psql_cmd,
     ]
@@ -95,11 +100,7 @@ def _run_psql(sql: str, db_password: str, dry_run: bool = False) -> str:
 
     result = subprocess.run(ssh_cmd, capture_output=True, text=True, timeout=30)
     if result.returncode != 0:
-        raise RuntimeError(
-            f"psql failed (exit {result.returncode}):\n"
-            f"stdout: {result.stdout}\n"
-            f"stderr: {result.stderr}"
-        )
+        raise RuntimeError(f"psql failed (exit {result.returncode}):\nstdout: {result.stdout}\nstderr: {result.stderr}")
     return result.stdout.strip()
 
 
@@ -118,10 +119,7 @@ def _read_db_password() -> str:
     pw_file = LOCAL_ROOT / "outline" / "database-password.txt"
     if pw_file.is_file():
         return pw_file.read_text().strip()
-    raise RuntimeError(
-        f"Outline DB password not found at {pw_file}. "
-        "Cannot provision token without database access."
-    )
+    raise RuntimeError(f"Outline DB password not found at {pw_file}. Cannot provision token without database access.")
 
 
 def provision(name: str = "agent-automation", dry_run: bool = False) -> str:
@@ -150,8 +148,8 @@ def provision(name: str = "agent-automation", dry_run: bool = False) -> str:
     key_id = str(uuid.uuid4())
 
     insert_sql = (
-        f"INSERT INTO \\\"apiKeys\\\" "
-        f"(id, name, secret, hash, last4, \\\"userId\\\", \\\"createdAt\\\", \\\"updatedAt\\\") "
+        f'INSERT INTO \\"apiKeys\\" '
+        f'(id, name, secret, hash, last4, \\"userId\\", \\"createdAt\\", \\"updatedAt\\") '
         f"VALUES ("
         f"'{key_id}', "
         f"'{name}', "

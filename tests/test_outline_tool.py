@@ -64,14 +64,16 @@ def capture_stderr(fn) -> dict:
 
 
 def test_collection_list_returns_all_collections(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {
-            "data": [
-                {"id": "col-1", "name": "ADRs", "description": "Arch decisions", "url": "/col/adrs"},
-                {"id": "col-2", "name": "Runbooks", "description": "Ops", "url": "/col/runbooks"},
-            ]
+    client = FakeClient(
+        {
+            "collections.list": {
+                "data": [
+                    {"id": "col-1", "name": "ADRs", "description": "Arch decisions", "url": "/col/adrs"},
+                    {"id": "col-2", "name": "Runbooks", "description": "Ops", "url": "/col/runbooks"},
+                ]
+            }
         }
-    })
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(lambda: outline_tool.main(["collection.list", "--token", "tok"]))
@@ -88,10 +90,12 @@ def test_collection_list_returns_all_collections(monkeypatch: pytest.MonkeyPatch
 
 
 def test_collection_create_creates_new_collection(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": []},
-        "collections.create": {"data": {"id": "new-col", "name": "My Docs"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": []},
+            "collections.create": {"data": {"id": "new-col", "name": "My Docs"}},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(
@@ -101,18 +105,21 @@ def test_collection_create_creates_new_collection(monkeypatch: pytest.MonkeyPatc
     assert result["ok"] is True
     assert result["outcome"] == "created"
     assert result["name"] == "My Docs"
-    assert ("collections.create", {"name": "My Docs", "description": "Test", "permission": "read", "sharing": True}) in client.calls
+    assert (
+        "collections.create",
+        {"name": "My Docs", "description": "Test", "permission": "read", "sharing": True},
+    ) in client.calls
 
 
 def test_collection_create_is_idempotent_when_collection_exists(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "existing-col", "name": "My Docs", "description": ""}]},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "existing-col", "name": "My Docs", "description": ""}]},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
-    result = capture_stdout(
-        lambda: outline_tool.main(["collection.create", "--name", "My Docs", "--token", "tok"])
-    )
+    result = capture_stdout(lambda: outline_tool.main(["collection.create", "--name", "My Docs", "--token", "tok"]))
 
     assert result["ok"] is True
     assert result["outcome"] == "exists"
@@ -127,15 +134,15 @@ def test_collection_create_is_idempotent_when_collection_exists(monkeypatch: pyt
 
 
 def test_collection_delete_removes_existing_collection(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "Old Docs", "description": ""}]},
-        "collections.delete": {"ok": True},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "Old Docs", "description": ""}]},
+            "collections.delete": {"ok": True},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
-    result = capture_stdout(
-        lambda: outline_tool.main(["collection.delete", "--name", "Old Docs", "--token", "tok"])
-    )
+    result = capture_stdout(lambda: outline_tool.main(["collection.delete", "--name", "Old Docs", "--token", "tok"]))
 
     assert result["ok"] is True
     assert result["deleted"] is True
@@ -157,20 +164,20 @@ def test_collection_delete_errors_when_collection_not_found(monkeypatch: pytest.
 
 
 def test_document_list_returns_documents_in_collection(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "ADRs", "description": ""}]},
-        "documents.list": {
-            "data": [
-                {"id": "doc-1", "title": "ADR 0001", "url": "/doc/adr-0001"},
-                {"id": "doc-2", "title": "ADR 0002", "url": "/doc/adr-0002"},
-            ]
-        },
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "ADRs", "description": ""}]},
+            "documents.list": {
+                "data": [
+                    {"id": "doc-1", "title": "ADR 0001", "url": "/doc/adr-0001"},
+                    {"id": "doc-2", "title": "ADR 0002", "url": "/doc/adr-0002"},
+                ]
+            },
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
-    result = capture_stdout(
-        lambda: outline_tool.main(["document.list", "--collection", "ADRs", "--token", "tok"])
-    )
+    result = capture_stdout(lambda: outline_tool.main(["document.list", "--collection", "ADRs", "--token", "tok"]))
 
     assert result["ok"] is True
     assert result["collection"] == "ADRs"
@@ -184,27 +191,33 @@ def test_document_list_returns_documents_in_collection(monkeypatch: pytest.Monke
 # ---------------------------------------------------------------------------
 
 
-def test_document_publish_creates_new_document_from_file(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_document_publish_creates_new_document_from_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     content_file = tmp_path / "finding.md"
     content_file.write_text("# My Finding\n\nDetails here.\n", encoding="utf-8")
 
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "Agent Findings", "description": ""}]},
-        "documents.list": {"data": []},
-        "documents.create": {"data": {"id": "doc-new", "url": "/doc/my-finding"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "Agent Findings", "description": ""}]},
+            "documents.list": {"data": []},
+            "documents.create": {"data": {"id": "doc-new", "url": "/doc/my-finding"}},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(
-        lambda: outline_tool.main([
-            "document.publish",
-            "--collection", "Agent Findings",
-            "--title", "My Finding",
-            "--file", str(content_file),
-            "--token", "tok",
-        ])
+        lambda: outline_tool.main(
+            [
+                "document.publish",
+                "--collection",
+                "Agent Findings",
+                "--title",
+                "My Finding",
+                "--file",
+                str(content_file),
+                "--token",
+                "tok",
+            ]
+        )
     )
 
     assert result["ok"] is True
@@ -216,27 +229,33 @@ def test_document_publish_creates_new_document_from_file(
     assert create_calls[0][1]["text"] == "# My Finding\n\nDetails here.\n"
 
 
-def test_document_publish_updates_existing_document(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_document_publish_updates_existing_document(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     content_file = tmp_path / "updated.md"
     content_file.write_text("# Updated\n", encoding="utf-8")
 
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
-        "documents.list": {"data": [{"id": "doc-1", "title": "Restart Guide", "url": "/doc/restart"}]},
-        "documents.update": {"data": {"id": "doc-1", "url": "/doc/restart"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
+            "documents.list": {"data": [{"id": "doc-1", "title": "Restart Guide", "url": "/doc/restart"}]},
+            "documents.update": {"data": {"id": "doc-1", "url": "/doc/restart"}},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(
-        lambda: outline_tool.main([
-            "document.publish",
-            "--collection", "Runbooks",
-            "--title", "Restart Guide",
-            "--file", str(content_file),
-            "--token", "tok",
-        ])
+        lambda: outline_tool.main(
+            [
+                "document.publish",
+                "--collection",
+                "Runbooks",
+                "--title",
+                "Restart Guide",
+                "--file",
+                str(content_file),
+                "--token",
+                "tok",
+            ]
+        )
     )
 
     assert result["ok"] is True
@@ -250,22 +269,29 @@ def test_document_publish_updates_existing_document(
 def test_document_publish_reads_content_from_stdin(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "Automation Runs", "description": ""}]},
-        "documents.list": {"data": []},
-        "documents.create": {"data": {"id": "doc-run", "url": "/doc/run"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "Automation Runs", "description": ""}]},
+            "documents.list": {"data": []},
+            "documents.create": {"data": {"id": "doc-run", "url": "/doc/run"}},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
     monkeypatch.setattr(sys, "stdin", StringIO("# Run output\n\nDone.\n"))
 
     result = capture_stdout(
-        lambda: outline_tool.main([
-            "document.publish",
-            "--collection", "Automation Runs",
-            "--title", "deploy-2026-04-05",
-            "--stdin",
-            "--token", "tok",
-        ])
+        lambda: outline_tool.main(
+            [
+                "document.publish",
+                "--collection",
+                "Automation Runs",
+                "--title",
+                "deploy-2026-04-05",
+                "--stdin",
+                "--token",
+                "tok",
+            ]
+        )
     )
 
     assert result["ok"] is True
@@ -274,33 +300,39 @@ def test_document_publish_reads_content_from_stdin(
     assert create_calls[0][1]["text"] == "# Run output\n\nDone.\n"
 
 
-def test_document_publish_removes_duplicate_documents(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_document_publish_removes_duplicate_documents(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     content_file = tmp_path / "doc.md"
     content_file.write_text("# Doc\n", encoding="utf-8")
 
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "ADRs", "description": ""}]},
-        "documents.list": {
-            "data": [
-                {"id": "doc-1", "title": "ADR Index"},
-                {"id": "doc-2", "title": "ADR Index"},  # duplicate
-            ]
-        },
-        "documents.update": {"data": {"id": "doc-1", "url": "/doc/adr-index"}},
-        "documents.delete": {"ok": True},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "ADRs", "description": ""}]},
+            "documents.list": {
+                "data": [
+                    {"id": "doc-1", "title": "ADR Index"},
+                    {"id": "doc-2", "title": "ADR Index"},  # duplicate
+                ]
+            },
+            "documents.update": {"data": {"id": "doc-1", "url": "/doc/adr-index"}},
+            "documents.delete": {"ok": True},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     capture_stdout(
-        lambda: outline_tool.main([
-            "document.publish",
-            "--collection", "ADRs",
-            "--title", "ADR Index",
-            "--file", str(content_file),
-            "--token", "tok",
-        ])
+        lambda: outline_tool.main(
+            [
+                "document.publish",
+                "--collection",
+                "ADRs",
+                "--title",
+                "ADR Index",
+                "--file",
+                str(content_file),
+                "--token",
+                "tok",
+            ]
+        )
     )
 
     delete_calls = [(ep, p) for ep, p in client.calls if ep == "documents.delete"]
@@ -314,15 +346,21 @@ def test_document_publish_removes_duplicate_documents(
 
 
 def test_document_get_returns_full_text(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
-        "documents.list": {"data": [{"id": "doc-1", "title": "Restart Guide", "url": "/doc/restart"}]},
-        "documents.info": {"data": {"id": "doc-1", "title": "Restart Guide", "text": "# Restart\n\nStep 1.", "url": "/doc/restart"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
+            "documents.list": {"data": [{"id": "doc-1", "title": "Restart Guide", "url": "/doc/restart"}]},
+            "documents.info": {
+                "data": {"id": "doc-1", "title": "Restart Guide", "text": "# Restart\n\nStep 1.", "url": "/doc/restart"}
+            },
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(
-        lambda: outline_tool.main(["document.get", "--collection", "Runbooks", "--title", "Restart Guide", "--token", "tok"])
+        lambda: outline_tool.main(
+            ["document.get", "--collection", "Runbooks", "--title", "Restart Guide", "--token", "tok"]
+        )
     )
 
     assert result["ok"] is True
@@ -331,13 +369,17 @@ def test_document_get_returns_full_text(monkeypatch: pytest.MonkeyPatch) -> None
 
 
 def test_document_get_errors_when_document_not_found(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
-        "documents.list": {"data": []},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
+            "documents.list": {"data": []},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
-    exit_code = outline_tool.main(["document.get", "--collection", "Runbooks", "--title", "Ghost Doc", "--token", "tok"])
+    exit_code = outline_tool.main(
+        ["document.get", "--collection", "Runbooks", "--title", "Ghost Doc", "--token", "tok"]
+    )
 
     assert exit_code == 1
 
@@ -348,11 +390,13 @@ def test_document_get_errors_when_document_not_found(monkeypatch: pytest.MonkeyP
 
 
 def test_document_delete_removes_matching_document(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "ADRs", "description": ""}]},
-        "documents.list": {"data": [{"id": "doc-1", "title": "Old ADR"}]},
-        "documents.delete": {"ok": True},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "ADRs", "description": ""}]},
+            "documents.list": {"data": [{"id": "doc-1", "title": "Old ADR"}]},
+            "documents.delete": {"ok": True},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(
@@ -371,16 +415,23 @@ def test_document_delete_removes_matching_document(monkeypatch: pytest.MonkeyPat
 
 
 def test_document_search_returns_results(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "documents.search": {
-            "data": [
-                {
-                    "document": {"id": "doc-1", "title": "Postgres Upgrade", "collectionId": "col-1", "url": "/doc/pg"},
-                    "context": "postgres migration steps...",
-                }
-            ]
+    client = FakeClient(
+        {
+            "documents.search": {
+                "data": [
+                    {
+                        "document": {
+                            "id": "doc-1",
+                            "title": "Postgres Upgrade",
+                            "collectionId": "col-1",
+                            "url": "/doc/pg",
+                        },
+                        "context": "postgres migration steps...",
+                    }
+                ]
+            }
         }
-    })
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(
@@ -394,19 +445,26 @@ def test_document_search_returns_results(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_document_search_scoped_to_collection(monkeypatch: pytest.MonkeyPatch) -> None:
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
-        "documents.search": {"data": []},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "col-1", "name": "Runbooks", "description": ""}]},
+            "documents.search": {"data": []},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     result = capture_stdout(
-        lambda: outline_tool.main([
-            "document.search",
-            "--query", "restart",
-            "--collection", "Runbooks",
-            "--token", "tok",
-        ])
+        lambda: outline_tool.main(
+            [
+                "document.search",
+                "--query",
+                "restart",
+                "--collection",
+                "Runbooks",
+                "--token",
+                "tok",
+            ]
+        )
     )
 
     assert result["ok"] is True
@@ -419,23 +477,21 @@ def test_document_search_scoped_to_collection(monkeypatch: pytest.MonkeyPatch) -
 # ---------------------------------------------------------------------------
 
 
-def test_changelog_push_creates_document_from_repo_changelog(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_changelog_push_creates_document_from_repo_changelog(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     changelog = tmp_path / "changelog.md"
     changelog.write_text("# Changelog\n\n## v1.0.0\n- initial release\n", encoding="utf-8")
 
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "cl-col", "name": "Changelogs", "description": ""}]},
-        "documents.list": {"data": []},
-        "documents.create": {"data": {"id": "doc-cl", "url": "/doc/changelog"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "cl-col", "name": "Changelogs", "description": ""}]},
+            "documents.list": {"data": []},
+            "documents.create": {"data": {"id": "doc-cl", "url": "/doc/changelog"}},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
     # Point the tool at the tmp_path changelog by using --file
-    result = capture_stdout(
-        lambda: outline_tool.main(["changelog.push", "--file", str(changelog), "--token", "tok"])
-    )
+    result = capture_stdout(lambda: outline_tool.main(["changelog.push", "--file", str(changelog), "--token", "tok"]))
 
     assert result["ok"] is True
     assert result["outcome"] == "created"
@@ -444,22 +500,20 @@ def test_changelog_push_creates_document_from_repo_changelog(
     assert "## v1.0.0" in create_calls[0][1]["text"]
 
 
-def test_changelog_push_updates_existing_changelog_document(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_changelog_push_updates_existing_changelog_document(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     changelog = tmp_path / "changelog.md"
     changelog.write_text("# Changelog\n\n## v2.0.0\n- new feature\n", encoding="utf-8")
 
-    client = FakeClient({
-        "collections.list": {"data": [{"id": "cl-col", "name": "Changelogs", "description": ""}]},
-        "documents.list": {"data": [{"id": "doc-cl", "title": "Changelog"}]},
-        "documents.update": {"data": {"id": "doc-cl", "url": "/doc/changelog"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": [{"id": "cl-col", "name": "Changelogs", "description": ""}]},
+            "documents.list": {"data": [{"id": "doc-cl", "title": "Changelog"}]},
+            "documents.update": {"data": {"id": "doc-cl", "url": "/doc/changelog"}},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
-    result = capture_stdout(
-        lambda: outline_tool.main(["changelog.push", "--file", str(changelog), "--token", "tok"])
-    )
+    result = capture_stdout(lambda: outline_tool.main(["changelog.push", "--file", str(changelog), "--token", "tok"]))
 
     assert result["ok"] is True
     assert result["outcome"] == "updated"
@@ -473,17 +527,17 @@ def test_changelog_push_creates_changelogs_collection_when_missing(
     changelog = tmp_path / "changelog.md"
     changelog.write_text("# Changelog\n", encoding="utf-8")
 
-    client = FakeClient({
-        "collections.list": {"data": []},
-        "collections.create": {"data": {"id": "new-cl-col", "name": "Changelogs"}},
-        "documents.list": {"data": []},
-        "documents.create": {"data": {"id": "doc-cl", "url": "/doc/changelog"}},
-    })
+    client = FakeClient(
+        {
+            "collections.list": {"data": []},
+            "collections.create": {"data": {"id": "new-cl-col", "name": "Changelogs"}},
+            "documents.list": {"data": []},
+            "documents.create": {"data": {"id": "doc-cl", "url": "/doc/changelog"}},
+        }
+    )
     monkeypatch.setattr(outline_tool, "_client", lambda _args: client)
 
-    result = capture_stdout(
-        lambda: outline_tool.main(["changelog.push", "--file", str(changelog), "--token", "tok"])
-    )
+    result = capture_stdout(lambda: outline_tool.main(["changelog.push", "--file", str(changelog), "--token", "tok"]))
 
     assert result["ok"] is True
     assert result["outcome"] == "created"
@@ -504,9 +558,7 @@ def test_error_output_is_valid_json_on_unknown_collection(monkeypatch: pytest.Mo
     assert exit_code == 1
 
 
-def test_token_loaded_from_environment_variable(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_token_loaded_from_environment_variable(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OUTLINE_API_TOKEN", "env-token-value")
 
     captured_tokens: list[str] = []

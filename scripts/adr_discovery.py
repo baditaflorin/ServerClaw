@@ -34,11 +34,17 @@ CONCERN_RULES: list[tuple[str, list[str]]] = [
         ["security", "hardening", "firewall", "mtls", "credential", "secret", "token", "key", "certificate", "tls"],
     ),
     ("storage", ["storage", "backup", "pbs", "volume", "disk"]),
-    ("monitoring", ["monitoring", "grafana", "prometheus", "alertmanager", "metrics", "observability", "loki", "tempo"]),
+    (
+        "monitoring",
+        ["monitoring", "grafana", "prometheus", "alertmanager", "metrics", "observability", "loki", "tempo"],
+    ),
     ("ci-cd", ["ci", "cd", "gitea", "github", "actions", "pipeline", "validation", "pre-push", "gate"]),
     ("automation", ["ansible", "playbook", "role", "windmill", "workflow", "automation", "scheduled"]),
     ("identity", ["keycloak", "sso", "oidc", "identity", "authentication", "authorization", "access"]),
-    ("documentation", ["changelog", "runbook", "documentation", "portal", "search", "indexing", "reservation", "shard"]),
+    (
+        "documentation",
+        ["changelog", "runbook", "documentation", "portal", "search", "indexing", "reservation", "shard"],
+    ),
     ("testing", ["testing", "test", "pytest", "molecule", "integration-test", "idempotency"]),
     ("release", ["release", "version", "changelog", "semantic"]),
     ("api", ["api", "gateway", "catalog", "openapi", "rest"]),
@@ -288,7 +294,7 @@ def _extract_value(text: str, key: str, default: str = "") -> str:
     match = pattern.search(text)
     if match:
         return match.group(1).strip()
-    header_pattern = re.compile(rf"^#{1,2}\s+{re.escape(key)}:\s+(.+)$", re.IGNORECASE | re.MULTILINE)
+    header_pattern = re.compile(rf"^#{1, 2}\s+{re.escape(key)}:\s+(.+)$", re.IGNORECASE | re.MULTILINE)
     match = header_pattern.search(text)
     if match:
         return match.group(1).strip()
@@ -476,9 +482,7 @@ def load_reservation_ledger(path: Path = RESERVATIONS_PATH) -> ReservationLedger
             raise ValueError(f"{path}.reservations[{index}].expires_on must be YYYY-MM-DD when set")
         status = slugify(str(item.get("status", "active") or "active"))
         if status not in RESERVATION_STATUSES:
-            raise ValueError(
-                f"{path}.reservations[{index}].status must be one of {sorted(RESERVATION_STATUSES)}"
-            )
+            raise ValueError(f"{path}.reservations[{index}].status must be one of {sorted(RESERVATION_STATUSES)}")
         reservations.append(
             AdrReservation(
                 reservation_id=reservation_id,
@@ -524,8 +528,7 @@ def validate_reservation_ledger(
         for number in range(reservation.start, reservation.end + 1):
             if number in committed_numbers:
                 issues.append(
-                    "reservation "
-                    f"'{reservation.reservation_id}' overlaps committed ADR {committed_numbers[number]}"
+                    f"reservation '{reservation.reservation_id}' overlaps committed ADR {committed_numbers[number]}"
                 )
                 break
 
@@ -533,10 +536,7 @@ def validate_reservation_ledger(
     for index, left in enumerate(active):
         for right in active[index + 1 :]:
             if left.overlaps(right.start, right.end):
-                issues.append(
-                    "active reservations "
-                    f"'{left.reservation_id}' and '{right.reservation_id}' overlap"
-                )
+                issues.append(f"active reservations '{left.reservation_id}' and '{right.reservation_id}' overlap")
 
     return issues
 
@@ -793,7 +793,11 @@ def build_generated_index_documents(
 
 def generated_shard_paths(adr_dir: Path = ADR_DIR) -> set[Path]:
     paths: set[Path] = set()
-    for directory in (adr_dir / "index" / "by-range", adr_dir / "index" / "by-concern", adr_dir / "index" / "by-status"):
+    for directory in (
+        adr_dir / "index" / "by-range",
+        adr_dir / "index" / "by-concern",
+        adr_dir / "index" / "by-status",
+    ):
         if not directory.exists():
             continue
         paths.update(path for path in directory.glob("*.yaml") if path.is_file())

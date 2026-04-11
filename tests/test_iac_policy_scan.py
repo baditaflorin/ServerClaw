@@ -12,9 +12,7 @@ import yaml  # type: ignore[import-untyped]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = REPO_ROOT / "scripts" / "iac_policy_scan.py"
-CUSTOM_CHECKS_PATH = (
-    REPO_ROOT / "config" / "checkov" / "checks" / "terraform" / "lv3_proxmox_checks.py"
-)
+CUSTOM_CHECKS_PATH = REPO_ROOT / "config" / "checkov" / "checks" / "terraform" / "lv3_proxmox_checks.py"
 
 
 def load_module(name: str, path: Path):
@@ -254,7 +252,7 @@ def test_iac_policy_scan_enforces_custom_tofu_invariants(tmp_path: Path, monkeyp
     (repo_root / "tofu" / "environments" / "production").mkdir(parents=True)
     (repo_root / "tofu" / "modules" / "proxmox-vm").mkdir(parents=True)
     (repo_root / "tofu" / "environments" / "production" / "main.tf").write_text(
-        '\n'.join(
+        "\n".join(
             [
                 'provider "proxmox" {',
                 "  insecure = true",
@@ -269,7 +267,7 @@ def test_iac_policy_scan_enforces_custom_tofu_invariants(tmp_path: Path, monkeyp
         encoding="utf-8",
     )
     (repo_root / "tofu" / "modules" / "proxmox-vm" / "main.tf").write_text(
-        '\n'.join(
+        "\n".join(
             [
                 'resource "proxmox_virtual_environment_vm" "this" {',
                 "  disk {",
@@ -373,9 +371,14 @@ def test_custom_proxmox_checks_cover_current_invariants() -> None:
 
     assert disk_check.scan_resource_conf({"disk": [{"backup": [True]}, {"backup": [True]}]}) == CheckResult.PASSED
     assert disk_check.scan_resource_conf({"disk": [{"backup": [False]}]}) == CheckResult.FAILED
-    assert mac_check.scan_resource_conf({"network_device": [{"mac_address": ["BC:24:11:00:00:01"]}]}) == CheckResult.PASSED
+    assert (
+        mac_check.scan_resource_conf({"network_device": [{"mac_address": ["BC:24:11:00:00:01"]}]}) == CheckResult.PASSED
+    )
     assert mac_check.scan_resource_conf({"network_device": [{"bridge": ["vmbr10"]}]}) == CheckResult.FAILED
-    assert module_check.scan_module_conf({"source": ["../../modules/proxmox-vm"], "mac_address": ["BC:24:11:00:00:02"]}) == CheckResult.PASSED
+    assert (
+        module_check.scan_module_conf({"source": ["../../modules/proxmox-vm"], "mac_address": ["BC:24:11:00:00:02"]})
+        == CheckResult.PASSED
+    )
     assert module_check.scan_module_conf({"source": ["../../modules/proxmox-vm"]}) == CheckResult.FAILED
     assert module_check.scan_module_conf({"source": ["../../modules/other"]}) == CheckResult.UNKNOWN
     assert provider_check.scan_provider_conf({"insecure": [True]}) == CheckResult.FAILED

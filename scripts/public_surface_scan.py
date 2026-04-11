@@ -47,6 +47,7 @@ from mutation_audit import build_event, emit_event_best_effort
 from glitchtip_event import emit_glitchtip_event
 from platform_observation_tool import maybe_read_secret_path, post_json_webhook
 from subdomain_catalog import load_public_edge_defaults, load_subdomain_catalog
+
 DEFAULT_ENVIRONMENT = "production"
 DEFAULT_POLICY_PATH = repo_path("config", "public-surface-scan-policy.json")
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "security-scan")
@@ -121,7 +122,7 @@ def load_public_surface_scan_policy(path: Path = DEFAULT_POLICY_PATH) -> dict[st
 def maybe_load_controller_context() -> dict[str, Any] | None:
     try:
         return load_controller_context()
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
 
 
@@ -460,7 +461,9 @@ def classify_testssl_findings(
         if "certificate" in finding_lower and "expired" in finding_lower:
             severity = "critical"
             summary = "TLS certificate is expired."
-        elif ("tls 1 " in finding_lower or "tls 1.0" in finding_lower or "tls 1.1" in finding_lower) and "offered" in finding_lower:
+        elif (
+            "tls 1 " in finding_lower or "tls 1.0" in finding_lower or "tls 1.1" in finding_lower
+        ) and "offered" in finding_lower:
             severity = "high"
             summary = "Deprecated TLS protocol is still accepted."
         elif "weak cipher" in finding_lower or "3des" in finding_lower or "null cipher" in finding_lower:
@@ -1008,14 +1011,14 @@ def run_scan(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Run the ADR 0142 public-surface security scan and write a receipt."
-    )
+    parser = argparse.ArgumentParser(description="Run the ADR 0142 public-surface security scan and write a receipt.")
     parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=sorted(ALLOWED_ENVIRONMENTS))
     parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY_PATH)
     parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
     parser.add_argument("--artifacts-root", type=Path, default=DEFAULT_ARTIFACTS_ROOT)
-    parser.add_argument("--testssl-image", default=os.environ.get("PUBLIC_SURFACE_TESTSSL_IMAGE", DEFAULT_TESTSSL_IMAGE))
+    parser.add_argument(
+        "--testssl-image", default=os.environ.get("PUBLIC_SURFACE_TESTSSL_IMAGE", DEFAULT_TESTSSL_IMAGE)
+    )
     parser.add_argument("--nuclei-image", default=os.environ.get("PUBLIC_SURFACE_NUCLEI_IMAGE", DEFAULT_NUCLEI_IMAGE))
     parser.add_argument("--timeout-seconds", type=int, default=180)
     parser.add_argument("--skip-testssl", action="store_true")
@@ -1086,7 +1089,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.print_report_json:
             print(f"REPORT_JSON={json.dumps(report, separators=(',', ':'))}")
         return report["summary"]["status_code"]
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("public surface security scan", exc)
 
 

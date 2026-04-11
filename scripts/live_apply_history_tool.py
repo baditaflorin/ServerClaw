@@ -21,6 +21,7 @@ Examples
   python scripts/live_apply_history_tool.py summary
   python scripts/live_apply_history_tool.py failed
 """
+
 from __future__ import annotations
 
 import argparse
@@ -55,6 +56,7 @@ def _verification_passed(receipt: dict) -> bool:
 # ---------------------------------------------------------------------------
 # commands
 # ---------------------------------------------------------------------------
+
 
 def cmd_list(args: argparse.Namespace) -> int:
     receipts = _all_receipts()
@@ -145,16 +147,16 @@ def cmd_summary(args: argparse.Namespace) -> int:
         month = (d.get("applied_on") or d.get("recorded_on") or "?")[:7]
         by_month[month] = by_month.get(month, 0) + 1
 
-    print(f"Live Apply History Summary\n")
+    print("Live Apply History Summary\n")
     print(f"  Total receipts      : {total}")
     print(f"  Parse errors        : {parse_errors}")
     print(f"  Verification passed : {passed}")
     print(f"  Verification failed : {failed}")
     print(f"  Unique ADRs covered : {len(adrs)}")
-    print(f"\n  Top 10 workflows:")
+    print("\n  Top 10 workflows:")
     for wf, cnt in sorted(workflows.items(), key=lambda x: -x[1])[:10]:
         print(f"    {wf:<50}  {cnt}")
-    print(f"\n  By month:")
+    print("\n  By month:")
     for month, cnt in sorted(by_month.items(), reverse=True)[:12]:
         print(f"    {month}  {cnt}")
     return 0
@@ -162,10 +164,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
 
 def cmd_failed(args: argparse.Namespace) -> int:
     receipts = _all_receipts()
-    failures = [
-        (p, d) for p, d in receipts
-        if "_error" not in d and not _verification_passed(d)
-    ]
+    failures = [(p, d) for p, d in receipts if "_error" not in d and not _verification_passed(d)]
     if not failures:
         print("No receipts with failed verifications")
         return 0
@@ -175,7 +174,7 @@ def cmd_failed(args: argparse.Namespace) -> int:
         for check in data.get("verification", []):
             result = check.get("result", "?")
             if result not in ("pass", "ok", "success"):
-                print(f"    FAIL: {check.get('check','?')} — {check.get('observed','')[:80]}")
+                print(f"    FAIL: {check.get('check', '?')} — {check.get('observed', '')[:80]}")
         print()
     return 1 if failures else 0
 
@@ -183,6 +182,7 @@ def cmd_failed(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

@@ -21,10 +21,26 @@ CONTROL_PLANE_LANES_PATH = REPO_ROOT / "config" / "control-plane-lanes.json"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 RESTIC_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "restic-config-backup.yml"
 RESTIC_ROLE_DEFAULTS_PATH = (
-    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "restic_config_backup" / "defaults" / "main.yml"
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "restic_config_backup"
+    / "defaults"
+    / "main.yml"
 )
 RESTIC_ROLE_TASKS_PATH = (
-    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "restic_config_backup" / "tasks" / "main.yml"
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "restic_config_backup"
+    / "tasks"
+    / "main.yml"
 )
 
 
@@ -307,7 +323,9 @@ def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(t
                     "files": 230,
                 },
                 "last_restore_verification": None,
-                "reasons": ["Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."],
+                "reasons": [
+                    "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
+                ],
             },
             {
                 "source_id": "versions_stack",
@@ -326,7 +344,9 @@ def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(t
                     "files": 1,
                 },
                 "last_restore_verification": None,
-                "reasons": ["Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."],
+                "reasons": [
+                    "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
+                ],
             },
         ],
     }
@@ -429,6 +449,7 @@ def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
     )
 
     assert restic_backup.snapshot_id_from_backup_stdout(stdout) == "abc123"
+
 
 def test_resolve_minio_endpoint_recovers_compose_managed_container(monkeypatch) -> None:
     calls: list[list[str]] = []
@@ -591,7 +612,16 @@ def test_resolve_minio_endpoint_force_recreates_running_compose_managed_containe
                 ),
                 stderr="",
             )
-        if argv == ["docker", "compose", "--file", "/opt/minio/docker-compose.yml", "up", "-d", "--force-recreate", "minio"]:
+        if argv == [
+            "docker",
+            "compose",
+            "--file",
+            "/opt/minio/docker-compose.yml",
+            "up",
+            "-d",
+            "--force-recreate",
+            "minio",
+        ]:
             return types.SimpleNamespace(returncode=0, stdout="recreated\n", stderr="")
         raise AssertionError(f"unexpected command: {argv}")
 
@@ -718,7 +748,9 @@ def test_resolve_minio_endpoint_rejects_invalid_container_ip_after_network_recov
         raise AssertionError(f"unexpected command: {argv}")
 
     restic_backup.run_command = fake_run_command
-    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError()))
+    monkeypatch.setattr(
+        restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError())
+    )
 
     try:
         restic_backup.resolve_minio_endpoint(
@@ -828,7 +860,10 @@ def test_repo_surfaces_register_restic_backup_contract() -> None:
     assert "restic-config-backup" in workflow_catalog
     assert "restic-config-restore-verify" in workflow_catalog
     assert "converge-restic-config-backup" in workflow_catalog
-    assert workflow_catalog["converge-restic-config-backup"]["preflight"]["required_secret_ids"][1] == "minio_root_password"
+    assert (
+        workflow_catalog["converge-restic-config-backup"]["preflight"]["required_secret_ids"][1]
+        == "minio_root_password"
+    )
     assert command_catalog["run-restic-config-backup"]["workflow_id"] == "restic-config-backup"
     assert command_catalog["run-restic-config-restore-verify"]["workflow_id"] == "restic-config-restore-verify"
     assert command_catalog["converge-restic-config-backup"]["workflow_id"] == "converge-restic-config-backup"
@@ -855,6 +890,7 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
 
     assert "--live-apply-trigger" in command
 
+
 def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_surfaces() -> None:
     command = trigger.build_remote_command(
         mode="backup",
@@ -869,6 +905,7 @@ def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_
     assert "/etc/lv3/restic-config-backup/restic-file-backup-catalog.json" in command
     assert "/srv/proxmox_florin_server/receipts/restic-backups" in command
     assert "/srv/proxmox_florin_server/receipts/restic-restore-verifications" in command
+
 
 def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: Path, monkeypatch) -> None:
     scripts_dir = tmp_path / "scripts"
@@ -902,10 +939,17 @@ def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: P
 
     assert len(remote_commands) == 4
     assert len(stdin_payloads) == 4
-    assert any("/srv/proxmox_florin_server/scripts/restic_config_backup.py" in command for _, command in remote_commands)
+    assert any(
+        "/srv/proxmox_florin_server/scripts/restic_config_backup.py" in command for _, command in remote_commands
+    )
     assert any("/srv/proxmox_florin_server/scripts/script_bootstrap.py" in command for _, command in remote_commands)
-    assert any("/srv/proxmox_florin_server/scripts/controller_automation_toolkit.py" in command for _, command in remote_commands)
-    assert any("/srv/proxmox_florin_server/config/restic-file-backup-catalog.json" in command for _, command in remote_commands)
+    assert any(
+        "/srv/proxmox_florin_server/scripts/controller_automation_toolkit.py" in command
+        for _, command in remote_commands
+    )
+    assert any(
+        "/srv/proxmox_florin_server/config/restic-file-backup-catalog.json" in command for _, command in remote_commands
+    )
     assert all("sudo tee" in command for _, command in remote_commands)
     assert stdin_payloads[0].startswith("#!/usr/bin/env python3")
 
@@ -915,10 +959,9 @@ def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path
     monkeypatch.setattr(
         trigger,
         "fetch_remote_repo_file",
-        lambda context, target, repo_root, relative_path: json.dumps(
-            {"path": relative_path, "repo_root": repo_root, "target": target}
-        )
-        + "\n",
+        lambda context, target, repo_root, relative_path: (
+            json.dumps({"path": relative_path, "repo_root": repo_root, "target": target}) + "\n"
+        ),
     )
 
     synced = trigger.sync_reported_receipt_artifacts(
@@ -990,7 +1033,9 @@ def test_ensure_remote_runtime_credentials_raises_when_converge_does_not_restore
     except RuntimeError as exc:
         assert "restic runtime credentials are still missing" in str(exc)
     else:
-        raise AssertionError("expected ensure_remote_runtime_credentials to fail when the credential file stays missing")
+        raise AssertionError(
+            "expected ensure_remote_runtime_credentials to fail when the credential file stays missing"
+        )
 
 
 def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkeypatch) -> None:
@@ -1016,24 +1061,30 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
             }
         ),
     )
-    monkeypatch.setattr(trigger, "build_guest_ssh_command", lambda context, target, remote_command: ["ssh", target, remote_command])
+    monkeypatch.setattr(
+        trigger, "build_guest_ssh_command", lambda context, target, remote_command: ["ssh", target, remote_command]
+    )
     monkeypatch.setattr(
         trigger,
         "run_command",
-        lambda command: types.SimpleNamespace(returncode=0, stdout='REPORT_JSON={"summary":{"protected":1}}', stderr=""),
+        lambda command: types.SimpleNamespace(
+            returncode=0, stdout='REPORT_JSON={"summary":{"protected":1}}', stderr=""
+        ),
     )
     monkeypatch.setattr(
         trigger,
         "sync_reported_receipt_artifacts",
-        lambda context, target, repo_root, report: captured.update(
-            {
-                "sync_context": context,
-                "sync_target": target,
-                "sync_repo_root": repo_root,
-                "sync_report": report,
-            }
-        )
-        or ["receipts/restic-snapshots-latest.json"],
+        lambda context, target, repo_root, report: (
+            captured.update(
+                {
+                    "sync_context": context,
+                    "sync_target": target,
+                    "sync_repo_root": repo_root,
+                    "sync_report": report,
+                }
+            )
+            or ["receipts/restic-snapshots-latest.json"]
+        ),
     )
 
     assert (
@@ -1085,9 +1136,13 @@ def test_main_live_apply_backup_omits_ntfy_requirement(monkeypatch, tmp_path: Pa
     monkeypatch.setattr(
         restic_backup,
         "runtime_lock",
-        lambda **kwargs: types.SimpleNamespace(__enter__=lambda self: None, __exit__=lambda self, exc_type, exc, tb: False),
+        lambda **kwargs: types.SimpleNamespace(
+            __enter__=lambda self: None, __exit__=lambda self, exc_type, exc, tb: False
+        ),
     )
-    monkeypatch.setattr(restic_backup, "resolve_minio_endpoint", lambda catalog: ("10.10.10.20", "http://10.10.10.20:9000"))
+    monkeypatch.setattr(
+        restic_backup, "resolve_minio_endpoint", lambda catalog: ("10.10.10.20", "http://10.10.10.20:9000")
+    )
     monkeypatch.setattr(restic_backup, "ensure_restic_repository", lambda **kwargs: None)
     monkeypatch.setattr(restic_backup, "resolve_source_paths", lambda raw_sources, repo_root: [])
     monkeypatch.setattr(restic_backup, "filter_sources", lambda sources, only_live_apply: [])
@@ -1155,8 +1210,14 @@ def test_restic_role_prefers_runtime_control_openbao_with_local_fallback() -> No
     assert "restic_config_backup_runtime_openbao_local_address" in defaults
     assert "Probe whether the dedicated OpenBao API is reachable from the backup runtime" in tasks
     assert "restic_config_backup_runtime_openbao_effective_address" in tasks
-    assert 'common_openbao_systemd_credentials_openbao_address: "{{ restic_config_backup_runtime_openbao_effective_address }}"' in tasks
-    assert 'common_openbao_systemd_credentials_manage_local_openbao_runtime: "{{ restic_config_backup_runtime_openbao_effective_manage_local_runtime }}"' in tasks
+    assert (
+        'common_openbao_systemd_credentials_openbao_address: "{{ restic_config_backup_runtime_openbao_effective_address }}"'
+        in tasks
+    )
+    assert (
+        'common_openbao_systemd_credentials_manage_local_openbao_runtime: "{{ restic_config_backup_runtime_openbao_effective_manage_local_runtime }}"'
+        in tasks
+    )
 
 
 def test_restic_playbook_enables_bridge_chain_recovery_on_docker_runtime() -> None:
@@ -1165,6 +1226,7 @@ def test_restic_playbook_enables_bridge_chain_recovery_on_docker_runtime() -> No
     firewall_role = next(role for role in roles if role["role"] == "lv3.platform.linux_guest_firewall")
 
     assert firewall_role["vars"]["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
+
 
 def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
     makefile = MAKEFILE_PATH.read_text(encoding="utf-8")

@@ -36,10 +36,7 @@ def test_workflow_and_command_catalog_preserve_n8n_adapter_boundary() -> None:
     )
 
     assert "ServerClaw connector fabric" in command["description"]
-    assert any(
-        "thin-adapter rule for ServerClaw" in precondition
-        for precondition in command["expected_preconditions"]
-    )
+    assert any("thin-adapter rule for ServerClaw" in precondition for precondition in command["expected_preconditions"])
     assert "protected editor redirect" in command["evidence"]["notes"]
 
 

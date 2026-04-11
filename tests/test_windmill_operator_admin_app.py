@@ -24,9 +24,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     defaults_text = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
     ).read_text()
-    defaults = yaml.safe_load(
-        defaults_text
-    )
+    defaults = yaml.safe_load(defaults_text)
 
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
     raw_app_paths = {entry["path"] for entry in defaults["windmill_seed_raw_apps"]}
@@ -50,10 +48,22 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_service_topology"] == (
         "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
     )
-    assert defaults["windmill_server_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_server_port }}"
-    assert defaults["windmill_host_proxy_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
-    assert defaults["windmill_private_base_url"] == "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
-    assert defaults["windmill_base_url"] == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+    assert (
+        defaults["windmill_server_port"]
+        == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_server_port }}"
+    )
+    assert (
+        defaults["windmill_host_proxy_port"]
+        == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
+    )
+    assert (
+        defaults["windmill_private_base_url"]
+        == "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
+    )
+    assert (
+        defaults["windmill_base_url"]
+        == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+    )
     assert defaults["windmill_ntfy_resource_path"] == "f/lv3/ntfy_platform"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
     assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
@@ -62,7 +72,10 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_worker_checkout_repo_root_local_dir"].strip().startswith("{{\n  (playbook_dir ~ '/..')")
     assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
-    assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
+    assert (
+        defaults["windmill_seed_app_repo_root_local_dir"]
+        == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
+    )
     assert {
         "Makefile",
         "config/sbom-scanner.json",
@@ -91,8 +104,14 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "config/windmill/scripts/stage-smoke-suites.py",
     } == set(defaults["windmill_worker_checkout_integrity_files"])
     assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
-    assert defaults["windmill_seed_script_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
-    assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
+    assert (
+        defaults["windmill_seed_script_root_local_dir"]
+        == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
+    )
+    assert (
+        defaults["windmill_seed_app_repo_root_local_dir"]
+        == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
+    )
     assert {
         ".gitea",
         "README.md",
@@ -131,11 +150,26 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert "windmill_worker_seed_job_secret_files" in defaults_text
     assert "windmill_worker_proxmox_api_token_payload_dir" in defaults_text
     assert "windmill_worker_superadmin_secret_file" in defaults_text
-    assert defaults["windmill_worker_superadmin_secret_dir"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
-    assert defaults["windmill_worker_superadmin_secret_file"] == "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
-    assert defaults["windmill_worker_seed_job_secret_root"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill-job-secrets"
-    assert defaults["windmill_atlas_approle_local_file"] == "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
-    assert defaults["windmill_ntfy_alertmanager_password_local_file"] == "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
+    assert (
+        defaults["windmill_worker_superadmin_secret_dir"]
+        == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
+    )
+    assert (
+        defaults["windmill_worker_superadmin_secret_file"]
+        == "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
+    )
+    assert (
+        defaults["windmill_worker_seed_job_secret_root"]
+        == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill-job-secrets"
+    )
+    assert (
+        defaults["windmill_atlas_approle_local_file"]
+        == "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
+    )
+    assert (
+        defaults["windmill_ntfy_alertmanager_password_local_file"]
+        == "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
+    )
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
     assert defaults["windmill_worker_network_mode"] == "{{ windmill_server_network_mode }}"
     assert "127.0.0.1" in defaults["windmill_worker_api_base_url"]
@@ -149,23 +183,73 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     mutable_directories = {frozenset(item.items()) for item in defaults["windmill_worker_repo_mutable_directories"]}
     assert {
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/idempotency", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes", "mode": "0777"}.items()),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access",
+                "mode": "0777",
+            }.items()
+        ),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/idempotency", "mode": "0777"}.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes",
+                "mode": "0777",
+            }.items()
+        ),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/scheduler", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fault-injection", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/network-impairment-matrix", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/journey-analytics", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs", "mode": "0777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts", "mode": "0777"}.items()),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fault-injection", "mode": "0777"}.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/network-impairment-matrix",
+                "mode": "0777",
+            }.items()
+        ),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests", "mode": "0777"}.items()
+        ),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites", "mode": "0777"}.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/journey-analytics",
+                "mode": "0777",
+            }.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs",
+                "mode": "0777",
+            }.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts",
+                "mode": "0777",
+            }.items()
+        ),
     }.issubset(mutable_directories)
     mutable_files = {frozenset(item.items()) for item in defaults["windmill_worker_repo_mutable_files"]}
     assert {
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml", "mode": "0666"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes/registry.json", "mode": "0666"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes/registry.lock", "mode": "0666"}.items()),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml", "mode": "0666"}.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes/registry.json",
+                "mode": "0666",
+            }.items()
+        ),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes/registry.lock",
+                "mode": "0666",
+            }.items()
+        ),
     }.issubset(mutable_files)
     assert defaults["windmill_worker_repo_secret_directories"] == [
         {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak", "mode": "0700"},
@@ -227,7 +311,9 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert "KEYCLOAK_BOOTSTRAP_PASSWORD" in defaults["windmill_operator_manager_env"]
     assert "OPENBAO_INIT_JSON" in defaults["windmill_operator_manager_env"]
     assert {
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/atlas-drift", "mode": "1777"}.items()),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/atlas-drift", "mode": "1777"}.items()
+        ),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/cve", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/sbom", "mode": "1777"}.items()),
@@ -236,25 +322,46 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local", "mode": "0755"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/k6", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures", "mode": "1777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs", "mode": "1777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/runtime", "mode": "1777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/archive", "mode": "1777"}.items()),
-        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks", "mode": "1777"}.items()),
+        frozenset(
+            {
+                "path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs",
+                "mode": "1777",
+            }.items()
+        ),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/runtime", "mode": "1777"}.items()
+        ),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/archive", "mode": "1777"}.items()
+        ),
+        frozenset(
+            {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks", "mode": "1777"}.items()
+        ),
     }.issubset({frozenset(item.items()) for item in defaults["windmill_worker_runtime_writable_directories"]})
-    weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
+    weekly_schedule = next(
+        entry
+        for entry in defaults["windmill_seed_schedules"]
+        if entry["path"] == "f/lv3/build_cache_maintenance_weekly"
+    )
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
-    atlas_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/atlas_drift_check_daily")
+    atlas_schedule = next(
+        entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/atlas_drift_check_daily"
+    )
     assert atlas_schedule["schedule"] == "0 0 6 * * *"
     assert atlas_schedule["script_path"] == "f/lv3/atlas_drift_check"
     assert atlas_schedule["enabled"] is True
     quarterly_schedule = next(
-        entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/quarterly_access_review_every_monday_0900"
+        entry
+        for entry in defaults["windmill_seed_schedules"]
+        if entry["path"] == "f/lv3/quarterly_access_review_every_monday_0900"
     )
     assert quarterly_schedule["schedule"] == "0 0 9 * * 1"
     assert quarterly_schedule["timezone"] == "Europe/Bucharest"
     assert quarterly_schedule["args"]["schedule_guard"] == "first_monday_of_quarter"
     journey_schedule = next(
-        entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/operator_journey_scorecards_daily"
+        entry
+        for entry in defaults["windmill_seed_schedules"]
+        if entry["path"] == "f/lv3/operator_journey_scorecards_daily"
     )
     assert journey_schedule["script_path"] == "f/lv3/operator_journey_scorecards"
     assert journey_schedule["enabled"] is True
@@ -307,7 +414,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert 'data-tour-target="tour-launcher"' in app_source
     assert "startOperatorAccessTour" in app_source
     assert "themeQuartz.withParams" in app_source
-    assert 'quickFilterText={deferredQuickFilterText}' in app_source
+    assert "quickFilterText={deferredQuickFilterText}" in app_source
     assert "rowSelection={rosterRowSelection}" in app_source
     assert "paginationPageSizeSelector={[10, 25, 50]}" in app_source
     assert "includeHiddenColumnsInQuickFilter={true}" in app_source
@@ -333,13 +440,13 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "StateGuidanceCard" in app_source
     assert "Next best action" in app_source
     assert "Help and recovery" in app_source
-    assert 'data-canonical-state={state.kind}' in app_source
+    assert "data-canonical-state={state.kind}" in app_source
     assert "ADR 0315 Page Guidance" in app_source
     assert "Latest Result State" in app_source
     assert "Rich Notes State" in app_source
     assert "Inventory State" in app_source
     assert "isRosterPayload" in app_source
-    assert "candidate.status === \"ok\" && Array.isArray(candidate.operators)" in app_source
+    assert 'candidate.status === "ok" && Array.isArray(candidate.operators)' in app_source
     assert "extractRosterError" in app_source
     assert "useForm<OnboardFormValues>" in app_source
     assert "resolver: zodResolver(onboardFormSchema)" in app_source
@@ -367,9 +474,9 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "useModalOverlay: true" in tour_source
     assert "canClickTarget: false" in tour_source
     assert 'const DOCS_BASE_URL = "https://docs.lv3.org";' in tour_source
-    assert 'const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;' in tour_source
-    assert 'const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;' in tour_source
-    assert 'const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;' in tour_source
+    assert "const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;" in tour_source
+    assert "const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;" in tour_source
+    assert "const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;" in tour_source
     assert package_lock["packages"][""]["dependencies"]["@tanstack/react-query"] == "^5.85.1"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-react"] == "35.2.0"
@@ -389,12 +496,19 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "docs_href_for_source_path" in command_palette_script
     inventory_script = (REPO_ROOT / "config/windmill/scripts/operator-inventory.py").read_text()
     update_notes_script = (REPO_ROOT / "config/windmill/scripts/operator-update-notes.py").read_text()
-    for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script, update_notes_script):
-        assert "\"uv\"" in script_source
-        assert "\"run\"" in script_source
-        assert "\"--no-project\"" in script_source
-        assert "\"pyyaml\"" in script_source
-        assert "\"PYTHONPATH\"" in script_source
+    for script_source in (
+        roster_script,
+        onboard_script,
+        offboard_script,
+        sync_script,
+        inventory_script,
+        update_notes_script,
+    ):
+        assert '"uv"' in script_source
+        assert '"run"' in script_source
+        assert '"--no-project"' in script_source
+        assert '"pyyaml"' in script_source
+        assert '"PYTHONPATH"' in script_source
     assert "backend.create_operator" in app_source
     assert "backend.offboard_operator" in app_source
     assert "backend.sync_operators" in app_source
@@ -485,7 +599,7 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert "- name: Install frontend dependencies for repo-managed Windmill raw apps" in runtime_tasks
     assert "register: windmill_seed_raw_app_frontend_install" in runtime_tasks
     assert "npm ci --no-audit --no-fund" in runtime_tasks
-    assert 'missing package-lock.json for {{ item.path }}' in runtime_tasks
+    assert "missing package-lock.json for {{ item.path }}" in runtime_tasks
     assert "npm install --no-package-lock --no-audit --no-fund" not in runtime_tasks
     assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in runtime_tasks
     assert runtime_tasks.count("retries: 3") >= 2
@@ -493,9 +607,9 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert "until: windmill_seed_raw_app_frontend_install.rc == 0" in runtime_tasks
     assert "register: windmill_seed_raw_app_sync" in runtime_tasks
     assert "until: windmill_seed_raw_app_sync.rc == 0" in runtime_tasks
-    assert runtime_tasks.index("- name: Install frontend dependencies for repo-managed Windmill raw apps") < runtime_tasks.index(
-        "- name: Sync repo-managed Windmill raw apps"
-    )
+    assert runtime_tasks.index(
+        "- name: Install frontend dependencies for repo-managed Windmill raw apps"
+    ) < runtime_tasks.index("- name: Sync repo-managed Windmill raw apps")
     assert "windmill_seed_app_repo_root_local_dir" in argument_specs["argument_specs"]["main"]["options"]
 
 
@@ -619,7 +733,9 @@ def test_operator_onboard_wrapper_reads_runtime_env_fallback(tmp_path: Path, mon
         "LV3_OPENBAO_URL=http://127.0.0.1:8201\nKEYCLOAK_BOOTSTRAP_PASSWORD=test-bootstrap\nOPENBAO_INIT_JSON={'root_token':'test'}\nIGNORED=value\n",
         encoding="utf-8",
     )
-    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-onboard.py", "operator_onboard_wrapper_runtime_env")
+    module = load_module(
+        REPO_ROOT / "config/windmill/scripts/operator-onboard.py", "operator_onboard_wrapper_runtime_env"
+    )
     monkeypatch.setattr(module, "RUNTIME_ENV_FILE", runtime_env)
     captured = {}
 
@@ -643,7 +759,9 @@ def test_operator_onboard_wrapper_sets_openbao_url_without_runtime_env(tmp_path:
     workflow = repo_root / "scripts" / "operator_manager.py"
     workflow.parent.mkdir(parents=True)
     workflow.write_text("# stub\n", encoding="utf-8")
-    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-onboard.py", "operator_onboard_wrapper_default_env")
+    module = load_module(
+        REPO_ROOT / "config/windmill/scripts/operator-onboard.py", "operator_onboard_wrapper_default_env"
+    )
 
     env = module.build_subprocess_env(repo_root)
 
@@ -655,7 +773,9 @@ def test_operator_update_notes_wrapper_uses_temp_markdown_file(tmp_path: Path, m
     workflow = repo_root / "scripts" / "operator_manager.py"
     workflow.parent.mkdir(parents=True)
     workflow.write_text("# stub\n", encoding="utf-8")
-    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-update-notes.py", "operator_update_notes_wrapper")
+    module = load_module(
+        REPO_ROOT / "config/windmill/scripts/operator-update-notes.py", "operator_update_notes_wrapper"
+    )
     captured = {}
 
     def fake_run(command, cwd, env, text, capture_output, check):
@@ -666,7 +786,9 @@ def test_operator_update_notes_wrapper_uses_temp_markdown_file(tmp_path: Path, m
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    payload = module.main(operator_id="alice-example", notes_markdown="## Shift handoff\n\n- [ ] Review alerts", repo_path=str(repo_root))
+    payload = module.main(
+        operator_id="alice-example", notes_markdown="## Shift handoff\n\n- [ ] Review alerts", repo_path=str(repo_root)
+    )
 
     assert payload["status"] == "ok"
     assert captured["command"][:9] == [
@@ -705,10 +827,13 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml"
     ).read_text()
     compose_template = (
-        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
+        REPO_ROOT
+        / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
     ).read_text()
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
 
     assert "Ensure the Windmill bootstrap workspace identity is consistent" in tasks
@@ -750,7 +875,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
     assert "register: windmill_seed_raw_app_frontend_install" in tasks
     assert "npm ci --no-audit --no-fund" in tasks
-    assert 'missing package-lock.json for {{ item.path }}' in tasks
+    assert "missing package-lock.json for {{ item.path }}" in tasks
     assert "npm install --no-package-lock --no-audit --no-fund" not in tasks
     assert "npm ci --prefix" not in tasks
     assert "npm install --prefix" not in tasks
@@ -764,7 +889,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert '"{{ windmill_seed_app_sync_dir }}:/workspace"' not in tasks
     assert "wmill sync push" in tasks
     assert "--skip-scripts" in tasks
-    assert "--includes \"{{ item.sync_pattern }}\"" in tasks
+    assert '--includes "{{ item.sync_pattern }}"' in tasks
     assert "--skip-branch-validation" in tasks
     assert "register: windmill_seed_raw_app_sync" in tasks
     assert "until: windmill_seed_raw_app_sync.rc == 0" in tasks
@@ -775,7 +900,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'windmill_version_url="{{ windmill_runtime_api_base_url }}/api/version"' in tasks
     assert 'if ! curl -fsS "$windmill_version_url" >/dev/null; then' in tasks
     assert 'docker compose --file "{{ windmill_compose_file }}" up -d --remove-orphans \\' in tasks
-    assert 'openbao-agent windmill_server windmill_worker windmill_worker_native >/dev/null' in tasks
+    assert "openbao-agent windmill_server windmill_worker windmill_worker_native >/dev/null" in tasks
     assert "sleep {{ windmill_runtime_api_wait_delay_seconds }}" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
     assert "python3 - <<'PY'" in tasks
@@ -806,8 +931,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "*.pyc" in tasks
     assert "-delete" in tasks
     assert "-exec rm -rf {} +" in tasks
-    assert '{{ windmill_worker_repo_checkout_host_path }}/scripts' in tasks
-    assert '{{ windmill_worker_repo_checkout_host_path }}/platform' in tasks
+    assert "{{ windmill_worker_repo_checkout_host_path }}/scripts" in tasks
+    assert "{{ windmill_worker_repo_checkout_host_path }}/platform" in tasks
     assert "Ensure repo-backed Windmill runtime paths stay writable after checkout sync" in tasks
     assert "Ensure the Windmill worker checkout mutable directories exist with write access" in tasks
     assert "Collect controller-side bootstrap sources for Windmill worker mutable files" in tasks
@@ -846,7 +971,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "manifest_entries = set()" in tasks
     assert 'path.name == "__pycache__"' in tasks
     assert 'path.suffix == ".pyc"' in tasks
-    assert 'manifest_entries.add(f"{path.relative_to(repo_root).as_posix().rstrip(\'/\')}/")' in tasks
+    assert "manifest_entries.add(f\"{path.relative_to(repo_root).as_posix().rstrip('/')}/\")" in tasks
     assert "Copy the staged Windmill worker checkout manifest to the guest" in tasks
     assert "Prune stale immutable files from the Windmill worker checkout" in tasks
     assert "Removed stale immutable files from the Windmill worker checkout" in tasks
@@ -899,10 +1024,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Mirror Windmill validation gate integrity files to the guest before verification" in verify_tasks
     assert "Collect controller-side checksums for Windmill Atlas verification helper files" in verify_tasks
     assert "Ensure Windmill Atlas verification helper parent directories exist on the guest" in verify_tasks
-    assert "Mirror Windmill Atlas verification helper files to the guest immediately before Atlas verification" in verify_tasks
+    assert (
+        "Mirror Windmill Atlas verification helper files to the guest immediately before Atlas verification"
+        in verify_tasks
+    )
     assert "Mirror Windmill Atlas schema snapshots to the guest immediately before Atlas verification" in verify_tasks
     assert "Collect guest-side checksums for Windmill Atlas verification helper files" in verify_tasks
-    assert "Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification" in verify_tasks
+    assert (
+        "Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification"
+        in verify_tasks
+    )
     assert "Reconcile the Windmill runtime before validation gate verification" in verify_tasks
     assert "Reconcile the Windmill runtime before stage smoke verification" in verify_tasks
     assert "Reconcile the Windmill runtime before Atlas drift verification" in verify_tasks
@@ -915,19 +1046,36 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Run the Windmill Atlas drift check script" in verify_tasks
     assert "Assert the Windmill Atlas drift check result" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations" in verify_tasks
-    assert "Verify the critical Windmill verification scripts are seeded with current controller content" in verify_tasks
+    assert (
+        "Verify the critical Windmill verification scripts are seeded with current controller content" in verify_tasks
+    )
     assert "Initialize the critical Windmill verification script drift tracker" in verify_tasks
     assert "Record critical Windmill verification scripts that drifted after sync" in verify_tasks
     assert "Re-sync drifted critical Windmill verification scripts after concurrent drift" in verify_tasks
-    assert "Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt" in verify_tasks
+    assert (
+        "Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt"
+        in verify_tasks
+    )
     assert "Assert the critical Windmill verification scripts match controller content" in verify_tasks
     assert "windmill_seed_script_root_local_dir ~ '/gate-status.py'" in verify_tasks
     assert "inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py'" in verify_tasks
     assert "inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py'" in verify_tasks
-    assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False)" in verify_tasks
-    assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False)" in verify_tasks
-    assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py', rstrip=False)" in verify_tasks
-    assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)" in verify_tasks
+    assert (
+        "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False)"
+        in verify_tasks
+    )
+    assert (
+        "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False)"
+        in verify_tasks
+    )
+    assert (
+        "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py', rstrip=False)"
+        in verify_tasks
+    )
+    assert (
+        "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)"
+        in verify_tasks
+    )
     assert "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert "windmill_verify_critical_seed_script_drift_paths" in verify_tasks
@@ -955,7 +1103,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         "Check whether the Windmill runtime API is reachable before verification recovery for {{ windmill_verify_runtime_reconcile_reason }}"
         in recover_verify_tasks
     )
-    assert "docker compose --file \"{{ windmill_compose_file }}\" up -d --remove-orphans" in recover_verify_tasks
+    assert 'docker compose --file "{{ windmill_compose_file }}" up -d --remove-orphans' in recover_verify_tasks
     assert (
         "Wait for the Windmill runtime API after verification recovery for {{ windmill_verify_runtime_reconcile_reason }}"
         in recover_verify_tasks
@@ -978,7 +1126,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py" in tasks
     assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
-    assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
+    assert (
+        defaults["windmill_seed_app_repo_root_local_dir"]
+        == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
+    )
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' \"{{ windmill_env_file }}\"" in tasks
@@ -990,16 +1141,21 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "grep '^LV3_WINDMILL_TOKEN=' {{ windmill_env_file }}" in compose_template
     assert "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' {{ windmill_env_file }}" in compose_template
     assert "grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' {{ windmill_env_file }}" in compose_template
-    assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
+    assert (
+        "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}"
+        in compose_template
+    )
     assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
     assert "openbao_runtime" in compose_template
     assert "name: {{ windmill_openbao_runtime_network }}" in compose_template
     assert compose_template.count('user: "0:0"') >= 3
     runtime_template = (
-        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2"
+        REPO_ROOT
+        / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2"
     ).read_text()
     runtime_ctmpl_template = (
-        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
+        REPO_ROOT
+        / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
     ).read_text()
     assert "TF_VAR_proxmox_endpoint" in runtime_template
     assert "TF_VAR_proxmox_api_token" in runtime_template
@@ -1007,11 +1163,20 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "{% for item in windmill_operator_manager_env" in runtime_template
     assert "TF_VAR_proxmox_endpoint" in runtime_ctmpl_template
     assert "TF_VAR_proxmox_api_token" in runtime_ctmpl_template
-    assert 'LV3_WINDMILL_TOKEN=[[ with secret "kv/data/{{ windmill_openbao_secret_path }}" ]][[ .Data.data.LV3_WINDMILL_TOKEN ]][[ end ]]' in runtime_ctmpl_template
+    assert (
+        'LV3_WINDMILL_TOKEN=[[ with secret "kv/data/{{ windmill_openbao_secret_path }}" ]][[ .Data.data.LV3_WINDMILL_TOKEN ]][[ end ]]'
+        in runtime_ctmpl_template
+    )
     assert "LV3_ATLAS_OPENBAO_APPROLE_JSON=" in runtime_template
     assert "LV3_NTFY_ALERTMANAGER_PASSWORD=" in runtime_template
-    assert '[[ end ]][[ if (index .Data.data "LV3_ATLAS_OPENBAO_APPROLE_JSON") ]]LV3_ATLAS_OPENBAO_APPROLE_JSON=' in runtime_ctmpl_template
-    assert '[[ end ]][[ if (index .Data.data "LV3_NTFY_ALERTMANAGER_PASSWORD") ]]LV3_NTFY_ALERTMANAGER_PASSWORD=' in runtime_ctmpl_template
+    assert (
+        '[[ end ]][[ if (index .Data.data "LV3_ATLAS_OPENBAO_APPROLE_JSON") ]]LV3_ATLAS_OPENBAO_APPROLE_JSON='
+        in runtime_ctmpl_template
+    )
+    assert (
+        '[[ end ]][[ if (index .Data.data "LV3_NTFY_ALERTMANAGER_PASSWORD") ]]LV3_NTFY_ALERTMANAGER_PASSWORD='
+        in runtime_ctmpl_template
+    )
     assert "{% for item in windmill_operator_manager_env" in runtime_ctmpl_template
 
 
@@ -1031,14 +1196,19 @@ def test_windmill_runtime_waits_for_full_env_contract_before_starting_or_recreat
     )
     names = [task["name"] for task in tasks]
 
-    assert names.index("Start the Windmill OpenBao agent") < names.index(
-        "Wait for the rendered Windmill runtime env contract before startup"
-    ) < names.index("Start Windmill and wait for the API socket")
-    assert names.index(
-        "Check whether the rendered Windmill runtime env and live worker container expose the required runtime contract"
-    ) < names.index("Force-recreate the Windmill OpenBao agent when the runtime env contract is stale") < names.index(
-        "Wait for the rendered Windmill runtime env contract before recreating dependent services"
-    ) < names.index("Force-recreate the Windmill application services when the runtime env contract is stale")
+    assert (
+        names.index("Start the Windmill OpenBao agent")
+        < names.index("Wait for the rendered Windmill runtime env contract before startup")
+        < names.index("Start Windmill and wait for the API socket")
+    )
+    assert (
+        names.index(
+            "Check whether the rendered Windmill runtime env and live worker container expose the required runtime contract"
+        )
+        < names.index("Force-recreate the Windmill OpenBao agent when the runtime env contract is stale")
+        < names.index("Wait for the rendered Windmill runtime env contract before recreating dependent services")
+        < names.index("Force-recreate the Windmill application services when the runtime env contract is stale")
+    )
 
     startup_block = next(task for task in tasks if task.get("name") == "Start Windmill and wait for the API socket")
     startup_task = next(
@@ -1080,7 +1250,10 @@ def test_windmill_runtime_waits_for_full_env_contract_before_starting_or_recreat
         "windmill_extra",
     ]
     assert rescue_openbao_agent["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "openbao-agent"]
-    assert 'grep \'^LV3_ATLAS_OPENBAO_APPROLE_JSON=\' "{{ windmill_env_file }}"' in rescue_env_wait["ansible.builtin.shell"]
+    assert (
+        "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' \"{{ windmill_env_file }}\""
+        in rescue_env_wait["ansible.builtin.shell"]
+    )
     assert rescue_service_start["ansible.builtin.command"]["argv"][-5:] == [
         "--remove-orphans",
         "windmill_server",
@@ -1141,7 +1314,8 @@ def test_windmill_controller_local_sync_and_verify_calls_use_the_host_proxy_url(
     verify_seed_task = next(
         task
         for task in verify_tasks
-        if task["name"] == "Verify the critical Windmill verification scripts are seeded with current controller content"
+        if task["name"]
+        == "Verify the critical Windmill verification scripts are seeded with current controller content"
     )
     resync_seed_task = next(
         task
@@ -1224,7 +1398,9 @@ def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift
     )
     atlas_drift_check_index = task_names.index("Run the Windmill Atlas drift check script")
 
-    assert stage_smoke_assert_index < atlas_helper_collect_index < atlas_helper_mirror_index < atlas_snapshot_mirror_index
+    assert (
+        stage_smoke_assert_index < atlas_helper_collect_index < atlas_helper_mirror_index < atlas_snapshot_mirror_index
+    )
     assert atlas_snapshot_mirror_index < atlas_helper_assert_index < atlas_seed_job_secret_dir_index
     assert atlas_seed_job_secret_dir_index < atlas_seed_job_secret_mirror_index < critical_scripts_verify_index
     assert critical_scripts_verify_index < critical_scripts_assert_index < atlas_drift_check_index
@@ -1279,14 +1455,10 @@ def test_windmill_worker_secret_mirror_uses_ops_ownership() -> None:
         ).read_text(encoding="utf-8")
     )
     mirror_secret_task = next(
-        task
-        for task in loaded_tasks
-        if task["name"] == "Mirror the Windmill worker checkout bootstrap secret files"
+        task for task in loaded_tasks if task["name"] == "Mirror the Windmill worker checkout bootstrap secret files"
     )
     ensure_secret_dir_task = next(
-        task
-        for task in loaded_tasks
-        if task["name"] == "Ensure the Windmill worker checkout secret directories exist"
+        task for task in loaded_tasks if task["name"] == "Ensure the Windmill worker checkout secret directories exist"
     )
 
     assert "Ensure the mirrored worker secret directories exist" in tasks

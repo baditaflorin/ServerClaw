@@ -24,8 +24,12 @@ LIVE_MARKERS = (
 
 def test_reference_inventory_examples_parse() -> None:
     hosts = yaml.safe_load((REFERENCE_INVENTORY_ROOT / "hosts.yml").read_text(encoding="utf-8"))
-    platform_vars = yaml.safe_load((REFERENCE_INVENTORY_ROOT / "group_vars" / "platform.yml").read_text(encoding="utf-8"))
-    host_vars = yaml.safe_load((REFERENCE_INVENTORY_ROOT / "host_vars" / "proxmox_reference.yml").read_text(encoding="utf-8"))
+    platform_vars = yaml.safe_load(
+        (REFERENCE_INVENTORY_ROOT / "group_vars" / "platform.yml").read_text(encoding="utf-8")
+    )
+    host_vars = yaml.safe_load(
+        (REFERENCE_INVENTORY_ROOT / "host_vars" / "proxmox_reference.yml").read_text(encoding="utf-8")
+    )
 
     proxmox_hosts = hosts["all"]["children"]["proxmox_hosts"]["hosts"]
     guests = hosts["all"]["children"]["lv3_guests"]["hosts"]
@@ -37,9 +41,15 @@ def test_reference_inventory_examples_parse() -> None:
 
 
 def test_reference_config_examples_parse() -> None:
-    provider_profile = yaml.safe_load((REFERENCE_CONFIG_ROOT / "reference-provider-profile.yaml").read_text(encoding="utf-8"))
-    publication_profile = json.loads((REFERENCE_CONFIG_ROOT / "reference-publication-profile.json").read_text(encoding="utf-8"))
-    secret_manifest = json.loads((REFERENCE_CONFIG_ROOT / "reference-controller-local-secrets.json").read_text(encoding="utf-8"))
+    provider_profile = yaml.safe_load(
+        (REFERENCE_CONFIG_ROOT / "reference-provider-profile.yaml").read_text(encoding="utf-8")
+    )
+    publication_profile = json.loads(
+        (REFERENCE_CONFIG_ROOT / "reference-publication-profile.json").read_text(encoding="utf-8")
+    )
+    secret_manifest = json.loads(
+        (REFERENCE_CONFIG_ROOT / "reference-controller-local-secrets.json").read_text(encoding="utf-8")
+    )
 
     assert provider_profile["profile"]["public_domain"] == "platform.example.com"
     assert publication_profile["profile_id"] == "public-github-proxmox"

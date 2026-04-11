@@ -51,9 +51,7 @@ VALID_RETRY_ADVICE: frozenset[str] = frozenset({"none", "immediate", "backoff", 
 _CODE_PATTERN: re.Pattern[str] = re.compile(r"^[A-Z][A-Z0-9]*(?:_[A-Z][A-Z0-9]+)+$")
 
 #: Path to the canonical registry relative to the repository root.
-_DEFAULT_REGISTRY_PATH: Path = (
-    Path(__file__).resolve().parents[1] / "config" / "error-codes.yaml"
-)
+_DEFAULT_REGISTRY_PATH: Path = Path(__file__).resolve().parents[1] / "config" / "error-codes.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -256,9 +254,7 @@ def load_registry(path: Path | None = None) -> ErrorRegistry:
     try:
         return ErrorRegistry.load(registry_path)
     except (ValueError, KeyError) as exc:
-        raise ErrorRegistryError(
-            f"registry file {registry_path} could not be loaded: {exc}"
-        ) from exc
+        raise ErrorRegistryError(f"registry file {registry_path} could not be loaded: {exc}") from exc
 
 
 def lookup(code: str, *, registry_path: Path | None = None) -> ErrorCodeDefinition:
@@ -379,20 +375,26 @@ def _main() -> None:  # pragma: no cover
             defn = registry.definition(args.code)
         except KeyError:
             import sys
+
             print(f"error: unknown code {args.code!r}", file=sys.stderr)
             sys.exit(1)
-        print(json.dumps({
-            "code": defn.code,
-            "http_status": defn.http_status,
-            "severity": defn.severity,
-            "category": defn.category,
-            "retry_advice": defn.retry_advice,
-            "retry_after_s": defn.retry_after_s,
-            "description": defn.description,
-            "docs_url": defn.docs_url,
-            "context_fields": list(defn.context_fields),
-            "deprecated_since": defn.deprecated_since,
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "code": defn.code,
+                    "http_status": defn.http_status,
+                    "severity": defn.severity,
+                    "category": defn.category,
+                    "retry_advice": defn.retry_advice,
+                    "retry_after_s": defn.retry_after_s,
+                    "description": defn.description,
+                    "docs_url": defn.docs_url,
+                    "context_fields": list(defn.context_fields),
+                    "deprecated_since": defn.deprecated_since,
+                },
+                indent=2,
+            )
+        )
 
     elif args.command == "validate":
         print(f"registry at {args.registry or _DEFAULT_REGISTRY_PATH} is valid.")

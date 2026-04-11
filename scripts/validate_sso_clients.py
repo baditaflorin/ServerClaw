@@ -26,8 +26,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import yaml  # noqa: E402 — must come after sys.path adjustment
-from validation_toolkit import require_bool, require_list, require_mapping, require_str  # noqa: E402
+import yaml
+from validation_toolkit import require_bool, require_list, require_mapping, require_str
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SSO_CLIENTS_PATH = REPO_ROOT / "config" / "generated" / "sso-clients.yaml"
@@ -113,15 +113,9 @@ def validate_clients(clients: dict) -> tuple[list[str], list[str]]:
 
                 # Non-localhost http:// is rejected
                 if uri.startswith("http://") and not _LOCALHOST_RE.match(uri):
-                    errors.append(
-                        f"{uri_path}: non-localhost redirect URIs must use HTTPS "
-                        f"(got: {uri!r})"
-                    )
+                    errors.append(f"{uri_path}: non-localhost redirect URIs must use HTTPS (got: {uri!r})")
                 elif not uri.startswith("https://") and not uri.startswith("http://"):
-                    errors.append(
-                        f"{uri_path}: redirect URI must start with https:// or http:// "
-                        f"(got: {uri!r})"
-                    )
+                    errors.append(f"{uri_path}: redirect URI must start with https:// or http:// (got: {uri!r})")
 
         # Required: scopes (list)
         scopes = client_config.get("scopes", [])
@@ -176,7 +170,7 @@ This script does NOT make live Keycloak API calls.
     if args.list:
         print(f"SSO clients in {SSO_CLIENTS_PATH.relative_to(REPO_ROOT)}:")
         print(f"  {'CLIENT ID':<35} {'SERVICE':<25} {'PROVIDER':<15} {'PUBLIC'}")
-        print(f"  {'-'*35} {'-'*25} {'-'*15} {'-'*6}")
+        print(f"  {'-' * 35} {'-' * 25} {'-' * 15} {'-' * 6}")
         for client_id, cfg in sorted(clients.items()):
             service = cfg.get("service", "?")
             provider = cfg.get("provider", "?")
@@ -199,10 +193,7 @@ This script does NOT make live Keycloak API calls.
             print(f"  ERROR: {err}", file=sys.stderr)
         return 1
 
-    print(
-        f"\nValidation passed: {len(clients)} client(s) checked, "
-        f"{len(warnings)} warning(s), 0 error(s)."
-    )
+    print(f"\nValidation passed: {len(clients)} client(s) checked, {len(warnings)} warning(s), 0 error(s).")
     return 0
 
 

@@ -31,9 +31,7 @@ def test_build_deploy_repo_args_from_dockercompose_profile(tmp_path: Path) -> No
                     "ports": "80",
                     "llm_assistance": "prohibited",
                     "docker_compose_location": "/compose.yaml",
-                    "compose_domains": [
-                        {"service": "catalog-web", "domain": "education-wemeshup.apps.lv3.org"}
-                    ],
+                    "compose_domains": [{"service": "catalog-web", "domain": "education-wemeshup.apps.lv3.org"}],
                 }
             ],
         },

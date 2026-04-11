@@ -26,9 +26,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
 
 
 SERVICE_REDUNDANCY_PATH: Final = repo_path("config", "service-redundancy-catalog.json")
-SERVICE_REDUNDANCY_SCHEMA_PATH: Final = repo_path(
-    "docs", "schema", "service-redundancy-catalog.schema.json"
-)
+SERVICE_REDUNDANCY_SCHEMA_PATH: Final = repo_path("docs", "schema", "service-redundancy-catalog.schema.json")
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
 HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 
@@ -82,7 +80,9 @@ def load_service_catalog_index() -> dict[str, dict[str, Any]]:
     index: dict[str, dict[str, Any]] = {}
     for index_number, service in enumerate(services):
         service = require_mapping(service, f"config/service-capability-catalog.json.services[{index_number}]")
-        service_id = require_str(service.get("id"), f"config/service-capability-catalog.json.services[{index_number}].id")
+        service_id = require_str(
+            service.get("id"), f"config/service-capability-catalog.json.services[{index_number}].id"
+        )
         index[service_id] = service
     return index
 
@@ -101,7 +101,9 @@ def known_locations() -> set[str]:
     locations = {"proxmox_florin"}
     for index, guest in enumerate(guests):
         guest = require_mapping(guest, f"inventory/host_vars/proxmox_florin.yml.proxmox_guests[{index}]")
-        locations.add(require_str(guest.get("name"), f"inventory/host_vars/proxmox_florin.yml.proxmox_guests[{index}].name"))
+        locations.add(
+            require_str(guest.get("name"), f"inventory/host_vars/proxmox_florin.yml.proxmox_guests[{index}].name")
+        )
     return locations
 
 
@@ -110,11 +112,7 @@ def max_supported_tier_for_domains(failure_domain_count: int) -> str:
 
 
 def required_rehearsal_tiers(declared_tier: str) -> list[str]:
-    return [
-        tier
-        for tier in REHEARSAL_TIER_SEQUENCE
-        if TIER_ORDER[tier] <= TIER_ORDER[declared_tier]
-    ]
+    return [tier for tier in REHEARSAL_TIER_SEQUENCE if TIER_ORDER[tier] <= TIER_ORDER[declared_tier]]
 
 
 def load_rehearsal_gate_policies(catalog: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -122,10 +120,7 @@ def load_rehearsal_gate_policies(catalog: dict[str, Any]) -> dict[str, dict[str,
     rehearsal_gate = require_mapping(platform.get("rehearsal_gate"), "platform.rehearsal_gate")
     tiers = require_mapping(rehearsal_gate.get("tiers"), "platform.rehearsal_gate.tiers")
     if set(tiers) != set(REHEARSAL_TIER_SEQUENCE):
-        raise ValueError(
-            "platform.rehearsal_gate.tiers must define exactly "
-            + ", ".join(REHEARSAL_TIER_SEQUENCE)
-        )
+        raise ValueError("platform.rehearsal_gate.tiers must define exactly " + ", ".join(REHEARSAL_TIER_SEQUENCE))
 
     normalized: dict[str, dict[str, Any]] = {}
     for tier in REHEARSAL_TIER_SEQUENCE:
@@ -150,10 +145,7 @@ def normalized_rehearsal_metadata(
     service_id: str,
     entry: dict[str, Any],
 ) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
-    policies = {
-        tier: dict(policy)
-        for tier, policy in load_rehearsal_gate_policies(catalog).items()
-    }
+    policies = {tier: dict(policy) for tier, policy in load_rehearsal_gate_policies(catalog).items()}
 
     rehearsal = entry.get("rehearsal")
     if rehearsal is None:
@@ -306,9 +298,7 @@ def evaluate_rehearsal_gate(
         candidate_pass = latest_pass_by_tier.get(candidate_tier)
         if candidate_pass is None:
             continue
-        expires_on = candidate_pass["performed_on"] + timedelta(
-            days=candidate_policy["freshness_window_days"]
-        )
+        expires_on = candidate_pass["performed_on"] + timedelta(days=candidate_policy["freshness_window_days"])
         if reference_date <= expires_on:
             status = "fresh" if candidate_tier == declared_tier else "downgraded"
             return {
@@ -336,9 +326,7 @@ def evaluate_rehearsal_gate(
         status = "downgraded"
     else:
         declared_policy = policies[declared_tier]
-        expires_on = latest_declared_proof["performed_on"] + timedelta(
-            days=declared_policy["freshness_window_days"]
-        )
+        expires_on = latest_declared_proof["performed_on"] + timedelta(days=declared_policy["freshness_window_days"])
         summary = (
             f"The latest passing {declared_tier} rehearsal from {latest_declared_proof['performed_on'].isoformat()} "
             f"expired on {expires_on.isoformat()}, so the implemented claim falls back to R0."
@@ -387,9 +375,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
     )
     expected_max_tier = max_supported_tier_for_domains(failure_domain_count)
     if TIER_ORDER[max_supported_tier] > TIER_ORDER[expected_max_tier]:
-        raise ValueError(
-            "platform.max_supported_tier exceeds what the declared failure_domain_count supports"
-        )
+        raise ValueError("platform.max_supported_tier exceeds what the declared failure_domain_count supports")
     require_string_list(platform.get("notes"), "platform.notes")
     load_rehearsal_gate_policies(catalog)
 
@@ -434,9 +420,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
         )
         expected_kind = STANDBY_KIND_BY_TIER[tier]
         if standby_kind != expected_kind:
-            raise ValueError(
-                f"services.{service_id}.standby.kind must be {expected_kind!r} for tier {tier}"
-            )
+            raise ValueError(f"services.{service_id}.standby.kind must be {expected_kind!r} for tier {tier}")
 
         location = require_str(standby.get("location"), f"services.{service_id}.standby.location")
         require_str(
@@ -453,9 +437,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
                     f"services.{service_id}.standby.location must describe an empty standby location for tier {tier}"
                 )
         elif location not in allowed_locations:
-            raise ValueError(
-                f"services.{service_id}.standby.location must reference a known host or guest location"
-            )
+            raise ValueError(f"services.{service_id}.standby.location must reference a known host or guest location")
         normalized_rehearsal_metadata(catalog, service_id, entry)
 
 
@@ -554,10 +536,7 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
     print(f"Implemented Tier: {rehearsal_gate['implemented_tier']}")
     print(f"Rehearsal Gate: {rehearsal_gate['status']}")
     print(f"Rehearsal Summary: {rehearsal_gate['summary']}")
-    print(
-        "Recovery Objective: "
-        f"RTO {recovery_objective['rto_minutes']}m / RPO {recovery_objective['rpo_minutes']}m"
-    )
+    print(f"Recovery Objective: RTO {recovery_objective['rto_minutes']}m / RPO {recovery_objective['rpo_minutes']}m")
     print("Backup Sources:")
     for backup_source in entry["backup_sources"]:
         print(f"  - {backup_source}")
@@ -568,10 +547,7 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
     if rehearsal_gate["required_policies"]:
         print("Required Rehearsals:")
         for policy in rehearsal_gate["required_policies"]:
-            print(
-                f"  - {policy['tier']}: {policy['exercise']} within "
-                f"{policy['freshness_window_days']}d"
-            )
+            print(f"  - {policy['tier']}: {policy['exercise']} within {policy['freshness_window_days']}d")
     if rehearsal_gate["proofs"]:
         print("Recorded Proofs:")
         for proof in rehearsal_gate["proofs"]:
@@ -646,7 +622,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.service:
             return show_service(catalog, args.service)
         return list_services(catalog)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Service redundancy catalog", exc)
 
 

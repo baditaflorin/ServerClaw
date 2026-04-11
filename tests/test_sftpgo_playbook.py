@@ -19,7 +19,9 @@ def test_sftpgo_dns_stage_converges_only_the_files_subdomain_record() -> None:
     assert dns_play["vars"]["subdomain_fqdn"] == "files.lv3.org"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the SFTPGo subdomain entry")
-    assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    assert (
+        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    )
 
     converge_task = next(task for task in tasks if task.get("name") == "Converge the SFTPGo Hetzner DNS record")
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"

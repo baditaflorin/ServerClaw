@@ -140,7 +140,9 @@ def alert_contact_spec(contact_id: int, *, threshold: int = 0, recurrence: int =
     return f"{contact_id}_{threshold}_{recurrence}"
 
 
-def ensure_alert_contacts(client: UptimeRobotClient, config: dict[str, Any], secret_paths: dict[str, Path]) -> dict[str, int]:
+def ensure_alert_contacts(
+    client: UptimeRobotClient, config: dict[str, Any], secret_paths: dict[str, Path]
+) -> dict[str, int]:
     existing_by_name = {item["friendly_name"]: item for item in client.get_alert_contacts()}
     contact_ids: dict[str, int] = {}
 
@@ -262,7 +264,7 @@ def main() -> int:
         return 1
     try:
         return args.func(args)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Uptime Robot", exc, exit_code=1)
 
 

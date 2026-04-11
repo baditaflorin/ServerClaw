@@ -63,7 +63,9 @@ def build_generated_index(tmp_path: Path) -> None:
     adr_dir = tmp_path / "docs" / "adr"
     reservations_path = adr_dir / "index" / "reservations.yaml"
 
-    write_adr(adr_dir, "0306", "checkov", "Checkov For IaC", implementation_status="Implemented", tags="security, validation")
+    write_adr(
+        adr_dir, "0306", "checkov", "Checkov For IaC", implementation_status="Implemented", tags="security, validation"
+    )
     write_adr(adr_dir, "0325", "faceted-adr-index", "Faceted ADR Index", tags="documentation, reservation, sharding")
     write(
         reservations_path,

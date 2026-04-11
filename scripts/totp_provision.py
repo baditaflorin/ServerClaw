@@ -5,7 +5,6 @@ import base64
 import hashlib
 import hmac
 import json
-import os
 import secrets
 import struct
 import time
@@ -52,10 +51,7 @@ def main() -> None:
     account = args.account
     label = urllib.parse.quote(f"{issuer}:{account}")
     issuer_q = urllib.parse.quote(issuer)
-    uri = (
-        f"otpauth://totp/{label}"
-        f"?secret={secret}&issuer={issuer_q}&algorithm=SHA1&digits=6&period=30"
-    )
+    uri = f"otpauth://totp/{label}?secret={secret}&issuer={issuer_q}&algorithm=SHA1&digits=6&period=30"
 
     payload = {
         "secret": secret,

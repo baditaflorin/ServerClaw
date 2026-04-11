@@ -20,6 +20,7 @@ Examples
   python scripts/api_gateway_tool.py upstream --service grafana
   python scripts/api_gateway_tool.py summary
 """
+
 from __future__ import annotations
 
 import argparse
@@ -44,6 +45,7 @@ def _load() -> list[dict]:
 # commands
 # ---------------------------------------------------------------------------
 
+
 def cmd_list(args: argparse.Namespace) -> int:
     services = _load()
     auth_filter = (args.auth or "").lower()
@@ -52,9 +54,9 @@ def cmd_list(args: argparse.Namespace) -> int:
     print("-" * 105)
     for s in sorted(results, key=lambda x: x["id"]):
         print(
-            f"{s['id']:<20}  {s.get('gateway_prefix',''):<25}  "
-            f"{s.get('auth',''):<20}  {s.get('required_role',''):<25}  "
-            f"{s.get('timeout_seconds','?'):>9}"
+            f"{s['id']:<20}  {s.get('gateway_prefix', ''):<25}  "
+            f"{s.get('auth', ''):<20}  {s.get('required_role', ''):<25}  "
+            f"{s.get('timeout_seconds', '?'):>9}"
         )
     print(f"\n{len(results)} service(s)")
     return 0
@@ -111,9 +113,9 @@ def cmd_summary(args: argparse.Namespace) -> int:
     auth_counts: dict[str, int] = defaultdict(int)
     for s in services:
         auth_counts[s.get("auth", "none")] += 1
-    print(f"API Gateway Catalog Summary\n")
+    print("API Gateway Catalog Summary\n")
     print(f"  Total services : {len(services)}")
-    print(f"\n  Auth mechanisms:")
+    print("\n  Auth mechanisms:")
     for auth, cnt in sorted(auth_counts.items(), key=lambda x: -x[1]):
         print(f"    {auth:<30}  {cnt}")
     return 0
@@ -122,6 +124,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

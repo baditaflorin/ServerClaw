@@ -6,13 +6,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROOT_PLAYBOOK = REPO_ROOT / "playbooks" / "mail-platform-verify.yml"
 COLLECTION_PLAYBOOK = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "playbooks"
-    / "mail-platform-verify.yml"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "mail-platform-verify.yml"
 )
 
 
@@ -29,9 +23,18 @@ def test_collection_playbook_keeps_environment_aware_runtime_targeting() -> None
     send_play = plays[2]
     verify_play = plays[3]
 
-    assert prepare_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
-    assert send_play["hosts"] == "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
-    assert verify_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+    assert (
+        prepare_play["hosts"]
+        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+    )
+    assert (
+        send_play["hosts"]
+        == "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+    )
+    assert (
+        verify_play["hosts"]
+        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+    )
 
 
 def test_collection_playbook_adds_staging_mailpit_probe_flow() -> None:
@@ -41,7 +44,9 @@ def test_collection_playbook_adds_staging_mailpit_probe_flow() -> None:
     verify_tasks = plays[3]["tasks"]
 
     clear_task = next(
-        task for task in prepare_tasks if task["name"] == "Clear any previous Mailpit messages before the staging SMTP probe"
+        task
+        for task in prepare_tasks
+        if task["name"] == "Clear any previous Mailpit messages before the staging SMTP probe"
     )
     assert "mailpit_http_port" in clear_task["ansible.builtin.uri"]["url"]
     assert clear_task["when"] == "playbook_execution_env == 'staging'"
@@ -54,6 +59,11 @@ def test_collection_playbook_adds_staging_mailpit_probe_flow() -> None:
     read_task = next(task for task in verify_tasks if task["name"] == "Read the captured staging Mailpit messages")
     assert "mailpit_http_port" in read_task["ansible.builtin.uri"]["url"]
 
-    assert_task = next(task for task in verify_tasks if task["name"] == "Assert the staging SMTP probe was captured by Mailpit")
-    assert "hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].mailpit_staging_probe.stdout == 'sent'" in assert_task["ansible.builtin.assert"]["that"]
+    assert_task = next(
+        task for task in verify_tasks if task["name"] == "Assert the staging SMTP probe was captured by Mailpit"
+    )
+    assert (
+        "hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].mailpit_staging_probe.stdout == 'sent'"
+        in assert_task["ansible.builtin.assert"]["that"]
+    )
     assert "'mailpit-staging@lv3.org'" in str(assert_task["ansible.builtin.assert"]["that"])

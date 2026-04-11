@@ -116,7 +116,9 @@ def test_run_stage_smoke_suites_writes_aggregate_and_receipt_payload(monkeypatch
     )
 
     def fake_run_suite(**kwargs):
-        assert kwargs["selection"] == ["tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version"]
+        assert kwargs["selection"] == [
+            "tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version"
+        ]
         assert kwargs["required_service_ids"] == ["windmill"]
         return 0, {
             "status": "passed",
@@ -191,7 +193,7 @@ def test_run_stage_smoke_suites_replaces_existing_read_only_report(monkeypatch, 
 
     report_file = tmp_path / ".local" / "stage-smoke-suites" / "production-windmill.json"
     report_file.parent.mkdir(parents=True, exist_ok=True)
-    report_file.write_text("{\"status\":\"stale\"}\n", encoding="utf-8")
+    report_file.write_text('{"status":"stale"}\n', encoding="utf-8")
     report_file.chmod(0o444)
 
     exit_code, payload = stage_smoke_suites.run_stage_smoke_suites(

@@ -18,6 +18,7 @@ Examples
   python scripts/slo_catalog_tool.py at-risk --threshold 99.9
   python scripts/slo_catalog_tool.py by-service --service gitea
 """
+
 from __future__ import annotations
 
 import argparse
@@ -41,15 +42,16 @@ def _load() -> list[dict]:
 # commands
 # ---------------------------------------------------------------------------
 
+
 def cmd_list(args: argparse.Namespace) -> int:
     slos = _load()
     print(f"{'ID':<45}  {'SERVICE':<30}  {'OBJ%':>6}  {'WINDOW_DAYS':>11}  INDICATOR")
     print("-" * 110)
     for s in sorted(slos, key=lambda x: x["id"]):
         print(
-            f"{s['id']:<45}  {s.get('service_id',''):<30}  "
-            f"{s.get('objective_percent',0):>6.2f}  "
-            f"{s.get('window_days',30):>11}  {s.get('indicator','')}"
+            f"{s['id']:<45}  {s.get('service_id', ''):<30}  "
+            f"{s.get('objective_percent', 0):>6.2f}  "
+            f"{s.get('window_days', 30):>11}  {s.get('indicator', '')}"
         )
     print(f"\n{len(slos)} SLO(s)")
     return 0
@@ -77,10 +79,7 @@ def cmd_at_risk(args: argparse.Namespace) -> int:
     print("-" * 120)
     for s in sorted(at_risk, key=lambda x: x.get("objective_percent", 100)):
         desc = s.get("description", "")[:55]
-        print(
-            f"{s['id']:<45}  {s.get('service_id',''):<30}  "
-            f"{s.get('objective_percent',0):>6.2f}  {desc}"
-        )
+        print(f"{s['id']:<45}  {s.get('service_id', ''):<30}  {s.get('objective_percent', 0):>6.2f}  {desc}")
     print(f"\n{len(at_risk)} SLO(s) at risk")
     return 0
 
@@ -102,6 +101,7 @@ def cmd_by_service(args: argparse.Namespace) -> int:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="slo_catalog_tool.py",
@@ -116,7 +116,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     arp = sub.add_parser("at-risk", help="Show SLOs below an objective threshold")
     arp.add_argument(
-        "--threshold", type=float, default=99.5,
+        "--threshold",
+        type=float,
+        default=99.5,
         metavar="PCT",
         help="Flag SLOs below this objective percentage (default 99.5)",
     )

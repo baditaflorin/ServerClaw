@@ -10,9 +10,16 @@ from typing import Any
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import load_yaml_with_identity, require_bool, require_list, require_mapping, require_str, require_string_list
+from validation_toolkit import (
+    load_yaml_with_identity,
+    require_bool,
+    require_list,
+    require_mapping,
+    require_str,
+    require_string_list,
+)
 
-from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 from environment_catalog import configured_environment_ids
 
 
@@ -20,8 +27,14 @@ SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 PUBLIC_EDGE_DEFAULTS_PATH = repo_path(
-    "collections", "ansible_collections", "lv3", "platform",
-    "roles", "nginx_edge_publication", "defaults", "main.yml",
+    "collections",
+    "ansible_collections",
+    "lv3",
+    "platform",
+    "roles",
+    "nginx_edge_publication",
+    "defaults",
+    "main.yml",
 )
 
 ALLOWED_STATUSES = {"active", "planned", "reserved", "retiring"}
@@ -35,8 +48,6 @@ HOSTNAME_PATTERN = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
 ROUTE_HOSTNAME_PATTERN = re.compile(r"^(\*\.)?[a-z0-9-]+(\.[a-z0-9-]+)+$")
 PREFIX_PATTERN = re.compile(r"^[a-z0-9-]+$")
 ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
-
-
 
 
 def _is_jinja2_expression(value: str) -> bool:
@@ -225,8 +236,7 @@ def collect_edge_route_hostnames(
         enabled = edge.get("enabled", False)
         if not isinstance(enabled, bool):
             raise ValueError(
-                "inventory/host_vars/proxmox_florin.yml.lv3_service_topology."
-                f"{service_id}.edge.enabled must be boolean"
+                f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}.edge.enabled must be boolean"
             )
         if not enabled:
             continue
@@ -244,9 +254,7 @@ def collect_edge_route_hostnames(
         require_list(public_edge_defaults.get("public_edge_extra_sites", []), "public_edge_extra_sites")
     ):
         site = require_mapping(site, f"public_edge_extra_sites[{index}]")
-        hostnames.update(
-            collect_site_hostnames(site, f"public_edge_extra_sites[{index}]", allow_wildcards=True)
-        )
+        hostnames.update(collect_site_hostnames(site, f"public_edge_extra_sites[{index}]", allow_wildcards=True))
 
     apex_hostname = public_edge_defaults.get("public_edge_apex_hostname")
     if apex_hostname is not None:
@@ -260,7 +268,10 @@ def collect_authenticated_edge_hostnames(public_edge_defaults: dict[str, Any]) -
         public_edge_defaults.get("public_edge_authenticated_sites", {}),
         "public_edge_authenticated_sites",
     )
-    return {require_hostname(hostname, f"public_edge_authenticated_sites key '{hostname}'") for hostname in authenticated_sites}
+    return {
+        require_hostname(hostname, f"public_edge_authenticated_sites key '{hostname}'")
+        for hostname in authenticated_sites
+    }
 
 
 def get_subdomain_entry(catalog: dict[str, Any], fqdn: str) -> dict[str, Any]:
@@ -284,16 +295,12 @@ def validate_provisionable_subdomain(entry: dict[str, Any], edge_route_hostnames
     fqdn = require_hostname(entry.get("fqdn"), "selected_subdomain.fqdn")
     status = require_str(entry.get("status"), "selected_subdomain.status")
     if status not in PROVISIONABLE_STATUSES:
-        raise ValueError(
-            f"subdomain '{fqdn}' has status '{status}' and cannot be provisioned"
-        )
+        raise ValueError(f"subdomain '{fqdn}' has status '{status}' and cannot be provisioned")
 
     exposure = require_str(entry.get("exposure"), "selected_subdomain.exposure")
     route_mode = route_mode_for_entry(entry, edge_route_hostnames)
     if exposure == "edge-published" and route_mode != "edge":
-        raise ValueError(
-            f"subdomain '{fqdn}' is marked edge-published but no repo-managed NGINX route exists yet"
-        )
+        raise ValueError(f"subdomain '{fqdn}' is marked edge-published but no repo-managed NGINX route exists yet")
 
     return route_mode
 
@@ -329,9 +336,7 @@ def validate_subdomain_catalog(
 
         environment = require_str(entry.get("environment"), f"subdomains[{index}].environment")
         if environment not in ALLOWED_ENVIRONMENTS:
-            raise ValueError(
-                f"subdomains[{index}].environment must be one of {sorted(ALLOWED_ENVIRONMENTS)}"
-            )
+            raise ValueError(f"subdomains[{index}].environment must be one of {sorted(ALLOWED_ENVIRONMENTS)}")
 
         status = require_str(entry.get("status"), f"subdomains[{index}].status")
         if status not in ALLOWED_STATUSES:
@@ -339,19 +344,14 @@ def validate_subdomain_catalog(
 
         exposure = require_str(entry.get("exposure"), f"subdomains[{index}].exposure")
         if exposure not in ALLOWED_EXPOSURES:
-            raise ValueError(
-                f"subdomains[{index}].exposure must be one of {sorted(ALLOWED_EXPOSURES)}"
-            )
+            raise ValueError(f"subdomains[{index}].exposure must be one of {sorted(ALLOWED_EXPOSURES)}")
 
         auth_requirement = require_str(
             entry.get("auth_requirement"),
             f"subdomains[{index}].auth_requirement",
         )
         if auth_requirement not in ALLOWED_AUTH_REQUIREMENTS:
-            raise ValueError(
-                f"subdomains[{index}].auth_requirement must be one of "
-                f"{sorted(ALLOWED_AUTH_REQUIREMENTS)}"
-            )
+            raise ValueError(f"subdomains[{index}].auth_requirement must be one of {sorted(ALLOWED_AUTH_REQUIREMENTS)}")
 
         expected_dns_records_for_entry(entry, f"subdomains[{index}]")
         require_adr_id(entry.get("owner_adr"), f"subdomains[{index}].owner_adr")
@@ -361,10 +361,7 @@ def validate_subdomain_catalog(
             )
 
         reserved_prefix = fqdn.split(".", 1)[0]
-        if (
-            reserved_prefix in allowed_fqdns_by_prefix
-            and fqdn not in allowed_fqdns_by_prefix[reserved_prefix]
-        ):
+        if reserved_prefix in allowed_fqdns_by_prefix and fqdn not in allowed_fqdns_by_prefix[reserved_prefix]:
             raise ValueError(
                 f"subdomain '{fqdn}' uses reserved prefix '{reserved_prefix}' without an explicit allowlist entry"
             )
@@ -372,31 +369,21 @@ def validate_subdomain_catalog(
         tls = require_mapping(entry.get("tls"), f"subdomains[{index}].tls")
         provider = require_str(tls.get("provider"), f"subdomains[{index}].tls.provider")
         if provider not in ALLOWED_TLS_PROVIDERS:
-            raise ValueError(
-                f"subdomains[{index}].tls.provider must be one of {sorted(ALLOWED_TLS_PROVIDERS)}"
-            )
+            raise ValueError(f"subdomains[{index}].tls.provider must be one of {sorted(ALLOWED_TLS_PROVIDERS)}")
         auto_renew = require_bool(tls.get("auto_renew"), f"subdomains[{index}].tls.auto_renew")
         cert_path = tls.get("cert_path")
         if provider == "none":
             if auto_renew:
-                raise ValueError(
-                    f"subdomains[{index}].tls.auto_renew must be false when tls.provider is 'none'"
-                )
+                raise ValueError(f"subdomains[{index}].tls.auto_renew must be false when tls.provider is 'none'")
             if cert_path is not None:
-                raise ValueError(
-                    f"subdomains[{index}].tls.cert_path must be omitted when tls.provider is 'none'"
-                )
+                raise ValueError(f"subdomains[{index}].tls.cert_path must be omitted when tls.provider is 'none'")
         else:
             require_str(cert_path, f"subdomains[{index}].tls.cert_path")
 
         if exposure == "edge-published" and provider == "none":
-            raise ValueError(
-                f"subdomains[{index}] edge-published hostnames must declare a TLS provider"
-            )
+            raise ValueError(f"subdomains[{index}] edge-published hostnames must declare a TLS provider")
         if exposure == "private-only" and provider == "letsencrypt":
-            raise ValueError(
-                f"subdomains[{index}] private-only hostnames must not use Let's Encrypt"
-            )
+            raise ValueError(f"subdomains[{index}] private-only hostnames must not use Let's Encrypt")
         if exposure == "private-only" and auth_requirement != "private_network":
             raise ValueError(
                 f"subdomains[{index}].auth_requirement must be 'private_network' for private-only hostnames"
@@ -406,9 +393,7 @@ def validate_subdomain_catalog(
                 f"subdomains[{index}].auth_requirement must not be 'private_network' for publicly exposed hostnames"
             )
         if auth_requirement == "edge_oidc" and status == "active" and fqdn not in edge_route_hostnames:
-            raise ValueError(
-                f"subdomain '{fqdn}' requires edge_oidc but has no repo-managed NGINX route"
-            )
+            raise ValueError(f"subdomain '{fqdn}' requires edge_oidc but has no repo-managed NGINX route")
         if (
             auth_requirement == "edge_oidc"
             and fqdn in edge_route_hostnames
@@ -417,11 +402,7 @@ def validate_subdomain_catalog(
             raise ValueError(
                 f"subdomain '{fqdn}' requires edge_oidc but is missing from public_edge_authenticated_sites"
             )
-        if (
-            authenticated_edge_hostnames
-            and fqdn in authenticated_edge_hostnames
-            and auth_requirement != "edge_oidc"
-        ):
+        if authenticated_edge_hostnames and fqdn in authenticated_edge_hostnames and auth_requirement != "edge_oidc":
             raise ValueError(
                 f"subdomain '{fqdn}' is protected in public_edge_authenticated_sites but auth_requirement is '{auth_requirement}'"
             )
@@ -442,8 +423,7 @@ def validate_subdomain_catalog(
         )
         if missing_edge_route_entries:
             raise ValueError(
-                "repo-managed NGINX routes missing from the subdomain catalog: "
-                + ", ".join(missing_edge_route_entries)
+                "repo-managed NGINX routes missing from the subdomain catalog: " + ", ".join(missing_edge_route_entries)
             )
 
         active_edge_published_missing_routes = sorted(
@@ -497,7 +477,7 @@ def main(argv: list[str] | None = None) -> int:
                     print(entry[args.print_field])
 
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("subdomain catalog", exc)
 
 

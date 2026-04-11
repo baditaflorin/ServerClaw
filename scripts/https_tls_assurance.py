@@ -169,9 +169,7 @@ def run_scan(
 
 def build_parser() -> argparse.ArgumentParser:
     timeout_default = int(os.environ.get("HTTPS_TLS_TIMEOUT_SECONDS", str(DEFAULT_TIMEOUT_SECONDS)))
-    parser = argparse.ArgumentParser(
-        description="Run the ADR 0249 HTTPS/TLS assurance scan and write a receipt."
-    )
+    parser = argparse.ArgumentParser(description="Run the ADR 0249 HTTPS/TLS assurance scan and write a receipt.")
     parser.add_argument("--env", default=DEFAULT_ENVIRONMENT)
     parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
     parser.add_argument("--artifacts-root", type=Path, default=DEFAULT_ARTIFACTS_ROOT)
@@ -205,7 +203,9 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import subprocess, sys as _sys
+    import subprocess
+    import sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -219,7 +219,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         subprocess.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:
@@ -229,5 +230,5 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise SystemExit(emit_cli_error("https tls assurance", exc))

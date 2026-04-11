@@ -46,14 +46,22 @@ def test_temporal_postgres_role_generates_and_mirrors_password_and_databases() -
     tasks = load_tasks()
 
     generate_task = next(task for task in tasks if task.get("name") == "Generate the Temporal database password")
-    mirror_task = next(task for task in tasks if task.get("name") == "Mirror the Temporal database password to the control machine")
-    persist_task = next(task for task in tasks if task.get("name") == "Persist the Temporal database password on the current guest")
+    mirror_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Temporal database password to the control machine"
+    )
+    persist_task = next(
+        task for task in tasks if task.get("name") == "Persist the Temporal database password on the current guest"
+    )
     database_check_task = next(
         task for task in tasks if task.get("name") == "Check whether the Temporal PostgreSQL databases already exist"
     )
-    database_create_task = next(task for task in tasks if task.get("name") == "Create the Temporal PostgreSQL databases")
+    database_create_task = next(
+        task for task in tasks if task.get("name") == "Create the Temporal PostgreSQL databases"
+    )
     database_owner_check_task = next(
-        task for task in tasks if task.get("name") == "Check whether the Temporal PostgreSQL database owners already match"
+        task
+        for task in tasks
+        if task.get("name") == "Check whether the Temporal PostgreSQL database owners already match"
     )
     database_owner_task = next(
         task for task in tasks if task.get("name") == "Ensure the Temporal PostgreSQL database owners are correct"
@@ -67,7 +75,10 @@ def test_temporal_postgres_role_generates_and_mirrors_password_and_databases() -
         "{{ temporal_visibility_database_name }}",
     ]
     assert database_create_task["changed_when"] is True
-    assert "CREATE DATABASE {{ item.item }} OWNER {{ temporal_database_user }}" in database_create_task["ansible.builtin.command"]["argv"][-1]
+    assert (
+        "CREATE DATABASE {{ item.item }} OWNER {{ temporal_database_user }}"
+        in database_create_task["ansible.builtin.command"]["argv"][-1]
+    )
     assert database_owner_check_task["loop"] == [
         "{{ temporal_database_name }}",
         "{{ temporal_visibility_database_name }}",

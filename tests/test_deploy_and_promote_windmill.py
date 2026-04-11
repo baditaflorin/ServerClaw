@@ -35,7 +35,9 @@ def test_windmill_wrapper_forwards_platform_trace_id(monkeypatch, tmp_path: Path
     monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
     monkeypatch.setenv("PLATFORM_TRACE_ID", "trace-windmill-123")
 
-    payload = MODULE.main(service="api_gateway", staging_receipt="receipts/live-applies/staging/test.json", repo_path=str(repo_root))
+    payload = MODULE.main(
+        service="api_gateway", staging_receipt="receipts/live-applies/staging/test.json", repo_path=str(repo_root)
+    )
 
     assert payload["status"] == "ok"
     assert payload["trace_id"] == "trace-windmill-123"

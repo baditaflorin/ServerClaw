@@ -265,7 +265,9 @@ def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
         capture_output=True,
         text=True,
     ).stdout.strip()
-    subprocess.run(["git", "-C", str(repo_root), "checkout", "-b", "codex/docs-change"], check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "-C", str(repo_root), "checkout", "-b", "codex/docs-change"], check=True, capture_output=True, text=True
+    )
     doc_path.write_text("# ADR test\n\nUpdated.\n", encoding="utf-8")
 
     exit_code = run_gate.main(
@@ -580,8 +582,14 @@ def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
     script_paths = {entry["path"] for entry in runtime_defaults["windmill_seed_scripts"]}
 
     assert "config/windmill/scripts/gate-status.py" in catalog["workflows"]["gate-status"]["implementation_refs"]
-    assert "config/windmill/scripts/atlas-drift-check.py" in catalog["workflows"]["atlas-drift-check"]["implementation_refs"]
-    assert "config/windmill/scripts/stage-smoke-suites.py" in catalog["workflows"]["stage-smoke-suites"]["implementation_refs"]
+    assert (
+        "config/windmill/scripts/atlas-drift-check.py"
+        in catalog["workflows"]["atlas-drift-check"]["implementation_refs"]
+    )
+    assert (
+        "config/windmill/scripts/stage-smoke-suites.py"
+        in catalog["workflows"]["stage-smoke-suites"]["implementation_refs"]
+    )
     assert "f/lv3/atlas_drift_check" in script_paths
     assert "f/lv3/gate-status" in script_paths
     assert "f/lv3/stage-smoke-suites" in script_paths

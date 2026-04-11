@@ -21,53 +21,53 @@ TARGET = REPO_ROOT / "config" / "uptime-kuma" / "monitors.json"
 # Infrastructure items (Proxmox, PostgreSQL VIP, NGINX Edge, etc.) are mapped
 # to None so they are left without a service_id (the decommission script skips them).
 MONITOR_SERVICE_MAP: dict[str, str | None] = {
-    "Platform API Gateway Public":      "api_gateway",
-    "Backup PBS Port":                  None,          # infrastructure — no catalog service
-    "Browser Runner Private":           None,          # ambiguous — port 8096 matches repo_intake but name diverges
-    "Dify Public":                      "dify",
-    "Directus Public Health":           "directus",
-    "Docker Build SSH":                 None,          # infrastructure
-    "Dozzle Private":                   "dozzle",
-    "Excalidraw Public":                "excalidraw",
-    "Flagsmith Public Health":          "flagsmith",
-    "Gitea Private":                    "gitea",
-    "Grafana Public":                   "grafana",
-    "Harbor Registry Public":           "harbor",
-    "Headscale Public Health":          "headscale",
-    "Homepage Public":                  "homepage",
-    "Keycloak OIDC Discovery":          "keycloak",
-    "Lago Public Health":               "lago",
-    "Langfuse Public Health":           "langfuse",
-    "Mail Platform Gateway Private":    None,          # infrastructure
-    "MinIO Public Health":              "minio",
-    "Matrix Synapse Public":            "matrix_synapse",
-    "Mattermost Private":               "mattermost",
-    "n8n Public Health":                "n8n",
-    "Nextcloud Public Status":          "nextcloud",
-    "NetBox Private":                   "netbox",
-    "NGINX Edge Public":                None,          # infrastructure
-    "ntfy Public":                      "ntfy",
-    "Ops Portal Public":                "ops_portal",
-    "Grist Public Status":              "grist",
-    "Outline Public Health":            "outline",
-    "Paperless Public Health":          "paperless",
-    "Plane Public":                     "plane",
-    "Platform Context Private":         None,          # internal platform service
-    "Plausible Public Health":          "plausible",
-    "Portainer Private":                "portainer",
-    "PostgreSQL VIP Port":              None,          # infrastructure
-    "Proxmox UI Port":                  None,          # infrastructure
-    "Realtime Metrics Private":         "netdata",     # already removed — decommission handles cleanup
-    "Semaphore Private":                "semaphore",
-    "ServerClaw":                       "serverclaw",
-    "Step CA Private":                  "step_ca",
-    "Superset Public Health":           "superset",
-    "Tika Private":                     "tika",
-    "Uptime Kuma Public":               "uptime_kuma",
-    "Windmill Private":                 "windmill",
-    "Woodpecker Public":                "woodpecker",
-    "GlitchTip Public Health":          "glitchtip",
-    "Repowise Private":                 "repowise",
+    "Platform API Gateway Public": "api_gateway",
+    "Backup PBS Port": None,  # infrastructure — no catalog service
+    "Browser Runner Private": None,  # ambiguous — port 8096 matches repo_intake but name diverges
+    "Dify Public": "dify",
+    "Directus Public Health": "directus",
+    "Docker Build SSH": None,  # infrastructure
+    "Dozzle Private": "dozzle",
+    "Excalidraw Public": "excalidraw",
+    "Flagsmith Public Health": "flagsmith",
+    "Gitea Private": "gitea",
+    "Grafana Public": "grafana",
+    "Harbor Registry Public": "harbor",
+    "Headscale Public Health": "headscale",
+    "Homepage Public": "homepage",
+    "Keycloak OIDC Discovery": "keycloak",
+    "Lago Public Health": "lago",
+    "Langfuse Public Health": "langfuse",
+    "Mail Platform Gateway Private": None,  # infrastructure
+    "MinIO Public Health": "minio",
+    "Matrix Synapse Public": "matrix_synapse",
+    "Mattermost Private": "mattermost",
+    "n8n Public Health": "n8n",
+    "Nextcloud Public Status": "nextcloud",
+    "NetBox Private": "netbox",
+    "NGINX Edge Public": None,  # infrastructure
+    "ntfy Public": "ntfy",
+    "Ops Portal Public": "ops_portal",
+    "Grist Public Status": "grist",
+    "Outline Public Health": "outline",
+    "Paperless Public Health": "paperless",
+    "Plane Public": "plane",
+    "Platform Context Private": None,  # internal platform service
+    "Plausible Public Health": "plausible",
+    "Portainer Private": "portainer",
+    "PostgreSQL VIP Port": None,  # infrastructure
+    "Proxmox UI Port": None,  # infrastructure
+    "Realtime Metrics Private": "netdata",  # already removed — decommission handles cleanup
+    "Semaphore Private": "semaphore",
+    "ServerClaw": "serverclaw",
+    "Step CA Private": "step_ca",
+    "Superset Public Health": "superset",
+    "Tika Private": "tika",
+    "Uptime Kuma Public": "uptime_kuma",
+    "Windmill Private": "windmill",
+    "Woodpecker Public": "woodpecker",
+    "GlitchTip Public Health": "glitchtip",
+    "Repowise Private": "repowise",
 }
 
 

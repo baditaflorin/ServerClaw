@@ -36,9 +36,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -52,6 +51,7 @@ _SKIP_NAMES = {".DS_Store"}
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _iter_receipts(type_filter: str | None = None):
     """Yield (path, receipt_type) for every receipt file under RECEIPTS_ROOT."""
@@ -79,7 +79,7 @@ def _file_meta(fp: Path, receipt_type: str) -> dict:
         "path": str(fp.relative_to(REPO_ROOT)),
         "type": receipt_type,
         "name": fp.stem,
-        "mtime": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "mtime": datetime.fromtimestamp(stat.st_mtime, tz=UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "size_bytes": stat.st_size,
     }
 
@@ -120,6 +120,7 @@ def _snippet(text: str, query: str, max_len: int = 200) -> str:
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
+
 
 def command_list(args) -> int:
     since: str | None = args.since
@@ -168,12 +169,14 @@ def command_search(args) -> int:
             continue
 
         snippet = _snippet(content, query) if content_hits else fp.stem
-        scored.append({
-            "path": str(fp.relative_to(REPO_ROOT)),
-            "type": receipt_type,
-            "snippet": snippet,
-            "score": total_hits,
-        })
+        scored.append(
+            {
+                "path": str(fp.relative_to(REPO_ROOT)),
+                "type": receipt_type,
+                "snippet": snippet,
+                "score": total_hits,
+            }
+        )
 
     scored.sort(key=lambda r: r["score"], reverse=True)
     scored = scored[:limit]
@@ -222,7 +225,7 @@ def _emit_receipt(fp: Path) -> int:
     return 0
 
 
-def command_summary(args) -> int:  # noqa: ARG001
+def command_summary(args) -> int:
     by_type: dict[str, int] = {}
     dates: list[str] = []
 
@@ -233,7 +236,7 @@ def command_summary(args) -> int:  # noqa: ARG001
             dates.append(date_str)
         else:
             stat = fp.stat()
-            mtime_date = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).strftime("%Y-%m-%d")
+            mtime_date = datetime.fromtimestamp(stat.st_mtime, tz=UTC).strftime("%Y-%m-%d")
             dates.append(mtime_date)
 
     total = sum(by_type.values())
@@ -254,6 +257,7 @@ def command_summary(args) -> int:  # noqa: ARG001
 # ---------------------------------------------------------------------------
 # Parser
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -291,6 +295,7 @@ def build_parser() -> argparse.ArgumentParser:
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 def main() -> int:
     args = build_parser().parse_args()

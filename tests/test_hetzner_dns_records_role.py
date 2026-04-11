@@ -3,20 +3,14 @@ from pathlib import Path
 import yaml
 
 
-ROLE_TASKS = Path(
-    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml"
-)
-MAIN_TASKS = Path(
-    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml"
-)
+ROLE_TASKS = Path("collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml")
+MAIN_TASKS = Path("collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml")
 
 
 def test_missing_live_ttl_defaults_to_desired_ttl() -> None:
     tasks = yaml.safe_load(ROLE_TASKS.read_text())
     update_task = next(
-        task
-        for task in tasks
-        if task["name"] == "Update the canonical DNS record when drift is detected"
+        task for task in tasks if task["name"] == "Update the canonical DNS record when drift is detected"
     )
     condition = " ".join(str(part) for part in update_task["when"])
 

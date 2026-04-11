@@ -9,19 +9,19 @@ Provides authenticated intake surfaces for self-service repo deployment:
 from __future__ import annotations
 
 import json
-import subprocess  # noqa: S404
-from datetime import datetime, timezone
+import subprocess
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 
-UTC = timezone.utc
+UTC = UTC
 
 
 def utc_now() -> datetime:
@@ -42,7 +42,7 @@ def _load_repo_deploy_catalog() -> list[dict[str, Any]]:
             with open(catalog_path) as f:
                 data = json.load(f)
             return data.get("profiles", []) if isinstance(data, dict) else []
-    except Exception:  # noqa: BLE001
+    except Exception:
         pass
     return []
 
@@ -92,10 +92,14 @@ def create_app() -> FastAPI:
         try:
             repo_root = Path(__file__).resolve().parents[2]
             args = [
-                "python3", "-m", "scripts.lv3_cli", "deploy-repo-profile",
-                "--profile-id", profile_id,
+                "python3",
+                "-m",
+                "scripts.lv3_cli",
+                "deploy-repo-profile",
+                "--profile-id",
+                profile_id,
             ]
-            result = subprocess.run(  # noqa: S603
+            result = subprocess.run(
                 args,
                 capture_output=True,
                 text=True,
@@ -110,17 +114,17 @@ def create_app() -> FastAPI:
                 status = "failed"
                 detail = result.stderr.strip() or "Deploy failed."
                 tone = "danger"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             status = "failed"
             detail = str(exc)
             tone = "danger"
 
-        html = f'''
+        html = f"""
         <div class="alert alert-{tone}">
-            <strong>{profile.get('app_name', profile_id)}</strong><br>
+            <strong>{profile.get("app_name", profile_id)}</strong><br>
             <small>{detail}</small>
         </div>
-        '''
+        """
         return HTMLResponse(html)
 
     @app.post("/actions/repo-intake/custom", response_class=HTMLResponse)
@@ -159,22 +163,33 @@ def create_app() -> FastAPI:
         try:
             repo_root = Path(__file__).resolve().parents[2]
             args = [
-                "python3", "-m", "scripts.lv3_cli", "deploy-repo",
-                "--repo", repo,
-                "--branch", branch or "main",
-                "--source", source,
-                "--app-name", app_name,
-                "--project", project or "LV3 Apps",
-                "--environment", environment or "production",
-                "--build-pack", build_pack,
-                "--ports", ports or "80",
+                "python3",
+                "-m",
+                "scripts.lv3_cli",
+                "deploy-repo",
+                "--repo",
+                repo,
+                "--branch",
+                branch or "main",
+                "--source",
+                source,
+                "--app-name",
+                app_name,
+                "--project",
+                project or "LV3 Apps",
+                "--environment",
+                environment or "production",
+                "--build-pack",
+                build_pack,
+                "--ports",
+                ports or "80",
             ]
             if domain.strip():
                 args.extend(["--domain", domain.strip()])
             if docker_compose_location.strip():
                 args.extend(["--docker-compose-location", docker_compose_location.strip()])
 
-            result = subprocess.run(  # noqa: S603
+            result = subprocess.run(
                 args,
                 capture_output=True,
                 text=True,
@@ -189,17 +204,17 @@ def create_app() -> FastAPI:
                 status = "failed"
                 detail = result.stderr.strip() or "Deploy failed."
                 tone = "danger"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             status = "failed"
             detail = str(exc)
             tone = "danger"
 
-        html = f'''
+        html = f"""
         <div class="alert alert-{tone}">
             <strong>{app_name}</strong><br>
             <small>{detail}</small>
         </div>
-        '''
+        """
         return HTMLResponse(html)
 
     # JSON API endpoint
@@ -220,7 +235,7 @@ def create_app() -> FastAPI:
 
         try:
             body = await request.json()
-        except Exception:  # noqa: BLE001
+        except Exception:
             return JSONResponse({"ok": False, "error": "Request body must be valid JSON."}, status_code=400)
 
         if not isinstance(body, dict):
@@ -239,20 +254,26 @@ def create_app() -> FastAPI:
             try:
                 repo_root = Path(__file__).resolve().parents[2]
                 args = ["python3", "-m", "scripts.lv3_cli", "deploy-repo-profile", "--profile-id", profile_id]
-                result = subprocess.run(  # noqa: S603
-                    args, capture_output=True, text=True, timeout=30, cwd=str(repo_root),
+                result = subprocess.run(
+                    args,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    cwd=str(repo_root),
                 )
                 if result.returncode == 0:
-                    return JSONResponse({
-                        "ok": True,
-                        "status": "queued",
-                        "detail": result.stdout.strip() or "Deploy queued.",
-                    })
+                    return JSONResponse(
+                        {
+                            "ok": True,
+                            "status": "queued",
+                            "detail": result.stdout.strip() or "Deploy queued.",
+                        }
+                    )
                 return JSONResponse(
                     {"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."},
                     status_code=502,
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
         # Custom repo
@@ -271,9 +292,9 @@ def create_app() -> FastAPI:
         if not app_name:
             errors.append("'app_name' is required.")
         if source not in {"auto", "public", "private-deploy-key"}:
-            errors.append(f"'source' must be one of {{'auto', 'public', 'private-deploy-key'}}.")
+            errors.append("'source' must be one of {'auto', 'public', 'private-deploy-key'}.")
         if build_pack not in {"nixpacks", "static", "dockerfile", "dockercompose"}:
-            errors.append(f"'build_pack' must be one of {{'nixpacks', 'static', 'dockerfile', 'dockercompose'}}.")
+            errors.append("'build_pack' must be one of {'nixpacks', 'static', 'dockerfile', 'dockercompose'}.")
 
         if errors:
             return JSONResponse({"ok": False, "error": " ".join(errors)}, status_code=422)
@@ -281,35 +302,52 @@ def create_app() -> FastAPI:
         try:
             repo_root = Path(__file__).resolve().parents[2]
             args = [
-                "python3", "-m", "scripts.lv3_cli", "deploy-repo",
-                "--repo", repo,
-                "--branch", branch,
-                "--source", source,
-                "--app-name", app_name,
-                "--project", project,
-                "--environment", environment,
-                "--build-pack", build_pack,
-                "--ports", ports,
+                "python3",
+                "-m",
+                "scripts.lv3_cli",
+                "deploy-repo",
+                "--repo",
+                repo,
+                "--branch",
+                branch,
+                "--source",
+                source,
+                "--app-name",
+                app_name,
+                "--project",
+                project,
+                "--environment",
+                environment,
+                "--build-pack",
+                build_pack,
+                "--ports",
+                ports,
             ]
             if domain:
                 args.extend(["--domain", domain])
             if docker_compose_location:
                 args.extend(["--docker-compose-location", docker_compose_location])
 
-            result = subprocess.run(  # noqa: S603
-                args, capture_output=True, text=True, timeout=30, cwd=str(repo_root),
+            result = subprocess.run(
+                args,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=str(repo_root),
             )
             if result.returncode == 0:
-                return JSONResponse({
-                    "ok": True,
-                    "status": "queued",
-                    "detail": result.stdout.strip() or "Deploy queued.",
-                })
+                return JSONResponse(
+                    {
+                        "ok": True,
+                        "status": "queued",
+                        "detail": result.stdout.strip() or "Deploy queued.",
+                    }
+                )
             return JSONResponse(
                 {"ok": False, "status": "failed", "detail": result.stderr.strip() or "Deploy failed."},
                 status_code=502,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
     # Health check
@@ -323,6 +361,7 @@ def create_app() -> FastAPI:
 
 if __name__ == "__main__":
     import uvicorn
+
     app = create_app()
     uvicorn.run(
         app,

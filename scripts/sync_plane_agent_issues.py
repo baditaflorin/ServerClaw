@@ -69,8 +69,7 @@ DEFAULT_AUTH_FILE = REPO_ROOT / ".local" / "plane" / "admin-auth.json"
 DEFAULT_AW_IDENTIFIER = "AW"
 DEFAULT_AW_NAME = "Agent Work"
 DEFAULT_AW_DESCRIPTION = (
-    "Live task board for all LLM agent sessions. One issue per worktree. "
-    "See ADR 0360 for the full protocol."
+    "Live task board for all LLM agent sessions. One issue per worktree. See ADR 0360 for the full protocol."
 )
 WORKSTREAMS_ACTIVE = REPO_ROOT / "workstreams" / "active"
 AW_AUTH_FILE = REPO_ROOT / ".local" / "plane" / "aw-auth.json"
@@ -80,6 +79,7 @@ ALL_LABELS = list(AW_LABEL_COLORS.keys())
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _load_yaml(path: Path) -> dict[str, Any]:
     try:
@@ -149,7 +149,12 @@ def _ensure_aw_project(client: PlaneClient, auth: dict[str, Any], identifier: st
         DEFAULT_AW_DESCRIPTION,
     )
     # Persist AW project metadata alongside main auth for other scripts
-    aw_auth = {**auth, "project_id": project["id"], "project_name": project.get("name", DEFAULT_AW_NAME), "project_identifier": identifier}
+    aw_auth = {
+        **auth,
+        "project_id": project["id"],
+        "project_name": project.get("name", DEFAULT_AW_NAME),
+        "project_identifier": identifier,
+    }
     AW_AUTH_FILE.parent.mkdir(parents=True, exist_ok=True)
     write_json(AW_AUTH_FILE, aw_auth, mode=0o600)
     return project
@@ -158,6 +163,7 @@ def _ensure_aw_project(client: PlaneClient, auth: dict[str, Any], identifier: st
 # ---------------------------------------------------------------------------
 # Core sync
 # ---------------------------------------------------------------------------
+
 
 def sync_workstreams(
     *,
@@ -207,12 +213,14 @@ def sync_workstreams(
         if comment:
             client.add_comment(workspace_slug, project_id, issue_id, f"<p>{comment}</p>")
 
-        synced.append({
-            "workstream_id": wid,
-            "plane_issue_id": issue_id,
-            "action": action,
-            "status": ws.get("status"),
-        })
+        synced.append(
+            {
+                "workstream_id": wid,
+                "plane_issue_id": issue_id,
+                "action": action,
+                "status": ws.get("status"),
+            }
+        )
 
     return {
         "workspace_slug": workspace_slug,
@@ -251,7 +259,9 @@ def repair_orphans(*, auth_file: Path, aw_identifier: str) -> dict[str, Any]:
         if ws_id not in active_ws_ids:
             client.update_issue(workspace_slug, project_id, issue["id"], {"state_id": done_id})
             client.add_comment(
-                workspace_slug, project_id, issue["id"],
+                workspace_slug,
+                project_id,
+                issue["id"],
                 "<p>Auto-closed: workstream no longer in active/ and branch is absent from git.</p>",
             )
             closed.append(ws_id)
@@ -262,6 +272,7 @@ def repair_orphans(*, auth_file: Path, aw_identifier: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -280,12 +291,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="AW project identifier (default: AW)",
     )
     parser.add_argument(
-        "--workstream", "-w",
+        "--workstream",
+        "-w",
         metavar="ID",
         help="Sync a single workstream by id (default: all active)",
     )
     parser.add_argument(
-        "--comment", "-m",
+        "--comment",
+        "-m",
         metavar="TEXT",
         help="Add a plain-text comment to the synced issue(s)",
     )
@@ -349,13 +362,15 @@ def sync_workspace_members(
             else:
                 # Plane v1.x CE does not expose a member-role-update REST endpoint.
                 # Record as needs_role_update so Ansible can enforce via Django shell.
-                results.append({
-                    "email": email,
-                    "action": "needs_role_update",
-                    "current_role": existing_role,
-                    "desired_role": role,
-                    "note": "Use make converge-plane or Django shell to update role",
-                })
+                results.append(
+                    {
+                        "email": email,
+                        "action": "needs_role_update",
+                        "current_role": existing_role,
+                        "desired_role": role,
+                        "note": "Use make converge-plane or Django shell to update role",
+                    }
+                )
         else:
             # Try direct invitation (works for existing Plane users without email flow)
             try:

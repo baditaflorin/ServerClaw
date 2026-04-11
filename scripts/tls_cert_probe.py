@@ -41,9 +41,7 @@ def probe_tls_certificate(
     ca_bundle_path: Path | None = None,
     timeout_seconds: float = 5.0,
 ) -> dict[str, Any]:
-    context = ssl.create_default_context(
-        cafile=str(ca_bundle_path) if ca_bundle_path is not None else None
-    )
+    context = ssl.create_default_context(cafile=str(ca_bundle_path) if ca_bundle_path is not None else None)
     with socket.create_connection((host, port), timeout=timeout_seconds) as sock:
         with context.wrap_socket(sock, server_hostname=server_name or host) as tls_sock:
             certificate = tls_sock.getpeercert()

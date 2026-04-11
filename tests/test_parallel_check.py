@@ -174,10 +174,7 @@ def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkey
     assert "LV3_DOCKER_WORKSPACE_PATH=/host/gitea-runner/workspace" in command
     assert "LV3_SNAPSHOT_BRANCH=codex/adr-0264-live-apply" in command
     assert "LV3_VALIDATION_BASE_REF=origin/main" in command
-    assert (
-        'LV3_VALIDATION_CHANGED_FILES_JSON=["config/validation-gate.json", "scripts/run_gate.py"]'
-        in command
-    )
+    assert 'LV3_VALIDATION_CHANGED_FILES_JSON=["config/validation-gate.json", "scripts/run_gate.py"]' in command
 
 
 def test_build_docker_command_mounts_docker_socket_and_host_workspace(

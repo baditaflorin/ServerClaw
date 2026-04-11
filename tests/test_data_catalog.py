@@ -47,9 +47,9 @@ def test_data_catalog_rejects_public_secret_store() -> None:
                 "access_role": "public",
                 "pii_risk": "low",
                 "locations": ["kv/app"],
-                "notes": "invalid"
+                "notes": "invalid",
             }
-        ]
+        ],
     }
 
     try:

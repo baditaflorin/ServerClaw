@@ -23,18 +23,25 @@ def test_temporal_playbook_bootstraps_schema_from_localhost_and_deploys_runtime(
     postgres_play = plays[0]
     runtime_play = plays[1]
     schema_tool_task = next(
-        task for task in postgres_play["post_tasks"] if task["name"] == "Ensure Temporal schema bootstrap tools are available on the schema tool host"
+        task
+        for task in postgres_play["post_tasks"]
+        if task["name"] == "Ensure Temporal schema bootstrap tools are available on the schema tool host"
     )
     schema_probe_task = next(
-        task for task in postgres_play["post_tasks"] if task["name"] == "Check whether the Temporal default schema version table exists"
+        task
+        for task in postgres_play["post_tasks"]
+        if task["name"] == "Check whether the Temporal default schema version table exists"
     )
     connection_headroom_task = next(
-        task for task in postgres_play["post_tasks"] if task["name"] == "Check PostgreSQL connection headroom before Temporal schema migrations"
+        task
+        for task in postgres_play["post_tasks"]
+        if task["name"] == "Check PostgreSQL connection headroom before Temporal schema migrations"
     )
     drain_task = next(
         task
         for task in postgres_play["post_tasks"]
-        if task["name"] == "Stop the Temporal runtime before schema migrations when PostgreSQL has no regular connection slots left"
+        if task["name"]
+        == "Stop the Temporal runtime before schema migrations when PostgreSQL has no regular connection slots left"
     )
     schema_update_task = next(
         task for task in postgres_play["post_tasks"] if task["name"] == "Apply the Temporal default schema migrations"
@@ -49,7 +56,10 @@ def test_temporal_playbook_bootstraps_schema_from_localhost_and_deploys_runtime(
         "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}",
         "{{ temporal_schema_tool_delegate_host }}",
     ]
-    assert postgres_play["vars"]["temporal_controller_database_host"] == "{{ temporal_controller_database_url | urlsplit('hostname') }}"
+    assert (
+        postgres_play["vars"]["temporal_controller_database_host"]
+        == "{{ temporal_controller_database_url | urlsplit('hostname') }}"
+    )
     assert (
         postgres_play["vars"]["temporal_schema_tool_delegate_host"]
         == "{{ playbook_execution_host_patterns.runtime_control[playbook_execution_env] }}"
@@ -73,7 +83,10 @@ def test_temporal_playbook_bootstraps_schema_from_localhost_and_deploys_runtime(
     assert schema_update_task["ansible.builtin.command"]["argv"][10] == "{{ temporal_database_host }}"
     assert schema_update_task["ansible.builtin.command"]["argv"][12] == "5432"
     assert schema_update_task["ansible.builtin.command"]["argv"][5] == "{{ temporal_admin_tools_image }}"
-    assert runtime_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+    assert (
+        runtime_play["hosts"]
+        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+    )
     assert [role["role"] for role in runtime_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",

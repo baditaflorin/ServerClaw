@@ -21,7 +21,6 @@ from command_catalog import (
     validate_command_catalog,
 )
 from controller_automation_toolkit import (
-    REPO_ROOT,
     emit_cli_error,
     load_json,
     load_yaml,
@@ -38,7 +37,7 @@ from workflow_catalog import (
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_list, require_mapping, require_str
+from validation_toolkit import require_mapping, require_str
 
 
 SECRET_ENV_BINDINGS = {
@@ -147,19 +146,11 @@ def normalize_approver_classes(values: list[str]) -> list[str]:
 
 
 def validate_operator_parameters(contract: dict[str, Any], provided: dict[str, Any]) -> dict[str, str]:
-    allowed_inputs = {
-        item["name"]: item
-        for item in contract["inputs"]
-        if item["kind"] == "operator_parameter"
-    }
+    allowed_inputs = {item["name"]: item for item in contract["inputs"] if item["kind"] == "operator_parameter"}
     extras = sorted(set(provided) - set(allowed_inputs))
     if extras:
         raise ValueError(f"unsupported operator parameters for {contract['workflow_id']}: {', '.join(extras)}")
-    missing = sorted(
-        name
-        for name, item in allowed_inputs.items()
-        if item["required"] and name not in provided
-    )
+    missing = sorted(name for name, item in allowed_inputs.items() if item["required"] and name not in provided)
     if missing:
         raise ValueError(f"missing required operator parameters: {', '.join(missing)}")
     return {name: normalize_scalar(value) for name, value in provided.items()}
@@ -232,7 +223,9 @@ def build_execution_payload(
         require_str(name, f"execution_profiles.{execution['profile']}.env key"): require_str(
             value, f"execution_profiles.{execution['profile']}.env.{name}"
         )
-        for name, value in require_mapping(profile.get("env", {}), f"execution_profiles.{execution['profile']}.env").items()
+        for name, value in require_mapping(
+            profile.get("env", {}), f"execution_profiles.{execution['profile']}.env"
+        ).items()
     }
     staged_files, secret_env = build_secret_materialization(contract, secret_manifest, runtime_repo_root)
     env = {**profile_env, **secret_env, **operator_parameters}
@@ -262,19 +255,18 @@ def build_execution_payload(
     return payload
 
 
-def submit_remote_payload(controller_context: dict[str, Any], runtime_host: str, payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
+def submit_remote_payload(
+    controller_context: dict[str, Any], runtime_host: str, payload: dict[str, Any]
+) -> tuple[dict[str, Any], int]:
     payload_base64 = base64.b64encode(json.dumps(payload).encode("utf-8")).decode("utf-8")
     remote_repo_root = shlex.quote(payload["runtime_repo_root"])
     remote_payload = shlex.quote(payload_base64)
     remote_command = (
-        f"sudo python3 {remote_repo_root}/scripts/governed_command_runtime.py "
-        f"submit --payload-base64 {remote_payload}"
+        f"sudo python3 {remote_repo_root}/scripts/governed_command_runtime.py submit --payload-base64 {remote_payload}"
     )
     if runtime_host == "docker-runtime-lv3":
         command = build_guest_ssh_command(controller_context, runtime_host, remote_command)
-    elif runtime_host == controller_context["host_vars"]["host_public_hostname"]:
-        command = build_host_ssh_command(controller_context, remote_command)
-    elif runtime_host == "proxmox_florin":
+    elif runtime_host == controller_context["host_vars"]["host_public_hostname"] or runtime_host == "proxmox_florin":
         command = build_host_ssh_command(controller_context, remote_command)
     else:
         command = build_guest_ssh_command(controller_context, runtime_host, remote_command)

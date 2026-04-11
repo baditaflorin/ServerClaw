@@ -76,20 +76,20 @@ def list_projects(base_url: str, token: str) -> list[dict[str, Any]]:
     projects: list[dict[str, Any]] = []
     page = 1
     while True:
-      url = f"{base_url}/api/projects?{parse.urlencode({'page': page, 'page_size': 100})}"
-      payload = request_json("GET", url, token)
-      if isinstance(payload, dict) and "results" in payload:
-          batch = payload.get("results", [])
-          next_page = payload.get("next")
-      elif isinstance(payload, list):
-          batch = payload
-          next_page = None
-      else:
-          raise RuntimeError(f"Unexpected project list payload: {payload!r}")
-      projects.extend(batch)
-      if not next_page or not batch:
-          break
-      page += 1
+        url = f"{base_url}/api/projects?{parse.urlencode({'page': page, 'page_size': 100})}"
+        payload = request_json("GET", url, token)
+        if isinstance(payload, dict) and "results" in payload:
+            batch = payload.get("results", [])
+            next_page = payload.get("next")
+        elif isinstance(payload, list):
+            batch = payload
+            next_page = None
+        else:
+            raise RuntimeError(f"Unexpected project list payload: {payload!r}")
+        projects.extend(batch)
+        if not next_page or not batch:
+            break
+        page += 1
     return projects
 
 
@@ -197,7 +197,9 @@ def apply_sync_plan(base_url: str, token: str, plan: dict[str, Any]) -> dict[str
     created: list[Any] = []
     updated: list[Any] = []
     for item in plan["creates"]:
-        created.append(request_json("POST", f"{base_url}/api/projects", token, item["payload"], expected_status=(201, 200)))
+        created.append(
+            request_json("POST", f"{base_url}/api/projects", token, item["payload"], expected_status=(201, 200))
+        )
     for item in plan["updates"]:
         updated.append(
             request_json(

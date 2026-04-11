@@ -64,10 +64,10 @@ def receipt_passed(receipt: dict[str, Any]) -> bool:
 def latest_receipt(receipts: list[dict[str, Any]]) -> dict[str, Any] | None:
     ordered = sorted(
         receipts,
-        key=lambda item: parse_timestamp(
-            str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or "")
-        )
-        or datetime(1970, 1, 1, tzinfo=UTC),
+        key=lambda item: (
+            parse_timestamp(str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or ""))
+            or datetime(1970, 1, 1, tzinfo=UTC)
+        ),
         reverse=True,
     )
     return ordered[0] if ordered else None
@@ -153,10 +153,10 @@ def latest_matching_smoke_receipt(
 ) -> tuple[dict[str, Any] | None, list[str]]:
     ordered = sorted(
         receipts,
-        key=lambda item: parse_timestamp(
-            str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or "")
-        )
-        or datetime(1970, 1, 1, tzinfo=UTC),
+        key=lambda item: (
+            parse_timestamp(str(item.get("recorded_at") or item.get("recorded_on") or item.get("applied_on") or ""))
+            or datetime(1970, 1, 1, tzinfo=UTC)
+        ),
         reverse=True,
     )
     for receipt in ordered:

@@ -59,27 +59,23 @@ def validate_api_publication_catalog(
 
     tiers = require_mapping(catalog.get("tiers"), "api-publication.tiers")
     if set(tiers.keys()) != set(ALLOWED_PUBLICATION_TIERS):
-        raise ValueError(
-            f"api-publication.tiers must define exactly {list(ALLOWED_PUBLICATION_TIERS)}"
-        )
+        raise ValueError(f"api-publication.tiers must define exactly {list(ALLOWED_PUBLICATION_TIERS)}")
 
     normalized_tiers: dict[str, dict[str, Any]] = {}
     for tier_id in ALLOWED_PUBLICATION_TIERS:
         tier = require_mapping(tiers.get(tier_id), f"api-publication.tiers.{tier_id}")
         normalized_tiers[tier_id] = {
-          "title": require_str(tier.get("title"), f"api-publication.tiers.{tier_id}.title"),
-          "summary": require_str(tier.get("summary"), f"api-publication.tiers.{tier_id}.summary"),
-          "approval_rule": require_str(
-              tier.get("approval_rule"),
-              f"api-publication.tiers.{tier_id}.approval_rule",
-          ),
+            "title": require_str(tier.get("title"), f"api-publication.tiers.{tier_id}.title"),
+            "summary": require_str(tier.get("summary"), f"api-publication.tiers.{tier_id}.summary"),
+            "approval_rule": require_str(
+                tier.get("approval_rule"),
+                f"api-publication.tiers.{tier_id}.approval_rule",
+            ),
         }
 
     lane_surface_index = build_lane_surface_index(lane_catalog)
     governed_http_surface_ids = {
-        surface_id
-        for surface_id, surface in lane_surface_index.items()
-        if surface["lane"] in ALLOWED_HTTP_LANES
+        surface_id for surface_id, surface in lane_surface_index.items() if surface["lane"] in ALLOWED_HTTP_LANES
     }
 
     surfaces = require_list(catalog.get("surfaces"), "api-publication.surfaces")
@@ -104,18 +100,14 @@ def validate_api_publication_catalog(
 
         publication_tier = require_str(surface.get("publication_tier"), f"{path}.publication_tier")
         if publication_tier not in ALLOWED_PUBLICATION_TIERS:
-            raise ValueError(
-                f"{path}.publication_tier must be one of {list(ALLOWED_PUBLICATION_TIERS)}"
-            )
+            raise ValueError(f"{path}.publication_tier must be one of {list(ALLOWED_PUBLICATION_TIERS)}")
 
         lane_surface_ref = require_identifier(surface.get("lane_surface_ref"), f"{path}.lane_surface_ref")
         lane_surface = lane_surface_index.get(lane_surface_ref)
         if lane_surface is None:
             raise ValueError(f"{path}.lane_surface_ref references unknown lane surface '{lane_surface_ref}'")
         if lane_surface["lane"] != lane:
-            raise ValueError(
-                f"{path}.lane must match lane surface '{lane_surface_ref}' ({lane_surface['lane']})"
-            )
+            raise ValueError(f"{path}.lane must match lane surface '{lane_surface_ref}' ({lane_surface['lane']})")
         if lane_surface_ref in seen_lane_surface_refs:
             raise ValueError(f"lane surface '{lane_surface_ref}' is classified more than once")
         seen_lane_surface_refs.add(lane_surface_ref)
@@ -144,8 +136,7 @@ def validate_api_publication_catalog(
     missing_classifications = sorted(governed_http_surface_ids - seen_lane_surface_refs)
     if missing_classifications:
         raise ValueError(
-            "api-publication.surfaces must classify every API/event lane surface: "
-            + ", ".join(missing_classifications)
+            "api-publication.surfaces must classify every API/event lane surface: " + ", ".join(missing_classifications)
         )
 
     return normalized_tiers, normalized_surfaces

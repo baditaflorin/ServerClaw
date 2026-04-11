@@ -41,13 +41,7 @@ def write_health_probe_catalog(repo_root: Path, windmill_probe_url: str = "http:
         + "\n",
         encoding="utf-8",
     )
-    (
-        repo_root
-        / "config"
-        / "windmill"
-        / "scripts"
-        / "windmill_integration_env.py"
-    ).write_text(
+    (repo_root / "config" / "windmill" / "scripts" / "windmill_integration_env.py").write_text(
         (REPO_ROOT / "config" / "windmill" / "scripts" / "windmill_integration_env.py").read_text(encoding="utf-8"),
         encoding="utf-8",
     )

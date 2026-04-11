@@ -41,7 +41,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 import urllib.request
@@ -103,8 +102,7 @@ def find_platform_yml(override: str | None = None) -> Path:
         candidate = parent
 
     print(
-        "ERROR: Could not find inventory/group_vars/platform.yml. "
-        "Use --platform-yml to specify the path.",
+        "ERROR: Could not find inventory/group_vars/platform.yml. Use --platform-yml to specify the path.",
         file=sys.stderr,
     )
     sys.exit(1)
@@ -229,9 +227,7 @@ def next_available_port(instances: dict[str, dict[str, Any]], override: int | No
     return port
 
 
-def next_available_udp_range(
-    instances: dict[str, dict[str, Any]], override: str | None = None
-) -> str:
+def next_available_udp_range(instances: dict[str, dict[str, Any]], override: str | None = None) -> str:
     """Return the next available UDP range string, optionally honouring an override."""
     if override is not None:
         # Validate format
@@ -358,8 +354,7 @@ def cmd_add(args: argparse.Namespace, instances: dict[str, dict[str, Any]], plat
 
     if not validate_name(name):
         print(
-            f"ERROR: Instance name {name!r} is invalid. "
-            "Use only letters, digits, hyphens, and underscores.",
+            f"ERROR: Instance name {name!r} is invalid. Use only letters, digits, hyphens, and underscores.",
             file=sys.stderr,
         )
         return 2
@@ -404,8 +399,7 @@ def cmd_add(args: argparse.Namespace, instances: dict[str, dict[str, Any]], plat
         ex_start, ex_end = _parse_udp_range(icfg["udp_range"])
         if _ranges_overlap(new_udp_start, new_udp_end, ex_start, ex_end):
             print(
-                f"ERROR: UDP range {udp_range} overlaps with instance {iname!r} "
-                f"({icfg['udp_range']}).",
+                f"ERROR: UDP range {udp_range} overlaps with instance {iname!r} ({icfg['udp_range']}).",
                 file=sys.stderr,
             )
             return 1
@@ -432,9 +426,7 @@ def cmd_add(args: argparse.Namespace, instances: dict[str, dict[str, Any]], plat
     return 0
 
 
-def cmd_remove(
-    args: argparse.Namespace, instances: dict[str, dict[str, Any]], platform_yml: Path
-) -> int:
+def cmd_remove(args: argparse.Namespace, instances: dict[str, dict[str, Any]], platform_yml: Path) -> int:
     name = args.name
 
     if name not in instances:
@@ -566,8 +558,7 @@ def cmd_validate(args: argparse.Namespace, instances: dict[str, dict[str, Any]])
             b_start, b_end, b_name = range_list[j]
             if _ranges_overlap(a_start, a_end, b_start, b_end):
                 errors.append(
-                    f"UDP range overlap between {a_name!r} ({a_start}-{a_end}) "
-                    f"and {b_name!r} ({b_start}-{b_end})"
+                    f"UDP range overlap between {a_name!r} ({a_start}-{a_end}) and {b_name!r} ({b_start}-{b_end})"
                 )
 
     if args.json:
@@ -700,8 +691,7 @@ def cmd_sync_from_keycloak(
 
     if not secret_path.exists():
         print(
-            f"ERROR: Admin client secret not found at {secret_path}\n"
-            "Use --secret-file to specify an alternate path.",
+            f"ERROR: Admin client secret not found at {secret_path}\nUse --secret-file to specify an alternate path.",
             file=sys.stderr,
         )
         return 1
@@ -751,9 +741,7 @@ def cmd_sync_from_keycloak(
         print(f"Found {len(kc_by_email)} Keycloak user(s) with valid emails.")
 
     # Build current email → instance name mapping
-    current_by_email: dict[str, str] = {
-        cfg["email"].lower(): name for name, cfg in instances.items()
-    }
+    current_by_email: dict[str, str] = {cfg["email"].lower(): name for name, cfg in instances.items()}
 
     # --- Determine changes ---
     to_add: list[str] = []  # emails to add
@@ -853,7 +841,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Emit machine-readable JSON output",
     )
     parser.add_argument(
-        "--yes", "-y",
+        "--yes",
+        "-y",
         action="store_true",
         default=False,
         help="Skip confirmation prompts (for automation)",
@@ -929,15 +918,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--secret-file",
         default=None,
         metavar="PATH",
-        help="Path to admin client secret file "
-        "(default: .local/keycloak/admin-client-secret.txt)",
+        help="Path to admin client secret file (default: .local/keycloak/admin-client-secret.txt)",
     )
     p_sync.add_argument(
         "--group",
         default="/lv3-platform-admins",
         metavar="GROUP_PATH",
-        help="Only sync users in this Keycloak group path "
-        "(default: /lv3-platform-admins; use '' for all users)",
+        help="Only sync users in this Keycloak group path (default: /lv3-platform-admins; use '' for all users)",
     )
     p_sync.add_argument(
         "--dry-run",

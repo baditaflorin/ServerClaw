@@ -89,9 +89,7 @@ def test_wrapper_overrides_blank_direct_endpoint_env_values(monkeypatch, tmp_pat
     assert captured["env"]["LV3_NATS_URL"] == "nats://127.0.0.1:4222"
 
 
-def test_wrapper_loads_worker_secret_files_when_runtime_env_is_missing(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_wrapper_loads_worker_secret_files_when_runtime_env_is_missing(monkeypatch, tmp_path: Path) -> None:
     module = load_module("atlas_drift_worker_secret_files")
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
@@ -195,9 +193,7 @@ def test_wrapper_prefers_seed_job_secret_files_when_repo_local_worker_secrets_ar
     assert captured["env"]["LV3_NTFY_ALERTMANAGER_PASSWORD"] == "ntfy-password"
 
 
-def test_wrapper_loads_worker_secrets_from_proc_env_when_files_are_unreadable(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_wrapper_loads_worker_secrets_from_proc_env_when_files_are_unreadable(monkeypatch, tmp_path: Path) -> None:
     module = load_module("atlas_drift_proc_env")
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
@@ -219,12 +215,8 @@ def test_wrapper_loads_worker_secrets_from_proc_env_when_files_are_unreadable(
 
     def fake_read_proc_env_var(name: str, proc_environ_path: Path = Path("/proc/1/environ")) -> str:
         values = {
-            "LV3_ATLAS_OPENBAO_APPROLE_JSON": json.dumps(
-                {"role_id": "atlas-role", "secret_id": "atlas-secret"}
-            ),
-            "LV3_ATLAS_OPENBAO_INIT_JSON": json.dumps(
-                {"keys_base64": ["key-one"], "root_token": "root-token"}
-            ),
+            "LV3_ATLAS_OPENBAO_APPROLE_JSON": json.dumps({"role_id": "atlas-role", "secret_id": "atlas-secret"}),
+            "LV3_ATLAS_OPENBAO_INIT_JSON": json.dumps({"keys_base64": ["key-one"], "root_token": "root-token"}),
             "LV3_NTFY_ALERTMANAGER_PASSWORD": "ntfy-password",
         }
         return values.get(name, "")

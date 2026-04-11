@@ -48,7 +48,9 @@ def scan(paths: list[Path]) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Fail when targeted source files still contain hardcoded timeout literals.")
+    parser = argparse.ArgumentParser(
+        description="Fail when targeted source files still contain hardcoded timeout literals."
+    )
     parser.add_argument("targets", nargs="*", default=list(DEFAULT_TARGETS))
     args = parser.parse_args()
 

@@ -36,9 +36,7 @@ def test_compose_template_build_uses_host_network() -> None:
 
 
 def test_host_network_policy_allows_platform_context_proxy_port() -> None:
-    host_vars = yaml.safe_load(
-        (REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text()
-    )
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     assert 8010 in host_rule["ports"]
@@ -47,7 +45,9 @@ def test_host_network_policy_allows_platform_context_proxy_port() -> None:
 def test_role_restores_docker_nat_chain_before_recreate() -> None:
     tasks = load_tasks()
     check_task = next(
-        task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before recreating published ports"
+        task
+        for task in tasks
+        if task.get("name") == "Check whether the Docker nat chain exists before recreating published ports"
     )
     restore_task = next(
         task for task in tasks if task.get("name") == "Restore Docker networking when the nat chain is missing"
@@ -133,17 +133,27 @@ def test_role_uses_classic_builder_for_platform_context_stack_bring_up() -> None
         if task.get("name") == "Build and start the platform context stack and recover stale compose networks"
     )
     build_task = next(
-        task for task in startup_block["block"] if task.get("name") == "Build the platform context API image with host networking"
+        task
+        for task in startup_block["block"]
+        if task.get("name") == "Build the platform context API image with host networking"
     )
     start_task = next(task for task in startup_block["block"] if task.get("name") == "Start the platform context stack")
     assert build_task["ansible.builtin.command"]["argv"][:4] == ["docker", "build", "--network", "host"]
-    assert build_task["ansible.builtin.command"]["argv"][-2:] == ["{{ platform_context_api_image_name }}:latest", "{{ platform_context_service_dir }}"]
+    assert build_task["ansible.builtin.command"]["argv"][-2:] == [
+        "{{ platform_context_api_image_name }}:latest",
+        "{{ platform_context_service_dir }}",
+    ]
     assert build_task["environment"]["DOCKER_BUILDKIT"] == "0"
     assert build_task["environment"]["COMPOSE_DOCKER_CLI_BUILD"] == "0"
     assert "--no-build" in start_task["ansible.builtin.command"]["argv"]
-    assert 'PLATFORM_CONTEXT_CORPUS_ROOT={{ platform_context_corpus_dir }}' in env_contract_task["ansible.builtin.shell"]
-    assert 'PLATFORM_CONTEXT_MEMORY_COLLECTION={{ platform_context_memory_collection }}' in env_contract_task["ansible.builtin.shell"]
-    assert 'PLATFORM_CONTEXT_API_TOKEN=' in env_contract_task["ansible.builtin.shell"]
+    assert (
+        "PLATFORM_CONTEXT_CORPUS_ROOT={{ platform_context_corpus_dir }}" in env_contract_task["ansible.builtin.shell"]
+    )
+    assert (
+        "PLATFORM_CONTEXT_MEMORY_COLLECTION={{ platform_context_memory_collection }}"
+        in env_contract_task["ansible.builtin.shell"]
+    )
+    assert "PLATFORM_CONTEXT_API_TOKEN=" in env_contract_task["ansible.builtin.shell"]
 
 
 def test_compose_template_starts_platform_context_without_openbao_health_gate() -> None:
@@ -174,7 +184,9 @@ def test_role_resets_stale_compose_networks_before_retrying_platform_context_sta
         for task in startup_block["rescue"]
         if task.get("name") == "Retry platform context stack startup after compose-network recovery"
     )
-    assert "failed to create endpoint" in flag_task["ansible.builtin.set_fact"]["platform_context_docker_network_missing"]
+    assert (
+        "failed to create endpoint" in flag_task["ansible.builtin.set_fact"]["platform_context_docker_network_missing"]
+    )
     assert reset_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert "--force-recreate" in retry_task["ansible.builtin.command"]["argv"]
     assert retry_task["when"] == "platform_context_docker_network_missing"
@@ -189,7 +201,12 @@ def test_role_applies_serverclaw_memory_migration() -> None:
     )
     assert apply_task["delegate_to"] == "{{ platform_context_database_inventory_host }}"
     assert apply_task["become_user"] == "postgres"
-    assert apply_task["ansible.builtin.command"]["argv"][:4] == ["psql", "-d", "{{ platform_context_database_name }}", "-v"]
+    assert apply_task["ansible.builtin.command"]["argv"][:4] == [
+        "psql",
+        "-d",
+        "{{ platform_context_database_name }}",
+        "-v",
+    ]
 
 
 def test_role_uses_archive_bundle_for_platform_context_corpus_sync() -> None:
@@ -200,9 +217,7 @@ def test_role_uses_archive_bundle_for_platform_context_corpus_sync() -> None:
         if task.get("name") == "Archive the platform context corpus bundle from the repository workspace"
     )
     unpack_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Unpack the platform context corpus bundle on the runtime host"
+        task for task in tasks if task.get("name") == "Unpack the platform context corpus bundle on the runtime host"
     )
     assert archive_task["delegate_to"] == "localhost"
     assert archive_task["become"] is False
@@ -214,7 +229,8 @@ def test_verify_tasks_repair_degraded_vector_index_from_controller_seed() -> Non
     repair_task = next(
         task
         for task in tasks
-        if task.get("name") == "Repair a degraded platform context vector index with a bounded controller-side seed rebuild"
+        if task.get("name")
+        == "Repair a degraded platform context vector index with a bounded controller-side seed rebuild"
     )
     assert repair_task["delegate_to"] == "localhost"
     assert repair_task["become"] is False

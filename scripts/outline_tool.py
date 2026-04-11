@@ -74,7 +74,7 @@ from pathlib import Path
 from typing import Any
 
 GITHUB_REPO_BASE = "https://github.com/baditaflorin/proxmox_florin_server/blob/main"
-_RELATIVE_LINK_RE = re.compile(r'\[([^\]]+)\]\((?!https?://|mailto:|#)([^)]+)\)')
+_RELATIVE_LINK_RE = re.compile(r"\[([^\]]+)\]\((?!https?://|mailto:|#)([^)]+)\)")
 
 
 def _rewrite_links(content: str) -> str:
@@ -92,6 +92,7 @@ def _rewrite_links(content: str) -> str:
         return f"[{label}]({GITHUB_REPO_BASE}/{href})"
 
     return _RELATIVE_LINK_RE.sub(replace, content)
+
 
 from outline_client import (
     DEFAULT_BASE_URL,
@@ -218,17 +219,19 @@ def _client(args: argparse.Namespace) -> OutlineClient:
 
 def cmd_collection_list(client: OutlineClient, _args: argparse.Namespace) -> None:
     by_name = collections_by_name(client)
-    _ok({
-        "collections": [
-            {
-                "id": v["id"],
-                "name": v["name"],
-                "description": v.get("description", ""),
-                "url": v.get("url", ""),
-            }
-            for v in by_name.values()
-        ]
-    })
+    _ok(
+        {
+            "collections": [
+                {
+                    "id": v["id"],
+                    "name": v["name"],
+                    "description": v.get("description", ""),
+                    "url": v.get("url", ""),
+                }
+                for v in by_name.values()
+            ]
+        }
+    )
 
 
 def cmd_collection_create(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -284,17 +287,19 @@ def _read_content(args: argparse.Namespace) -> str:
 def cmd_document_list(client: OutlineClient, args: argparse.Namespace) -> None:
     collection_id = _require_collection(client, args.collection)
     docs = documents_in_collection(client, collection_id)
-    _ok({
-        "collection": args.collection,
-        "documents": [
-            {
-                "id": d["id"],
-                "title": d.get("title", ""),
-                "url": d.get("url", ""),
-            }
-            for d in docs
-        ],
-    })
+    _ok(
+        {
+            "collection": args.collection,
+            "documents": [
+                {
+                    "id": d["id"],
+                    "title": d.get("title", ""),
+                    "url": d.get("url", ""),
+                }
+                for d in docs
+            ],
+        }
+    )
 
 
 def cmd_document_publish(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -321,13 +326,15 @@ def cmd_document_publish(client: OutlineClient, args: argparse.Namespace) -> Non
         doc = response.get("data", {})
         for dup in matching[1:]:
             client.call("documents.delete", {"id": dup["id"]})
-        _ok({
-            "id": doc_id,
-            "title": args.title,
-            "collection": args.collection,
-            "url": doc.get("url", ""),
-            "outcome": "updated",
-        })
+        _ok(
+            {
+                "id": doc_id,
+                "title": args.title,
+                "collection": args.collection,
+                "url": doc.get("url", ""),
+                "outcome": "updated",
+            }
+        )
     else:
         payload: dict[str, Any] = {
             "collectionId": collection_id,
@@ -339,13 +346,15 @@ def cmd_document_publish(client: OutlineClient, args: argparse.Namespace) -> Non
             payload["parentDocumentId"] = parent_id
         response = client.call("documents.create", payload)
         doc = response.get("data", {})
-        _ok({
-            "id": doc.get("id", ""),
-            "title": args.title,
-            "collection": args.collection,
-            "url": doc.get("url", ""),
-            "outcome": "created",
-        })
+        _ok(
+            {
+                "id": doc.get("id", ""),
+                "title": args.title,
+                "collection": args.collection,
+                "url": doc.get("url", ""),
+                "outcome": "created",
+            }
+        )
 
 
 def cmd_document_get(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -357,13 +366,15 @@ def cmd_document_get(client: OutlineClient, args: argparse.Namespace) -> None:
     doc_id = matching[0]["id"]
     response = client.call("documents.info", {"id": doc_id})
     doc = response.get("data", {})
-    _ok({
-        "id": doc_id,
-        "title": doc.get("title", ""),
-        "text": doc.get("text", ""),
-        "collection": args.collection,
-        "url": doc.get("url", ""),
-    })
+    _ok(
+        {
+            "id": doc_id,
+            "title": doc.get("title", ""),
+            "text": doc.get("text", ""),
+            "collection": args.collection,
+            "url": doc.get("url", ""),
+        }
+    )
 
 
 def cmd_document_delete(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -383,19 +394,21 @@ def cmd_document_search(client: OutlineClient, args: argparse.Namespace) -> None
         payload["collectionId"] = _require_collection(client, collection_name)
     response = client.call("documents.search", payload)
     results = response.get("data", [])
-    _ok({
-        "query": args.query,
-        "results": [
-            {
-                "id": r.get("document", {}).get("id", ""),
-                "title": r.get("document", {}).get("title", ""),
-                "collection_id": r.get("document", {}).get("collectionId", ""),
-                "url": r.get("document", {}).get("url", ""),
-                "context": r.get("context", ""),
-            }
-            for r in results
-        ],
-    })
+    _ok(
+        {
+            "query": args.query,
+            "results": [
+                {
+                    "id": r.get("document", {}).get("id", ""),
+                    "title": r.get("document", {}).get("title", ""),
+                    "collection_id": r.get("document", {}).get("collectionId", ""),
+                    "url": r.get("document", {}).get("url", ""),
+                    "context": r.get("context", ""),
+                }
+                for r in results
+            ],
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -499,27 +512,37 @@ def cmd_receipt_publish(client: OutlineClient, args: argparse.Namespace) -> None
 
     by_name = collections_by_name(client)
     if collection_name not in by_name:
-        response = client.call("collections.create", {
-            "name": collection_name,
-            "description": f"Automated outputs — {collection_name}.",
-            "permission": "read", "sharing": True,
-        })
+        response = client.call(
+            "collections.create",
+            {
+                "name": collection_name,
+                "description": f"Automated outputs — {collection_name}.",
+                "permission": "read",
+                "sharing": True,
+            },
+        )
         collection_id = response["data"]["id"]
     else:
         collection_id = by_name[collection_name]["id"]
 
     matching = [d for d in documents_in_collection(client, collection_id) if d.get("title") == title]
     if matching:
-        client.call("documents.update", {"id": matching[0]["id"], "title": title, "text": content, "publish": True, "done": True})
+        client.call(
+            "documents.update",
+            {"id": matching[0]["id"], "title": title, "text": content, "publish": True, "done": True},
+        )
         _ok({"outcome": "updated", "title": title, "collection": collection_name})
     else:
-        response = client.call("documents.create", {"collectionId": collection_id, "title": title, "text": content, "publish": True})
+        response = client.call(
+            "documents.create", {"collectionId": collection_id, "title": title, "text": content, "publish": True}
+        )
         doc = response.get("data", {})
         _ok({"outcome": "created", "title": title, "collection": collection_name, "url": doc.get("url", "")})
 
 
 def cmd_receipt_backfill(client: OutlineClient, args: argparse.Namespace) -> None:
     import time
+
     receipt_dir = Path(args.receipt_dir)
     collection_name = getattr(args, "collection", None) or _infer_collection_from_path(receipt_dir / "dummy.json")
     receipts = sorted(receipt_dir.glob("*.json"))
@@ -529,11 +552,15 @@ def cmd_receipt_backfill(client: OutlineClient, args: argparse.Namespace) -> Non
 
     by_name = collections_by_name(client)
     if collection_name not in by_name:
-        response = client.call("collections.create", {
-            "name": collection_name,
-            "description": f"Automated outputs — {collection_name}.",
-            "permission": "read", "sharing": True,
-        })
+        response = client.call(
+            "collections.create",
+            {
+                "name": collection_name,
+                "description": f"Automated outputs — {collection_name}.",
+                "permission": "read",
+                "sharing": True,
+            },
+        )
         collection_id = response["data"]["id"]
     else:
         collection_id = by_name[collection_name]["id"]
@@ -545,7 +572,7 @@ def cmd_receipt_backfill(client: OutlineClient, args: argparse.Namespace) -> Non
         title = receipt_path.stem[:100]
         try:
             data = json.loads(receipt_path.read_text(encoding="utf-8"))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             results.append({"title": title, "outcome": "error", "error": str(exc)})
             continue
         content = _receipt_json_to_markdown(data, filename=receipt_path.name)
@@ -553,7 +580,10 @@ def cmd_receipt_backfill(client: OutlineClient, args: argparse.Namespace) -> Non
             if getattr(args, "force", False):
                 matching = [d for d in documents_in_collection(client, collection_id) if d.get("title") == title]
                 if matching:
-                    client.call("documents.update", {"id": matching[0]["id"], "title": title, "text": content, "publish": True, "done": True})
+                    client.call(
+                        "documents.update",
+                        {"id": matching[0]["id"], "title": title, "text": content, "publish": True, "done": True},
+                    )
                     updated += 1
                     results.append({"title": title, "outcome": "updated"})
                     time.sleep(0.4)
@@ -561,14 +591,24 @@ def cmd_receipt_backfill(client: OutlineClient, args: argparse.Namespace) -> Non
                 skipped += 1
                 results.append({"title": title, "outcome": "skipped"})
         else:
-            response = client.call("documents.create", {"collectionId": collection_id, "title": title, "text": content, "publish": True})
+            response = client.call(
+                "documents.create", {"collectionId": collection_id, "title": title, "text": content, "publish": True}
+            )
             doc = response.get("data", {})
             existing_titles.add(title)
             created += 1
             results.append({"title": title, "outcome": "created", "url": doc.get("url", "")})
             time.sleep(0.4)
-    _ok({"backfilled": created + updated, "created": created, "updated": updated, "skipped": skipped,
-         "collection": collection_name, "results": results})
+    _ok(
+        {
+            "backfilled": created + updated,
+            "created": created,
+            "updated": updated,
+            "skipped": skipped,
+            "collection": collection_name,
+            "results": results,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -604,15 +644,22 @@ def cmd_bypass_publish(client: OutlineClient, args: argparse.Namespace) -> None:
         client.call("documents.update", {"id": doc_id, "title": title, "text": content, "publish": True, "done": True})
         _ok({"outcome": "updated", "title": title, "collection": _DEFAULT_BYPASS_COLLECTION})
     else:
-        response = client.call("documents.create", {
-            "collectionId": collection_id, "title": title, "text": content, "publish": True,
-        })
+        response = client.call(
+            "documents.create",
+            {
+                "collectionId": collection_id,
+                "title": title,
+                "text": content,
+                "publish": True,
+            },
+        )
         doc = response.get("data", {})
         _ok({"outcome": "created", "title": title, "collection": _DEFAULT_BYPASS_COLLECTION, "url": doc.get("url", "")})
 
 
 def cmd_bypass_backfill(client: OutlineClient, args: argparse.Namespace) -> None:
     import time
+
     receipt_dir = Path(getattr(args, "receipt_dir", "receipts/gate-bypasses"))
     receipts = sorted(receipt_dir.glob("*.json"))
     if not receipts:
@@ -626,7 +673,7 @@ def cmd_bypass_backfill(client: OutlineClient, args: argparse.Namespace) -> None
         title = receipt_path.stem
         try:
             data = json.loads(receipt_path.read_text(encoding="utf-8"))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             results.append({"title": title, "outcome": "error", "error": str(exc)})
             continue
         content = _receipt_to_markdown(data, filename=receipt_path.name)
@@ -634,7 +681,10 @@ def cmd_bypass_backfill(client: OutlineClient, args: argparse.Namespace) -> None
             if getattr(args, "force", False):
                 matching = [d for d in documents_in_collection(client, collection_id) if d.get("title") == title]
                 if matching:
-                    client.call("documents.update", {"id": matching[0]["id"], "title": title, "text": content, "publish": True, "done": True})
+                    client.call(
+                        "documents.update",
+                        {"id": matching[0]["id"], "title": title, "text": content, "publish": True, "done": True},
+                    )
                     updated += 1
                     results.append({"title": title, "outcome": "updated"})
                     time.sleep(0.4)
@@ -642,22 +692,30 @@ def cmd_bypass_backfill(client: OutlineClient, args: argparse.Namespace) -> None
                 skipped += 1
                 results.append({"title": title, "outcome": "skipped"})
         else:
-            response = client.call("documents.create", {
-                "collectionId": collection_id, "title": title, "text": content, "publish": True,
-            })
+            response = client.call(
+                "documents.create",
+                {
+                    "collectionId": collection_id,
+                    "title": title,
+                    "text": content,
+                    "publish": True,
+                },
+            )
             doc = response.get("data", {})
             existing_titles.add(title)
             created += 1
             results.append({"title": title, "outcome": "created", "url": doc.get("url", "")})
             time.sleep(0.4)
-    _ok({
-        "backfilled": created + updated,
-        "created": created,
-        "updated": updated,
-        "skipped": skipped,
-        "collection": _DEFAULT_BYPASS_COLLECTION,
-        "results": results,
-    })
+    _ok(
+        {
+            "backfilled": created + updated,
+            "created": created,
+            "updated": updated,
+            "skipped": skipped,
+            "collection": _DEFAULT_BYPASS_COLLECTION,
+            "results": results,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -668,6 +726,7 @@ def cmd_bypass_backfill(client: OutlineClient, args: argparse.Namespace) -> None
 def cmd_ci_publish(client: OutlineClient, args: argparse.Namespace) -> None:
     """Publish a CI validation summary to Outline. Used by CI/CD pipelines."""
     import json as _json
+
     lines = [
         f"# CI Validation: {args.title}",
         "",
@@ -701,12 +760,15 @@ def cmd_ci_publish(client: OutlineClient, args: argparse.Namespace) -> None:
         result = client.call("documents.update", {"id": match["id"], "title": title, "text": content, "done": True})
         outcome = "updated"
     else:
-        result = client.call("documents.create", {
-            "collectionId": collection_id,
-            "title": title,
-            "text": content,
-            "publish": True,
-        })
+        result = client.call(
+            "documents.create",
+            {
+                "collectionId": collection_id,
+                "title": title,
+                "text": content,
+                "publish": True,
+            },
+        )
         outcome = "created"
     doc = result.get("data", {})
     print(_json.dumps({"outcome": outcome, "title": title, "url": doc.get("url", "")}, indent=2))
@@ -724,9 +786,7 @@ def cmd_changelog_push(client: OutlineClient, args: argparse.Namespace) -> None:
     else:
         default_changelog = Path(__file__).resolve().parents[1] / "changelog.md"
         if not default_changelog.exists():
-            raise OutlineError(
-                f"changelog.md not found at {default_changelog}; pass --file PATH to specify one"
-            )
+            raise OutlineError(f"changelog.md not found at {default_changelog}; pass --file PATH to specify one")
         content = default_changelog.read_text(encoding="utf-8")
 
     content = _rewrite_links(content)
@@ -764,12 +824,14 @@ def cmd_changelog_push(client: OutlineClient, args: argparse.Namespace) -> None:
             {"collectionId": collection_id, "title": title, "text": content, "publish": True},
         )
         doc = response.get("data", {})
-        _ok({
-            "outcome": "created",
-            "title": title,
-            "collection": collection_name,
-            "url": doc.get("url", ""),
-        })
+        _ok(
+            {
+                "outcome": "created",
+                "title": title,
+                "collection": collection_name,
+                "url": doc.get("url", ""),
+            }
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -795,9 +857,7 @@ def _resolve_user(client: OutlineClient, identifier: str) -> dict[str, Any]:
     by_name = _users_by_name(client)
     if identifier in by_name:
         return by_name[identifier]
-    raise OutlineError(
-        f"user not found: {identifier!r} — pass email address or exact display name"
-    )
+    raise OutlineError(f"user not found: {identifier!r} — pass email address or exact display name")
 
 
 def _groups_by_name(client: OutlineClient) -> dict[str, dict[str, Any]]:
@@ -813,18 +873,20 @@ def _groups_by_name(client: OutlineClient) -> dict[str, dict[str, Any]]:
 def cmd_user_list(client: OutlineClient, _args: argparse.Namespace) -> None:
     response = client.call("users.list", {})
     users = response.get("data", [])
-    _ok({
-        "users": [
-            {
-                "id": u["id"],
-                "name": u.get("name", ""),
-                "email": u.get("email", ""),
-                "role": u.get("role", ""),
-                "isActive": u.get("isSuspended") is False,
-            }
-            for u in users
-        ]
-    })
+    _ok(
+        {
+            "users": [
+                {
+                    "id": u["id"],
+                    "name": u.get("name", ""),
+                    "email": u.get("email", ""),
+                    "role": u.get("role", ""),
+                    "isActive": u.get("isSuspended") is False,
+                }
+                for u in users
+            ]
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -838,17 +900,23 @@ def cmd_collection_members(client: OutlineClient, args: argparse.Namespace) -> N
     memberships = response.get("data", {})
     users = memberships.get("users", [])
     groups = memberships.get("groups", [])
-    _ok({
-        "collection": args.collection,
-        "users": [
-            {"id": u["id"], "name": u.get("name", ""), "email": u.get("email", ""), "permission": u.get("permission", "")}
-            for u in users
-        ],
-        "groups": [
-            {"id": g["id"], "name": g.get("name", ""), "permission": g.get("permission", "")}
-            for g in groups
-        ],
-    })
+    _ok(
+        {
+            "collection": args.collection,
+            "users": [
+                {
+                    "id": u["id"],
+                    "name": u.get("name", ""),
+                    "email": u.get("email", ""),
+                    "permission": u.get("permission", ""),
+                }
+                for u in users
+            ],
+            "groups": [
+                {"id": g["id"], "name": g.get("name", ""), "permission": g.get("permission", "")} for g in groups
+            ],
+        }
+    )
 
 
 def cmd_collection_grant(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -859,23 +927,27 @@ def cmd_collection_grant(client: OutlineClient, args: argparse.Namespace) -> Non
         "collections.addUser",
         {"id": collection_id, "userId": user["id"], "permission": permission},
     )
-    _ok({
-        "granted": True,
-        "collection": args.collection,
-        "user": user.get("email", user.get("name", "")),
-        "permission": permission,
-    })
+    _ok(
+        {
+            "granted": True,
+            "collection": args.collection,
+            "user": user.get("email", user.get("name", "")),
+            "permission": permission,
+        }
+    )
 
 
 def cmd_collection_revoke(client: OutlineClient, args: argparse.Namespace) -> None:
     collection_id = _require_collection(client, args.collection)
     user = _resolve_user(client, args.user)
     client.call("collections.removeUser", {"id": collection_id, "userId": user["id"]})
-    _ok({
-        "revoked": True,
-        "collection": args.collection,
-        "user": user.get("email", user.get("name", "")),
-    })
+    _ok(
+        {
+            "revoked": True,
+            "collection": args.collection,
+            "user": user.get("email", user.get("name", "")),
+        }
+    )
 
 
 def cmd_collection_grant_group(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -889,12 +961,14 @@ def cmd_collection_grant_group(client: OutlineClient, args: argparse.Namespace) 
         "collections.addGroup",
         {"id": collection_id, "groupId": group["id"], "permission": permission},
     )
-    _ok({
-        "granted": True,
-        "collection": args.collection,
-        "group": args.group,
-        "permission": permission,
-    })
+    _ok(
+        {
+            "granted": True,
+            "collection": args.collection,
+            "group": args.group,
+            "permission": permission,
+        }
+    )
 
 
 def cmd_collection_revoke_group(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -915,12 +989,9 @@ def cmd_collection_revoke_group(client: OutlineClient, args: argparse.Namespace)
 def cmd_group_list(client: OutlineClient, _args: argparse.Namespace) -> None:
     response = client.call("groups.list", {})
     groups = response.get("data", [])
-    _ok({
-        "groups": [
-            {"id": g["id"], "name": g.get("name", ""), "memberCount": g.get("memberCount", 0)}
-            for g in groups
-        ]
-    })
+    _ok(
+        {"groups": [{"id": g["id"], "name": g.get("name", ""), "memberCount": g.get("memberCount", 0)} for g in groups]}
+    )
 
 
 def cmd_group_create(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -949,10 +1020,12 @@ def cmd_group_members(client: OutlineClient, args: argparse.Namespace) -> None:
     group_id = groups[args.group]["id"]
     response = client.call("groups.memberships", {"id": group_id})
     users = response.get("data", {}).get("users", [])
-    _ok({
-        "group": args.group,
-        "members": [{"id": u["id"], "name": u.get("name", ""), "email": u.get("email", "")} for u in users],
-    })
+    _ok(
+        {
+            "group": args.group,
+            "members": [{"id": u["id"], "name": u.get("name", ""), "email": u.get("email", "")} for u in users],
+        }
+    )
 
 
 def cmd_group_add_user(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -961,11 +1034,13 @@ def cmd_group_add_user(client: OutlineClient, args: argparse.Namespace) -> None:
         raise OutlineError(f"group not found: {args.group!r}")
     user = _resolve_user(client, args.user)
     client.call("groups.addUser", {"id": groups[args.group]["id"], "userId": user["id"]})
-    _ok({
-        "added": True,
-        "group": args.group,
-        "user": user.get("email", user.get("name", "")),
-    })
+    _ok(
+        {
+            "added": True,
+            "group": args.group,
+            "user": user.get("email", user.get("name", "")),
+        }
+    )
 
 
 def cmd_group_remove_user(client: OutlineClient, args: argparse.Namespace) -> None:
@@ -974,11 +1049,13 @@ def cmd_group_remove_user(client: OutlineClient, args: argparse.Namespace) -> No
         raise OutlineError(f"group not found: {args.group!r}")
     user = _resolve_user(client, args.user)
     client.call("groups.removeUser", {"id": groups[args.group]["id"], "userId": user["id"]})
-    _ok({
-        "removed": True,
-        "group": args.group,
-        "user": user.get("email", user.get("name", "")),
-    })
+    _ok(
+        {
+            "removed": True,
+            "group": args.group,
+            "user": user.get("email", user.get("name", "")),
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1032,7 +1109,9 @@ def build_parser() -> argparse.ArgumentParser:
     content_group = p.add_mutually_exclusive_group(required=True)
     content_group.add_argument("--file", metavar="PATH", help="Read content from this file")
     content_group.add_argument("--stdin", action="store_true", help="Read content from stdin")
-    p.add_argument("--rewrite-links", action="store_true", help="Rewrite relative markdown links to absolute GitHub URLs")
+    p.add_argument(
+        "--rewrite-links", action="store_true", help="Rewrite relative markdown links to absolute GitHub URLs"
+    )
 
     # document.get
     p = sub.add_parser("document.get", help="Retrieve a document's full text.")
@@ -1060,21 +1139,29 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--title", default=None, help="Document title (defaults to filename stem)")
 
     # receipt.backfill
-    p = sub.add_parser("receipt.backfill", help="Upload all JSON receipts from a directory to the appropriate collection.")
+    p = sub.add_parser(
+        "receipt.backfill", help="Upload all JSON receipts from a directory to the appropriate collection."
+    )
     _add_auth_args(p)
     p.add_argument("--receipt-dir", required=True, metavar="DIR", help="Directory containing receipt JSON files")
     p.add_argument("--collection", default=None, help="Target collection (auto-detected from dir name if omitted)")
     p.add_argument("--force", action="store_true", help="Re-upload receipts that already exist in the wiki")
 
     # bypass.publish
-    p = sub.add_parser("bypass.publish", help=f"Publish one bypass receipt JSON to the '{_DEFAULT_BYPASS_COLLECTION}' collection.")
+    p = sub.add_parser(
+        "bypass.publish", help=f"Publish one bypass receipt JSON to the '{_DEFAULT_BYPASS_COLLECTION}' collection."
+    )
     _add_auth_args(p)
     p.add_argument("--file", required=True, metavar="PATH", help="Path to the receipt .json file")
 
     # bypass.backfill
-    p = sub.add_parser("bypass.backfill", help=f"Upload all bypass receipts to the '{_DEFAULT_BYPASS_COLLECTION}' collection.")
+    p = sub.add_parser(
+        "bypass.backfill", help=f"Upload all bypass receipts to the '{_DEFAULT_BYPASS_COLLECTION}' collection."
+    )
     _add_auth_args(p)
-    p.add_argument("--receipt-dir", default="receipts/gate-bypasses", metavar="DIR", help="Directory containing receipt JSON files")
+    p.add_argument(
+        "--receipt-dir", default="receipts/gate-bypasses", metavar="DIR", help="Directory containing receipt JSON files"
+    )
     p.add_argument("--force", action="store_true", help="Re-upload receipts that already exist in the wiki")
 
     # ci.publish
@@ -1108,7 +1195,9 @@ def build_parser() -> argparse.ArgumentParser:
     _add_auth_args(p)
     p.add_argument("--collection", required=True, help="Collection name")
     p.add_argument("--user", required=True, metavar="EMAIL_OR_NAME", help="User email or display name")
-    p.add_argument("--permission", default="read", choices=["read", "read_write"], help="Permission level (default: read)")
+    p.add_argument(
+        "--permission", default="read", choices=["read", "read_write"], help="Permission level (default: read)"
+    )
 
     # collection.revoke
     p = sub.add_parser("collection.revoke", help="Revoke a user's access to a collection.")
@@ -1121,7 +1210,9 @@ def build_parser() -> argparse.ArgumentParser:
     _add_auth_args(p)
     p.add_argument("--collection", required=True, help="Collection name")
     p.add_argument("--group", required=True, help="Group name")
-    p.add_argument("--permission", default="read", choices=["read", "read_write"], help="Permission level (default: read)")
+    p.add_argument(
+        "--permission", default="read", choices=["read", "read_write"], help="Permission level (default: read)"
+    )
 
     # collection.revoke-group
     p = sub.add_parser("collection.revoke-group", help="Revoke a group's access to a collection.")
@@ -1207,7 +1298,7 @@ def main(argv: list[str] | None = None) -> int:
     except OutlineError as exc:
         _err(str(exc))
         return 1
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         _err(f"unexpected error: {exc}")
         return 1
 

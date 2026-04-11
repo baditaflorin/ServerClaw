@@ -167,12 +167,14 @@ def _chunks_python(text: str, file_path: str) -> list[dict[str, Any]]:
     if not boundaries:
         # No clear structure — plain chunks
         for seg in _split_plain_text(text):
-            chunks.append({
-                "chunk_type": "module",
-                "chunk_name": file_path.rsplit("/", 1)[-1],
-                "start_line": 0,
-                "text": seg,
-            })
+            chunks.append(
+                {
+                    "chunk_type": "module",
+                    "chunk_name": file_path.rsplit("/", 1)[-1],
+                    "start_line": 0,
+                    "text": seg,
+                }
+            )
         return chunks
 
     # Extract blocks between boundaries
@@ -186,30 +188,36 @@ def _chunks_python(text: str, file_path: str) -> list[dict[str, Any]]:
     if first_boundary > 0:
         header = "".join(lines[:first_boundary]).strip()
         if header:
-            chunks.append({
-                "chunk_type": "module_header",
-                "chunk_name": "module:" + file_path.rsplit("/", 1)[-1],
-                "start_line": 0,
-                "text": header[:CHUNK_MAX_CHARS],
-            })
+            chunks.append(
+                {
+                    "chunk_type": "module_header",
+                    "chunk_name": "module:" + file_path.rsplit("/", 1)[-1],
+                    "start_line": 0,
+                    "text": header[:CHUNK_MAX_CHARS],
+                }
+            )
 
     for start_line, end_line, name in ranges:
         block = "".join(lines[start_line:end_line]).strip()
         if len(block) > CHUNK_MAX_CHARS:
             for seg in _split_plain_text(block):
-                chunks.append({
+                chunks.append(
+                    {
+                        "chunk_type": "function" if "def " in lines[start_line] else "class",
+                        "chunk_name": name,
+                        "start_line": start_line + 1,
+                        "text": seg,
+                    }
+                )
+        elif len(block) > 40:
+            chunks.append(
+                {
                     "chunk_type": "function" if "def " in lines[start_line] else "class",
                     "chunk_name": name,
                     "start_line": start_line + 1,
-                    "text": seg,
-                })
-        elif len(block) > 40:
-            chunks.append({
-                "chunk_type": "function" if "def " in lines[start_line] else "class",
-                "chunk_name": name,
-                "start_line": start_line + 1,
-                "text": block,
-            })
+                    "text": block,
+                }
+            )
 
     return chunks
 
@@ -259,7 +267,9 @@ def _chunks_yaml(text: str, file_path: str) -> list[dict[str, Any]]:
         # parts: [pre, name1, body1, name2, body2, ...]
         pre = parts[0].strip()
         if pre and len(pre) > 40:
-            chunks.append({"chunk_type": "yaml_header", "chunk_name": "header", "start_line": 0, "text": pre[:CHUNK_MAX_CHARS]})
+            chunks.append(
+                {"chunk_type": "yaml_header", "chunk_name": "header", "start_line": 0, "text": pre[:CHUNK_MAX_CHARS]}
+            )
         i = 1
         while i < len(parts) - 1:
             name = parts[i].strip()
@@ -273,7 +283,9 @@ def _chunks_yaml(text: str, file_path: str) -> list[dict[str, Any]]:
             i += 2
     else:
         for seg in _split_plain_text(text):
-            chunks.append({"chunk_type": "yaml", "chunk_name": file_path.rsplit("/", 1)[-1], "start_line": 0, "text": seg})
+            chunks.append(
+                {"chunk_type": "yaml", "chunk_name": file_path.rsplit("/", 1)[-1], "start_line": 0, "text": seg}
+            )
 
     return chunks
 
@@ -282,12 +294,14 @@ def _chunks_generic(text: str, file_path: str, chunk_type: str) -> list[dict[str
     """Generic plain-text chunking for JSON, HTML, Jinja2, etc."""
     chunks = []
     for seg in _split_plain_text(text):
-        chunks.append({
-            "chunk_type": chunk_type,
-            "chunk_name": file_path.rsplit("/", 1)[-1],
-            "start_line": 0,
-            "text": seg,
-        })
+        chunks.append(
+            {
+                "chunk_type": chunk_type,
+                "chunk_name": file_path.rsplit("/", 1)[-1],
+                "start_line": 0,
+                "text": seg,
+            }
+        )
     return chunks
 
 
@@ -362,16 +376,18 @@ def build_chunks(repo_root: Path) -> list[dict[str, Any]]:
             if chunk_id in seen_ids:
                 continue
             seen_ids.add(chunk_id)
-            all_chunks.append({
-                "id": chunk_id,
-                "text": chunk_text,
-                "file_path": rel,
-                "language": lang,
-                "document_kind": kind,
-                "chunk_type": rc.get("chunk_type", "block"),
-                "chunk_name": rc.get("chunk_name", ""),
-                "start_line": rc.get("start_line", 0),
-            })
+            all_chunks.append(
+                {
+                    "id": chunk_id,
+                    "text": chunk_text,
+                    "file_path": rel,
+                    "language": lang,
+                    "document_kind": kind,
+                    "chunk_type": rc.get("chunk_type", "block"),
+                    "chunk_name": rc.get("chunk_name", ""),
+                    "start_line": rc.get("start_line", 0),
+                }
+            )
 
     return all_chunks
 

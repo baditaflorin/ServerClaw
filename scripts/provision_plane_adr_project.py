@@ -23,7 +23,6 @@ Exit codes:
 
 import os
 import sys
-import json
 import argparse
 from pathlib import Path
 from typing import Optional
@@ -118,7 +117,7 @@ PLANE_WORKSPACE_SLUG={workspace_slug}
         output_path.chmod(0o600)
 
         print(f"\n[✓] Credentials saved to {output_file}")
-        print(f"[!] File permissions: 0o600 (owner read-write only)")
+        print("[!] File permissions: 0o600 (owner read-write only)")
 
     return {
         "project_id": project_id,
@@ -171,8 +170,8 @@ def main():
     if args.dry_run:
         print("[DRY-RUN] Would provision:")
         print(f"  Workspace: {args.workspace_slug}")
-        print(f"  Project: adr-index (Architecture Decisions)")
-        print(f"  API Token: (would create)")
+        print("  Project: adr-index (Architecture Decisions)")
+        print("  API Token: (would create)")
         print(f"  Output: {args.output_file}")
         return 0
 
@@ -189,8 +188,8 @@ def main():
         print("=" * 60)
         print("\nNext steps:")
         print(f"  1. Source the credentials: source {args.output_file}")
-        print(f"  2. Sync ADRs to Plane: make sync-adrs-to-plane")
-        print(f"  3. Verify in Plane: Check project 'Architecture Decisions'")
+        print("  2. Sync ADRs to Plane: make sync-adrs-to-plane")
+        print("  3. Verify in Plane: Check project 'Architecture Decisions'")
         print()
 
         return 0
@@ -198,6 +197,7 @@ def main():
     except Exception as e:
         print(f"\n[✗] Provisioning failed: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         return 1
 

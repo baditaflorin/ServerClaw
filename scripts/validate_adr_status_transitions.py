@@ -26,13 +26,12 @@ Exit codes:
   2 = error running validator
 """
 
-import os
 import re
 import sys
 import subprocess
 import yaml
 from pathlib import Path
-from typing import Dict, Tuple, List, Optional
+from typing import Optional
 
 
 # ADR status hierarchy: lower tier values are "lower" in the stack
@@ -47,7 +46,7 @@ ADR_DIR = Path("docs/adr")
 INDEX_PATH = Path("docs/adr/.index.yaml")
 
 
-def get_staged_files() -> List[str]:
+def get_staged_files() -> list[str]:
     """Get list of staged files from git."""
     try:
         result = subprocess.run(
@@ -63,7 +62,7 @@ def get_staged_files() -> List[str]:
         return []
 
 
-def get_files_from_push() -> List[str]:
+def get_files_from_push() -> list[str]:
     """
     Get list of files being pushed from stdin (pre-push hook format).
 
@@ -74,6 +73,7 @@ def get_files_from_push() -> List[str]:
     """
     try:
         import sys
+
         # Only try to read stdin if it's not a terminal (i.e., we're in a hook context)
         if sys.stdin.isatty():
             return []
@@ -118,7 +118,7 @@ def get_files_from_push() -> List[str]:
                 all_files.update(f for f in files if f)
 
         return list(all_files)
-    except Exception as e:
+    except Exception:
         # If anything fails, silently return empty list and fall back to staged files
         return []
 
@@ -129,7 +129,7 @@ def get_adr_number_from_path(path: str) -> Optional[str]:
     return match.group(1) if match else None
 
 
-def parse_adr_frontmatter(adr_path: Path) -> Dict[str, str]:
+def parse_adr_frontmatter(adr_path: Path) -> dict[str, str]:
     """Parse ADR markdown frontmatter (Status, Implementation Status fields)."""
     try:
         with open(adr_path) as f:
@@ -151,7 +151,7 @@ def parse_adr_frontmatter(adr_path: Path) -> Dict[str, str]:
         return {}
 
 
-def get_adr_from_index(adr_num: str) -> Optional[Dict]:
+def get_adr_from_index(adr_num: str) -> Optional[dict]:
     """Load ADR metadata from docs/adr/.index.yaml."""
     try:
         if not INDEX_PATH.exists():
@@ -173,7 +173,7 @@ def get_adr_from_index(adr_num: str) -> Optional[Dict]:
         return None
 
 
-def get_git_evidence_for_adr(adr_num: str, days_back: int = 180) -> Tuple[List[str], int]:
+def get_git_evidence_for_adr(adr_num: str, days_back: int = 180) -> tuple[list[str], int]:
     """
     Search git history for commits mentioning this ADR.
 
@@ -184,9 +184,9 @@ def get_git_evidence_for_adr(adr_num: str, days_back: int = 180) -> Tuple[List[s
         date_since = f"--since={days_back}.days.ago"
         # Try multiple patterns to catch different naming conventions
         patterns = [
-            f"ADR.{adr_num}",     # "ADR-0025" or "ADR 0025"
-            f"adr-{adr_num}",     # "adr-0025"
-            f"0{adr_num}",        # "00025" (bare number)
+            f"ADR.{adr_num}",  # "ADR-0025" or "ADR 0025"
+            f"adr-{adr_num}",  # "adr-0025"
+            f"0{adr_num}",  # "00025" (bare number)
         ]
 
         all_commits = set()  # Use set to avoid duplicates
@@ -258,7 +258,7 @@ def validate_adr_status_transition(
     old_status: str,
     new_status: str,
     commit_msg: str = "",
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """
     Validate a single ADR status transition.
 
@@ -297,7 +297,10 @@ def validate_adr_status_transition(
         # Require explicit reason in commit message
         if not commit_msg:
             # Pre-push hook: we don't have commit message yet, warn
-            return True, f"WARNING: ADR {adr_num} status downgrade detected. Please provide ADR-STATUS-CHANGE-REASON in commit message."
+            return (
+                True,
+                f"WARNING: ADR {adr_num} status downgrade detected. Please provide ADR-STATUS-CHANGE-REASON in commit message.",
+            )
 
         # Check for required reason comment
         if "ADR-STATUS-CHANGE-REASON:" not in commit_msg:
@@ -312,7 +315,7 @@ def validate_adr_status_transition(
     return True, ""
 
 
-def check_index_validity() -> Tuple[bool, List[str]]:
+def check_index_validity() -> tuple[bool, list[str]]:
     """
     Verify that docs/adr/.index.yaml is current.
 
@@ -345,6 +348,7 @@ def main() -> int:
     # Determine if we're in pre-push hook context (stdin has refs) or pre-commit context
     # In pre-push hook, stdin contains: <local-ref> <local-oid> <remote-ref> <remote-oid>
     import sys
+
     push_files = get_files_from_push()
     if push_files:
         # We got files from stdin (pre-push hook mode)

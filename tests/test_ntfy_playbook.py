@@ -7,8 +7,12 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "ntfy.yml"
 SERVICE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "ntfy.yml"
-COLLECTION_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "ntfy.yml"
-COLLECTION_SERVICE_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "ntfy.yml"
+COLLECTION_PLAYBOOK_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "ntfy.yml"
+)
+COLLECTION_SERVICE_PLAYBOOK_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "ntfy.yml"
+)
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
@@ -45,8 +49,14 @@ def test_ntfy_service_wrappers_import_root_playbook_with_metadata() -> None:
     root_wrapper_text = SERVICE_PLAYBOOK_PATH.read_text()
     collection_wrapper_text = COLLECTION_SERVICE_PLAYBOOK_PATH.read_text()
 
-    assert "# Purpose: Provide a leaf service import for ntfy so governed live-apply automation can target the notification channel directly." in root_wrapper_text
-    assert "# Purpose: Provide a leaf service import for ntfy so governed live-apply automation can target the notification channel directly." in collection_wrapper_text
+    assert (
+        "# Purpose: Provide a leaf service import for ntfy so governed live-apply automation can target the notification channel directly."
+        in root_wrapper_text
+    )
+    assert (
+        "# Purpose: Provide a leaf service import for ntfy so governed live-apply automation can target the notification channel directly."
+        in collection_wrapper_text
+    )
     assert yaml.safe_load(SERVICE_PLAYBOOK_PATH.read_text()) == [{"import_playbook": "../ntfy.yml"}]
     assert yaml.safe_load(COLLECTION_SERVICE_PLAYBOOK_PATH.read_text()) == [{"import_playbook": "../ntfy.yml"}]
     assert COLLECTION_PLAYBOOK_PATH.exists()
@@ -60,10 +70,12 @@ def test_ntfy_workflow_command_and_scope_catalog_entries_exist() -> None:
     assert command_catalog["commands"]["converge-ntfy"]["workflow_id"] == "converge-ntfy"
     assert command_catalog["commands"]["converge-ntfy"]["approval_policy"] == "sensitive_live_change"
     assert any(
-        item["name"] == "hetzner_dns_api_token"
-        for item in command_catalog["commands"]["converge-ntfy"]["inputs"]
+        item["name"] == "hetzner_dns_api_token" for item in command_catalog["commands"]["converge-ntfy"]["inputs"]
     )
-    assert workflow_catalog["workflows"]["converge-ntfy"]["preferred_entrypoint"]["command"] == "HETZNER_DNS_API_TOKEN=... make converge-ntfy"
+    assert (
+        workflow_catalog["workflows"]["converge-ntfy"]["preferred_entrypoint"]["command"]
+        == "HETZNER_DNS_API_TOKEN=... make converge-ntfy"
+    )
     assert workflow_catalog["workflows"]["converge-ntfy"]["owner_runbook"] == "docs/runbooks/configure-ntfy.md"
     assert execution_scopes["playbooks"]["playbooks/ntfy.yml"] == {
         "playbook_id": "ntfy",
@@ -119,9 +131,7 @@ def test_ntfy_dependency_wave_metadata_locks_the_runtime_vm_and_shared_edge() ->
 def test_ntfy_public_hostname_is_present_in_the_certificate_catalog() -> None:
     certificates = json.loads(CERTIFICATE_CATALOG_PATH.read_text())["certificates"]
     ntfy_certificate = next(
-        certificate
-        for certificate in certificates
-        if certificate["endpoint"]["host"] == "ntfy.lv3.org"
+        certificate for certificate in certificates if certificate["endpoint"]["host"] == "ntfy.lv3.org"
     )
 
     assert ntfy_certificate["id"] == "ntfy-edge"

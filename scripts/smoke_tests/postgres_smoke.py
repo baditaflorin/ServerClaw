@@ -46,12 +46,9 @@ def run_smoke_tests(
 
     for database in databases:
         table_count = execute_command(
-            "sudo -u postgres psql"
-            f" -d {database} -Atqc \"SELECT count(*) FROM information_schema.tables\""
+            f'sudo -u postgres psql -d {database} -Atqc "SELECT count(*) FROM information_schema.tables"'
         )
-        dump_check = execute_command(
-            f"sudo -u postgres pg_dump --schema-only -d {database} >/dev/null"
-        )
+        dump_check = execute_command(f"sudo -u postgres pg_dump --schema-only -d {database} >/dev/null")
 
         if table_count.returncode == 0 and dump_check.returncode == 0:
             results.append(

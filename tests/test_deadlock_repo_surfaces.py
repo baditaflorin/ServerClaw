@@ -10,7 +10,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def test_windmill_defaults_seed_deadlock_detector_script_and_schedule() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
     schedule_map = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}

@@ -96,10 +96,7 @@ def _cmd_reconcile_all(args: argparse.Namespace) -> int:
         detail = r.get("error") or "success"
         _summary(f"  [{status}] {r['portal']}: {detail}")
 
-    _summary(
-        f"Reconciliation complete: {result['portals_regenerated']} succeeded, "
-        f"{result['portals_failed']} failed."
-    )
+    _summary(f"Reconciliation complete: {result['portals_regenerated']} succeeded, {result['portals_failed']} failed.")
 
     _emit(result)
     return 0 if result["portals_failed"] == 0 else 1

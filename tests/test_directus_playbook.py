@@ -7,8 +7,12 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "directus.yml"
 SERVICE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "directus.yml"
-COLLECTION_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "directus.yml"
-COLLECTION_SERVICE_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "directus.yml"
+COLLECTION_PLAYBOOK_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "directus.yml"
+)
+COLLECTION_SERVICE_PLAYBOOK_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "directus.yml"
+)
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
@@ -45,7 +49,9 @@ def test_directus_service_wrappers_import_root_playbook_with_metadata() -> None:
     collection_wrapper_text = COLLECTION_SERVICE_PLAYBOOK_PATH.read_text()
 
     assert "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Directus." in root_wrapper_text
-    assert "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Directus." in collection_wrapper_text
+    assert (
+        "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Directus." in collection_wrapper_text
+    )
     assert yaml.safe_load(SERVICE_PLAYBOOK_PATH.read_text()) == [{"import_playbook": "../directus.yml"}]
     assert yaml.safe_load(COLLECTION_SERVICE_PLAYBOOK_PATH.read_text()) == [{"import_playbook": "../directus.yml"}]
     assert COLLECTION_PLAYBOOK_PATH.exists()

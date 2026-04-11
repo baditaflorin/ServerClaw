@@ -5,13 +5,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COLLECTION_PLAYBOOK = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "playbooks"
-    / "redpanda.yml"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "redpanda.yml"
 )
 ROOT_PLAYBOOK = REPO_ROOT / "playbooks" / "redpanda.yml"
 SERVICE_PLAYBOOK = REPO_ROOT / "playbooks" / "services" / "redpanda.yml"
@@ -21,7 +15,10 @@ def test_root_playbook_targets_runtime_host_and_roles() -> None:
     plays = yaml.safe_load(ROOT_PLAYBOOK.read_text())
     play = plays[0]
 
-    assert play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    assert (
+        play["hosts"]
+        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    )
     assert play["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},
         {"role": "lv3.platform.docker_runtime"},
@@ -47,7 +44,9 @@ def test_host_network_policy_allows_private_redpanda_ports() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
 
-    management_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "management" and 9092 in rule["ports"])
+    management_rule = next(
+        rule for rule in docker_runtime_rules if rule["source"] == "management" and 9092 in rule["ports"]
+    )
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 9092 in rule["ports"])
 
     assert 9644 in management_rule["ports"]

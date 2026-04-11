@@ -21,7 +21,9 @@ def test_defaults_define_metadata_schema_reader_role_and_catalog_paths() -> None
     assert defaults["superset_database_user"] == "superset"
     assert defaults["superset_reader_user"] == "superset_reader"
     assert defaults["superset_postgres_secret_dir"] == "/etc/lv3/superset"
-    assert defaults["superset_database_password_local_file"] == "{{ superset_local_artifact_dir }}/database-password.txt"
+    assert (
+        defaults["superset_database_password_local_file"] == "{{ superset_local_artifact_dir }}/database-password.txt"
+    )
     assert defaults["superset_reader_password_local_file"] == "{{ superset_local_artifact_dir }}/reader-password.txt"
     assert (
         defaults["superset_postgres_database_catalog_local_file"]
@@ -52,12 +54,34 @@ def test_tasks_create_roles_schema_and_database_catalog() -> None:
     assert "Ensure the Superset reader inherits the cluster-wide read-all-data capability" in names
     assert "Persist the Superset PostgreSQL database catalog on the control machine" in names
 
-    schema_task = next(task for task in tasks if task["name"] == "Ensure the Superset metadata database is reachable and the schema exists")
-    assert "CREATE SCHEMA IF NOT EXISTS {{ superset_database_schema }}" in schema_task["ansible.builtin.command"]["argv"][-1]
+    schema_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Ensure the Superset metadata database is reachable and the schema exists"
+    )
+    assert (
+        "CREATE SCHEMA IF NOT EXISTS {{ superset_database_schema }}"
+        in schema_task["ansible.builtin.command"]["argv"][-1]
+    )
 
-    search_path_task = next(task for task in tasks if task["name"] == "Ensure the Superset metadata role defaults to the managed schema")
-    assert "ALTER ROLE {{ superset_database_user }} IN DATABASE {{ superset_database_name }}" in search_path_task["ansible.builtin.command"]["argv"][-1]
-    assert "SET search_path TO {{ superset_database_schema }}, public" in search_path_task["ansible.builtin.command"]["argv"][-1]
+    search_path_task = next(
+        task for task in tasks if task["name"] == "Ensure the Superset metadata role defaults to the managed schema"
+    )
+    assert (
+        "ALTER ROLE {{ superset_database_user }} IN DATABASE {{ superset_database_name }}"
+        in search_path_task["ansible.builtin.command"]["argv"][-1]
+    )
+    assert (
+        "SET search_path TO {{ superset_database_schema }}, public"
+        in search_path_task["ansible.builtin.command"]["argv"][-1]
+    )
 
-    reader_grant_task = next(task for task in tasks if task["name"] == "Ensure the Superset reader inherits the cluster-wide read-all-data capability")
-    assert reader_grant_task["ansible.builtin.command"]["argv"][-1] == "GRANT pg_read_all_data TO {{ superset_reader_user }}"
+    reader_grant_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Ensure the Superset reader inherits the cluster-wide read-all-data capability"
+    )
+    assert (
+        reader_grant_task["ansible.builtin.command"]["argv"][-1]
+        == "GRANT pg_read_all_data TO {{ superset_reader_user }}"
+    )

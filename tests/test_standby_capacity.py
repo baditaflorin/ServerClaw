@@ -165,9 +165,7 @@ def test_standby_rejects_namespace_and_data_path_conflicts(tmp_path: Path, monke
     )
     service = postgres_service()
     service["redundancy"]["standby"]["placement"]["standby_namespace"] = "guest:postgres-lv3:patroni"
-    service["redundancy"]["standby"]["placement"]["standby_data_paths"] = [
-        "guest:postgres-lv3:/var/lib/postgresql"
-    ]
+    service["redundancy"]["standby"]["placement"]["standby_data_paths"] = ["guest:postgres-lv3:/var/lib/postgresql"]
     model_path = write_capacity_model(
         tmp_path / "capacity-model.json",
         host=base_host(),

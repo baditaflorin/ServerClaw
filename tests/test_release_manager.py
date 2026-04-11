@@ -198,10 +198,20 @@ workstreams:
     monkeypatch.setattr(release_manager, "CHANGELOG_PATH", tmp_path / "changelog.md")
     monkeypatch.setattr(release_manager, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
     monkeypatch.setattr(gate_bypass_waivers, "REPO_ROOT", tmp_path)
-    monkeypatch.setattr(gate_bypass_waivers, "DEFAULT_CATALOG_PATH", tmp_path / "config" / "gate-bypass-waiver-catalog.json")
+    monkeypatch.setattr(
+        gate_bypass_waivers, "DEFAULT_CATALOG_PATH", tmp_path / "config" / "gate-bypass-waiver-catalog.json"
+    )
     monkeypatch.setattr(gate_bypass_waivers, "DEFAULT_RECEIPT_DIR", tmp_path / "receipts" / "gate-bypasses")
-    monkeypatch.setattr(gate_bypass_waivers, "CATALOG_SCHEMA_PATH", tmp_path / "docs" / "schema" / "gate-bypass-waiver-catalog.schema.json")
-    monkeypatch.setattr(gate_bypass_waivers, "RECEIPT_SCHEMA_PATH", tmp_path / "docs" / "schema" / "gate-bypass-waiver-receipt.schema.json")
+    monkeypatch.setattr(
+        gate_bypass_waivers,
+        "CATALOG_SCHEMA_PATH",
+        tmp_path / "docs" / "schema" / "gate-bypass-waiver-catalog.schema.json",
+    )
+    monkeypatch.setattr(
+        gate_bypass_waivers,
+        "RECEIPT_SCHEMA_PATH",
+        tmp_path / "docs" / "schema" / "gate-bypass-waiver-receipt.schema.json",
+    )
     monkeypatch.setattr(canonical_truth, "infer_release_bump", lambda: "patch")
     monkeypatch.setattr(canonical_truth, "load_workstream_canonical_truth", lambda *args, **kwargs: [])
     monkeypatch.setattr(canonical_truth, "assemble_changelog_text", lambda changelog_text, **kwargs: changelog_text)
@@ -214,7 +224,9 @@ workstreams:
     monkeypatch.setattr(canonical_truth, "write_assembled_truth", lambda **kwargs: [])
 
     monkeypatch.setattr(generate_release_notes, "CHANGELOG_PATH", tmp_path / "changelog.md")
-    monkeypatch.setattr(generate_release_notes, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
+    monkeypatch.setattr(
+        generate_release_notes, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md"
+    )
     monkeypatch.setattr(generate_release_notes, "ROOT_RELEASE_NOTES_PATH", tmp_path / "RELEASE.md")
     monkeypatch.setattr(generate_release_notes, "RELEASE_NOTES_DIR", tmp_path / "docs" / "release-notes")
     return tmp_path

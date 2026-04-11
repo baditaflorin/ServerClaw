@@ -57,7 +57,9 @@ def test_inventory_explicitly_pins_private_prometheus_bind_for_live_k6_replays()
 def test_main_tasks_explicitly_disable_public_dashboards_and_embedding() -> None:
     tasks = load_tasks(TASKS_PATH)
     public_dashboards = next(task for task in tasks if task.get("name") == "Disable Grafana public dashboards")
-    login_form = next(task for task in tasks if task.get("name") == "Keep the Grafana login form available for recovery")
+    login_form = next(
+        task for task in tasks if task.get("name") == "Keep the Grafana login form available for recovery"
+    )
     allow_embedding = next(task for task in tasks if task.get("name") == "Disable Grafana embedding")
     assert public_dashboards["community.general.ini_file"]["section"] == "public_dashboards"
     assert public_dashboards["community.general.ini_file"]["option"] == "enabled"
@@ -104,7 +106,9 @@ def test_capacity_dashboard_is_copied_imported_and_verified() -> None:
 
     copy_task = next(task for task in main_tasks if task.get("name") == "Copy LV3 capacity overview dashboard")
     import_task = next(task for task in main_tasks if task.get("name") == "Import LV3 capacity dashboard into Grafana")
-    verify_task = next(task for task in verify_tasks if task.get("name") == "Verify LV3 capacity dashboard is provisioned")
+    verify_task = next(
+        task for task in verify_tasks if task.get("name") == "Verify LV3 capacity dashboard is provisioned"
+    )
 
     assert defaults["monitoring_grafana_capacity_dashboard_source_file"] == (
         "{{ monitoring_repo_root }}/config/grafana/dashboards/capacity-overview.json"
@@ -123,8 +127,12 @@ def test_log_canary_dashboard_is_copied_imported_and_verified() -> None:
     verify_tasks = load_tasks(VERIFY_PATH)
 
     copy_task = next(task for task in main_tasks if task.get("name") == "Copy LV3 log canary overview dashboard")
-    import_task = next(task for task in main_tasks if task.get("name") == "Import LV3 log canary dashboard into Grafana")
-    verify_task = next(task for task in verify_tasks if task.get("name") == "Verify LV3 log canary dashboard is provisioned")
+    import_task = next(
+        task for task in main_tasks if task.get("name") == "Import LV3 log canary dashboard into Grafana"
+    )
+    verify_task = next(
+        task for task in verify_tasks if task.get("name") == "Verify LV3 log canary dashboard is provisioned"
+    )
 
     assert defaults["monitoring_grafana_log_canary_dashboard_source_file"] == (
         "{{ monitoring_repo_root }}/config/grafana/dashboards/log-canary-overview.json"
@@ -153,7 +161,10 @@ def test_prometheus_template_scrapes_postgres_audit_alloy_metrics() -> None:
     assert "job_name: {{ monitoring_postgres_audit_metrics_job_name }}" in template
     assert "{{ monitoring_postgres_audit_metrics_target }}" in template
     assert "metric_relabel_configs:" in template
-    assert "regex: loki_process_custom_(postgres_(audit_events_total|connection_authorized_total|unknown_connection_events_total))" in template
+    assert (
+        "regex: loki_process_custom_(postgres_(audit_events_total|connection_authorized_total|unknown_connection_events_total))"
+        in template
+    )
     assert "replacement: $1" in template
 
 

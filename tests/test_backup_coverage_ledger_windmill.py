@@ -13,7 +13,7 @@ SPEC.loader.exec_module(backup_coverage_ledger_windmill)
 
 
 def test_extract_report_json_reads_last_report_line() -> None:
-    payload = backup_coverage_ledger_windmill.extract_report_json("x\nREPORT_JSON={\"summary\":{\"uncovered\":1}}\n")
+    payload = backup_coverage_ledger_windmill.extract_report_json('x\nREPORT_JSON={"summary":{"uncovered":1}}\n')
     assert payload == {"summary": {"uncovered": 1}}
 
 
@@ -29,7 +29,7 @@ def test_main_runs_coverage_script(monkeypatch, tmp_path: Path) -> None:
 
     class Result:
         returncode = 0
-        stdout = "REPORT_JSON={\"summary\":{\"protected\":6,\"uncovered\":1}}\n"
+        stdout = 'REPORT_JSON={"summary":{"protected":6,"uncovered":1}}\n'
         stderr = ""
 
     monkeypatch.setattr(backup_coverage_ledger_windmill.subprocess, "run", lambda *args, **kwargs: Result())

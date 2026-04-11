@@ -33,7 +33,9 @@ def validation_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         )
         + "\n"
     )
-    (tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml").write_text("proxmox_guests:\n  - vmid: 110\n    name: nginx-lv3\n")
+    (tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml").write_text(
+        "proxmox_guests:\n  - vmid: 110\n    name: nginx-lv3\n"
+    )
     (tmp_path / "versions" / "stack.yaml").write_text(
         "\n".join(
             [
@@ -54,7 +56,9 @@ def validation_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     )
 
     monkeypatch.setattr(validate_ephemeral_vmid, "CAPACITY_MODEL_PATH", tmp_path / "config" / "capacity-model.json")
-    monkeypatch.setattr(validate_ephemeral_vmid, "HOST_VARS_PATH", tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml")
+    monkeypatch.setattr(
+        validate_ephemeral_vmid, "HOST_VARS_PATH", tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml"
+    )
     monkeypatch.setattr(validate_ephemeral_vmid, "STACK_PATH", tmp_path / "versions" / "stack.yaml")
     return tmp_path
 

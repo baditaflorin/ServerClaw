@@ -28,9 +28,7 @@ RELEASE_CANDIDATE_STATUSES = {"ready_for_merge", "merged", "live_applied"}
 LIVE_APPLIED_STATUS = "live_applied"
 VALID_RELEASE_BUMPS = {"patch", "minor", "major"}
 UNRELEASED_PATTERN = re.compile(r"(?ms)(^## Unreleased\n)(.*?)(?=^## )")
-LATEST_RECEIPTS_PATTERN = re.compile(
-    r"(?ms)(^live_apply_evidence:\n(?:  [^\n]*\n)*?  latest_receipts:\n)(.*?)(?=^\S)"
-)
+LATEST_RECEIPTS_PATTERN = re.compile(r"(?ms)(^live_apply_evidence:\n(?:  [^\n]*\n)*?  latest_receipts:\n)(.*?)(?=^\S)")
 WORKSTREAM_BLOCK_PATTERN = r"(?ms)^  - id: {workstream_id}\n.*?(?=^  - id: |\Z)"
 WORKSTREAM_RELEASE_BUMP_PATTERN = re.compile(r"(?m)^(      release_bump:\s*\S+\n)")
 WORKSTREAM_INCLUDED_IN_REPO_VERSION_PATTERN = re.compile(r"(?m)^(      included_in_repo_version:\s*)(null|\S+)\n")
@@ -131,11 +129,11 @@ def load_workstream_canonical_truth(path: Path | None = None) -> list[Workstream
         )
         latest_receipts: dict[str, str] = {}
         for capability, receipt_id in latest_receipts_mapping.items():
-            latest_receipts[_require_string(capability, path=f"{workstream_path}.canonical_truth.latest_receipts.key")] = (
-                _require_string(
-                    receipt_id,
-                    path=f"{workstream_path}.canonical_truth.latest_receipts[{capability}]",
-                )
+            latest_receipts[
+                _require_string(capability, path=f"{workstream_path}.canonical_truth.latest_receipts.key")
+            ] = _require_string(
+                receipt_id,
+                path=f"{workstream_path}.canonical_truth.latest_receipts[{capability}]",
             )
 
         included_in_repo_version = _require_optional_semver(
@@ -334,9 +332,7 @@ def write_assembled_truth(*, update_readme: bool = True) -> list[Path]:
 def check_assembled_truth() -> tuple[int, list[Path]]:
     expected_files = render_expected_files()
     stale_paths = [
-        path
-        for path, expected_text in expected_files.items()
-        if expected_text != path.read_text(encoding="utf-8")
+        path for path, expected_text in expected_files.items() if expected_text != path.read_text(encoding="utf-8")
     ]
     if stale_paths:
         return 2, stale_paths
@@ -353,7 +349,9 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
     if has_sharded_sources(compatibility_path=resolved_workstreams_path):
         changed_ids: list[str] = []
         for item in items:
-            record = find_workstream(item.workstream_id, compatibility_path=resolved_workstreams_path, include_archive=True)
+            record = find_workstream(
+                item.workstream_id, compatibility_path=resolved_workstreams_path, include_archive=True
+            )
             if record is None or record.location == "compatibility":
                 raise ValueError(
                     f"failed to locate shard for workstream '{item.workstream_id}' in {resolved_workstreams_path.name}"
@@ -378,9 +376,7 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
         pattern = re.compile(WORKSTREAM_BLOCK_PATTERN.format(workstream_id=re.escape(item.workstream_id)))
         match = pattern.search(updated)
         if match is None:
-            raise ValueError(
-                f"failed to locate workstream '{item.workstream_id}' in {resolved_workstreams_path.name}"
-            )
+            raise ValueError(f"failed to locate workstream '{item.workstream_id}' in {resolved_workstreams_path.name}")
 
         block = match.group(0)
         if WORKSTREAM_INCLUDED_IN_REPO_VERSION_PATTERN.search(block):
@@ -401,7 +397,7 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
                 f"failed to mark workstream '{item.workstream_id}' as released in {resolved_workstreams_path.name}"
             )
 
-        updated = f"{updated[:match.start()]}{next_block}{updated[match.end():]}"
+        updated = f"{updated[: match.start()]}{next_block}{updated[match.end() :]}"
         changed_ids.append(item.workstream_id)
 
     resolved_workstreams_path.write_text(updated, encoding="utf-8")
@@ -409,7 +405,9 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Assemble integration-only canonical truth files from workstream metadata.")
+    parser = argparse.ArgumentParser(
+        description="Assemble integration-only canonical truth files from workstream metadata."
+    )
     parser.add_argument("--write", action="store_true", help="Write assembled canonical truth files.")
     parser.add_argument("--check", action="store_true", help="Verify the canonical truth files are current.")
     parser.add_argument(
@@ -442,7 +440,10 @@ def main(argv: list[str] | None = None) -> int:
         if exit_code == 0:
             print("Canonical truth OK")
             return 0
-        print("Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.", file=sys.stderr)
+        print(
+            "Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.",
+            file=sys.stderr,
+        )
         for path in stale_paths:
             print(f"- {path}", file=sys.stderr)
         return exit_code

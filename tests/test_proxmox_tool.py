@@ -28,6 +28,7 @@ _PROD_AUTH = {
     "authorization_header": "PVEAPIToken=lv3-automation@pve!primary=test-secret",
 }
 
+
 def _auth_file(tmp_path: Path, extra: dict | None = None) -> Path:
     """Write a valid auth file and return its path."""
     data = dict(_PROD_AUTH)
@@ -101,9 +102,7 @@ def test_proxmox_client_guest_exec_success(monkeypatch: pytest.MonkeyPatch) -> N
     """guest_exec polls exec-status until exited=1 and returns (exitcode, stdout, stderr)."""
     requests: list[tuple[str, str]] = []
 
-    def fake_request(
-        self: tool.ProxmoxClient, method: str, path: str, payload: dict | None = None
-    ) -> Any:
+    def fake_request(self: tool.ProxmoxClient, method: str, path: str, payload: dict | None = None) -> Any:
         requests.append((method, path))
         if method == "POST":
             return {"pid": 42}
@@ -128,9 +127,7 @@ def test_proxmox_client_guest_exec_success(monkeypatch: pytest.MonkeyPatch) -> N
 def test_proxmox_client_guest_exec_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     """guest_exec raises TimeoutError when the command does not finish in time."""
 
-    def fake_request(
-        self: tool.ProxmoxClient, method: str, path: str, payload: dict | None = None
-    ) -> Any:
+    def fake_request(self: tool.ProxmoxClient, method: str, path: str, payload: dict | None = None) -> Any:
         if method == "POST":
             return {"pid": 99}
         return {"exited": 0}  # never finishes
@@ -155,18 +152,22 @@ def test_proxmox_client_guest_exec_timeout(monkeypatch: pytest.MonkeyPatch) -> N
 # ---------------------------------------------------------------------------
 
 
-def test_command_guest_exec(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_command_guest_exec(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
     """guest-exec outputs JSON with vmid, exit_code, stdout, stderr."""
     fake = FakeGuestExec([(0, "nginx-lv3\n", "")])
     monkeypatch.setattr(tool.ProxmoxClient, "guest_exec", fake)
 
-    rc = tool.main([
-        "--auth-file", str(_auth_file(tmp_path)),
-        "guest-exec", "--vmid", "110", "--",
-        "hostname",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_auth_file(tmp_path)),
+            "guest-exec",
+            "--vmid",
+            "110",
+            "--",
+            "hostname",
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
     assert out["vmid"] == 110
@@ -181,11 +182,18 @@ def test_command_guest_exec_shell_flag(
     fake = FakeGuestExec([(0, "ok", "")])
     monkeypatch.setattr(tool.ProxmoxClient, "guest_exec", fake)
 
-    tool.main([
-        "--auth-file", str(_auth_file(tmp_path)),
-        "guest-exec", "--vmid", "170", "--shell",
-        "echo", "hello",
-    ])
+    tool.main(
+        [
+            "--auth-file",
+            str(_auth_file(tmp_path)),
+            "guest-exec",
+            "--vmid",
+            "170",
+            "--shell",
+            "echo",
+            "hello",
+        ]
+    )
     assert fake.calls[0]["command"] == ["bash", "-c", "echo hello"]
 
 
@@ -196,11 +204,18 @@ def test_command_guest_exec_propagate_exit_code(
     fake = FakeGuestExec([(3, "", "error")])
     monkeypatch.setattr(tool.ProxmoxClient, "guest_exec", fake)
 
-    rc = tool.main([
-        "--auth-file", str(_auth_file(tmp_path)),
-        "guest-exec", "--vmid", "170", "--propagate-exit-code", "--",
-        "false",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_auth_file(tmp_path)),
+            "guest-exec",
+            "--vmid",
+            "170",
+            "--propagate-exit-code",
+            "--",
+            "false",
+        ]
+    )
     assert rc == 3
 
 
@@ -209,18 +224,21 @@ def test_command_guest_exec_propagate_exit_code(
 # ---------------------------------------------------------------------------
 
 
-def test_command_docker_ps(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_command_docker_ps(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
     """docker-ps returns a JSON array of container objects."""
     container_json = json.dumps({"Names": "coolify", "Status": "Up 5 minutes"})
     fake = FakeGuestExec([(0, container_json + "\n", "")])
     monkeypatch.setattr(tool.ProxmoxClient, "guest_exec", fake)
 
-    rc = tool.main([
-        "--auth-file", str(_auth_file(tmp_path)),
-        "docker-ps", "--vmid", "170",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_auth_file(tmp_path)),
+            "docker-ps",
+            "--vmid",
+            "170",
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
     assert out["vmid"] == 170
@@ -238,16 +256,25 @@ def test_command_install_key_new_key(
 ) -> None:
     """install-key appends the key and exits 0 when the key is not already present."""
     pubkey = "ssh-ed25519 AAAAC3Nza some-comment"
-    fake = FakeGuestExec([
-        (0, "ssh-rsa AAAA existing-key\n", ""),   # read existing
-        (0, "", ""),                                # append + chmod
-    ])
+    fake = FakeGuestExec(
+        [
+            (0, "ssh-rsa AAAA existing-key\n", ""),  # read existing
+            (0, "", ""),  # append + chmod
+        ]
+    )
     monkeypatch.setattr(tool.ProxmoxClient, "guest_exec", fake)
 
-    rc = tool.main([
-        "--auth-file", str(_auth_file(tmp_path)),
-        "install-key", "--vmid", "171", "--pubkey", pubkey,
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_auth_file(tmp_path)),
+            "install-key",
+            "--vmid",
+            "171",
+            "--pubkey",
+            pubkey,
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
     assert out["status"] == "installed"
@@ -264,10 +291,17 @@ def test_command_install_key_already_present(
     fake = FakeGuestExec([(0, pubkey + "\n", "")])
     monkeypatch.setattr(tool.ProxmoxClient, "guest_exec", fake)
 
-    rc = tool.main([
-        "--auth-file", str(_auth_file(tmp_path)),
-        "install-key", "--vmid", "171", "--pubkey", pubkey,
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_auth_file(tmp_path)),
+            "install-key",
+            "--vmid",
+            "171",
+            "--pubkey",
+            pubkey,
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 2
     assert out["status"] == "already_present"
@@ -291,7 +325,7 @@ def test_resolve_topology_cli_overrides_auth_file(
         topology_file=None,
         env="prod",
         node=None,
-        coolify_vmid=999,   # CLI override
+        coolify_vmid=999,  # CLI override
         container=None,
         coolify_container=None,
         db_user=None,

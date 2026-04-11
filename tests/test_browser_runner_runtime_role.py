@@ -48,9 +48,10 @@ def test_main_tasks_render_build_and_verify_runtime() -> None:
     assert "Verify the browser runner runtime" in names
     build_task = next(task for task in tasks if task["name"] == "Build the browser runner image")
     assert build_task["ansible.builtin.shell"].startswith("set -euo pipefail")
-    assert 'docker build --pull=false -t "{{ browser_runner_runtime_image_name }}:latest" "$build_dir"' in build_task[
-        "ansible.builtin.shell"
-    ]
+    assert (
+        'docker build --pull=false -t "{{ browser_runner_runtime_image_name }}:latest" "$build_dir"'
+        in build_task["ansible.builtin.shell"]
+    )
     assert build_task["retries"] == 2
     assert build_task["delay"] == 5
     assert build_task["until"] == "browser_runner_runtime_build.rc == 0"
@@ -67,7 +68,10 @@ def test_verify_tasks_cover_health_and_smoke_session() -> None:
     smoke_task = next(
         task for task in verify if task["name"] == "Verify the browser runner smoke session succeeds locally"
     )
-    assert smoke_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ browser_runner_runtime_internal_port }}/sessions"
+    assert (
+        smoke_task["ansible.builtin.uri"]["url"]
+        == "http://127.0.0.1:{{ browser_runner_runtime_internal_port }}/sessions"
+    )
 
 
 def test_templates_define_host_network_build_and_healthcheck() -> None:

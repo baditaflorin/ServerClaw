@@ -246,7 +246,7 @@ def validate_agent_tool_registry(
 
 
 def utc_now_iso() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_scalar(value: Any) -> Any:
@@ -314,10 +314,7 @@ def read_secret_file(path: Path, label: str) -> str:
 
 
 def build_tool_index(registry: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    return {
-        tool["name"]: tool
-        for tool in require_list(registry.get("tools"), "agent-tool-registry.tools")
-    }
+    return {tool["name"]: tool for tool in require_list(registry.get("tools"), "agent-tool-registry.tools")}
 
 
 def render_mcp_tools(registry: dict[str, Any]) -> list[dict[str, Any]]:
@@ -490,9 +487,7 @@ def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> d
     top_k = require_int(args.get("top_k", 5), "arguments.top_k", minimum=1)
     token = resolve_platform_context_token()
     endpoint_override = os.environ.get(PLATFORM_CONTEXT_API_URL_ENV, "").strip()
-    endpoint = endpoint_override if endpoint_override else require_str(
-        tool.get("endpoint"), f"{tool['name']}.endpoint"
-    )
+    endpoint = endpoint_override if endpoint_override else require_str(tool.get("endpoint"), f"{tool['name']}.endpoint")
     request = urllib.request.Request(
         endpoint,
         method="POST",
@@ -510,9 +505,7 @@ def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> d
             )
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace").strip()
-        raise ValueError(
-            f"platform-context API query failed with HTTP {exc.code}: {detail or exc.reason}"
-        ) from exc
+        raise ValueError(f"platform-context API query failed with HTTP {exc.code}: {detail or exc.reason}") from exc
     except urllib.error.URLError as exc:
         raise ValueError(f"platform-context API query failed: {exc.reason}") from exc
 
@@ -566,8 +559,7 @@ def normalize_approval_args(args: dict[str, Any]) -> dict[str, Any]:
     approver_classes = args.get("approver_classes", [])
     approver_classes = require_list(approver_classes, "arguments.approver_classes")
     normalized_approvers = [
-        require_str(item, f"arguments.approver_classes[{index}]")
-        for index, item in enumerate(approver_classes)
+        require_str(item, f"arguments.approver_classes[{index}]") for index, item in enumerate(approver_classes)
     ]
     return {
         "requester_class": requester_class,
@@ -655,8 +647,9 @@ def _docker_socket_request(method: str, path: str, params: dict[str, str] | None
     return json.loads(response.read().decode("utf-8"))
 
 
-def _docker_socket_json(method: str, path: str, body: dict[str, Any] | None = None,
-                        *, accept_status: tuple[int, ...] = (200, 201, 204)) -> Any:
+def _docker_socket_json(
+    method: str, path: str, body: dict[str, Any] | None = None, *, accept_status: tuple[int, ...] = (200, 201, 204)
+) -> Any:
     """Docker Engine API request with optional JSON body.  Returns parsed JSON or None for 204."""
     conn = _docker_unix_connection(timeout=60)
     headers: dict[str, str] = {"Host": "localhost"}
@@ -697,6 +690,7 @@ def tool_list_containers(_tool: dict[str, Any], args: dict[str, Any]) -> dict[st
 
     if _portainer_available():
         from portainer_tool import PortainerClient  # lazy import
+
         client = PortainerClient(resolve_portainer_auth())
         client.login()
         containers = client.list_containers(all_containers=include_stopped)
@@ -731,6 +725,7 @@ def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict
 
     if _portainer_available():
         from portainer_tool import PortainerClient  # lazy import
+
         client = PortainerClient(resolve_portainer_auth())
         client.login()
         logs = client.container_logs(container, tail)
@@ -769,11 +764,11 @@ def tool_get_container_logs(_tool: dict[str, Any], args: dict[str, Any]) -> dict
         if response.status != 200:
             raise ValueError(f"Docker API returned HTTP {response.status}")
         from portainer_tool import decode_docker_log_stream
+
         logs = decode_docker_log_stream(response.read())
     else:
         raise ValueError(
-            "Cannot get container logs: no Portainer credentials configured and "
-            "Docker socket not available."
+            "Cannot get container logs: no Portainer credentials configured and Docker socket not available."
         )
 
     return {"container": container, "tail": tail, "logs": logs}
@@ -784,7 +779,9 @@ DEFAULT_NOMAD_TOKEN_PATH: Final[Path] = REPO_ROOT / ".local" / "nomad" / "tokens
 DEFAULT_NOMAD_CA_CERT_PATH: Final[Path] = REPO_ROOT / ".local" / "nomad" / "tls" / "nomad-agent-ca.pem"
 
 
-def _nomad_request(method: str, path: str, *, params: dict | None = None, json_body: dict | None = None) -> dict[str, Any]:
+def _nomad_request(
+    method: str, path: str, *, params: dict | None = None, json_body: dict | None = None
+) -> dict[str, Any]:
     import requests  # lazy import
 
     token_file = DEFAULT_NOMAD_TOKEN_PATH
@@ -794,7 +791,8 @@ def _nomad_request(method: str, path: str, *, params: dict | None = None, json_b
     ca_cert = str(DEFAULT_NOMAD_CA_CERT_PATH) if DEFAULT_NOMAD_CA_CERT_PATH.is_file() else False
     url = f"{DEFAULT_NOMAD_API_URL}{path}"
     resp = requests.request(
-        method, url,
+        method,
+        url,
         headers={"X-Nomad-Token": token},
         params=params,
         json=json_body,
@@ -839,7 +837,8 @@ def tool_dispatch_nomad_job(_tool: dict[str, Any], args: dict[str, Any]) -> dict
     meta = args.get("meta", {})
     namespace = args.get("namespace", "default")
     result = _nomad_request(
-        "POST", f"/v1/job/{job_id}/dispatch",
+        "POST",
+        f"/v1/job/{job_id}/dispatch",
         params={"namespace": namespace},
         json_body={"Meta": meta},
     )
@@ -879,8 +878,7 @@ def _resolve_service_auth(service_name: str) -> dict[str, Any]:
         return {"api_token": token_file.read_text().strip()}
 
     raise RuntimeError(
-        f"No credentials found for service '{service_name}'. "
-        f"Expected {admin_auth} or {token_file}, or set {env_var}."
+        f"No credentials found for service '{service_name}'. Expected {admin_auth} or {token_file}, or set {env_var}."
     )
 
 
@@ -1128,11 +1126,14 @@ def tool_list_outline_documents(_tool: dict[str, Any], args: dict[str, Any]) -> 
     limit = 100
     all_docs: list[dict[str, Any]] = []
     while True:
-        response = client.call("documents.list", {
-            "collectionId": collection_id,
-            "limit": limit,
-            "offset": offset,
-        })
+        response = client.call(
+            "documents.list",
+            {
+                "collectionId": collection_id,
+                "limit": limit,
+                "offset": offset,
+            },
+        )
         batch = response.get("data", [])
         all_docs.extend(batch)
         if len(batch) < limit:
@@ -1143,13 +1144,15 @@ def tool_list_outline_documents(_tool: dict[str, Any], args: dict[str, Any]) -> 
         "count": len(all_docs),
         "documents": [
             {
-                k: v for k, v in {
+                k: v
+                for k, v in {
                     "id": d.get("id", ""),
                     "title": d.get("title", ""),
                     "url": d.get("url", ""),
                     "parent_document_id": d.get("parentDocumentId"),
                     "updated_at": d.get("updatedAt", ""),
-                }.items() if v is not None
+                }.items()
+                if v is not None
             }
             for d in all_docs
         ],
@@ -1193,11 +1196,14 @@ def tool_upsert_outline_document(_tool: dict[str, Any], args: dict[str, Any]) ->
     limit = 100
     existing_id: str | None = None
     while True:
-        response = client.call("documents.list", {
-            "collectionId": collection_id,
-            "limit": limit,
-            "offset": offset,
-        })
+        response = client.call(
+            "documents.list",
+            {
+                "collectionId": collection_id,
+                "limit": limit,
+                "offset": offset,
+            },
+        )
         batch = response.get("data", [])
         for d in batch:
             if d.get("title") == title:
@@ -1208,13 +1214,16 @@ def tool_upsert_outline_document(_tool: dict[str, Any], args: dict[str, Any]) ->
         offset += limit
 
     if existing_id:
-        response = client.call("documents.update", {
-            "id": existing_id,
-            "title": title,
-            "text": text,
-            "publish": True,
-            "done": True,
-        })
+        response = client.call(
+            "documents.update",
+            {
+                "id": existing_id,
+                "title": title,
+                "text": text,
+                "publish": True,
+                "done": True,
+            },
+        )
         doc = response.get("data", {})
         return {
             "id": doc.get("id", existing_id),
@@ -1250,9 +1259,7 @@ def tool_delete_outline_document(_tool: dict[str, Any], args: dict[str, Any]) ->
     return {"deleted": True, "document_id": document_id}
 
 
-def tool_provision_outline_api_token(
-    _tool: dict[str, Any], args: dict[str, Any]
-) -> dict[str, Any]:
+def tool_provision_outline_api_token(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     """Provision a new Outline API token via direct DB insertion.
 
     This is the self-service credential rotation path for agents. When Outline
@@ -1260,7 +1267,6 @@ def tool_provision_outline_api_token(
     """
     # Lazy import to avoid module-load side effects (subprocess calls, etc.)
     import importlib.util
-    import sys as _sys
 
     script_path = REPO_ROOT / "scripts" / "provision_outline_api_token.py"
     spec = importlib.util.spec_from_file_location("provision_outline_api_token", script_path)
@@ -1305,6 +1311,7 @@ def tool_mempalace_search(_tool: dict[str, Any], args: dict[str, Any]) -> dict[s
 
         # Parse search results from output
         import json as _json
+
         try:
             output_lines = result.stdout.strip().split("\n")
             results = []
@@ -1442,6 +1449,7 @@ def tool_mempalace_status(_tool: dict[str, Any], args: dict[str, Any]) -> dict[s
 
         # Parse status output to extract key metrics
         import re
+
         output = result.stdout
         drawers = 0
         rooms = {}
@@ -1519,6 +1527,7 @@ def _shell_quote(s: str) -> str:
     """Shell-quote a string for safe embedding in a bash -c argument."""
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
+
 # Mapping of friendly host names → (transport, detail).
 # transport "local"    → nsenter into host PID 1.
 # transport "ssh"      → SSH directly (only Proxmox host allows this from LAN).
@@ -1528,12 +1537,12 @@ _HOST_COMMAND_PROXMOX_IP: Final[str] = "10.10.10.1"
 
 _HOST_COMMAND_TARGETS: Final[dict[str, tuple[str, str]]] = {
     "runtime-control-lv3": ("local", ""),
-    "proxmox":             ("ssh", "10.10.10.1"),
-    "postgres-lv3":        ("qm", "150"),
-    "docker-runtime-lv3":  ("qm", "120"),
-    "build-server":        ("qm", "130"),
-    "coolify-lv3":         ("qm", "170"),
-    "runtime-comms-lv3":   ("qm", "121"),
+    "proxmox": ("ssh", "10.10.10.1"),
+    "postgres-lv3": ("qm", "150"),
+    "docker-runtime-lv3": ("qm", "120"),
+    "build-server": ("qm", "130"),
+    "coolify-lv3": ("qm", "170"),
+    "runtime-comms-lv3": ("qm", "121"),
 }
 
 
@@ -1586,8 +1595,15 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
     transport, detail = _HOST_COMMAND_TARGETS[host]
 
     _nsenter_prefix = [
-        "nsenter", "--target", "1",
-        "--mount", "--uts", "--ipc", "--net", "--pid", "--",
+        "nsenter",
+        "--target",
+        "1",
+        "--mount",
+        "--uts",
+        "--ipc",
+        "--net",
+        "--pid",
+        "--",
     ]
 
     if transport == "local":
@@ -1597,9 +1613,13 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
     elif transport == "ssh":
         # Direct SSH (only works for Proxmox host, which accepts SSH from LAN)
         container_cmd = _nsenter_prefix + [
-            "ssh", "-o", "StrictHostKeyChecking=no",
-            "-o", "UserKnownHostsFile=/dev/null",
-            "-o", f"ConnectTimeout={min(timeout_secs, 10)}",
+            "ssh",
+            "-o",
+            "StrictHostKeyChecking=no",
+            "-o",
+            "UserKnownHostsFile=/dev/null",
+            "-o",
+            f"ConnectTimeout={min(timeout_secs, 10)}",
             f"root@{detail}",
             command,
         ]
@@ -1615,14 +1635,18 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
             f"qm guest exec {vmid} -- bash -c {_shell_quote(command)}"
             f" | python3 -c '"
             f"import json,sys; d=json.load(sys.stdin);"
-            f" sys.stdout.write(d.get(\"out-data\",\"\"));"
-            f" sys.stderr.write(d.get(\"err-data\",\"\"));"
-            f" sys.exit(d.get(\"exitcode\",1))'"
+            f' sys.stdout.write(d.get("out-data",""));'
+            f' sys.stderr.write(d.get("err-data",""));'
+            f' sys.exit(d.get("exitcode",1))\''
         )
         container_cmd = _nsenter_prefix + [
-            "ssh", "-o", "StrictHostKeyChecking=no",
-            "-o", "UserKnownHostsFile=/dev/null",
-            "-o", f"ConnectTimeout={min(timeout_secs, 10)}",
+            "ssh",
+            "-o",
+            "StrictHostKeyChecking=no",
+            "-o",
+            "UserKnownHostsFile=/dev/null",
+            "-o",
+            f"ConnectTimeout={min(timeout_secs, 10)}",
             f"root@{_HOST_COMMAND_PROXMOX_IP}",
             qm_cmd,
         ]
@@ -1638,26 +1662,29 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
         }
 
     # Create a privileged temporary container with host PID namespace
-    create_resp = _docker_socket_json("POST", "/containers/create", body={
-        "Image": _HOST_COMMAND_EXEC_IMAGE,
-        "Cmd": container_cmd,
-        "HostConfig": {
-            "AutoRemove": False,
-            "Privileged": True,
-            "NetworkMode": "host",
-            "PidMode": "host",
+    create_resp = _docker_socket_json(
+        "POST",
+        "/containers/create",
+        body={
+            "Image": _HOST_COMMAND_EXEC_IMAGE,
+            "Cmd": container_cmd,
+            "HostConfig": {
+                "AutoRemove": False,
+                "Privileged": True,
+                "NetworkMode": "host",
+                "PidMode": "host",
+            },
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "TERM=xterm",
+            ],
         },
-        "Env": [
-            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-            "TERM=xterm",
-        ],
-    })
+    )
     container_id = require_str(create_resp.get("Id"), "container creation response.Id")
 
     try:
         # Start the container
-        _docker_socket_json("POST", f"/containers/{container_id}/start",
-                            accept_status=(204, 304))
+        _docker_socket_json("POST", f"/containers/{container_id}/start", accept_status=(204, 304))
 
         # Wait for it to finish (with timeout)
         wait_resp = _docker_socket_json(
@@ -1677,8 +1704,7 @@ def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> di
     finally:
         # Always clean up the container
         try:
-            _docker_socket_json("DELETE", f"/containers/{container_id}?force=1",
-                                accept_status=(200, 204, 404, 409))
+            _docker_socket_json("DELETE", f"/containers/{container_id}?force=1", accept_status=(200, 204, 404, 409))
         except Exception:
             pass  # best-effort cleanup
 
@@ -1832,9 +1858,7 @@ def list_tools(registry: dict[str, Any]) -> int:
     print(f"Agent tool registry: {AGENT_TOOL_REGISTRY_PATH}")
     print("Available tools:")
     for tool in registry["tools"]:
-        print(
-            f"  - {tool['name']} [{tool['category']}, {tool['transport']}]: {tool['title']}"
-        )
+        print(f"  - {tool['name']} [{tool['category']}, {tool['transport']}]: {tool['title']}")
     return 0
 
 

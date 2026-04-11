@@ -28,5 +28,7 @@ def test_platform_import_scripts_bootstrap_repo_root_first() -> None:
                 bootstrap_line = index
                 break
         if bootstrap_line is None or bootstrap_line > platform_line:
-            failures.append(f"{path.relative_to(SCRIPTS_DIR.parent)}: bootstrap={bootstrap_line}, platform={platform_line}")
+            failures.append(
+                f"{path.relative_to(SCRIPTS_DIR.parent)}: bootstrap={bootstrap_line}, platform={platform_line}"
+            )
     assert not failures, "\n".join(failures)

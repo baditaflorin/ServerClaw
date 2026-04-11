@@ -21,7 +21,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|semgrep|compose-runtime-envs|retry-guard|dependency-direction|data-models|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|semgrep|compose-runtime-envs|retry-guard|dependency-direction|data-models|cross-catalog|python-type-safety|waiver-escalation-proofs|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -518,6 +518,41 @@ validate_data_models() {
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/atlas_schema.py" validate --repo-root "$REPO_ROOT" >/dev/null
 }
 
+validate_cross_catalog() {
+  resolve_python_bin
+  echo "Cross-catalog referential integrity validation"
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/validate_cross_catalog_integrity.py"
+}
+
+validate_waiver_escalation_proofs() {
+  echo "Gate bypass waiver escalation: Z3 formal verification"
+  uvx --from z3-solver python "$REPO_ROOT/scripts/verify_waiver_escalation.py"
+}
+
+validate_python_types() {
+  echo "Python type safety validation (pyright + bandit + crosshair)"
+  # pyright: type-check the catalog-integrity and proof scripts we own, plus Ansible plugins.
+  # Broad scripts/ coverage is a separate cleanup task (pre-existing codebase accumulated ~159 errors).
+  uvx --quiet pyright --pythonversion 3.12 \
+    "$REPO_ROOT/scripts/validate_cross_catalog_integrity.py" \
+    "$REPO_ROOT/scripts/verify_waiver_escalation.py" \
+    "$REPO_ROOT/scripts/gate_bypass_waivers.py" \
+    "$REPO_ROOT/collections/ansible_collections/lv3/platform/plugins/"
+  # bandit: security SAST on new catalog-integrity and proof scripts only.
+  # Pre-existing scripts have accumulated findings that are tracked separately;
+  # expanding the scope here is a dedicated cleanup task, not a gate blocker.
+  uvx --from bandit bandit \
+    "$REPO_ROOT/scripts/validate_cross_catalog_integrity.py" \
+    "$REPO_ROOT/scripts/verify_waiver_escalation.py" \
+    --skip B101,B603,B607 \
+    --severity-level medium \
+    -q
+  # crosshair: symbolic contract verification on validation_toolkit
+  uvx --from crosshair-tool crosshair check "$REPO_ROOT/scripts/validation_toolkit.py" \
+    --per_path_timeout 10 \
+    --analysis_kind PEP316
+}
+
 validate_policy() {
   echo "ADR 0230 policy validation"
   python3 "$REPO_ROOT/scripts/policy_checks.py" --validate >/dev/null
@@ -848,6 +883,9 @@ for stage in "$@"; do
       validate_alert_rules
       validate_tofu
       validate_data_models
+      validate_cross_catalog
+      validate_python_types
+      validate_waiver_escalation_proofs
       validate_policy
       validate_architecture_fitness
       validate_workstream_surfaces
@@ -893,6 +931,15 @@ for stage in "$@"; do
       ;;
     data-models)
       validate_data_models
+      ;;
+    cross-catalog)
+      validate_cross_catalog
+      ;;
+    python-type-safety)
+      validate_python_types
+      ;;
+    waiver-escalation-proofs)
+      validate_waiver_escalation_proofs
       ;;
     policy)
       validate_policy

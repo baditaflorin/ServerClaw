@@ -117,9 +117,7 @@ def validate_resource_reservation_payload(payload: dict, workflow_id: str) -> No
     for field in required_int_fields:
         value = payload.get(field)
         if isinstance(value, bool) or not isinstance(value, int):
-            raise ValueError(
-                f"workflow '{workflow_id}' resource_reservation field '{field}' must be an integer"
-            )
+            raise ValueError(f"workflow '{workflow_id}' resource_reservation field '{field}' must be an integer")
         if value < 0:
             raise ValueError(f"workflow '{workflow_id}' resource_reservation field '{field}' must be >= 0")
     if payload["estimated_duration_seconds"] < 1:
@@ -204,15 +202,11 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
 
         lifecycle_status = workflow.get("lifecycle_status")
         if lifecycle_status not in ALLOWED_LIFECYCLE_STATUSES:
-            raise ValueError(
-                f"workflow '{workflow_id}' has invalid lifecycle_status '{lifecycle_status}'"
-            )
+            raise ValueError(f"workflow '{workflow_id}' has invalid lifecycle_status '{lifecycle_status}'")
 
         execution_class = workflow.get("execution_class", "mutation")
         if execution_class not in ALLOWED_EXECUTION_CLASSES:
-            raise ValueError(
-                f"workflow '{workflow_id}' has invalid execution_class '{execution_class}'"
-            )
+            raise ValueError(f"workflow '{workflow_id}' has invalid execution_class '{execution_class}'")
         target_lane = workflow.get("target_lane")
         if target_lane is not None:
             if not isinstance(target_lane, str) or not target_lane.strip():
@@ -220,7 +214,9 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
             if target_lane not in execution_lane_ids:
                 raise ValueError(f"workflow '{workflow_id}' references unknown target_lane '{target_lane}'")
         dedup_window = workflow.get("dedup_window_seconds")
-        if dedup_window is not None and (isinstance(dedup_window, bool) or not isinstance(dedup_window, int) or dedup_window < 0):
+        if dedup_window is not None and (
+            isinstance(dedup_window, bool) or not isinstance(dedup_window, int) or dedup_window < 0
+        ):
             raise ValueError(f"workflow '{workflow_id}' dedup_window_seconds must be an integer >= 0")
         validate_resource_claims(workflow.get("resource_claims"), workflow_id)
         tags = workflow.get("tags", [])
@@ -262,9 +258,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
                         )
                     personas = launcher.get("personas", [])
                     if not isinstance(personas, list):
-                        raise ValueError(
-                            f"workflow '{workflow_id}' human_navigation.launcher.personas must be a list"
-                        )
+                        raise ValueError(f"workflow '{workflow_id}' human_navigation.launcher.personas must be a list")
                     for index, persona in enumerate(personas):
                         if not isinstance(persona, str) or not persona.strip():
                             raise ValueError(
@@ -275,9 +269,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
             raise ValueError(f"workflow '{workflow_id}' required_read_surfaces must be a list")
         for index, surface in enumerate(required_read_surfaces):
             if not isinstance(surface, str) or not surface.strip():
-                raise ValueError(
-                    f"workflow '{workflow_id}' required_read_surfaces[{index}] must be a non-empty string"
-                )
+                raise ValueError(f"workflow '{workflow_id}' required_read_surfaces[{index}] must be a non-empty string")
 
         budget = dict(defaults_payload)
         workflow_budget = workflow.get("budget", {})
@@ -303,9 +295,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
 
         entrypoint_kind = preferred_entrypoint.get("kind")
         if entrypoint_kind not in ALLOWED_ENTRYPOINT_KINDS:
-            raise ValueError(
-                f"workflow '{workflow_id}' has unsupported entrypoint kind '{entrypoint_kind}'"
-            )
+            raise ValueError(f"workflow '{workflow_id}' has unsupported entrypoint kind '{entrypoint_kind}'")
 
         if entrypoint_kind == "make_target":
             target = preferred_entrypoint.get("target")
@@ -313,13 +303,9 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
             if not isinstance(target, str) or not target:
                 raise ValueError(f"workflow '{workflow_id}' make_target entrypoint needs target")
             if target not in make_targets:
-                raise ValueError(
-                    f"workflow '{workflow_id}' references unknown Make target '{target}'"
-                )
+                raise ValueError(f"workflow '{workflow_id}' references unknown Make target '{target}'")
             if not isinstance(command, str) or not command.strip():
-                raise ValueError(
-                    f"workflow '{workflow_id}' make_target entrypoint needs a command string"
-                )
+                raise ValueError(f"workflow '{workflow_id}' make_target entrypoint needs a command string")
 
         preflight = workflow.get("preflight")
         if not isinstance(preflight, dict):
@@ -334,17 +320,13 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
                 raise ValueError(f"workflow '{workflow_id}' field '{field}' must be a list")
             for secret_id in secret_ids:
                 if secret_id not in secrets:
-                    raise ValueError(
-                        f"workflow '{workflow_id}' references unknown secret '{secret_id}'"
-                    )
+                    raise ValueError(f"workflow '{workflow_id}' references unknown secret '{secret_id}'")
         bootstrap_manifest_ids = preflight.get("bootstrap_manifest_ids", [])
         if not isinstance(bootstrap_manifest_ids, list):
             raise ValueError(f"workflow '{workflow_id}' field 'bootstrap_manifest_ids' must be a list")
         for index, manifest_id in enumerate(bootstrap_manifest_ids):
             if not isinstance(manifest_id, str) or not manifest_id.strip():
-                raise ValueError(
-                    f"workflow '{workflow_id}' bootstrap_manifest_ids[{index}] must be a non-empty string"
-                )
+                raise ValueError(f"workflow '{workflow_id}' bootstrap_manifest_ids[{index}] must be a non-empty string")
         resolve_workflow_manifest_ids(bootstrap_catalog, workflow)
         validate_preflight_health_checks(preflight.get("health_checks", []), workflow_id)
 
@@ -353,9 +335,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
             raise ValueError(f"workflow '{workflow_id}' must define validation_targets as a list")
         for target in validation_targets:
             if target not in make_targets:
-                raise ValueError(
-                    f"workflow '{workflow_id}' references unknown validation target '{target}'"
-                )
+                raise ValueError(f"workflow '{workflow_id}' references unknown validation target '{target}'")
 
         live_impact = workflow.get("live_impact")
         if live_impact not in ALLOWED_LIVE_IMPACTS:
@@ -365,20 +345,14 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
         if not isinstance(owner_runbook, str) or not owner_runbook:
             raise ValueError(f"workflow '{workflow_id}' must define owner_runbook")
         if not (REPO_ROOT / owner_runbook).is_file():
-            raise ValueError(
-                f"workflow '{workflow_id}' references missing owner_runbook '{owner_runbook}'"
-            )
+            raise ValueError(f"workflow '{workflow_id}' references missing owner_runbook '{owner_runbook}'")
 
         implementation_refs = workflow.get("implementation_refs")
         if not isinstance(implementation_refs, list) or not implementation_refs:
-            raise ValueError(
-                f"workflow '{workflow_id}' must define a non-empty implementation_refs list"
-            )
+            raise ValueError(f"workflow '{workflow_id}' must define a non-empty implementation_refs list")
         for path_str in implementation_refs:
             if not (REPO_ROOT / path_str).exists():
-                raise ValueError(
-                    f"workflow '{workflow_id}' references missing implementation path '{path_str}'"
-                )
+                raise ValueError(f"workflow '{workflow_id}' references missing implementation path '{path_str}'")
 
         outputs = workflow.get("outputs")
         if not isinstance(outputs, list) or not outputs:
@@ -386,9 +360,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
 
         verification_commands = workflow.get("verification_commands")
         if not isinstance(verification_commands, list) or not verification_commands:
-            raise ValueError(
-                f"workflow '{workflow_id}' must define a non-empty verification_commands list"
-            )
+            raise ValueError(f"workflow '{workflow_id}' must define a non-empty verification_commands list")
 
         speculative = workflow.get("speculative")
         if speculative is not None:
@@ -410,9 +382,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
                     )
                 conflict_probe = speculative.get("conflict_probe")
                 if not isinstance(conflict_probe, dict):
-                    raise ValueError(
-                        f"workflow '{workflow_id}' speculative.conflict_probe must be a mapping"
-                    )
+                    raise ValueError(f"workflow '{workflow_id}' speculative.conflict_probe must be a mapping")
                 callable_name = conflict_probe.get("callable")
                 if not isinstance(callable_name, str) or not callable_name.strip():
                     raise ValueError(
@@ -434,22 +404,14 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
                     )
                 probe_delay_seconds = speculative.get("probe_delay_seconds", 30)
                 if isinstance(probe_delay_seconds, bool) or not isinstance(probe_delay_seconds, int):
-                    raise ValueError(
-                        f"workflow '{workflow_id}' speculative.probe_delay_seconds must be an integer"
-                    )
+                    raise ValueError(f"workflow '{workflow_id}' speculative.probe_delay_seconds must be an integer")
                 if probe_delay_seconds < 0:
-                    raise ValueError(
-                        f"workflow '{workflow_id}' speculative.probe_delay_seconds must be >= 0"
-                    )
+                    raise ValueError(f"workflow '{workflow_id}' speculative.probe_delay_seconds must be >= 0")
                 rollback_window_seconds = speculative.get("rollback_window_seconds", 300)
                 if isinstance(rollback_window_seconds, bool) or not isinstance(rollback_window_seconds, int):
-                    raise ValueError(
-                        f"workflow '{workflow_id}' speculative.rollback_window_seconds must be an integer"
-                    )
+                    raise ValueError(f"workflow '{workflow_id}' speculative.rollback_window_seconds must be an integer")
                 if rollback_window_seconds < 1:
-                    raise ValueError(
-                        f"workflow '{workflow_id}' speculative.rollback_window_seconds must be >= 1"
-                    )
+                    raise ValueError(f"workflow '{workflow_id}' speculative.rollback_window_seconds must be >= 1")
 
 
 def list_workflows(catalog: dict) -> int:
@@ -565,9 +527,7 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Inspect or validate the repository workflow execution catalog."
-    )
+    parser = argparse.ArgumentParser(description="Inspect or validate the repository workflow execution catalog.")
     parser.add_argument("--list", action="store_true", help="List available workflows.")
     parser.add_argument("--workflow", help="Show one workflow from the catalog.")
     parser.add_argument("--validate", action="store_true", help="Validate the workflow catalog.")

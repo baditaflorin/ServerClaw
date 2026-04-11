@@ -254,9 +254,7 @@ def _collect_changed_files(repo_root: Path, base_ref: str) -> list[str]:
         changed_files: set[str] = set()
         for index, item in enumerate(payload):
             if not isinstance(item, str) or not item.strip():
-                raise ValueError(
-                    f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string"
-                )
+                raise ValueError(f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string")
             changed_files.add(item.strip().replace("\\", "/"))
         return sorted(changed_files)
 
@@ -315,10 +313,7 @@ def validate_branch_ownership(
         implicit_mutable_paths.add(source_record.path.relative_to(repo_root).as_posix())
 
     global_mutable_patterns: tuple[str, ...] = tuple(
-        str(p)
-        for p in (
-            registry.get("surface_ownership") or {}
-        ).get("global_mutable_paths", [])
+        str(p) for p in (registry.get("surface_ownership") or {}).get("global_mutable_paths", [])
     )
 
     mutable_surfaces = [surface for surface in ownership.owned_surfaces if surface.mode in MUTABLE_SURFACE_MODES]
@@ -331,7 +326,9 @@ def validate_branch_ownership(
         if global_mutable_patterns and _matches_any_pattern(changed_file, global_mutable_patterns):
             continue
         matched_mutable = [surface for surface in mutable_surfaces if _matches_any_pattern(changed_file, surface.paths)]
-        matched_immutable = [surface for surface in immutable_surfaces if _matches_any_pattern(changed_file, surface.paths)]
+        matched_immutable = [
+            surface for surface in immutable_surfaces if _matches_any_pattern(changed_file, surface.paths)
+        ]
         if matched_mutable:
             continue
         if matched_immutable:
@@ -341,16 +338,16 @@ def validate_branch_ownership(
         failures.append(f"{changed_file}: outside declared owned surfaces for {ownership.workstream_id}")
 
     if failures:
-        raise ValueError(
-            "workstream surface ownership validation failed:\n- " + "\n- ".join(failures)
-        )
+        raise ValueError("workstream surface ownership validation failed:\n- " + "\n- ".join(failures))
     return changed_files
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate workstream surface ownership manifests and branch edits.")
     parser.add_argument("--validate-registry", action="store_true", help="Validate the ownership manifest registry.")
-    parser.add_argument("--validate-branch", action="store_true", help="Validate the current branch against its manifest.")
+    parser.add_argument(
+        "--validate-branch", action="store_true", help="Validate the current branch against its manifest."
+    )
     parser.add_argument("--base-ref", help="Git base ref to diff against when validating a branch.")
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT, help="Repository root to validate.")
     args = parser.parse_args(argv)

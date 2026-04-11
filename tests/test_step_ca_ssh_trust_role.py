@@ -41,9 +41,13 @@ def test_step_ca_ssh_trust_defaults_define_retry_budget() -> None:
 def test_step_ca_ssh_trust_delegates_signing_to_runtime_control() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text())
     slurp_task = next(task for task in tasks if task["name"] == "Read the SSH host public key that will be signed")
-    host_id_task = next(task for task in tasks if task["name"] == "Derive the SSH host identity UUID from /etc/machine-id")
+    host_id_task = next(
+        task for task in tasks if task["name"] == "Derive the SSH host identity UUID from /etc/machine-id"
+    )
     issue_task = next(task for task in tasks if task["name"] == "Issue or renew the SSH host certificate from step-ca")
-    install_task = next(task for task in tasks if task["name"] == "Install the signed SSH host certificate on the target")
+    install_task = next(
+        task for task in tasks if task["name"] == "Install the signed SSH host certificate on the target"
+    )
 
     assert slurp_task["register"] == "step_ca_ssh_host_public_key_slurp"
     assert slurp_task["no_log"] is True
@@ -55,8 +59,8 @@ def test_step_ca_ssh_trust_delegates_signing_to_runtime_control() -> None:
     assert issue_task["delay"] == "{{ step_ca_ssh_issue_delay_seconds }}"
     assert issue_task["until"] == "step_ca_ssh_issue_result.rc == 0"
     assert issue_task["throttle"] == 1
-    assert "--host-id \"{{ step_ca_ssh_host_identity_uuid.stdout | trim }}\"" in issue_task["ansible.builtin.shell"]
-    assert "base64 -d > \"$workdir/host.pub\"" in issue_task["ansible.builtin.shell"]
+    assert '--host-id "{{ step_ca_ssh_host_identity_uuid.stdout | trim }}"' in issue_task["ansible.builtin.shell"]
+    assert 'base64 -d > "$workdir/host.pub"' in issue_task["ansible.builtin.shell"]
     assert "--provisioner-password-file" in issue_task["ansible.builtin.shell"]
     assert "--token" not in issue_task["ansible.builtin.shell"]
     assert issue_task["no_log"] is True

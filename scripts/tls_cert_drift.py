@@ -6,7 +6,7 @@ import argparse
 import json
 from typing import Any
 
-from drift_lib import drift_event_topic, isoformat, utc_now
+from drift_lib import drift_event_topic, utc_now
 from tls_cert_probe import collect_certificate_results
 
 

@@ -36,9 +36,9 @@ import subprocess
 import sys
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
-from statistics import mean, median, stdev
+from statistics import median, stdev
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -57,14 +57,12 @@ PHASE_PATTERNS = {
     "notification": re.compile(r"TASK \[.*ntfy.*|Publish.*notification\]"),
 }
 
-PLAY_RESULT_PATTERN = re.compile(
-    r"(ok|changed|unreachable|failed|skipped|rescued|ignored)=(\d+)"
-)
+PLAY_RESULT_PATTERN = re.compile(r"(ok|changed|unreachable|failed|skipped|rescued|ignored)=(\d+)")
 PLAY_RECAP_PATTERN = re.compile(r"^PLAY RECAP")
 
 
 def _utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def _source_commit() -> str:
@@ -105,7 +103,7 @@ def _parse_ansible_summary(stdout: str) -> dict[str, Any]:
                 recap[match.group(1)] = int(match.group(2))
 
         # Detect changed tasks
-        if line.strip().startswith("changed:") or "changed" in line and "TASK" not in line:
+        if line.strip().startswith("changed:") or ("changed" in line and "TASK" not in line):
             # Extract task name from context (2 lines back)
             for j in range(max(0, i - 3), i):
                 if "TASK [" in lines[j]:
@@ -121,10 +119,12 @@ def _parse_ansible_summary(stdout: str) -> dict[str, Any]:
         for phase_name, pattern in PHASE_PATTERNS.items():
             if pattern.search(line):
                 if current_phase and current_phase != phase_name:
-                    phases.append({
-                        "phase": current_phase,
-                        "first_seen_line": phase_start_line,
-                    })
+                    phases.append(
+                        {
+                            "phase": current_phase,
+                            "first_seen_line": phase_start_line,
+                        }
+                    )
                 if current_phase != phase_name:
                     current_phase = phase_name
                     phase_start_line = i
@@ -149,7 +149,7 @@ def _build_receipt(
     stdout: str,
     stderr: str,
 ) -> dict[str, Any]:
-    receipt_id = f"{datetime.now(timezone.utc).strftime('%Y-%m-%d')}-{service}-timing-{uuid.uuid4().hex[:6]}"
+    receipt_id = f"{datetime.now(UTC).strftime('%Y-%m-%d')}-{service}-timing-{uuid.uuid4().hex[:6]}"
     ansible_summary = _parse_ansible_summary(stdout)
 
     return {
@@ -187,7 +187,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     print(f"[convergence-timer] Starting {service} ({env})")
     print(f"[convergence-timer] Command: {command}")
-    print(f"[convergence-timer] Timing begins now...")
+    print("[convergence-timer] Timing begins now...")
 
     started_at = _utcnow_iso()
     t0 = time.monotonic()
@@ -207,15 +207,19 @@ def cmd_run(args: argparse.Namespace) -> int:
     print(f"\n[convergence-timer] Completed in {duration:.1f}s (rc={result.returncode})")
 
     # Re-run quickly just to capture output for parsing (without showing again)
-    capture_result = subprocess.run(
-        command + " 2>&1",
-        shell=True,
-        cwd=REPO_ROOT,
-        text=True,
-        capture_output=True,
-        env={**os.environ, "ANSIBLE_NOCOLOR": "1", "ANSIBLE_FORCE_COLOR": "0"},
-        timeout=10,  # Only for summary parsing — likely cached/skipped
-    ) if args.capture_summary else None
+    capture_result = (
+        subprocess.run(
+            command + " 2>&1",
+            shell=True,
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            env={**os.environ, "ANSIBLE_NOCOLOR": "1", "ANSIBLE_FORCE_COLOR": "0"},
+            timeout=10,  # Only for summary parsing — likely cached/skipped
+        )
+        if args.capture_summary
+        else None
+    )
 
     captured_stdout = capture_result.stdout if capture_result else ""
     captured_stderr = capture_result.stderr if capture_result else ""
@@ -273,15 +277,17 @@ def cmd_report(args: argparse.Namespace) -> int:
         sort_key = args.sort_by or "median"
         rows = []
         for svc, durations in services.items():
-            rows.append({
-                "service": svc,
-                "runs": len(durations),
-                "min": min(durations),
-                "median": median(durations),
-                "max": max(durations),
-                "last": durations[-1],
-                "stdev": stdev(durations) if len(durations) > 1 else 0.0,
-            })
+            rows.append(
+                {
+                    "service": svc,
+                    "runs": len(durations),
+                    "min": min(durations),
+                    "median": median(durations),
+                    "max": max(durations),
+                    "last": durations[-1],
+                    "stdev": stdev(durations) if len(durations) > 1 else 0.0,
+                }
+            )
         rows.sort(key=lambda r: r[sort_key], reverse=True)
 
         print(f"\n{'Service':<30} {'Runs':>4} {'Min':>7} {'Median':>8} {'Max':>7} {'Last':>7} {'StdDev':>8}")
@@ -375,15 +381,22 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("--env", default="production", help="Environment (default: production)")
     run_p.add_argument("--command", help="Custom command override (default: make converge-<service>)")
     run_p.add_argument("--dry-run", action="store_true", help="Print command, do not run.")
-    run_p.add_argument("--capture-summary", action="store_true",
-                       help="Re-run silently after main run to capture Ansible output for phase analysis.")
+    run_p.add_argument(
+        "--capture-summary",
+        action="store_true",
+        help="Re-run silently after main run to capture Ansible output for phase analysis.",
+    )
 
     # report
     rep_p = subparsers.add_parser("report", help="Show timing history for a service.")
     rep_p.add_argument("--service", help="Service name (required unless --all)")
     rep_p.add_argument("--all", action="store_true", help="Report all services.")
-    rep_p.add_argument("--sort-by", choices=["min", "median", "max", "last", "stdev"],
-                       default="median", help="Sort order for --all (default: median)")
+    rep_p.add_argument(
+        "--sort-by",
+        choices=["min", "median", "max", "last", "stdev"],
+        default="median",
+        help="Sort order for --all (default: median)",
+    )
 
     # trend
     subparsers.add_parser("trend", help="Show improving/stable/degrading trend per service.")

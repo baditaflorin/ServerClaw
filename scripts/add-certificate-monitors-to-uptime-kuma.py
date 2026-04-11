@@ -22,24 +22,20 @@ Requirements:
 import json
 import sys
 import argparse
-from typing import Dict, List, Optional
+from typing import Optional
 import requests
-from pathlib import Path
 
 
 class UptimeKumaClient:
     """Client for Uptime Kuma REST API."""
 
     def __init__(self, base_url: str, api_key: str):
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.session = requests.Session()
-        self.session.headers.update({
-            'Authorization': f'Bearer {api_key}',
-            'Content-Type': 'application/json'
-        })
+        self.session.headers.update({"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"})
 
-    def _request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> Dict:
+    def _request(self, method: str, endpoint: str, data: Optional[dict] = None) -> dict:
         """Make authenticated request to Uptime Kuma API."""
         url = f"{self.base_url}/api/{endpoint}"
         try:
@@ -59,28 +55,28 @@ class UptimeKumaClient:
         except requests.RequestException as e:
             raise Exception(f"Request failed: {e}")
 
-    def get_monitors(self) -> List[Dict]:
+    def get_monitors(self) -> list[dict]:
         """Get all monitors."""
         result = self._request("GET", "monitor")
         return result.get("monitors", []) if isinstance(result, dict) else result
 
-    def create_monitor(self, monitor_config: Dict) -> Dict:
+    def create_monitor(self, monitor_config: dict) -> dict:
         """Create a new monitor."""
         return self._request("POST", "monitor", monitor_config)
 
-    def update_monitor(self, monitor_id: int, monitor_config: Dict) -> Dict:
+    def update_monitor(self, monitor_id: int, monitor_config: dict) -> dict:
         """Update an existing monitor."""
         return self._request("PUT", f"monitor/{monitor_id}", monitor_config)
 
-    def get_monitor(self, monitor_id: int) -> Dict:
+    def get_monitor(self, monitor_id: int) -> dict:
         """Get a specific monitor."""
         return self._request("GET", f"monitor/{monitor_id}")
 
 
-def load_subdomain_catalog(config_path: str) -> List[Dict]:
+def load_subdomain_catalog(config_path: str) -> list[dict]:
     """Load subdomain catalog from JSON."""
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             catalog = json.load(f)
         return catalog.get("subdomains", [])
     except FileNotFoundError:
@@ -91,7 +87,7 @@ def load_subdomain_catalog(config_path: str) -> List[Dict]:
         sys.exit(1)
 
 
-def create_certificate_monitor_config(fqdn: str, service_id: str = "") -> Dict:
+def create_certificate_monitor_config(fqdn: str, service_id: str = "") -> dict:
     """Create Uptime Kuma monitor configuration for SSL certificate checking."""
     return {
         "type": "http",
@@ -112,7 +108,28 @@ def create_certificate_monitor_config(fqdn: str, service_id: str = "") -> Dict:
         "tlskey": "",
         "tlspin": "",
         "tlsversion": "",
-        "acceptable_status_codes": ["200", "201", "202", "203", "204", "205", "206", "300", "301", "302", "303", "304", "305", "307", "308", "400", "401", "402", "403", "404"],
+        "acceptable_status_codes": [
+            "200",
+            "201",
+            "202",
+            "203",
+            "204",
+            "205",
+            "206",
+            "300",
+            "301",
+            "302",
+            "303",
+            "304",
+            "305",
+            "307",
+            "308",
+            "400",
+            "401",
+            "402",
+            "403",
+            "404",
+        ],
         "validateSSL": True,
         "follow_redirects": True,
         "description": f"Monitor SSL certificate validity and expiration for {fqdn}",
@@ -121,22 +138,14 @@ def create_certificate_monitor_config(fqdn: str, service_id: str = "") -> Dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Add SSL certificate monitors to Uptime Kuma"
-    )
-    parser.add_argument("--base-url", required=True,
-                        help="Uptime Kuma base URL (e.g., https://uptime.localhost)")
-    parser.add_argument("--api-key", required=True,
-                        help="Uptime Kuma API key (from settings)")
-    parser.add_argument("--config", default="config/subdomain-catalog.json",
-                        help="Path to subdomain catalog config")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Show what would be created without actually creating")
-    parser.add_argument("--skip-existing", action="store_true",
-                        help="Skip domains that already have monitors")
+    parser = argparse.ArgumentParser(description="Add SSL certificate monitors to Uptime Kuma")
+    parser.add_argument("--base-url", required=True, help="Uptime Kuma base URL (e.g., https://uptime.localhost)")
+    parser.add_argument("--api-key", required=True, help="Uptime Kuma API key (from settings)")
+    parser.add_argument("--config", default="config/subdomain-catalog.json", help="Path to subdomain catalog config")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be created without actually creating")
+    parser.add_argument("--skip-existing", action="store_true", help="Skip domains that already have monitors")
     parser.add_argument("--fqdn", help="Only add monitor for a specific FQDN")
-    parser.add_argument("--update-all", action="store_true",
-                        help="Update existing monitors with new configuration")
+    parser.add_argument("--update-all", action="store_true", help="Update existing monitors with new configuration")
 
     args = parser.parse_args()
 
@@ -216,7 +225,7 @@ def main():
             except Exception as e:
                 print(f"  ✗ Failed to create: {e}", file=sys.stderr)
 
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Created: {created}")
     print(f"  Updated: {updated}")
     print(f"  Skipped: {skipped}")

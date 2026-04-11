@@ -78,7 +78,7 @@ def test_run_purge_reports_and_deletes_expired_receipts(tmp_path: Path) -> None:
                     "pii_risk": "low",
                     "locations": ["receipts/live-applies"],
                     "retention_paths": ["live-applies"],
-                    "notes": "test"
+                    "notes": "test",
                 },
                 {
                     "id": "mutation-audit-log",
@@ -90,9 +90,9 @@ def test_run_purge_reports_and_deletes_expired_receipts(tmp_path: Path) -> None:
                     "access_role": "platform-operator",
                     "pii_risk": "medium",
                     "locations": ["mutation-audit.jsonl"],
-                    "notes": "test"
+                    "notes": "test",
                 },
-            ]
+            ],
         },
     )
 

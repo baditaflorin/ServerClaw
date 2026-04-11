@@ -22,7 +22,7 @@ import shlex
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -128,7 +128,7 @@ def _load_inventory_hosts(path: Path | None = None) -> dict[str, str]:
     hosts: dict[str, str] = {}
     for group_name in ("proxmox_hosts", "lv3_guests"):
         group = children.get(group_name) or {}
-        group_hosts = (group.get("hosts") or {})
+        group_hosts = group.get("hosts") or {}
         for name, payload in group_hosts.items():
             payload = payload or {}
             if not isinstance(payload, dict):
@@ -153,14 +153,22 @@ def _ssh_monitoring_command() -> list[str] | None:
         f"ops@{jump_host} -W %h:%p"
     )
     return [
-        "ssh", "-q",
-        "-i", str(key_path),
-        "-o", "IdentitiesOnly=yes",
-        "-o", "BatchMode=yes",
-        "-o", f"ConnectTimeout={SSH_TIMEOUT_SECONDS}",
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-o", f"ProxyCommand={proxy}",
+        "ssh",
+        "-q",
+        "-i",
+        str(key_path),
+        "-o",
+        "IdentitiesOnly=yes",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        f"ConnectTimeout={SSH_TIMEOUT_SECONDS}",
+        "-o",
+        "StrictHostKeyChecking=no",
+        "-o",
+        "UserKnownHostsFile=/dev/null",
+        "-o",
+        f"ProxyCommand={proxy}",
         f"ops@{monitoring_host}",
     ]
 
@@ -169,8 +177,7 @@ def _influx_query(command: list[str], flux: str) -> list[dict[str, str]]:
     """Run a Flux query via SSH and return all result rows."""
     remote_command = (
         "sudo influx query --raw --host http://127.0.0.1:8086 --org lv3 "
-        '--token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '
-        + shlex.quote(flux)
+        '--token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" ' + shlex.quote(flux)
     )
     result = subprocess.run(
         [*command, remote_command],
@@ -247,7 +254,7 @@ def query_disk_usage(
     active_guests = [g for g in guests if g.status == "active"]
     if not active_guests:
         return DiskReport(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             source="no_active_vms",
             vms=(),
         )
@@ -255,7 +262,7 @@ def query_disk_usage(
     ssh_command = _ssh_monitoring_command()
     if not ssh_command:
         return DiskReport(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             source="unavailable",
             vms=tuple(
                 VMDiskStatus(
@@ -320,12 +327,8 @@ def query_disk_usage(
 
         # Check all known paths for this guest, plus any discovered paths
         known_paths = set(guest.disk_paths)
-        discovered_paths = {
-            path for (host, path) in used_by_host_path
-            if host == guest.metrics_host
-        } | {
-            path for (host, path) in total_by_host_path
-            if host == guest.metrics_host
+        discovered_paths = {path for (host, path) in used_by_host_path if host == guest.metrics_host} | {
+            path for (host, path) in total_by_host_path if host == guest.metrics_host
         }
         all_paths = sorted(known_paths | discovered_paths)
 
@@ -366,7 +369,7 @@ def query_disk_usage(
         )
 
     return DiskReport(
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         source="ssh+influx",
         vms=tuple(vm_statuses),
     )
@@ -375,18 +378,16 @@ def query_disk_usage(
 def render_markdown(report: DiskReport, threshold_percent: float = 85.0) -> str:
     """Render a disk report as a Markdown table."""
     lines = [
-        f"# Disk Usage Report",
-        f"",
+        "# Disk Usage Report",
+        "",
         f"**Source:** {report.source} | **Time:** {report.timestamp}",
-        f"",
-        f"| VM | VMID | Mount | Used GB | Total GB | Used % | Budget GB | Status |",
-        f"|---|---:|---|---:|---:|---:|---:|---|",
+        "",
+        "| VM | VMID | Mount | Used GB | Total GB | Used % | Budget GB | Status |",
+        "|---|---:|---|---:|---:|---:|---:|---|",
     ]
     for vm in report.vms:
         if not vm.mounts:
-            lines.append(
-                f"| {vm.name} | {vm.vmid} | - | - | - | - | {vm.budget_disk_gb} | no data |"
-            )
+            lines.append(f"| {vm.name} | {vm.vmid} | - | - | - | - | {vm.budget_disk_gb} | no data |")
             continue
         for mount in vm.mounts:
             status_parts = []

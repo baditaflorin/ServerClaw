@@ -14,7 +14,7 @@ SPEC.loader.exec_module(restore_verification_windmill)
 
 
 def test_extract_report_json_reads_last_report_line() -> None:
-    payload = restore_verification_windmill.extract_report_json("x\nREPORT_JSON={\"overall\":\"pass\"}\n")
+    payload = restore_verification_windmill.extract_report_json('x\nREPORT_JSON={"overall":"pass"}\n')
     assert payload == {"overall": "pass"}
 
 
@@ -30,7 +30,7 @@ def test_main_runs_restore_script(monkeypatch, tmp_path: Path) -> None:
 
     class Result:
         returncode = 0
-        stdout = "REPORT_JSON={\"overall\":\"pass\",\"summary\":{\"summary\":\"ok\"}}\n"
+        stdout = 'REPORT_JSON={"overall":"pass","summary":{"summary":"ok"}}\n'
         stderr = ""
 
     monkeypatch.setattr(restore_verification_windmill.subprocess, "run", lambda *args, **kwargs: Result())

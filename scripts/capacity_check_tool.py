@@ -44,6 +44,7 @@ CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
 # Loader
 # ---------------------------------------------------------------------------
 
+
 def _load_model() -> dict[str, Any]:
     if not CAPACITY_MODEL_PATH.exists():
         raise SystemExit(f"Capacity model not found: {CAPACITY_MODEL_PATH}")
@@ -53,6 +54,7 @@ def _load_model() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Computation helpers
 # ---------------------------------------------------------------------------
+
 
 def _active_guests(model: dict[str, Any]) -> list[dict[str, Any]]:
     return [g for g in model.get("guests", []) if g.get("status") == "active"]
@@ -106,6 +108,7 @@ def _headroom_status(model: dict[str, Any], headroom: dict[str, float]) -> str:
 # sub-command: report
 # ---------------------------------------------------------------------------
 
+
 def cmd_report(args: argparse.Namespace) -> int:
     model = _load_model()
     active = _active_guests(model)
@@ -124,40 +127,44 @@ def cmd_report(args: argparse.Namespace) -> int:
             or alloc.get("vcpu", 0) > budget.get("vcpu", 0)
             or alloc.get("disk_gb", 0) > budget.get("disk_gb", 0)
         )
-        guests_out.append({
-            "vmid": g.get("vmid"),
-            "name": g.get("name"),
-            "environment": g.get("environment"),
-            "allocated": alloc,
-            "budget": budget,
-            "over_budget": over,
-        })
+        guests_out.append(
+            {
+                "vmid": g.get("vmid"),
+                "name": g.get("name"),
+                "environment": g.get("environment"),
+                "allocated": alloc,
+                "budget": budget,
+                "over_budget": over,
+            }
+        )
 
     warnings = [
         f"{g['name']} exceeds budget on: "
-        + ", ".join(
-            k for k in ("ram_gb", "vcpu", "disk_gb")
-            if g["allocated"].get(k, 0) > g["budget"].get(k, 0)
-        )
+        + ", ".join(k for k in ("ram_gb", "vcpu", "disk_gb") if g["allocated"].get(k, 0) > g["budget"].get(k, 0))
         for g in active
         if any(g["allocated"].get(k, 0) > g["budget"].get(k, 0) for k in ("ram_gb", "vcpu", "disk_gb"))
     ]
 
-    print(json.dumps({
-        "host": {
-            "id": host.get("id"),
-            "physical": phys,
-            "target_utilisation": host.get("target_utilisation"),
-            "reserved_for_platform": host.get("reserved_for_platform"),
-        },
-        "active_guest_count": len(active),
-        "allocated": allocated,
-        "budgeted": budgeted,
-        "headroom": headroom,
-        "headroom_status": _headroom_status(model, headroom),
-        "guests": guests_out,
-        "warnings": warnings,
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "host": {
+                    "id": host.get("id"),
+                    "physical": phys,
+                    "target_utilisation": host.get("target_utilisation"),
+                    "reserved_for_platform": host.get("reserved_for_platform"),
+                },
+                "active_guest_count": len(active),
+                "allocated": allocated,
+                "budgeted": budgeted,
+                "headroom": headroom,
+                "headroom_status": _headroom_status(model, headroom),
+                "guests": guests_out,
+                "warnings": warnings,
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
@@ -165,31 +172,38 @@ def cmd_report(args: argparse.Namespace) -> int:
 # sub-command: headroom
 # ---------------------------------------------------------------------------
 
+
 def cmd_headroom(args: argparse.Namespace) -> int:
     model = _load_model()
     active = _active_guests(model)
     allocated = _sum_allocated(active)
     headroom = _compute_headroom(model, allocated)
     status = _headroom_status(model, headroom)
-    print(json.dumps({
-        "ram_gb_free": headroom["ram_gb"],
-        "vcpu_free": headroom["vcpu"],
-        "disk_gb_free": headroom["disk_gb"],
-        "status": status,
-        "note": (
-            "critical: at least one resource < 10% of physical capacity"
-            if status == "critical"
-            else "tight: at least one resource < 20% of physical capacity"
-            if status == "tight"
-            else "healthy: all resources above 20% of physical capacity"
-        ),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "ram_gb_free": headroom["ram_gb"],
+                "vcpu_free": headroom["vcpu"],
+                "disk_gb_free": headroom["disk_gb"],
+                "status": status,
+                "note": (
+                    "critical: at least one resource < 10% of physical capacity"
+                    if status == "critical"
+                    else "tight: at least one resource < 20% of physical capacity"
+                    if status == "tight"
+                    else "healthy: all resources above 20% of physical capacity"
+                ),
+            },
+            indent=2,
+        )
+    )
     return 2 if status in ("critical", "tight") else 0
 
 
 # ---------------------------------------------------------------------------
 # sub-command: check
 # ---------------------------------------------------------------------------
+
 
 def cmd_check(args: argparse.Namespace) -> int:
     if not any([args.ram_gb, args.vcpu, args.disk_gb]):
@@ -231,6 +245,7 @@ def cmd_check(args: argparse.Namespace) -> int:
 # sub-command: guest
 # ---------------------------------------------------------------------------
 
+
 def cmd_guest(args: argparse.Namespace) -> int:
     model = _load_model()
     matches = [g for g in model.get("guests", []) if g.get("vmid") == args.vmid]
@@ -243,29 +258,33 @@ def cmd_guest(args: argparse.Namespace) -> int:
     def pct(a: float, b: float) -> float:
         return round(a / b * 100, 1) if b else 0.0
 
-    print(json.dumps({
-        "vmid": g.get("vmid"),
-        "name": g.get("name"),
-        "status": g.get("status"),
-        "environment": g.get("environment"),
-        "allocated": alloc,
-        "budget": budget,
-        "utilisation": {
-            "ram_pct": pct(alloc.get("ram_gb", 0), budget.get("ram_gb", 1)),
-            "vcpu_pct": pct(alloc.get("vcpu", 0), budget.get("vcpu", 1)),
-            "disk_pct": pct(alloc.get("disk_gb", 0), budget.get("disk_gb", 1)),
-        },
-        "over_budget": any(
-            alloc.get(k, 0) > budget.get(k, 0) for k in ("ram_gb", "vcpu", "disk_gb")
-        ),
-        "notes": g.get("notes", ""),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "vmid": g.get("vmid"),
+                "name": g.get("name"),
+                "status": g.get("status"),
+                "environment": g.get("environment"),
+                "allocated": alloc,
+                "budget": budget,
+                "utilisation": {
+                    "ram_pct": pct(alloc.get("ram_gb", 0), budget.get("ram_gb", 1)),
+                    "vcpu_pct": pct(alloc.get("vcpu", 0), budget.get("vcpu", 1)),
+                    "disk_pct": pct(alloc.get("disk_gb", 0), budget.get("disk_gb", 1)),
+                },
+                "over_budget": any(alloc.get(k, 0) > budget.get(k, 0) for k in ("ram_gb", "vcpu", "disk_gb")),
+                "notes": g.get("notes", ""),
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
 # ---------------------------------------------------------------------------
 # Parser + main
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

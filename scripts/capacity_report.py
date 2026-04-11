@@ -56,7 +56,7 @@ def clamp_negative(value: float) -> float:
     return value if value >= 0 else 0.0
 
 
-def subtract_resources(total: "ResourceAmount", occupied: "ResourceAmount") -> "ResourceAmount":
+def subtract_resources(total: ResourceAmount, occupied: ResourceAmount) -> ResourceAmount:
     return ResourceAmount(
         ram_gb=clamp_negative(total.ram_gb - occupied.ram_gb),
         vcpu=clamp_negative(total.vcpu - occupied.vcpu),
@@ -70,7 +70,7 @@ class ResourceAmount:
     vcpu: float
     disk_gb: float
 
-    def add(self, other: "ResourceAmount") -> "ResourceAmount":
+    def add(self, other: ResourceAmount) -> ResourceAmount:
         return ResourceAmount(
             ram_gb=self.ram_gb + other.ram_gb,
             vcpu=self.vcpu + other.vcpu,
@@ -326,7 +326,13 @@ def load_capacity_model(
                         f"{path}.reservations[{index}].capacity_class",
                     )
                     if reservation.get("capacity_class") is not None
-                    else ("preview_burst" if reservation.get("kind") == "ephemeral_pool" else "ha_reserved" if reservation.get("kind") == "standby" else None)
+                    else (
+                        "preview_burst"
+                        if reservation.get("kind") == "ephemeral_pool"
+                        else "ha_reserved"
+                        if reservation.get("kind") == "standby"
+                        else None
+                    )
                 ),
                 service_id=(
                     require_str(reservation.get("service_id"), f"{path}.reservations[{index}].service_id")
@@ -339,7 +345,9 @@ def load_capacity_model(
                     else None
                 ),
                 standby_vmid=(
-                    int(require_number(reservation.get("standby_vmid"), f"{path}.reservations[{index}].standby_vmid", 1))
+                    int(
+                        require_number(reservation.get("standby_vmid"), f"{path}.reservations[{index}].standby_vmid", 1)
+                    )
                     if reservation.get("standby_vmid") is not None
                     else None
                 ),
@@ -502,9 +510,7 @@ def validate_capacity_model_payload(
             1,
         )
         if value > 100:
-            raise ValueError(
-                f"config/capacity-model.json.host.target_utilisation.{field} must be <= 100"
-            )
+            raise ValueError(f"config/capacity-model.json.host.target_utilisation.{field} must be <= 100")
     host_reserved_for_platform = resource_from_mapping(
         host.get("reserved_for_platform"),
         "config/capacity-model.json.host.reserved_for_platform",
@@ -539,17 +545,13 @@ def validate_capacity_model_payload(
         name = require_str(guest.get("name"), f"config/capacity-model.json.guests[{index}].name")
         status = require_str(guest.get("status"), f"config/capacity-model.json.guests[{index}].status")
         if status not in {"active", "planned"}:
-            raise ValueError(
-                f"config/capacity-model.json.guests[{index}].status must be 'active' or 'planned'"
-            )
+            raise ValueError(f"config/capacity-model.json.guests[{index}].status must be 'active' or 'planned'")
         environment = require_str(
             guest.get("environment"),
             f"config/capacity-model.json.guests[{index}].environment",
         )
         if environment not in {"production", "staging"}:
-            raise ValueError(
-                f"config/capacity-model.json.guests[{index}].environment must be production or staging"
-            )
+            raise ValueError(f"config/capacity-model.json.guests[{index}].environment must be production or staging")
         metrics_host = require_str(
             guest.get("metrics_host"),
             f"config/capacity-model.json.guests[{index}].metrics_host",
@@ -562,13 +564,9 @@ def validate_capacity_model_payload(
         seen_names.add(name)
         if status == "active":
             if name not in inventory_guest_names:
-                raise ValueError(
-                    f"active capacity-model guest '{name}' must exist in inventory/hosts.yml"
-                )
+                raise ValueError(f"active capacity-model guest '{name}' must exist in inventory/hosts.yml")
         if metrics_host != name and status == "active":
-            raise ValueError(
-                f"active capacity-model guest '{name}' must use metrics_host equal to the guest name"
-            )
+            raise ValueError(f"active capacity-model guest '{name}' must use metrics_host equal to the guest name")
         allocated = resource_from_mapping(
             guest.get("allocated"),
             f"config/capacity-model.json.guests[{index}].allocated",
@@ -578,9 +576,7 @@ def validate_capacity_model_payload(
             f"config/capacity-model.json.guests[{index}].budget",
         )
         if allocated.ram_gb > budget.ram_gb or allocated.vcpu > budget.vcpu or allocated.disk_gb > budget.disk_gb:
-            raise ValueError(
-                f"config/capacity-model.json.guests[{index}] allocated resources must not exceed budget"
-            )
+            raise ValueError(f"config/capacity-model.json.guests[{index}] allocated resources must not exceed budget")
         for disk_index, path_value in enumerate(guest.get("disk_paths", ["/"])):
             require_str(
                 path_value,
@@ -594,8 +590,7 @@ def validate_capacity_model_payload(
             )
             if capacity_class not in CAPACITY_CLASSES:
                 raise ValueError(
-                    "config/capacity-model.json.guests["
-                    f"{index}].capacity_class must be one of {list(CAPACITY_CLASSES)}"
+                    f"config/capacity-model.json.guests[{index}].capacity_class must be one of {list(CAPACITY_CLASSES)}"
                 )
             if status != "planned":
                 raise ValueError(
@@ -603,15 +598,11 @@ def validate_capacity_model_payload(
                 )
 
     for missing_guest in sorted(inventory_guest_names - seen_names):
-        raise ValueError(
-            f"capacity-model coverage is missing inventory guest '{missing_guest}'"
-        )
+        raise ValueError(f"capacity-model coverage is missing inventory guest '{missing_guest}'")
 
     seen_reservations: set[str] = set()
     reservation_ram_total = 0.0
-    for index, item in enumerate(
-        require_list(payload.get("reservations"), "config/capacity-model.json.reservations")
-    ):
+    for index, item in enumerate(require_list(payload.get("reservations"), "config/capacity-model.json.reservations")):
         reservation = require_mapping(item, f"config/capacity-model.json.reservations[{index}]")
         identifier = require_str(
             reservation.get("id"),
@@ -634,9 +625,7 @@ def validate_capacity_model_payload(
             f"config/capacity-model.json.reservations[{index}].status",
         )
         if status not in {"reserved", "planned"}:
-            raise ValueError(
-                f"config/capacity-model.json.reservations[{index}].status must be reserved or planned"
-            )
+            raise ValueError(f"config/capacity-model.json.reservations[{index}].status must be reserved or planned")
         reserved = resource_from_mapping(
             reservation.get("reserved"),
             f"config/capacity-model.json.reservations[{index}].reserved",
@@ -677,9 +666,7 @@ def validate_capacity_model_payload(
                 )
             )
             if start > end:
-                raise ValueError(
-                    f"config/capacity-model.json.reservations[{index}].vmid_range.start must be <= end"
-                )
+                raise ValueError(f"config/capacity-model.json.reservations[{index}].vmid_range.start must be <= end")
             require_number(
                 reservation.get("max_concurrent_vms"),
                 f"config/capacity-model.json.reservations[{index}].max_concurrent_vms",
@@ -843,14 +830,9 @@ def validate_capacity_model_payload(
                 "config/capacity-model.json.runtime_pool_memory combined baseline RAM must be at least 40 GB"
             )
         if combined_max_ram_gb > 64:
-            raise ValueError(
-                "config/capacity-model.json.runtime_pool_memory combined max RAM must not exceed 64 GB"
-            )
+            raise ValueError("config/capacity-model.json.runtime_pool_memory combined max RAM must not exceed 64 GB")
         remaining_ram_after_runtime_pool_max = (
-            host_physical.ram_gb
-            - host_reserved_for_platform.ram_gb
-            - reservation_ram_total
-            - combined_max_ram_gb
+            host_physical.ram_gb - host_reserved_for_platform.ram_gb - reservation_ram_total - combined_max_ram_gb
         )
         if remaining_ram_after_runtime_pool_max < host_free_memory_floor_gb:
             raise ValueError(
@@ -887,9 +869,7 @@ def validate_capacity_model_payload(
                 1,
             )
             if smoke_vus > 3:
-                raise ValueError(
-                    f"config/capacity-model.json.service_load_profiles[{index}].smoke_vus must be <= 3"
-                )
+                raise ValueError(f"config/capacity-model.json.service_load_profiles[{index}].smoke_vus must be <= 3")
         if "request_timeout_seconds" in profile:
             require_number(
                 profile.get("request_timeout_seconds"),
@@ -913,9 +893,7 @@ def normalize_requester_class(value: str) -> str:
     normalized = value.strip().lower().replace(" ", "_")
     canonical = REQUESTER_CLASS_ALIASES.get(normalized)
     if canonical is None:
-        raise ValueError(
-            f"requester class '{value}' must be one of {sorted(REQUESTER_CLASS_ALIASES)}"
-        )
+        raise ValueError(f"requester class '{value}' must be one of {sorted(REQUESTER_CLASS_ALIASES)}")
     return canonical
 
 
@@ -936,9 +914,7 @@ def class_sources(model: CapacityModel) -> dict[str, list[str]]:
     for reservation in model.reservations:
         if reservation.capacity_class is None:
             continue
-        sources[reservation.capacity_class].append(
-            f"reservation:{reservation.identifier}[{reservation.kind}]"
-        )
+        sources[reservation.capacity_class].append(f"reservation:{reservation.identifier}[{reservation.kind}]")
     return sources
 
 
@@ -1076,20 +1052,14 @@ def check_capacity_class_request(
                 result["approved"] = True
                 result["borrowed_from"] = admitted_classes[1:]
                 result["admitted_classes"] = admitted_classes
-                result["conditions"].append(
-                    "Declared recovery drill approved with protected spillover."
-                )
+                result["conditions"].append("Declared recovery drill approved with protected spillover.")
                 return result
 
     if break_glass_borrow_classes:
         if not break_glass_ref:
-            result["reasons"].append(
-                "borrowing from protected classes requires explicit break-glass evidence"
-            )
+            result["reasons"].append("borrowing from protected classes requires explicit break-glass evidence")
         if duration_hours is None or duration_hours <= 0:
-            result["reasons"].append(
-                "borrowing from protected classes must declare a positive time-bounded duration"
-            )
+            result["reasons"].append("borrowing from protected classes must declare a positive time-bounded duration")
         if break_glass_ref and duration_hours is not None and duration_hours > 0:
             combined = primary_available
             admitted_classes = [primary_class]
@@ -1110,22 +1080,16 @@ def check_capacity_class_request(
                     f"Break-glass admission approved with evidence `{break_glass_ref}` for {duration_hours:g}h."
                 )
                 return result
-            result["reasons"].append(
-                "requested resources still exceed the combined available protected capacity"
-            )
+            result["reasons"].append("requested resources still exceed the combined available protected capacity")
 
     if canonical_requester == "preview":
         result["reasons"].append(
             "preview demand must remain within preview_burst and should spill to the auxiliary cloud domain before protected classes are borrowed"
         )
     elif canonical_requester == "standby":
-        result["reasons"].append(
-            "standby promotion requests must fit within the protected ha_reserved class"
-        )
+        result["reasons"].append("standby promotion requests must fit within the protected ha_reserved class")
     else:
-        result["reasons"].append(
-            "requested resources exceed the available class capacity for this admission rule"
-        )
+        result["reasons"].append("requested resources exceed the available class capacity for this admission rule")
     return result
 
 
@@ -1140,8 +1104,7 @@ def normalize_rows(raw_csv: str) -> list[dict[str, str]]:
 def influx_scalar_query(command: list[str], flux: str) -> dict[str, float]:
     remote_command = (
         "sudo influx query --raw --host http://127.0.0.1:8086 --org lv3 "
-        '--token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '
-        + shlex.quote(flux)
+        '--token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" ' + shlex.quote(flux)
     )
     result = subprocess.run(
         [*command, remote_command],
@@ -1206,20 +1169,21 @@ def collect_live_actuals(model: CapacityModel) -> tuple[HostActuals, dict[str, G
     if not ssh_command:
         return HostActuals(), {guest.name: GuestActuals() for guest in model.guests}, "unavailable"
 
-    metric_hosts = sorted({model.host.metrics_host} | {guest.metrics_host for guest in model.guests if guest.status == "active"})
+    metric_hosts = sorted(
+        {model.host.metrics_host} | {guest.metrics_host for guest in model.guests if guest.status == "active"}
+    )
     host_filter = build_host_filters(metric_hosts)
 
     memory_flux = (
         'from(bucket: "proxmox") '
-        '|> range(start: -7d) '
-        '|> filter(fn: (r) => r._measurement == "mem" and r._field == "used" and '
-        + f"({host_filter})) "
+        "|> range(start: -7d) "
+        '|> filter(fn: (r) => r._measurement == "mem" and r._field == "used" and ' + f"({host_filter})) "
         '|> group(columns: ["host"]) '
         "|> mean()"
     )
     cpu_flux = (
         'from(bucket: "proxmox") '
-        '|> range(start: -7d) '
+        "|> range(start: -7d) "
         '|> filter(fn: (r) => r._measurement == "cpu" and r.cpu == "cpu-total" and r._field == "usage_active" and '
         + f"({host_filter})) "
         '|> group(columns: ["host"]) '
@@ -1227,7 +1191,7 @@ def collect_live_actuals(model: CapacityModel) -> tuple[HostActuals, dict[str, G
     )
     disk_flux = (
         'from(bucket: "proxmox") '
-        '|> range(start: -24h) '
+        "|> range(start: -24h) "
         '|> filter(fn: (r) => r._measurement == "disk" and r._field == "used" and r.path == "/" and '
         + f"({host_filter})) "
         '|> group(columns: ["host"]) '
@@ -1243,9 +1207,7 @@ def collect_live_actuals(model: CapacityModel) -> tuple[HostActuals, dict[str, G
         guest_disk = disk_values.get(guest.metrics_host)
         guest_actuals[guest.name] = GuestActuals(
             memory_used_gb=(
-                memory_values[guest.metrics_host] / (1024**3)
-                if guest.metrics_host in memory_values
-                else None
+                memory_values[guest.metrics_host] / (1024**3) if guest.metrics_host in memory_values else None
             ),
             cpu_used_cores_p95=(
                 cpu_values[guest.metrics_host] / 100.0 * guest.allocated.vcpu
@@ -1257,9 +1219,7 @@ def collect_live_actuals(model: CapacityModel) -> tuple[HostActuals, dict[str, G
 
     host_actuals = HostActuals(
         memory_used_gb=(
-            memory_values[model.host.metrics_host] / (1024**3)
-            if model.host.metrics_host in memory_values
-            else None
+            memory_values[model.host.metrics_host] / (1024**3) if model.host.metrics_host in memory_values else None
         ),
         cpu_used_cores_p95=(
             cpu_values[model.host.metrics_host] / 100.0 * model.host.physical.vcpu
@@ -1267,9 +1227,7 @@ def collect_live_actuals(model: CapacityModel) -> tuple[HostActuals, dict[str, G
             else None
         ),
         disk_used_gb=(
-            disk_values[model.host.metrics_host] / (1024**3)
-            if model.host.metrics_host in disk_values
-            else None
+            disk_values[model.host.metrics_host] / (1024**3) if model.host.metrics_host in disk_values else None
         ),
     )
     return host_actuals, guest_actuals, "ssh+influx"
@@ -1301,16 +1259,24 @@ def runtime_pool_memory_headroom_after_max(model: CapacityModel) -> float | None
     )
 
 
-def calculate_committed(model: CapacityModel, *, include_planned: bool = False, include_reservations: bool = False) -> ResourceAmount:
-    guests = [guest for guest in model.guests if guest.status == "active" or (include_planned and guest.status == "planned")]
+def calculate_committed(
+    model: CapacityModel, *, include_planned: bool = False, include_reservations: bool = False
+) -> ResourceAmount:
+    guests = [
+        guest for guest in model.guests if guest.status == "active" or (include_planned and guest.status == "planned")
+    ]
     total = model.host.reserved_for_platform.add(totals_for_guests(guests, "allocated"))
     if include_reservations:
         total = total.add(totals_for_reservations(list(model.reservations)))
     return total
 
 
-def calculate_budgeted(model: CapacityModel, *, include_planned: bool = True, include_reservations: bool = True) -> ResourceAmount:
-    guests = [guest for guest in model.guests if guest.status == "active" or (include_planned and guest.status == "planned")]
+def calculate_budgeted(
+    model: CapacityModel, *, include_planned: bool = True, include_reservations: bool = True
+) -> ResourceAmount:
+    guests = [
+        guest for guest in model.guests if guest.status == "active" or (include_planned and guest.status == "planned")
+    ]
     total = model.host.reserved_for_platform.add(totals_for_guests(guests, "budget"))
     if include_reservations:
         total = total.add(totals_for_reservations(list(model.reservations)))
@@ -1373,7 +1339,9 @@ def render_text(report: CapacityReport) -> str:
             lines.append(base + "actual=n/a")
             continue
 
-        cpu_text = "CPU n/a" if actuals.cpu_used_cores_p95 is None else f"{actuals.cpu_used_cores_p95:.2f} cores CPU p95"
+        cpu_text = (
+            "CPU n/a" if actuals.cpu_used_cores_p95 is None else f"{actuals.cpu_used_cores_p95:.2f} cores CPU p95"
+        )
         disk_text = "disk n/a" if actuals.disk_used_gb is None else f"{actuals.disk_used_gb:.1f}GB disk"
         lines.append(base + f"actual={actuals.memory_used_gb:.1f}GB RAM, {cpu_text}, {disk_text}")
 
@@ -1393,10 +1361,7 @@ def render_text(report: CapacityReport) -> str:
                     f"{governance.host_free_memory_floor_gb:.1f} GB (remaining at pool max "
                     f"{remaining_ram:.1f} GB)"
                 ),
-                (
-                    "- Measurement and control: "
-                    f"{governance.metrics_source} via {governance.control_surface}"
-                ),
+                (f"- Measurement and control: {governance.metrics_source} via {governance.control_surface}"),
             ]
         )
         for pool in sorted(governance.pools, key=lambda item: item.admission_priority):
@@ -1681,17 +1646,11 @@ def check_capacity_gate(
 
     reasons: list[str] = []
     if projected.ram_gb > target.ram_gb:
-        reasons.append(
-            f"projected RAM commitment {projected.ram_gb:.1f} GB exceeds target {target.ram_gb:.1f} GB"
-        )
+        reasons.append(f"projected RAM commitment {projected.ram_gb:.1f} GB exceeds target {target.ram_gb:.1f} GB")
     if projected.vcpu > target.vcpu:
-        reasons.append(
-            f"projected vCPU commitment {projected.vcpu:.1f} exceeds target {target.vcpu:.1f}"
-        )
+        reasons.append(f"projected vCPU commitment {projected.vcpu:.1f} exceeds target {target.vcpu:.1f}")
     if projected.disk_gb > target.disk_gb:
-        reasons.append(
-            f"projected disk commitment {projected.disk_gb:.1f} GB exceeds target {target.disk_gb:.1f} GB"
-        )
+        reasons.append(f"projected disk commitment {projected.disk_gb:.1f} GB exceeds target {target.disk_gb:.1f} GB")
     return (not reasons, reasons)
 
 
@@ -1701,9 +1660,7 @@ def parse_proposed_changes(values: list[str]) -> list[ResourceAmount]:
         try:
             ram_text, vcpu_text, disk_text = raw.split(",", 2)
         except ValueError as exc:
-            raise ValueError(
-                f"--proposed-change #{index + 1} must use ram_gb,vcpu,disk_gb"
-            ) from exc
+            raise ValueError(f"--proposed-change #{index + 1} must use ram_gb,vcpu,disk_gb") from exc
         changes.append(
             ResourceAmount(
                 ram_gb=float(ram_text),

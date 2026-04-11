@@ -7,8 +7,12 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "superset.yml"
 SERVICE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "superset.yml"
-COLLECTION_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "superset.yml"
-COLLECTION_SERVICE_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "superset.yml"
+COLLECTION_PLAYBOOK_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "superset.yml"
+)
+COLLECTION_SERVICE_PLAYBOOK_PATH = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "superset.yml"
+)
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
@@ -50,7 +54,9 @@ def test_superset_service_wrappers_import_root_playbook_with_metadata() -> None:
     collection_wrapper_text = COLLECTION_SERVICE_PLAYBOOK_PATH.read_text()
 
     assert "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Superset." in root_wrapper_text
-    assert "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Superset." in collection_wrapper_text
+    assert (
+        "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Superset." in collection_wrapper_text
+    )
     assert yaml.safe_load(root_wrapper_text) == [{"import_playbook": "../superset.yml"}]
     assert yaml.safe_load(collection_wrapper_text) == [{"import_playbook": "../superset.yml"}]
     assert COLLECTION_PLAYBOOK_PATH.exists()

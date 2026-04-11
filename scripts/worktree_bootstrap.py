@@ -68,7 +68,9 @@ def validate_bootstrap_catalog(catalog: dict[str, Any]) -> None:
         defaults = {}
     if not isinstance(defaults, dict):
         raise ValueError("worktree bootstrap catalog defaults must be a mapping")
-    default_manifest_ids = _require_manifest_id_list(defaults.get("workflow_manifest_ids", []), "defaults.workflow_manifest_ids")
+    default_manifest_ids = _require_manifest_id_list(
+        defaults.get("workflow_manifest_ids", []), "defaults.workflow_manifest_ids"
+    )
 
     for manifest_id, manifest in manifests.items():
         if not isinstance(manifest, dict):
@@ -88,7 +90,9 @@ def validate_bootstrap_catalog(catalog: dict[str, Any]) -> None:
         for index, entry in enumerate(required_local_inputs):
             _validate_bootstrap_input(entry, f"manifests.{manifest_id}.required_local_inputs[{index}]", generated=False)
         for index, entry in enumerate(optional_read_only_caches):
-            _validate_bootstrap_input(entry, f"manifests.{manifest_id}.optional_read_only_caches[{index}]", generated=False)
+            _validate_bootstrap_input(
+                entry, f"manifests.{manifest_id}.optional_read_only_caches[{index}]", generated=False
+            )
 
     for manifest_id in default_manifest_ids:
         if manifest_id not in manifests:

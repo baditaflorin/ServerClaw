@@ -53,7 +53,9 @@ def _base_element(element_id: str, element_type: str, *, x: int, y: int, width: 
     }
 
 
-def rectangle(label: str, *, x: int, y: int, width: int = 220, height: int = 72, background: str = "#f8fafc") -> list[dict[str, Any]]:
+def rectangle(
+    label: str, *, x: int, y: int, width: int = 220, height: int = 72, background: str = "#f8fafc"
+) -> list[dict[str, Any]]:
     rect_id = _element_id("rect", label, str(x), str(y))
     text_id = _element_id("text", label, str(x), str(y))
     rect = _base_element(rect_id, "rectangle", x=x, y=y, width=width, height=height)
@@ -120,9 +122,13 @@ def render_network_topology(host_vars: dict[str, Any]) -> dict[str, Any]:
         background="#e0f2fe",
     )
     elements += rectangle("vmbr0 public uplink", x=360, y=180, background="#fef3c7")
-    elements += rectangle(f"vmbr10 guest LAN\n{host_vars['proxmox_internal_network']}", x=360, y=300, background="#dcfce7")
+    elements += rectangle(
+        f"vmbr10 guest LAN\n{host_vars['proxmox_internal_network']}", x=360, y=300, background="#dcfce7"
+    )
     elements += rectangle(f"nginx-lv3\n{guests['nginx-lv3']['ipv4']}", x=80, y=420, background="#fef9c3")
-    elements += rectangle(f"docker-runtime-lv3\n{guests['docker-runtime-lv3']['ipv4']}", x=360, y=420, background="#ede9fe")
+    elements += rectangle(
+        f"docker-runtime-lv3\n{guests['docker-runtime-lv3']['ipv4']}", x=360, y=420, background="#ede9fe"
+    )
     elements += rectangle(f"monitoring-lv3\n{guests['monitoring-lv3']['ipv4']}", x=640, y=420, background="#fee2e2")
     elements += rectangle(f"postgres-lv3\n{guests['postgres-lv3']['ipv4']}", x=920, y=420, background="#fce7f3")
     elements.append(arrow("internet-host", x=280, y=88, dx=80, dy=0))
@@ -187,19 +193,36 @@ def render_trust_tier_model(host_vars: dict[str, Any]) -> dict[str, Any]:
     authenticated = sorted(
         service["public_hostname"]
         for service in topology.values()
-        if service.get("public_hostname") in {"docs.localhost", "home.localhost", "langfuse.localhost", "logs.localhost", "n8n.localhost", "ops.localhost", "draw.localhost"}
+        if service.get("public_hostname")
+        in {
+            "docs.localhost",
+            "home.localhost",
+            "langfuse.localhost",
+            "logs.localhost",
+            "n8n.localhost",
+            "ops.localhost",
+            "draw.localhost",
+        }
     )
     private = sorted(
-        service["service_name"]
-        for service in topology.values()
-        if service.get("exposure_model") == "private-only"
+        service["service_name"] for service in topology.values() if service.get("exposure_model") == "private-only"
     )[:6]
     elements: list[dict[str, Any]] = []
     elements += rectangle("Public Edge\nnginx.localhost", x=80, y=60, height=96, background="#dbeafe")
-    elements += rectangle("Authenticated Edge\n" + "\n".join(authenticated[:4]), x=420, y=60, height=148, background="#e0e7ff")
+    elements += rectangle(
+        "Authenticated Edge\n" + "\n".join(authenticated[:4]), x=420, y=60, height=148, background="#e0e7ff"
+    )
     elements += rectangle("Private Runtime\n" + "\n".join(private[:4]), x=760, y=60, height=148, background="#dcfce7")
-    elements += rectangle("Tailnet / Host Access\n100.64.0.1 and private TCP proxies", x=1080, y=60, height=96, background="#fef3c7")
-    elements += rectangle("draw.localhost\nshared oauth2-proxy auth\n/socket.io/ split route", x=420, y=300, height=120, background="#ede9fe")
+    elements += rectangle(
+        "Tailnet / Host Access\n100.64.0.1 and private TCP proxies", x=1080, y=60, height=96, background="#fef3c7"
+    )
+    elements += rectangle(
+        "draw.localhost\nshared oauth2-proxy auth\n/socket.io/ split route",
+        x=420,
+        y=300,
+        height=120,
+        background="#ede9fe",
+    )
     elements += rectangle("10.10.10.20:3095\nfrontend", x=760, y=280, background="#f5f3ff")
     elements += rectangle("10.10.10.20:3096\ncollaboration room", x=760, y=420, background="#f5f3ff")
     elements.append(arrow("public-auth", x=300, y=120, dx=120, dy=0))
@@ -255,7 +278,9 @@ def scene_to_text(payload: dict[str, Any]) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Generate the committed Excalidraw architecture scenes.")
-    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR, help="Destination directory for generated scenes.")
+    parser.add_argument(
+        "--output-dir", type=Path, default=OUTPUT_DIR, help="Destination directory for generated scenes."
+    )
     parser.add_argument("--write", action="store_true", help="Write the generated scenes.")
     parser.add_argument("--check", action="store_true", help="Verify the generated scenes are current.")
     parser.add_argument("--stdout", action="store_true", help="Print a JSON summary of generated filenames.")
@@ -294,7 +319,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         print("Architecture diagrams OK")
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("architecture diagrams", exc)
 
 

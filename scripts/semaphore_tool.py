@@ -11,7 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, load_operator_auth
+from controller_automation_toolkit import emit_cli_error, repo_path, load_operator_auth
 from platform.ansible.semaphore import SemaphoreClient, SemaphoreError
 
 
@@ -89,7 +89,8 @@ def command_run_template(args) -> int:
         "template_id": int(template["id"]),
         "task_id": int(task["id"]),
         "status": task.get("status"),
-        "finished": task.get("status") not in {"waiting", "starting", "running", "stopping", "confirmed", "rejected", "waiting_confirmation"},
+        "finished": task.get("status")
+        not in {"waiting", "starting", "running", "stopping", "confirmed", "rejected", "waiting_confirmation"},
     }
     if args.wait:
         payload["raw_output"] = client.get_task_output(int(project["id"]), int(task["id"]))
