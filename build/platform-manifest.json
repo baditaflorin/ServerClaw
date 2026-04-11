@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.112",
+  "repo_version": "0.178.113",
   "platform_version": "0.178.77",
-  "generated_at": "2026-04-11T18:47:40Z",
-  "next_refresh_at": "2026-04-11T19:47:40Z",
+  "generated_at": "2026-04-11T19:12:43Z",
+  "next_refresh_at": "2026-04-11T20:12:43Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.111",
+    "last_version": "0.178.112",
     "deployed_at": "2026-04-11",
-    "summary": "fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars; postmortem documents 6 findings from Docker inception IoC test [docs] IoC value-flow architecture diagrams \u2014 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline",
-    "release_notes_url": "docs/release-notes/0.178.112.md"
+    "summary": "[adr-0410] Docker isolation testing and IoC completion \u2014 proposed architecture for parallel test topologies (micro/minimal/standard/extended profiles), subnet isolation (172.30.x.0/24 replacing 10.10.10.0/24), Docker-native CA/TLS via step-ca + Pebble, cert validator identity awareness, generator identity overlay, test scenario catalog with CI integration; ~41h estimated across 8 phases fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars; postmortem documents 6 findings from Docker inception IoC test",
+    "release_notes_url": "docs/release-notes/0.178.113.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

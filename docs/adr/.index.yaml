@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-11'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 439
+total_adrs: 443
 adr_number_range:
   first: '0001'
-  last: '0406'
-  next_available: '0407'
+  last: '0410'
+  next_available: '0411'
 implementation_status_summary:
   Implemented: 343
   Partial: 3
   Not Implemented: 33
   Deprecated: 5
   Accepted: 25
-  Proposed: 30
+  Proposed: 34
 decision_status_summary:
   Accepted: 340
-  Proposed: 36
+  Proposed: 40
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 7
+      count: 11
       first_adr: '0400'
-      last_adr: '0406'
+      last_adr: '0410'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -88,13 +88,13 @@ facets:
       count: 27
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 144
+      count: 146
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
     - concern: resilience
       path: docs/adr/index/by-concern/resilience.yaml
-      count: 6
+      count: 7
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
       count: 38
@@ -103,7 +103,7 @@ facets:
       count: 7
     - concern: testing
       path: docs/adr/index/by-concern/testing.yaml
-      count: 3
+      count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
       count: 38
@@ -131,26 +131,34 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 30
+      count: 34
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0409'
+  next_available_adr: '0411'
 latest_adrs:
-  - adr: '0408'
+  - adr: '0410'
+    title: — Docker Isolation Testing and IoC Completion
+    implementation_status: Proposed
+    concern: testing
+    path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md
+  - adr: 0409
+    title: — Zero-Sanitization Publication
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0409-zero-sanitization-publication.md
+  - adr: 0408
     title: Generic Inventory Hostnames
-    implementation_status: Implemented
-    concern: publication
+    implementation_status: Proposed
+    concern: platform
     path: docs/adr/0408-generic-inventory-hostnames.md
-    implemented_on: '2026-04-11'
   - adr: '0407'
     title: Generic-by-Default Codebase with Local Overlay
-    implementation_status: Implementing
-    concern: publication
+    implementation_status: Proposed
+    concern: resilience
     path: docs/adr/0407-generic-by-default-local-overlay-architecture.md
-    implemented_on: '2026-04-11'
   - adr: '0406'
     title: Automated DNS Propagation From Single IP Source of Truth
     implementation_status: Implemented
@@ -186,28 +194,6 @@ latest_adrs:
     concern: monitoring
     path: docs/adr/0401-remove-netdata.md
     implemented_on: '2026-04-10'
-  - adr: '0400'
-    title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
-    implementation_status: Implemented
-    concern: api
-    path: docs/adr/0400-homepage-dashboard-fidelity.md
-    implemented_on: '2026-04-10'
-  - adr: 0399
-    title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
-    implementation_status: Implemented
-    concern: ci-cd
-    path: docs/adr/0399-platform-reconciliation-daemon.md
-    implemented_on: '2026-04-10'
-  - adr: 0398
-    title: Outline Shared S3 Migration
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0398-outline-shared-s3-migration.md
-  - adr: 0397
-    title: Managed S3 Bucket Consumer Pattern
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0397-managed-s3-bucket-consumer-pattern.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

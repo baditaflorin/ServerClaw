@@ -21,8 +21,8 @@ adrs:
       - platform
       - operations
       - portal
-    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served from
-      the NGINX edge.
+    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served
+      from the NGINX edge.
     filename: 0074-platform-operations-portal.md
     path: docs/adr/0074-platform-operations-portal.md
     implemented_in_repo_version: 0.69.0
@@ -78,8 +78,8 @@ adrs:
       - across
       - platform
       - services
-    summary: 'We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime and
-      build a search indexer that ingests the six primary '
+    summary: We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime and build
+      a search indexer that ingests the six primary plat
     filename: 0095-unified-platform-search.md
     path: docs/adr/0095-unified-platform-search.md
     implemented_in_repo_version: 0.119.0

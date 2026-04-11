@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-11'
 facet: concern
 concern: platform
-total_adrs: 144
+total_adrs: 146
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -412,7 +412,7 @@ adrs:
       - automated
       - failover
     summary: We will provision a second PostgreSQL VM (postgres-replica, VMID 151) and implement Patroni-managed streaming
-      replication with automatic failover, keeping p
+      replication with automatic failover, keeping postg
     filename: 0098-postgres-high-availability.md
     path: docs/adr/0098-postgres-high-availability.md
     implemented_in_repo_version: 0.103.0
@@ -505,8 +505,8 @@ adrs:
       - public
       - status
       - page
-    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented by
-      an independent Uptime Robot probe set.
+    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented
+      by an independent Uptime Robot probe set.
     filename: 0109-public-status-page.md
     path: docs/adr/0109-public-status-page.md
     implemented_in_repo_version: 0.104.0
@@ -728,7 +728,7 @@ adrs:
       - service
       - dashboard
     summary: We run Homepage on docker-runtime as the unified LV3 service dashboard and generate its repo-managed configuration
-      directly from the canonical service and s
+      directly from the canonical service and subdo
     filename: 0152-homepage-for-unified-service-dashboard.md
     path: docs/adr/0152-homepage-for-unified-service-dashboard.md
     implemented_in_repo_version: 0.169.0
@@ -1041,8 +1041,8 @@ adrs:
       - vulnerability-scanning
       - container
       - registry
-    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
-      vulnerability scanning on every push integ'
+    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds:
+      Trivy-powered vulnerability scanning on every push i'
     filename: 0201-harbor-container-registry-with-cve-scanning.md
     path: docs/adr/0201-harbor-container-registry-with-cve-scanning.md
     implemented_in_repo_version: 0.177.63
@@ -2439,10 +2439,10 @@ adrs:
       - mempalace
       - integration
       - chat
-      - lv3
-      - org
-    summary: Implement unified cross-interface memory by connecting chat.example.com to MemPalace, enabling both Claude Code and
-      chat.example.com users to access a shared memory poo
+      - example
+      - com
+    summary: Implement unified cross-interface memory by connecting chat.example.com to MemPalace, enabling both Claude Code
+      and chat.example.com users to access a shared me
     filename: 0385-mempalace-chat-lv3-integration.md
     path: docs/adr/0385-mempalace-chat-lv3-integration.md
   - adr: 0387
@@ -2577,3 +2577,28 @@ adrs:
     summary: 'Every hand-authored YAML file that contains per-service blocks must wrap each block with:'
     filename: 0404-service-lifecycle-contract.md
     path: docs/adr/0404-service-lifecycle-contract.md
+  - adr: 0408
+    title: Generic Inventory Hostnames
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - generic
+      - inventory
+      - hostnames
+    summary: Rename all Ansible inventory hostnames from <role>-lv3 to <role> (production)
+    filename: 0408-generic-inventory-hostnames.md
+    path: docs/adr/0408-generic-inventory-hostnames.md
+  - adr: 0409
+    title: — Zero-Sanitization Publication
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - zero-sanitization
+      - publication
+    summary: 'Invert the publication model: committed code uses generic placeholder values'
+    filename: 0409-zero-sanitization-publication.md
+    path: docs/adr/0409-zero-sanitization-publication.md

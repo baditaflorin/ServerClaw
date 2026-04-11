@@ -184,8 +184,8 @@ adrs:
     date: '2026-03-21'
     concern: networking
     keywords:
-      - lv3
-      - org
+      - example
+      - com
       - dns
       - subdomain
       - model

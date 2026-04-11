@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 7
+total_adrs: 11
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -159,3 +159,57 @@ adrs:
     filename: 0406-automated-dns-propagation-from-single-ip-source-of-truth.md
     path: docs/adr/0406-automated-dns-propagation-from-single-ip-source-of-truth.md
     implemented_on: '2026-04-11'
+  - adr: '0407'
+    title: Generic-by-Default Codebase with Local Overlay
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - generic-by-default
+      - codebase
+      - local
+      - overlay
+    summary: 'Flip the model: make the committed codebase generic by default'
+    filename: 0407-generic-by-default-local-overlay-architecture.md
+    path: docs/adr/0407-generic-by-default-local-overlay-architecture.md
+  - adr: 0408
+    title: Generic Inventory Hostnames
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - generic
+      - inventory
+      - hostnames
+    summary: Rename all Ansible inventory hostnames from <role>-lv3 to <role> (production)
+    filename: 0408-generic-inventory-hostnames.md
+    path: docs/adr/0408-generic-inventory-hostnames.md
+  - adr: 0409
+    title: — Zero-Sanitization Publication
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - zero-sanitization
+      - publication
+    summary: 'Invert the publication model: committed code uses generic placeholder values'
+    filename: 0409-zero-sanitization-publication.md
+    path: docs/adr/0409-zero-sanitization-publication.md
+  - adr: '0410'
+    title: — Docker Isolation Testing and IoC Completion
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: testing
+    keywords:
+      - docker
+      - isolation
+      - testing
+      - ioc
+      - completion
+    summary: Replace the hardcoded 10.10.10.0/24 with a configurable subnet that avoids
+    filename: 0410-docker-isolation-testing-and-ioc-completion.md
+    path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md

@@ -255,8 +255,8 @@ adrs:
     date: '2026-03-21'
     concern: networking
     keywords:
-      - lv3
-      - org
+      - example
+      - com
       - dns
       - subdomain
       - model
@@ -1301,8 +1301,8 @@ adrs:
       - platform
       - operations
       - portal
-    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served from
-      the NGINX edge.
+    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served
+      from the NGINX edge.
     filename: 0074-platform-operations-portal.md
     path: docs/adr/0074-platform-operations-portal.md
     implemented_in_repo_version: 0.69.0
@@ -1512,7 +1512,7 @@ adrs:
       - role
       - distribution
     summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
-      internal Ansible Galaxy server (galaxy.example.com).
+      internal Ansible Galaxy server (galaxy.example.com)
     filename: 0086-ansible-collection-packaging.md
     path: docs/adr/0086-ansible-collection-packaging.md
     implemented_in_repo_version: 0.88.0
@@ -1614,8 +1614,8 @@ adrs:
       - platform
       - api
       - gateway
-    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service,
-      exposed on the host at http://10.10.10.20:8083 and
+    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service, exposed
+      on the host at http://10.10.10.20:8083 and pub
     filename: 0092-unified-platform-api-gateway.md
     path: docs/adr/0092-unified-platform-api-gateway.md
     implemented_in_repo_version: 0.101.0
@@ -1671,8 +1671,8 @@ adrs:
       - across
       - platform
       - services
-    summary: 'We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime and
-      build a search indexer that ingests the six primary '
+    summary: We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime and build
+      a search indexer that ingests the six primary plat
     filename: 0095-unified-platform-search.md
     path: docs/adr/0095-unified-platform-search.md
     implemented_in_repo_version: 0.119.0
@@ -1728,7 +1728,7 @@ adrs:
       - automated
       - failover
     summary: We will provision a second PostgreSQL VM (postgres-replica, VMID 151) and implement Patroni-managed streaming
-      replication with automatic failover, keeping p
+      replication with automatic failover, keeping postg
     filename: 0098-postgres-high-availability.md
     path: docs/adr/0098-postgres-high-availability.md
     implemented_in_repo_version: 0.103.0

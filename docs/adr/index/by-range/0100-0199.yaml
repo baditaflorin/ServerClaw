@@ -196,8 +196,8 @@ adrs:
       - public
       - status
       - page
-    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented by
-      an independent Uptime Robot probe set.
+    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented
+      by an independent Uptime Robot probe set.
     filename: 0109-public-status-page.md
     path: docs/adr/0109-public-status-page.md
     implemented_in_repo_version: 0.104.0
@@ -930,8 +930,8 @@ adrs:
       - api
       - integration
       - automation
-    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and
-      published at https://n8n.example.com.
+    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and published
+      at https://n8n.example.com.
     filename: 0151-n8n-for-webhook-and-api-integration-automation.md
     path: docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md
     implemented_in_repo_version: 0.148.0
@@ -949,7 +949,7 @@ adrs:
       - service
       - dashboard
     summary: We run Homepage on docker-runtime as the unified LV3 service dashboard and generate its repo-managed configuration
-      directly from the canonical service and s
+      directly from the canonical service and subdo
     filename: 0152-homepage-for-unified-service-dashboard.md
     path: docs/adr/0152-homepage-for-unified-service-dashboard.md
     implemented_in_repo_version: 0.169.0

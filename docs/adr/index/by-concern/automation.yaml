@@ -125,7 +125,7 @@ adrs:
       - role
       - distribution
     summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
-      internal Ansible Galaxy server (galaxy.example.com).
+      internal Ansible Galaxy server (galaxy.example.com)
     filename: 0086-ansible-collection-packaging.md
     path: docs/adr/0086-ansible-collection-packaging.md
     implemented_in_repo_version: 0.88.0
@@ -269,8 +269,8 @@ adrs:
       - api
       - integration
       - automation
-    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and
-      published at https://n8n.example.com.
+    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and published
+      at https://n8n.example.com.
     filename: 0151-n8n-for-webhook-and-api-integration-automation.md
     path: docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md
     implemented_in_repo_version: 0.148.0

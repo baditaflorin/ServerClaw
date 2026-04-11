@@ -140,8 +140,8 @@ adrs:
       - platform
       - api
       - gateway
-    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service,
-      exposed on the host at http://10.10.10.20:8083 and
+    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service, exposed
+      on the host at http://10.10.10.20:8083 and pub
     filename: 0092-unified-platform-api-gateway.md
     path: docs/adr/0092-unified-platform-api-gateway.md
     implemented_in_repo_version: 0.101.0

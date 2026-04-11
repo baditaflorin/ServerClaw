@@ -41,8 +41,8 @@ adrs:
       - across
       - platform
       - services
-    summary: 'We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime and
-      build a search indexer that ingests the six primary '
+    summary: We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime and build
+      a search indexer that ingests the six primary plat
     filename: 0095-unified-platform-search.md
     path: docs/adr/0095-unified-platform-search.md
     implemented_in_repo_version: 0.119.0

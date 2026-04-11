@@ -10,7 +10,7 @@ generated: '2026-04-11'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 30
+total_adrs: 34
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -284,7 +284,7 @@ adrs:
       - memory
       - system
       - integration
-    summary: Integrate MemPalace as the primary agent cross-session memory system for the proxmoxflorinserver platform.
+    summary: Integrate MemPalace as the primary agent cross-session memory system for the proxmox-hostserver platform.
     filename: 0384-mempalace-agent-memory-system.md
     path: docs/adr/0384-mempalace-agent-memory-system.md
   - adr: 0385
@@ -312,10 +312,10 @@ adrs:
       - mempalace
       - integration
       - chat
-      - lv3
-      - org
-    summary: Implement unified cross-interface memory by connecting chat.example.com to MemPalace, enabling both Claude Code and
-      chat.example.com users to access a shared memory poo
+      - example
+      - com
+    summary: Implement unified cross-interface memory by connecting chat.example.com to MemPalace, enabling both Claude Code
+      and chat.example.com users to access a shared me
     filename: 0385-mempalace-chat-lv3-integration.md
     path: docs/adr/0385-mempalace-chat-lv3-integration.md
   - adr: 0386
@@ -470,3 +470,57 @@ adrs:
     summary: 'Every hand-authored YAML file that contains per-service blocks must wrap each block with:'
     filename: 0404-service-lifecycle-contract.md
     path: docs/adr/0404-service-lifecycle-contract.md
+  - adr: '0407'
+    title: Generic-by-Default Codebase with Local Overlay
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - generic-by-default
+      - codebase
+      - local
+      - overlay
+    summary: 'Flip the model: make the committed codebase generic by default'
+    filename: 0407-generic-by-default-local-overlay-architecture.md
+    path: docs/adr/0407-generic-by-default-local-overlay-architecture.md
+  - adr: 0408
+    title: Generic Inventory Hostnames
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - generic
+      - inventory
+      - hostnames
+    summary: Rename all Ansible inventory hostnames from <role>-lv3 to <role> (production)
+    filename: 0408-generic-inventory-hostnames.md
+    path: docs/adr/0408-generic-inventory-hostnames.md
+  - adr: 0409
+    title: — Zero-Sanitization Publication
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - zero-sanitization
+      - publication
+    summary: 'Invert the publication model: committed code uses generic placeholder values'
+    filename: 0409-zero-sanitization-publication.md
+    path: docs/adr/0409-zero-sanitization-publication.md
+  - adr: '0410'
+    title: — Docker Isolation Testing and IoC Completion
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: testing
+    keywords:
+      - docker
+      - isolation
+      - testing
+      - ioc
+      - completion
+    summary: Replace the hardcoded 10.10.10.0/24 with a configurable subnet that avoids
+    filename: 0410-docker-isolation-testing-and-ioc-completion.md
+    path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md

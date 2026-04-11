@@ -25,8 +25,8 @@ adrs:
       - vulnerability-scanning
       - container
       - registry
-    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
-      vulnerability scanning on every push integ'
+    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds:
+      Trivy-powered vulnerability scanning on every push i'
     filename: 0201-harbor-container-registry-with-cve-scanning.md
     path: docs/adr/0201-harbor-container-registry-with-cve-scanning.md
     implemented_in_repo_version: 0.177.63

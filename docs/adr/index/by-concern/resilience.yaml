@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-11'
 facet: concern
 concern: resilience
-total_adrs: 6
+total_adrs: 7
 adrs:
   - adr: '0163'
     title: Platform-Wide Retry Taxonomy and Exponential Backoff
@@ -116,3 +116,17 @@ adrs:
       identity and metadata. A shared Ansible vars plugin '
     filename: 0373-service-registry-and-derived-defaults.md
     path: docs/adr/0373-service-registry-and-derived-defaults.md
+  - adr: '0407'
+    title: Generic-by-Default Codebase with Local Overlay
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - generic-by-default
+      - codebase
+      - local
+      - overlay
+    summary: 'Flip the model: make the committed codebase generic by default'
+    filename: 0407-generic-by-default-local-overlay-architecture.md
+    path: docs/adr/0407-generic-by-default-local-overlay-architecture.md

@@ -1,8 +1,9 @@
-# Release 0.178.112
+# Release 0.178.113
 
 - Date: 2026-04-11
 
 ## Summary
+- [adr-0410] Docker isolation testing and IoC completion — proposed architecture for parallel test topologies (micro/minimal/standard/extended profiles), subnet isolation (172.30.x.0/24 replacing 10.10.10.0/24), Docker-native CA/TLS via step-ca + Pebble, cert validator identity awareness, generator identity overlay, test scenario catalog with CI integration; ~41h estimated across 8 phases
 - fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars; postmortem documents 6 findings from Docker inception IoC test
 - [docs] IoC value-flow architecture diagrams — 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline
 - [adr-0409] Zero-sanitization publication — committed code fully generic; 129 files, 2,581 replacements; identity.yml uses example.com (real values in .local/identity.yml); topology host renamed to proxmox-host; public IPs→RFC 5737; 6 generated files gitignored; publication Tier C sanitization reduced from 128 to **0 files**

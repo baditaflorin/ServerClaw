@@ -913,8 +913,8 @@ adrs:
       - platform
       - operations
       - portal
-    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served from
-      the NGINX edge.
+    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served
+      from the NGINX edge.
     filename: 0074-platform-operations-portal.md
     path: docs/adr/0074-platform-operations-portal.md
     implemented_in_repo_version: 0.69.0
@@ -1124,7 +1124,7 @@ adrs:
       - role
       - distribution
     summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
-      internal Ansible Galaxy server (galaxy.example.com).
+      internal Ansible Galaxy server (galaxy.example.com)
     filename: 0086-ansible-collection-packaging.md
     path: docs/adr/0086-ansible-collection-packaging.md
     implemented_in_repo_version: 0.88.0
@@ -1226,8 +1226,8 @@ adrs:
       - platform
       - api
       - gateway
-    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service,
-      exposed on the host at http://10.10.10.20:8083 and
+    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service, exposed
+      on the host at http://10.10.10.20:8083 and pub
     filename: 0092-unified-platform-api-gateway.md
     path: docs/adr/0092-unified-platform-api-gateway.md
     implemented_in_repo_version: 0.101.0
@@ -1322,7 +1322,7 @@ adrs:
       - automated
       - failover
     summary: We will provision a second PostgreSQL VM (postgres-replica, VMID 151) and implement Patroni-managed streaming
-      replication with automatic failover, keeping p
+      replication with automatic failover, keeping postg
     filename: 0098-postgres-high-availability.md
     path: docs/adr/0098-postgres-high-availability.md
     implemented_in_repo_version: 0.103.0
@@ -1528,8 +1528,8 @@ adrs:
       - public
       - status
       - page
-    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented by
-      an independent Uptime Robot probe set.
+    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented
+      by an independent Uptime Robot probe set.
     filename: 0109-public-status-page.md
     path: docs/adr/0109-public-status-page.md
     implemented_in_repo_version: 0.104.0
@@ -2262,8 +2262,8 @@ adrs:
       - api
       - integration
       - automation
-    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and
-      published at https://n8n.example.com.
+    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and published
+      at https://n8n.example.com.
     filename: 0151-n8n-for-webhook-and-api-integration-automation.md
     path: docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md
     implemented_in_repo_version: 0.148.0
@@ -2281,7 +2281,7 @@ adrs:
       - service
       - dashboard
     summary: We run Homepage on docker-runtime as the unified LV3 service dashboard and generate its repo-managed configuration
-      directly from the canonical service and s
+      directly from the canonical service and subdo
     filename: 0152-homepage-for-unified-service-dashboard.md
     path: docs/adr/0152-homepage-for-unified-service-dashboard.md
     implemented_in_repo_version: 0.169.0
@@ -3268,8 +3268,8 @@ adrs:
       - vulnerability-scanning
       - container
       - registry
-    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
-      vulnerability scanning on every push integ'
+    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds:
+      Trivy-powered vulnerability scanning on every push i'
     filename: 0201-harbor-container-registry-with-cve-scanning.md
     path: docs/adr/0201-harbor-container-registry-with-cve-scanning.md
     implemented_in_repo_version: 0.177.63

@@ -434,7 +434,7 @@ adrs:
       - memory
       - system
       - integration
-    summary: Integrate MemPalace as the primary agent cross-session memory system for the proxmoxflorinserver platform.
+    summary: Integrate MemPalace as the primary agent cross-session memory system for the proxmox-hostserver platform.
     filename: 0384-mempalace-agent-memory-system.md
     path: docs/adr/0384-mempalace-agent-memory-system.md
   - adr: 0386
