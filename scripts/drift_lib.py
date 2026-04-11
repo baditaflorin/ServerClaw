@@ -25,10 +25,11 @@ from controller_automation_toolkit import load_json, load_yaml, repo_path, resol
 from platform.events import build_envelope
 from platform.retry import async_with_retry, policy_for_surface
 from platform.timeouts import default_timeout, resolve_timeout_seconds
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from platform.workstream_registry import load_active_workstreams
 
 
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
+HOST_VARS_PATH = TOPOLOGY_HOST_VARS_PATH  # ADR 0407: single source of truth in platform.repo
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 NATS_PUBLISH_POLICY = policy_for_surface("nats_publish")

@@ -6,7 +6,7 @@ Provision the named PostgreSQL role and database used by the repo-managed Dify r
 
 ## Use Case
 
-Run as part of `playbooks/dify.yml` before the runtime converges on `docker-runtime-lv3`.
+Run as part of `playbooks/dify.yml` before the runtime converges on `docker-runtime`.
 
 ## Inputs
 

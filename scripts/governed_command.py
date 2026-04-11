@@ -12,6 +12,7 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from command_catalog import (
@@ -44,7 +45,6 @@ SECRET_ENV_BINDINGS = {
     "bootstrap_ssh_private_key": "BOOTSTRAP_KEY",
     "nats_jetstream_admin_password": "LV3_NATS_PASSWORD_FILE",
 }
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 
@@ -66,7 +66,7 @@ def load_catalog_context() -> tuple[dict[str, Any], dict[str, Any], dict[str, An
 
 
 def load_controller_context() -> dict[str, Any]:
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
     bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])

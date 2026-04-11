@@ -6,4 +6,4 @@ The controller-driven bootstrap step can create a least-privilege Gitea read tok
 
 The role also renders a dedicated local inventory for `ansible-pull` so the
 checkout step can target `localhost` while the playbook still limits to the
-durable `proxmox_florin` alias.
+durable `proxmox-host` alias.

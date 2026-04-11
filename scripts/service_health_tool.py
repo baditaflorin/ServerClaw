@@ -43,17 +43,19 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HEALTH_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 _PRIVATE_RE = re.compile(r"https?://(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|100\.)")
 
@@ -73,12 +75,12 @@ def _load_vm_ip_map() -> dict[str, str]:
     try:
         import yaml  # type: ignore[import]
 
-        data = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
+        data = yaml.safe_load(TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8"))
         return {v["name"]: v.get("ipv4", "") for v in data.get("proxmox_vms", [])}
     except ImportError:
         pass
     # Fallback regex
-    text = HOST_VARS_PATH.read_text(encoding="utf-8")
+    text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     vms: dict[str, str] = {}
     current_name = ""
     for line in text.splitlines():

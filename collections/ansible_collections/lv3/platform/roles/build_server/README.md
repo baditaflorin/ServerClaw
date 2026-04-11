@@ -1,6 +1,6 @@
 # build_server
 
-Configures `docker-build-lv3` as the repository-managed build cache host.
+Configures `docker-build` as the repository-managed build cache host.
 
 Managed surfaces:
 

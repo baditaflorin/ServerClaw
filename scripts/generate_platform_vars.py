@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, repo_path
@@ -19,7 +20,6 @@ from validation_toolkit import require_int, require_list
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 IDENTITY_VARS_PATH = repo_path("inventory", "group_vars", "all", "identity.yml")
 PLATFORM_VARS_PATH = repo_path("inventory", "group_vars", "platform.yml")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
@@ -298,7 +298,7 @@ def service_url(scheme: str, host: str, port: int, suffix: str = "") -> str:
 
 def load_sources() -> tuple[dict[str, Any], dict[str, Any]]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
-    host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
+    host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
     # Merge identity vars (platform_domain, operator email/name, etc.) into host_vars
     # so HOST_VAR_TEMPLATE_RE can resolve {{ platform_domain }} in strings like
     # "nginx.{{ platform_domain }}". Identity vars are loaded second so host_vars
@@ -1001,7 +1001,7 @@ def build_platform_vars(
     platform_vars = {
         "platform_generation": {
             "stack_source": str(STACK_PATH.relative_to(repo_path())),
-            "host_vars_source": str(HOST_VARS_PATH.relative_to(repo_path())),
+            "host_vars_source": str(TOPOLOGY_HOST_VARS_PATH.relative_to(repo_path())),
         },
         "platform_host": {
             "id": host_id,

@@ -4,7 +4,7 @@ argument_specs:
     short_description: Install the identity-core health watchdog (ADR 0376).
     description:
       - Deploys a systemd timer that probes Keycloak, Step-CA, OpenBao, and
-        API Gateway every 15 seconds on runtime-control-lv3.
+        API Gateway every 15 seconds on runtime-control.
       - Auto-restarts services on consecutive health failures.
       - Sends ntfy notifications on failure and recovery.
     options:

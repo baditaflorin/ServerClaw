@@ -30,6 +30,7 @@ from mutation_audit import build_event, emit_event_best_effort
 from parse_lynis_report import DEFAULT_SUPPRESSIONS_PATH, load_suppressions, parse_path
 from glitchtip_event import emit_glitchtip_event
 from platform_observation_tool import maybe_read_secret_path, post_json_webhook
+from platform.repo import TOPOLOGY_HOST
 
 
 REPO_ROOT = repo_path()
@@ -43,7 +44,7 @@ DEFAULT_ENVIRONMENT = primary_environment()
 ENVIRONMENT_CHOICES = environment_choices()
 DEFAULT_LYNIS_HOSTS = {
     "production": [
-        "proxmox_florin",
+        TOPOLOGY_HOST,
         "docker-build-lv3",
         "docker-runtime-lv3",
         "backup-lv3",
@@ -53,7 +54,7 @@ DEFAULT_LYNIS_HOSTS = {
         "monitoring-lv3",
     ],
     "staging": [
-        "proxmox_florin",
+        TOPOLOGY_HOST,
         "docker-runtime-staging-lv3",
         "postgres-staging-lv3",
         "nginx-staging-lv3",

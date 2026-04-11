@@ -1,6 +1,6 @@
 ---
 # Purpose: Declare the supported variable contract for the Lago runtime role.
-# Use case: Loaded by Ansible before converging the Lago API, front-end, and smoke-verification runtime on docker-runtime-lv3.
+# Use case: Loaded by Ansible before converging the Lago API, front-end, and smoke-verification runtime on docker-runtime.
 # Inputs: lago_* paths, image pins, publication URLs, OpenBao inputs, and controller-local secrets.
 # Outputs: Machine-readable argument specs for the lago_runtime role.
 # Idempotency: Fully idempotent because this file only documents the role interface.

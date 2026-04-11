@@ -29,7 +29,7 @@
 # Last Updated: 2026-03-28
 argument_specs:
   main:
-    short_description: Prepare the Plane PostgreSQL database and login on postgres-lv3.
+    short_description: Prepare the Plane PostgreSQL database and login on postgres.
     options:
       plane_database_name:
         type: str

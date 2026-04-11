@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: Deploy the managed Gitea Actions runner on docker-build-lv3.
+    short_description: Deploy the managed Gitea Actions runner on docker-build.
     options:
       gitea_runner_site_dir:
         type: path

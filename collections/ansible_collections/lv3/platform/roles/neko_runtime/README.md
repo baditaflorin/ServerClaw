@@ -7,11 +7,11 @@ Deploy Neko remote desktop for interactive operator browser access via WebRTC.
 Neko (`m1k1o/neko`) provides a web-based remote desktop interface streamed via WebRTC to operator browsers. This role:
 
 - Pulls and runs the Neko Docker image
-- Configures signalling endpoint (TCP 8080, proxied via NGINX at `browser.lv3.org`)
+- Configures signalling endpoint (TCP 8080, proxied via NGINX at `browser.example.com`)
 - Enables WebRTC media streams (UDP RTP on 50000–60000 range)
 - Provides health checks and verification testing
 
-This role is typically deployed on a dedicated VM (`runtime-comms-lv3`, VMID 121) to prevent resource contention with other real-time services per ADR 0347.
+This role is typically deployed on a dedicated VM (`runtime-comms`, VMID 121) to prevent resource contention with other real-time services per ADR 0347.
 
 ## Role Variables
 
@@ -53,7 +53,7 @@ See `meta/argument_specs.yml` for formal argument validation.
 Minimal playbook:
 
 ```yaml
-- hosts: runtime-comms-lv3
+- hosts: runtime-comms
   become: true
   gather_facts: true
   roles:
@@ -65,7 +65,7 @@ Minimal playbook:
 With custom image and resolution:
 
 ```yaml
-- hosts: runtime-comms-lv3
+- hosts: runtime-comms
   become: true
   gather_facts: true
   roles:
@@ -103,9 +103,9 @@ python3 scripts/verify_neko_webrtc_session.py \
 ```
 Operator browser
        ↓
-nginx-lv3 (TLS termination)
+nginx-edge (TLS termination)
        ↓
-proxy pass → runtime-comms-lv3:8080 (Neko signalling)
+proxy pass → runtime-comms:8080 (Neko signalling)
 ```
 
 ### Media Path (UDP RTP → Direct from Host)
@@ -113,7 +113,7 @@ proxy pass → runtime-comms-lv3:8080 (Neko signalling)
 ```
 Neko container (UDP 50000–60000)
        ↓
-Proxmox host port forwarding (proxmox_florin.yml)
+Proxmox host port forwarding (proxmox-host.yml)
        ↓
 Operator network (Tailscale 100.64.0.0/10)
 ```
@@ -152,7 +152,7 @@ Expected: Rules forwarding UDP 50000–60000 from public interface to container 
 Verify NGINX proxy timeout is set correctly:
 
 ```bash
-grep proxy_read_timeout /etc/nginx/sites-enabled/browser.lv3.org.conf
+grep proxy_read_timeout /etc/nginx/sites-enabled/browser.example.com.conf
 # Should output: proxy_read_timeout 3600s;
 ```
 

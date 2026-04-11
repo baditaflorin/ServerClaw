@@ -166,8 +166,8 @@ argument_specs:
         elements: str
         required: false
         default:
-          - docker-runtime-lv3
-          - docker-runtime-staging-lv3
+          - docker-runtime
+          - docker-runtime
         description:
           - Inventory hosts where automatic Docker daemon restarts must fail closed by default.
   wait_port:

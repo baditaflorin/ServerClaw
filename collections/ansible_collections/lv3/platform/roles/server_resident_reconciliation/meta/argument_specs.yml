@@ -22,7 +22,7 @@ argument_specs:
       server_resident_reconciliation_repo_name:
         type: str
         required: false
-        default: proxmox_florin_server
+        default: platform_server
       server_resident_reconciliation_repo_branch:
         type: str
         required: false
@@ -35,7 +35,7 @@ argument_specs:
       server_resident_reconciliation_inventory_host:
         type: str
         required: false
-        default: proxmox_florin
+        default: proxmox-host
       server_resident_reconciliation_playbook_path:
         type: str
         required: false
@@ -43,7 +43,7 @@ argument_specs:
       server_resident_reconciliation_checkout_path:
         type: str
         required: false
-        default: /srv/proxmox_florin_server
+        default: /srv/platform_server
       server_resident_reconciliation_runtime_root:
         type: str
         required: false
@@ -93,7 +93,7 @@ argument_specs:
       server_resident_reconciliation_gitea_token_name:
         type: str
         required: false
-        default: proxmox-florin-ansible-pull
+        default: proxmox-host-ansible-pull
       server_resident_reconciliation_gitea_token_scopes:
         type: list
         elements: str

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Converge the repo-managed Dify runtime stack, bootstrap secrets, and verification hooks on `docker-runtime-lv3`.
+Converge the repo-managed Dify runtime stack, bootstrap secrets, and verification hooks on `docker-runtime`.
 
 ## Use Case
 

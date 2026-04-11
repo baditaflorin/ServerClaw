@@ -35,7 +35,7 @@
 # Last Updated: 2026-03-28
 argument_specs:
   main:
-    short_description: Converge the Plane runtime on docker-runtime-lv3.
+    short_description: Converge the Plane runtime on docker-runtime.
     options:
       plane_site_dir:
         type: path

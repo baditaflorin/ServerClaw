@@ -1,6 +1,6 @@
 ---
 # Purpose: Declare the supported variable contract for the Typesense runtime role.
-# Use case: Loaded by Ansible before converging the private Typesense search runtime on docker-runtime-lv3.
+# Use case: Loaded by Ansible before converging the private Typesense search runtime on docker-runtime.
 # Inputs: typesense_* paths, image pin, OpenBao settings, and controller-local secret references.
 # Outputs: Machine-readable argument specs for the typesense_runtime role.
 # Idempotency: Fully idempotent because this file only documents the role interface.

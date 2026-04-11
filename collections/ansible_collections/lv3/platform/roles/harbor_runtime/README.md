@@ -1,6 +1,6 @@
 # harbor_runtime
 
-Deploys Harbor on `docker-runtime-lv3` using the upstream online installer, publishes it behind the shared edge at `registry.lv3.org`, and bootstraps repo-managed operator and automation artifacts.
+Deploys Harbor on `docker-runtime` using the upstream online installer, publishes it behind the shared edge at `registry.example.com`, and bootstraps repo-managed operator and automation artifacts.
 
 Managed surfaces:
 

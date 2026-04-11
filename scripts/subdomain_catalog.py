@@ -5,6 +5,7 @@ import re
 import socket
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -25,7 +26,6 @@ from environment_catalog import configured_environment_ids
 
 SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 PUBLIC_EDGE_DEFAULTS_PATH = repo_path(
     "collections",
     "ansible_collections",
@@ -142,7 +142,7 @@ def load_subdomain_catalog() -> dict[str, Any]:
 
 
 def load_host_vars() -> dict[str, Any]:
-    return load_yaml_with_identity(HOST_VARS_PATH)
+    return load_yaml_with_identity(TOPOLOGY_HOST_VARS_PATH)
 
 
 def load_public_edge_defaults() -> dict[str, Any]:

@@ -5,6 +5,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
@@ -16,7 +17,6 @@ from validation_toolkit import require_list, require_mapping, require_str, requi
 
 
 CONTROL_PLANE_LANES_PATH = repo_path("config", "control-plane-lanes.json")
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 WORKFLOW_CATALOG_PATH = repo_path("config", "workflow-catalog.json")
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
@@ -55,13 +55,13 @@ def load_workflow_ids() -> set[str]:
 
 
 def load_service_and_owner_refs() -> tuple[set[str], set[str]]:
-    host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
+    host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     service_refs = {
         require_identifier(service_id, f"host_vars.lv3_service_topology.{service_id}") for service_id in topology
     }
 
-    owners = {require_identifier(HOST_VARS_PATH.stem, "host_vars host id")}
+    owners = {require_identifier(TOPOLOGY_HOST_VARS_PATH.stem, "host_vars host id")}
     guests = require_list(host_vars.get("proxmox_guests"), "host_vars.proxmox_guests")
     for index, guest in enumerate(guests):
         guest = require_mapping(guest, f"host_vars.proxmox_guests[{index}]")

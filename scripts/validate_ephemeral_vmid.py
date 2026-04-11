@@ -8,7 +8,6 @@ import argparse
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 
 
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 STACK_PATH = repo_path("versions", "stack.yaml")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 
@@ -49,7 +48,7 @@ def append_violation(violations: list[str], vmid: int, label: str, vmid_range: t
 
 def validate_ephemeral_vmid_ranges() -> list[str]:
     vmid_range = load_ephemeral_range()
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     stack = load_yaml(STACK_PATH)
     violations: list[str] = []
 

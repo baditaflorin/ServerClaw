@@ -11,7 +11,7 @@ argument_specs:
   main:
     short_description: Converge the Keycloak runtime, realm bootstrap, and brokered identities.
     description: >-
-      Converges the Keycloak identity service on docker-runtime-lv3.
+      Converges the Keycloak identity service on docker-runtime.
       Conventional variables (site_dir, secret_dir, compose_file, env_file, image, etc.) are
       automatically derived from the platform_service_registry via ADR 0373.
       Only service-specific variables are documented here.

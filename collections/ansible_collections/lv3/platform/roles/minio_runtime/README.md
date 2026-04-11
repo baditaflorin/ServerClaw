@@ -1,6 +1,6 @@
 # MinIO Runtime
 
-Converges the shared standalone MinIO runtime on `docker-runtime-lv3`.
+Converges the shared standalone MinIO runtime on `docker-runtime`.
 
 This role:
 

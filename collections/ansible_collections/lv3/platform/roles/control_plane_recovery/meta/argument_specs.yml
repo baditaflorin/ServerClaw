@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: Configure scheduled control-plane runtime backups on docker-runtime-lv3.
+    short_description: Configure scheduled control-plane runtime backups on docker-runtime.
     options:
       control_plane_recovery_runtime_root:
         type: path

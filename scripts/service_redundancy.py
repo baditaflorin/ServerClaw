@@ -6,6 +6,7 @@ import argparse
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -28,7 +29,6 @@ except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
 SERVICE_REDUNDANCY_PATH: Final = repo_path("config", "service-redundancy-catalog.json")
 SERVICE_REDUNDANCY_SCHEMA_PATH: Final = repo_path("docs", "schema", "service-redundancy-catalog.schema.json")
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
-HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 
 SHARED_POLICIES = load_shared_policy_packs()
 TIER_ORDER = SHARED_POLICIES.tier_order
@@ -96,7 +96,7 @@ def active_service_ids(service_catalog_index: dict[str, dict[str, Any]]) -> list
 
 
 def known_locations() -> set[str]:
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     guests = require_list(host_vars.get("proxmox_guests"), "inventory/host_vars/proxmox_florin.yml.proxmox_guests")
     locations = {"proxmox_florin"}
     for index, guest in enumerate(guests):

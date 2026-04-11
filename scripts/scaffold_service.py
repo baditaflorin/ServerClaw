@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from platform.repo import TOPOLOGY_HOST
 
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -259,7 +260,7 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
         playbook_dir=repo_root / "playbooks",
         service_playbook_dir=repo_root / "playbooks" / "services",
         workstreams_registry=repo_root / "workstreams.yaml",
-        host_vars_path=repo_root / "inventory" / "host_vars" / "proxmox_florin.yml",
+        host_vars_path=repo_root / "inventory" / "host_vars" / f"{TOPOLOGY_HOST}.yml",
         service_catalog_path=repo_root / "config" / "service-capability-catalog.json",
         subdomain_catalog_path=repo_root / "config" / "subdomain-catalog.json",
         health_probe_catalog_path=repo_root / "config" / "health-probe-catalog.json",
@@ -292,7 +293,7 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
 def resolve_vm_context(host_vars: dict[str, Any], vm: str, requested_vmid: int | None) -> tuple[int | None, str]:
     guests = host_vars.get("proxmox_guests", [])
     if not isinstance(guests, list):
-        raise ValueError("inventory/host_vars/proxmox_florin.yml.proxmox_guests must be a list")
+        raise ValueError(f"inventory/host_vars/{TOPOLOGY_HOST}.yml.proxmox_guests must be a list")
 
     for guest in guests:
         if not isinstance(guest, dict):
@@ -307,10 +308,10 @@ def resolve_vm_context(host_vars: dict[str, Any], vm: str, requested_vmid: int |
             raise ValueError(f"managed guest {vm} does not declare an ipv4 address")
         return int(guest_vmid), guest_ip
 
-    if vm == "proxmox_florin":
+    if vm == TOPOLOGY_HOST:
         private_ip = host_vars.get("management_tailscale_ipv4")
         if not isinstance(private_ip, str) or not private_ip:
-            raise ValueError("inventory/host_vars/proxmox_florin.yml.management_tailscale_ipv4 is missing")
+            raise ValueError(f"inventory/host_vars/{TOPOLOGY_HOST}.yml.management_tailscale_ipv4 is missing")
         return requested_vmid, private_ip
 
     raise ValueError(f"vm '{vm}' is not a managed guest or the Proxmox host id")
@@ -561,7 +562,7 @@ def insert_topology_block(host_vars_path: Path, spec: ServiceSpec) -> None:
         f"    service_name: {spec.service_name}",
         f"    owning_vm: {spec.vm}",
     ]
-    if spec.vm == "proxmox_florin":
+    if spec.vm == TOPOLOGY_HOST:
         lines.append('    private_ip: "{{ management_tailscale_ipv4 }}"')
     else:
         lines.append(

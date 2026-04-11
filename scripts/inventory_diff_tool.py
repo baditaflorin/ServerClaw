@@ -40,11 +40,11 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 CONTROLLER_SECRETS_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 
 
@@ -68,8 +68,8 @@ def _proxmox_host() -> str:
     env = os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
     if env:
         return env
-    ts = _yaml_scalar(HOST_VARS_PATH, "management_tailscale_ipv4")
-    return ts or _yaml_scalar(HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
+    ts = _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_tailscale_ipv4")
+    return ts or _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
 
 
 def _jump_user() -> str:
@@ -111,12 +111,12 @@ def _load_inventory_vms() -> list[dict[str, Any]]:
     try:
         import yaml  # type: ignore[import]
 
-        data = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
+        data = yaml.safe_load(TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8"))
         return data.get("proxmox_vms", [])
     except ImportError:
         pass
     # Fallback regex
-    text = HOST_VARS_PATH.read_text(encoding="utf-8")
+    text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     vms: list[dict[str, Any]] = []
     current: dict[str, Any] | None = None
     for line in text.splitlines():
@@ -343,7 +343,7 @@ def cmd_sync_inventory(args: argparse.Namespace) -> int:
         return 0
 
     # Apply: patch inventory file
-    text = HOST_VARS_PATH.read_text(encoding="utf-8")
+    text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
     in_block = False
     patched_fields: set[str] = set()
@@ -367,7 +367,7 @@ def cmd_sync_inventory(args: argparse.Namespace) -> int:
                     line = " " * indent + f"{field}: {live_val}\n"
                     patched_fields.add(field)
         new_lines.append(line)
-    HOST_VARS_PATH.write_text("".join(new_lines), encoding="utf-8")
+    TOPOLOGY_HOST_VARS_PATH.write_text("".join(new_lines), encoding="utf-8")
     print(json.dumps({"status": "applied", "vmid": args.vmid, "updated": changes}))
     return 0
 

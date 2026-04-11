@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: Converge the Langfuse runtime on docker-runtime-lv3.
+    short_description: Converge the Langfuse runtime on docker-runtime.
     options:
       langfuse_site_dir:
         type: path

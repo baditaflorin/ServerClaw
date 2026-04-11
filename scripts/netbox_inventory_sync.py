@@ -20,11 +20,12 @@ from controller_automation_toolkit import emit_cli_error, load_json, load_yaml
 from platform.retry import MaxRetriesExceeded, policy_for_surface, with_retry
 
 from platform.timeouts import TimeoutContext, default_timeout
+from platform.repo import TOPOLOGY_HOST
 
 
 HOSTNAME_PORT_PATTERN = re.compile(r":(\d+)(?:/|$)")
 TEMPLATE_PATTERN = re.compile(r"{{\s*([^{}]+?)\s*}}")
-HOSTVARS_REF_PATTERN = re.compile(r"^hostvars\['proxmox_florin'\]\.([a-zA-Z0-9_]+)$")
+HOSTVARS_REF_PATTERN = re.compile(r"^hostvars\[TOPOLOGY_HOST\]\.([a-zA-Z0-9_]+)$")
 GUEST_IP_EXPR_PATTERN = re.compile(
     r"^\(proxmox_guests \| selectattr\('name', 'equalto', '([^']+)'\) \| map\(attribute='ipv4'\) \| first\)$"
 )
@@ -325,9 +326,9 @@ def ensure_reference_inventory(
     )
     device = client.ensure(
         "/api/dcim/devices/",
-        lookup={"name": "proxmox_florin"},
+        lookup={"name": TOPOLOGY_HOST},
         payload={
-            "name": "proxmox_florin",
+            "name": TOPOLOGY_HOST,
             "site": site["id"],
             "role": device_role["id"],
             "device_type": device_type["id"],
@@ -554,7 +555,7 @@ def build_service_catalog(
     for service_id, service in topology.items():
         owning_vm = service["owning_vm"]
         private_ip = resolve_template_value(service.get("private_ip", ""), host_vars, guest_ips)
-        if owning_vm == "proxmox_florin":
+        if owning_vm == TOPOLOGY_HOST:
             private_ip = host_vars["management_tailscale_ipv4"]
         elif not private_ip or "{{" in str(private_ip):
             private_ip = guest_ips.get(owning_vm, str(service.get("private_ip", "")))
@@ -650,7 +651,7 @@ def ensure_service_inventory(
                 ]
             ),
         }
-        if service["owning_vm"] == "proxmox_florin":
+        if service["owning_vm"] == TOPOLOGY_HOST:
             payload["parent_object_type"] = "dcim.device"
             payload["parent_object_id"] = references["device"]["id"]
             lookup = {

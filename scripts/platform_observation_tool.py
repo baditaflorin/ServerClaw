@@ -35,6 +35,7 @@ from maintenance_window_tool import list_active_windows_best_effort, suppress_fi
 from glitchtip_event import emit_glitchtip_event
 from platform.degradation import default_state_path
 from platform.events import build_envelope
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from platform.health.semantics import (
     RUNTIME_STATE_DEGRADED,
     RUNTIME_STATE_FAILED,
@@ -51,7 +52,6 @@ HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 DEFAULT_OUTPUT_DIR = repo_path(".local", "platform-observation", "latest")
@@ -132,7 +132,7 @@ def iter_observation_images(catalog: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def load_observation_context() -> dict[str, Any]:
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
     bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])

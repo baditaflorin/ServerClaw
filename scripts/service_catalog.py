@@ -4,6 +4,7 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -27,7 +28,6 @@ except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
 SERVICE_CATALOG_SCHEMA_PATH: Final = repo_path("docs", "schema", "service-capability-catalog.schema.json")
 ADR_DIR: Final = repo_path("docs", "adr")
-HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 STACK_PATH: Final = repo_path("versions", "stack.yaml")
 WORKSTREAMS_PATH: Final = repo_path("workstreams.yaml")
 UPTIME_MONITORS_PATH: Final = repo_path("config", "uptime-kuma", "monitors.json")
@@ -275,7 +275,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
     if not services:
         raise ValueError("services must not be empty")
 
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     stack = load_yaml(STACK_PATH)
     monitor_catalog = load_json(UPTIME_MONITORS_PATH)
     topology = require_mapping(host_vars.get("lv3_service_topology"), "lv3_service_topology")

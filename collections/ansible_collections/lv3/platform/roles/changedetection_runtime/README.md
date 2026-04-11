@@ -21,4 +21,4 @@ remains after converge.
 
 Dependencies: ADR 0280 for the product boundary, ADR 0086 for backup scope,
 ADR 0124 for ntfy routing, and the shared docker runtime baseline on
-`docker-runtime-lv3`.
+`docker-runtime`.

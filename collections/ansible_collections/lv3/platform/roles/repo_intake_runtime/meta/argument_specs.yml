@@ -3,7 +3,7 @@ argument_specs:
   main:
     short_description: Deploy repo-intake runtime (ADR 0224)
     description: |
-      Deploy the self-service repository intake application on docker-runtime-lv3.
+      Deploy the self-service repository intake application on docker-runtime.
       Provides web form and JSON API for programmatic repository deployment requests.
     options:
       repo_intake_container_name:

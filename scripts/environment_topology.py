@@ -5,6 +5,7 @@ import ipaddress
 import re
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -19,7 +20,6 @@ from shared_policy_packs import load_shared_policy_packs
 ENVIRONMENT_TOPOLOGY_PATH = repo_path("config", "environment-topology.json")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 
 ALLOWED_ENVIRONMENT_STATUSES = {"active", "planned"}
 ALLOWED_TOPOLOGY_MODELS = {"single-node-shared-edge"}
@@ -352,7 +352,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         catalog = load_environment_topology()
-        host_vars = load_yaml(HOST_VARS_PATH)
+        host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
         validate_environment_topology(catalog, host_vars)
         if args.validate:
             service_catalog = load_json(SERVICE_CATALOG_PATH)

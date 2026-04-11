@@ -56,10 +56,12 @@ import subprocess
 import sys
 import textwrap
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -75,13 +77,13 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
     del sys.modules["platform"]
 
 from platform.locking import LockType, ResourceLockRegistry
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 
 # ---------------------------------------------------------------------------
 # Paths (mirrors fixture_manager.py conventions)
 # ---------------------------------------------------------------------------
 
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 CONTROLLER_SECRETS_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 RECEIPTS_DIR = REPO_ROOT / "receipts" / "vm-disk-resize"
 
@@ -118,10 +120,10 @@ def _proxmox_host() -> str:
     env = os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
     if env:
         return env
-    ts = _yaml_scalar(HOST_VARS_PATH, "management_tailscale_ipv4")
+    ts = _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_tailscale_ipv4")
     if ts:
         return ts
-    return _yaml_scalar(HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
+    return _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
 
 
 def _jump_user() -> str:
@@ -139,7 +141,7 @@ def _guest_user() -> str:
 
 def load_vm_catalog() -> list[dict[str, Any]]:
     """Parse the proxmox_vms list from inventory/host_vars/proxmox_florin.yml."""
-    text = HOST_VARS_PATH.read_text(encoding="utf-8")
+    text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     # Find the proxmox_vms block and extract each VM entry as a mini-dict.
     # We do simple regex parsing — avoids a hard PyYAML dep in a CLI tool.
     try:
@@ -738,7 +740,7 @@ def cmd_release_lock(args: argparse.Namespace) -> int:
 
 def _update_inventory_disk_gb(vmid: int, new_gb: int) -> None:
     """Patch the disk_gb for vmid in proxmox_florin.yml (in-place, minimal diff)."""
-    text = HOST_VARS_PATH.read_text(encoding="utf-8")
+    text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
     # Find the block for this vmid, then update the next disk_gb line after it.
     in_block = False
@@ -754,7 +756,7 @@ def _update_inventory_disk_gb(vmid: int, new_gb: int) -> None:
             line = " " * indent + f"disk_gb: {new_gb}\n"
             in_block = False  # only patch the first occurrence
         new_lines.append(line)
-    HOST_VARS_PATH.write_text("".join(new_lines), encoding="utf-8")
+    TOPOLOGY_HOST_VARS_PATH.write_text("".join(new_lines), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------

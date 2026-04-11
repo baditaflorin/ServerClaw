@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: Florin Badita-Nistor
+  author: Platform Operator
   description: Shared preflight validation for lv3.platform roles.
   license: MIT
   min_ansible_version: "2.17"

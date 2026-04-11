@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -35,7 +36,6 @@ IMMUTABLE_GUEST_REPLACEMENT_SCHEMA_PATH: Final = repo_path(
     "schema",
     "immutable-guest-replacement-catalog.schema.json",
 )
-HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 
 EDGE_EXPOSURES = {"edge-published", "edge-static"}
 CLASSIFICATIONS = {"edge", "stateful", "edge_and_stateful"}
@@ -70,14 +70,14 @@ def load_guest_replacement_catalog() -> dict[str, Any]:
 
 
 def load_inventory_guest_index() -> dict[str, dict[str, Any]]:
-    payload = load_yaml(HOST_VARS_PATH)
-    guests = require_list(payload.get("proxmox_guests"), "inventory/host_vars/proxmox_florin.yml.proxmox_guests")
+    payload = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+    guests = require_list(payload.get("proxmox_guests"), f"inventory/host_vars/{TOPOLOGY_HOST}.yml.proxmox_guests")
     index: dict[str, dict[str, Any]] = {}
     for guest_index, guest in enumerate(guests):
-        guest = require_mapping(guest, f"inventory/host_vars/proxmox_florin.yml.proxmox_guests[{guest_index}]")
+        guest = require_mapping(guest, f"inventory/host_vars/{TOPOLOGY_HOST}.yml.proxmox_guests[{guest_index}]")
         guest_name = require_str(
             guest.get("name"),
-            f"inventory/host_vars/proxmox_florin.yml.proxmox_guests[{guest_index}].name",
+            f"inventory/host_vars/{TOPOLOGY_HOST}.yml.proxmox_guests[{guest_index}].name",
         )
         index[guest_name] = guest
     return index
@@ -146,7 +146,7 @@ def validate_guest_replacement_catalog(catalog: dict[str, Any]) -> None:
         policy = require_mapping(policy, f"guests.{guest_name}")
         if guest_name not in inventory_guest_index:
             raise ValueError(
-                f"guests.{guest_name} must reference a known guest in inventory/host_vars/proxmox_florin.yml"
+                f"guests.{guest_name} must reference a known guest in inventory/host_vars/{TOPOLOGY_HOST}.yml"
             )
 
         hosted_services = active_services_by_guest.get(guest_name, [])

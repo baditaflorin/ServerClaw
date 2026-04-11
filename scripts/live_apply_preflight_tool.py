@@ -33,10 +33,12 @@ import json
 import subprocess
 import sys
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -49,10 +51,10 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
     del sys.modules["platform"]
 
 from platform.locking import LockType, ResourceLockRegistry
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 
 WORKSTREAMS_PATH = REPO_ROOT / "workstreams.yaml"
 CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 VALIDATION_GATE_PATH = REPO_ROOT / "config" / "validation-gate.json"
 PRE_PUSH_HOOK_PATH = REPO_ROOT / ".git" / "hooks" / "pre-push"
 

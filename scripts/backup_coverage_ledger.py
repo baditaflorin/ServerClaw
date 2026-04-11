@@ -9,19 +9,21 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from drift_lib import build_host_ssh_command, isoformat, load_controller_context, run_command, utc_now
 
 
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 REDUNDANCY_CATALOG_PATH = repo_path("config", "service-redundancy-catalog.json")
 DR_TARGETS_PATH = repo_path("config", "disaster-recovery-targets.json")
 RESTIC_FILE_CATALOG_PATH = repo_path("config", "restic-file-backup-catalog.json")
@@ -471,7 +473,7 @@ def evaluate_restic_asset(
 def build_backup_coverage_report(
     *,
     now: datetime | None = None,
-    host_vars_path: Path = HOST_VARS_PATH,
+    host_vars_path: Path = TOPOLOGY_HOST_VARS_PATH,
     redundancy_catalog_path: Path = REDUNDANCY_CATALOG_PATH,
     dr_targets_path: Path = DR_TARGETS_PATH,
     restic_catalog_path: Path = RESTIC_FILE_CATALOG_PATH,
@@ -616,7 +618,7 @@ def write_receipt(report: dict[str, Any], receipts_dir: Path) -> Path:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate the ADR 0271 backup coverage ledger.")
-    parser.add_argument("--host-vars", type=Path, default=HOST_VARS_PATH)
+    parser.add_argument("--host-vars", type=Path, default=TOPOLOGY_HOST_VARS_PATH)
     parser.add_argument("--redundancy-catalog", type=Path, default=REDUNDANCY_CATALOG_PATH)
     parser.add_argument("--dr-targets", type=Path, default=DR_TARGETS_PATH)
     parser.add_argument("--restic-catalog", type=Path, default=RESTIC_FILE_CATALOG_PATH)

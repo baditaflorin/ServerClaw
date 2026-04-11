@@ -12,9 +12,9 @@ from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from platform.workstream_registry import load_registry as load_workstream_registry
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 
 
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 DEPENDENCY_GRAPH_PATH = repo_path("config", "dependency-graph.json")
 OUTPUT_DIR = repo_path("docs", "diagrams")
 
@@ -259,7 +259,7 @@ def render_agent_coordination_map(workstreams: dict[str, Any]) -> dict[str, Any]
 
 
 def render_diagrams() -> dict[str, str]:
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     workstreams = load_workstream_registry(repo_root=repo_path(), include_archive=True)
     dependency_graph = load_json(DEPENDENCY_GRAPH_PATH)
 

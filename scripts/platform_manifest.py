@@ -15,6 +15,7 @@ from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, 
 from deployment_history import collect_live_apply_entries
 from maintenance_window_tool import list_active_windows_best_effort
 from slo_tracking import build_slo_status_entries
+from platform.repo import TOPOLOGY_HOST
 
 try:
     import jsonschema
@@ -507,7 +508,7 @@ def build_identity(static_config: dict[str, Any], stack: dict[str, Any]) -> dict
         "platform_name": static_config["identity"]["platform_name"],
         "operator": static_config["identity"]["operator"],
         "description": static_config["identity"]["description"],
-        "host_id": str(desired.get("host_id") or "proxmox_florin"),
+        "host_id": str(desired.get("host_id") or TOPOLOGY_HOST),
         "provider": str(desired.get("provider") or "hetzner-dedicated"),
     }
 

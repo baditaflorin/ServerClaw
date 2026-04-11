@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 import os
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -40,7 +41,6 @@ from agent_tool_registry import load_agent_tool_registry
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 ADR_DIR = repo_path("docs", "adr")
 RUNBOOK_DIR = repo_path("docs", "runbooks")
 BUILD_DIR = repo_path("build", "ops-portal")
@@ -1063,7 +1063,7 @@ def render_portal(
     public_edge_defaults = load_public_edge_defaults()
     agent_registry, _workflow_catalog = load_agent_registry_best_effort()
     stack = load_yaml(STACK_PATH)
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
 
     validate_environment_topology(environment_catalog, host_vars)
     validate_service_catalog(service_catalog)

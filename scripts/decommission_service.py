@@ -39,6 +39,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 from validation_toolkit import require_list, require_mapping
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, run_command, write_json
+from platform.repo import TOPOLOGY_HOST
 
 
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
@@ -115,13 +116,13 @@ CATALOG_REGISTRY: list[dict[str, str]] = [
     {"path": "config/ansible-role-idempotency.yml", "type": "yaml_dict_key", "list_key": "roles"},
     # --- YAML topology block: remove service key from lv3_service_topology dict ---
     {
-        "path": "inventory/host_vars/proxmox_florin.yml",
+        "path": f"inventory/host_vars/{TOPOLOGY_HOST}.yml",
         "type": "yaml_topology_block",
         "list_key": "lv3_service_topology",
     },
     # --- YAML var-prefix: remove <service_id>_* lines under a named parent dict ---
     {
-        "path": "inventory/host_vars/proxmox_florin.yml",
+        "path": f"inventory/host_vars/{TOPOLOGY_HOST}.yml",
         "type": "yaml_var_prefix",
         "parent_key": "platform_port_assignments",
     },
@@ -629,7 +630,7 @@ def _remove_from_yaml_topology_block(path: Path, list_key: str, service_id: str)
     Operates line-by-line to avoid clobbering comments and surrounding content.
     Scoped to the ``list_key`` section so only the service entry inside it is removed.
 
-    Used for ``lv3_service_topology`` in ``inventory/host_vars/proxmox_florin.yml``.
+    Used for ``lv3_service_topology`` in ``inventory/host_vars/{TOPOLOGY_HOST}.yml``.
     """
     if not path.is_file():
         return False
@@ -750,7 +751,7 @@ def _remove_from_yaml_var_prefix(path: Path, parent_key: str, service_id: str) -
 
     Operates line-by-line to preserve all comments and surrounding structure.
     Used to clean up standalone ``<service_id>_port: N`` entries under
-    ``platform_port_assignments`` in inventory/host_vars/proxmox_florin.yml.
+    ``platform_port_assignments`` in inventory/host_vars/{TOPOLOGY_HOST}.yml.
     """
     if not path.is_file():
         return False
@@ -1596,7 +1597,7 @@ def validate_catalog_registry(probe_service_id: str) -> list[str]:
             "yaml_topology_block",
             "yaml_marker_block",  # platform_services.yml — only docker-compose services; VMs are absent
             "json_array_flat",  # monitors.json — not all services have uptime monitors
-            "yaml_var_prefix",  # proxmox_florin.yml — not all services have port assignments
+            "yaml_var_prefix",  # topology host_vars — not all services have port assignments
         }
         if not found and kind not in OPTIONAL_CATALOG_TYPES:
             warnings.append(

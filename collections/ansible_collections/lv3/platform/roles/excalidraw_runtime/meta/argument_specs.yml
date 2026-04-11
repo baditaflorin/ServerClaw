@@ -3,7 +3,7 @@
 # Use case: Used by argument-spec validation before converging the Excalidraw frontend and room stack.
 #
 # Inputs (required):
-#   - excalidraw_runtime_site_dir (path, required): Runtime directory on docker-runtime-lv3.
+#   - excalidraw_runtime_site_dir (path, required): Runtime directory on docker-runtime.
 #   - excalidraw_runtime_compose_file (path, required): Rendered compose file path.
 #   - excalidraw_runtime_bootstrap_script (path, required): Frontend bootstrap script path.
 #   - excalidraw_runtime_app_container_name (str, required): Frontend container name.

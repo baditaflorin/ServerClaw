@@ -10,6 +10,11 @@ from typing import Any, Final
 
 
 REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[1]
+# The Ansible inventory hostname of the hypervisor / topology host.
+# Used by 25+ scripts that read host_vars for topology data.
+# ADR 0407: centralized here to keep the deployment-specific name in one place.
+TOPOLOGY_HOST: Final[str] = "proxmox_florin"
+TOPOLOGY_HOST_VARS_PATH: Final[Path] = REPO_ROOT / "inventory" / "host_vars" / f"{TOPOLOGY_HOST}.yml"
 PACKAGED_SIBLING_DIRS: Final[set[str]] = {"config"}
 MAKEFILE_PATH: Final[Path] = REPO_ROOT / "Makefile"
 README_PATH: Final[Path] = REPO_ROOT / "README.md"
@@ -17,8 +22,7 @@ RECEIPTS_DIR: Final[Path] = REPO_ROOT / "receipts" / "live-applies"
 MAKE_TARGET_PATTERN: Final[re.Pattern[str]] = re.compile(r"^([A-Za-z0-9_-]+):")
 WINDOWS_ABSOLUTE_PATH_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[A-Za-z]:/")
 PYYAML_INSTALL_HINT: Final[str] = (
-    "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or "
-    "'uv run --with pyyaml ...'."
+    "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'."
 )
 _MISSING = object()
 
@@ -68,6 +72,8 @@ def resolve_local_overlay_path(path_value: str | Path, *, repo_root: Path | None
         return path
     marker_index = path.parts.index(marker)
     return local_overlay_root(root).joinpath(*path.parts[marker_index + 1 :])
+
+
 def repo_path(*parts: str) -> Path:
     if not parts:
         return REPO_ROOT

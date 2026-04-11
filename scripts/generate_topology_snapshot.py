@@ -20,12 +20,15 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from platform.repo import TOPOLOGY_HOST
 import sys
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -282,12 +285,12 @@ def build_topology(
 ) -> dict:
     """Read inventory and return the topology snapshot dict."""
     hosts_yml_path = inventory_dir / "hosts.yml"
-    host_vars_path = inventory_dir / "host_vars" / "proxmox_florin.yml"
+    host_vars_path = inventory_dir / "host_vars" / f"{TOPOLOGY_HOST}.yml"
     platform_yml_path = inventory_dir / "group_vars" / "platform.yml"
 
     generated_from = [
         "inventory/hosts.yml",
-        "inventory/host_vars/proxmox_florin.yml",
+        f"inventory/host_vars/{TOPOLOGY_HOST}.yml",
         "inventory/group_vars/platform.yml",
     ]
 

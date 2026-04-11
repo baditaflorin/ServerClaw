@@ -7,7 +7,7 @@ argument_specs:
         type: int
         required: true
         description:
-          - Host port exposed by the gateway on runtime-control-lv3.
+          - Host port exposed by the gateway on runtime-control.
       api_gateway_sources:
         type: list
         elements: dict

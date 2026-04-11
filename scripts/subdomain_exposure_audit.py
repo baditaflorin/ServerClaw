@@ -22,6 +22,7 @@ from script_bootstrap import ensure_repo_root_on_path
 ensure_repo_root_on_path(__file__)
 
 from platform.datetime_compat import UTC, datetime
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from controller_automation_toolkit import emit_cli_error, repo_path, write_json
 from publication_contract import (
     publication_access_model,
@@ -35,7 +36,6 @@ import subdomain_catalog
 REGISTRY_PATH = repo_path("config", "subdomain-exposure-registry.json")
 REGISTRY_SCHEMA_PATH = repo_path("docs", "schema", "subdomain-exposure-registry.schema.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaults", "main.yml")
 GLOBAL_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 RECEIPTS_DIR = repo_path("receipts", "subdomain-exposure-audit")

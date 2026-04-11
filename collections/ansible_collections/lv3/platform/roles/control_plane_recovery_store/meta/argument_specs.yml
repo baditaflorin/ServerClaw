@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: Configure the backup-lv3 recovery store and recurring restore drills.
+    short_description: Configure the backup recovery store and recurring restore drills.
     options:
       control_plane_recovery_store_root:
         type: path

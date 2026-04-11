@@ -14,7 +14,7 @@ argument_specs:
       build_server_workspace:
         type: str
         required: false
-        default: /opt/builds/proxmox_florin_server
+        default: /opt/builds/platform_server
         description:
           - Remote workspace root used by build-server automation.
       build_server_packer_plugin_cache:

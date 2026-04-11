@@ -1,6 +1,6 @@
 ---
 # Purpose: Declare the validated input contract for the matrix_synapse_runtime role.
-# Use case: Used by Ansible argument validation before converging Matrix Synapse runtime state on docker-runtime-lv3.
+# Use case: Used by Ansible argument validation before converging Matrix Synapse runtime state on docker-runtime.
 #
 # Inputs (required):
 #   - matrix_synapse_site_dir (path, required): Runtime root directory.
@@ -39,7 +39,7 @@
 # Last Updated: 2026-03-29
 argument_specs:
   main:
-    short_description: Converge Matrix Synapse on docker-runtime-lv3.
+    short_description: Converge Matrix Synapse on docker-runtime.
     options:
       matrix_synapse_site_dir:
         type: path

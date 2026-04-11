@@ -26,6 +26,7 @@ from validation_toolkit import require_int, require_mapping
 REPO_ROOT = ensure_repo_root_on_path(__file__)
 
 from platform.datetime_compat import UTC, datetime, timedelta
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from controller_automation_toolkit import (
     emit_cli_error,
     load_json,
@@ -37,7 +38,6 @@ from controller_automation_toolkit import (
 from mutation_audit import build_event, emit_event_best_effort
 
 
-HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
@@ -92,7 +92,7 @@ def state_file_path() -> Optional[Path]:
 
 
 def load_controller_context() -> dict[str, Any]:
-    host_vars = load_yaml(HOST_VARS_PATH)
+    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
     bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])

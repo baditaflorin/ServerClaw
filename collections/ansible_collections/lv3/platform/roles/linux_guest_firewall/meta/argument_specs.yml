@@ -12,7 +12,7 @@ argument_specs:
       linux_guest_firewall_host_id:
         type: str
         required: false
-        default: proxmox_florin
+        default: proxmox-host
         description:
           - Inventory host ID that owns the canonical `network_policy` data.
       linux_guest_firewall_docker_bridge_chain_service_name:

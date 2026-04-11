@@ -107,7 +107,7 @@ argument_specs:
         type: path
         required: false
         description:
-          - Root directory on backup-lv3 used to store anonymized seed-data snapshots.
+          - Root directory on backup used to store anonymized seed-data snapshots.
       backup_vm_seed_snapshot_store_mode:
         type: str
         required: false
@@ -118,4 +118,4 @@ argument_specs:
         elements: str
         required: false
         description:
-          - Seed snapshot class directories created and verified on backup-lv3.
+          - Seed snapshot class directories created and verified on backup.

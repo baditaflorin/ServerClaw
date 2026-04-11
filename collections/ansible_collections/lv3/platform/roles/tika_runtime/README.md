@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Converge the private Apache Tika Server runtime on `docker-runtime-lv3` so the
+Converge the private Apache Tika Server runtime on `docker-runtime` so the
 RAG and document-ingestion pipelines can extract clean text and metadata from
 binary documents before embedding.
 
@@ -23,7 +23,7 @@ document-extraction service on the private guest network must match repo truth.
 
 ## Outputs
 
-- `/opt/tika/docker-compose.yml` on `docker-runtime-lv3`
+- `/opt/tika/docker-compose.yml` on `docker-runtime`
 - a running `tika` container listening on the internal guest network
 - verified `/version`, `/tika`, and `/meta` behavior on the live runtime
 

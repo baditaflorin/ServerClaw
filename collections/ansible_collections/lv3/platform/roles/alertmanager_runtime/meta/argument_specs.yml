@@ -3,7 +3,7 @@ argument_specs:
   main:
     short_description: Converge Alertmanager on the monitoring stack.
     description: >-
-      Converges the Alertmanager system package on monitoring-lv3.
+      Converges the Alertmanager system package on monitoring.
       Conventional variables (package, service_name, env_file, config_file, data_dir)
       are automatically derived from the platform_service_registry via ADR 0373.
       Only service-specific variables are documented here.

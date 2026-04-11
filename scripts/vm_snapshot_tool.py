@@ -51,10 +51,12 @@ import re
 import subprocess
 import sys
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -70,13 +72,13 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
     del sys.modules["platform"]
 
 from platform.locking import LockType, ResourceLockRegistry
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
 
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 CONTROLLER_SECRETS_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 RECEIPTS_DIR = REPO_ROOT / "receipts" / "vm-snapshots"
 
@@ -104,8 +106,8 @@ def _proxmox_host() -> str:
     env = os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
     if env:
         return env
-    ts = _yaml_scalar(HOST_VARS_PATH, "management_tailscale_ipv4")
-    return ts or _yaml_scalar(HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
+    ts = _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_tailscale_ipv4")
+    return ts or _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
 
 
 def _jump_user() -> str:
@@ -162,7 +164,7 @@ def _require_ok(result: subprocess.CompletedProcess, label: str) -> None:
 
 def load_vm_catalog() -> list[dict[str, Any]]:
     """Parse proxmox_guests list from host_vars/proxmox_florin.yml."""
-    text = HOST_VARS_PATH.read_text(encoding="utf-8")
+    text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     try:
         import yaml  # type: ignore[import]
 

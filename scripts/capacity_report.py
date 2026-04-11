@@ -21,6 +21,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 from validation_toolkit import require_list, require_mapping, require_str
 
 from shared_policy_packs import load_shared_policy_packs
+from platform.repo import TOPOLOGY_HOST
 
 
 CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
@@ -532,13 +533,13 @@ def validate_capacity_model_payload(
     }
 
     inventory_hosts = load_inventory_hosts(inventory_path)
-    proxmox_host = inventory_hosts.get("proxmox_florin")
+    proxmox_host = inventory_hosts.get(TOPOLOGY_HOST)
     if not proxmox_host:
-        raise ValueError("inventory/hosts.yml must define proxmox_florin under proxmox_hosts")
+        raise ValueError(f"inventory/hosts.yml must define {TOPOLOGY_HOST} under proxmox_hosts")
 
     seen_vmids: set[int] = set()
     seen_names: set[str] = set()
-    inventory_guest_names = {name for name in inventory_hosts if name != "proxmox_florin"}
+    inventory_guest_names = {name for name in inventory_hosts if name != TOPOLOGY_HOST}
     for index, item in enumerate(require_list(payload.get("guests"), "config/capacity-model.json.guests")):
         guest = require_mapping(item, f"config/capacity-model.json.guests[{index}]")
         vmid = int(require_number(guest.get("vmid"), f"config/capacity-model.json.guests[{index}].vmid", 1))
@@ -1128,7 +1129,7 @@ def influx_scalar_query(command: list[str], flux: str) -> dict[str, float]:
 def ssh_monitoring_command() -> list[str] | None:
     key_path = bootstrap_key_path()
     inventory_hosts = load_inventory_hosts()
-    jump_host = inventory_hosts.get("proxmox_florin")
+    jump_host = inventory_hosts.get(TOPOLOGY_HOST)
     monitoring_host = inventory_hosts.get("monitoring-lv3")
     if not key_path or not jump_host or not monitoring_host:
         return None

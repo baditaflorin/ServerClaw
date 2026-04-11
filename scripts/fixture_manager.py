@@ -25,6 +25,7 @@ import urllib.request
 from urllib.parse import urlparse
 from dataclasses import dataclass
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 import vmid_allocator
@@ -43,7 +44,6 @@ FIXTURE_LOCKS_DIR = FIXTURE_LOCAL_ROOT / "locks"
 CONTROLLER_SECRETS_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 TEMPLATE_MANIFEST_PATH = REPO_ROOT / "config" / "vm-template-manifest.json"
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 PROXMOX_ENV_KEYS = ("TF_VAR_proxmox_endpoint", "TF_VAR_proxmox_api_token")
 TOFU_IMAGE = os.environ.get("TOFU_IMAGE", "registry.localhost/check-runner/infra:2026.03.23")
 TOFU_PLATFORM = os.environ.get("TOFU_PLATFORM", "linux/amd64")
@@ -340,14 +340,14 @@ def controller_secret_path(secret_id: str) -> Path:
 
 def default_fixture_context() -> dict[str, str]:
     proxmox_node_name = yaml_scalar(
-        HOST_VARS_PATH,
+        TOPOLOGY_HOST_VARS_PATH,
         "proxmox_node_name",
-        yaml_scalar(HOST_VARS_PATH, "host_public_hostname", "proxmox_florin"),
+        yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "host_public_hostname", "proxmox_florin"),
     )
     jump_host = yaml_scalar(
-        HOST_VARS_PATH,
+        TOPOLOGY_HOST_VARS_PATH,
         "management_tailscale_ipv4",
-        yaml_scalar(HOST_VARS_PATH, "management_ipv4", "65.108.75.123"),
+        yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "65.108.75.123"),
     )
     return {
         "node_name": proxmox_node_name,
@@ -1231,7 +1231,7 @@ def converge_roles(receipt: dict[str, Any], *, skip_roles: bool = False) -> None
             "hosts": "fixture",
             "gather_facts": True,
             "become": True,
-            "vars_files": [str(GROUP_VARS_PATH), str(HOST_VARS_PATH)],
+            "vars_files": [str(GROUP_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH)],
             "vars": play_vars,
             "roles": roles,
         }

@@ -14,6 +14,7 @@ import tarfile
 import tempfile
 from pathlib import Path
 from typing import Any
+from platform.repo import TOPOLOGY_HOST
 
 
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -32,7 +33,7 @@ REQUIRED_SNAPSHOT_FILES = (
     "docs/runbooks/disaster-recovery.md",
     "inventory/hosts.yml",
     "inventory/group_vars/all.yml",
-    "inventory/host_vars/proxmox_florin.yml",
+    f"inventory/host_vars/{TOPOLOGY_HOST}.yml",
     "versions/stack.yaml",
 )
 REQUIRED_SNAPSHOT_PREFIXES = (

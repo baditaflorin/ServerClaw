@@ -26,7 +26,7 @@
 # Last Updated: 2026-03-30
 argument_specs:
   main:
-    short_description: Prepare the Vikunja PostgreSQL database and login on postgres-lv3.
+    short_description: Prepare the Vikunja PostgreSQL database and login on postgres.
     options:
       vikunja_database_name:
         type: str

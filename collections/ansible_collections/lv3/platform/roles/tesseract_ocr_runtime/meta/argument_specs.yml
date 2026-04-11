@@ -1,5 +1,5 @@
 # Purpose: Declare the argument contract for the private Tesseract OCR runtime role.
-# Use case: Run during syntax and argument validation before converging ADR 0286 on docker-runtime-lv3.
+# Use case: Run during syntax and argument validation before converging ADR 0286 on docker-runtime.
 # Inputs: tesseract_ocr_runtime_* variables required by the role.
 # Outputs: Machine-readable argument specs for the tesseract_ocr_runtime role.
 # Idempotency: Fully idempotent; metadata only validates role inputs.

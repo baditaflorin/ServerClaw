@@ -29,6 +29,7 @@ from governed_command import execute_governed_command
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
 from maintenance_window_tool import list_active_windows_best_effort
 from platform.use_cases.serverclaw_skills import list_serverclaw_skill_packs
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -42,7 +43,6 @@ TOOL_SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "agent-tool.json")
 REGISTRY_SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "agent-tool-registry.json")
 AUDIT_SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "governed-tool-call-audit-event.json")
 STACK_PATH: Final[Path] = repo_path("versions", "stack.yaml")
-HOST_VARS_PATH: Final[Path] = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 SERVICE_CATALOG_PATH: Final[Path] = repo_path("config", "service-capability-catalog.json")
 AUDIT_LOG_ENV: Final[str] = "LV3_AGENT_TOOL_AUDIT_LOG_PATH"
 PLATFORM_CONTEXT_TOKEN_ENV: Final[str] = "LV3_PLATFORM_CONTEXT_API_TOKEN_FILE"
@@ -392,7 +392,7 @@ def resolve_service_base_url(service_id: str, *, env_var: str | None = None) -> 
 
 def tool_get_platform_status(_tool: dict[str, Any], _args: dict[str, Any]) -> dict[str, Any]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
-    host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
+    host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     public_services = sorted(
         service["public_hostname"]
@@ -1291,7 +1291,7 @@ def tool_mempalace_search(_tool: dict[str, Any], args: dict[str, Any]) -> dict[s
     import subprocess
 
     query = require_str(args.get("query"), "arguments.query")
-    wing = args.get("wing", "proxmox_florin")
+    wing = args.get("wing", TOPOLOGY_HOST)
     limit = args.get("limit", 10)
 
     try:
@@ -1349,7 +1349,7 @@ def tool_mempalace_add_drawer(_tool: dict[str, Any], args: dict[str, Any]) -> di
     import subprocess
 
     content = require_str(args.get("content"), "arguments.content")
-    wing = args.get("wing", "proxmox_florin")
+    wing = args.get("wing", TOPOLOGY_HOST)
     room = args.get("room", "discoveries")
 
     try:
@@ -1391,7 +1391,7 @@ def tool_mempalace_wake_up(_tool: dict[str, Any], args: dict[str, Any]) -> dict[
     """Load critical facts from MemPalace at session start."""
     import subprocess
 
-    wing = args.get("wing", "proxmox_florin")
+    wing = args.get("wing", TOPOLOGY_HOST)
 
     try:
         result = subprocess.run(

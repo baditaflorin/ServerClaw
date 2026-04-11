@@ -1,7 +1,7 @@
 # rag_context_runtime
 
 Deploys the private platform context API, its Qdrant-backed retrieval index,
-and the ADR 0263 ServerClaw memory substrate on `docker-runtime-lv3`.
+and the ADR 0263 ServerClaw memory substrate on `docker-runtime`.
 
 Inputs: Docker compose paths, Qdrant image, shared PostgreSQL DSN, local
 embedding backend settings, controller-local API token path, and repo corpus

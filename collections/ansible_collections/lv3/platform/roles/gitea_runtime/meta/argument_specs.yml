@@ -3,7 +3,7 @@ argument_specs:
   main:
     short_description: Converge the private Gitea runtime, bootstrap admin access, and prepare CI artifacts.
     description: >-
-      Converges the private Gitea service on docker-runtime-lv3.
+      Converges the private Gitea service on docker-runtime.
       Conventional variables (site_dir, data_dir, compose_file, env_file, image, etc.) are
       automatically derived from the platform_service_registry via ADR 0373.
       Only service-specific variables are documented here.

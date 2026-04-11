@@ -7,6 +7,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -18,7 +19,6 @@ from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, 
 from shared_policy_packs import load_shared_policy_packs
 
 
-HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 ENVIRONMENT_TOPOLOGY_PATH: Final = repo_path("config", "environment-topology.json")
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
 
@@ -52,7 +52,7 @@ def normalize_tag_token(value: str) -> str:
 
 
 def load_host_vars() -> dict[str, Any]:
-    return require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
+    return require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
 
 
 def load_environment_topology() -> dict[str, Any]:
