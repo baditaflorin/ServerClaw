@@ -178,7 +178,7 @@ live_apply_evidence:
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
-  management_ipv4: 203.0.113.1
+  management_ipv4: 65.108.75.123
   base_os:
     family: debian
     major: 13
@@ -441,7 +441,7 @@ desired_state:
     notifications_email: operator@example.com
   dns:
     zone: example.com
-    public_ipv4_target: 203.0.113.1
+    public_ipv4_target: 65.108.75.123
     initial_subdomains:
       - mail.example.com
       - proxmox.example.com
@@ -629,7 +629,7 @@ observed_state:
     mail_queue_empty_after_probe: true
   dns:
     zone: example.com
-    root_a: 203.0.113.1
+    root_a: 65.108.75.123
     root_aaaa_present: false
     root_aaaa_matches_current_host_ipv6: false
     created_a_subdomains:
