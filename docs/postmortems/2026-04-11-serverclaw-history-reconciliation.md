@@ -130,7 +130,7 @@ Before publishing, two rounds of redaction were needed:
 | `2026-04-11-full-credential-rotation-convergence.md` | Gitea token suffix `...6807f3` | Replaced with generic description |
 
 The publish script's built-in leak detector caught the Semaphore password
-(`62r4JXGau0hOjYdSLIPJL4yPNkoejC99`) before it could reach the public repo.
+(`[REDACTED — rotated]`) before it could reach the public repo.
 Even though these credentials are all rotated and invalid, publishing old
 values in documentation is an anti-pattern.
 
