@@ -1,8 +1,9 @@
-# Release 0.178.101
+# Release 0.178.102
 
 - Date: 2026-04-11
 
 ## Summary
+- static analysis gate: ruff/bandit/pyright pre-commit hooks; three new validation-gate lanes (python-type-safety, cross-catalog-integrity, waiver-escalation-proofs); Z3 formal verification of waiver escalation state machine (6 proofs + 19 test vectors); cross-catalog referential integrity checker; full ruff format pass across scripts/ and tests/
 - [publish] Prepare repository for public GitHub release at baditaflorin/ServerClaw — scrub PII, replace identity.yml with placeholders, remove credential files, add AI-native README positioning, clean CLAUDE.md for public consumption
 - fix: Remove duplicate excalidraw topology block in proxmox_florin.yml that caused exposure_model to be overridden to private-only; changelog portal generation unblocked
 - NetBox infrastructure deployment converged successfully — preflight hang fixed (follow: false on find task), token provisioning retry timeout increased to 300s, verification tasks conditionalized on token definition, ops/password credentials provisioned to .local/netbox/
