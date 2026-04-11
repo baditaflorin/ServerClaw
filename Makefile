@@ -1765,3 +1765,13 @@ docker-dev-reset: ## Destroy and recreate Docker dev environment
 	$(MAKE) docker-dev-down
 	docker volume ls -q --filter name=serverclaw | xargs -r docker volume rm 2>/dev/null || true
 	$(MAKE) docker-dev-up
+
+# =============================================================================
+# Publication — sync to public ServerClaw repo
+# =============================================================================
+
+publish-serverclaw: ## Dry-run: sanitize repo and check for leaks (no push)
+	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/publish_to_serverclaw.py
+
+publish-serverclaw-push: ## Sanitize and push to public ServerClaw repo
+	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/publish_to_serverclaw.py --push

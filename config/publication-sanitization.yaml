@@ -1,0 +1,104 @@
+# =============================================================================
+# Publication Sanitization Map
+# =============================================================================
+# Used by scripts/publish_to_serverclaw.py to transform the private repo
+# into the public ServerClaw repo. This file stays in the private repo only.
+# =============================================================================
+schema_version: "1.0.0"
+
+# --- Tier A: Whole-file replacements ---
+# These files differ structurally between private and public.
+# Replace entirely with the template version.
+file_replacements:
+  - source: inventory/group_vars/all/identity.yml
+    template: publication/templates/identity.yml
+  - source: inventory/hosts.yml
+    template: publication/templates/hosts.yml
+  - source: config/operators.yaml
+    template: publication/templates/operators.yaml
+  - source: inventory/host_vars/proxmox_florin.yml
+    template: publication/templates/proxmox_florin.yml
+
+# --- Tier C: Regex replacements ---
+# Applied to ALL text files not in tier A. Order matters: longer patterns first.
+string_replacements:
+  # Domain (must come before shorter patterns)
+  - pattern: "lv3\\.org"
+    replacement: "example.com"
+  # VM/host names (structural references)
+  - pattern: "nginx-lv3"
+    replacement: "nginx-edge"
+  - pattern: "docker-runtime-lv3"
+    replacement: "docker-runtime"
+  - pattern: "docker-build-lv3"
+    replacement: "docker-build"
+  - pattern: "monitoring-lv3"
+    replacement: "monitoring"
+  - pattern: "postgres-vm-lv3"
+    replacement: "postgres-vm"
+  - pattern: "postgres-lv3"
+    replacement: "postgres"
+  - pattern: "backup-lv3"
+    replacement: "backup"
+  - pattern: "runtime-control-lv3"
+    replacement: "runtime-control"
+  - pattern: "runtime-ai-lv3"
+    replacement: "runtime-ai"
+  - pattern: "coolify-apps-lv3"
+    replacement: "coolify-apps"
+  - pattern: "coolify-lv3"
+    replacement: "coolify"
+  - pattern: "proxmox[_-]florin"
+    replacement: "proxmox-host"
+  - pattern: "Debian-trixie-latest-amd64-base"
+    replacement: "proxmox-host"
+  # Real public IPs
+  - pattern: "65\\.108\\.75\\.123"
+    replacement: "203.0.113.1"
+  - pattern: "65\\.108\\.75\\.65"
+    replacement: "203.0.113.65"
+  - pattern: "65\\.108\\.75\\.64"
+    replacement: "203.0.113.0"
+  - pattern: "2a01:4f9:6b:4b47::2"
+    replacement: "2001:db8::2"
+  # Operator PII
+  - pattern: "baditaflorin\\+tmp\\d+@gmail\\.com"
+    replacement: "operator@example.com"
+  - pattern: "baditaflorin@gmail\\.com"
+    replacement: "operator@example.com"
+  - pattern: "florin@badita\\.org"
+    replacement: "operator@example.com"
+  - pattern: "busui\\.matei1994@gmail\\.com"
+    replacement: "operator@example.com"
+  - pattern: "Florin Badita-Nistor"
+    replacement: "Platform Operator"
+  - pattern: "Florin Badita"
+    replacement: "Platform Operator"
+  # Management ACL IP
+  - pattern: "90\\.95\\.35\\.115"
+    replacement: "203.0.113.100"
+
+# --- Files to exclude from publication (never copied) ---
+exclude_paths:
+  - ".local/"
+  - "publication/"
+  - "config/publication-sanitization.yaml"
+
+# --- Files to delete from the public copy ---
+delete_paths:
+  - "CERTIFICATE-MONITORING.md"
+  - "DEPLOYMENT-STEPS-WS-0362.md"
+  - "DEPLOYMENT_STATUS.md"
+  - "SEMAPHORE-SETUP-QUICK-START.md"
+  - "WS-0362-FINAL-SUMMARY.md"
+
+# --- Leak markers ---
+# If any of these appear in the sanitized output, abort the push.
+leak_markers:
+  - "lv3.org"
+  - "65.108.75.123"
+  - "baditaflorin@gmail.com"
+  - "busui.matei1994@gmail.com"
+  - "florin@badita.org"
+  - "62r4JXGau0hOjYdSLIPJL4yPNkoejC99"
+  - "90.95.35.115"
