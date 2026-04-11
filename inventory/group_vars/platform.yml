@@ -8,7 +8,7 @@ platform_host:
   public_hostname: Debian-trixie-latest-amd64-base
   management:
     interface: enp7s0
-    ipv4: 203.0.113.1
+    ipv4: 65.108.75.123
     ipv4_cidr: 26
     gateway4: 65.108.75.65
     ipv6: 2a01:4f9:6b:4b47::2
@@ -1664,7 +1664,7 @@ platform_service_topology:
       visibility: public
       name: nginx
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1699,7 +1699,7 @@ platform_service_topology:
       visibility: public
       name: grafana
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1740,7 +1740,7 @@ platform_service_topology:
       managed: true
       visibility: public
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1771,7 +1771,7 @@ platform_service_topology:
       visibility: public
       name: headscale
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1821,7 +1821,7 @@ platform_service_topology:
       visibility: public
       name: proxmox
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1859,7 +1859,7 @@ platform_service_topology:
       visibility: public
       name: docker
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1894,7 +1894,7 @@ platform_service_topology:
       visibility: public
       name: build
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1929,7 +1929,7 @@ platform_service_topology:
       visibility: public
       name: uptime
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1961,7 +1961,7 @@ platform_service_topology:
       visibility: public
       name: status
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -1994,7 +1994,7 @@ platform_service_topology:
       visibility: public
       name: mail
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2051,7 +2051,7 @@ platform_service_topology:
       visibility: public
       name: livekit
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2217,7 +2217,7 @@ platform_service_topology:
       visibility: public
       name: scheduler
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2320,7 +2320,7 @@ platform_service_topology:
       visibility: public
       name: matrix
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2436,7 +2436,7 @@ platform_service_topology:
       visibility: public
       name: langfuse
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2469,7 +2469,7 @@ platform_service_topology:
       visibility: public
       name: flags
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2502,7 +2502,7 @@ platform_service_topology:
       visibility: public
       name: analytics
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2538,12 +2538,12 @@ platform_service_topology:
       visibility: public
       name: minio
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
       additional_records:
         - name: minio-console
           type: A
-          target: 203.0.113.1
+          target: 65.108.75.123
           ttl: 60
     edge:
       enabled: true
@@ -2586,7 +2586,7 @@ platform_service_topology:
       visibility: public
       name: errors
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2619,7 +2619,7 @@ platform_service_topology:
       visibility: public
       name: billing
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2657,7 +2657,7 @@ platform_service_topology:
       visibility: public
       name: agents
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2690,7 +2690,7 @@ platform_service_topology:
       visibility: public
       name: tasks
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2728,7 +2728,7 @@ platform_service_topology:
       visibility: public
       name: ci
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2766,7 +2766,7 @@ platform_service_topology:
       visibility: public
       name: wiki
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2799,7 +2799,7 @@ platform_service_topology:
       visibility: public
       name: grist
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2832,7 +2832,7 @@ platform_service_topology:
       visibility: public
       name: paperless
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2871,7 +2871,7 @@ platform_service_topology:
       visibility: public
       name: logs
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2904,7 +2904,7 @@ platform_service_topology:
       visibility: public
       name: draw
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -2983,7 +2983,7 @@ platform_service_topology:
       visibility: public
       name: chat
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3034,7 +3034,7 @@ platform_service_topology:
       visibility: public
       name: chat
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3103,7 +3103,7 @@ platform_service_topology:
       visibility: public
       name: n8n
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3135,7 +3135,7 @@ platform_service_topology:
       visibility: public
       name: cloud
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3181,7 +3181,7 @@ platform_service_topology:
       visibility: public
       name: coolify
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3219,7 +3219,7 @@ platform_service_topology:
       visibility: public
       name: apps
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3256,7 +3256,7 @@ platform_service_topology:
       visibility: public
       name: api
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3365,7 +3365,7 @@ platform_service_topology:
       visibility: public
       name: sso
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3397,7 +3397,7 @@ platform_service_topology:
       visibility: public
       name: registry
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3434,7 +3434,7 @@ platform_service_topology:
       visibility: public
       name: ops
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3466,7 +3466,7 @@ platform_service_topology:
       visibility: public
       name: home
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3563,7 +3563,7 @@ platform_service_topology:
       visibility: public
       name: ntfy
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3722,7 +3722,7 @@ platform_service_topology:
       visibility: public
       name: data
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3753,7 +3753,7 @@ platform_service_topology:
       visibility: public
       name: notebooks
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3787,7 +3787,7 @@ platform_service_topology:
       visibility: public
       name: annotate
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3820,7 +3820,7 @@ platform_service_topology:
       visibility: public
       name: bi
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3853,7 +3853,7 @@ platform_service_topology:
       visibility: public
       name: repowise
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -3881,186 +3881,186 @@ platform_dns_records:
   public: &id001
     - name: '@'
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: nginx
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: grafana
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: headscale
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: proxmox
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: docker
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: build
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: uptime
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: status
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: mail
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: livekit
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: scheduler
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: matrix
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: langfuse
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: flags
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: analytics
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: minio
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: minio-console
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: errors
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: billing
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: agents
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: tasks
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: ci
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: wiki
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: grist
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: paperless
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: logs
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: draw
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: chat
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: n8n
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: cloud
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: coolify
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: apps
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: '*.apps'
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: api
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: sso
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: registry
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: ops
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: home
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: ntfy
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: data
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: notebooks
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: annotate
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: bi
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: repowise
       type: A
-      value: 203.0.113.1
+      value: 65.108.75.123
       ttl: 60
     - name: '@'
       type: MX
@@ -4139,7 +4139,7 @@ public_edge_service_topology:
       visibility: public
       name: nginx
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4174,7 +4174,7 @@ public_edge_service_topology:
       visibility: public
       name: grafana
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4215,7 +4215,7 @@ public_edge_service_topology:
       managed: true
       visibility: public
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4246,7 +4246,7 @@ public_edge_service_topology:
       visibility: public
       name: headscale
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4296,7 +4296,7 @@ public_edge_service_topology:
       visibility: public
       name: proxmox
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4334,7 +4334,7 @@ public_edge_service_topology:
       visibility: public
       name: docker
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4369,7 +4369,7 @@ public_edge_service_topology:
       visibility: public
       name: build
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4404,7 +4404,7 @@ public_edge_service_topology:
       visibility: public
       name: uptime
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4436,7 +4436,7 @@ public_edge_service_topology:
       visibility: public
       name: status
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4469,7 +4469,7 @@ public_edge_service_topology:
       visibility: public
       name: mail
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4526,7 +4526,7 @@ public_edge_service_topology:
       visibility: public
       name: livekit
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4692,7 +4692,7 @@ public_edge_service_topology:
       visibility: public
       name: scheduler
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4795,7 +4795,7 @@ public_edge_service_topology:
       visibility: public
       name: matrix
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4911,7 +4911,7 @@ public_edge_service_topology:
       visibility: public
       name: langfuse
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4944,7 +4944,7 @@ public_edge_service_topology:
       visibility: public
       name: flags
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -4977,7 +4977,7 @@ public_edge_service_topology:
       visibility: public
       name: analytics
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5013,12 +5013,12 @@ public_edge_service_topology:
       visibility: public
       name: minio
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
       additional_records:
         - name: minio-console
           type: A
-          target: 203.0.113.1
+          target: 65.108.75.123
           ttl: 60
     edge:
       enabled: true
@@ -5061,7 +5061,7 @@ public_edge_service_topology:
       visibility: public
       name: errors
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5094,7 +5094,7 @@ public_edge_service_topology:
       visibility: public
       name: billing
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5132,7 +5132,7 @@ public_edge_service_topology:
       visibility: public
       name: agents
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5165,7 +5165,7 @@ public_edge_service_topology:
       visibility: public
       name: tasks
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5203,7 +5203,7 @@ public_edge_service_topology:
       visibility: public
       name: ci
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5241,7 +5241,7 @@ public_edge_service_topology:
       visibility: public
       name: wiki
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5274,7 +5274,7 @@ public_edge_service_topology:
       visibility: public
       name: grist
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5307,7 +5307,7 @@ public_edge_service_topology:
       visibility: public
       name: paperless
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5346,7 +5346,7 @@ public_edge_service_topology:
       visibility: public
       name: logs
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5379,7 +5379,7 @@ public_edge_service_topology:
       visibility: public
       name: draw
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5458,7 +5458,7 @@ public_edge_service_topology:
       visibility: public
       name: chat
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5509,7 +5509,7 @@ public_edge_service_topology:
       visibility: public
       name: chat
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5578,7 +5578,7 @@ public_edge_service_topology:
       visibility: public
       name: n8n
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5610,7 +5610,7 @@ public_edge_service_topology:
       visibility: public
       name: cloud
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5656,7 +5656,7 @@ public_edge_service_topology:
       visibility: public
       name: coolify
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5694,7 +5694,7 @@ public_edge_service_topology:
       visibility: public
       name: apps
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5731,7 +5731,7 @@ public_edge_service_topology:
       visibility: public
       name: api
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5840,7 +5840,7 @@ public_edge_service_topology:
       visibility: public
       name: sso
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5872,7 +5872,7 @@ public_edge_service_topology:
       visibility: public
       name: registry
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5909,7 +5909,7 @@ public_edge_service_topology:
       visibility: public
       name: ops
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -5941,7 +5941,7 @@ public_edge_service_topology:
       visibility: public
       name: home
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -6038,7 +6038,7 @@ public_edge_service_topology:
       visibility: public
       name: ntfy
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -6197,7 +6197,7 @@ public_edge_service_topology:
       visibility: public
       name: data
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -6228,7 +6228,7 @@ public_edge_service_topology:
       visibility: public
       name: notebooks
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -6262,7 +6262,7 @@ public_edge_service_topology:
       visibility: public
       name: annotate
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -6295,7 +6295,7 @@ public_edge_service_topology:
       visibility: public
       name: bi
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -6328,7 +6328,7 @@ public_edge_service_topology:
       visibility: public
       name: repowise
       type: A
-      target: 203.0.113.1
+      target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
@@ -6353,7 +6353,7 @@ uptime_kuma_service_topology:
     visibility: public
     name: uptime
     type: A
-    target: 203.0.113.1
+    target: 65.108.75.123
     ttl: 60
   edge:
     enabled: true
