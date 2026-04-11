@@ -38,7 +38,7 @@ if [[ "${SKIP_REMOTE_GATE:-0}" == "1" ]]; then
   if [[ -n "${GATE_BYPASS_EXPIRES_ON:-}" ]]; then
     bypass_args+=( --expires-on "${GATE_BYPASS_EXPIRES_ON}" )
   fi
-  python3 scripts/log_gate_bypass.py "${bypass_args[@]}"
+  uv run python scripts/log_gate_bypass.py "${bypass_args[@]}"
   exit 0
 fi
 
@@ -96,7 +96,7 @@ if [[ "${SKIP_ADR_VALIDATION:-0}" == "1" ]]; then
   if [[ -n "${GATE_BYPASS_EXPIRES_ON:-}" ]]; then
     bypass_args+=( --expires-on "${GATE_BYPASS_EXPIRES_ON}" )
   fi
-  python3 scripts/log_gate_bypass.py "${bypass_args[@]}"
+  uv run python scripts/log_gate_bypass.py "${bypass_args[@]}"
 else
   if uv run python scripts/validate_adr_status_transitions.py; then
     :  # ADR validation passed
