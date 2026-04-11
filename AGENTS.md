@@ -41,6 +41,66 @@ current deployment.
 - Prefer placeholder, example, or repository-relative values in committed
   documentation and metadata.
 
+## Publication Pipeline (ServerClaw)
+
+This private repo publishes a sanitized copy to the public
+`github.com/baditaflorin/ServerClaw` repo. The pipeline is automated —
+never manually edit or push to the public repo.
+
+### How it works
+
+1. **Drift audit** — `scripts/audit_sanitization_coverage.py` parses the four
+   authoritative inventory sources (identity.yml, hosts.yml, host_vars,
+   operators.yaml), extracts every sensitive value, and verifies
+   `config/publication-sanitization.yaml` covers them. Aborts on CRITICAL gaps.
+2. **Tier A** — Four deployment-specific files are replaced wholesale with
+   fork-ready templates from `publication/templates/`.
+3. **Tier C** — Regex patterns replace domains, VM names, IPs, and PII across
+   all text files (~6400 files).
+4. **Leak check** — Scans the sanitized tree for leak markers (auto-derived
+   from real inventory + manual list). Aborts if any marker is found.
+5. **Force-push** — Commits the sanitized snapshot and force-pushes to
+   `serverclaw/main`.
+
+### Commands
+
+| Task | Command |
+|------|---------|
+| Dry-run (sanitize + leak check, no push) | `make publish-serverclaw` |
+| Sanitize + push to public repo | `make publish-serverclaw-push` |
+| Check sanitization coverage for drift | `make audit-sanitization` |
+| Strict audit (exit 1 on any gap) | `make audit-sanitization-strict` |
+
+### When to publish
+
+Run `make publish-serverclaw-push` after merging meaningful changes to `main`.
+Not every commit needs publishing — use judgment (new features, new roles,
+documentation improvements, security fixes).
+
+### When adding new sensitive values
+
+If you add a new VM, operator, public IP, or domain reference:
+
+1. Add the replacement pattern to `config/publication-sanitization.yaml`
+2. If the value belongs in a Tier A file, also update the template in
+   `publication/templates/`
+3. Run `make audit-sanitization` to verify coverage
+4. Add a leak marker if the value is CRITICAL (PII, public IP, secret)
+
+The drift detector will catch omissions automatically on the next publish
+attempt, but fixing gaps proactively avoids blocking the publish pipeline.
+
+### Key files
+
+| File | Purpose |
+|------|---------|
+| `scripts/publish_to_serverclaw.py` | Publication engine |
+| `scripts/audit_sanitization_coverage.py` | Drift detector |
+| `config/publication-sanitization.yaml` | Replacement patterns + leak markers |
+| `publication/templates/` | Tier A replacement files (4 files) |
+
+See `docs/runbooks/publish-to-serverclaw.md` for the full operational runbook.
+
 ## Deployment Context
 
 - Base OS target: Debian 13
@@ -373,3 +433,5 @@ For targeted VM-only runs (`make provision-guests`), apply each service in the t
 - NEVER create symlinks to `.local/` or any credential directory. A symlink named `.local` bypasses `.gitignore` (which only ignores the directory), and committing it destroys the real credential store when checked out. (See ADR 0376.)
 - NEVER run `git add .local`, `git add -A`, or `git add .` in any directory containing `.local`. Always name specific files or directories when staging.
 - Agents in worktrees do NOT have `.local/` — this is intentional. If credentials are needed, read from the main worktree path directly. Do not create symlinks, copies, or placeholder credentials.
+- Never hand-maintain a security boundary list (like sanitization patterns) without an automated audit. The initial publication sanitization config missed 7 of 25 VMs (28% miss rate) and an IPv6 address in a template file. The drift detector (`make audit-sanitization`) catches these gaps automatically.
+- Regex patterns for VM names with staging variants need `(-staging)?` optionality — `monitoring-lv3` does NOT match `monitoring-staging-lv3` because `-staging-` is in the middle.

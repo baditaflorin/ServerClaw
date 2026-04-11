@@ -152,6 +152,9 @@ git push origin main
 | Generate release notes | `uv run --with pyyaml python scripts/generate_release_notes.py --version X.Y.Z --released-on YYYY-MM-DD --write` |
 | Refresh changelog/index | `uv run --with pyyaml python scripts/generate_release_notes.py --write-root-summaries` |
 | Skip remote gate (with reason) | `SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=<code> git push origin main` |
+| Publish to ServerClaw (dry-run) | `make publish-serverclaw` |
+| Publish to ServerClaw (push) | `make publish-serverclaw-push` |
+| Audit sanitization coverage | `make audit-sanitization` |
 
 ---
 
