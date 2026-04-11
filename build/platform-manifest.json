@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.108",
+  "repo_version": "0.178.109",
   "platform_version": "0.178.77",
-  "generated_at": "2026-04-11T14:47:52Z",
-  "next_refresh_at": "2026-04-11T15:47:52Z",
+  "generated_at": "2026-04-11T15:34:46Z",
+  "next_refresh_at": "2026-04-11T16:34:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -255,7 +255,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z",
+        "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
       "grist": {
@@ -521,7 +521,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://scheduler.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.107",
+    "last_version": "0.178.108",
     "deployed_at": "2026-04-11",
-    "summary": "[adr-0407] DRY round 2: Centralize WINDMILL_WORKSPACE, GITHUB_REPO_BASE_URL, and remaining TOPOLOGY_HOST \u2014 3 new env-overridable constants in platform/repo.py; Windmill workspace, GitHub URL, and 20+ more \"proxmox_florin\" literals consolidated; only 4 intentional references remain across entire Python codebase [adr-0407] DRY: Consolidate TOPOLOGY_HOST into platform.repo + generalize role docs \u2014 centralized TOPOLOGY_HOST and TOPOLOGY_HOST_VARS_PATH constants in platform/repo.py; 25 scripts consolidated from local HOST_VARS_PATH definitions; 11 scripts migrated from hardcoded \"proxmox_florin\" string to TOPOLOGY_HOST constant; 82 collection files generalized (53 READMEs, 27 argument_specs, 1 test fixture, 1 meta); tracked files with deployment-specific content reduced further",
-    "release_notes_url": "docs/release-notes/0.178.108.md"
+    "summary": "[adr-0408] Remove -lv3 suffix from 24 inventory hostnames \u2014 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config [adr-0407] DRY round 2: Centralize WINDMILL_WORKSPACE, GITHUB_REPO_BASE_URL, and remaining TOPOLOGY_HOST \u2014 3 new env-overridable constants in platform/repo.py; Windmill workspace, GitHub URL, and 20+ more \"proxmox_florin\" literals consolidated; only 4 intentional references remain across entire Python codebase",
+    "release_notes_url": "docs/release-notes/0.178.109.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

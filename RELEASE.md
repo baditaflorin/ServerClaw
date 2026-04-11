@@ -1,8 +1,9 @@
-# Release 0.178.108
+# Release 0.178.109
 
 - Date: 2026-04-11
 
 ## Summary
+- [adr-0408] Remove -lv3 suffix from 24 inventory hostnames — 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config
 - [adr-0407] DRY round 2: Centralize WINDMILL_WORKSPACE, GITHUB_REPO_BASE_URL, and remaining TOPOLOGY_HOST — 3 new env-overridable constants in platform/repo.py; Windmill workspace, GitHub URL, and 20+ more "proxmox_florin" literals consolidated; only 4 intentional references remain across entire Python codebase
 - [adr-0407] DRY: Consolidate TOPOLOGY_HOST into platform.repo + generalize role docs — centralized TOPOLOGY_HOST and TOPOLOGY_HOST_VARS_PATH constants in platform/repo.py; 25 scripts consolidated from local HOST_VARS_PATH definitions; 11 scripts migrated from hardcoded "proxmox_florin" string to TOPOLOGY_HOST constant; 82 collection files generalized (53 READMEs, 27 argument_specs, 1 test fixture, 1 meta); tracked files with deployment-specific content reduced further
 - [adr-0407] Generic-by-default codebase with local overlay — gitignore receipts/ (6,520 files) and config/generated/ (4 files); generalize docs/ (1,100+ files), tests/ (227 files), workstreams/ (107 files) from lv3.org to example.com; Ansible identity override via `-e @.local/identity.yml` auto-injection; publish pipeline reduced from 6,482 files to ~76 (97% reduction)

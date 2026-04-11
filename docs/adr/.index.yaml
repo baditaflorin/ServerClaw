@@ -137,8 +137,14 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0407'
+  next_available_adr: '0409'
 latest_adrs:
+  - adr: '0408'
+    title: Generic Inventory Hostnames
+    implementation_status: Implemented
+    concern: publication
+    path: docs/adr/0408-generic-inventory-hostnames.md
+    implemented_on: '2026-04-11'
   - adr: '0407'
     title: Generic-by-Default Codebase with Local Overlay
     implementation_status: Implementing
