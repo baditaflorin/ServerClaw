@@ -4,5 +4,5 @@ semaphore_database_user: semaphore_admin
 semaphore_database_support_role: semaphore_user
 semaphore_postgres_secret_dir: /etc/lv3/semaphore
 semaphore_postgres_password_file: "{{ semaphore_postgres_secret_dir }}/database-password"
-semaphore_local_artifact_dir: "{{ playbook_dir }}/../.local/semaphore"
+semaphore_local_artifact_dir: "{{ repo_shared_local_root }}/semaphore"
 semaphore_database_password_local_file: "{{ semaphore_local_artifact_dir }}/database-password.txt"

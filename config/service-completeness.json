@@ -629,9 +629,11 @@
     "semaphore": {
       "service_type": "compose",
       "requires_subdomain": false,
-      "requires_oidc": false,
+      "requires_oidc": true,
       "requires_secrets": true,
-      "requires_compose_secrets": true
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true,
+      "suppressed_checks": {}
     },
     "serverclaw": {
       "service_type": "compose",

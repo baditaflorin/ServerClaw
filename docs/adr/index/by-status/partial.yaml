@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 3
+total_adrs: 4
 adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
@@ -28,6 +28,23 @@ adrs:
     summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
     filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
     path: docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md
+  - adr: '0361'
+    title: Semaphore Keycloak OIDC Integration
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-07'
+    concern: security
+    keywords:
+      - semaphore
+      - keycloak
+      - oidc
+      - sso
+      - private-access
+      - integration
+    summary: Make the Semaphore OIDC client a repo-managed Keycloak concern and converge it
+    filename: 0361-semaphore-keycloak-oidc-integration.md
+    path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
+    implemented_on: '2026-04-11'
   - adr: 0386
     title: Agent Cross-Host Execution and MCP Tool Surface
     status: Accepted

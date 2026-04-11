@@ -1,0 +1,95 @@
+{
+  "workstream_id": "ws-0361-live-apply",
+  "adr": "0361",
+  "title": "Semaphore Keycloak OIDC integration live apply",
+  "status": "blocked",
+  "live_applied": false,
+  "platform_changed": false,
+  "attempted_on": "2026-04-11",
+  "source_commit_at_attempt": "86390fcc8a07fca2a58670f60ec4cf6b9d0278eb",
+  "latest_upstream_checked": "59fbe662b57c28388e47e784c29f457ffd4ec1d3",
+  "attempted_commands": [
+    {
+      "command": "make converge-semaphore env=production",
+      "result": "blocked",
+      "failure": "ssh: connect to host 100.64.0.1 port 22: Operation timed out"
+    }
+  ],
+  "repo_validation": [
+    {
+      "command": "uv run --with pytest --with pyyaml python -m pytest -q tests/test_semaphore_runtime_role.py tests/test_semaphore_playbook.py tests/test_keycloak_runtime_role.py",
+      "result": "passed",
+      "details": "32 passed in 3.19s"
+    },
+    {
+      "command": "uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_dependency_graph.py tests/test_preflight_controller_local.py tests/test_validate_service_completeness.py tests/test_secret_rotation.py",
+      "result": "baseline_drift",
+      "details": "25 passed, 1 failed; the lone failure is the unrelated current-mainline litellm dependency-graph assertion drift"
+    },
+    {
+      "command": "make syntax-check-semaphore",
+      "result": "passed"
+    },
+    {
+      "command": "make preflight WORKFLOW=converge-semaphore",
+      "result": "passed",
+      "details": "Reported keycloak_semaphore_client_secret absent-before-apply as expected"
+    },
+    {
+      "command": "./scripts/validate_repo.sh workstream-surfaces",
+      "result": "passed"
+    }
+  ],
+  "connectivity_probes": [
+    {
+      "probe": "ssh ops@100.64.0.1",
+      "result": "timeout"
+    },
+    {
+      "probe": "ssh ops@65.108.75.123",
+      "result": "timeout"
+    },
+    {
+      "probe": "ssh ops@100.118.189.95",
+      "result": "connection refused"
+    },
+    {
+      "probe": "ssh -p 2222 ops@100.118.189.95",
+      "result": "connection refused"
+    },
+    {
+      "probe": "tailscale ping 100.64.0.1",
+      "result": "timeout"
+    },
+    {
+      "probe": "tailscale ping 10.10.10.92",
+      "result": "timeout"
+    },
+    {
+      "probe": "ssh ops@10.10.10.92",
+      "result": "timeout"
+    },
+    {
+      "probe": "curl http://100.64.0.1:8020/api/ping",
+      "result": "timeout"
+    },
+    {
+      "probe": "curl http://100.118.189.95:8020/api/ping",
+      "result": "connection refused"
+    },
+    {
+      "probe": "curl https://100.64.0.1:8006/api2/json/",
+      "result": "timeout"
+    }
+  ],
+  "environment_notes": [
+    "tailscale status --json still listed proxmox-florin-subnet-router online at 100.64.0.1, but the local client reported coordination-server health warnings and there was no usable host or routed-guest management path from this workstation",
+    "tailscale ssh could not be used as a fallback because the macOS App Store/TestFlight build installed on this machine does not provide that subcommand"
+  ],
+  "next_steps": [
+    "Restore working reachability to proxmox-host or provide the correct LV3_PROXMOX_HOST_ADDR for this workstation",
+    "Rerun make converge-semaphore env=production",
+    "Verify /api/ping, /auth/oidc/login, make semaphore-manage ACTION=list-projects, and the seeded Semaphore Self-Test template",
+    "Record the successful live-apply receipt(s), update ADR 0361 from Partial to Live applied, and only then perform the exact-main integration step for protected release surfaces"
+  ]
+}

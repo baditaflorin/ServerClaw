@@ -23,7 +23,7 @@ The proxmox-host_server codebase was published to GitHub as `baditaflorin/Server
 
 | # | Secret | Location | Exposure | Action |
 |---|--------|----------|----------|--------|
-| 1 | **Keycloak OIDC client secret** `[REDACTED — rotated]` | `docs/workstreams/ws-0362-semaphore-keycloak-oidc.md:87` | **LIVE on serverclaw/main** — not scrubbed | Regenerate in Keycloak, update `.local/semaphore/oidc-client-secret.txt`, re-converge Semaphore |
+| 1 | **Keycloak OIDC client secret** `[REDACTED — rotated]` | `docs/workstreams/ws-0362-semaphore-keycloak-oidc.md:87` | **LIVE on serverclaw/main** — not scrubbed | Regenerate in Keycloak, update `.local/keycloak/semaphore-client-secret.txt`, re-converge Semaphore |
 | 2 | **Semaphore admin password** `[REDACTED — rotated]` | Git history (commit `147cf950e:SEMAPHORE-SETUP-QUICK-START.md`) | Recoverable from git history | Change Semaphore admin password, update `.local/semaphore/admin-password.txt` |
 | 3 | **Gitea API token** `[REDACTED — rotated]` | Local `.git/config` remote URL (not in tree, but if anyone clones with `--mirror`) | Local only — low risk but rotate anyway | Revoke token in Gitea (`ops-gitea` user), create new one, update git remote |
 
@@ -89,7 +89,7 @@ These are NOT secrets but reveal internal architecture. They are present in comm
 
 ### Phase 1: Credential Rotation (Do Now)
 
-- [ ] **Keycloak OIDC secret** — Regenerate the `semaphore` client secret in Keycloak admin, update `.local/semaphore/oidc-client-secret.txt`, run `make converge-semaphore env=production`
+- [ ] **Keycloak OIDC secret** — Regenerate the `semaphore` client secret in Keycloak admin, update `.local/keycloak/semaphore-client-secret.txt`, run `make converge-semaphore env=production`
 - [ ] **Semaphore admin password** — Change via Semaphore UI or API, update `.local/semaphore/admin-password.txt`
 - [ ] **Gitea API token** — Revoke `[REDACTED — rotated]` in Gitea settings for `ops-gitea` user, generate new token, update local git remote URL
 - [ ] **Review ALL Keycloak client secrets** — The OIDC secret structure is now known; verify all other client secrets (grafana, ops-portal, agent-hub, etc.) were NOT exposed. They appear to be safe (only template references), but double-check.

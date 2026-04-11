@@ -1433,19 +1433,21 @@ adrs:
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0361'
     title: Semaphore Keycloak OIDC Integration
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-07'
     concern: security
     keywords:
       - semaphore
       - keycloak
       - oidc
+      - sso
+      - private-access
       - integration
-    summary: 'Extend Semaphore runtime configuration to support Keycloak OpenID Connect (OIDC) authentication while maintaining
-      fallback username/password login for recovery '
+    summary: Make the Semaphore OIDC client a repo-managed Keycloak concern and converge it
     filename: 0361-semaphore-keycloak-oidc-integration.md
     path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
+    implemented_on: '2026-04-11'
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted

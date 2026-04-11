@@ -2742,7 +2742,7 @@
     {
       "id": "semaphore",
       "name": "Semaphore",
-      "description": "Private Semaphore UI and API for bounded Ansible job execution.",
+      "description": "Private Semaphore UI and API for bounded Ansible job execution with a repo-managed Keycloak OIDC login path and retained break-glass admin access.",
       "category": "automation",
       "lifecycle_status": "active",
       "vm": "runtime-control",
@@ -2757,7 +2757,8 @@
       "secret_catalog_ids": [
         "semaphore_database_password",
         "semaphore_admin_password",
-        "semaphore_api_token"
+        "semaphore_api_token",
+        "keycloak_semaphore_client_secret"
       ],
       "adr": "0149",
       "runbook": "docs/runbooks/configure-semaphore.md",
@@ -2769,7 +2770,8 @@
       "tags": [
         "ansible",
         "automation",
-        "jobs"
+        "jobs",
+        "oidc"
       ],
       "environments": {
         "production": {

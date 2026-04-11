@@ -55,21 +55,6 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
-  - adr: '0361'
-    title: Semaphore Keycloak OIDC Integration
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: security
-    keywords:
-      - semaphore
-      - keycloak
-      - oidc
-      - integration
-    summary: 'Extend Semaphore runtime configuration to support Keycloak OpenID Connect (OIDC) authentication while maintaining
-      fallback username/password login for recovery '
-    filename: 0361-semaphore-keycloak-oidc-integration.md
-    path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
   - adr: '0364'
     title: Native Build Server Gate Execution
     status: Proposed

@@ -1376,7 +1376,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: semaphore_runtime
     internal_port: 3004
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/semaphore
     container_name: semaphore
     needs_openbao: true

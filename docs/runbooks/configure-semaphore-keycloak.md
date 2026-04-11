@@ -2,130 +2,116 @@
 
 ## Purpose
 
-Configure Semaphore to support Keycloak SSO authentication while maintaining fallback username/password login.
+Configure Semaphore to use the shared Keycloak broker for routine browser
+sign-in while keeping the repo-managed `ops-semaphore` login path available for
+recovery.
 
-## Prerequisites
+The dedicated Keycloak client is no longer created manually. The repo-managed
+`playbooks/semaphore.yml` flow reconciles the `semaphore` client, mirrors its
+secret to `.local/keycloak/semaphore-client-secret.txt`, and then converges the
+Semaphore runtime with that secret.
 
-- Keycloak is deployed and accessible at `https://auth.example.com`
-- Semaphore database and runtime are deployed
-- Administrator access to Keycloak admin console
+## Desired Auth Model
 
-## Setup Steps
+- **Routine operator access**: Keycloak OIDC through the dedicated confidential
+  `semaphore` client
+- **Break-glass access**: repo-managed `ops-semaphore` username/password stored
+  under `.local/semaphore/admin-password.txt`
+- **Automation access**: repo-managed API token stored under
+  `.local/semaphore/api-token.txt`
 
-### 1. Create Keycloak Client for Semaphore
+## Repo-Managed Converge Flow
 
-1. Log into Keycloak admin console: `https://auth.example.com/admin`
-2. Navigate to **Clients** in the left sidebar
-3. Click **Create client**
-4. Set the following values:
-   - **Client type**: OpenID Connect
-   - **Client ID**: `semaphore`
-   - Click **Next**
+### 1. Ensure Keycloak is healthy enough to reconcile clients
 
-5. On the Capability config page:
-   - **Client authentication**: Toggle ON (confidential client)
-   - **Authorization**: Toggle OFF
-   - Click **Next**
+If the shared Keycloak admin client secret is missing locally or the Keycloak
+runtime drifted, converge Keycloak first:
 
-6. On the Login settings page:
-   - **Valid redirect URIs**: Add `http://100.64.0.1:8020/auth/oidc/callback`
-   - **Valid post logout redirect URIs**: Add `http://100.64.0.1:8020`
-   - Click **Save**
-
-### 2. Retrieve Client Secret
-
-1. Go to the **semaphore** client credentials tab
-2. Copy the **Client secret** value
-3. Store it securely - you'll need this for Semaphore configuration
-
-### 3. Configure User for Keycloak Login
-
-In Keycloak, create or verify a user account:
-
-1. Navigate to **Users**
-2. Click **Create new user**
-3. Set **Username**: `ops` (or desired username)
-4. Set **Email**: `ops@example.com` (or desired email)
-5. Toggle **Email verified**: ON
-6. Click **Create**
-7. Go to the **Credentials** tab
-8. Set a temporary password and toggle **Temporary**: OFF
-
-### 4. Update Semaphore Configuration
-
-The role defaults now include Keycloak OIDC support. Update the following in your inventory if needed:
-
-```yaml
-# Enable OIDC
-semaphore_enable_oidc: true
-
-# Keycloak configuration
-semaphore_oidc_provider: keycloak
-semaphore_oidc_client_id: semaphore
-semaphore_oidc_issuer_url: "https://auth.example.com/realms/lv3"
-semaphore_oidc_callback_url: "http://100.64.0.1:8020/auth/oidc/callback"
-semaphore_oidc_scopes: "openid profile email"
-semaphore_oidc_auto_provision_user: true
-
-# Fallback username/password auth
-semaphore_admin_username: ops-semaphore
-semaphore_admin_email: ops-semaphore@example.com
+```bash
+make converge-keycloak env=production
 ```
 
-### 5. Deploy Semaphore with Keycloak
+### 2. Syntax-check the Semaphore workflow
 
-Run the Semaphore converge playbook to apply the OIDC configuration:
+```bash
+make syntax-check-semaphore
+```
+
+### 3. Converge Semaphore
 
 ```bash
 make converge-semaphore env=production
 ```
 
-### 6. Verify Configuration
+This flow:
 
-1. Access Semaphore at `http://100.64.0.1:8020`
-2. You should now see:
-   - **"Login with Keycloak"** button (OIDC)
-   - **Username/Password** login fields (fallback)
+1. waits for the private Keycloak admin API
+2. reconciles the dedicated `semaphore` OIDC client
+3. mirrors the client secret to `.local/keycloak/semaphore-client-secret.txt`
+4. converges the Semaphore runtime on `runtime-control`
+5. refreshes the controller-local Semaphore auth artifacts under `.local/semaphore/`
 
-## Credentials
+### 4. Verify the login paths
 
-### Keycloak Admin
-- **Username**: admin
-- **Password**: Stored in `.local/keycloak/admin-password.txt`
+```bash
+SEMAPHORE_BASE_URL="$(jq -r '.base_url' .local/semaphore/admin-auth.json)"
+curl -fsS "$SEMAPHORE_BASE_URL/api/ping"
+curl -fsSI "$SEMAPHORE_BASE_URL/auth/oidc/login"
+make semaphore-manage ACTION=list-projects
+make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template "Semaphore Self-Test" --wait'
+```
 
-### Semaphore Admin (Fallback)
-- **Username**: `ops-semaphore`
-- **Password**: Generated and stored in `.local/semaphore/admin-password.txt`
+Expected results:
 
-### Keycloak User for SSO
-- **Username**: `ops` (or as configured)
-- **Password**: Set during user creation in Keycloak
+- `/api/ping` returns a successful response from the private controller URL
+- `/auth/oidc/login` returns a redirect into Keycloak
+- the governed wrapper can still authenticate with the fallback admin material
+- the seeded self-test template completes successfully
+
+## Managed Artifacts
+
+- `.local/keycloak/semaphore-client-secret.txt`
+  Repo-managed mirror of the Keycloak OIDC client secret consumed by Semaphore
+- `.local/semaphore/admin-password.txt`
+  Repo-managed break-glass admin password
+- `.local/semaphore/api-token.txt`
+  Repo-managed Semaphore API token used by the governed wrapper
+- `.local/semaphore/admin-auth.json`
+  Controller-local auth payload that records the private controller URL plus
+  the current bootstrap identity and API token
 
 ## Troubleshooting
 
-### OIDC button not appearing
+### Missing `.local/keycloak/semaphore-client-secret.txt`
 
-1. Verify `SEMAPHORE_OIDC_PROVIDER` environment variable is set
-2. Check Keycloak is reachable from Semaphore container:
+1. Verify the shared Keycloak runtime is healthy.
+2. Ensure `.local/keycloak/admin-client-secret.txt` exists.
+3. Re-run `make converge-semaphore env=production`.
+4. If the admin client secret is missing locally, run
+   `make converge-keycloak env=production` first.
+
+### OIDC login endpoint does not redirect
+
+1. Run `curl -fsSI "$SEMAPHORE_BASE_URL/auth/oidc/login"` and confirm a
+   redirect response is returned.
+2. Inspect the guest runtime:
    ```bash
-   docker exec semaphore curl -v https://auth.example.com/.well-known/openid-configuration
+   docker compose --file /opt/semaphore/docker-compose.yml logs --tail=100
    ```
-3. Review Semaphore container logs: `docker logs semaphore`
+3. Confirm the Keycloak client still has the controller callback URI
+   registered through the repo-managed converge path.
 
-### Invalid redirect URI error
+### Secret exposure or forced rotation
 
-1. Verify callback URL in Keycloak matches `semaphore_oidc_callback_url`
-2. Ensure URL uses correct hostname (`100.64.0.1` for internal access)
-3. Check Tailscale proxy is running: `systemctl status lv3-tailscale-proxy-semaphore.socket`
-
-### User not auto-provisioning
-
-1. Verify `SEMAPHORE_OIDC_AUTO_PROVISION_USER=true` in environment
-2. Check user has email configured in Keycloak
-3. Verify email mapping in scopes (default: `openid profile email`)
+1. Rotate the `semaphore` client secret in Keycloak.
+2. Re-run `make converge-semaphore env=production` so the controller-local
+   mirror and guest runtime both pick up the new secret.
+3. Re-run the verification commands above and record the new evidence.
 
 ## Related Documentation
 
+- [Configure Semaphore](configure-semaphore.md)
+- [Configure Keycloak](configure-keycloak.md)
 - ADR 0056: Keycloak as shared SSO broker
-- Keycloak configuration runbook
-- Semaphore official OIDC documentation
+- ADR 0149: Semaphore for Ansible job management UI and API
+- ADR 0361: Semaphore Keycloak OIDC integration
