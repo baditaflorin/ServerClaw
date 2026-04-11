@@ -5,7 +5,8 @@
 If you discover a security vulnerability in this project, please report it
 responsibly. **Do not open a public issue.**
 
-Email: **baditaflorin@gmail.com**
+Use [GitHub Security Advisories](../../security/advisories/new) to report
+vulnerabilities privately, or email the repository owner.
 
 Include:
 - Description of the vulnerability

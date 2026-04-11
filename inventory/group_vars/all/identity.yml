@@ -8,9 +8,9 @@
 # ---------------------------------------------------------------------------
 # Core identity anchors — everything else in this file derives from these
 # ---------------------------------------------------------------------------
-platform_domain: lv3.org
-platform_operator_email: baditaflorin@gmail.com
-platform_operator_name: "Florin Badita"
+platform_domain: example.com
+platform_operator_email: operator@example.com
+platform_operator_name: "Platform Operator"
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 
 # ---------------------------------------------------------------------------
@@ -86,7 +86,7 @@ platform_tailscale_network_cidr: 100.64.0.0/10
 proxmox_management_allowed_sources:
   - "{{ platform_tailscale_network_cidr }}"
   - "{{ platform_guest_network_cidr }}"
-  - 90.95.35.115/32
+  # - YOUR_PUBLIC_IP/32
 
 # ---------------------------------------------------------------------------
 # Container registry (used by CI gate check runners)

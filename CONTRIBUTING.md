@@ -1,6 +1,6 @@
-# Contributing to Proxmox Florin Server
+# Contributing to ServerClaw Platform
 
-Welcome! This document outlines the contribution guidelines and development practices for the Proxmox Florin Server project.
+Welcome! This document outlines the contribution guidelines and development practices for the ServerClaw Platform project.
 
 ## Code Organization
 

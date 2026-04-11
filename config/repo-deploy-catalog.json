@@ -5,7 +5,7 @@
     {
       "id": "education-wemeshup-production",
       "description": "Pull the latest committed Docker Compose deployment from upstream main into the governed production Coolify lane.",
-      "repo": "git@github.com:baditaflorin/education_wemeshup.git",
+      "repo": "git@github.com:example/example-app.git",
       "branch": "main",
       "source": "private-deploy-key",
       "app_name": "education-wemeshup",

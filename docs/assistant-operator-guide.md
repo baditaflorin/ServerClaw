@@ -17,7 +17,7 @@ The repository is not only documentation. It is intended to be the operating con
 
 The current target shape is:
 
-- Proxmox host on public IPv4 `65.108.75.123`
+- Proxmox host on public IPv4 `203.0.113.1`
 - `vmbr0` for the public uplink
 - `vmbr10` for the private guest network
 - `10.10.10.10` NGINX

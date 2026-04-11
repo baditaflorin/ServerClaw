@@ -3,7 +3,7 @@
     {
       "friendly_name": "lv3 operator email",
       "type": 2,
-      "value": "baditaflorin@gmail.com"
+      "value": "operator@example.com"
     },
     {
       "friendly_name": "lv3 platform ops mattermost",

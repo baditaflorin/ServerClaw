@@ -1,15 +1,15 @@
 host_public_hostname: Debian-trixie-latest-amd64-base
 proxmox_node_name: Debian-trixie-latest-amd64-base
 management_interface: enp7s0
-management_ipv4: 65.108.75.123
+management_ipv4: 203.0.113.1               # CHANGE: your server's public IPv4
 management_tailscale_ipv4: 100.64.0.1
-management_ipv4_cidr: 26
-management_gateway4: 65.108.75.65
-management_ipv6: 2a01:4f9:6b:4b47::2
+management_ipv4_cidr: 26                     # CHANGE: your provider's subnet mask
+management_gateway4: 203.0.113.65            # CHANGE: your gateway
+management_ipv6: "2001:db8::2"               # CHANGE: your server's IPv6
 management_ipv6_cidr: 64
 management_gateway6: fe80::1
-hetzner_ipv4_route_network: 65.108.75.64
-hetzner_ipv4_route_netmask: 255.255.255.192
+hetzner_ipv4_route_network: 203.0.113.0      # CHANGE: your provider's route network
+hetzner_ipv4_route_netmask: 255.255.255.192  # CHANGE: your provider's netmask
 proxmox_wan_bridge: vmbr0
 proxmox_internal_bridge: vmbr10
 proxmox_internal_ipv4: 10.10.10.1

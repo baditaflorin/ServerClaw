@@ -111,7 +111,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0197",
       "tls": {
@@ -128,7 +128,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0283",
       "tls": {
@@ -145,7 +145,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0289",
       "tls": {
@@ -162,7 +162,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0092",
       "tls": {
@@ -179,7 +179,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0340",
       "tls": {
@@ -198,7 +198,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0292",
       "tls": {
@@ -215,7 +215,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0292",
       "tls": {
@@ -232,7 +232,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0380",
       "tls": {
@@ -249,7 +249,7 @@
       "status": "active",
       "exposure": "informational-only",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0028",
       "tls": {
@@ -265,7 +265,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0081",
       "tls": {
@@ -282,7 +282,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0254",
       "tls": {
@@ -299,7 +299,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0287",
       "tls": {
@@ -316,7 +316,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0260",
       "tls": {
@@ -333,7 +333,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0194",
       "tls": {
@@ -350,7 +350,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0289",
       "tls": {
@@ -383,7 +383,7 @@
       "status": "active",
       "exposure": "informational-only",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0023",
       "tls": {
@@ -399,7 +399,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0094",
       "tls": {
@@ -416,7 +416,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0202",
       "tls": {
@@ -433,7 +433,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0281",
       "tls": {
@@ -450,7 +450,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0288",
       "tls": {
@@ -483,7 +483,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0011",
       "tls": {
@@ -499,7 +499,7 @@
       "status": "planned",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0072",
       "tls": {
@@ -516,7 +516,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0279",
       "tls": {
@@ -533,7 +533,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0144",
       "tls": {
@@ -550,7 +550,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0152",
       "tls": {
@@ -567,7 +567,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0146",
       "tls": {
@@ -583,7 +583,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0293",
       "tls": {
@@ -600,7 +600,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0150",
       "tls": {
@@ -617,12 +617,12 @@
       "status": "active",
       "exposure": "informational-only",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "expected_dns_records": [
         {
           "type": "A",
-          "value": "65.108.75.123"
+          "value": "203.0.113.1"
         }
       ],
       "owner_adr": "0021",
@@ -640,7 +640,7 @@
       "status": "active",
       "exposure": "informational-only",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0041",
       "tls": {
@@ -657,7 +657,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0255",
       "tls": {
@@ -674,7 +674,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0274",
       "tls": {
@@ -691,7 +691,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0274",
       "tls": {
@@ -708,7 +708,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0151",
       "tls": {
@@ -725,7 +725,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0021",
       "tls": {
@@ -741,7 +741,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0299",
       "tls": {
@@ -758,7 +758,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0093",
       "tls": {
@@ -775,7 +775,7 @@
       "status": "planned",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0072",
       "tls": {
@@ -792,7 +792,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0285",
       "tls": {
@@ -809,7 +809,7 @@
       "status": "active",
       "exposure": "informational-only",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0004",
       "tls": {
@@ -825,7 +825,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0201",
       "tls": {
@@ -842,7 +842,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0346",
       "tls": {
@@ -859,7 +859,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0361",
       "tls": {
@@ -892,7 +892,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0056",
       "tls": {
@@ -908,7 +908,7 @@
       "status": "planned",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0072",
       "tls": {
@@ -925,7 +925,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "none",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0109",
       "tls": {
@@ -941,7 +941,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0193",
       "tls": {
@@ -958,7 +958,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0027",
       "tls": {
@@ -974,7 +974,7 @@
       "status": "planned",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0072",
       "tls": {
@@ -1008,7 +1008,7 @@
       "status": "active",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
+      "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0199",
       "tls": {

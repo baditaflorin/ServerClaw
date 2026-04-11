@@ -178,7 +178,7 @@ live_apply_evidence:
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
-  management_ipv4: 65.108.75.123
+  management_ipv4: 203.0.113.1
   base_os:
     family: debian
     major: 13
@@ -438,10 +438,10 @@ desired_state:
       - 10.10.10.0/24
     proxmox_tfa_user: ops@pam
     proxmox_tls_hostname: proxmox.lv3.org
-    notifications_email: baditaflorin@gmail.com
+    notifications_email: operator@example.com
   dns:
     zone: lv3.org
-    public_ipv4_target: 65.108.75.123
+    public_ipv4_target: 203.0.113.1
     initial_subdomains:
       - mail.lv3.org
       - proxmox.lv3.org
@@ -624,12 +624,12 @@ observed_state:
     inter_guest_connectivity_working: true
   notifications:
     sendmail_endpoint: lv3-ops-email
-    sendmail_target_email: baditaflorin@gmail.com
+    sendmail_target_email: operator@example.com
     catch_all_matcher: lv3-all-events
     mail_queue_empty_after_probe: true
   dns:
     zone: lv3.org
-    root_a: 65.108.75.123
+    root_a: 203.0.113.1
     root_aaaa_present: false
     root_aaaa_matches_current_host_ipv6: false
     created_a_subdomains:
