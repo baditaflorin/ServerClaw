@@ -5,6 +5,10 @@
 # Idempotency: Fully idempotent; tasks converge the same guest policy on repeated runs.
 # Dependencies: ADR 0165 metadata standard, the linux_guest_firewall role defaults, and canonical host policy data.
 ---
+- name: Skip guest firewall in docker-dev (nftables/systemd unavailable)
+  ansible.builtin.meta: end_role
+  when: platform_environment | default('production') == 'docker-dev'
+
 - name: Validate guest network policy inputs
   ansible.builtin.assert:
     that:

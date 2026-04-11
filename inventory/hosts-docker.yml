@@ -3,6 +3,11 @@
 # =============================================================================
 # Targets the Docker containers started by docker-dev/ compose files.
 #
+# Host names MUST match production inventory (hosts.yml) exactly so that
+# playbooks using direct `hosts: nginx` or conditional patterns like
+# `"{{ 'nginx-staging' if env == 'staging' else 'nginx' }}"` resolve
+# correctly. The separate inventory file IS the context — no suffix needed.
+#
 # On macOS Docker Desktop, container bridge IPs are NOT routable from the
 # host. SSH is exposed via localhost port mappings: port 22xx maps to
 # container with last-octet xx (e.g., 2250 -> postgres-vm at .50).
@@ -34,6 +39,8 @@ all:
     platform_domain: "{{ lookup('env', 'PLATFORM_DOMAIN') | default('docker-dev.local', true) }}"
     platform_operator_email: "{{ lookup('env', 'PLATFORM_OPERATOR_EMAIL') | default('operator@docker-dev.local', true) }}"
     platform_operator_name: "{{ lookup('env', 'PLATFORM_OPERATOR_NAME') | default('Docker Dev Operator', true) }}"
+    # Pattern map: keys match production hosts.yml so playbooks using
+    # playbook_execution_host_patterns resolve identically in docker-dev.
     playbook_execution_host_patterns:
       proxmox_hosts:
         production: "proxmox_hosts:&production"
@@ -44,31 +51,43 @@ all:
       backup_guests:
         production: "backup_guests:&production"
       nginx_edge:
-        production: nginx-docker
+        production: nginx
       docker_runtime:
-        production: docker-runtime-docker
+        production: docker-runtime
+      runtime_ai:
+        production: runtime-control
       runtime_control:
-        production: runtime-control-docker
+        production: runtime-control
+      runtime_general:
+        production: runtime-control
+      runtime_comms:
+        production: docker-runtime
+      runtime_apps:
+        production: docker-runtime
       postgres:
-        production: postgres-docker
+        production: postgres
+      postgres_apps:
+        production: postgres
+      postgres_data:
+        production: postgres
       backup:
-        production: backup-docker
+        production: backup
       monitoring:
-        production: monitoring-docker
+        production: monitoring
       docker_build:
-        production: docker-build-docker
+        production: docker-build
 
   children:
     production:
       hosts:
         localhost:
-        nginx-docker:
-        docker-runtime-docker:
-        docker-build-docker:
-        monitoring-docker:
-        postgres-docker:
-        backup-docker:
-        runtime-control-docker:
+        nginx:
+        docker-runtime:
+        docker-build:
+        monitoring:
+        postgres:
+        backup:
+        runtime-control:
 
     platform:
       children:
@@ -81,45 +100,104 @@ all:
       hosts:
         localhost:
           ansible_connection: local
-          # Stub: Proxmox API calls are skipped in docker-dev mode
+          # Topology stub: roles look up hostvars[platform_topology_host].*
+          # which resolves to localhost in docker-dev. These values mirror
+          # the production proxmox-host.yml structure using Docker subnet.
+          proxmox_internal_ipv4: 10.99.10.1
+          proxmox_internal_cidr: 24
+          proxmox_internal_network: 10.99.10.0/24
+          proxmox_public_edge_ipv4: 10.99.10.10
+          proxmox_guests:
+            - {vmid: 110, name: nginx, role: nginx, ipv4: 10.99.10.10, cidr: 24, gateway4: 10.99.10.1}
+            - {vmid: 120, name: docker-runtime, role: docker-runtime, ipv4: 10.99.10.20, cidr: 24, gateway4: 10.99.10.1}
+            - {vmid: 130, name: docker-build, role: docker-build, ipv4: 10.99.10.30, cidr: 24, gateway4: 10.99.10.1}
+            - {vmid: 140, name: monitoring, role: monitoring, ipv4: 10.99.10.40, cidr: 24, gateway4: 10.99.10.1}
+            - {vmid: 150, name: postgres, role: postgres, ipv4: 10.99.10.50, cidr: 24, gateway4: 10.99.10.1}
+            - {vmid: 160, name: backup, role: backup, ipv4: 10.99.10.60, cidr: 24, gateway4: 10.99.10.1}
+            - {vmid: 192, name: runtime-control, role: runtime-control, ipv4: 10.99.10.92, cidr: 24, gateway4: 10.99.10.1}
+          network_policy:
+            guest_management_sources:
+              - 10.99.10.0/24
+            host_source: 10.99.10.1/32
+            guests:
+              nginx:
+                allowed_inbound:
+                  - {source: management, protocol: tcp, ports: [22, 80, 443], description: "Docker dev SSH + HTTP"}
+              docker-runtime:
+                allow_container_forwarding: true
+                allowed_inbound:
+                  - {source: management, protocol: tcp, ports: [22], description: "Docker dev SSH"}
+              docker-build:
+                allowed_inbound:
+                  - {source: management, protocol: tcp, ports: [22], description: "Docker dev SSH"}
+              monitoring:
+                allowed_inbound:
+                  - {source: management, protocol: tcp, ports: [22], description: "Docker dev SSH"}
+              postgres:
+                allowed_inbound:
+                  - {source: management, protocol: tcp, ports: [22, 5432], description: "Docker dev SSH + PG"}
+              backup:
+                allowed_inbound:
+                  - {source: management, protocol: tcp, ports: [22], description: "Docker dev SSH"}
+              runtime-control:
+                allow_container_forwarding: true
+                allowed_inbound:
+                  - {source: management, protocol: tcp, ports: [22], description: "Docker dev SSH"}
+          platform_port_assignments:
+            alertmanager_port: 9093
+            monitoring_grafana_port: 3000
+            monitoring_prometheus_port: 9090
+            monitoring_loki_port: 3100
+            monitoring_blackbox_exporter_port: 9115
+            gitea_http_port: 3003
+            gitea_host_proxy_port: 3009
+            windmill_server_port: 8000
+            windmill_host_proxy_port: 8005
+            api_gateway_internal_port: 8083
+            platform_context_internal_port: 8010
+            openbao_http_port: 8201
+            openbao_proxy_port: 8200
+            semaphore_server_port: 3004
+            semaphore_host_proxy_port: 8020
+            homepage_port: 3090
 
     lv3_guests:
       hosts:
-        nginx-docker:
+        nginx:
           ansible_host: 127.0.0.1
           ansible_port: 2210
           deployment_environment: production
-        docker-runtime-docker:
+        docker-runtime:
           ansible_host: 127.0.0.1
           ansible_port: 2220
           deployment_environment: production
-        docker-build-docker:
+        docker-build:
           ansible_host: 127.0.0.1
           ansible_port: 2230
           deployment_environment: production
-        monitoring-docker:
+        monitoring:
           ansible_host: 127.0.0.1
           ansible_port: 2240
           deployment_environment: production
-        postgres-docker:
+        postgres:
           ansible_host: 127.0.0.1
           ansible_port: 2250
           deployment_environment: production
-        backup-docker:
+        backup:
           ansible_host: 127.0.0.1
           ansible_port: 2260
           deployment_environment: production
-        runtime-control-docker:
+        runtime-control:
           ansible_host: 127.0.0.1
           ansible_port: 2292
           deployment_environment: production
 
     postgres_guests:
       hosts:
-        postgres-docker:
+        postgres:
 
     backup_guests:
       hosts:
-        backup-docker:
+        backup:
           ansible_host: 127.0.0.1
           ansible_port: 2260

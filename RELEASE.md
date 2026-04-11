@@ -1,8 +1,9 @@
-# Release 0.178.115
+# Release 0.178.116
 
 - Date: 2026-04-11
 
 ## Summary
+- [adr-0410] IoC inventory generation + self-generating README — `inventory/hosts.yml` now fully generated from `proxmox_guests` in `proxmox-host.yml` (VMID%100 formula, 30 unit+integration tests); ~30 hardcoded IPs in proxmox-host.yml replaced with selectattr lookups; `README.md` generated from `docs/templates/README.md.j2` with live counts (roles, ADRs, runbooks, scripts) + Makefile `## ` annotations auto-populating the Make Targets table; `make generate-inventory` and `make generate-readme` added
 - fix: Correct postmortem RAM claims — 5 MB/container reflects idle SSH only, not converged services; ADR 0410 estimates (4–32 GB) remain valid projections; measurement meaningless without service deployment
 - fix: Docker dev end-to-end tested — 7 bugs found and fixed: subnet changed to 10.99.10.0/24 (Tailscale + Docker IPAM collision), SSH port mappings added for macOS (bridge IPs unreachable), base image switched from Ubuntu to Debian Bookworm (playbook assertion), SSH key path fixed (inventory_dir), all 7 containers verified with Ansible ping; convergence blocked by playbook host pattern mismatch (documented, P1 fix needed)
 - [adr-0410] Docker isolation testing and IoC completion — proposed architecture for parallel test topologies (micro/minimal/standard/extended profiles), subnet isolation, Docker-native CA/TLS via step-ca + Pebble, cert validator identity awareness, generator identity overlay, test scenario catalog with CI integration; ~41h estimated across 8 phases
