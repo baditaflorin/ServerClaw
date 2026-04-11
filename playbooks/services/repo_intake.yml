@@ -1,9 +1,29 @@
-# Service Playbook: repo_intake.yml
-# Included by: playbooks/repo-intake.yml
-# Purpose: Focused convergence of just the repo-intake runtime role.
-
 ---
-- name: Deploy repo-intake service
-  hosts: "{{ ansible_host | default('localhost') }}"
-  tasks:
-    - role: lv3.platform.repo_intake_runtime
+# Playbook: services/repo_intake.yml
+# Purpose: Provide the canonical service-scoped entrypoint for the ADR 0224 repo-intake live apply.
+# Use case: Used by shared live-apply and service-scoped automation paths that target only the repo-intake runtime.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - None.
+#
+# Outputs:
+#   - Imports the top-level repo-intake playbook without redefining host selection.
+#
+# Idempotency: Fully idempotent
+#              This file only re-exports the canonical playbook entrypoint.
+#
+# Dependencies:
+#   - ADR 0165: Requires committed playbook metadata headers.
+#   - ADR 0224: Self-service repo intake and agent-assisted deployments.
+#   - Requires: playbooks/repo-intake.yml.
+#
+# Related ADRs: 0165, 0224
+# Related Runbooks: docs/runbooks/repo-intake.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-12
+
+- import_playbook: ../repo-intake.yml

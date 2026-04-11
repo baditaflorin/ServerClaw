@@ -86,7 +86,7 @@ ServerClaw mirror.
 | Situation | Required action |
 |-----------|-----------------|
 | After any change to `.local/identity.yml` | `make generate-platform-vars` + commit |
-| After any change to `inventory/host_vars/proxmox-host.yml` | `make generate-platform-vars` + commit |
+| After any change to `inventory/host_vars/<topology-host>.yml` | `make generate-platform-vars` + commit |
 | You see `203.0.113.1` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator; `.local/identity.yml` was not applied |
 | You see `example.com` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator |
 | Publishing to ServerClaw | Publish pipeline sanitises real values automatically |
@@ -97,7 +97,7 @@ not appear in the private repo's generated output. If `.local/identity.yml`
 is missing, the generator falls back to committed placeholders; treat that
 state as broken.
 
-> **Incident reference**: This gap caused `headscale.lv3.org` to have a DNS
+> **Incident reference**: This gap caused `headscale.example.com` to have a DNS
 > A record pointing to `203.0.113.1` (a non-routable documentation IP), which
 > broke Tailscale VPN for the entire deployment. The fix was to make the
 > generator apply `.local/identity.yml` as a high-priority override.
