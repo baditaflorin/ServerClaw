@@ -1,8 +1,0 @@
-Workstream surface ownership validation
-Workstream surface ownership validation failed: workstream surface ownership validation failed:
-- docs/adr/.index.yaml: outside declared owned surfaces for ws-0305-main-integration
-- docs/runbooks/agent-session-workspace-isolation.md: outside declared owned surfaces for ws-0305-main-integration
-- docs/runbooks/remote-build-gateway.md: outside declared owned surfaces for ws-0305-main-integration
-- docs/schema/capacity-model.schema.json: outside declared owned surfaces for ws-0305-main-integration
-- docs/schema/k6-receipt.schema.json: outside declared owned surfaces for ws-0305-main-integration
-- tests/test_promotion_pipeline.py: outside declared owned surfaces for ws-0305-main-integration

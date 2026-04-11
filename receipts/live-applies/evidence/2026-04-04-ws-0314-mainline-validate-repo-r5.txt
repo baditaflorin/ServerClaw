@@ -1,6 +1,0 @@
-Workstream surface ownership validation
-Agent standards validation (ADR 0163-0168)
-ERROR: Playbooks/roles missing metadata headers (ADR 0165):
-  - collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/verify.yml
-  Copy header from: playbooks/.metadata-template.yml
-  Reference: docs/adr/0165-playbook-role-metadata-standard.md

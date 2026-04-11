@@ -1,8 +1,0 @@
-# ws-0331 openbao mtls verification
-UTC 2026-04-05T10:27:55Z
-
-## with client cert
-{"initialized":true,"sealed":false,"standby":false,"performance_standby":false,"replication_performance_mode":"primary","replication_dr_mode":"disabled","server_time_utc":1775384879,"version":"2.5.1","cluster_name":"vault-cluster-0a1cd33d","cluster_id":"64f388be-6224-ad5f-c9f2-bef4c7b7791b"}
-
-## without client cert (expected failure)
-request without client cert failed as expected

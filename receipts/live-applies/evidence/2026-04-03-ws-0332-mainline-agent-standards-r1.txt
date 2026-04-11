@@ -1,3 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-Public entrypoint validation failed:
-- README.md: deployment-specific domain: lv3.org

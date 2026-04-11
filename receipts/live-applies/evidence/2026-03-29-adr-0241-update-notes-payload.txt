@@ -1,1 +1,0 @@
-{"operator_id": "florin-badita", "notes_markdown": "## ADR 0241 Live Apply Verification\n\n- [x] Tiptap bundle seeded\n- [x] Governed Windmill note mutation succeeded\n\n| Key | Value |\n| --- | --- |\n| source_commit | f06430c3cc65b30ec0576d224dfe2eda728a6412 |\n| applied_on | 2026-03-29 |\n"}

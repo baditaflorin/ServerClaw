@@ -1,2 +1,0 @@
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by manual-backup
-make: *** [restic-config-backup] Error 143

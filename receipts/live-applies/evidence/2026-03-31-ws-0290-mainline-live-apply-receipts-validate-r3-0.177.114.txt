@@ -1,1 +1,0 @@
-Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0290-mainline/receipts/live-applies

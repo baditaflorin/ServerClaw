@@ -1,8 +1,0 @@
-[2026-04-04T14:06:28Z] validate_repo agent-standards
-Agent standards validation (ADR 0163-0168)
-ERROR: Playbooks/roles missing metadata headers (ADR 0165):
-  - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
-  - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
-  - playbooks/api-gateway.yml
-  Copy header from: playbooks/.metadata-template.yml
-  Reference: docs/adr/0165-playbook-role-metadata-standard.md

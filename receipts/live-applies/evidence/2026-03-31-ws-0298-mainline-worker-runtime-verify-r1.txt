@@ -1,7 +1,0 @@
-windmill-windmill_worker_native-1        Up 7 minutes
-/usr/local/bin/syft
-Application:   syft
-Version:       1.41.2
-/usr/local/bin/grype
-Application:         grype
-Version:             0.110.0

@@ -1,8 +1,0 @@
-$ curl -fsS http://10.10.10.20:9998/version
-Apache Tika 3.2.3
-
-$ curl -fsS http://10.10.10.20:3008/healthz
-{"status":"ok","default_language":"eng","max_pages":20,"render_dpi":200}
-
-$ curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.20:3008/ocr
-{"filename":"ocr-ok.png","content_type":"image/png","extraction_method":"tesseract","languages":"eng","page_count":1,"text":"OCR OK"}

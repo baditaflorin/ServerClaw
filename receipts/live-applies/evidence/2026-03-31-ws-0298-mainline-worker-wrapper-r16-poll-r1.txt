@@ -1,2 +1,0 @@
--rw-rw-r-- 1 ops ops 0 Mar 31 12:18 /tmp/ws-0298-full-wrapper-r16.out
-0 /tmp/ws-0298-full-wrapper-r16.out

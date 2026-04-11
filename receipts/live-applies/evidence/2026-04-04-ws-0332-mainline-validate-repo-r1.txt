@@ -1,3 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-WARNING: Branch 'codex/ws-0332-main-integration-r2' not found in workstreams.yaml (ADR 0167)
-  Add an entry: docs/adr/0167-agent-handoff-and-context-preservation.md

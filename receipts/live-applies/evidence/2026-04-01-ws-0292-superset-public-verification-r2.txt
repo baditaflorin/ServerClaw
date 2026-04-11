@@ -1,3 +1,0 @@
-timestamp=2026-04-01T11:29:24Z
-health=OK
-verify_public

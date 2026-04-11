@@ -1,9 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/sda1        95G   80G   11G  89% /
-
-TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
-Images          84        74        51.97GB   45.01GB (86%)
-Containers      111       86        1.047GB   50.62MB (4%)
-Local Volumes   967       60        1.047GB   1.495MB (0%)
-Build Cache     3         0         289B      289B

@@ -1,8 +1,0 @@
-2026-03-30T09:47:59Z
-Debian-trixie-latest-amd64-base
-6.17.13-2-pve
-pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)
-VM_STATE
-      VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
-       110 nginx-lv3            running    4096              32.00 2296230
-       120 docker-runtime-lv3   running    24576             96.00 2296294

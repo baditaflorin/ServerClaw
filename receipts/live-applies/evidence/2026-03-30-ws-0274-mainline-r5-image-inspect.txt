@@ -1,5 +1,0 @@
-[postgres:17.4-alpine3.21] sha256:0150e3200277b907866758e22a3b9bba7857325b994848fe9f44b3610c3ae17e
-[mirror.gcr.io/library/alpine:3.21.3] sha256:aded1e1a5b3705116fa0a92ba074a5e0b0031647d9c315983ccba2ee5428ec8b
-[mirror.gcr.io/library/golang:1.25.0-alpine3.21] sha256:a7748fe1737c417bfcddc2099dd59106d539c7f835bbce48d95a2ac4f7c83a42
-[mirror.gcr.io/library/node:22.14.0-bookworm-slim] sha256:854cb78ac3ed2e215515e3ed78bf40a955bde16fc74114051a1850e509f602e6
-[mirror.gcr.io/nginxinc/nginx-unprivileged:1.27.5-alpine3.21] sha256:47ce8258a10e28ce4b4498588c25ef77ae328f4c56cbe3e8d5dcf4f6d8019997

@@ -1,8 +1,0 @@
-# ws-0314 keycloak mail relay proof r13
-
-recorded_at=2026-04-04T09:16:27Z
-
-10.200.3.2      STREAM lv3-mail-stalwart
-10.200.3.2      DGRAM
-10.200.3.2      RAW
-submission_reachable=true

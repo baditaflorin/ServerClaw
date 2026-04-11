@@ -1,4 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-37:                "/var/run/docker.sock:/var/run/docker.sock:rw",
-155:                "Source": "/var/run/docker.sock",
-156:                "Destination": "/var/run/docker.sock",

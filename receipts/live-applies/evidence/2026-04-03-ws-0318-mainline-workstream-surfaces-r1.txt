@@ -1,5 +1,0 @@
-Workstream surface ownership validation
-Workstream surface ownership validation failed: workstream surface ownership validation failed:
-- README.md: outside declared owned surfaces for ws-0318-live-apply
-- changelog.md: outside declared owned surfaces for ws-0318-live-apply
-- versions/stack.yaml: outside declared owned surfaces for ws-0318-live-apply

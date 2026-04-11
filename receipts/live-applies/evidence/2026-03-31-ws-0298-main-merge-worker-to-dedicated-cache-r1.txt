@@ -1,2 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=-1 >>
-template error while templating string: unexpected '.'. String: worker=$(docker ps --format "{{.Names}}" | grep "windmill.*worker" | head -n1); test -n "$worker"; docker exec "$worker" bash -lc 'for port in 5001 5002 5003 5004; do if curl -fsS --connect-timeout 3 "http://10.10.10.80:${port}/v2/" >/dev/null; then echo OK:$port; else echo FAIL:$port; fi; done'. unexpected '.'

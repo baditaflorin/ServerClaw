@@ -139,6 +139,12 @@ reservation_ledger:
   expired_candidates: 0
   next_available_adr: '0407'
 latest_adrs:
+  - adr: '0407'
+    title: Generic-by-Default Codebase with Local Overlay
+    implementation_status: Implementing
+    concern: publication
+    path: docs/adr/0407-generic-by-default-local-overlay-architecture.md
+    implemented_on: '2026-04-11'
   - adr: '0406'
     title: Automated DNS Propagation From Single IP Source of Truth
     implementation_status: Implemented

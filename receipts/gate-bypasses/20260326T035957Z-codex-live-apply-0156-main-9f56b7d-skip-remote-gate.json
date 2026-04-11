@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T03:59:57.286119+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "manual ADR 0156 live verification completed; pre-push hook checksum rsync to docker-build-lv3 stalled during redundant sync",
-  "source": "pre-push-hook",
-  "branch": "codex/live-apply-0156-main",
-  "commit": "9f56b7d89cf80ffb0c5512d63216379b345c27e4"
-}

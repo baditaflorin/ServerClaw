@@ -1,5 +1,0 @@
-uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/nats_streams.py --apply
-Installed 2 packages in 8ms
-PLATFORM_EVENTS: created
-RAG_DOCUMENT: created
-SECRET_ROTATION: created

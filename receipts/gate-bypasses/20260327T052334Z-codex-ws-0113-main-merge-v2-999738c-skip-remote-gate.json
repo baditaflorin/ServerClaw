@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-27T05:23:35.005966+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "remote pre-push gate blocked by inherited origin/main ownership_manifest schema drift and remote dependency-graph stale mismatch; local targeted validations passed and versions/stack.yaml intentionally remains unchanged because ADR 0113 is not yet durably live-applied from main",
-  "source": "pre-push-hook",
-  "branch": "codex/ws-0113-main-merge-v2",
-  "commit": "999738c368d07d1406af210a56b0e749c53e9776"
-}

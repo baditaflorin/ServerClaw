@@ -1,1 +1,0 @@
-OK: docs/adr/.index.yaml is current (278 ADRs)

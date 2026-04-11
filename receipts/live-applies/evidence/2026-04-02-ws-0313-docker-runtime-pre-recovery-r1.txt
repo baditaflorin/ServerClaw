@@ -1,2 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=-1 >>
-template error while templating string: unexpected '.'. String: systemctl is-active docker && iptables -t nat -S DOCKER && iptables -t filter -S DOCKER-FORWARD && docker ps --format "{{.Names}} {{.Status}}". unexpected '.'

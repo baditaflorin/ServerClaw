@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T10:59:55.667366+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "build-server pre-push schema-validation still fails because /workspace/.git-remote/worktree is not treated as a git repository even after local Dozzle validation, repository data-model validation, alert-rule validation, health-probe validation, syntax-check-dozzle, and dependency-diagram refresh all passed on the rebased 0.168.0 integration tip.",
-  "source": "main_push",
-  "branch": "codex/integration-0150-main",
-  "commit": "d4f82f54213e25e3c7e2cd0aa7d0df97c36752d4"
-}

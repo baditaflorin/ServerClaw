@@ -1,7 +1,0 @@
-Workstream surface ownership validation
-Generated status document validation
-Generated portal validation
-Repository data model validation
-Health probe contract validation
-Alert rule validation
-Agent standards validation (ADR 0163-0168)

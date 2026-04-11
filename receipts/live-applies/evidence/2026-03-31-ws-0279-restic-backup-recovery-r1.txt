@@ -1,8 +1,0 @@
-{
-  "status": "error",
-  "target": "docker-runtime-lv3",
-  "command": "sh -lc 'primary_script=/srv/proxmox_florin_server/scripts/restic_config_backup.py\nfallback_script=/opt/api-gateway/service/scripts/restic_config_backup.py\nscript_path=\"$primary_script\"\nif [ ! -f \"$script_path\" ] && [ -f \"$fallback_script\" ]; then script_path=\"$fallback_script\"; fi\nif [ ! -f \"$script_path\" ]; then\n  echo \"restic_config_backup.py is missing from both $primary_script and $fallback_script\" >&2\n  exit 2\nfi\nsudo python3 \"$script_path\" --repo-root /srv/proxmox_florin_server --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by ws-0279-outline-runtime-recovery --print-report-json --live-apply-trigger'",
-  "returncode": 2,
-  "stdout": "",
-  "stderr": "Restic config backup error: jupyterhub-minio is exited; start the Outline MinIO runtime before rerunning restic config backup"
-}

@@ -1,2 +1,0 @@
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/scripts/generate_status_docs.py --write
-Updated generated status docs: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/README.md

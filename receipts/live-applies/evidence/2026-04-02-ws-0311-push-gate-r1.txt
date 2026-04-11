@@ -1,9 +1,0 @@
-Remote push attempt for `git push -u origin codex/ws-0311-live-apply` reached the remote pre-push gate and then failed on exact-main-only generated surfaces that this workstream branch intentionally does not rewrite.
-
-Observed blocking checks:
-
-- `dependency-graph`: `docs/diagrams/agent-coordination-map.excalidraw` is stale and would require `python3 scripts/generate_diagrams.py --write`
-- `generated-docs`: canonical truth is stale and would require `uvx --from pyyaml python scripts/canonical_truth.py --write`, which updates protected branch-local surfaces including `changelog.md` and `versions/stack.yaml`
-- `schema-validation`: `build/platform-manifest.json` is out of date and would require `python scripts/platform_manifest.py --write`
-
-The branch therefore remains committed locally with merge-safe ADR/workstream/receipt state, but not pushed, because satisfying the remote gate would violate the user's instruction not to update protected integration files on this workstream branch.

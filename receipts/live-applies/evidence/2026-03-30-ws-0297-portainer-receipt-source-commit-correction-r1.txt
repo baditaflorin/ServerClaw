@@ -1,5 +1,0 @@
-receipt_path=receipts/live-applies/2026-03-22-adr-0055-portainer-live-apply.json
-orphan_source_commit=bf9ed052e500972f83b3f814a342d49165344789
-corrected_source_commit=a8ba607cd19a2603e46e6a90845cfb5e45c5577f
-reachable_from_origin_main=0
-release_commit_parent=dd1337123d0ec0a2145143419dca891facca5646 a8ba607cd19a2603e46e6a90845cfb5e45c5577f

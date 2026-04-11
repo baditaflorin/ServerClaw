@@ -1,1 +1,0 @@
-OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0325-live-apply/docs/adr/.index.yaml and 26 ADR shard files are current (365 ADRs indexed)

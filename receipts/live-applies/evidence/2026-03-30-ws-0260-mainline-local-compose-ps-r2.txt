@@ -1,6 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-NAME                      IMAGE                                                                                                               COMMAND                  SERVICE           CREATED       STATUS                    PORTS
-nextcloud-app             docker.io/library/nextcloud:33.0.1-apache@sha256:59da99ff25d5085f3525251c88f8cda312d1ac01379f347cf499c61abb74a2a0   "/entrypoint.sh apac…"   nextcloud-app     2 hours ago   Up 46 minutes             0.0.0.0:8084->80/tcp, [::]:8084->80/tcp
-nextcloud-cron            docker.io/library/nextcloud:33.0.1-apache@sha256:59da99ff25d5085f3525251c88f8cda312d1ac01379f347cf499c61abb74a2a0   "/cron.sh"               nextcloud-cron    2 hours ago   Up 46 minutes             80/tcp
-nextcloud-openbao-agent   docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b             "docker-entrypoint.s…"   openbao-agent     2 hours ago   Up 46 minutes (healthy)
-nextcloud-redis           docker.io/library/redis:7.4-alpine@sha256:4bfd9eca23339865dc14fe75f6d9ae643f714924623978dd2798f1a673b08f43          "docker-entrypoint.s…"   nextcloud-redis   2 hours ago   Up 46 minutes (healthy)   6379/tcp

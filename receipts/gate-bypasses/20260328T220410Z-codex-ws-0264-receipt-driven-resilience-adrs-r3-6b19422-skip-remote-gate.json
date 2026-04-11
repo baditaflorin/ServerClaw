@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-28T22:04:10.209226+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "remote pre-push gate stalled during repeated build-server SSH handoff to 10.10.10.30 while the release 0.177.56 resilience ADR bundle had already passed local agent-standards, data-model, generated-doc, canonical-truth, ADR-index, and platform-manifest checks",
-  "source": "manual-main-push",
-  "branch": "codex/ws-0264-receipt-driven-resilience-adrs-r3",
-  "commit": "6b19422d54441943dc44c234b97d5d4ce623cc56"
-}

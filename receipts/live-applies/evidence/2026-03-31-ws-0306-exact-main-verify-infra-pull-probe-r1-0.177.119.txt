@@ -1,1 +1,0 @@
-LV3_RUN_ID=91f4e564e0d44d8f990bfc886a7e8cf5 COMMAND="docker pull registry.lv3.org/check-runner/infra:2026.03.23" /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-exact-main-verify/scripts/remote_exec.sh remote-exec --local-fallback

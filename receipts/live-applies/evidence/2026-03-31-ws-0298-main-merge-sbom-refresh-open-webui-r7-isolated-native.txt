@@ -1,8 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=1 >>
-Traceback (most recent call last):
-  File "/tmp/ws-0298-runtime/scripts/sbom_refresh.py", line 15, in <module>
-    from controller_automation_toolkit import emit_cli_error, repo_path
-  File "/tmp/ws-0298-runtime/scripts/controller_automation_toolkit.py", line 19, in <module>
-    from platform.repo import *  # noqa: F401,F403
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-ModuleNotFoundError: No module named 'platform.repo'; 'platform' is not a packagenon-zero return code

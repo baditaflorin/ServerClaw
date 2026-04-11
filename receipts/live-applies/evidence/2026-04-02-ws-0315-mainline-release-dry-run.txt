@@ -1,5 +1,0 @@
-Current version: 0.177.139
-Next version: 0.177.140
-Unreleased notes: 1
-Platform impact: platform version advances to 0.130.88 after the exact-main ADR 0315 replay re-verifies the governed Windmill operator admin surface and next-best-action guidance on top of the 0.130.87 baseline
-Release notes index: docs/release-notes/README.md

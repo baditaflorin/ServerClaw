@@ -1,8 +1,0 @@
-{
-  "start": "0342",
-  "end": "0344",
-  "window_size": 3,
-  "highest_committed_adr": "0341",
-  "active_reservation_count": 0,
-  "reservations_path": "docs/adr/index/reservations.yaml"
-}

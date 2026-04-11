@@ -1,3 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-Workstream surface ownership validation
-Workstream surface ownership validation failed: path pattern 'inventory/group_vars/platform.yml' is claimed as exclusive by both 'ws-0224-repo-intake' and 'ws-0340-implementation'

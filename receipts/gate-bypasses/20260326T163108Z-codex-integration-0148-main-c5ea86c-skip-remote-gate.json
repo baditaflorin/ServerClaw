@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T16:31:08+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "ADR 0148 integration push to main after latest-main alignment; remote pre-push gate remained blocked by repo-generated docs/adr/.index.yaml yamllint failure and a terminated remote_exec local-fallback retry after build/platform-manifest.json was refreshed. Focused ADR 0148 tests, syntax checks, repository validations, generated manifest refresh, and live-apply evidence for search.lv3.org passed on this integrated branch.",
-  "source": "manual",
-  "branch": "codex/integration-0148-main",
-  "commit": "c5ea86cda41386a23cbecc30c0e60e5a925e6a64"
-}

@@ -1,8 +1,0 @@
-Current version: 0.177.153
-Next version: 0.178.0
-Unreleased notes: 1
-- implements ADR 0300 by adding repo-managed Falco syscall monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, restoring the runtime-control NATS fan-out path and streams, and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery
-Marked workstreams released: ws-0300-live-apply
-Canonical truth rewrites:
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/README.md
-Generated truth refresh: complete

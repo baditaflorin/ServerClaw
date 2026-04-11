@@ -1,7 +1,0 @@
-total 4
--rw-------    1 root     root           272 Mar 30 14:40 renovate.env
-RENOVATE_GITEA_BASE_URL=http://10.10.10.20:3003
-RENOVATE_GITEA_USERNAME=renovate-bot
-RENOVATE_GITEA_PASSWORD=SIwu5LmAZpiAhHVotvuVFhsRhb+QXh5k
-RENOVATE_GITEA_TOKEN_SCOPES=write:repository,read:user,write:issue,read:organization
-RENOVATE_REPOSITORY=ops/proxmox_florin_server

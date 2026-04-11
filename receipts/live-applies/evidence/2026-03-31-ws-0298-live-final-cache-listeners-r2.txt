@@ -1,6 +1,0 @@
-artifact-cache-lv3 | CHANGED | rc=0 >>
-State  Recv-Q Send-Q Local Address:Port Peer Address:Port
-LISTEN 0      4096               *:5001            *:*
-LISTEN 0      4096               *:5002            *:*
-LISTEN 0      4096               *:5003            *:*
-LISTEN 0      4096               *:5004            *:*

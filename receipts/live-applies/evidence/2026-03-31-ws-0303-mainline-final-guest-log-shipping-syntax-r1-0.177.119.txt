@@ -1,2 +1,0 @@
-
-playbook: playbooks/services/guest-log-shipping.yml

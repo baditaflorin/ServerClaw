@@ -54,3 +54,9 @@ build/onboarding/*
 docs/site-generated/*
 !docs/site-generated/.gitkeep
 .ansible/fact_cache/
+
+# ADR 0407: Generated configs and deployment evidence stay local.
+# These contain deployment-specific values (domain, IPs) and are
+# regenerated at runtime from templates + .local/identity.yml.
+config/generated/
+receipts/

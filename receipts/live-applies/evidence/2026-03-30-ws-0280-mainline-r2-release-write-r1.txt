@@ -1,1 +1,0 @@
-Prepared release 0.177.100 with 1 changelog note(s).

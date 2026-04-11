@@ -1,9 +1,0 @@
-SERVER_STATE
-Mon Mar 30 09:01:45 UTC 2026
-plausible                           Up 31 minutes
-plausible-openbao-agent             Up 31 minutes (healthy)
-plausible-events-db                 Up 31 minutes (healthy)
-plausible-db                        Up 31 minutes (healthy)
-
-{"sessions":"ok","postgres":"ok","clickhouse":"ok","sites_cache":"ok"}
-BOOTSTRAP_VERIFY

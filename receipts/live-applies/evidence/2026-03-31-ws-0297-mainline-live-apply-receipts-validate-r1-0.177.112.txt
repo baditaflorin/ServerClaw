@@ -1,1 +1,0 @@
-Live apply receipt error: 2026-03-31-adr-0297-renovate-live-apply.json: evidence ref 'receipts/live-applies/evidence/2026-03-31-ws-0297-mainline-targeted-pytest-r1.txt' does not exist

@@ -1,6 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-docker-runtime-lv3
-2026-03-30T12:30:07+00:00
-CONTAINER ID                                                       IMAGE                                                                                                                        COMMAND                                                                CREATED       STATUS          PORTS      NAMES
-a4eb8073543092530e10bb495e1d145ae0e62a75b4c5a19e94547fe214828574   docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b   "/usr/bin/docker-entrypoint.sh server --console-address :9001 /data"   4 hours ago   Up 11 minutes   9000/tcp   outline-minio
-/opt/minio-missing

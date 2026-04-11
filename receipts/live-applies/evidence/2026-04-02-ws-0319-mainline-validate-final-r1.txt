@@ -1,4 +1,0 @@
-Repository data model validation
-Workstream surface ownership validation
-Workstream surface ownership validation failed: workstream surface ownership validation failed:
-- receipts/ops-portal-snapshot.html: outside declared owned surfaces for ws-0319-live-apply

@@ -1,4 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=live-apply-service
-Manifest error: workflow 'converge-woodpecker' references unknown secret 'woodpecker_database_password'
-make[1]: *** [preflight] Error 2
-make: *** [live-apply-service] Error 2

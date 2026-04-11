@@ -1,4 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/sda1        95G   83G  7.9G  92% /
- 17:59:19 up 3 days, 12 min,  6 users,  load average: 23.88, 22.32, 18.14

@@ -1,1 +1,0 @@
-{"email":"superadmin_secret@windmill.dev","login_type":"password","super_admin":true,"devops":false,"verified":true,"name":null,"company":null,"username":"superadmin_secret","first_time_user":false,"role_source":"manual"}

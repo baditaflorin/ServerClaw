@@ -1,2 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=2 >>
-SBOM refresh error: time="2026-03-30T17:50:10Z" level=error msg="error waiting for container: unexpected EOF"non-zero return code

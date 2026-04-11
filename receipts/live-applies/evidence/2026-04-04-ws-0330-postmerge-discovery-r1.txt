@@ -1,5 +1,0 @@
-.repo-structure.yaml
-.config-locations.yaml
-build/onboarding/agent-core.yaml
-build/onboarding/automation.yaml
-build/onboarding/service-catalog.yaml

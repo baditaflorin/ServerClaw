@@ -1,1 +1,0 @@
-Repository data model error: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json: correction_loop.diagnosis must be one of ['contract_drift', 'dependency_outage', 'irreversible_data_loss_risk', 'stale_input', 'transient_failure']

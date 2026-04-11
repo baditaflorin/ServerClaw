@@ -1,9 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-10.10.10.20:8100
-127.0.0.1:8100
-
---healthz--
-{"default_voice":"en_US-ryan-medium","sample_rate":22050,"status":"ok","voices":["en_US-ryan-medium"]}
-
---voices--
-{"default_voice":"en_US-ryan-medium","voices":["en_US-ryan-medium"]}

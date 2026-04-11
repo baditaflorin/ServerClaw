@@ -1,2 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=3 >>
-deactivatingnon-zero return code

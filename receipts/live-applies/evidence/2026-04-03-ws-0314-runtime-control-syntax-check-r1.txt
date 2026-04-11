@@ -1,2 +1,0 @@
-
-playbook: playbooks/runtime-control-pool.yml

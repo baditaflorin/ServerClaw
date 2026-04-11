@@ -1,7 +1,0 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/run_python_with_packages.sh pyyaml -- scripts/atlas_schema.py validate --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline
-{
-  "catalog_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/config/atlas/catalog.json",
-  "database_count": 20,
-  "lint_target_count": 1,
-  "status": "ok"
-}

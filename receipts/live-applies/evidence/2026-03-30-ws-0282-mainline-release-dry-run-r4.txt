@@ -1,5 +1,0 @@
-Current version: 0.177.94
-Next version: 0.177.95
-Unreleased notes: 1
-Platform impact: ADR 0282 is already live on platform version 0.130.60; this exact-main integration replays Mailpit onto the refreshed 0.177.94 / 0.130.62 baseline without advancing platform_version again.
-Release notes index: docs/release-notes/README.md

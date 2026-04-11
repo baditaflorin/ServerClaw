@@ -1,5 +1,0 @@
-workstreams.yaml
-Canonical truth already current.
-Updated generated status docs: README.md, docs/status/history/live-apply-evidence.md, docs/status/history/merged-workstreams.md
-Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0337-live-apply/docs/diagrams
-generated-surfaces-ok

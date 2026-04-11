@@ -718,6 +718,20 @@ def _reserved_lane(
         registry.release(actor_intent_id)
 
 
+def _resolve_identity_override(repo_root: Path) -> list[str]:
+    """Return extra-vars args for the local identity overlay (ADR 0407).
+
+    If ``.local/identity.yml`` exists, it is injected as ``-e @path`` so that
+    deployment-specific values (real domain, operator name) override the
+    generic defaults committed in ``inventory/group_vars/all/identity.yml``.
+    """
+    # .local/ is always relative to the main repo root, even from worktrees.
+    local_identity = repo_root / ".local" / "identity.yml"
+    if local_identity.is_file():
+        return ["-e", f"@{local_identity}"]
+    return []
+
+
 def run_planned_playbook(
     plan: PlannedPlaybookExecution,
     *,
@@ -738,6 +752,7 @@ def run_planned_playbook(
         str(repo_root / plan.playbook_path),
         "-e",
         f"env={plan.env}",
+        *_resolve_identity_override(repo_root),
         *(passthrough_args or []),
     ]
     with _reserved_lane(plan, repo_root=repo_root, lane_registry=lane_registry) as lane_reservation:

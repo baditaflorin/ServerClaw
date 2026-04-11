@@ -1,5 +1,0 @@
-Current version: 0.177.123
-Next version: 0.177.124
-Unreleased notes: 1
-Platform impact: exact-main validation confirms the shared MinIO object-storage runtime, edge publication, and MinIO-backed Restic recovery path; platform version advances to 0.130.79 with this release
-Release notes index: docs/release-notes/README.md

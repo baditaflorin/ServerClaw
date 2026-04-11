@@ -1,4 +1,0 @@
-
-CHECK          STATUS DURATION(s)
-iac-policy-scan passed 87.53
-type-check      passed 7.23

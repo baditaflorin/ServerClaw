@@ -1,4 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-Workstream surface ownership validation
-Workstream surface ownership validation failed: workstream surface ownership validation failed:
-- docs/adr/.index.yaml: outside declared owned surfaces for ws-0328-live-apply

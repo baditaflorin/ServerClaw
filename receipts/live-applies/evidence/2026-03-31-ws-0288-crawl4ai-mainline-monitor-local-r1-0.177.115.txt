@@ -1,1 +1,0 @@
-{"container":{"memory_percent":7.9,"cpu_percent":100.0,"network_sent_mb":0.05,"network_recv_mb":0.1,"uptime_seconds":65},"pool":{"permanent":{"active":true,"memory_mb":270},"hot":{"count":0,"memory_mb":0},"cold":{"count":0,"memory_mb":0},"total_memory_mb":270},"janitor":{"next_cleanup_estimate":"adaptive","memory_pressure":"LOW"}}

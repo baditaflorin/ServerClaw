@@ -1,2 +1,0 @@
-{"seq": 2, "stream": "SECRET_ROTATION", "stream_message_count": 2, "subject": "secret.rotation.completed"}
-{"seq": 2, "stream": "RAG_DOCUMENT", "stream_message_count": 2, "subject": "rag.document.staged"}

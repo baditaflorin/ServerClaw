@@ -1,5 +1,0 @@
-cf6ddb19b3353f718b5933cb589d6a3d1c3ae7377ceda033ed0e29e4bcfcc7ba  /opt/ops-portal/service/ops_portal/app.py
-d9094470c32e2f93c71ba5b3eb4f2df7737186ec4e9299adb660a83e0194e904  /opt/ops-portal/service/search_fabric/__init__.py
-3e9131c2beda07a91e4a419a8d5d1729ff92749be840f4fedb718f100c6a34c9  /opt/ops-portal/data/config/workflow-catalog.json
-86819853d16693a72c2d5119690043b66f8db825d43ce4a5b6873bb52437033b  /opt/ops-portal/data/config/persona-catalog.json
-1324:    @app.get("/partials/launcher", response_class=HTMLResponse)

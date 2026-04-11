@@ -1,2 +1,0 @@
-Workstream surface ownership registry OK
-Workstream branch ownership OK

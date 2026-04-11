@@ -1,3 +1,0 @@
-Updated canonical truth:
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge/versions/stack.yaml
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge/README.md

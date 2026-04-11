@@ -1,8 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-FAIL:5001
-FAIL:5002
-FAIL:5003
-FAIL:5004curl: (28) Failed to connect to 10.10.10.80 port 5001 after 3001 ms: Timeout was reached
-curl: (28) Failed to connect to 10.10.10.80 port 5002 after 3001 ms: Timeout was reached
-curl: (28) Failed to connect to 10.10.10.80 port 5003 after 3001 ms: Timeout was reached
-curl: (28) Failed to connect to 10.10.10.80 port 5004 after 3001 ms: Timeout was reached

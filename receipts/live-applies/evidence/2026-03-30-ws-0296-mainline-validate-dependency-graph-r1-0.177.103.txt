@@ -1,7 +1,0 @@
-Unknown validation stage: dependency-graph
-Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|dependency-direction|data-models|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
-
-Examples:
-  scripts/validate_repo.sh
-  scripts/validate_repo.sh ansible-syntax role-argument-specs ansible-lint ansible-idempotency

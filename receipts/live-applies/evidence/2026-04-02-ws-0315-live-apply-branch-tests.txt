@@ -1,3 +1,0 @@
-Installed 6 packages in 23ms
-.............................                                            [100%]
-29 passed in 3.29s

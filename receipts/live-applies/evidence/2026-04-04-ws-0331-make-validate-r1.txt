@@ -1,4 +1,0 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-exact-main/scripts/validate_repo.sh
-Generated platform vars validation
-Generated platform vars are stale. Run 'uvx --from pyyaml python scripts/generate_platform_vars.py --write' or 'make generate-platform-vars'.
-make: *** [validate] Error 2

@@ -1,8 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-{
-  "status": "error",
-  "command": "uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json",
-  "returncode": 2,
-  "stdout": "",
-  "stderr": "SBOM refresh error: [0061] ERROR could not determine source: an error occurred attempting to resolve '10.10.10.30:5002/dgtlmoon/changedetection.io:0.54.7@sha256:0179240fef0ff5e7cabc52f7670e4d50cebf32d57f02a970ebf2f3a67aca0870': oci-registry: failed to get image descriptor from registry: Get \"https://10.10.10.30:5002/v2/\": dial tcp 10.10.10.30:5002: i/o timeout; Get \"http://10.10.10.30:5002/v2/\": dial tcp 10.10.10.30:5002: i/o timeout"
-}

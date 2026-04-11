@@ -1,6 +1,0 @@
-Workstream surface ownership validation
-Agent standards validation (ADR 0163-0168)
-YAML lint
-JSON validation
-Role argument specs
-Repository data model validation

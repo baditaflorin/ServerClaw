@@ -1,5 +1,0 @@
-Current version: 0.177.128
-Next version: 0.177.129
-Unreleased notes: 1
-Platform impact: platform version advances to 0.130.82 after the exact-main ADR 0292 replay re-verifies Apache Superset on bi.lv3.org, preserves the shared Keycloak and PostgreSQL contracts, and records the canonical SQL-first BI live-apply receipt on top of the 0.130.81 baseline
-Release notes index: docs/release-notes/README.md

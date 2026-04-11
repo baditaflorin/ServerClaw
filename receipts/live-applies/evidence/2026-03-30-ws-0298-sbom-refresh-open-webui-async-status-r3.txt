@@ -1,5 +1,0 @@
-docker-runtime-lv3 | UNREACHABLE! => {
-    "changed": false,
-    "msg": "Failed to connect to the host via ssh: Connection closed by UNKNOWN port 65535",
-    "unreachable": true
-}

@@ -1,9 +1,0 @@
-{
-  "source": "build-server",
-  "status": "passed",
-  "runner_id": "build-server-validation",
-  "cpu_architecture": "x86_64",
-  "container_runtime_available": true,
-  "check_count": 15,
-  "failed_checks": []
-}

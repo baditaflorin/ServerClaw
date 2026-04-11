@@ -1,4 +1,0 @@
-8c48a528d200389ec106dad7ef99d59d5fb1ff6891aa957c3503cf4f4359a77d  /srv/proxmox_florin_server/scripts/operator_manager.py
-7937e0fe94600789f75d777241ec50bb0b87cf81eca04e1454a84a09d870e5a8  /srv/proxmox_florin_server/config/windmill/scripts/operator-update-notes.py
-wrapper_present=yes
-lock_present=yes

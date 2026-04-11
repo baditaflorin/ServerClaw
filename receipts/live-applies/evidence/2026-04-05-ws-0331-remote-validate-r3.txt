@@ -1,1 +1,0 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-exact-main/scripts/remote_exec.sh remote-validate --local-fallback

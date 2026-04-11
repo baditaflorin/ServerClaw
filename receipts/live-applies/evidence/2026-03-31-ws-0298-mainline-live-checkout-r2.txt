@@ -1,5 +1,0 @@
-24:DEFAULT_SYFT_TMP_DIR = Path(os.environ.get("LV3_SYFT_TMP_DIR", str(REPO_ROOT / ".local" / "syft-tmp")))
-105:def find_native_grype_binary() -> str | None:
-145:    syft_tmp_dir: Path = DEFAULT_SYFT_TMP_DIR,
-221:    native_grype_binary = find_native_grype_binary()
-367:    native_grype_binary = find_native_grype_binary()

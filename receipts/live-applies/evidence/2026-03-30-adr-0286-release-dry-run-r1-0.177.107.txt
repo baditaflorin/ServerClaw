@@ -1,5 +1,0 @@
-Current version: 0.177.106
-Next version: 0.177.107
-Unreleased notes: 1
-Platform impact: no live platform version bump; this release records the verified ADR 0286 private Tesseract OCR rollout and the controller-local Tika-first fallback automation on current platform version 0.130.71
-Release notes index: docs/release-notes/README.md

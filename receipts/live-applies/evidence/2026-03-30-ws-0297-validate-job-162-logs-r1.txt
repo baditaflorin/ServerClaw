@@ -1,161 +1,0 @@
-2026-03-30T22:45:39.4739654Z docker-build-lv3(version:v0.2.12) received task 148 of job validate, be triggered by event: push
-2026-03-30T22:45:39.4744027Z workflow prepared
-2026-03-30T22:45:39.4744628Z evaluating expression 'success()'
-2026-03-30T22:45:39.4745255Z expression 'success()' evaluated to 'true'
-2026-03-30T22:45:39.4745438Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-30T22:45:39.4811338Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-30T22:45:39.4811611Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-30T22:45:39.4822304Z Image exists? true
-2026-03-30T22:45:39.4853033Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-03-30T22:45:39.4929642Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-30T22:45:39.4930054Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-30T22:45:39.4930418Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000182fc8 OomKillDisable:0xc000182ec3 PidsLimit:0xc000183028 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-30T22:45:39.4930869Z --network and --net in the options will be ignored.
-2026-03-30T22:45:39.4931146Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000182fc8 OomKillDisable:0xc000182ec3 PidsLimit:0xc000183028 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-148_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-148_WORKFLOW-validate_JOB-validate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-30T22:45:39.5107562Z Created container name=GITEA-ACTIONS-TASK-148_WORKFLOW-validate_JOB-validate id=d82ec1bc4ec64322a92085dd48142270dcb8cddee65f993fdd2cae54b7d3a3ce from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
-2026-03-30T22:45:39.5108049Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-30T22:45:39.5108205Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-03-30T22:45:39.5108391Z Starting container: d82ec1bc4ec64322a92085dd48142270dcb8cddee65f993fdd2cae54b7d3a3ce
-2026-03-30T22:45:39.6145654Z Started container: d82ec1bc4ec64322a92085dd48142270dcb8cddee65f993fdd2cae54b7d3a3ce
-2026-03-30T22:45:39.7030773Z Writing entry to tarball workflow/event.json len:40289
-2026-03-30T22:45:39.7031265Z Writing entry to tarball workflow/envs.txt len:0
-2026-03-30T22:45:39.7031486Z Extracting content to '/var/run/act/'
-2026-03-30T22:45:39.7166573Z expression '${{ github.server_url }}' rewritten to 'format('{0}', github.server_url)'
-2026-03-30T22:45:39.7166942Z evaluating expression 'format('{0}', github.server_url)'
-2026-03-30T22:45:39.7167474Z expression 'format('{0}', github.server_url)' evaluated to '%!t(string=http://10.10.10.20:3003)'
-2026-03-30T22:45:39.7167649Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
-2026-03-30T22:45:39.7167750Z evaluating expression 'format('{0}', github.token)'
-2026-03-30T22:45:39.7167950Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
-2026-03-30T22:45:39.7168106Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
-2026-03-30T22:45:39.7168199Z evaluating expression 'format('{0}', github.repository)'
-2026-03-30T22:45:39.7168381Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
-2026-03-30T22:45:39.7168570Z expression '${{ github.sha }}' rewritten to 'format('{0}', github.sha)'
-2026-03-30T22:45:39.7168662Z evaluating expression 'format('{0}', github.sha)'
-2026-03-30T22:45:39.7168842Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=c5d543b184815d96ee70e009a5ba613023252183)'
-2026-03-30T22:45:39.7168991Z expression '${{ github.ref }}' rewritten to 'format('{0}', github.ref)'
-2026-03-30T22:45:39.7169084Z evaluating expression 'format('{0}', github.ref)'
-2026-03-30T22:45:39.7169257Z expression 'format('{0}', github.ref)' evaluated to '%!t(string=refs/heads/codex/ws-0297-live-apply)'
-2026-03-30T22:45:39.7273414Z evaluating expression ''
-2026-03-30T22:45:39.7273858Z expression '' evaluated to 'true'
-2026-03-30T22:45:39.7273958Z ⭐ Run Main Checkout
-2026-03-30T22:45:39.7274122Z Writing entry to tarball workflow/outputcmd.txt len:0
-2026-03-30T22:45:39.7274274Z Writing entry to tarball workflow/statecmd.txt len:0
-2026-03-30T22:45:39.7274362Z Writing entry to tarball workflow/pathcmd.txt len:0
-2026-03-30T22:45:39.7274455Z Writing entry to tarball workflow/envs.txt len:0
-2026-03-30T22:45:39.7274533Z Writing entry to tarball workflow/SUMMARY.md len:0
-2026-03-30T22:45:39.7274783Z Extracting content to '/var/run/act'
-2026-03-30T22:45:39.7460380Z Wrote command \n\nset -euo pipefail\ngit config --global --add safe.directory "$PWD"\ngit init .\nif git remote get-url origin >/dev/null 2>&1; then\n  git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nelse\n  git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nfi\ngit -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin "${WORKFLOW_REF}"\ngit -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin main\ngit checkout --force "${WORKFLOW_SHA}"\n\n\n to 'workflow/0.sh'
-2026-03-30T22:45:39.7460943Z Writing entry to tarball workflow/0.sh len:512
-2026-03-30T22:45:39.7461113Z Extracting content to '/var/run/act'
-2026-03-30T22:45:39.7473313Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
-2026-03-30T22:45:39.7473648Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-30T22:45:39.7473945Z Working directory '/workspace/ops/proxmox_florin_server'
-2026-03-30T22:45:39.8043001Z hint: Using 'master' as the name for the initial branch. This default branch name
-2026-03-30T22:45:39.8043578Z hint: is subject to change. To configure the initial branch name to use in all
-2026-03-30T22:45:39.8043663Z hint: of your new repositories, which will suppress this warning, call:
-2026-03-30T22:45:39.8043747Z hint:
-2026-03-30T22:45:39.8043863Z hint: 	git config --global init.defaultBranch <name>
-2026-03-30T22:45:39.8043953Z hint:
-2026-03-30T22:45:39.8044056Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
-2026-03-30T22:45:39.8044135Z hint: 'development'. The just-created branch can be renamed via this command:
-2026-03-30T22:45:39.8044216Z hint:
-2026-03-30T22:45:39.8044335Z hint: 	git branch -m <name>
-2026-03-30T22:45:39.8044511Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-30T22:45:47.4833256Z From http://10.10.10.20:3003/ops/proxmox_florin_server
-2026-03-30T22:45:47.4833741Z  * branch              codex/ws-0297-live-apply -> FETCH_HEAD
-2026-03-30T22:45:47.4839730Z  * [new branch]        codex/ws-0297-live-apply -> origin/codex/ws-0297-live-apply
-2026-03-30T22:45:54.3508173Z From http://10.10.10.20:3003/ops/proxmox_florin_server
-2026-03-30T22:45:54.3508885Z  * branch              main       -> FETCH_HEAD
-2026-03-30T22:45:54.3510439Z  * [new branch]        main       -> origin/main
-2026-03-30T22:45:54.7746018Z Note: switching to 'c5d543b184815d96ee70e009a5ba613023252183'.
-2026-03-30T22:45:54.7746793Z
-2026-03-30T22:45:54.7746968Z You are in 'detached HEAD' state. You can look around, make experimental
-2026-03-30T22:45:54.7747121Z changes and commit them, and you can discard any commits you make in this
-2026-03-30T22:45:54.7747259Z state without impacting any branches by switching back to a branch.
-2026-03-30T22:45:54.7747408Z
-2026-03-30T22:45:54.7747524Z If you want to create a new branch to retain commits you create, you may
-2026-03-30T22:45:54.7747662Z do so (now or later) by using -c with the switch command. Example:
-2026-03-30T22:45:54.7747799Z
-2026-03-30T22:45:54.7747937Z   git switch -c <new-branch-name>
-2026-03-30T22:45:54.7748068Z
-2026-03-30T22:45:54.7748192Z Or undo this operation with:
-2026-03-30T22:45:54.7748330Z
-2026-03-30T22:45:54.7748455Z   git switch -
-2026-03-30T22:45:54.7748580Z
-2026-03-30T22:45:54.7748695Z Turn off this advice by setting config variable advice.detachedHead to false
-2026-03-30T22:45:54.7748834Z
-2026-03-30T22:45:54.7748952Z HEAD is now at c5d543b1 [renovate] Restore hosted validate history access
-2026-03-30T22:45:54.9748706Z Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
-2026-03-30T22:45:54.9966459Z Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
-2026-03-30T22:45:55.0055941Z Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
-2026-03-30T22:45:55.0160332Z Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
-2026-03-30T22:45:55.1328624Z Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
-2026-03-30T22:45:55.1330290Z Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [114 kB]
-2026-03-30T22:45:55.7006589Z Fetched 10.0 MB in 1s (12.8 MB/s)
-2026-03-30T22:45:56.1849954Z Reading package lists...
-2026-03-30T22:45:56.7114266Z Reading package lists...
-2026-03-30T22:45:56.8783487Z Building dependency tree...
-2026-03-30T22:45:56.8784111Z Reading state information...
-2026-03-30T22:45:57.1511374Z Suggested packages:
-2026-03-30T22:45:57.1511737Z   docker-doc
-2026-03-30T22:45:57.1511866Z Recommended packages:
-2026-03-30T22:45:57.1511959Z   docker-buildx
-2026-03-30T22:45:57.1723332Z The following NEW packages will be installed:
-2026-03-30T22:45:57.1732776Z   docker-cli
-2026-03-30T22:45:57.2518816Z 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
-2026-03-30T22:45:57.2519201Z Need to get 7338 kB of archives.
-2026-03-30T22:45:57.2519311Z After this operation, 31.1 MB of additional disk space will be used.
-2026-03-30T22:45:57.2519406Z Get:1 http://deb.debian.org/debian trixie/main amd64 docker-cli amd64 26.1.5+dfsg1-9+b12 [7338 kB]
-2026-03-30T22:45:58.0068391Z Fetched 7338 kB in 0s (46.5 MB/s)
-2026-03-30T22:45:58.0215854Z Selecting previously unselected package docker-cli.
-2026-03-30T22:45:58.0259816Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
-2026-03-30T22:45:58.0266246Z Preparing to unpack .../docker-cli_26.1.5+dfsg1-9+b12_amd64.deb ...
-2026-03-30T22:45:58.0280423Z Unpacking docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-03-30T22:45:58.2628628Z Setting up docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-03-30T22:45:58.3373754Z Docker version 26.1.5+dfsg1, build a72d7cd
-2026-03-30T22:49:06.9761948Z Validation lane selection
-2026-03-30T22:49:06.9762739Z   mode: all_lanes
-2026-03-30T22:49:06.9762882Z   branch: HEAD
-2026-03-30T22:49:06.9763022Z   selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
-2026-03-30T22:49:06.9763263Z   blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
-2026-03-30T22:49:06.9763490Z
-2026-03-30T22:49:06.9763616Z CHECK                STATUS DURATION(s)
-2026-03-30T22:49:06.9763751Z agent-standards       passed 1.15
-2026-03-30T22:49:06.9763884Z alert-rule-validation passed 1.67
-2026-03-30T22:49:06.9764005Z ansible-lint          passed 188.18
-2026-03-30T22:49:06.9764133Z ansible-syntax        passed 109.67
-2026-03-30T22:49:06.9764273Z artifact-secret-scan  passed 2.54
-2026-03-30T22:49:06.9764409Z dependency-direction  passed 3.31
-2026-03-30T22:49:06.9764540Z dependency-graph      passed 4.30
-2026-03-30T22:49:06.9764669Z documentation-index   passed 1.55
-2026-03-30T22:49:06.9764821Z generated-docs        passed 8.13
-2026-03-30T22:49:06.9764961Z generated-portals     passed 28.80
-2026-03-30T22:49:06.9765080Z integration-tests     passed 1.49
-2026-03-30T22:49:06.9765195Z packer-validate       passed 5.92
-2026-03-30T22:49:06.9765354Z policy-validation     passed 1.83
-2026-03-30T22:49:06.9765476Z schema-validation     failed 3.51
-2026-03-30T22:49:06.9765722Z security-scan         passed 13.91
-2026-03-30T22:49:06.9765854Z semgrep-sast          passed 39.57
-2026-03-30T22:49:06.9765984Z service-completeness  passed 1.33
-2026-03-30T22:49:06.9766120Z tofu-validate         passed 1.96
-2026-03-30T22:49:06.9766254Z type-check            passed 4.54
-2026-03-30T22:49:06.9766378Z workstream-surfaces   passed 3.93
-2026-03-30T22:49:06.9766495Z yaml-lint             passed 14.61
-2026-03-30T22:49:06.9766606Z
-2026-03-30T22:49:06.9766744Z [schema-validation] docker command
-2026-03-30T22:49:06.9766882Z /usr/bin/docker run --rm --cpus=4 -v /var/lib/docker/volumes/GITEA-ACTIONS-TASK-148_WORKFLOW-validate_JOB-validate/_data:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_DOCKER_WORKSPACE_PATH=/var/lib/docker/volumes/GITEA-ACTIONS-TASK-148_WORKFLOW-validate_JOB-validate/_data -e LV3_VALIDATION_BASE_REF=origin/main -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
-2026-03-30T22:49:06.9767263Z [schema-validation] stderr
-2026-03-30T22:49:06.9767408Z Repository data model error: 2026-03-22-adr-0055-portainer-live-apply.json: source_commit 'bf9ed052e500972f83b3f814a342d49165344789' is not a valid git commit
-2026-03-30T22:49:06.9970380Z   ❌  Failure - Main Run authoritative validation gate
-2026-03-30T22:49:07.0106123Z exitcode '1': failure
-2026-03-30T22:49:07.1432005Z Bundled validation artifacts:
-2026-03-30T22:49:07.1440019Z .local/validation-gate/gitea-last-run.json
-2026-03-30T22:49:07.1440464Z .local/validation-gate/semgrep-summary.json
-2026-03-30T22:49:07.1440631Z receipts/sast/c5d543b184815d96ee70e009a5ba613023252183.sarif.json
-2026-03-30T22:49:07.1458959Z -rw-r--r-- 1 root root 7.0K Mar 30 22:49 .local/validation-gate/gitea-validation-receipts.tar.gz
-2026-03-30T22:49:07.1577248Z Cleaning up container for job validate
-2026-03-30T22:49:07.2258544Z Removed container: d82ec1bc4ec64322a92085dd48142270dcb8cddee65f993fdd2cae54b7d3a3ce
-2026-03-30T22:49:07.2270656Z   🐳  docker volume rm GITEA-ACTIONS-TASK-148_WORKFLOW-validate_JOB-validate
-2026-03-30T22:49:07.4739545Z   🐳  docker volume rm GITEA-ACTIONS-TASK-148_WORKFLOW-validate_JOB-validate-env
-2026-03-30T22:49:07.4762233Z 🏁  Job failed
-2026-03-30T22:49:07.4859274Z Job 'validate' failed

@@ -1,1 +1,0 @@
-Repo-deploy base image profile catalog OK

@@ -1,1 +1,0 @@
-{"content_type":"audio/wav","riff":"RIFF","wave":"WAVE","bytes":109612}

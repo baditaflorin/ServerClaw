@@ -73,7 +73,7 @@ COLLECTION_INSTALL_SOURCE ?= tarball
 CHECKS ?=
 # Fork operators: override this to point to your own container registry.
 # The check-runner images are built by `make build-check-runners`.
-CHECK_RUNNER_REGISTRY ?= registry.lv3.org/check-runner
+CHECK_RUNNER_REGISTRY ?= registry.example.com/check-runner
 CHECK_RUNNER_ANSIBLE_TAG ?= 2.17.10
 CHECK_RUNNER_PYTHON_TAG ?= 3.12.10
 CHECK_RUNNER_INFRA_TAG ?= 2026.03.23

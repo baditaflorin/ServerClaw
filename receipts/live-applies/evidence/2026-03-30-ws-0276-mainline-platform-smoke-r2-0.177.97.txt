@@ -1,4 +1,0 @@
-PLATFORM_EVENTS: none
-RAG_DOCUMENT: none
-SECRET_ROTATION: none
-smoke_publish: {"duplicate": null, "seq": 170, "stream": "PLATFORM_EVENTS", "subject": "platform.findings.observation"}

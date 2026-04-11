@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T10:55:39.217569+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "build-server pre-push schema-validation treats /workspace/.git-remote/worktree as a non-repository even though local repository data-model validation passed after refreshing the dependency diagram for ADR 0150.",
-  "source": "main_push",
-  "branch": "codex/integration-0150-main",
-  "commit": "0feda573fb30b3eba17ebbf5f962edf7b0a115f7"
-}

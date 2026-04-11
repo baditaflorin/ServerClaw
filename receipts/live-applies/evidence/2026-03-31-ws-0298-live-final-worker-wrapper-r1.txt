@@ -1,7 +1,0 @@
-[ERROR]: Task failed: Module failed: non-zero return code
-Origin: <adhoc 'shell' task>
-
-{'action': 'shell', 'args': {'_raw_params': "docker exec windmill-windmill_worker-1 bash -lc 'cd [...]
-
-docker-runtime-lv3 | FAILED | rc=1 >>
-Error response from daemon: container cfaccc6f566cec536c87187f56dbb59bbca10e9eb467f9a4a21a793e2a411d75 is not runningnon-zero return code

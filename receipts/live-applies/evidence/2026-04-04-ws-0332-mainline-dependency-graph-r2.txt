@@ -1,2 +1,0 @@
-Dependency graph OK
-dependency diagram error: Missing dependency: jsonschema. Run via 'uv run --with jsonschema python ...'.

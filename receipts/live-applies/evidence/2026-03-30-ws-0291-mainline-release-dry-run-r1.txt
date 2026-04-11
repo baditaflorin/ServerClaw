@@ -1,6 +1,0 @@
-$ LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "no additional platform_version bump; this release integrates ADR 0291 onto the current 0.130.72 mainline baseline and prepares the exact-main JupyterHub replay without changing the already-live notebook capability baseline" --released-on 2026-03-30 --dry-run
-Current version: 0.177.109
-Next version: 0.177.110
-Unreleased notes: 1
-Platform impact: no additional platform_version bump; this release integrates ADR 0291 onto the current 0.130.72 mainline baseline and prepares the exact-main JupyterHub replay without changing the already-live notebook capability baseline
-Release notes index: docs/release-notes/README.md

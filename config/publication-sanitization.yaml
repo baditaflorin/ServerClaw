@@ -9,6 +9,7 @@ schema_version: "1.0.0"
 # --- Tier A: Whole-file replacements ---
 # These files differ structurally between private and public.
 # Replace entirely with the template version.
+# NOTE: identity.yml is a no-op since ADR 0407 (committed version is already generic).
 file_replacements:
   - source: inventory/group_vars/all/identity.yml
     template: publication/templates/identity.yml

@@ -187,7 +187,27 @@ Branch-local changes to these will be overwritten or conflict on merge.
 
 ---
 
-## 9. Common Pitfalls
+## 9. Deployment-Specific Values (ADR 0407)
+
+The committed codebase uses **generic values** (`example.com`, `Platform Operator`,
+`203.0.113.x`). Real deployment values live exclusively in `.local/`:
+
+| What | Committed (generic) | Real value location |
+|------|---------------------|---------------------|
+| Domain | `example.com` | `.local/identity.yml` → `platform_domain: lv3.org` |
+| Operator | `Platform Operator` | `.local/identity.yml` → `platform_operator_name` |
+| Email | `operator@example.com` | `.local/identity.yml` → `platform_operator_email` |
+| Host IPs | Template placeholders | `.local/hosts.yml` (future) |
+
+**When you need the actual deployment domain, IP, or operator identity:**
+1. Read `.local/identity.yml` first — it has the real values
+2. The committed `identity.yml` is a structural reference with example values
+3. Ansible automatically loads `.local/identity.yml` as extra-vars (highest precedence)
+4. **Never hardcode values from `.local/` into committed files**
+
+---
+
+## 10. Common Pitfalls
 
 **Preflight `.env` scanner** — `roles/preflight` uses `ansible.builtin.find *.env` recursively. It excludes by basename, not path, so `.local/open-webui/provider.env` and `.local/serverclaw/provider.env` are always found. Temporarily rename them to `.bak` before any `make converge-*` run and restore after.
 

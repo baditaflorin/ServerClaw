@@ -1,7 +1,0 @@
-[ERROR]: Task failed: Module failed: non-zero return code
-Origin: <adhoc 'shell' task>
-
-{'action': 'shell', 'args': {'_raw_params': 'set -euo pipefail; container=; test -n ""; docker exec "" bash -lc [...]
-
-docker-runtime-lv3 | FAILED | rc=1 >>
-non-zero return code

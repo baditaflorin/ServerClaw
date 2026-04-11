@@ -1,5 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-runtime:10.10.10.80:5001=ok
-runtime:10.10.10.80:5002=ok
-runtime:10.10.10.80:5003=ok
-runtime:10.10.10.80:5004=ok

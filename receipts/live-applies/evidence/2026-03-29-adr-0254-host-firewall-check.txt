@@ -1,9 +1,0 @@
-Command:
-ansible -i inventory/hosts.yml proxmox_florin -m shell -a 'set -e; . /etc/os-release; printf "PRETTY_NAME=%s\n" "$PRETTY_NAME"; uname -r; pveversion; grep -n "10.10.10.10/32 -p tcp -dport 8096" /etc/pve/firewall/170.fw' --private-key .local/ssh/hetzner_llm_agents_ed25519
-
-Observed on 2026-03-29:
-
-PRETTY_NAME=Debian GNU/Linux 13 (trixie)
-6.17.13-2-pve
-pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)
-17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096

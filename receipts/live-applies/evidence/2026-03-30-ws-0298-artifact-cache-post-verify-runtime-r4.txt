@@ -1,5 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=28 >>
-curl: (28) Failed to connect to 10.10.10.30 port 80 after 133588 ms: Could not connect to server
-curl: (28) Failed to connect to 10.10.10.30 port 80 after 135154 ms: Could not connect to server
-curl: (28) Failed to connect to 10.10.10.30 port 80 after 135159 ms: Could not connect to server
-curl: (28) Failed to connect to 10.10.10.30 port 80 after 135155 ms: Could not connect to servernon-zero return code

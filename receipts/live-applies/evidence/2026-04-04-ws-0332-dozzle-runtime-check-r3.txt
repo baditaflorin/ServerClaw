@@ -1,4 +1,0 @@
-hub-health-ok
-local-agent-ok
-docker-build-agent-ok
-monitoring-agent-ok

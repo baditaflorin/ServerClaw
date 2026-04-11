@@ -1,5 +1,0 @@
-runtime-control-lv3 | CHANGED | rc=0 >>
-EHLO=250 b'mail.lv3.org you had me at EHLO\nSMTPUTF8\nSIZE 104857600\nREQUIRETLS\nPIPELINING\nNO-SOLICITING\nENHANCEDSTATUSCODES\nCHUNKING\nBINARYMIME\nAUTH PLAIN LOGIN\n8BITMIME'
-FEATURES={'smtputf8': '', 'size': '104857600', 'requiretls': '', 'pipelining': '', 'no-soliciting': '', 'enhancedstatuscodes': '', 'chunking': '', 'binarymime': '', 'auth': ' PLAIN LOGIN', '8bitmime': ''}
-LOGIN server FAILED: SMTPAuthenticationError: (535, b'5.7.8 Authentication credentials invalid.')
-LOGIN server@lv3.org FAILED: SMTPAuthenticationError: (455, b'4.3.0 Too many authentication errors, disconnecting.')
