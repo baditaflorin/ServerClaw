@@ -39,9 +39,9 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://data.lv3.org/server/health",
+      "target_url": "https://data.example.com/server/health",
       "probe_module": "http_2xx_follow_redirects",
-      "description": "Directus should keep the public health contract on data.lv3.org reachable through the shared edge."
+      "description": "Directus should keep the public health contract on data.example.com reachable through the shared edge."
     },
     {
       "id": "dozzle-availability",
@@ -59,7 +59,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://draw.lv3.org",
+      "target_url": "https://draw.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The private Excalidraw publication remains reachable through the authenticated LV3 edge."
     },
@@ -90,7 +90,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "probe_module": "http_2xx_follow_redirects",
-      "target_url": "https://errors.lv3.org/api/0/internal/health/",
+      "target_url": "https://errors.example.com/api/0/internal/health/",
       "window_days": 30
     },
     {
@@ -99,7 +99,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://grafana.lv3.org",
+      "target_url": "https://grafana.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Grafana remains reachable through the public LV3 edge."
     },
@@ -109,7 +109,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://registry.lv3.org/api/v2.0/ping",
+      "target_url": "https://registry.example.com/api/v2.0/ping",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Harbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access."
     },
@@ -119,7 +119,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://home.lv3.org",
+      "target_url": "https://home.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The unified operator dashboard remains reachable through the authenticated LV3 edge."
     },
@@ -129,7 +129,7 @@
       "indicator": "availability",
       "objective_percent": 99.7,
       "window_days": 30,
-      "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+      "target_url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Keycloak discovery remains reachable for operator and service authentication."
     },
@@ -139,7 +139,7 @@
       "indicator": "latency",
       "objective_percent": 95.0,
       "window_days": 30,
-      "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+      "target_url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
       "probe_module": "http_2xx_follow_redirects",
       "latency_threshold_ms": 500,
       "description": "Keycloak discovery responds in under 500ms for 95% of probes."
@@ -150,7 +150,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://langfuse.lv3.org/api/public/health",
+      "target_url": "https://langfuse.example.com/api/public/health",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Langfuse remains reachable through the public LV3 edge for trace ingestion and operator access."
     },
@@ -170,7 +170,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://minio.lv3.org/minio/health/live",
+      "target_url": "https://minio.example.com/minio/health/live",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge."
     },
@@ -180,7 +180,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://matrix.lv3.org/_matrix/client/versions",
+      "target_url": "https://matrix.example.com/_matrix/client/versions",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Matrix Synapse remains reachable on the public client versions endpoint."
     },
@@ -200,7 +200,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://cloud.lv3.org/status.php",
+      "target_url": "https://cloud.example.com/status.php",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane."
     },
@@ -210,7 +210,7 @@
       "indicator": "availability",
       "objective_percent": 99.95,
       "window_days": 30,
-      "target_url": "https://nginx.lv3.org",
+      "target_url": "https://nginx.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The edge reverse proxy remains reachable for published services."
     },
@@ -220,7 +220,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://grist.lv3.org/status",
+      "target_url": "https://grist.example.com/status",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Grist remains reachable through the public LV3 edge for operator-managed spreadsheet databases and workflow tables."
     },
@@ -251,7 +251,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://wiki.lv3.org/_health",
+      "target_url": "https://wiki.example.com/_health",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Outline remains reachable through the public LV3 edge for living knowledge browsing and sync automation."
     },
@@ -281,7 +281,7 @@
       "indicator": "availability",
       "objective_percent": 99.0,
       "window_days": 30,
-      "target_url": "https://paperless.lv3.org/",
+      "target_url": "https://paperless.example.com/",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Paperless remains reachable through the public LV3 edge for document archive access and governed API reconciliation."
     },
@@ -291,7 +291,7 @@
       "indicator": "availability",
       "objective_percent": 99.0,
       "window_days": 30,
-      "target_url": "https://tasks.lv3.org/",
+      "target_url": "https://tasks.example.com/",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Plane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization."
     },
@@ -311,7 +311,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://analytics.lv3.org/api/system/health/ready",
+      "target_url": "https://analytics.example.com/api/system/health/ready",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification."
     },
@@ -331,7 +331,7 @@
       "indicator": "availability",
       "objective_percent": 99.0,
       "window_days": 30,
-      "target_url": "https://chat.lv3.org",
+      "target_url": "https://chat.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "ServerClaw remains reachable through the public LV3 edge for chat-first assistant access."
     },
@@ -341,7 +341,7 @@
       "indicator": "availability",
       "objective_percent": 99.9,
       "window_days": 30,
-      "target_url": "https://status.lv3.org",
+      "target_url": "https://status.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The public status page remains externally reachable as the last-resort platform signal."
     },
@@ -351,7 +351,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://bi.lv3.org/health",
+      "target_url": "https://bi.example.com/health",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Superset remains reachable through the public LV3 edge for SQL-first BI exploration, dashboard viewing, and governed datasource verification."
     },
@@ -391,7 +391,7 @@
       "indicator": "availability",
       "objective_percent": 99.9,
       "window_days": 30,
-      "target_url": "https://uptime.lv3.org",
+      "target_url": "https://uptime.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Uptime Kuma remains reachable through the public status surface."
     },
@@ -401,7 +401,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://vault.lv3.org/alive",
+      "target_url": "https://vault.example.com/alive",
       "probe_module": "http_2xx_insecure_tls",
       "description": "Vaultwarden remains reachable on the private Tailscale operator path."
     },
@@ -421,7 +421,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://ci.lv3.org/healthz",
+      "target_url": "https://ci.example.com/healthz",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Woodpecker stays reachable for repo-managed CI bootstrap, API inspection, and manual validation pipeline triggers."
     }

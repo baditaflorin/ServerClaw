@@ -75,7 +75,7 @@ def state_file_path() -> Path | None:
 
 def load_controller_context(*, repo_root: Path | None = None) -> dict[str, Any]:
     root = Path(__file__).resolve().parents[2] if repo_root is None else Path(repo_root)
-    host_vars_path = _repo_path(repo_root, "inventory", "host_vars", "proxmox_florin.yml")
+    host_vars_path = _repo_path(repo_root, "inventory", "host_vars", "proxmox-host.yml")
     group_vars_path = _repo_path(repo_root, "inventory", "group_vars", "all.yml")
     secret_manifest_path = _repo_path(repo_root, "config", "controller-local-secrets.json")
     host_vars = load_yaml(host_vars_path)

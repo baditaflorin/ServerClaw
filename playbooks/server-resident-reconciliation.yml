@@ -7,7 +7,7 @@
 #   - server_resident_reconciliation_bootstrap_gitea_access (bool, required): Whether the controller run should create or recover the low-privilege Gitea read token before mirroring it to the host.
 #
 # Inputs (optional):
-#   - ansible_ssh_private_key_file (path, optional): SSH key used by controller-driven bootstrap runs to reach proxmox_florin.
+#   - ansible_ssh_private_key_file (path, optional): SSH key used by controller-driven bootstrap runs to reach proxmox-host.
 #
 # Outputs:
 #   - Installs a managed checkout, askpass helper, wrapper script, and systemd timer for host-local ansible-pull runs.
@@ -28,7 +28,7 @@
 # Last Updated: 2026-03-28
 
 - name: Bootstrap and maintain server-resident reconciliation on the Proxmox host
-  hosts: proxmox_florin
+  hosts: proxmox-host
   become: true
   gather_facts: true
 

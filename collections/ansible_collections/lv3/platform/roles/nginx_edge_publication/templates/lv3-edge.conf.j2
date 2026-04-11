@@ -43,7 +43,7 @@ map $http_authorization $lv3_logout_id_token {
 {% macro render_security_headers(site, tls_enabled) -%}
 {% if site.security_headers_enabled | default(true) %}
 {# Dict keys from defaults/main.yml are Jinja2 template strings (e.g. "wiki.{{ platform_domain }}").
-   Ansible evaluates Jinja2 in dict values but NOT keys, so site.hostname ("wiki.lv3.org") will
+   Ansible evaluates Jinja2 in dict values but NOT keys, so site.hostname ("wiki.example.com") will
    never match a stored key ("wiki.{{ platform_domain }}") directly. Convert site.hostname back
    to the raw key format so the lookup succeeds. #}
 {% set _pd_placeholder = '{{' + ' platform_domain ' + '}}' %}

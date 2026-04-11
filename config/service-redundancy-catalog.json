@@ -1118,7 +1118,7 @@
     "standby": {
       "kind": "cold",
       "location": "docker-runtime",
-      "failover_trigger": "Restore docker-runtime or postgres when Superset, its managed metadata schema, or the published bi.lv3.org surface cannot be recovered in place.",
+      "failover_trigger": "Restore docker-runtime or postgres when Superset, its managed metadata schema, or the published bi.example.com surface cannot be recovered in place.",
       "failback_method": "Restore or rebuild docker-runtime and postgres as needed, then rerun the Superset converge plus public datasource inventory verification from git."
     }
   },

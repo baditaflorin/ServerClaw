@@ -47,7 +47,7 @@
     },
     {
       "id": "network_identity_change",
-      "surface": "inventory/host_vars/proxmox_florin.yml",
+      "surface": "inventory/host_vars/proxmox-host.yml",
       "description": "Changing the declared IP addressing or other deterministic guest identity inputs is a major release."
     },
     {
@@ -111,17 +111,17 @@
         {
           "id": "ops_portal",
           "label": "Ops portal",
-          "url": "https://ops.lv3.org"
+          "url": "https://ops.example.com"
         },
         {
           "id": "status_page",
           "label": "Status page",
-          "url": "https://status.lv3.org"
+          "url": "https://status.example.com"
         },
         {
           "id": "docs_portal",
           "label": "Docs site",
-          "url": "https://docs.lv3.org"
+          "url": "https://docs.example.com"
         }
       ],
       "required_slos": [

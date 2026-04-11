@@ -189,7 +189,7 @@ def build_graph_documents(
     _ensure_node(
         nodes,
         GraphNode(
-            id="host:proxmox_florin",
+            id="host:proxmox-host",
             kind="host",
             label=TOPOLOGY_HOST,
             metadata={"source": "derived_default", "host_role": "hypervisor"},
@@ -259,7 +259,7 @@ def build_graph_documents(
                         edges,
                         GraphEdge(
                             from_node=_host_node_id(vm),
-                            to_node="host:proxmox_florin",
+                            to_node="host:proxmox-host",
                             edge_kind="hosted_on",
                             metadata={"source": "derived_default", "relationship": "proxmox_guest"},
                         ),
@@ -388,7 +388,7 @@ def build_graph_documents(
                         edges,
                         GraphEdge(
                             from_node=_host_node_id(name),
-                            to_node="host:proxmox_florin",
+                            to_node="host:proxmox-host",
                             edge_kind="hosted_on",
                             metadata={"source": "world_state.netbox_topology", "relationship": "proxmox_guest"},
                         ),

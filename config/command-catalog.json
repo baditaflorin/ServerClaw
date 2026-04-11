@@ -544,7 +544,7 @@
       }
     },
     "converge-api-gateway": {
-      "description": "Converge the unified platform API gateway on docker-runtime and publish it at api.lv3.org.",
+      "description": "Converge the unified platform API gateway on docker-runtime and publish it at api.example.com.",
       "workflow_id": "converge-api-gateway",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -571,16 +571,16 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, public `api.lv3.org` HTTPS verification, and one authenticated `/v1/platform/services` response."
+        "notes": "Record the source commit, public `api.example.com` HTTPS verification, and one authenticated `/v1/platform/services` response."
       },
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the runtime, bearer-token verification, or shared-edge publication fails.",
-          "Stop if `api.lv3.org` loses the intended certificate SAN or begins routing to the wrong upstream."
+          "Stop if `api.example.com` loses the intended certificate SAN or begins routing to the wrong upstream."
         ],
         "rollback_guidance": [
           "Restore the last known-good gateway and edge configuration from version control before retrying.",
-          "Do not leave `api.lv3.org` partially published with a broken certificate or mismatched runtime port."
+          "Do not leave `api.example.com` partially published with a broken certificate or mismatched runtime port."
         ]
       },
       "execution": {
@@ -809,7 +809,7 @@
       }
     },
     "converge-dify": {
-      "description": "Converge the Dify visual workflow canvas on docker-runtime, publish it at agents.lv3.org, and verify governed tool sync plus smoke workflow export.",
+      "description": "Converge the Dify visual workflow canvas on docker-runtime, publish it at agents.example.com, and verify governed tool sync plus smoke workflow export.",
       "workflow_id": "converge-dify",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -826,7 +826,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish agents.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish agents.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -841,7 +841,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if PostgreSQL, the Dify runtime, the API gateway tool route, or shared-edge publication verification fails.",
-          "Stop if agents.lv3.org becomes reachable outside the intended edge-auth boundary or if the governed tool sync starts returning unauthorized responses."
+          "Stop if agents.example.com becomes reachable outside the intended edge-auth boundary or if the governed tool sync starts returning unauthorized responses."
         ],
         "rollback_guidance": [
           "Restore the last known-good Dify and edge configuration from version control before retrying.",
@@ -854,7 +854,7 @@
       }
     },
     "converge-directus": {
-      "description": "Converge the Directus PostgreSQL backend, runtime, Keycloak client, and shared-edge publication, then verify REST, GraphQL, and OIDC access on data.lv3.org.",
+      "description": "Converge the Directus PostgreSQL backend, runtime, Keycloak client, and shared-edge publication, then verify REST, GraphQL, and OIDC access on data.example.com.",
       "workflow_id": "converge-directus",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -871,7 +871,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish data.lv3.org and keep the shared edge certificate current."
+          "description": "DNS token used to publish data.example.com and keep the shared edge certificate current."
         }
       ],
       "expected_preconditions": [
@@ -886,7 +886,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the Directus runtime fails to start, the access model cannot be seeded cleanly, or the governed collection bootstrap drifts from repo truth.",
-          "Stop if data.lv3.org does not serve the expected health contract or if the Keycloak redirect, REST token path, or GraphQL token path fails after converge."
+          "Stop if data.example.com does not serve the expected health contract or if the Keycloak redirect, REST token path, or GraphQL token path fails after converge."
         ],
         "rollback_guidance": [
           "Restore the last known-good Directus runtime and publication config from version control before retrying.",
@@ -995,7 +995,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the hub healthcheck, remote agent-test results, and the authenticated edge publication verification for logs.lv3.org."
+        "notes": "Record the hub healthcheck, remote agent-test results, and the authenticated edge publication verification for logs.example.com."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -1013,7 +1013,7 @@
       }
     },
     "converge-excalidraw": {
-      "description": "Converge the private Excalidraw runtime, collaboration room, and authenticated edge publication at draw.lv3.org.",
+      "description": "Converge the private Excalidraw runtime, collaboration room, and authenticated edge publication at draw.example.com.",
       "workflow_id": "converge-excalidraw",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1030,7 +1030,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used if draw.lv3.org expands the shared edge certificate SAN set."
+          "description": "DNS token used if draw.example.com expands the shared edge certificate SAN set."
         }
       ],
       "expected_preconditions": [
@@ -1045,7 +1045,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the Excalidraw frontend, collaboration room, or shared-edge publication fails verification.",
-          "Stop if draw.lv3.org responds without the intended shared auth boundary or if the /socket.io/ route no longer reaches the collaboration backend."
+          "Stop if draw.example.com responds without the intended shared auth boundary or if the /socket.io/ route no longer reaches the collaboration backend."
         ],
         "rollback_guidance": [
           "Restore the last known-good Excalidraw runtime and edge configuration before retrying.",
@@ -1110,7 +1110,7 @@
       }
     },
     "converge-flagsmith": {
-      "description": "Converge the Flagsmith runtime, shared PostgreSQL backing store, seeded feature state, and the authenticated flags.lv3.org publication.",
+      "description": "Converge the Flagsmith runtime, shared PostgreSQL backing store, seeded feature state, and the authenticated flags.example.com publication.",
       "workflow_id": "converge-flagsmith",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1127,7 +1127,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish flags.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish flags.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -1180,7 +1180,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if PostgreSQL, Gitea bootstrap, OIDC auth-source setup, or runner registration fails.",
-          "Stop if the converge would leave git.lv3.org reachable without the expected repo bootstrap or webhook contract."
+          "Stop if the converge would leave git.example.com reachable without the expected repo bootstrap or webhook contract."
         ],
         "rollback_guidance": [
           "Restore the last known-good Gitea, runner, and supporting secret state from version control before retrying.",
@@ -1193,7 +1193,7 @@
       }
     },
     "converge-glitchtip": {
-      "description": "Converge the GlitchTip error-tracking runtime, publish errors.lv3.org, and verify repo-managed DSN ingestion plus OIDC settings.",
+      "description": "Converge the GlitchTip error-tracking runtime, publish errors.example.com, and verify repo-managed DSN ingestion plus OIDC settings.",
       "workflow_id": "converge-glitchtip",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1210,7 +1210,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish errors.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish errors.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -1225,7 +1225,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if PostgreSQL, the GlitchTip runtime, the shared edge publication, or the OIDC settings verification fails.",
-          "Stop if the rollout would leave errors.lv3.org reachable without the documented in-app Keycloak sign-in path or without working DSN ingestion."
+          "Stop if the rollout would leave errors.example.com reachable without the documented in-app Keycloak sign-in path or without working DSN ingestion."
         ],
         "rollback_guidance": [
           "Restore the last known-good GlitchTip, Keycloak client, and shared edge configuration from version control before retrying.",
@@ -1292,7 +1292,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-guest-network-policy passes",
         "make validate passes before the apply",
-        "The canonical allow matrix in inventory/host_vars/proxmox_florin.yml is reviewed before the maintenance window"
+        "The canonical allow matrix in inventory/host_vars/proxmox-host.yml is reviewed before the maintenance window"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -1314,7 +1314,7 @@
       }
     },
     "converge-harbor": {
-      "description": "Converge Harbor on docker-runtime, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner Harbor project automation credentials.",
+      "description": "Converge Harbor on docker-runtime, publish it at registry.example.com through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner Harbor project automation credentials.",
       "workflow_id": "converge-harbor",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1331,7 +1331,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish registry.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish registry.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -1341,7 +1341,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, registry.lv3.org ping verification, the Harbor check-runner project state, one artifact scan summary, and one successful pull from docker-build."
+        "notes": "Record the source commit, registry.example.com ping verification, the Harbor check-runner project state, one artifact scan summary, and one successful pull from docker-build."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -1360,7 +1360,7 @@
       }
     },
     "converge-headscale": {
-      "description": "Converge Headscale on the Proxmox host, publish headscale.lv3.org through the shared edge, and provision the public DNS record.",
+      "description": "Converge Headscale on the Proxmox host, publish headscale.example.com through the shared edge, and provision the public DNS record.",
       "workflow_id": "converge-headscale",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -1405,7 +1405,7 @@
       }
     },
     "converge-homepage": {
-      "description": "Converge the Homepage dashboard runtime and authenticated edge publication at home.lv3.org.",
+      "description": "Converge the Homepage dashboard runtime and authenticated edge publication at home.example.com.",
       "workflow_id": "converge-homepage",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1478,7 +1478,7 @@
       }
     },
     "converge-keycloak": {
-      "description": "Converge the shared Keycloak SSO broker, publish it at sso.lv3.org, and wire Grafana to the shared OIDC login flow.",
+      "description": "Converge the shared Keycloak SSO broker, publish it at sso.example.com, and wire Grafana to the shared OIDC login flow.",
       "workflow_id": "converge-keycloak",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1495,7 +1495,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish sso.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish sso.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -1505,7 +1505,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, sso.lv3.org verification, agent client-credentials verification, and the Grafana OAuth redirect check."
+        "notes": "Record the source commit, sso.example.com verification, agent client-credentials verification, and the Grafana OAuth redirect check."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -1523,7 +1523,7 @@
       }
     },
     "converge-label-studio": {
-      "description": "Converge the Label Studio runtime, shared PostgreSQL backing store, repo-managed project catalog, and the authenticated annotate.lv3.org publication.",
+      "description": "Converge the Label Studio runtime, shared PostgreSQL backing store, repo-managed project catalog, and the authenticated annotate.example.com publication.",
       "workflow_id": "converge-label-studio",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1540,7 +1540,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish annotate.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish annotate.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -1568,7 +1568,7 @@
       }
     },
     "converge-lago": {
-      "description": "Converge Lago with the shared PostgreSQL backend, protected billing.lv3.org publication, and governed public producer-ingest adapter.",
+      "description": "Converge Lago with the shared PostgreSQL backend, protected billing.example.com publication, and governed public producer-ingest adapter.",
       "workflow_id": "converge-lago",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1585,7 +1585,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish billing.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish billing.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -1613,7 +1613,7 @@
       }
     },
     "converge-langfuse": {
-      "description": "Converge the Langfuse observability runtime, publish it at langfuse.lv3.org, and verify one repo-managed trace ingestion path.",
+      "description": "Converge the Langfuse observability runtime, publish it at langfuse.example.com, and verify one repo-managed trace ingestion path.",
       "workflow_id": "converge-langfuse",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1630,7 +1630,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish langfuse.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish langfuse.example.com and expand the shared edge certificate."
         },
         {
           "name": "langfuse_project_secret_key",
@@ -1689,7 +1689,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish chat.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish chat.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -1698,7 +1698,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, chat.lv3.org verification, and agent tool-calling verification."
+        "notes": "Record the source commit, chat.example.com verification, and agent tool-calling verification."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -1749,7 +1749,7 @@
       }
     },
     "converge-livekit": {
-      "description": "Converge LiveKit, Proxmox public media forwarding, and the shared edge publication for livekit.lv3.org.",
+      "description": "Converge LiveKit, Proxmox public media forwarding, and the shared edge publication for livekit.example.com.",
       "workflow_id": "converge-livekit",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -1766,7 +1766,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish livekit.lv3.org and expand the shared edge certificate SAN set."
+          "description": "DNS token used to publish livekit.example.com and expand the shared edge certificate SAN set."
         }
       ],
       "expected_preconditions": [
@@ -1884,7 +1884,7 @@
       }
     },
     "converge-matrix-synapse": {
-      "description": "Converge Matrix Synapse, its PostgreSQL backend, the Discord and WhatsApp mautrix bridges, the host-side controller proxy, and the shared-edge publication for matrix.lv3.org.",
+      "description": "Converge Matrix Synapse, its PostgreSQL backend, the Discord and WhatsApp mautrix bridges, the host-side controller proxy, and the shared-edge publication for matrix.example.com.",
       "workflow_id": "converge-matrix-synapse",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -1901,7 +1901,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish matrix.lv3.org and reconcile the shared edge certificate coverage."
+          "description": "DNS token used to publish matrix.example.com and reconcile the shared edge certificate coverage."
         }
       ],
       "expected_preconditions": [
@@ -1984,7 +1984,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish minio.lv3.org, minio-console.lv3.org, and expand the shared edge certificate."
+          "description": "DNS token used to publish minio.example.com, minio-console.example.com, and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -2050,7 +2050,7 @@
       }
     },
     "converge-n8n": {
-      "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org as the governed ServerClaw connector fabric while keeping the editor behind edge auth and public webhooks reachable.",
+      "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.example.com as the governed ServerClaw connector fabric while keeping the editor behind edge auth and public webhooks reachable.",
       "workflow_id": "converge-n8n",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2067,7 +2067,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish n8n.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish n8n.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -2077,7 +2077,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, n8n.lv3.org health verification, local readiness, owner sign-in verification, public webhook reachability, and the protected editor redirect."
+        "notes": "Record the source commit, n8n.example.com health verification, local readiness, owner sign-in verification, public webhook reachability, and the protected editor redirect."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -2112,7 +2112,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish browser.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish browser.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -2121,7 +2121,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit and browser.lv3.org WebRTC connectivity verification."
+        "notes": "Record the source commit and browser.example.com WebRTC connectivity verification."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -2175,7 +2175,7 @@
       }
     },
     "converge-nextcloud": {
-      "description": "Converge Nextcloud with PostgreSQL persistence and publish it at cloud.lv3.org with DAV discovery and large-upload support.",
+      "description": "Converge Nextcloud with PostgreSQL persistence and publish it at cloud.example.com with DAV discovery and large-upload support.",
       "workflow_id": "converge-nextcloud",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2192,7 +2192,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish cloud.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish cloud.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -2258,7 +2258,7 @@
       }
     },
     "converge-ntfy": {
-      "description": "Converge the published ntfy push channel, governed topic registry, repo-managed publisher credentials, and shared edge route for ntfy.lv3.org.",
+      "description": "Converge the published ntfy push channel, governed topic registry, repo-managed publisher credentials, and shared edge route for ntfy.example.com.",
       "workflow_id": "converge-ntfy",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2275,7 +2275,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish ntfy.lv3.org and expand the shared edge certificate SAN set."
+          "description": "DNS token used to publish ntfy.example.com and expand the shared edge certificate SAN set."
         }
       ],
       "expected_preconditions": [
@@ -2491,7 +2491,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-ops-portal passes",
         "make validate passes before the apply",
-        "The shared runbook delivery surfaces and authenticated `ops.lv3.org` browser flows are reviewed before rollout"
+        "The shared runbook delivery surfaces and authenticated `ops.example.com` browser flows are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -2500,11 +2500,11 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the portal can no longer load its gateway-backed runbook panel or if authenticated actions stop returning structured results.",
-          "Stop if `ops.lv3.org` serves stale data that drifts from the shared gateway contract."
+          "Stop if `ops.example.com` serves stale data that drifts from the shared gateway contract."
         ],
         "rollback_guidance": [
           "Restore the last known-good portal and runtime configuration from version control before retrying.",
-          "Do not leave `ops.lv3.org` published with a runbook launcher that bypasses or drifts from the shared gateway contract."
+          "Do not leave `ops.example.com` published with a runbook launcher that bypasses or drifts from the shared gateway contract."
         ]
       },
       "execution": {
@@ -2530,13 +2530,13 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish or correct the paperless.lv3.org A record on the shared edge."
+          "description": "DNS token used to publish or correct the paperless.example.com A record on the shared edge."
         }
       ],
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-paperless passes",
         "make validate passes before the apply",
-        "The public Paperless upload surface, docs.lv3.org hostname reservation, and governed `/v1/paperless` API route are reviewed before rollout"
+        "The public Paperless upload surface, docs.example.com hostname reservation, and governed `/v1/paperless` API route are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -2613,7 +2613,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish tasks.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish tasks.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -2641,7 +2641,7 @@
       }
     },
     "converge-plausible": {
-      "description": "Converge the Plausible Analytics runtime, publish analytics.lv3.org, and refresh tracker injection on the declared public LV3 hostnames.",
+      "description": "Converge the Plausible Analytics runtime, publish analytics.example.com, and refresh tracker injection on the declared public LV3 hostnames.",
       "workflow_id": "converge-plausible",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2658,7 +2658,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish analytics.lv3.org and expand the shared edge certificate."
+          "description": "DNS token used to publish analytics.example.com and expand the shared edge certificate."
         }
       ],
       "expected_preconditions": [
@@ -2673,7 +2673,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the Plausible runtime, shared edge publication, or tracker-injection verification fails.",
-          "Stop if the rollout would leave analytics.lv3.org reachable without the documented edge-auth dashboard boundary or without the declared public tracker allowlist."
+          "Stop if the rollout would leave analytics.example.com reachable without the documented edge-auth dashboard boundary or without the declared public tracker allowlist."
         ],
         "rollback_guidance": [
           "Restore the last known-good Plausible runtime and shared edge configuration from version control before retrying.",
@@ -2875,7 +2875,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-restic-config-backup passes",
         "make validate passes before the apply",
-        "The docker-runtime worker checkout exists at /srv/proxmox_florin_server so converge can stage the required restic runtime support files before the immediate validation run"
+        "The docker-runtime worker checkout exists at /srv/platform_server so converge can stage the required restic runtime support files before the immediate validation run"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -2929,7 +2929,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if runtime deployment, host-side proxy setup, DNS publication, or JSON search verification fails.",
-          "Stop if search.lv3.org becomes reachable outside the intended private-network boundary."
+          "Stop if search.example.com becomes reachable outside the intended private-network boundary."
         ],
         "rollback_guidance": [
           "Restore the last known-good SearXNG runtime and host proxy state before retrying.",
@@ -2980,7 +2980,7 @@
       }
     },
     "converge-serverclaw": {
-      "description": "Converge the public ServerClaw runtime, its dedicated Keycloak OIDC client, and the chat.lv3.org edge publication.",
+      "description": "Converge the public ServerClaw runtime, its dedicated Keycloak OIDC client, and the chat.example.com edge publication.",
       "workflow_id": "converge-serverclaw",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -2996,7 +2996,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-serverclaw passes",
         "make validate passes before the apply",
-        "HETZNER_DNS_API_TOKEN is available before adding chat.lv3.org to the shared edge certificate"
+        "HETZNER_DNS_API_TOKEN is available before adding chat.example.com to the shared edge certificate"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -3005,7 +3005,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the Keycloak client, runtime deployment, or edge publication fails verification.",
-          "Stop if chat.lv3.org serves traffic without the intended in-app authentication and repo-managed model-search settings."
+          "Stop if chat.example.com serves traffic without the intended in-app authentication and repo-managed model-search settings."
         ],
         "rollback_guidance": [
           "Restore the last known-good ServerClaw runtime, Keycloak client contract, and edge publication before retrying.",
@@ -3056,7 +3056,7 @@
       }
     },
     "converge-superset": {
-      "description": "Converge the Superset PostgreSQL metadata plane, runtime, Keycloak client, and shared-edge publication, then verify SQL-first BI access on bi.lv3.org.",
+      "description": "Converge the Superset PostgreSQL metadata plane, runtime, Keycloak client, and shared-edge publication, then verify SQL-first BI access on bi.example.com.",
       "workflow_id": "converge-superset",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3073,7 +3073,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish bi.lv3.org and keep the shared edge certificate current."
+          "description": "DNS token used to publish bi.example.com and keep the shared edge certificate current."
         }
       ],
       "expected_preconditions": [
@@ -3268,7 +3268,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-vaultwarden passes",
         "make validate passes before the apply",
-        "The private trust model for vault.lv3.org and the controller-local admin token path are reviewed before rollout"
+        "The private trust model for vault.example.com and the controller-local admin token path are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -3345,13 +3345,13 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Hetzner DNS API token required to publish or renew the ci.lv3.org edge certificate path."
+          "description": "Hetzner DNS API token required to publish or renew the ci.example.com edge certificate path."
         }
       ],
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-woodpecker passes",
         "make validate passes before the apply",
-        "Gitea health, ci.lv3.org edge publication, and the seeded repository scope are reviewed before rollout"
+        "Gitea health, ci.example.com edge publication, and the seeded repository scope are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -4648,7 +4648,7 @@
       }
     },
     "provision-subdomain": {
-      "description": "Publish one catalogued lv3.org hostname through the governed DNS and edge-publication workflow.",
+      "description": "Publish one catalogued example.com hostname through the governed DNS and edge-publication workflow.",
       "workflow_id": "provision-subdomain",
       "scope": "external_service",
       "approval_policy": "sensitive_live_change",
@@ -4665,7 +4665,7 @@
           "kind": "user_input",
           "required": true,
           "source": "config/subdomain-catalog.json",
-          "description": "One catalogued FQDN to provision, such as ops.lv3.org."
+          "description": "One catalogued FQDN to provision, such as ops.example.com."
         }
       ],
       "expected_preconditions": [
@@ -5721,16 +5721,16 @@
     "docker_runtime_systemd_make": {
       "transport": "ssh_systemd_run_make",
       "runtime_host": "docker-runtime",
-      "runtime_repo_root": "/srv/proxmox_florin_server",
-      "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
+      "runtime_repo_root": "/srv/platform_server",
+      "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/platform_server",
       "effective_user": "ops",
-      "working_directory": "/srv/proxmox_florin_server",
+      "working_directory": "/srv/platform_server",
       "env": {
         "LV3_WINDMILL_BASE_URL": "http://127.0.0.1:8000"
       },
       "kill_mode": "mixed",
-      "log_directory": "/srv/proxmox_florin_server/.local/governed-command/logs",
-      "receipt_directory": "/srv/proxmox_florin_server/.local/governed-command/receipts"
+      "log_directory": "/srv/platform_server/.local/governed-command/logs",
+      "receipt_directory": "/srv/platform_server/.local/governed-command/receipts"
     }
   }
 }

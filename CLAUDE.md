@@ -203,7 +203,7 @@ Real deployment values live in `.local/` (gitignored).
 | Docs, ADRs, runbooks | `example.com` | `Visit https://grafana.example.com` |
 | Tests, fixtures | `example.com` | `assert url == "https://api.example.com"` |
 | Workstream YAML | `example.com` | `url: https://ops.example.com` |
-| Inventory/config files | Real values OK (publish sanitizes) | `platform_domain: lv3.org` |
+| Inventory/config files | Real values OK (publish sanitizes) | `platform_domain: example.com` |
 | Commit messages | Generic or real OK (not published) | Either is fine |
 
 ### Finding real values
@@ -219,7 +219,7 @@ Real deployment values live in `.local/` (gitignored).
 ### Why this matters
 
 The publish pipeline syncs this repo to the public `ServerClaw` GitHub repo.
-If you write `lv3.org` in a doc or test, the pipeline must regex-replace it.
+If you write `example.com` in a doc or test, the pipeline must regex-replace it.
 If you use `example.com`, the file passes through unchanged — keeping the
 private↔public diff small and reviewable.
 

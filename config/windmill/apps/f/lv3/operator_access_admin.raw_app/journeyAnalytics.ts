@@ -39,8 +39,8 @@ export type JourneyEventInput = {
 };
 
 const SURFACE_ID = "windmill.operator_access_admin";
-const PLAUSIBLE_SITE_DOMAIN = "ops.lv3.org";
-const PLAUSIBLE_ENDPOINT = "https://analytics.lv3.org/api/event";
+const PLAUSIBLE_SITE_DOMAIN = "ops.example.com";
+const PLAUSIBLE_ENDPOINT = "https://analytics.example.com/api/event";
 const JOURNEY_STORAGE_KEY = "lv3.operator_access_admin.journey.v1";
 const JOURNEY_SESSION_KEY = "lv3.operator_access_admin.journey.session.v1";
 

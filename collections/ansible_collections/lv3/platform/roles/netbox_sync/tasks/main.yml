@@ -59,7 +59,7 @@
   ansible.builtin.assert:
     that:
       - netbox_sync_apply_summary.site_name == 'LV3 Hetzner'
-      - netbox_sync_apply_summary.device_name == 'proxmox_florin'
+      - netbox_sync_apply_summary.device_name == 'proxmox-host'
       - netbox_sync_apply_summary.vm_count >= 6
       - netbox_sync_apply_summary.prefix_count >= 2
       - netbox_sync_apply_summary.service_count >= 5

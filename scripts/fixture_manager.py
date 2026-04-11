@@ -342,12 +342,12 @@ def default_fixture_context() -> dict[str, str]:
     proxmox_node_name = yaml_scalar(
         TOPOLOGY_HOST_VARS_PATH,
         "proxmox_node_name",
-        yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "host_public_hostname", "proxmox_florin"),
+        yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "host_public_hostname", "proxmox-host"),
     )
     jump_host = yaml_scalar(
         TOPOLOGY_HOST_VARS_PATH,
         "management_tailscale_ipv4",
-        yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "65.108.75.123"),
+        yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "203.0.113.1"),
     )
     return {
         "node_name": proxmox_node_name,

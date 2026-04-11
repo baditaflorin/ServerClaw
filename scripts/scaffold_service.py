@@ -960,7 +960,7 @@ def update_platform_services_registry(path: Path, spec: ServiceSpec) -> None:
 
     dns_section = ""
     if spec.public_hostname:
-        hostname_var = spec.public_hostname.replace("lv3.org", "{{ platform_domain }}")
+        hostname_var = spec.public_hostname.replace("example.com", "{{ platform_domain }}")
         dns_section = (
             f"    dns:\n"
             f"      records:\n"

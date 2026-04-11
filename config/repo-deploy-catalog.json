@@ -19,11 +19,11 @@
       "compose_domains": [
         {
           "service": "catalog-web",
-          "domain": "education-wemeshup.apps.lv3.org"
+          "domain": "education-wemeshup.apps.example.com"
         }
       ],
       "verification": {
-        "url": "https://education-wemeshup.apps.lv3.org/api/v1/catalog/taxonomy",
+        "url": "https://education-wemeshup.apps.example.com/api/v1/catalog/taxonomy",
         "activity_count_json_path": "meta.activityCount",
         "minimum_activity_count": 1000
       }

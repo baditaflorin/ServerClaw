@@ -4,7 +4,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-TOFU_IMAGE="${TOFU_IMAGE:-registry.lv3.org/check-runner/infra:2026.03.23}"
+TOFU_IMAGE="${TOFU_IMAGE:-registry.example.com/check-runner/infra:2026.03.23}"
 TOFU_PLATFORM="${TOFU_PLATFORM:-linux/amd64}"
 TOFU_WORKSPACE="${TOFU_WORKSPACE:-/workspace}"
 TOFU_INIT_BACKEND="${TOFU_INIT_BACKEND:-auto}"

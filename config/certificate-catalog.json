@@ -6,12 +6,12 @@
       "id": "agents-edge",
       "service_id": "dify",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for agents.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for agents.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "agents.lv3.org",
+        "host": "agents.example.com",
         "port": 443,
-        "server_name": "agents.lv3.org"
+        "server_name": "agents.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -30,12 +30,12 @@
       "id": "analytics-edge",
       "service_id": "plausible",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for analytics.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for analytics.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "analytics.lv3.org",
+        "host": "analytics.example.com",
         "port": 443,
-        "server_name": "analytics.lv3.org"
+        "server_name": "analytics.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -54,12 +54,12 @@
       "id": "api-edge",
       "service_id": "api_gateway",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for api.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for api.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "api.lv3.org",
+        "host": "api.example.com",
         "port": 443,
-        "server_name": "api.lv3.org"
+        "server_name": "api.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -78,12 +78,12 @@
       "id": "apps-edge",
       "service_id": "coolify_apps",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for apps.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for apps.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "apps.lv3.org",
+        "host": "apps.example.com",
         "port": 443,
-        "server_name": "apps.lv3.org"
+        "server_name": "apps.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -123,12 +123,12 @@
       "id": "billing-edge",
       "service_id": "lago",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for billing.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for billing.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "billing.lv3.org",
+        "host": "billing.example.com",
         "port": 443,
-        "server_name": "billing.lv3.org"
+        "server_name": "billing.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -147,12 +147,12 @@
       "id": "bi-edge",
       "service_id": "superset",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for bi.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for bi.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "bi.lv3.org",
+        "host": "bi.example.com",
         "port": 443,
-        "server_name": "bi.lv3.org"
+        "server_name": "bi.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -172,12 +172,12 @@
       "id": "browser-edge",
       "service_id": "neko",
       "status": "active",
-      "summary": "Dedicated certificate for browser.lv3.org (Neko remote desktop).",
+      "summary": "Dedicated certificate for browser.example.com (Neko remote desktop).",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "browser.lv3.org",
+        "host": "browser.example.com",
         "port": 443,
-        "server_name": "browser.lv3.org"
+        "server_name": "browser.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -190,19 +190,19 @@
         "notes": "Neko uses a dedicated NGINX server block with its own certificate, separate from the shared lv3-edge bundle."
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/browser.lv3.org/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/browser.example.com/fullchain.pem"
       }
     },
     {
       "id": "build-edge",
       "service_id": "docker_build",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for build.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for build.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "build.lv3.org",
+        "host": "build.example.com",
         "port": 443,
-        "server_name": "build.lv3.org"
+        "server_name": "build.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -222,12 +222,12 @@
       "id": "changelog-edge",
       "service_id": "changelog_portal",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for changelog.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for changelog.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "changelog.lv3.org",
+        "host": "changelog.example.com",
         "port": 443,
-        "server_name": "changelog.lv3.org"
+        "server_name": "changelog.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -246,12 +246,12 @@
       "id": "ci-edge",
       "service_id": "woodpecker",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for ci.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for ci.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "ci.lv3.org",
+        "host": "ci.example.com",
         "port": 443,
-        "server_name": "ci.lv3.org"
+        "server_name": "ci.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -270,12 +270,12 @@
       "id": "chat-edge",
       "service_id": "serverclaw",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for chat.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for chat.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "chat.lv3.org",
+        "host": "chat.example.com",
         "port": 443,
-        "server_name": "chat.lv3.org"
+        "server_name": "chat.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -294,12 +294,12 @@
       "id": "cloud-edge",
       "service_id": "nextcloud",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for cloud.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for cloud.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "cloud.lv3.org",
+        "host": "cloud.example.com",
         "port": 443,
-        "server_name": "cloud.lv3.org"
+        "server_name": "cloud.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -318,12 +318,12 @@
       "id": "coolify-edge",
       "service_id": "coolify",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for coolify.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for coolify.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "coolify.lv3.org",
+        "host": "coolify.example.com",
         "port": 443,
-        "server_name": "coolify.lv3.org"
+        "server_name": "coolify.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -342,12 +342,12 @@
       "id": "data-edge",
       "service_id": "directus",
       "status": "tls_pending",
-      "summary": "Shared NGINX edge certificate served for data.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for data.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "data.lv3.org",
+        "host": "data.example.com",
         "port": 443,
-        "server_name": "data.lv3.org"
+        "server_name": "data.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -366,12 +366,12 @@
       "id": "docker-runtime-edge",
       "service_id": "docker_runtime",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for docker.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for docker.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "docker.lv3.org",
+        "host": "docker.example.com",
         "port": 443,
-        "server_name": "docker.lv3.org"
+        "server_name": "docker.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -390,12 +390,12 @@
       "id": "docs-edge",
       "service_id": "docs_portal",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for docs.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for docs.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "docs.lv3.org",
+        "host": "docs.example.com",
         "port": 443,
-        "server_name": "docs.lv3.org"
+        "server_name": "docs.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -414,12 +414,12 @@
       "id": "errors-edge",
       "service_id": "glitchtip",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for errors.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for errors.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "errors.lv3.org",
+        "host": "errors.example.com",
         "port": 443,
-        "server_name": "errors.lv3.org"
+        "server_name": "errors.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -438,12 +438,12 @@
       "id": "draw-edge",
       "service_id": "excalidraw",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for draw.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for draw.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "draw.lv3.org",
+        "host": "draw.example.com",
         "port": 443,
-        "server_name": "draw.lv3.org"
+        "server_name": "draw.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -462,12 +462,12 @@
       "id": "flags-edge",
       "service_id": "flagsmith",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for flags.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for flags.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "flags.lv3.org",
+        "host": "flags.example.com",
         "port": 443,
-        "server_name": "flags.lv3.org"
+        "server_name": "flags.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -486,12 +486,12 @@
       "id": "grafana-edge",
       "service_id": "grafana",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for grafana.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for grafana.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "grafana.lv3.org",
+        "host": "grafana.example.com",
         "port": 443,
-        "server_name": "grafana.lv3.org"
+        "server_name": "grafana.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -510,12 +510,12 @@
       "id": "grist-edge",
       "service_id": "grist",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for grist.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for grist.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "grist.lv3.org",
+        "host": "grist.example.com",
         "port": 443,
-        "server_name": "grist.lv3.org"
+        "server_name": "grist.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -534,12 +534,12 @@
       "id": "headscale-edge",
       "service_id": "headscale",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for headscale.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for headscale.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "headscale.lv3.org",
+        "host": "headscale.example.com",
         "port": 443,
-        "server_name": "headscale.lv3.org"
+        "server_name": "headscale.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -558,12 +558,12 @@
       "id": "home-edge",
       "service_id": "homepage",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for home.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for home.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "home.lv3.org",
+        "host": "home.example.com",
         "port": 443,
-        "server_name": "home.lv3.org"
+        "server_name": "home.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -582,12 +582,12 @@
       "id": "keycloak-edge",
       "service_id": "keycloak",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for sso.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for sso.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "sso.lv3.org",
+        "host": "sso.example.com",
         "port": 443,
-        "server_name": "sso.lv3.org"
+        "server_name": "sso.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -606,12 +606,12 @@
       "id": "langfuse-edge",
       "service_id": "langfuse",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for langfuse.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for langfuse.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "langfuse.lv3.org",
+        "host": "langfuse.example.com",
         "port": 443,
-        "server_name": "langfuse.lv3.org"
+        "server_name": "langfuse.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -630,12 +630,12 @@
       "id": "livekit-edge",
       "service_id": "livekit",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for livekit.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for livekit.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "livekit.lv3.org",
+        "host": "livekit.example.com",
         "port": 443,
-        "server_name": "livekit.lv3.org"
+        "server_name": "livekit.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -654,12 +654,12 @@
       "id": "logs-edge",
       "service_id": "dozzle",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for logs.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for logs.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "logs.lv3.org",
+        "host": "logs.example.com",
         "port": 443,
-        "server_name": "logs.lv3.org"
+        "server_name": "logs.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -678,12 +678,12 @@
       "id": "lv3-org-apex-edge",
       "service_id": "nginx_edge",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for the lv3.org apex crawl-policy endpoint.",
+      "summary": "Shared NGINX edge certificate served for the example.com apex crawl-policy endpoint.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "lv3.org",
+        "host": "example.com",
         "port": 443,
-        "server_name": "lv3.org"
+        "server_name": "example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -702,12 +702,12 @@
       "id": "mail-platform-edge",
       "service_id": "mail_platform",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for mail.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for mail.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "mail.lv3.org",
+        "host": "mail.example.com",
         "port": 443,
-        "server_name": "mail.lv3.org"
+        "server_name": "mail.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -726,12 +726,12 @@
       "id": "matrix-edge",
       "service_id": "matrix_synapse",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for matrix.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for matrix.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "matrix.lv3.org",
+        "host": "matrix.example.com",
         "port": 443,
-        "server_name": "matrix.lv3.org"
+        "server_name": "matrix.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -750,12 +750,12 @@
       "id": "minio-console-edge",
       "service_id": "minio",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for minio-console.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for minio-console.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "minio-console.lv3.org",
+        "host": "minio-console.example.com",
         "port": 443,
-        "server_name": "minio-console.lv3.org"
+        "server_name": "minio-console.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -774,12 +774,12 @@
       "id": "minio-edge",
       "service_id": "minio",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for minio.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for minio.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "minio.lv3.org",
+        "host": "minio.example.com",
         "port": 443,
-        "server_name": "minio.lv3.org"
+        "server_name": "minio.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -798,12 +798,12 @@
       "id": "n8n-edge",
       "service_id": "n8n",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for n8n.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for n8n.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "n8n.lv3.org",
+        "host": "n8n.example.com",
         "port": 443,
-        "server_name": "n8n.lv3.org"
+        "server_name": "n8n.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -822,12 +822,12 @@
       "id": "nginx-edge-public",
       "service_id": "nginx_edge",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for nginx.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for nginx.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "nginx.lv3.org",
+        "host": "nginx.example.com",
         "port": 443,
-        "server_name": "nginx.lv3.org"
+        "server_name": "nginx.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -846,12 +846,12 @@
       "id": "ntfy-edge",
       "service_id": "ntfy",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for ntfy.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for ntfy.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "ntfy.lv3.org",
+        "host": "ntfy.example.com",
         "port": 443,
-        "server_name": "ntfy.lv3.org"
+        "server_name": "ntfy.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -909,12 +909,12 @@
       "id": "ops-edge",
       "service_id": "ops_portal",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for ops.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for ops.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "ops.lv3.org",
+        "host": "ops.example.com",
         "port": 443,
-        "server_name": "ops.lv3.org"
+        "server_name": "ops.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -955,12 +955,12 @@
       "id": "proxmox-edge-page",
       "service_id": "proxmox_ui",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for proxmox.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for proxmox.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "proxmox.lv3.org",
+        "host": "proxmox.example.com",
         "port": 443,
-        "server_name": "proxmox.lv3.org"
+        "server_name": "proxmox.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -984,7 +984,7 @@
       "endpoint": {
         "host": "100.64.0.1",
         "port": 8006,
-        "server_name": "proxmox.lv3.org"
+        "server_name": "proxmox.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -993,7 +993,7 @@
       "renewal": {
         "agent": "proxmox-acme",
         "managed_by_repo": false,
-        "host": "proxmox_florin",
+        "host": "proxmox-host",
         "notes": "Renewed by the Proxmox ACME integration on the host."
       }
     },
@@ -1001,12 +1001,12 @@
       "id": "realtime-edge",
       "service_id": "realtime",
       "status": "tls_pending",
-      "summary": "Shared NGINX edge certificate served for realtime.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for realtime.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "realtime.lv3.org",
+        "host": "realtime.example.com",
         "port": 443,
-        "server_name": "realtime.lv3.org"
+        "server_name": "realtime.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1025,12 +1025,12 @@
       "id": "registry-edge",
       "service_id": "harbor",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for registry.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for registry.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "registry.lv3.org",
+        "host": "registry.example.com",
         "port": 443,
-        "server_name": "registry.lv3.org"
+        "server_name": "registry.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1049,12 +1049,12 @@
       "id": "repowise-edge",
       "service_id": "repowise",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for repowise.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for repowise.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "repowise.lv3.org",
+        "host": "repowise.example.com",
         "port": 443,
-        "server_name": "repowise.lv3.org"
+        "server_name": "repowise.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1073,12 +1073,12 @@
       "id": "scheduler-edge",
       "service_id": "nomad",
       "status": "active",
-      "summary": "Site-local NGINX edge certificate served for scheduler.lv3.org.",
+      "summary": "Site-local NGINX edge certificate served for scheduler.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "scheduler.lv3.org",
+        "host": "scheduler.example.com",
         "port": 443,
-        "server_name": "scheduler.lv3.org"
+        "server_name": "scheduler.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1090,19 +1090,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/scheduler.lv3.org/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/scheduler.example.com/fullchain.pem"
       }
     },
     {
       "id": "status-edge",
       "service_id": "status_page",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for status.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for status.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "status.lv3.org",
+        "host": "status.example.com",
         "port": 443,
-        "server_name": "status.lv3.org"
+        "server_name": "status.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1143,12 +1143,12 @@
       "id": "tasks-edge",
       "service_id": "plane",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for tasks.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for tasks.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "tasks.lv3.org",
+        "host": "tasks.example.com",
         "port": 443,
-        "server_name": "tasks.lv3.org"
+        "server_name": "tasks.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1167,12 +1167,12 @@
       "id": "uptime-kuma-edge",
       "service_id": "uptime_kuma",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for uptime.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for uptime.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "uptime.lv3.org",
+        "host": "uptime.example.com",
         "port": 443,
-        "server_name": "uptime.lv3.org"
+        "server_name": "uptime.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1196,7 +1196,7 @@
       "endpoint": {
         "host": "100.64.0.1",
         "port": 443,
-        "server_name": "vault.lv3.org"
+        "server_name": "vault.example.com"
       },
       "policy": {
         "warn_hours": 6,
@@ -1215,9 +1215,9 @@
         "certificate_file": "/opt/vaultwarden/tls/server.crt",
         "key_file": "/opt/vaultwarden/tls/server.key",
         "root_file": "/opt/step-ca/home/certs/root_ca.crt",
-        "subject": "vault.lv3.org",
+        "subject": "vault.example.com",
         "sans": [
-          "vault.lv3.org",
+          "vault.example.com",
           "10.10.10.20",
           "100.118.189.95",
           "127.0.0.1",
@@ -1233,12 +1233,12 @@
       "id": "wiki-edge",
       "service_id": "outline",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for wiki.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for wiki.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "wiki.lv3.org",
+        "host": "wiki.example.com",
         "port": 443,
-        "server_name": "wiki.lv3.org"
+        "server_name": "wiki.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1257,12 +1257,12 @@
       "id": "annotate-edge",
       "service_id": "label_studio",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for annotate.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for annotate.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "annotate.lv3.org",
+        "host": "annotate.example.com",
         "port": 443,
-        "server_name": "annotate.lv3.org"
+        "server_name": "annotate.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1281,12 +1281,12 @@
       "id": "paperless-edge",
       "service_id": "paperless",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for paperless.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for paperless.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "paperless.lv3.org",
+        "host": "paperless.example.com",
         "port": 443,
-        "server_name": "paperless.lv3.org"
+        "server_name": "paperless.example.com"
       },
       "policy": {
         "warn_days": 21,

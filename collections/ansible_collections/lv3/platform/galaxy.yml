@@ -4,7 +4,7 @@ name: platform
 version: 1.0.0
 readme: README.md
 authors:
-  - Florin Badita-Nistor
+  - Platform Operator
 description: LV3 homelab platform roles, plugins, and playbooks packaged as an Ansible collection.
 license:
   - MIT

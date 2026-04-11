@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0062-role-composability`, `adr-0075-service-capability-catalog`, `adr-0076-subdomain-governance`, `adr-0077-compose-secrets-injection`
 - Conflicts With: none
-- Shared Surfaces: `collections/ansible_collections/lv3/platform/roles/@@ROLE_NAME@@`, `playbooks/@@PLAYBOOK_FILENAME@@`, `playbooks/services/@@PLAYBOOK_FILENAME@@`, `config/`, `inventory/host_vars/proxmox_florin.yml`
+- Shared Surfaces: `collections/ansible_collections/lv3/platform/roles/@@ROLE_NAME@@`, `playbooks/@@PLAYBOOK_FILENAME@@`, `playbooks/services/@@PLAYBOOK_FILENAME@@`, `config/`, `inventory/host_vars/proxmox-host.yml`
 
 ## Scope
 

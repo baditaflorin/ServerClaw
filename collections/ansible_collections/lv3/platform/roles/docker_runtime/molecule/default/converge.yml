@@ -5,6 +5,6 @@
   become: true
   vars_files:
     - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/inventory/group_vars/all.yml"
-    - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/inventory/host_vars/proxmox_florin.yml"
+    - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/inventory/host_vars/proxmox-host.yml"
   roles:
     - lv3.platform.docker_runtime

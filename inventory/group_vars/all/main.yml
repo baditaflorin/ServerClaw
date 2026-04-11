@@ -422,8 +422,8 @@ playbook_execution_host_patterns:
     staging: backup-staging
 playbook_execution_required_hosts:
   proxmox_hosts:
-    production: proxmox_florin
-    staging: proxmox_florin
+    production: proxmox-host
+    staging: proxmox-host
   lv3_guests:
     production: "lv3_guests:&production"
     staging: "lv3_guests:&staging"

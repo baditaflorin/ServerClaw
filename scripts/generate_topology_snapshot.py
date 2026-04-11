@@ -354,7 +354,7 @@ def build_topology(
         "generated_from": generated_from,
         "environments": {
             "prod": {
-                "node": "Debian-trixie-latest-amd64-base",
+                "node": "debian-base-template",
                 "api_url": "https://proxmox.localhost:8006/api2/json",
                 "vms": prod_vms,
                 "services": {

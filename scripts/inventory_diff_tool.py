@@ -69,7 +69,7 @@ def _proxmox_host() -> str:
     if env:
         return env
     ts = _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_tailscale_ipv4")
-    return ts or _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
+    return ts or _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "203.0.113.1")
 
 
 def _jump_user() -> str:

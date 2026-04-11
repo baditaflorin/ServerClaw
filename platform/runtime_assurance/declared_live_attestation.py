@@ -609,7 +609,7 @@ def host_witness_for_service(
             "required": True,
             "source": "versions.stack.observed_state.proxmox",
             "declared_target": declared_vm,
-            "observed_target": "host:proxmox_florin",
+            "observed_target": "host:proxmox-host",
             "observed": "host observed in canonical stack state" if installed else "host installation state missing",
             "vmid": None,
         }

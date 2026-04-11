@@ -39,9 +39,9 @@ export type PaletteSearchResult = {
   sourcePath: string;
 };
 
-export const DOCS_BASE_URL = "https://docs.lv3.org";
-export const HOME_BASE_URL = "https://home.lv3.org";
-export const OPS_PORTAL_BASE_URL = "https://ops.lv3.org";
+export const DOCS_BASE_URL = "https://docs.example.com";
+export const HOME_BASE_URL = "https://home.example.com";
+export const OPS_PORTAL_BASE_URL = "https://ops.example.com";
 export const WINDMILL_BASE_URL = "http://100.64.0.1:8005";
 
 export const paletteLaneLabels: Record<PaletteLane, string> = {

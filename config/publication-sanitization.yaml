@@ -1,15 +1,19 @@
 # =============================================================================
-# Publication Sanitization Map
+# Publication Sanitization Map — ADR 0409
 # =============================================================================
 # Used by scripts/publish_to_serverclaw.py to transform the private repo
 # into the public ServerClaw repo. This file stays in the private repo only.
+#
+# ADR 0409: committed code is now fully generic. Tier C regex replacements
+# should find ZERO matches. Patterns are retained as defensive guards only.
 # =============================================================================
 schema_version: "1.0.0"
 
 # --- Tier A: Whole-file replacements ---
-# These files differ structurally between private and public.
-# Replace entirely with the template version.
-# NOTE: identity.yml is a no-op since ADR 0407 (committed version is already generic).
+# These files are replaced with fork-friendly templates that include
+# setup instructions and placeholder values for new operators.
+# Since ADR 0409, the committed versions are already generic — these
+# replacements improve the fork onboarding experience, not sanitization.
 file_replacements:
   - source: inventory/group_vars/all/identity.yml
     template: publication/templates/identity.yml
@@ -17,24 +21,24 @@ file_replacements:
     template: publication/templates/hosts.yml
   - source: config/operators.yaml
     template: publication/templates/operators.yaml
-  - source: inventory/host_vars/proxmox_florin.yml
-    template: publication/templates/proxmox_florin.yml
+  - source: inventory/host_vars/proxmox-host.yml
+    template: publication/templates/proxmox-host.yml
 
-# --- Tier C: Regex replacements ---
-# Applied to ALL text files not in tier A. Order matters: longer patterns first.
+# --- Tier C: Regex replacements (defensive guards) ---
+# ADR 0409 eliminated all leak-marker values from committed code.
+# These patterns remain as a safety net — they should match zero files.
 string_replacements:
-  # Repo checkout path (must come before proxmox[_-]florin pattern)
+  # Repo checkout path (must come before proxmox-host pattern)
   - pattern: "proxmox_florin_server"
     replacement: "platform_server"
-  # Domain (must come before shorter patterns)
+  # Domain
   - pattern: "lv3\\.org"
     replacement: "example.com"
-  # VM/host names — ADR 0408 removed -lv3 suffix from inventory names.
-  # Only the Proxmox host and template image still need sanitization.
+  # VM/host names
   - pattern: "proxmox[_-]florin"
     replacement: "proxmox-host"
   - pattern: "Debian-trixie-latest-amd64-base"
-    replacement: "proxmox-host"
+    replacement: "debian-base-template"
   # Real public IPs
   - pattern: "65\\.108\\.75\\.123"
     replacement: "203.0.113.1"

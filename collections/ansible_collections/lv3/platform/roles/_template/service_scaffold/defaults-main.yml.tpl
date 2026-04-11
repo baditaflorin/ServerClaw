@@ -1,5 +1,5 @@
 ---
-@@VARIABLE_PREFIX@@_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('@@SERVICE_ID@@') }}"
+@@VARIABLE_PREFIX@@_service_topology: "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('@@SERVICE_ID@@') }}"
 @@VARIABLE_PREFIX@@_site_dir: /opt/@@SERVICE_NAME@@
 @@VARIABLE_PREFIX@@_secret_dir: /etc/lv3/@@SERVICE_NAME@@
 @@VARIABLE_PREFIX@@_compose_file: "{{ @@VARIABLE_PREFIX@@_site_dir }}/docker-compose.yml"

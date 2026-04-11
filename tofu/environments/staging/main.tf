@@ -12,7 +12,7 @@ module "docker_runtime_staging_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "docker-runtime-staging"
-  description             = "docker-runtime staging VM for lv3.org platform"
+  description             = "docker-runtime staging VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 220
   template_node_name      = var.template_node_name
@@ -40,7 +40,7 @@ module "monitoring_staging_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "monitoring-staging"
-  description             = "monitoring staging VM for lv3.org platform"
+  description             = "monitoring staging VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 240
   template_node_name      = var.template_node_name

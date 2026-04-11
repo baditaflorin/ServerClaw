@@ -53,7 +53,7 @@ mail_platform_metrics_password_local_file: "{{ repo_shared_local_root }}/mail-pl
 mail_platform_gateway_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/gateway-api-key.txt"
 mail_platform_brevo_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/brevo-api-key.txt"
 mail_platform_brevo_api_url: https://api.brevo.com/v3/smtp/email
-mail_platform_brevo_sender_email: florin@badita.org
+mail_platform_brevo_sender_email: operator@example.com
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_gateway_bind_port: "{{ mail_platform_gateway_port }}"

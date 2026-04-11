@@ -115,7 +115,7 @@ def render_network_topology(host_vars: dict[str, Any]) -> dict[str, Any]:
     elements: list[dict[str, Any]] = []
     elements += rectangle("Public Internet", x=60, y=40, background="#dbeafe")
     elements += rectangle(
-        f"proxmox_florin\n{host_vars['management_ipv4']}\nTailscale {host_vars['management_tailscale_ipv4']}",
+        f"proxmox-host\n{host_vars['management_ipv4']}\nTailscale {host_vars['management_tailscale_ipv4']}",
         x=360,
         y=40,
         height=96,

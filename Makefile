@@ -41,7 +41,7 @@ AUTOMATION_UV_PYTHON ?= uv run --with pyyaml python
 PLATFORM_TRACE_ID ?= $(shell python3 -c 'import uuid; print(uuid.uuid4().hex)')
 PLATFORM_INTENT_ID ?=
 SURFACE ?=
-HOST ?= proxmox_florin
+HOST ?= proxmox-host
 TOOL ?=
 IMAGE_ID ?=
 IMAGE_TAG ?=
@@ -123,7 +123,7 @@ push-local:
 	@echo "Pushing with local-only validation (skipping Docker-based remote gates)"
 	SKIP_REMOTE_GATE=1 \
 	GATE_BYPASS_REASON_CODE=runner_image_pull_failure \
-	GATE_BYPASS_DETAIL="Docker registry registry.lv3.org not reachable from local machine" \
+	GATE_BYPASS_DETAIL="Docker registry registry.example.com not reachable from local machine" \
 	GATE_BYPASS_SUBSTITUTE_EVIDENCE="make validate-local passed; pre-commit hooks passed" \
 	GATE_BYPASS_REMEDIATION_REF="docs/adr/0392-convergence-speed-and-incremental-apply.md" \
 	GATE_BYPASS_OWNER="$$(git config user.name)" \
@@ -1321,7 +1321,7 @@ converge-homepage:
 	$(MAKE) preflight WORKFLOW=converge-homepage
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/homepage.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
-# Refresh all discovery surfaces (home.lv3.org, ops.lv3.org, wiki.lv3.org).
+# Refresh all discovery surfaces (home.example.com, ops.example.com, wiki.example.com).
 # Run after any service deployment to eliminate drift between the service
 # catalog and operator-facing portals.  See ADR 0383.
 # Usage:

@@ -8,7 +8,7 @@
  *
  * Run:
  *   npx playwright test playwright/accessibility.spec.ts
- *   PORTAL_URL=https://ops.lv3.org npx playwright test playwright/accessibility.spec.ts
+ *   PORTAL_URL=https://ops.example.com npx playwright test playwright/accessibility.spec.ts
  */
 
 import AxeBuilder from '@axe-core/playwright';

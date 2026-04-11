@@ -123,7 +123,7 @@ def _proxmox_host() -> str:
     ts = _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_tailscale_ipv4")
     if ts:
         return ts
-    return _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "65.108.75.123")
+    return _yaml_scalar(TOPOLOGY_HOST_VARS_PATH, "management_ipv4", "203.0.113.1")
 
 
 def _jump_user() -> str:
@@ -140,7 +140,7 @@ def _guest_user() -> str:
 
 
 def load_vm_catalog() -> list[dict[str, Any]]:
-    """Parse the proxmox_vms list from inventory/host_vars/proxmox_florin.yml."""
+    """Parse the proxmox_vms list from inventory/host_vars/proxmox-host.yml."""
     text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     # Find the proxmox_vms block and extract each VM entry as a mini-dict.
     # We do simple regex parsing — avoids a hard PyYAML dep in a CLI tool.
@@ -739,7 +739,7 @@ def cmd_release_lock(args: argparse.Namespace) -> int:
 
 
 def _update_inventory_disk_gb(vmid: int, new_gb: int) -> None:
-    """Patch the disk_gb for vmid in proxmox_florin.yml (in-place, minimal diff)."""
+    """Patch the disk_gb for vmid in proxmox-host.yml (in-place, minimal diff)."""
     text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
     # Find the block for this vmid, then update the next disk_gb line after it.
@@ -825,7 +825,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--update-inventory",
         action="store_true",
         default=False,
-        help="Patch disk_gb in inventory/host_vars/proxmox_florin.yml after a successful resize.",
+        help="Patch disk_gb in inventory/host_vars/proxmox-host.yml after a successful resize.",
     )
     p_resize.add_argument(
         "--force-locked",

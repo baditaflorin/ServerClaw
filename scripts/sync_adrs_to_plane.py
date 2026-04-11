@@ -126,7 +126,7 @@ def build_plane_issue_body(adr_num: str, metadata: dict[str, str], adr_path: Pat
 <p>{summary}</p>
 
 <h2>Links</h2>
-<p><a href="https://github.com/proxmox-florin/florin-server/blob/main/docs/adr/{adr_num}-*.md" target="_blank">View ADR in Repository</a></p>
+<p><a href="https://github.com/proxmox-host/florin-server/blob/main/docs/adr/{adr_num}-*.md" target="_blank">View ADR in Repository</a></p>
 
 <hr/>
 <p><em>Synced from ADR governance system</em></p>"""

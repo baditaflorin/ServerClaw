@@ -570,13 +570,13 @@ def render_reconciliation_panel() -> str:
     links = []
     links.append(
         render_external_link(
-            "https://grafana.lv3.org/d/lv3-portal-reconciliation/portal-reconciliation",
+            "https://grafana.example.com/d/lv3-portal-reconciliation/portal-reconciliation",
             "Grafana Dashboard",
         )
     )
     links.append(
         render_external_link(
-            "https://windmill.lv3.org",
+            "https://windmill.example.com",
             "Windmill Workflows",
         )
     )
@@ -838,7 +838,7 @@ def render_vm_inventory(
         0,
         "<tr>"
         "<td>host</td>"
-        "<td>proxmox_florin</td>"
+        "<td>proxmox-host</td>"
         "<td>100.118.189.95</td>"
         f"<td>{render_badge('running', 'ok')}</td>"
         "<td>proxmox-host</td>"

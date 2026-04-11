@@ -15,7 +15,7 @@
     {
       "friendly_name": "lv3 SSO Discovery",
       "type": 1,
-      "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+      "url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
       "interval": 300,
       "alert_contacts": [
         "lv3 operator email",
@@ -25,7 +25,7 @@
     {
       "friendly_name": "lv3 Grafana Health",
       "type": 1,
-      "url": "https://grafana.lv3.org/api/health",
+      "url": "https://grafana.example.com/api/health",
       "interval": 300,
       "alert_contacts": [
         "lv3 operator email",
@@ -35,7 +35,7 @@
     {
       "friendly_name": "lv3 Public Status Page",
       "type": 1,
-      "url": "https://status.lv3.org",
+      "url": "https://status.example.com",
       "interval": 300,
       "alert_contacts": [
         "lv3 operator email",

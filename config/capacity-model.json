@@ -2,9 +2,9 @@
   "$schema": "docs/schema/capacity-model.schema.json",
   "schema_version": "1.0.0",
   "host": {
-    "id": "proxmox_florin",
+    "id": "proxmox-host",
     "name": "florin",
-    "metrics_host": "Debian-trixie-latest-amd64-base",
+    "metrics_host": "debian-base-template",
     "physical": {
       "ram_gb": 128,
       "vcpu": 32,

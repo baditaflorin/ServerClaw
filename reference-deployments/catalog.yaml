@@ -5,7 +5,7 @@ samples:
   description: Example-first bootstrap set for one Proxmox host, one public edge guest, and one runtime guest.
   canonical_examples:
   - inventory/hosts.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/api-publication.json
   - config/controller-local-secrets.json
   supported_provider_profiles:

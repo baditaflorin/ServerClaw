@@ -57,11 +57,11 @@ workstreams:
       contract: workstream-registry-v1
   notes: 'Implements ADR 0375: automated SSL certificate validation for all 53
 
-    edge-published domains. Fixes hostname mismatches on ci.lv3.org,
+    edge-published domains. Fixes hostname mismatches on ci.example.com,
 
-    bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org,
+    bi.example.com, grist.example.com, paperless.example.com, annotate.example.com,
 
-    ntfy.lv3.org. Adds pre-push gate, Uptime Kuma integration, and
+    ntfy.example.com. Adds pre-push gate, Uptime Kuma integration, and
 
     automated remediation playbooks.
 
@@ -79,7 +79,7 @@ workstreams:
     \ 0363) but three\ngaps remain before the pattern is fully reusable:\n\n1. Generic\
     \ _resolve_service_auth(service_name) helper is missing \u2014 only Plane-specific\n\
     \   _resolve_plane_auth() exists. Must be built before other services can be added\
-    \ without\n   copy-pasting credential discovery logic.\n\n2. Outline tools (wiki.lv3.org)\
+    \ without\n   copy-pasting credential discovery logic.\n\n2. Outline tools (wiki.example.com)\
     \ \u2014 existing REST client at scripts/outline_client.py,\n   no governed tool\
     \ surface yet.\n\n3. Netbox tools \u2014 network source of truth, agents can't\
     \ query IP allocations.\n\n4. Dify tools \u2014 agents can't trigger workflows\
@@ -113,7 +113,7 @@ workstreams:
     title: Build Dify agent tools (list-apps, get-app, trigger-workflow)
     priority: low
     description: "Tools: list-dify-apps, get-dify-app, trigger-dify-workflow (approval_required:\
-      \ true)\nIMPORTANT: use internal URL http://10.10.10.20:8094 \u2014 agents.lv3.org\
+      \ true)\nIMPORTANT: use internal URL http://10.10.10.20:8094 \u2014 agents.example.com\
       \ is behind oauth2-proxy\nAuth: .local/dify/admin-auth.json (base_url, api_token\
       \ = Dify API key)\n"
   depends_on: []
@@ -263,7 +263,7 @@ workstreams:
       contract: ws-realtime-dynamic-children-generated-v1
   canonical_truth:
     changelog_entry: replaces the static Netdata child host list with a dynamic inventory-group
-      expression so all production hosts stream to realtime.lv3.org automatically
+      expression so all production hosts stream to realtime.example.com automatically
       when new VMs are added to the inventory
     release_bump: patch
     included_in_repo_version: null
@@ -516,7 +516,7 @@ workstreams:
   description: 'Extract repo-intake from ops_portal as a first-class service with
     its own
 
-    subdomain (repo-intake.lv3.org). Mirrors the ops_portal architectural pattern
+    subdomain (repo-intake.example.com). Mirrors the ops_portal architectural pattern
 
     but focuses on self-service repo deployment workflows. Updates navigation in
 

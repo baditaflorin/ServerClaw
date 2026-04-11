@@ -1677,7 +1677,7 @@
       "post": {
         "operationId": "list-outline-collections",
         "summary": "List Outline Collections",
-        "description": "List all document collections in the Outline wiki (wiki.lv3.org).",
+        "description": "List all document collections in the Outline wiki (wiki.example.com).",
         "requestBody": {
           "required": true,
           "content": {
@@ -1943,7 +1943,7 @@
       "post": {
         "operationId": "provision-outline-api-token",
         "summary": "Provision Outline API Token",
-        "description": "Provision a new Outline API token by inserting it into the Outline PostgreSQL database via the bootstrap SSH key. Writes the token to .local/outline/admin-auth.json so all Outline agent tools pick it up automatically. Call this when Outline tools return 401 errors or when .local/outline/admin-auth.json is missing. Uses the outline.automation@lv3.org service account.",
+        "description": "Provision a new Outline API token by inserting it into the Outline PostgreSQL database via the bootstrap SSH key. Writes the token to .local/outline/admin-auth.json so all Outline agent tools pick it up automatically. Call this when Outline tools return 401 errors or when .local/outline/admin-auth.json is missing. Uses the outline.automation@example.com service account.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2264,7 +2264,7 @@
                   },
                   "wing": {
                     "type": "string",
-                    "description": "Memory wing to search (default: 'proxmox_florin')"
+                    "description": "Memory wing to search (default: 'proxmox-host')"
                   },
                   "limit": {
                     "type": "integer",
@@ -2345,7 +2345,7 @@
                   },
                   "wing": {
                     "type": "string",
-                    "description": "Memory wing (default: 'proxmox_florin')"
+                    "description": "Memory wing (default: 'proxmox-host')"
                   },
                   "room": {
                     "type": "string",
@@ -2412,7 +2412,7 @@
                 "properties": {
                   "wing": {
                     "type": "string",
-                    "description": "Memory wing to wake up (default: 'proxmox_florin')"
+                    "description": "Memory wing to wake up (default: 'proxmox-host')"
                   }
                 }
               }

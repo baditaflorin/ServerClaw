@@ -6,13 +6,13 @@
       "name": "Production",
       "status": "active",
       "purpose": "Live operator and platform environment on the current LV3 single-node estate.",
-      "base_domain": "lv3.org",
-      "hostname_pattern": "<service>.lv3.org",
+      "base_domain": "example.com",
+      "hostname_pattern": "<service>.example.com",
       "edge_service_id": "nginx_edge",
       "edge_vm": "nginx",
       "ingress_ipv4": "203.0.113.1",
       "topology_model": "single-node-shared-edge",
-      "isolation_model": "Production uses the authoritative bare lv3.org hostnames and repo-managed runtime state.",
+      "isolation_model": "Production uses the authoritative bare example.com hostnames and repo-managed runtime state.",
       "operator_access": "Private-only services stay on the Tailscale-backed operator path through the Proxmox host.",
       "private_network": {
         "bridge": "vmbr10",
@@ -27,8 +27,8 @@
       "name": "Staging",
       "status": "active",
       "purpose": "Pre-production validation lane for staged edge-published and operator-facing services.",
-      "base_domain": "staging.lv3.org",
-      "hostname_pattern": "<service>.staging.lv3.org",
+      "base_domain": "staging.example.com",
+      "hostname_pattern": "<service>.staging.example.com",
       "edge_service_id": "nginx_edge",
       "edge_vm": "nginx",
       "ingress_ipv4": "203.0.113.1",
@@ -42,7 +42,7 @@
         "network": "10.20.10.0/24"
       },
       "placement": {
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "preview",
         "anti_affinity_group": "staging-preview",
         "co_location_exceptions": [

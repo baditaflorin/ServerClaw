@@ -176,7 +176,7 @@ live_apply_evidence:
     runbook_task_reentry: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     public_github_readiness: 2026-04-04-adr-0330-public-github-readiness-mainline-live-apply
 desired_state:
-  host_id: proxmox_florin
+  host_id: proxmox-host
   provider: hetzner-dedicated
   management_ipv4: 203.0.113.1
   base_os:
@@ -284,7 +284,7 @@ desired_state:
       - id: ops-linux
         class: human_operator
         principal: ops
-        owner: Florin Badita
+        owner: Platform Operator
         purpose: Routine Linux administration on the Proxmox host and managed Debian guests.
         scope_boundary: Linux shell access with sudo on the Proxmox host and managed guests; not used for Proxmox API tokens.
         rotation_or_expiry: Rotate the shared bootstrap SSH key on personnel change or compromise and replace it with short-lived SSH certificates under ADR 0047.
@@ -296,7 +296,7 @@ desired_state:
       - id: ops-proxmox-pam
         class: human_operator
         principal: ops@pam
-        owner: Florin Badita
+        owner: Platform Operator
         purpose: Routine Proxmox UI and CLI administration with TOTP.
         scope_boundary: Proxmox administrative APIs and UI only; not used for direct Linux login or non-human automation.
         rotation_or_expiry: Rotate the password and TOTP seed on personnel change, compromise, or recovery events.
@@ -319,7 +319,7 @@ desired_state:
       - id: ops-portainer
         class: human_operator
         principal: ops-portainer
-        owner: Florin Badita
+        owner: Platform Operator
         purpose: Routine read-mostly Docker runtime inspection in Portainer and bounded emergency actions through the governed Portainer surface.
         scope_boundary: Portainer UI and API on docker-runtime only; desired state remains repo-managed and Portainer is not the source of truth for stack definitions.
         rotation_or_expiry: Rotate the controller-local Portainer bootstrap password on operator change, compromise, or when narrower SSO-backed identities replace the bootstrap path.
@@ -331,7 +331,7 @@ desired_state:
       - id: florin-badita-sso
         class: human_operator
         principal: florin.badita
-        owner: Florin Badita
+        owner: Platform Operator
         purpose: Routine named operator login for the shared Keycloak broker and the first SSO-backed control-plane apps.
         scope_boundary: Keycloak realm `lv3` and downstream OIDC-integrated internal control-plane apps only; not used for Linux login, Proxmox API automation, or break-glass recovery.
         rotation_or_expiry: Rotate the bootstrap password after initial TOTP enrollment, on personnel change, or on compromise.
@@ -364,7 +364,7 @@ desired_state:
           - grafana_oauth
       - id: mail-platform-server-mailbox
         class: service
-        principal: server@lv3.org
+        principal: server@example.com
         owner: Mail platform runtime
         purpose: Authenticated mailbox and submission identity for the managed LV3 mail platform.
         scope_boundary: Mailbox access and SMTP submission on the internal mail platform only; not used for host, guest, or Proxmox administration.
@@ -376,7 +376,7 @@ desired_state:
           - mail_gateway_submission
       - id: mail-platform-operator-alerts
         class: service
-        principal: alerts@lv3.org
+        principal: alerts@example.com
         owner: Platform operations
         purpose: Outbound operator alert sender profile for incident and health notifications.
         scope_boundary: Profile-bound outbound sends through the internal mail gateway only; cannot enumerate mail objects or reuse other sender credentials.
@@ -388,7 +388,7 @@ desired_state:
           - mail_gateway_notification_profile
       - id: mail-platform-platform-transactional
         class: service
-        principal: platform@lv3.org
+        principal: platform@example.com
         owner: Platform services
         purpose: Outbound transactional sender profile for repo-managed service notifications.
         scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for operator alerts or agent reporting.
@@ -400,7 +400,7 @@ desired_state:
           - mail_gateway_notification_profile
       - id: mail-platform-agent-reports
         class: agent
-        principal: agents@lv3.org
+        principal: agents@example.com
         owner: Repository automation
         purpose: Outbound sender profile for agent-generated reports and workflow summaries.
         scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for human operators or unrelated services.
@@ -413,7 +413,7 @@ desired_state:
       - id: proxmox-root-break-glass
         class: break_glass
         principal: root
-        owner: Florin Badita
+        owner: Platform Operator
         purpose: Emergency recovery of the Proxmox host when named operator access is unavailable.
         scope_boundary: Proxmox host Linux only; not used for routine guest administration, API automation, or scheduled workflows.
         rotation_or_expiry: Rotate the SSH key immediately after any break-glass use or compromise.
@@ -424,7 +424,7 @@ desired_state:
       - id: keycloak-bootstrap-admin
         class: break_glass
         principal: lv3-bootstrap-admin
-        owner: Florin Badita
+        owner: Platform Operator
         purpose: Emergency master-realm and realm-administration recovery for Keycloak when named operator login is unavailable.
         scope_boundary: Keycloak recovery and bootstrap administration only; not used for routine operator sessions or non-human automation.
         rotation_or_expiry: Rotate the bootstrap admin password after any break-glass use, compromise, or major broker recovery event.
@@ -437,46 +437,46 @@ desired_state:
       - 100.64.0.0/10
       - 10.10.10.0/24
     proxmox_tfa_user: ops@pam
-    proxmox_tls_hostname: proxmox.lv3.org
+    proxmox_tls_hostname: proxmox.example.com
     notifications_email: operator@example.com
   dns:
-    zone: lv3.org
+    zone: example.com
     public_ipv4_target: 203.0.113.1
     initial_subdomains:
-      - mail.lv3.org
-      - proxmox.lv3.org
-      - grafana.lv3.org
-      - nginx.lv3.org
-      - docker.lv3.org
-      - build.lv3.org
-      - uptime.lv3.org
-      - sso.lv3.org
-      - database.lv3.org
+      - mail.example.com
+      - proxmox.example.com
+      - grafana.example.com
+      - nginx.example.com
+      - docker.example.com
+      - build.example.com
+      - uptime.example.com
+      - sso.example.com
+      - database.example.com
     publish_aaaa_initially: false
   mail:
-    domain: lv3.org
-    hostname: mail.lv3.org
-    mailbox_address: server@lv3.org
+    domain: example.com
+    hostname: mail.example.com
+    mailbox_address: server@example.com
     api_private_url: http://10.10.10.20:8081
     fallback_delivery_provider: brevo
     grafana_dashboard_uid: lv3-mail-platform
     notification_profiles:
       - id: operator-alerts
-        sender_address: alerts@lv3.org
+        sender_address: alerts@example.com
         owner: Platform operations
         credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
         rate_expectation: Low volume with bursty spikes during incidents; not used for bulk mail.
         retention_policy: Retain gateway counters and mail delivery traces under the managed observability policy.
         observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
       - id: platform-transactional
-        sender_address: platform@lv3.org
+        sender_address: platform@example.com
         owner: Platform services
         credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
         rate_expectation: Low to moderate transactional volume for repo-managed services.
         retention_policy: Retain gateway counters and mail delivery traces needed to audit service notifications.
         observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
       - id: agent-reports
-        sender_address: agents@lv3.org
+        sender_address: agents@example.com
         owner: Repository automation
         credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
         rate_expectation: Low to moderate workflow-report volume with bursty audit windows.
@@ -490,23 +490,23 @@ desired_state:
     edge_vm: 10.10.10.10
     tls_termination: nginx_edge
     published_hostnames:
-      - lv3.org
-      - apps.lv3.org
-      - api.lv3.org
-      - build.lv3.org
-      - changelog.lv3.org
-      - coolify.lv3.org
-      - docker.lv3.org
-      - docs.lv3.org
-      - grafana.lv3.org
-      - mail.lv3.org
-      - nginx.lv3.org
-      - ops.lv3.org
-      - proxmox.lv3.org
-      - sso.lv3.org
-      - status.lv3.org
-      - uptime.lv3.org
-      - wiki.lv3.org
+      - example.com
+      - apps.example.com
+      - api.example.com
+      - build.example.com
+      - changelog.example.com
+      - coolify.example.com
+      - docker.example.com
+      - docs.example.com
+      - grafana.example.com
+      - mail.example.com
+      - nginx.example.com
+      - ops.example.com
+      - proxmox.example.com
+      - sso.example.com
+      - status.example.com
+      - uptime.example.com
+      - wiki.example.com
 
 observed_state:
   checked_at: 2026-04-03
@@ -561,10 +561,10 @@ observed_state:
       - florin.badita
       - lv3-agent-hub
       - grafana-oauth
-      - server@lv3.org
-      - alerts@lv3.org
-      - platform@lv3.org
-      - agents@lv3.org
+      - server@example.com
+      - alerts@example.com
+      - platform@example.com
+      - agents@example.com
       - root
       - lv3-bootstrap-admin
     human_operator_access_verified: true
@@ -580,7 +580,7 @@ observed_state:
     representative_contract: configure-network
     representative_approval_gate_verified: true
   os:
-    banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
+    banner: Linux debian-base-template 6.17.13-2-pve
     kernel: 6.17.13-2-pve
     distribution: Debian GNU/Linux
     major: 13
@@ -590,7 +590,7 @@ observed_state:
     version: 9.1.6
     ve_version: 9.1.0
     api_ui_port: 8006
-    tls_hostname: proxmox.lv3.org
+    tls_hostname: proxmox.example.com
     tls_issuer: Let's Encrypt R13
     automation_api_user: lv3-automation@pve
     automation_api_token_id: primary
@@ -628,21 +628,21 @@ observed_state:
     catch_all_matcher: lv3-all-events
     mail_queue_empty_after_probe: true
   dns:
-    zone: lv3.org
+    zone: example.com
     root_a: 203.0.113.1
     root_aaaa_present: false
     root_aaaa_matches_current_host_ipv6: false
     created_a_subdomains:
-      - mail.lv3.org
-      - proxmox.lv3.org
-      - grafana.lv3.org
-      - nginx.lv3.org
-      - docker.lv3.org
-      - build.lv3.org
-      - uptime.lv3.org
-      - sso.lv3.org
-      - database.lv3.org
-      - vault.lv3.org
+      - mail.example.com
+      - proxmox.example.com
+      - grafana.example.com
+      - nginx.example.com
+      - docker.example.com
+      - build.example.com
+      - uptime.example.com
+      - sso.example.com
+      - database.example.com
+      - vault.example.com
   guests:
     template:
       vmid: 9000
@@ -730,7 +730,7 @@ observed_state:
     tempo_running: true
     alloy_log_shipping_active: true
     grafana_internal_url: http://10.10.10.40:3000
-    grafana_public_url: https://grafana.lv3.org
+    grafana_public_url: https://grafana.example.com
     grafana_sso_enabled: true
     grafana_keycloak_redirect_verified: true
     loki_internal_url: http://10.10.10.40:3100
@@ -792,12 +792,12 @@ observed_state:
       - monitoring
       - nginx
       - postgres
-      - proxmox_florin
+      - proxmox-host
   mutation_audit:
     sink_file: /var/log/platform/mutation-audit.jsonl
     loki_job_label: mutation-audit
     live_hosts:
-      - proxmox_florin
+      - proxmox-host
       - docker-runtime
     host_file_verified: true
     windmill_helper_path: f/lv3/mutation_audit_emit
@@ -806,14 +806,14 @@ observed_state:
     openbao_native_audit_file: /opt/openbao/logs/audit.log
     openbao_native_audit_scrape_verified: true
   headscale:
-    host: proxmox_florin
-    public_url: https://headscale.lv3.org
+    host: proxmox-host
+    public_url: https://headscale.example.com
     internal_url: http://10.10.10.1:8080
     service_running: true
     public_health_verified: true
     api_key_bootstrapped: true
     ops_user_present: true
-    proxmox_host_node: proxmox-florin-subnet-router
+    proxmox_host_node: proxmox-host-subnet-router
     operator_workstation_node: florins-macbook-pro
     subnet_route: 10.10.10.0/24
     subnet_route_approved: true
@@ -876,7 +876,7 @@ observed_state:
     ssh_host_certificates_installed: true
     ssh_certificate_login_verified: true
     trusted_hosts:
-      - proxmox_florin
+      - proxmox-host
       - nginx
       - docker-runtime
       - docker-build
@@ -916,7 +916,7 @@ observed_state:
   keycloak:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
-    public_url: https://sso.lv3.org
+    public_url: https://sso.example.com
     internal_http_url: http://10.10.10.20:8091
     realm: lv3
     container_running: true
@@ -936,8 +936,8 @@ observed_state:
     runtime_vm: 10.10.10.70
     apps_runtime_vm: 10.10.10.71
     private_controller_url: http://100.64.0.1:8012
-    public_url: https://coolify.lv3.org
-    apps_public_url: https://apps.lv3.org
+    public_url: https://coolify.example.com
+    apps_public_url: https://apps.example.com
     dashboard_version: 4.0.0-beta.470
     deployment_server_name: coolify-apps
     deployment_server_uuid: upsaaj0eoynvncqlorp7y2yj
@@ -945,14 +945,14 @@ observed_state:
     deployment_server_reachable: true
     deployment_server_usable: true
     apps_migration_status: migrated_via_db  # Direct DB: UPDATE applications SET destination_id=34 WHERE destination_id=1 via docker exec coolify-db psql
-    nginx_edge_updated: true  # *.apps.lv3.org upstream updated from 10.10.10.70 to http://10.10.10.71:80
-    repo_smoke_app_url: https://repo-smoke.apps.lv3.org
+    nginx_edge_updated: true  # *.apps.example.com upstream updated from 10.10.10.70 to http://10.10.10.71:80
+    repo_smoke_app_url: https://repo-smoke.apps.example.com
     repo_smoke_public_http_verified: true
     apps_apex_default_unassigned: true
   outline:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
-    public_url: https://wiki.lv3.org
+    public_url: https://wiki.example.com
     local_http_url: http://10.10.10.20:3001
     container_running: true
     public_health_verified: true
@@ -967,7 +967,7 @@ observed_state:
   searxng:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.64.0.1
-    tailnet_hostname: search.lv3.org
+    tailnet_hostname: search.example.com
     tailnet_dns_verified: true
     private_http_url: http://10.10.10.20:8881
     container_running: true
@@ -1014,24 +1014,24 @@ observed_state:
     repo_sync_verified: true
     repo_sync_idempotent: true
     synchronized_site: LV3 Hetzner
-    synchronized_device: proxmox_florin
+    synchronized_device: proxmox-host
     synchronized_vm_count: 6
     synchronized_prefix_count: 2
     synchronized_service_count: 11
   mail:
-    domain: lv3.org
-    hostname: mail.lv3.org
-    mailbox_address: server@lv3.org
+    domain: example.com
+    hostname: mail.example.com
+    mailbox_address: server@example.com
     docker_runtime_vm: 10.10.10.20
     gateway_api_private_url: http://10.10.10.20:8081
     stalwart_running: true
     brevo_domain_authenticated: true
-    brevo_sender_active: server@lv3.org
+    brevo_sender_active: server@example.com
     verified_sender_addresses:
-      - server@lv3.org
-      - alerts@lv3.org
-      - platform@lv3.org
-      - agents@lv3.org
+      - server@example.com
+      - alerts@example.com
+      - platform@example.com
+      - agents@example.com
     outbound_gmail_delivery_verified: true
     inbound_external_delivery_verified: true
     mailbox_inbox_delivery_verified: true
@@ -1039,19 +1039,19 @@ observed_state:
     notification_profile_scope_rejection_verified: true
     notification_profiles:
       - id: operator-alerts
-        sender_address: alerts@lv3.org
+        sender_address: alerts@example.com
         send_verified: true
       - id: platform-transactional
-        sender_address: platform@lv3.org
+        sender_address: platform@example.com
         send_verified: true
       - id: agent-reports
-        sender_address: agents@lv3.org
+        sender_address: agents@example.com
         send_verified: true
     fallback_delivery_provider: brevo
     grafana_dashboard_uid: lv3-mail-platform
   uptime_kuma:
     vm: 10.10.10.20
-    public_url: https://uptime.lv3.org
+    public_url: https://uptime.example.com
     site_dir: /opt/uptime-kuma
     container_running: true
     edge_published: true
@@ -1076,29 +1076,29 @@ observed_state:
     security_headers_audit_passed: true
     security_headers_audited_at: 2026-03-25T06:15:03Z
     published_hostnames:
-      - lv3.org
-      - apps.lv3.org
-      - api.lv3.org
-      - build.lv3.org
-      - changelog.lv3.org
-      - coolify.lv3.org
-      - docker.lv3.org
-      - docs.lv3.org
-      - grafana.lv3.org
-      - mail.lv3.org
-      - nginx.lv3.org
-      - ops.lv3.org
-      - proxmox.lv3.org
-      - sso.lv3.org
-      - status.lv3.org
-      - uptime.lv3.org
-      - wiki.lv3.org
+      - example.com
+      - apps.example.com
+      - api.example.com
+      - build.example.com
+      - changelog.example.com
+      - coolify.example.com
+      - docker.example.com
+      - docs.example.com
+      - grafana.example.com
+      - mail.example.com
+      - nginx.example.com
+      - ops.example.com
+      - proxmox.example.com
+      - sso.example.com
+      - status.example.com
+      - uptime.example.com
+      - wiki.example.com
   postgres:
     vm: 10.10.10.50
     service_running: true
     guest_firewall_enabled: true
     tailscale_proxy_host: 100.64.0.1:5432
-    dns_name: database.lv3.org
+    dns_name: database.example.com
     dns_resolves_to_tailscale_ip: true
     public_ipv4_reachable: false
   backups:

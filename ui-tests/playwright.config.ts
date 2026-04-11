@@ -8,7 +8,7 @@ import { defineConfig, devices } from '@playwright/test';
  *  - accessibility.spec.ts — axe-core a11y scans of every major portal section
  *
  * PORTAL_URL defaults to http://localhost:8000 (the Uvicorn dev server).
- * Override with:  PORTAL_URL=https://ops.lv3.org npx playwright test
+ * Override with:  PORTAL_URL=https://ops.example.com npx playwright test
  */
 
 const PORTAL_URL = process.env.PORTAL_URL || 'http://localhost:8000';

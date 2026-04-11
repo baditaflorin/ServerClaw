@@ -2,7 +2,7 @@
 """Apply publication-sanitization regex patterns to committed files in-place.
 
 ADR 0407 Phase 4-5: Convert docs/ and tests/ from deployment-specific
-values (lv3.org, real hostnames) to generic values (example.com) so the
+values (example.com, real hostnames) to generic values (example.com) so the
 publish pipeline has fewer files to change.
 
 Usage:

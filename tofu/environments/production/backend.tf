@@ -3,7 +3,7 @@ terraform {
     bucket                      = "tofu-state"
     key                         = "production/terraform.tfstate"
     region                      = "main"
-    endpoints                   = { s3 = "https://minio.lv3.org" }
+    endpoints                   = { s3 = "https://minio.example.com" }
     use_path_style              = true
     use_lockfile                = true
     skip_credentials_validation = true

@@ -60,3 +60,13 @@ docs/site-generated/*
 # regenerated at runtime from templates + .local/identity.yml.
 config/generated/
 receipts/
+
+# ADR 0409: Generated inventory and monitoring configs.
+# These are derived from source catalogs and regenerated at deploy time.
+# Generators resolve example.com → real domain from .local/identity.yml.
+inventory/group_vars/platform.yml
+inventory/group_vars/platform_hairpin.yml
+config/prometheus/rules/https_tls_alerts.yml
+config/prometheus/file_sd/https_tls_targets.yml
+config/prometheus/file_sd/slo_targets.yml
+config/uptime-kuma/monitors.json

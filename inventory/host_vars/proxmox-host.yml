@@ -1,14 +1,14 @@
-host_public_hostname: Debian-trixie-latest-amd64-base
-proxmox_node_name: Debian-trixie-latest-amd64-base
+host_public_hostname: debian-base-template
+proxmox_node_name: debian-base-template
 management_interface: enp7s0
-management_ipv4: 65.108.75.123
+management_ipv4: 203.0.113.1
 management_tailscale_ipv4: 100.64.0.1
 management_ipv4_cidr: 26
-management_gateway4: 65.108.75.65
-management_ipv6: 2a01:4f9:6b:4b47::2
+management_gateway4: 203.0.113.65
+management_ipv6: 2001:db8::2
 management_ipv6_cidr: 64
 management_gateway6: fe80::1
-hetzner_ipv4_route_network: 65.108.75.64
+hetzner_ipv4_route_network: 203.0.113.0
 hetzner_ipv4_route_netmask: 255.255.255.192
 proxmox_wan_bridge: vmbr0
 proxmox_internal_bridge: vmbr10
@@ -124,7 +124,7 @@ platform_port_assignments:
 monitoring_prometheus_listen_address: 0.0.0.0:9090
 openbao_http_extra_bind_addresses:
   - "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}"
-proxmox_tailscale_hostname: proxmox-florin-subnet-router
+proxmox_tailscale_hostname: proxmox-host-subnet-router
 proxmox_tailscale_login_server: https://headscale.{{ platform_domain }}
 proxmox_tailscale_tags: []
 proxmox_tailscale_advertise_routes:
@@ -172,10 +172,10 @@ proxmox_public_ingress_udp_forwards:
     target_port_range: 50000-60000
     description: Neko WebRTC media streams (UDP RTP/STUN for browser.{{ platform_domain }})
 platform_failure_domains:
-  - id: host:proxmox_florin
+  - id: host:proxmox-host
     kind: host
     status: active
-    live_label: fd-host-proxmox-florin
+    live_label: fd-host-proxmox-host
     summary: The current Hetzner dedicated Proxmox host that carries every live primary guest.
   - id: cloud:hetzner-fsn1
     kind: cloud
@@ -299,7 +299,7 @@ proxmox_guests:
       - nginx
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: edge-publication
       co_location_exceptions: []
@@ -322,7 +322,7 @@ proxmox_guests:
       - runtime
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: runtime-shared
       co_location_exceptions: []
@@ -344,7 +344,7 @@ proxmox_guests:
       - build
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: build-jobs
       co_location_exceptions: []
@@ -370,7 +370,7 @@ proxmox_guests:
       - grafana
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: observability-core
       co_location_exceptions: []
@@ -392,7 +392,7 @@ proxmox_guests:
       - database
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: postgres-ha
       co_location_exceptions: []
@@ -418,7 +418,7 @@ proxmox_guests:
       - ha
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: standby
       anti_affinity_group: postgres-ha
       co_location_exceptions:
@@ -449,7 +449,7 @@ proxmox_guests:
       - pbs
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: recovery
       anti_affinity_group: control-plane-recovery
       co_location_exceptions:
@@ -474,7 +474,7 @@ proxmox_guests:
       - coolify
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: paas-control-plane
       co_location_exceptions: []
@@ -497,7 +497,7 @@ proxmox_guests:
       - coolify-apps
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: paas-apps-runtime
       co_location_exceptions: []
@@ -521,7 +521,7 @@ proxmox_guests:
       - docker
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: artifact-cache-plane
       co_location_exceptions: []
@@ -544,7 +544,7 @@ proxmox_guests:
       - runtime
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: runtime-ai
       co_location_exceptions: []
@@ -566,7 +566,7 @@ proxmox_guests:
       - general
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: runtime-general
       co_location_exceptions: []
@@ -588,7 +588,7 @@ proxmox_guests:
       - control
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: runtime-control
       co_location_exceptions: []
@@ -610,7 +610,7 @@ proxmox_guests:
       - comms
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: runtime-comms
       co_location_exceptions: []
@@ -632,7 +632,7 @@ proxmox_guests:
       - apps
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: runtime-apps
       co_location_exceptions: []
@@ -654,7 +654,7 @@ proxmox_guests:
       - apps
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: postgres-apps
       co_location_exceptions:
@@ -682,7 +682,7 @@ proxmox_guests:
       - data
       - lv3
     placement:
-      failure_domain: host:proxmox_florin
+      failure_domain: host:proxmox-host
       placement_class: primary
       anti_affinity_group: postgres-data
       co_location_exceptions:
@@ -1996,7 +1996,7 @@ route_dns_assertion_extra_records:
 route_dns_assertion_retired_records:
   - name: "@"
     type: AAAA
-    value: "2a01:4f8:d0a:27bd::2"
+    value: "2001:db8::3"
     ttl: 60
     state: absent
   - name: autoconfig
@@ -2012,7 +2012,7 @@ route_dns_assertion_retired_records:
     state: absent
   - name: www
     type: AAAA
-    value: "2a01:4f8:d0a:27bd::2"
+    value: "2001:db8::3"
     ttl: 60
     state: absent
 
@@ -2097,7 +2097,7 @@ lv3_service_topology:
           status: 404
   headscale:
     service_name: headscale
-    owning_vm: proxmox_florin
+    owning_vm: proxmox-host
     private_ip: "{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}"
     public_hostname: headscale.{{ platform_domain }}
     exposure_model: edge-published
@@ -2126,7 +2126,7 @@ lv3_service_topology:
       service_telemetry: false
   proxmox_ui:
     service_name: proxmox-ui
-    owning_vm: proxmox_florin
+    owning_vm: proxmox-host
     private_ip: "{{ management_tailscale_ipv4 }}"
     public_hostname: proxmox.{{ platform_domain }}
     exposure_model: informational-only
@@ -3189,7 +3189,7 @@ lv3_service_topology:
       proxy_send_timeout_seconds: 900
   ntopng:
     service_name: ntopng
-    owning_vm: proxmox_florin
+    owning_vm: proxmox-host
     private_ip: "{{ management_tailscale_ipv4 }}"
     exposure_model: private-only
     observability:

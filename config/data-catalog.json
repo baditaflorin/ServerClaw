@@ -818,7 +818,7 @@
       "pii_risk": "high",
       "locations": [
         "/opt/serverclaw/data",
-        "https://chat.lv3.org"
+        "https://chat.example.com"
       ],
       "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its ServerClaw data volume on coolify."
     },

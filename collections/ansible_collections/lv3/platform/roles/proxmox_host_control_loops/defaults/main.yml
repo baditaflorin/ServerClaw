@@ -1,5 +1,5 @@
 ---
-# Purpose: Declare the canonical ADR 0226 host-resident control-loop unit names, filesystem paths, and scheduling defaults for proxmox_florin.
+# Purpose: Declare the canonical ADR 0226 host-resident control-loop unit names, filesystem paths, and scheduling defaults for proxmox-host.
 # Use case: Applied on the Proxmox host when the platform needs the repo-managed systemd supervisor baseline for host-local control loops.
 # Inputs:
 #   - proxmox_host_control_loops_root (str): Root directory for loop state and manual trigger files.

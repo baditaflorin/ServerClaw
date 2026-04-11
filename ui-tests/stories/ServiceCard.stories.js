@@ -50,7 +50,7 @@ export const Healthy = {
     category: 'observability',
     tone: 'ok',
     statusLabel: 'healthy',
-    url: 'https://grafana.lv3.org',
+    url: 'https://grafana.example.com',
     meta: [
       { label: 'Last checked', value: '2 min ago' },
       { label: 'Response', value: '200 OK — 48 ms' },
@@ -68,7 +68,7 @@ export const Degraded = {
     category: 'knowledge',
     tone: 'warn',
     statusLabel: 'degraded',
-    url: 'https://outline.lv3.org',
+    url: 'https://outline.example.com',
     meta: [
       { label: 'Last checked', value: '5 min ago' },
       { label: 'Response', value: '504 Gateway Timeout' },
@@ -86,7 +86,7 @@ export const Failed = {
     category: 'planning',
     tone: 'danger',
     statusLabel: 'unreachable',
-    url: 'https://plane.lv3.org',
+    url: 'https://plane.example.com',
     meta: [
       { label: 'Last checked', value: '1 min ago' },
       { label: 'Error', value: 'Connection refused' },
@@ -104,7 +104,7 @@ export const Unknown = {
     category: 'data',
     tone: '',
     statusLabel: '',
-    url: 'https://jupyter.lv3.org',
+    url: 'https://jupyter.example.com',
     meta: [],
     actions: [
       { label: 'Health check', primary: true },
@@ -126,7 +126,7 @@ export const DeployProfile = {
         <div><dt>Branch</dt><dd>main</dd></div>
         <div><dt>Build pack</dt><dd>dockercompose</dd></div>
         <div><dt>LLM assistance</dt><dd>prohibited</dd></div>
-        <div><dt>Domain</dt><dd><a href="https://education-wemeshup.apps.lv3.org" target="_blank" rel="noopener">education-wemeshup.apps.lv3.org</a></dd></div>
+        <div><dt>Domain</dt><dd><a href="https://education-wemeshup.apps.example.com" target="_blank" rel="noopener">education-wemeshup.apps.example.com</a></dd></div>
       </dl>
       <div class="service-card-actions">
         <button class="action-button action-button--primary" type="button">Deploy education-wemeshup</button>

@@ -15,7 +15,7 @@
       "post": {
         "operationId": "list-outline-collections",
         "summary": "List Outline Collections",
-        "description": "List all document collections in the Outline wiki (wiki.lv3.org).",
+        "description": "List all document collections in the Outline wiki (wiki.example.com).",
         "requestBody": {
           "required": true,
           "content": {

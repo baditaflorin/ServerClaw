@@ -16,7 +16,7 @@ from session_workspace import resolve_session_workspace
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SECRET_MANIFEST = REPO_ROOT / "config" / "controller-local-secrets.json"
 BUILD_SERVER_CONFIG = REPO_ROOT / "config" / "build-server.json"
-DEFAULT_NODE_NAME = "proxmox_florin"
+DEFAULT_NODE_NAME = "proxmox-host"
 
 PRODUCTION_VMIDS = {
     "nginx": 110,

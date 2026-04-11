@@ -7,7 +7,7 @@
     },
     {
       "id": "label-studio:human-review-queue",
-      "description": "Label Studio annotation queue for human review of agent decisions. Agents submit tasks via the human-review-queue skill; operators annotate at https://annotate.lv3.org."
+      "description": "Label Studio annotation queue for human review of agent decisions. Agents submit tasks via the human-review-queue skill; operators annotate at https://annotate.example.com."
     }
   ],
   "browser_refs": [

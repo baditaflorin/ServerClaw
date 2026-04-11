@@ -128,7 +128,7 @@ def main(repo_path: str | None = DEFAULT_REPO_PATH):
     fixture_manager.CONTROLLER_SECRETS_PATH = repo_root / "config" / "controller-local-secrets.json"
     fixture_manager.TEMPLATE_MANIFEST_PATH = repo_root / "config" / "vm-template-manifest.json"
     fixture_manager.GROUP_VARS_PATH = repo_root / "inventory" / "group_vars" / "all.yml"
-    fixture_manager.HOST_VARS_PATH = repo_root / "inventory" / "host_vars" / "proxmox_florin.yml"
+    fixture_manager.HOST_VARS_PATH = repo_root / "inventory" / "host_vars" / "proxmox-host.yml"
     fixture_manager.CAPACITY_MODEL_PATH = repo_root / "config" / "capacity-model.json"
 
     return fixture_manager.reap_expired()

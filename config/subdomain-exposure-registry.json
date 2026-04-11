@@ -3,7 +3,7 @@
   "zone_name": "localhost",
   "publications": [
     {
-      "fqdn": "agents.lv3.org",
+      "fqdn": "agents.example.com",
       "service_id": "dify",
       "environment": "production",
       "status": "active",
@@ -35,13 +35,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -77,7 +77,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "analytics.lv3.org",
+      "fqdn": "analytics.example.com",
       "service_id": "plausible",
       "environment": "production",
       "status": "active",
@@ -109,13 +109,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -159,7 +159,7 @@
       "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
     },
     {
-      "fqdn": "annotate.lv3.org",
+      "fqdn": "annotate.example.com",
       "service_id": "label_studio",
       "environment": "production",
       "status": "active",
@@ -191,13 +191,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -231,7 +231,7 @@
       "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Keycloak boundary; repo-managed Label Studio tokens remain the current app-local automation path."
     },
     {
-      "fqdn": "api.lv3.org",
+      "fqdn": "api.example.com",
       "service_id": "api_gateway",
       "environment": "production",
       "status": "active",
@@ -263,13 +263,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -302,7 +302,7 @@
       "notes": "Published publicly through the shared NGINX edge and verified live from current main."
     },
     {
-      "fqdn": "apps.lv3.org",
+      "fqdn": "apps.example.com",
       "service_id": "coolify_apps",
       "environment": "production",
       "status": "active",
@@ -334,13 +334,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -376,7 +376,7 @@
       "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps (10.10.10.71) \u2014 ADR 0340."
     },
     {
-      "fqdn": "bi.lv3.org",
+      "fqdn": "bi.example.com",
       "service_id": "superset",
       "environment": "production",
       "status": "active",
@@ -408,13 +408,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -448,7 +448,7 @@
       "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
     },
     {
-      "fqdn": "billing.lv3.org",
+      "fqdn": "billing.example.com",
       "service_id": "lago",
       "environment": "production",
       "status": "active",
@@ -480,13 +480,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -526,7 +526,7 @@
       "notes": "The shared edge protects the Lago browser UI while `/api/health` and `/api/v1/events` intentionally stay reachable for probes and governed producer ingest through the API gateway adapter."
     },
     {
-      "fqdn": "browser.lv3.org",
+      "fqdn": "browser.example.com",
       "service_id": "neko",
       "environment": "production",
       "status": "active",
@@ -545,7 +545,7 @@
           "service_id": "neko",
           "kind": "custom",
           "source": "service_topology",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -558,13 +558,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -597,7 +597,7 @@
       "notes": "Published through the shared NGINX edge for operator-only access via Tailscale headscale management network. WebRTC media streams direct from Proxmox host (UDP 50000-60000) bypass TLS proxy for latency optimization."
     },
     {
-      "fqdn": "build.lv3.org",
+      "fqdn": "build.example.com",
       "service_id": "docker_build",
       "environment": "production",
       "status": "active",
@@ -616,7 +616,7 @@
           "service_id": "docker_build",
           "kind": "static",
           "source": "service_topology",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -629,13 +629,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -671,7 +671,7 @@
       "notes": null
     },
     {
-      "fqdn": "changelog.lv3.org",
+      "fqdn": "changelog.example.com",
       "service_id": "changelog_portal",
       "environment": "production",
       "status": "active",
@@ -690,7 +690,7 @@
           "service_id": "changelog_portal",
           "kind": "static_dir",
           "source": "public_edge_extra_sites",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -703,13 +703,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -740,7 +740,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "chat.lv3.org",
+      "fqdn": "chat.example.com",
       "service_id": "serverclaw",
       "environment": "production",
       "status": "active",
@@ -772,13 +772,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -812,7 +812,7 @@
       "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
     },
     {
-      "fqdn": "ci.lv3.org",
+      "fqdn": "ci.example.com",
       "service_id": "woodpecker",
       "environment": "production",
       "status": "active",
@@ -844,13 +844,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -884,7 +884,7 @@
       "notes": "Published through the shared NGINX edge and authenticated through Woodpecker's delegated Gitea OAuth flow."
     },
     {
-      "fqdn": "cloud.lv3.org",
+      "fqdn": "cloud.example.com",
       "service_id": "nextcloud",
       "environment": "production",
       "status": "active",
@@ -916,13 +916,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -974,7 +974,7 @@
       "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
     },
     {
-      "fqdn": "coolify.lv3.org",
+      "fqdn": "coolify.example.com",
       "service_id": "coolify",
       "environment": "production",
       "status": "active",
@@ -1006,13 +1006,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1046,7 +1046,7 @@
       "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
     },
     {
-      "fqdn": "data.lv3.org",
+      "fqdn": "data.example.com",
       "service_id": "directus",
       "environment": "production",
       "status": "active",
@@ -1078,13 +1078,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1115,10 +1115,10 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The shared NGINX edge publishes data.lv3.org directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
+      "notes": "The shared NGINX edge publishes data.example.com directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
     },
     {
-      "fqdn": "database.lv3.org",
+      "fqdn": "database.example.com",
       "service_id": "postgres",
       "environment": "production",
       "status": "active",
@@ -1184,7 +1184,7 @@
       "notes": "Tailnet-only TCP proxy through the Proxmox host."
     },
     {
-      "fqdn": "docker.lv3.org",
+      "fqdn": "docker.example.com",
       "service_id": "docker_runtime",
       "environment": "production",
       "status": "active",
@@ -1203,7 +1203,7 @@
           "service_id": "docker_runtime",
           "kind": "static",
           "source": "service_topology",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -1216,13 +1216,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1258,7 +1258,7 @@
       "notes": null
     },
     {
-      "fqdn": "docs.lv3.org",
+      "fqdn": "docs.example.com",
       "service_id": "docs_portal",
       "environment": "production",
       "status": "active",
@@ -1277,7 +1277,7 @@
           "service_id": "docs_portal",
           "kind": "static_dir",
           "source": "public_edge_extra_sites",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -1290,13 +1290,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1327,7 +1327,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "draw.lv3.org",
+      "fqdn": "draw.example.com",
       "service_id": "excalidraw",
       "environment": "production",
       "status": "active",
@@ -1359,13 +1359,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1404,7 +1404,7 @@
       "notes": "Private Excalidraw publication for repo-generated architecture scenes through the shared authenticated NGINX edge."
     },
     {
-      "fqdn": "errors.lv3.org",
+      "fqdn": "errors.example.com",
       "service_id": "glitchtip",
       "environment": "production",
       "status": "active",
@@ -1436,13 +1436,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1476,7 +1476,7 @@
       "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Keycloak OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
     },
     {
-      "fqdn": "flags.lv3.org",
+      "fqdn": "flags.example.com",
       "service_id": "flagsmith",
       "environment": "production",
       "status": "active",
@@ -1508,13 +1508,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1550,7 +1550,7 @@
       "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Keycloak."
     },
     {
-      "fqdn": "git.lv3.org",
+      "fqdn": "git.example.com",
       "service_id": "gitea",
       "environment": "production",
       "status": "active",
@@ -1616,7 +1616,7 @@
       "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime."
     },
     {
-      "fqdn": "grafana.lv3.org",
+      "fqdn": "grafana.example.com",
       "service_id": "grafana",
       "environment": "production",
       "status": "active",
@@ -1648,13 +1648,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1698,7 +1698,7 @@
       "notes": null
     },
     {
-      "fqdn": "grafana.staging.lv3.org",
+      "fqdn": "grafana.staging.example.com",
       "service_id": "grafana",
       "environment": "staging",
       "status": "planned",
@@ -1717,7 +1717,7 @@
           "service_id": "grafana",
           "kind": "dns-only",
           "source": "dns-only",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -1730,13 +1730,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1765,7 +1765,7 @@
       "notes": "Planned staging hostname on the shared NGINX edge."
     },
     {
-      "fqdn": "grist.lv3.org",
+      "fqdn": "grist.example.com",
       "service_id": "grist",
       "environment": "production",
       "status": "active",
@@ -1797,13 +1797,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1837,7 +1837,7 @@
       "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
     },
     {
-      "fqdn": "headscale.lv3.org",
+      "fqdn": "headscale.example.com",
       "service_id": "headscale",
       "environment": "production",
       "status": "active",
@@ -1869,13 +1869,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1908,7 +1908,7 @@
       "notes": "Published through the shared NGINX edge and proxied to the Proxmox host Headscale listener on 10.10.10.1:8080."
     },
     {
-      "fqdn": "home.lv3.org",
+      "fqdn": "home.example.com",
       "service_id": "homepage",
       "environment": "production",
       "status": "active",
@@ -1940,13 +1940,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1979,7 +1979,7 @@
       "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "langfuse.lv3.org",
+      "fqdn": "langfuse.example.com",
       "service_id": "langfuse",
       "environment": "production",
       "status": "active",
@@ -2011,13 +2011,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2053,7 +2053,7 @@
       "notes": null
     },
     {
-      "fqdn": "livekit.lv3.org",
+      "fqdn": "livekit.example.com",
       "service_id": "livekit",
       "environment": "production",
       "status": "active",
@@ -2085,13 +2085,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2124,10 +2124,10 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The shared NGINX edge proxies signalling at https://livekit.lv3.org while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime for WebRTC media."
+      "notes": "The shared NGINX edge proxies signalling at https://livekit.example.com while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime for WebRTC media."
     },
     {
-      "fqdn": "logs.lv3.org",
+      "fqdn": "logs.example.com",
       "service_id": "dozzle",
       "environment": "production",
       "status": "active",
@@ -2159,13 +2159,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2199,7 +2199,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "lv3.org",
+      "fqdn": "example.com",
       "service_id": "nginx_edge",
       "environment": "production",
       "status": "active",
@@ -2218,7 +2218,7 @@
           "service_id": "nginx_edge",
           "kind": "redirect",
           "source": "public_edge_apex",
-          "target": "nginx.lv3.org",
+          "target": "nginx.example.com",
           "target_port": 443
         }
       },
@@ -2231,13 +2231,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2256,7 +2256,7 @@
         },
         "repo_route_service_id": "nginx_edge",
         "repo_route_metadata": {
-          "redirect_target_hostname": "nginx.lv3.org"
+          "redirect_target_hostname": "nginx.example.com"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -2268,7 +2268,7 @@
       "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
     },
     {
-      "fqdn": "mail.lv3.org",
+      "fqdn": "mail.example.com",
       "service_id": "mail_platform",
       "environment": "production",
       "status": "active",
@@ -2287,7 +2287,7 @@
           "service_id": "mail_platform",
           "kind": "static",
           "source": "service_topology",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -2300,13 +2300,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2342,7 +2342,7 @@
       "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
     },
     {
-      "fqdn": "matrix.lv3.org",
+      "fqdn": "matrix.example.com",
       "service_id": "matrix_synapse",
       "environment": "production",
       "status": "active",
@@ -2374,13 +2374,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2414,7 +2414,7 @@
       "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
     },
     {
-      "fqdn": "minio-console.lv3.org",
+      "fqdn": "minio-console.example.com",
       "service_id": "minio",
       "environment": "production",
       "status": "active",
@@ -2446,13 +2446,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2490,7 +2490,7 @@
       "notes": "The MinIO browser console is published through the shared authenticated edge path and proxied to the docker-runtime guest listener on port 9011."
     },
     {
-      "fqdn": "minio.lv3.org",
+      "fqdn": "minio.example.com",
       "service_id": "minio",
       "environment": "production",
       "status": "active",
@@ -2522,13 +2522,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2569,7 +2569,7 @@
       "notes": "The public MinIO S3-compatible API is published through the shared NGINX edge and proxies to the docker-runtime guest listener on port 9010."
     },
     {
-      "fqdn": "n8n.lv3.org",
+      "fqdn": "n8n.example.com",
       "service_id": "n8n",
       "environment": "production",
       "status": "active",
@@ -2601,13 +2601,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2646,7 +2646,7 @@
       "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
     },
     {
-      "fqdn": "nginx.lv3.org",
+      "fqdn": "nginx.example.com",
       "service_id": "nginx_edge",
       "environment": "production",
       "status": "active",
@@ -2665,7 +2665,7 @@
           "service_id": "nginx_edge",
           "kind": "static",
           "source": "service_topology",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -2678,13 +2678,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2707,7 +2707,7 @@
           "tls": true,
           "slug": "nginx",
           "title": "LV3 Edge",
-          "description": "NGINX is the public edge for published lv3.org services on this platform.",
+          "description": "NGINX is the public edge for published example.com services on this platform.",
           "meta": "Use the named subdomains for the actual service entry points exposed at the edge."
         },
         "tls": {
@@ -2720,7 +2720,7 @@
       "notes": null
     },
     {
-      "fqdn": "ntfy.lv3.org",
+      "fqdn": "ntfy.example.com",
       "service_id": "ntfy",
       "environment": "production",
       "status": "active",
@@ -2752,13 +2752,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2795,7 +2795,7 @@
       "notes": "Published through the shared NGINX edge; ntfy itself enforces repo-managed topic authentication for governed operator push delivery."
     },
     {
-      "fqdn": "ops.lv3.org",
+      "fqdn": "ops.example.com",
       "service_id": "ops_portal",
       "environment": "production",
       "status": "active",
@@ -2827,13 +2827,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2870,7 +2870,7 @@
       "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
     },
     {
-      "fqdn": "ops.staging.lv3.org",
+      "fqdn": "ops.staging.example.com",
       "service_id": "ops_portal",
       "environment": "staging",
       "status": "planned",
@@ -2889,7 +2889,7 @@
           "service_id": "ops_portal",
           "kind": "dns-only",
           "source": "dns-only",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -2902,13 +2902,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -2937,7 +2937,7 @@
       "notes": "Planned staging portal generated from the canonical service and environment catalogs."
     },
     {
-      "fqdn": "paperless.lv3.org",
+      "fqdn": "paperless.example.com",
       "service_id": "paperless",
       "environment": "production",
       "status": "active",
@@ -2969,13 +2969,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3012,10 +3012,10 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge; docs.lv3.org remains reserved for the developer portal from ADR 0094."
+      "notes": "Published through the shared NGINX edge; docs.example.com remains reserved for the developer portal from ADR 0094."
     },
     {
-      "fqdn": "proxmox.lv3.org",
+      "fqdn": "proxmox.example.com",
       "service_id": "proxmox_ui",
       "environment": "production",
       "status": "active",
@@ -3034,7 +3034,7 @@
           "service_id": "proxmox_ui",
           "kind": "static",
           "source": "service_topology",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -3047,13 +3047,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3091,7 +3091,7 @@
       "notes": null
     },
     {
-      "fqdn": "registry.lv3.org",
+      "fqdn": "registry.example.com",
       "service_id": "harbor",
       "environment": "production",
       "status": "active",
@@ -3123,13 +3123,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3167,7 +3167,7 @@
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
     },
     {
-      "fqdn": "repowise.lv3.org",
+      "fqdn": "repowise.example.com",
       "service_id": "repowise",
       "environment": "production",
       "status": "active",
@@ -3199,13 +3199,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3238,7 +3238,7 @@
       "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required."
     },
     {
-      "fqdn": "scheduler.lv3.org",
+      "fqdn": "scheduler.example.com",
       "service_id": "nomad",
       "environment": "production",
       "status": "active",
@@ -3270,13 +3270,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3302,7 +3302,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/scheduler.lv3.org/",
+          "cert_path": "/etc/letsencrypt/live/scheduler.example.com/",
           "auto_renew": true
         }
       },
@@ -3310,7 +3310,7 @@
       "notes": "Published through the shared NGINX edge with Nomad native OIDC auth (no oauth2-proxy)."
     },
     {
-      "fqdn": "search.lv3.org",
+      "fqdn": "search.example.com",
       "service_id": "searxng",
       "environment": "production",
       "status": "active",
@@ -3376,7 +3376,7 @@
       "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime."
     },
     {
-      "fqdn": "sso.lv3.org",
+      "fqdn": "sso.example.com",
       "service_id": "keycloak",
       "environment": "production",
       "status": "active",
@@ -3408,13 +3408,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3447,7 +3447,7 @@
       "notes": null
     },
     {
-      "fqdn": "sso.staging.lv3.org",
+      "fqdn": "sso.staging.example.com",
       "service_id": "keycloak",
       "environment": "staging",
       "status": "planned",
@@ -3466,7 +3466,7 @@
           "service_id": "keycloak",
           "kind": "dns-only",
           "source": "dns-only",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -3479,13 +3479,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3514,7 +3514,7 @@
       "notes": "Planned staging identity hostname on the shared NGINX edge."
     },
     {
-      "fqdn": "status.lv3.org",
+      "fqdn": "status.example.com",
       "service_id": "status_page",
       "environment": "production",
       "status": "active",
@@ -3546,13 +3546,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3586,7 +3586,7 @@
       "notes": null
     },
     {
-      "fqdn": "tasks.lv3.org",
+      "fqdn": "tasks.example.com",
       "service_id": "plane",
       "environment": "production",
       "status": "active",
@@ -3618,13 +3618,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3658,7 +3658,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "uptime.lv3.org",
+      "fqdn": "uptime.example.com",
       "service_id": "uptime_kuma",
       "environment": "production",
       "status": "active",
@@ -3690,13 +3690,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3729,7 +3729,7 @@
       "notes": null
     },
     {
-      "fqdn": "uptime.staging.lv3.org",
+      "fqdn": "uptime.staging.example.com",
       "service_id": "uptime_kuma",
       "environment": "staging",
       "status": "planned",
@@ -3748,7 +3748,7 @@
           "service_id": "uptime_kuma",
           "kind": "dns-only",
           "source": "dns-only",
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -3761,13 +3761,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -3796,7 +3796,7 @@
       "notes": "Planned staged monitoring hostname on the shared NGINX edge."
     },
     {
-      "fqdn": "vault.lv3.org",
+      "fqdn": "vault.example.com",
       "service_id": "vaultwarden",
       "environment": "production",
       "status": "active",
@@ -3863,7 +3863,7 @@
       "notes": "Tailnet-only HTTPS publication through the Proxmox host using an LV3 internal CA certificate."
     },
     {
-      "fqdn": "wiki.lv3.org",
+      "fqdn": "wiki.example.com",
       "service_id": "outline",
       "environment": "production",
       "status": "active",
@@ -3895,13 +3895,13 @@
       },
       "adapter": {
         "dns": {
-          "target": "65.108.75.123",
+          "target": "203.0.113.1",
           "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "65.108.75.123"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,

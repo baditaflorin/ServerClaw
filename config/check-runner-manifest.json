@@ -1,67 +1,67 @@
 {
   "lint-ansible": {
-    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "image": "registry.example.com/check-runner/ansible:2.17.10",
     "command": "ansible-lint playbooks roles",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
     "cache_mounts": ["ansible_collections"]
   },
   "lint-yaml": {
-    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "image": "registry.example.com/check-runner/ansible:2.17.10",
     "command": "find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint",
     "working_dir": "/workspace",
     "timeout_seconds": 240,
     "cache_mounts": ["ansible_collections"]
   },
   "validate-schemas": {
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/validate_repository_data_models.py --validate && python scripts/platform_manifest.py --check",
     "working_dir": "/workspace",
     "timeout_seconds": 180,
     "cache_mounts": ["pip"]
   },
   "policy-validation": {
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/policy_checks.py --validate",
     "working_dir": "/workspace",
     "timeout_seconds": 240,
     "cache_mounts": ["policy_tools"]
   },
   "type-check": {
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/run_python_with_packages.sh mypy pyyaml types-PyYAML httpx -- -m mypy scripts/parallel_check.py scripts/iac_policy_scan.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_runner_contracts.py config/windmill/scripts/check-runner-rebuild.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
     "cache_mounts": ["pip"]
   },
   "security-scan": {
-    "image": "registry.lv3.org/check-runner/security:2026.03.23",
+    "image": "registry.example.com/check-runner/security:2026.03.23",
     "command": "trivy fs --timeout 15m --skip-dirs .git --skip-dirs .worktrees --exit-code 1 --severity HIGH,CRITICAL .",
     "working_dir": "/workspace",
     "timeout_seconds": 240
   },
   "semgrep-sast": {
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python -m pip install --quiet --disable-pip-version-check semgrep==1.155.0 && ./scripts/validate_repo.sh semgrep",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
     "cache_mounts": ["pip"]
   },
   "iac-policy-scan": {
-    "image": "registry.lv3.org/check-runner/security:2026.03.23",
+    "image": "registry.example.com/check-runner/security:2026.03.23",
     "command": "python3 scripts/iac_policy_scan.py",
     "working_dir": "/workspace",
     "timeout_seconds": 300
   },
   "tofu-validate": {
-    "image": "registry.lv3.org/check-runner/infra:2026.03.23",
+    "image": "registry.example.com/check-runner/infra:2026.03.23",
     "command": "if [ -d tofu ]; then tofu -chdir=tofu/environments/production init -backend=false -input=false >/dev/null && tofu -chdir=tofu/environments/production validate && tofu -chdir=tofu/environments/staging init -backend=false -input=false >/dev/null && tofu -chdir=tofu/environments/staging validate; else echo 'No tofu configuration present'; fi",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
     "cache_mounts": ["packer_plugins"]
   },
   "packer-validate": {
-    "image": "registry.lv3.org/check-runner/infra:2026.03.23",
+    "image": "registry.example.com/check-runner/infra:2026.03.23",
     "command": "if [ -d packer ] && find packer -name '*.pkr.hcl' -print -quit | grep -q .; then packer validate packer; else echo 'No packer templates present'; fi",
     "working_dir": "/workspace",
     "timeout_seconds": 300,

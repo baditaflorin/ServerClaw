@@ -12,7 +12,7 @@ module "nginx_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                  = "nginx"
-  description           = "nginx VM for lv3.org platform"
+  description           = "nginx VM for example.com platform"
   node_name             = var.node_name
   vm_id                 = 110
   template_node_name    = var.template_node_name
@@ -39,7 +39,7 @@ module "docker_runtime_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "docker-runtime"
-  description             = "docker-runtime VM for lv3.org platform"
+  description             = "docker-runtime VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 120
   template_node_name      = var.template_node_name
@@ -66,7 +66,7 @@ module "docker_build_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "docker-build"
-  description             = "docker-build VM for lv3.org platform"
+  description             = "docker-build VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 130
   template_node_name      = var.template_node_name
@@ -93,7 +93,7 @@ module "monitoring_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "monitoring"
-  description             = "monitoring VM for lv3.org platform"
+  description             = "monitoring VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 140
   template_node_name      = var.template_node_name
@@ -120,7 +120,7 @@ module "postgres_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "postgres"
-  description             = "postgres VM for lv3.org platform"
+  description             = "postgres VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 150
   template_node_name      = var.template_node_name
@@ -147,7 +147,7 @@ module "postgres_replica_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "postgres-replica"
-  description             = "postgres replica VM for lv3.org platform"
+  description             = "postgres replica VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 151
   template_node_name      = var.template_node_name
@@ -174,7 +174,7 @@ module "backup_lv3" {
   source = "../../modules/proxmox-vm"
 
   name                    = "backup"
-  description             = "backup VM for lv3.org platform"
+  description             = "backup VM for example.com platform"
   node_name               = var.node_name
   vm_id                   = 160
   template_node_name      = var.template_node_name

@@ -3,14 +3,14 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.109",
   "platform_version": "0.178.77",
-  "generated_at": "2026-04-11T15:34:46Z",
-  "next_refresh_at": "2026-04-11T16:34:46Z",
+  "generated_at": "2026-04-11T17:02:43Z",
+  "next_refresh_at": "2026-04-11T18:02:43Z",
   "environment": "production",
   "identity": {
-    "platform_name": "lv3.org",
-    "operator": "Florin Badita-Nistor",
+    "platform_name": "example.com",
+    "operator": "Platform Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
-    "host_id": "proxmox_florin",
+    "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
   },
   "health": {
@@ -36,7 +36,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://api.lv3.org",
+        "primary_url": "https://api.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "backup_pbs": {
@@ -82,7 +82,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://changelog.lv3.org",
+        "primary_url": "https://changelog.example.com",
         "last_live_apply": "2026-04-07T00:00:00Z"
       },
       "coolify": {
@@ -93,7 +93,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://coolify.lv3.org",
+        "primary_url": "https://coolify.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "coolify_apps": {
@@ -104,7 +104,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://apps.lv3.org",
+        "primary_url": "https://apps.example.com",
         "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "crawl4ai": {
@@ -127,7 +127,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://agents.lv3.org",
+        "primary_url": "https://agents.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
       "directus": {
@@ -138,7 +138,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://data.lv3.org",
+        "primary_url": "https://data.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -150,7 +150,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://build.lv3.org",
+        "primary_url": "https://build.example.com",
         "last_live_apply": "2026-04-08T00:00:00Z"
       },
       "docker_runtime": {
@@ -161,7 +161,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://docker.lv3.org",
+        "primary_url": "https://docker.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "docs_portal": {
@@ -172,7 +172,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://docs.lv3.org",
+        "primary_url": "https://docs.example.com",
         "last_live_apply": "2026-04-07T00:00:00Z"
       },
       "dozzle": {
@@ -183,7 +183,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://logs.lv3.org",
+        "primary_url": "https://logs.example.com",
         "last_live_apply": "2026-04-08T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -195,7 +195,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://draw.lv3.org",
+        "primary_url": "https://draw.example.com",
         "last_live_apply": "2026-04-08T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -207,7 +207,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://flags.lv3.org",
+        "primary_url": "https://flags.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
       "gitea": {
@@ -230,7 +230,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://errors.lv3.org",
+        "primary_url": "https://errors.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -254,7 +254,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://grafana.lv3.org",
+        "primary_url": "https://grafana.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -266,7 +266,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://grist.lv3.org",
+        "primary_url": "https://grist.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -278,7 +278,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://registry.lv3.org",
+        "primary_url": "https://registry.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -290,8 +290,8 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://headscale.lv3.org",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "primary_url": "https://headscale.example.com",
+        "last_live_apply": "2026-04-04T00:00:00Z"
       },
       "homepage": {
         "service_name": "Homepage",
@@ -301,7 +301,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://home.lv3.org",
+        "primary_url": "https://home.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -313,7 +313,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://sso.lv3.org",
+        "primary_url": "https://sso.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -325,7 +325,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://annotate.lv3.org",
+        "primary_url": "https://annotate.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -337,7 +337,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://billing.lv3.org",
+        "primary_url": "https://billing.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
       "langfuse": {
@@ -348,7 +348,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://langfuse.lv3.org",
+        "primary_url": "https://langfuse.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -360,7 +360,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://chat.lv3.org",
+        "primary_url": "https://chat.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "litellm": {
@@ -382,7 +382,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://livekit.lv3.org",
+        "primary_url": "https://livekit.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z"
       },
       "mail_platform": {
@@ -393,7 +393,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://mail.lv3.org",
+        "primary_url": "https://mail.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "mailpit": {
@@ -416,7 +416,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://matrix.lv3.org",
+        "primary_url": "https://matrix.example.com",
         "last_live_apply": "2026-04-07T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -439,7 +439,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://minio.lv3.org",
+        "primary_url": "https://minio.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -451,7 +451,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://n8n.lv3.org",
+        "primary_url": "https://n8n.example.com",
         "last_live_apply": "2026-04-07T00:00:00Z"
       },
       "nats_jetstream": {
@@ -473,7 +473,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://browser.lv3.org",
+        "primary_url": "https://browser.example.com",
         "last_live_apply": "2026-04-04T00:00:00Z"
       },
       "netbox": {
@@ -496,7 +496,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://cloud.lv3.org",
+        "primary_url": "https://cloud.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -508,7 +508,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://nginx.lv3.org",
+        "primary_url": "https://nginx.example.com",
         "last_live_apply": "2026-04-07T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -520,7 +520,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://scheduler.lv3.org",
+        "primary_url": "https://scheduler.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "ntfy": {
@@ -531,7 +531,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://ntfy.lv3.org",
+        "primary_url": "https://ntfy.example.com",
         "last_live_apply": "2026-04-08T00:00:00Z"
       },
       "ntopng": {
@@ -543,7 +543,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-04-05T00:00:00Z"
+        "last_live_apply": "2026-04-04T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -587,7 +587,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://ops.lv3.org",
+        "primary_url": "https://ops.example.com",
         "last_live_apply": "2026-04-06T00:00:00Z"
       },
       "outline": {
@@ -598,7 +598,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://wiki.lv3.org",
+        "primary_url": "https://wiki.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -610,7 +610,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://paperless.lv3.org",
+        "primary_url": "https://paperless.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -634,7 +634,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://tasks.lv3.org",
+        "primary_url": "https://tasks.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -658,7 +658,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://analytics.lv3.org",
+        "primary_url": "https://analytics.example.com",
         "last_live_apply": "2026-04-05T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -681,7 +681,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "postgres://database.lv3.org:5432",
+        "primary_url": "postgres://database.example.com:5432",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "proxmox_ui": {
@@ -692,7 +692,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://proxmox.lv3.org",
+        "primary_url": "https://proxmox.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "redpanda": {
@@ -714,7 +714,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://repowise.lv3.org",
+        "primary_url": "https://repowise.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "searxng": {
@@ -725,7 +725,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "http://search.lv3.org",
+        "primary_url": "http://search.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z"
       },
       "semaphore": {
@@ -748,7 +748,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://chat.lv3.org",
+        "primary_url": "https://chat.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -760,7 +760,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://status.lv3.org",
+        "primary_url": "https://status.example.com",
         "last_live_apply": "2026-04-07T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -783,7 +783,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://bi.lv3.org",
+        "primary_url": "https://bi.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -842,7 +842,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://uptime.lv3.org",
+        "primary_url": "https://uptime.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -854,7 +854,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://vault.lv3.org",
+        "primary_url": "https://vault.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -878,7 +878,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "https://ci.lv3.org",
+        "primary_url": "https://ci.example.com",
         "last_live_apply": "2026-04-10T00:00:00Z",
         "slo_status": "unknown"
       }
@@ -1180,7 +1180,7 @@
       },
       {
         "id": "configure-host-control-loops",
-        "description": "Install the ADR 0226 host-resident control-loop baseline on proxmox_florin, including the managed systemd service, timer, path unit, and verification state paths.",
+        "description": "Install the ADR 0226 host-resident control-loop baseline on proxmox-host, including the managed systemd service, timer, path unit, and verification state paths.",
         "tags": [
           "configure-host-control-loops",
           "host-live",
@@ -1310,7 +1310,7 @@
       },
       {
         "id": "converge-api-gateway",
-        "description": "Converge the unified platform API gateway on docker-runtime and publish it at api.lv3.org through the shared NGINX edge.",
+        "description": "Converge the unified platform API gateway on docker-runtime and publish it at api.example.com through the shared NGINX edge.",
         "tags": [
           "converge-api-gateway",
           "guest-live",
@@ -1465,7 +1465,7 @@
       },
       {
         "id": "converge-dify",
-        "description": "Converge Dify on docker-runtime, provision its PostgreSQL backend on postgres, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
+        "description": "Converge Dify on docker-runtime, provision its PostgreSQL backend on postgres, publish it at agents.example.com, and verify the governed tool-sync and workflow export path.",
         "tags": [
           "converge-dify",
           "guest-live",
@@ -1569,7 +1569,7 @@
       },
       {
         "id": "converge-dozzle",
-        "description": "Deploy the Dozzle hub on docker-runtime, join remote log agents from docker-build and monitoring, and publish logs.lv3.org through the shared authenticated edge.",
+        "description": "Deploy the Dozzle hub on docker-runtime, join remote log agents from docker-build and monitoring, and publish logs.example.com through the shared authenticated edge.",
         "tags": [
           "converge-dozzle",
           "guest-live",
@@ -1595,7 +1595,7 @@
       },
       {
         "id": "converge-excalidraw",
-        "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime and publish draw.lv3.org through the shared authenticated edge.",
+        "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime and publish draw.example.com through the shared authenticated edge.",
         "tags": [
           "converge-excalidraw",
           "guest-live",
@@ -1647,7 +1647,7 @@
       },
       {
         "id": "converge-flagsmith",
-        "description": "Converge Flagsmith on docker-runtime, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
+        "description": "Converge Flagsmith on docker-runtime, prepare the shared PostgreSQL backing database, publish flags.example.com through the shared edge, and verify seeded feature state plus environment keys.",
         "tags": [
           "converge-flagsmith",
           "guest-live",
@@ -1699,7 +1699,7 @@
       },
       {
         "id": "converge-glitchtip",
-        "description": "Converge GlitchTip on docker-runtime, provision its PostgreSQL backend on postgres, publish it at errors.lv3.org, and verify public DSN ingestion end to end.",
+        "description": "Converge GlitchTip on docker-runtime, provision its PostgreSQL backend on postgres, publish it at errors.example.com, and verify public DSN ingestion end to end.",
         "tags": [
           "converge-glitchtip",
           "guest-live",
@@ -1777,7 +1777,7 @@
       },
       {
         "id": "converge-harbor",
-        "description": "Converge Harbor on docker-runtime, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
+        "description": "Converge Harbor on docker-runtime, publish it at registry.example.com through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
         "tags": [
           "converge-harbor",
           "guest-live",
@@ -1803,7 +1803,7 @@
       },
       {
         "id": "converge-headscale",
-        "description": "Deploy the repo-managed Headscale control plane on the Proxmox host, publish it through the shared NGINX edge, and reconcile the public DNS record for headscale.lv3.org.",
+        "description": "Deploy the repo-managed Headscale control plane on the Proxmox host, publish it through the shared NGINX edge, and reconcile the public DNS record for headscale.example.com.",
         "tags": [
           "converge-headscale",
           "host-and-guest-live",
@@ -1829,7 +1829,7 @@
       },
       {
         "id": "converge-homepage",
-        "description": "Deploy the Homepage unified service dashboard on runtime-general and publish it at home.lv3.org through the shared authenticated edge.",
+        "description": "Deploy the Homepage unified service dashboard on runtime-general and publish it at home.example.com through the shared authenticated edge.",
         "tags": [
           "converge-homepage",
           "guest-live",
@@ -1881,7 +1881,7 @@
       },
       {
         "id": "converge-keycloak",
-        "description": "Converge Keycloak on docker-runtime, provision its PostgreSQL backend on postgres, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
+        "description": "Converge Keycloak on docker-runtime, provision its PostgreSQL backend on postgres, publish it at sso.example.com, and wire Grafana through the shared SSO broker.",
         "tags": [
           "converge-keycloak",
           "guest-live",
@@ -1907,7 +1907,7 @@
       },
       {
         "id": "converge-label-studio",
-        "description": "Converge Label Studio on docker-runtime, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
+        "description": "Converge Label Studio on docker-runtime, prepare the shared PostgreSQL backing database, publish annotate.example.com through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
         "tags": [
           "converge-label-studio",
           "guest-live",
@@ -1933,7 +1933,7 @@
       },
       {
         "id": "converge-lago",
-        "description": "Converge Lago on docker-runtime, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
+        "description": "Converge Lago on docker-runtime, prepare the shared PostgreSQL backing database, publish billing.example.com through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
         "tags": [
           "converge-lago",
           "guest-live",
@@ -1959,7 +1959,7 @@
       },
       {
         "id": "converge-langfuse",
-        "description": "Converge Langfuse on docker-runtime, provision its PostgreSQL backend on postgres, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
+        "description": "Converge Langfuse on docker-runtime, provision its PostgreSQL backend on postgres, publish it at langfuse.example.com, and verify repo-managed trace ingestion.",
         "tags": [
           "converge-langfuse",
           "guest-live",
@@ -1985,7 +1985,7 @@
       },
       {
         "id": "converge-librechat",
-        "description": "Deploy LibreChat on coolify, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge.",
+        "description": "Deploy LibreChat on coolify, reconcile Keycloak OIDC client, and publish chat.example.com through the shared edge.",
         "tags": [
           "converge-librechat",
           "host-and-guest-live",
@@ -2037,7 +2037,7 @@
       },
       {
         "id": "converge-livekit",
-        "description": "Converge LiveKit on docker-runtime, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
+        "description": "Converge LiveKit on docker-runtime, program Proxmox public TCP and UDP media forwarding, and publish livekit.example.com through the shared NGINX edge.",
         "tags": [
           "converge-livekit",
           "host-and-guest-live",
@@ -2115,7 +2115,7 @@
       },
       {
         "id": "converge-matrix-synapse",
-        "description": "Converge Matrix Synapse on docker-runtime, provision its PostgreSQL backend plus bridge databases on postgres, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
+        "description": "Converge Matrix Synapse on docker-runtime, provision its PostgreSQL backend plus bridge databases on postgres, publish matrix.example.com through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
         "tags": [
           "converge-matrix-synapse",
           "host-and-guest-live",
@@ -2219,7 +2219,7 @@
       },
       {
         "id": "converge-n8n",
-        "description": "Converge the n8n connector fabric on docker-runtime, provision its PostgreSQL backend on postgres, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
+        "description": "Converge the n8n connector fabric on docker-runtime, provision its PostgreSQL backend on postgres, and publish it at n8n.example.com with a protected editor path and public webhook ingress for ServerClaw adapters.",
         "tags": [
           "converge-n8n",
           "guest-live",
@@ -2245,7 +2245,7 @@
       },
       {
         "id": "converge-neko",
-        "description": "Converge Neko remote desktop on dedicated runtime-comms VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
+        "description": "Converge Neko remote desktop on dedicated runtime-comms VM, program Proxmox public TCP and UDP media forwarding, and publish browser.example.com for interactive operator browser access (ADR 0380).",
         "tags": [
           "converge-neko",
           "host-and-guest-live",
@@ -2297,7 +2297,7 @@
       },
       {
         "id": "converge-nextcloud",
-        "description": "Converge Nextcloud on docker-runtime, provision its PostgreSQL backend on postgres, and publish cloud.lv3.org with DAV redirects and large-upload support.",
+        "description": "Converge Nextcloud on docker-runtime, provision its PostgreSQL backend on postgres, and publish cloud.example.com with DAV redirects and large-upload support.",
         "tags": [
           "converge-nextcloud",
           "guest-live",
@@ -2349,7 +2349,7 @@
       },
       {
         "id": "converge-ntfy",
-        "description": "Deploy the published ntfy push channel on docker-runtime, publish ntfy.lv3.org through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
+        "description": "Deploy the published ntfy push channel on docker-runtime, publish ntfy.example.com through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
         "tags": [
           "converge-ntfy",
           "guest-live",
@@ -2557,7 +2557,7 @@
       },
       {
         "id": "converge-plane",
-        "description": "Converge Plane on docker-runtime, provision its PostgreSQL backend on postgres, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
+        "description": "Converge Plane on docker-runtime, provision its PostgreSQL backend on postgres, publish it at tasks.example.com, and verify the repo-managed ADR synchronization path.",
         "tags": [
           "converge-plane",
           "guest-live",
@@ -2583,7 +2583,7 @@
       },
       {
         "id": "converge-plausible",
-        "description": "Converge Plausible on docker-runtime, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
+        "description": "Converge Plausible on docker-runtime, publish analytics.example.com through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
         "tags": [
           "converge-plausible",
           "guest-live",
@@ -2791,7 +2791,7 @@
       },
       {
         "id": "converge-serverclaw",
-        "description": "Deploy the first public ServerClaw surface on coolify, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
+        "description": "Deploy the first public ServerClaw surface on coolify, reconcile its dedicated Keycloak client, and publish chat.example.com through the shared edge.",
         "tags": [
           "converge-serverclaw",
           "host-and-guest-live",
@@ -3025,7 +3025,7 @@
       },
       {
         "id": "converge-woodpecker",
-        "description": "Converge Woodpecker on docker-runtime, provision its PostgreSQL backend on postgres, publish ci.lv3.org through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
+        "description": "Converge Woodpecker on docker-runtime, provision its PostgreSQL backend on postgres, publish ci.example.com through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
         "tags": [
           "converge-woodpecker",
           "host-and-guest-live",
@@ -3077,7 +3077,7 @@
       },
       {
         "id": "database-dns",
-        "description": "Publish the current private database.lv3.org DNS record toward the Proxmox host Tailscale proxy while the PostgreSQL HA VIP remains unapplied live.",
+        "description": "Publish the current private database.example.com DNS record toward the Proxmox host Tailscale proxy while the PostgreSQL HA VIP remains unapplied live.",
         "tags": [
           "database-dns",
           "external-live",
@@ -3155,7 +3155,7 @@
       },
       {
         "id": "deploy-uptime-kuma",
-        "description": "Deploy Uptime Kuma on the runtime-general VM and publish it at uptime.lv3.org.",
+        "description": "Deploy Uptime Kuma on the runtime-general VM and publish it at uptime.example.com.",
         "tags": [
           "deploy-uptime-kuma",
           "host-and-guest-live",
@@ -4070,7 +4070,7 @@
       },
       {
         "id": "provision-subdomain",
-        "description": "Converge one catalogued lv3.org hostname through the Hetzner DNS role and, when applicable, refresh the shared NGINX edge publication.",
+        "description": "Converge one catalogued example.com hostname through the Hetzner DNS role and, when applicable, refresh the shared NGINX edge publication.",
         "tags": [
           "external-live",
           "mutation",
@@ -4146,7 +4146,7 @@
       },
       {
         "id": "refresh-discovery-surfaces",
-        "description": "Refresh all operator-facing discovery surfaces (home.lv3.org, ops.lv3.org, wiki.lv3.org) to sync with current service catalog and ADR corpus. Cascade entry point after service deployments.",
+        "description": "Refresh all operator-facing discovery surfaces (home.example.com, ops.example.com, wiki.example.com) to sync with current service catalog and ADR corpus. Cascade entry point after service deployments.",
         "tags": [
           "guest-live",
           "mutation",
@@ -6140,7 +6140,7 @@
           "selected_product": "Keycloak",
           "service_id": "keycloak",
           "service_name": "Keycloak",
-          "service_url": "https://sso.lv3.org",
+          "service_url": "https://sso.example.com",
           "selection_adr": "0056",
           "runbook": "docs/runbooks/configure-keycloak.md",
           "selection_notes": "Selected for repo-managed OIDC, MFA, and group-aware operator login across shared edge and private surfaces.",
@@ -6158,7 +6158,7 @@
           "selected_product": "Headscale",
           "service_id": "headscale",
           "service_name": "Headscale",
-          "service_url": "https://headscale.lv3.org",
+          "service_url": "https://headscale.example.com",
           "selection_adr": "0144",
           "runbook": "docs/runbooks/configure-headscale.md",
           "selection_notes": "Selected for self-hosted mesh coordination and controlled subnet routing into the private guest network.",
@@ -6176,7 +6176,7 @@
           "selected_product": "Nextcloud",
           "service_id": "nextcloud",
           "service_name": "Nextcloud",
-          "service_url": "https://cloud.lv3.org",
+          "service_url": "https://cloud.example.com",
           "selection_adr": "0260",
           "runbook": "docs/runbooks/configure-nextcloud.md",
           "selection_notes": "Selected for self-hosted standards-based personal file and DAV data management with repo-managed runtime automation.",
@@ -6275,7 +6275,7 @@
   "recent_changes": {
     "last_version": "0.178.108",
     "deployed_at": "2026-04-11",
-    "summary": "[adr-0408] Remove -lv3 suffix from 24 inventory hostnames \u2014 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config [adr-0407] DRY round 2: Centralize WINDMILL_WORKSPACE, GITHUB_REPO_BASE_URL, and remaining TOPOLOGY_HOST \u2014 3 new env-overridable constants in platform/repo.py; Windmill workspace, GitHub URL, and 20+ more \"proxmox_florin\" literals consolidated; only 4 intentional references remain across entire Python codebase",
+    "summary": "[adr-0408] Remove -lv3 suffix from 24 inventory hostnames \u2014 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config [adr-0407] DRY round 2: Centralize WINDMILL_WORKSPACE, GITHUB_REPO_BASE_URL, and remaining TOPOLOGY_HOST \u2014 3 new env-overridable constants in platform/repo.py; Windmill workspace, GitHub URL, and 20+ more \"proxmox-host\" literals consolidated; only 4 intentional references remain across entire Python codebase",
     "release_notes_url": "docs/release-notes/0.178.109.md"
   },
   "agentic_architecture": {
@@ -6288,17 +6288,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.lv3.org",
+        "endpoint": "https://ops.example.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.lv3.org",
+        "endpoint": "https://windmill.example.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.lv3.org",
+        "endpoint": "https://api.example.com",
         "adr": "0092"
       }
     ],

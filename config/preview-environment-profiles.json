@@ -1,7 +1,7 @@
 {
   "$schema": "docs/schema/preview-environment-profiles.schema.json",
   "schema_version": "1.0.0",
-  "default_base_domain": "preview.lv3.org",
+  "default_base_domain": "preview.example.com",
   "default_ephemeral_policy": "integration-test",
   "network_pool": {
     "bridge": "vmbr20",

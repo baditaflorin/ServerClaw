@@ -10,11 +10,11 @@ Usage:
     python3 scripts/provision_operator.py \
         --id matei-busui-tmp-001 \
         --name "Matei Busui" \
-        --email busui.matei1994@gmail.com \
+        --email operator@example.com \
         --username matei.busui-tmp \
         --role admin \
         --expires 2026-04-08T00:00:00Z \
-        --requester florin@badita.org \
+        --requester operator@example.com \
         [--dry-run] [--skip-email]
 
 What it does:

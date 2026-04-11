@@ -34,11 +34,11 @@ PORTALS: dict[str, dict[str, str]] = {
         "check_path": "/",
     },
     "docs": {
-        "url": "https://docs.lv3.org",
+        "url": "https://docs.example.com",
         "check_path": "/",
     },
     "changelog": {
-        "url": "https://changelog.lv3.org",
+        "url": "https://changelog.example.com",
         "check_path": "/",
     },
 }

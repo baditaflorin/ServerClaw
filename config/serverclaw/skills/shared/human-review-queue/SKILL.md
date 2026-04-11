@@ -24,7 +24,7 @@ Call `submit-human-review-task` with:
 - `reason`: Why human review is needed (uncertainty, consequence, policy edge)
 - `urgency`: `low` | `normal` | `high`
 
-The task will appear in the Label Studio annotation queue at https://annotate.lv3.org under the "Langfuse Trace Review" project. A human operator will label it as `accept`, `reject`, or `needs_follow_up`.
+The task will appear in the Label Studio annotation queue at https://annotate.example.com under the "Langfuse Trace Review" project. A human operator will label it as `accept`, `reject`, or `needs_follow_up`.
 
 ## When NOT to use this skill
 

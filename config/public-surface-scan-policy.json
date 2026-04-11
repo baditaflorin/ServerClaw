@@ -54,7 +54,7 @@
     }
   ],
   "auth_redirect": {
-    "expected_host": "sso.lv3.org",
+    "expected_host": "sso.example.com",
     "forbidden_headers": [
       "X-Auth-Request-User"
     ],
@@ -77,7 +77,7 @@
     "server_requires_version_pattern": true
   },
   "nuclei": {
-    "target": "https://lv3.org",
+    "target": "https://example.com",
     "tags": [
       "redirect",
       "misconfig"

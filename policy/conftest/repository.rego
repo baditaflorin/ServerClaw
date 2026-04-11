@@ -3,7 +3,7 @@ package main
 import rego.v1
 
 trusted_runner_prefixes := [
-  "registry.lv3.org/check-runner/",
+  "registry.example.com/check-runner/",
 ]
 
 trusted_image(image) if {

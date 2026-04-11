@@ -14,7 +14,7 @@ REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[1]
 # The Ansible inventory hostname of the hypervisor / topology host.
 # Used by 25+ scripts that read host_vars for topology data.
 # ADR 0407: centralized here to keep the deployment-specific name in one place.
-TOPOLOGY_HOST: Final[str] = "proxmox_florin"
+TOPOLOGY_HOST: Final[str] = "proxmox-host"
 TOPOLOGY_HOST_VARS_PATH: Final[Path] = REPO_ROOT / "inventory" / "host_vars" / f"{TOPOLOGY_HOST}.yml"
 # ADR 0407: Windmill workspace name — matches windmill_workspace_id in role defaults.
 WINDMILL_WORKSPACE: Final[str] = os.environ.get("WINDMILL_WORKSPACE", "lv3")

@@ -2,7 +2,7 @@ schema_version: 1.0.0
 lanes:
   - lane_id: lane:proxmox-host
     vm_id: null
-    hostname: proxmox_florin
+    hostname: proxmox-host
     services:
       - proxmox_ui
       - ntopng

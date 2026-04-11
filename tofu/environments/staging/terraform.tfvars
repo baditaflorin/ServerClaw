@@ -1,9 +1,9 @@
-node_name               = "Debian-trixie-latest-amd64-base"
-template_node_name      = "Debian-trixie-latest-amd64-base"
+node_name               = "debian-base-template"
+template_node_name      = "debian-base-template"
 template_vmid           = 9000
 datastore_id            = "local"
 cloud_init_datastore_id = "local"
 bridge                  = "vmbr20"
 nameserver              = "1.1.1.1"
-search_domain           = "staging.lv3.org"
+search_domain           = "staging.example.com"
 ci_user                 = "ops"

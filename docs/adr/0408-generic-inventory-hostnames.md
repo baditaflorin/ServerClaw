@@ -14,7 +14,7 @@ is the `-lv3` suffix on Ansible inventory hostnames.
 
 **Analysis** of the 412 files still requiring sanitization:
 - **264 files (64%)** only need sanitization because VM names end in `-lv3`
-- 22 files have domain references only (lv3.org)
+- 22 files have domain references only (example.com)
 - 19 files have both VM names + domains
 - 13 files have IPs/PII only
 
@@ -66,9 +66,9 @@ inventory-only rename — actual Proxmox VM hostnames are not affected.
 ### What Does NOT Change
 
 - Actual Proxmox VM hostnames (they keep `-lv3` on the hypervisor)
-- The `proxmox_florin` inventory hostname (stays as-is, handled by TOPOLOGY_HOST)
+- The `proxmox-host` inventory hostname (stays as-is, handled by TOPOLOGY_HOST)
 - IP addresses (unchanged)
-- Domain references (`lv3.org` — handled separately by identity.yml)
+- Domain references (`example.com` — handled separately by identity.yml)
 - `.local/` overlay files
 
 ## Consequences

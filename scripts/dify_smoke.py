@@ -91,7 +91,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Verify Dify setup, tool sync, import/export, and tracing.")
     parser.add_argument("--base-url", required=True, help="Public Dify base URL")
     parser.add_argument("--admin-email", required=True, help="Dify admin email")
-    parser.add_argument("--admin-name", default="Florin Badita", help="Dify admin name for first-time setup")
+    parser.add_argument("--admin-name", default="Platform Operator", help="Dify admin name for first-time setup")
     parser.add_argument("--admin-password-file", required=True, help="Path to the Dify admin password file")
     parser.add_argument("--init-password-file", help="Optional path to the Dify init-validation password file")
     parser.add_argument("--tools-api-key-file", help="Optional path to the Dify tools gateway API key file")

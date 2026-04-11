@@ -18,7 +18,7 @@
         "y": 0
       },
       "options": {
-        "content": "### browser-runner-availability\n\nThe private browser runner remains reachable on docker-runtime for governed Playwright session execution.\n\nService: `browser_runner`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=browser-runner-availability)",
+        "content": "### browser-runner-availability\n\nThe private browser runner remains reachable on docker-runtime for governed Playwright session execution.\n\nService: `browser_runner`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=browser-runner-availability)",
         "mode": "markdown"
       }
     },
@@ -229,7 +229,7 @@
         "y": 7
       },
       "options": {
-        "content": "### changedetection-availability\n\nThe private Changedetection.io runtime remains reachable on docker-runtime for governed upstream release, advisory, and API change monitoring.\n\nService: `changedetection`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability)",
+        "content": "### changedetection-availability\n\nThe private Changedetection.io runtime remains reachable on docker-runtime for governed upstream release, advisory, and API change monitoring.\n\nService: `changedetection`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability)",
         "mode": "markdown"
       }
     },
@@ -440,7 +440,7 @@
         "y": 14
       },
       "options": {
-        "content": "### crawl4ai-availability\n\nThe private Crawl4AI runtime remains reachable on docker-runtime for LLM-oriented Markdown extraction and bounded browser-assisted fetches.\n\nService: `crawl4ai`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability)",
+        "content": "### crawl4ai-availability\n\nThe private Crawl4AI runtime remains reachable on docker-runtime for LLM-oriented Markdown extraction and bounded browser-assisted fetches.\n\nService: `crawl4ai`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability)",
         "mode": "markdown"
       }
     },
@@ -651,7 +651,7 @@
         "y": 21
       },
       "options": {
-        "content": "### directus-availability\n\nDirectus should keep the public health contract on data.lv3.org reachable through the shared edge.\n\nService: `directus`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=directus-availability)",
+        "content": "### directus-availability\n\nDirectus should keep the public health contract on data.example.com reachable through the shared edge.\n\nService: `directus`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=directus-availability)",
         "mode": "markdown"
       }
     },
@@ -862,7 +862,7 @@
         "y": 28
       },
       "options": {
-        "content": "### dozzle-availability\n\nThe Dozzle hub remains reachable on the private runtime network for real-time container log access.\n\nService: `dozzle`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=dozzle-availability)",
+        "content": "### dozzle-availability\n\nThe Dozzle hub remains reachable on the private runtime network for real-time container log access.\n\nService: `dozzle`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=dozzle-availability)",
         "mode": "markdown"
       }
     },
@@ -1073,7 +1073,7 @@
         "y": 35
       },
       "options": {
-        "content": "### excalidraw-availability\n\nThe private Excalidraw publication remains reachable through the authenticated LV3 edge.\n\nService: `excalidraw`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=excalidraw-availability)",
+        "content": "### excalidraw-availability\n\nThe private Excalidraw publication remains reachable through the authenticated LV3 edge.\n\nService: `excalidraw`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=excalidraw-availability)",
         "mode": "markdown"
       }
     },
@@ -1284,7 +1284,7 @@
         "y": 42
       },
       "options": {
-        "content": "### gitea-availability\n\nThe private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration.\n\nService: `gitea`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gitea-availability)",
+        "content": "### gitea-availability\n\nThe private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration.\n\nService: `gitea`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=gitea-availability)",
         "mode": "markdown"
       }
     },
@@ -1495,7 +1495,7 @@
         "y": 49
       },
       "options": {
-        "content": "### gotenberg-availability\n\nThe private Gotenberg document rendering API remains reachable on runtime-ai for synchronous PDF conversion workflows.\n\nService: `gotenberg`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gotenberg-availability)",
+        "content": "### gotenberg-availability\n\nThe private Gotenberg document rendering API remains reachable on runtime-ai for synchronous PDF conversion workflows.\n\nService: `gotenberg`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=gotenberg-availability)",
         "mode": "markdown"
       }
     },
@@ -1706,7 +1706,7 @@
         "y": 56
       },
       "options": {
-        "content": "### glitchtip-availability\n\nThe public GlitchTip health endpoint remains reachable for browser sign-in, DSN ingestion, and repo-managed smoke verification.\n\nService: `glitchtip`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=glitchtip-availability)",
+        "content": "### glitchtip-availability\n\nThe public GlitchTip health endpoint remains reachable for browser sign-in, DSN ingestion, and repo-managed smoke verification.\n\nService: `glitchtip`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=glitchtip-availability)",
         "mode": "markdown"
       }
     },
@@ -1917,7 +1917,7 @@
         "y": 63
       },
       "options": {
-        "content": "### grafana-availability\n\nGrafana remains reachable through the public LV3 edge.\n\nService: `grafana`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=grafana-availability)",
+        "content": "### grafana-availability\n\nGrafana remains reachable through the public LV3 edge.\n\nService: `grafana`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=grafana-availability)",
         "mode": "markdown"
       }
     },
@@ -2128,7 +2128,7 @@
         "y": 70
       },
       "options": {
-        "content": "### harbor-availability\n\nHarbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access.\n\nService: `harbor`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=harbor-availability)",
+        "content": "### harbor-availability\n\nHarbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access.\n\nService: `harbor`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=harbor-availability)",
         "mode": "markdown"
       }
     },
@@ -2339,7 +2339,7 @@
         "y": 77
       },
       "options": {
-        "content": "### homepage-availability\n\nThe unified operator dashboard remains reachable through the authenticated LV3 edge.\n\nService: `homepage`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=homepage-availability)",
+        "content": "### homepage-availability\n\nThe unified operator dashboard remains reachable through the authenticated LV3 edge.\n\nService: `homepage`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=homepage-availability)",
         "mode": "markdown"
       }
     },
@@ -2550,7 +2550,7 @@
         "y": 84
       },
       "options": {
-        "content": "### keycloak-availability\n\nKeycloak discovery remains reachable for operator and service authentication.\n\nService: `keycloak`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-availability)",
+        "content": "### keycloak-availability\n\nKeycloak discovery remains reachable for operator and service authentication.\n\nService: `keycloak`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-availability)",
         "mode": "markdown"
       }
     },
@@ -2761,7 +2761,7 @@
         "y": 91
       },
       "options": {
-        "content": "### keycloak-latency\n\nKeycloak discovery responds in under 500ms for 95% of probes.\n\nService: `keycloak`\n\nLatency threshold: `500ms`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-latency)",
+        "content": "### keycloak-latency\n\nKeycloak discovery responds in under 500ms for 95% of probes.\n\nService: `keycloak`\n\nLatency threshold: `500ms`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-latency)",
         "mode": "markdown"
       }
     },
@@ -2972,7 +2972,7 @@
         "y": 98
       },
       "options": {
-        "content": "### langfuse-availability\n\nLangfuse remains reachable through the public LV3 edge for trace ingestion and operator access.\n\nService: `langfuse`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=langfuse-availability)",
+        "content": "### langfuse-availability\n\nLangfuse remains reachable through the public LV3 edge for trace ingestion and operator access.\n\nService: `langfuse`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=langfuse-availability)",
         "mode": "markdown"
       }
     },
@@ -3183,7 +3183,7 @@
         "y": 105
       },
       "options": {
-        "content": "### mailpit-availability\n\nMailpit remains reachable on the private guest-network listener for staging and development SMTP capture flows.\n\nService: `mailpit`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=mailpit-availability)",
+        "content": "### mailpit-availability\n\nMailpit remains reachable on the private guest-network listener for staging and development SMTP capture flows.\n\nService: `mailpit`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=mailpit-availability)",
         "mode": "markdown"
       }
     },
@@ -3394,7 +3394,7 @@
         "y": 112
       },
       "options": {
-        "content": "### minio-availability\n\nThe shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge.\n\nService: `minio`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=minio-availability)",
+        "content": "### minio-availability\n\nThe shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge.\n\nService: `minio`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=minio-availability)",
         "mode": "markdown"
       }
     },
@@ -3605,7 +3605,7 @@
         "y": 119
       },
       "options": {
-        "content": "### matrix-synapse-availability\n\nMatrix Synapse remains reachable on the public client versions endpoint.\n\nService: `matrix_synapse`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=matrix-synapse-availability)",
+        "content": "### matrix-synapse-availability\n\nMatrix Synapse remains reachable on the public client versions endpoint.\n\nService: `matrix_synapse`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=matrix-synapse-availability)",
         "mode": "markdown"
       }
     },
@@ -3816,7 +3816,7 @@
         "y": 126
       },
       "options": {
-        "content": "### netbox-availability\n\nNetBox remains reachable for inventory, IPAM, and topology workflows.\n\nService: `netbox`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=netbox-availability)",
+        "content": "### netbox-availability\n\nNetBox remains reachable for inventory, IPAM, and topology workflows.\n\nService: `netbox`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=netbox-availability)",
         "mode": "markdown"
       }
     },
@@ -4027,7 +4027,7 @@
         "y": 133
       },
       "options": {
-        "content": "### nextcloud-availability\n\nThe public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane.\n\nService: `nextcloud`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=nextcloud-availability)",
+        "content": "### nextcloud-availability\n\nThe public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane.\n\nService: `nextcloud`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=nextcloud-availability)",
         "mode": "markdown"
       }
     },
@@ -4238,7 +4238,7 @@
         "y": 140
       },
       "options": {
-        "content": "### nginx-edge-availability\n\nThe edge reverse proxy remains reachable for published services.\n\nService: `nginx_edge`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=nginx-edge-availability)",
+        "content": "### nginx-edge-availability\n\nThe edge reverse proxy remains reachable for published services.\n\nService: `nginx_edge`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=nginx-edge-availability)",
         "mode": "markdown"
       }
     },
@@ -4449,7 +4449,7 @@
         "y": 147
       },
       "options": {
-        "content": "### grist-availability\n\nGrist remains reachable through the public LV3 edge for operator-managed spreadsheet databases and workflow tables.\n\nService: `grist`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=grist-availability)",
+        "content": "### grist-availability\n\nGrist remains reachable through the public LV3 edge for operator-managed spreadsheet databases and workflow tables.\n\nService: `grist`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=grist-availability)",
         "mode": "markdown"
       }
     },
@@ -4660,7 +4660,7 @@
         "y": 154
       },
       "options": {
-        "content": "### openfga-availability\n\nThe private OpenFGA runtime remains reachable on runtime-control for delegated authorization queries from the platform guest network.\n\nService: `openfga`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-availability)",
+        "content": "### openfga-availability\n\nThe private OpenFGA runtime remains reachable on runtime-control for delegated authorization queries from the platform guest network.\n\nService: `openfga`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-availability)",
         "mode": "markdown"
       }
     },
@@ -4871,7 +4871,7 @@
         "y": 161
       },
       "options": {
-        "content": "### openfga-latency\n\nThe private OpenFGA runtime responds in under 500ms for 95% of guest-network probes.\n\nService: `openfga`\n\nLatency threshold: `500ms`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-latency)",
+        "content": "### openfga-latency\n\nThe private OpenFGA runtime responds in under 500ms for 95% of guest-network probes.\n\nService: `openfga`\n\nLatency threshold: `500ms`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-latency)",
         "mode": "markdown"
       }
     },
@@ -5082,7 +5082,7 @@
         "y": 168
       },
       "options": {
-        "content": "### outline-availability\n\nOutline remains reachable through the public LV3 edge for living knowledge browsing and sync automation.\n\nService: `outline`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=outline-availability)",
+        "content": "### outline-availability\n\nOutline remains reachable through the public LV3 edge for living knowledge browsing and sync automation.\n\nService: `outline`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=outline-availability)",
         "mode": "markdown"
       }
     },
@@ -5293,7 +5293,7 @@
         "y": 175
       },
       "options": {
-        "content": "### label-studio-availability\n\nThe private Label Studio runtime remains reachable on docker-runtime for governed annotation queues and API automation.\n\nService: `label_studio`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability)",
+        "content": "### label-studio-availability\n\nThe private Label Studio runtime remains reachable on docker-runtime for governed annotation queues and API automation.\n\nService: `label_studio`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability)",
         "mode": "markdown"
       }
     },
@@ -5504,7 +5504,7 @@
         "y": 182
       },
       "options": {
-        "content": "### piper-availability\n\nThe private Piper TTS health endpoint remains reachable on docker-runtime for real-time voice synthesis workflows.\n\nService: `piper`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability)",
+        "content": "### piper-availability\n\nThe private Piper TTS health endpoint remains reachable on docker-runtime for real-time voice synthesis workflows.\n\nService: `piper`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability)",
         "mode": "markdown"
       }
     },
@@ -5715,7 +5715,7 @@
         "y": 189
       },
       "options": {
-        "content": "### paperless-availability\n\nPaperless remains reachable through the public LV3 edge for document archive access and governed API reconciliation.\n\nService: `paperless`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=paperless-availability)",
+        "content": "### paperless-availability\n\nPaperless remains reachable through the public LV3 edge for document archive access and governed API reconciliation.\n\nService: `paperless`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=paperless-availability)",
         "mode": "markdown"
       }
     },
@@ -5926,7 +5926,7 @@
         "y": 196
       },
       "options": {
-        "content": "### plane-availability\n\nPlane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization.\n\nService: `plane`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=plane-availability)",
+        "content": "### plane-availability\n\nPlane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization.\n\nService: `plane`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=plane-availability)",
         "mode": "markdown"
       }
     },
@@ -6137,7 +6137,7 @@
         "y": 203
       },
       "options": {
-        "content": "### platform-context-api-availability\n\nThe platform context API remains reachable for agent-assisted operator workflows.\n\nService: `platform_context_api`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=platform-context-api-availability)",
+        "content": "### platform-context-api-availability\n\nThe platform context API remains reachable for agent-assisted operator workflows.\n\nService: `platform_context_api`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=platform-context-api-availability)",
         "mode": "markdown"
       }
     },
@@ -6348,7 +6348,7 @@
         "y": 210
       },
       "options": {
-        "content": "### plausible-availability\n\nThe public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification.\n\nService: `plausible`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=plausible-availability)",
+        "content": "### plausible-availability\n\nThe public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification.\n\nService: `plausible`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=plausible-availability)",
         "mode": "markdown"
       }
     },
@@ -6559,7 +6559,7 @@
         "y": 217
       },
       "options": {
-        "content": "### semaphore-availability\n\nSemaphore stays reachable for private Ansible job launches and API-based task inspection.\n\nService: `semaphore`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=semaphore-availability)",
+        "content": "### semaphore-availability\n\nSemaphore stays reachable for private Ansible job launches and API-based task inspection.\n\nService: `semaphore`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=semaphore-availability)",
         "mode": "markdown"
       }
     },
@@ -6770,7 +6770,7 @@
         "y": 224
       },
       "options": {
-        "content": "### serverclaw-availability\n\nServerClaw remains reachable through the public LV3 edge for chat-first assistant access.\n\nService: `serverclaw`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=serverclaw-availability)",
+        "content": "### serverclaw-availability\n\nServerClaw remains reachable through the public LV3 edge for chat-first assistant access.\n\nService: `serverclaw`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=serverclaw-availability)",
         "mode": "markdown"
       }
     },
@@ -6981,7 +6981,7 @@
         "y": 231
       },
       "options": {
-        "content": "### status-page-availability\n\nThe public status page remains externally reachable as the last-resort platform signal.\n\nService: `status_page`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=status-page-availability)",
+        "content": "### status-page-availability\n\nThe public status page remains externally reachable as the last-resort platform signal.\n\nService: `status_page`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=status-page-availability)",
         "mode": "markdown"
       }
     },
@@ -7192,7 +7192,7 @@
         "y": 238
       },
       "options": {
-        "content": "### superset-availability\n\nSuperset remains reachable through the public LV3 edge for SQL-first BI exploration, dashboard viewing, and governed datasource verification.\n\nService: `superset`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=superset-availability)",
+        "content": "### superset-availability\n\nSuperset remains reachable through the public LV3 edge for SQL-first BI exploration, dashboard viewing, and governed datasource verification.\n\nService: `superset`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=superset-availability)",
         "mode": "markdown"
       }
     },
@@ -7403,7 +7403,7 @@
         "y": 245
       },
       "options": {
-        "content": "### tika-availability\n\nThe private Apache Tika extraction API remains reachable on runtime-ai for synchronous document text and metadata extraction workflows.\n\nService: `tika`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tika-availability)",
+        "content": "### tika-availability\n\nThe private Apache Tika extraction API remains reachable on runtime-ai for synchronous document text and metadata extraction workflows.\n\nService: `tika`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=tika-availability)",
         "mode": "markdown"
       }
     },
@@ -7614,7 +7614,7 @@
         "y": 252
       },
       "options": {
-        "content": "### tesseract-ocr-availability\n\nThe private Tesseract OCR runtime remains reachable on runtime-ai for scanned-image and image-only document fallback extraction.\n\nService: `tesseract_ocr`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability)",
+        "content": "### tesseract-ocr-availability\n\nThe private Tesseract OCR runtime remains reachable on runtime-ai for scanned-image and image-only document fallback extraction.\n\nService: `tesseract_ocr`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability)",
         "mode": "markdown"
       }
     },
@@ -7825,7 +7825,7 @@
         "y": 259
       },
       "options": {
-        "content": "### typesense-availability\n\nThe private Typesense controller endpoint remains reachable for repo-managed structured search sync and operator keyword lookups.\n\nService: `typesense`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=typesense-availability)",
+        "content": "### typesense-availability\n\nThe private Typesense controller endpoint remains reachable for repo-managed structured search sync and operator keyword lookups.\n\nService: `typesense`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=typesense-availability)",
         "mode": "markdown"
       }
     },
@@ -8036,7 +8036,7 @@
         "y": 266
       },
       "options": {
-        "content": "### uptime-kuma-availability\n\nUptime Kuma remains reachable through the public status surface.\n\nService: `uptime_kuma`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=uptime-kuma-availability)",
+        "content": "### uptime-kuma-availability\n\nUptime Kuma remains reachable through the public status surface.\n\nService: `uptime_kuma`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=uptime-kuma-availability)",
         "mode": "markdown"
       }
     },
@@ -8247,7 +8247,7 @@
         "y": 273
       },
       "options": {
-        "content": "### vaultwarden-availability\n\nVaultwarden remains reachable on the private Tailscale operator path.\n\nService: `vaultwarden`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=vaultwarden-availability)",
+        "content": "### vaultwarden-availability\n\nVaultwarden remains reachable on the private Tailscale operator path.\n\nService: `vaultwarden`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=vaultwarden-availability)",
         "mode": "markdown"
       }
     },
@@ -8458,7 +8458,7 @@
         "y": 280
       },
       "options": {
-        "content": "### windmill-availability\n\nWindmill API stays reachable for scheduled automation.\n\nService: `windmill`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=windmill-availability)",
+        "content": "### windmill-availability\n\nWindmill API stays reachable for scheduled automation.\n\nService: `windmill`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=windmill-availability)",
         "mode": "markdown"
       }
     },
@@ -8669,7 +8669,7 @@
         "y": 287
       },
       "options": {
-        "content": "### woodpecker-availability\n\nWoodpecker stays reachable for repo-managed CI bootstrap, API inspection, and manual validation pipeline triggers.\n\nService: `woodpecker`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=woodpecker-availability)",
+        "content": "### woodpecker-availability\n\nWoodpecker stays reachable for repo-managed CI bootstrap, API inspection, and manual validation pipeline triggers.\n\nService: `woodpecker`\n\n[Open Grafana](https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=woodpecker-availability)",
         "mode": "markdown"
       }
     },

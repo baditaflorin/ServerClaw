@@ -45,7 +45,7 @@ PERSONAL_PATH_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 ]
 DEPLOYMENT_SPECIFIC_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\bHetzner\b"), "provider-specific reference"),
-    (re.compile(r"\bproxmox_florin\b"), "deployment-specific hostname label"),
+    (re.compile(r"\bproxmox-host\b"), "deployment-specific hostname label"),
     (re.compile(r"\blv3\.org\b"), "deployment-specific domain"),
     (re.compile(r"\b65\.108\.75\.123\b"), "deployment-specific public IPv4"),
     (re.compile(r"\b100\.64\.0\.1\b"), "deployment-specific mesh address"),

@@ -2941,7 +2941,7 @@ function App() {
         </div>
         <p className="tourFootnote">
           Need the full operating procedure?{" "}
-          <a className="inlineLink" href="https://docs.lv3.org/runbooks/windmill-operator-access-admin/" target="_blank" rel="noreferrer">
+          <a className="inlineLink" href="https://docs.example.com/runbooks/windmill-operator-access-admin/" target="_blank" rel="noreferrer">
             Open the operator admin runbook
           </a>
           .
@@ -3330,13 +3330,13 @@ function App() {
                   </button>
                 </div>
                 <div className="helpLinks">
-                  <a className="inlineLink" href="https://docs.lv3.org/runbooks/windmill-operator-access-admin/" target="_blank" rel="noreferrer">
+                  <a className="inlineLink" href="https://docs.example.com/runbooks/windmill-operator-access-admin/" target="_blank" rel="noreferrer">
                     Operator admin runbook
                   </a>
-                  <a className="inlineLink" href="https://docs.lv3.org/runbooks/operator-onboarding/" target="_blank" rel="noreferrer">
+                  <a className="inlineLink" href="https://docs.example.com/runbooks/operator-onboarding/" target="_blank" rel="noreferrer">
                     Operator onboarding runbook
                   </a>
-                  <a className="inlineLink" href="https://docs.lv3.org/runbooks/operator-offboarding/" target="_blank" rel="noreferrer">
+                  <a className="inlineLink" href="https://docs.example.com/runbooks/operator-offboarding/" target="_blank" rel="noreferrer">
                     Operator off-boarding runbook
                   </a>
                 </div>

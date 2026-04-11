@@ -9,7 +9,7 @@
 #   - env (string, optional, default=production): Inventory environment selector for the shared execution runner.
 #
 # Outputs:
-#   - Repo-managed Typesense runtime on docker-runtime plus the private Tailscale TCP proxy on proxmox_florin.
+#   - Repo-managed Typesense runtime on docker-runtime plus the private Tailscale TCP proxy on proxmox-host.
 #
 # Idempotency: Fully idempotent.
 #

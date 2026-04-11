@@ -312,9 +312,9 @@ def ensure_reference_inventory(
     )
     cluster = client.ensure(
         "/api/virtualization/clusters/",
-        lookup={"name": "proxmox-florin"},
+        lookup={"name": "proxmox-host"},
         payload={
-            "name": "proxmox-florin",
+            "name": "proxmox-host",
             "type": cluster_type["id"],
             "group": cluster_group["id"],
             "scope_type": "dcim.site",

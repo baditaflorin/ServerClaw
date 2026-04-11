@@ -2,7 +2,7 @@
   "workstream-surfaces": {
     "description": "Validate the current branch against its declared workstream ownership manifest and shared-surface contract.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh workstream-surfaces",
     "working_dir": "/workspace",
     "timeout_seconds": 480,
@@ -11,7 +11,7 @@
   "agent-standards": {
     "description": "Enforce the ADR 0163 through ADR 0168 agent handoff, ADR index, and workstream registration standards.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh agent-standards",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -20,7 +20,7 @@
   "documentation-index": {
     "description": "Verify that the generated ADR root manifest, facet shards, and reservation summary are current for documentation and workstream changes.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --check >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -29,7 +29,7 @@
   "ansible-lint": {
     "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "image": "registry.example.com/check-runner/ansible:2.17.10",
     "command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
     "local_fallback_command": "./scripts/validate_repo.sh ansible-lint",
     "working_dir": "/workspace",
@@ -42,7 +42,7 @@
   "ansible-syntax": {
     "description": "Syntax check every tracked playbook outside the shared playbook task includes.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "image": "registry.example.com/check-runner/ansible:2.17.10",
     "command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax",
     "working_dir": "/workspace",
     "timeout_seconds": 900,
@@ -54,7 +54,7 @@
   "dependency-graph": {
     "description": "Validate the service dependency graph schema, cross references, generated Mermaid markdown, and generated Excalidraw architecture scenes.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -63,7 +63,7 @@
   "dependency-direction": {
     "description": "Reject reusable platform modules that import outward into scripts/ composition roots or dynamically load script-only helpers.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/validate_dependency_direction.py >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -72,7 +72,7 @@
   "generated-docs": {
     "description": "Regenerate the canonical generated documentation surfaces and fail if committed status docs drift.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh generated-docs",
     "working_dir": "/workspace",
     "timeout_seconds": 240,
@@ -81,7 +81,7 @@
   "generated-portals": {
     "description": "Regenerate the portal build outputs and fail if committed publication artifacts drift.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh generated-portals",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
@@ -90,7 +90,7 @@
   "packer-validate": {
     "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/infra:2026.03.23",
+    "image": "registry.example.com/check-runner/infra:2026.03.23",
     "command": "./scripts/validate_packer_templates.sh",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
@@ -102,7 +102,7 @@
   "schema-validation": {
     "description": "Validate canonical repository data models, provider-boundary anti-corruption guards, capability-contract catalogs, Atlas schema catalog contracts, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null && ./scripts/run_python_with_packages.sh pyyaml -- scripts/atlas_schema.py validate >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
@@ -111,7 +111,7 @@
   "atlas-lint": {
     "description": "Run Atlas pre-migration lint for the repo-managed SQL migration directories using the pinned Atlas image and an ephemeral PostgreSQL dev database.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py lint --repo-root ${LV3_HOST_WORKSPACE:-/workspace} >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
@@ -123,7 +123,7 @@
   "policy-validation": {
     "description": "Run the ADR 0230 shared OPA and Conftest policy checks against command approval, promotion eligibility, runner admission, and service-boundary invariants.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/policy_checks.py --validate",
     "working_dir": "/workspace",
     "timeout_seconds": 240,
@@ -135,7 +135,7 @@
   "alert-rule-validation": {
     "description": "Regenerate SLO and HTTPS/TLS Prometheus rules and enforce severity plus runbook annotations on committed alert rules.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/generate_slo_rules.py --check >/dev/null && python scripts/generate_https_tls_assurance.py --check >/dev/null && python scripts/validate_alert_rules.py",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -144,7 +144,7 @@
   "security-scan": {
     "description": "Run the repository filesystem through the pinned Trivy security scan policy.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/security:2026.03.23",
+    "image": "registry.example.com/check-runner/security:2026.03.23",
     "command": "trivy fs --timeout 15m --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL .",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
@@ -156,7 +156,7 @@
   "semgrep-sast": {
     "description": "Run the repo-managed Semgrep SAST, secret-pattern, and Dockerfile policy scan and write the SARIF receipt.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python -m pip install --quiet --disable-pip-version-check semgrep==1.155.0 && ./scripts/validate_repo.sh semgrep",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
@@ -168,7 +168,7 @@
   "iac-policy-scan": {
     "description": "Run the repo-managed Checkov IaC policy scan across the governed OpenTofu and Ansible surfaces and emit summary plus SARIF receipts.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/security:2026.03.23",
+    "image": "registry.example.com/check-runner/security:2026.03.23",
     "command": "python3 scripts/iac_policy_scan.py",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
@@ -177,7 +177,7 @@
   "artifact-secret-scan": {
     "description": "Scan published receipts and generated publication artifacts for secrets with the repo-managed gitleaks rules.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/security:2026.03.23",
+    "image": "registry.example.com/check-runner/security:2026.03.23",
     "command": "python scripts/published_artifact_secret_scan.py --repo-root /workspace --enforce-gitleaks",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
@@ -186,7 +186,7 @@
   "service-completeness": {
     "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/validate_service_completeness.py --validate >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -195,7 +195,7 @@
   "tofu-validate": {
     "description": "Validate OpenTofu configuration if the repo carries a tofu root; otherwise report a no-op pass.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/infra:2026.03.23",
+    "image": "registry.example.com/check-runner/infra:2026.03.23",
     "command": "if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -204,7 +204,7 @@
   "type-check": {
     "description": "Type check the gate orchestration code, Atlas schema helpers, and the manifest-backed Docker runner surfaces.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/run_python_with_packages.sh mypy pyyaml types-PyYAML httpx -- -m mypy --cache-dir /tmp/mypy-cache scripts/atlas_schema.py scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/atlas-drift-check.py config/windmill/scripts/post-merge-gate.py tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 180,
@@ -213,7 +213,7 @@
   "integration-tests": {
     "description": "Run the ADR 0111 non-destructive integration suite against staging if active, or record a repo-managed skip if no integration target is currently available.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
@@ -222,7 +222,7 @@
   "yaml-lint": {
     "description": "Run full-repository yamllint across tracked YAML files.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "image": "registry.example.com/check-runner/ansible:2.17.10",
     "command": "./scripts/validate_repo.sh yaml",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
@@ -234,7 +234,7 @@
   "python-type-safety": {
     "description": "Run pyright type-checking on scripts/ and Ansible plugins, bandit security SAST on scripts/, and crosshair symbolic contract verification on validation_toolkit. Catches None-dereferences, missing dict keys, and dangerous patterns before they reach production.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh python-type-safety",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
@@ -243,7 +243,7 @@
   "cross-catalog-integrity": {
     "description": "Validate referential integrity across all platform catalogs: service IDs in the manifest exist in the service catalog, tool references in agent_tool_registry exist in command_catalog, health probe service IDs exist in the dependency graph, and gate bypass waiver reason codes are not expired release-blockers.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh cross-catalog",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
@@ -252,7 +252,7 @@
   "waiver-escalation-proofs": {
     "description": "Z3 formal verification of the gate bypass waiver escalation state machine. Proves four universal properties: non-negativity, upper bound, monotonic escalation (adding a receipt never decreases the repeat counter), and threshold soundness (release_blocker implies warning threshold was crossed). Also proves the catalog constraint blocker_after >= warning_after is load-bearing. Fails if the algorithm in gate_bypass_waivers.py changes in a way that violates any property.",
     "severity": "error",
-    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh waiver-escalation-proofs",
     "working_dir": "/workspace",
     "timeout_seconds": 120,

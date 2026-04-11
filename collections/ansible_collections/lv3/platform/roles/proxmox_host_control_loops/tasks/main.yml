@@ -1,5 +1,5 @@
 ---
-# Purpose: Install the canonical ADR 0226 host-resident control-loop script and its managed systemd timer and path units on proxmox_florin.
+# Purpose: Install the canonical ADR 0226 host-resident control-loop script and its managed systemd timer and path units on proxmox-host.
 # Use case: Run through the control-loops tagged host play when the Proxmox host needs the repo-managed systemd supervisor baseline or a later replay.
 # Inputs:
 #   - proxmox_host_control_loops_*: Filesystem paths, unit names, timer cadence, and service hardening settings.

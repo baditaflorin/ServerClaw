@@ -75,7 +75,7 @@ values live in `.local/` (gitignored), not in committed code.
 public_url: "https://grafana.{{ platform_domain }}"
 
 # BAD: hardcodes deployment domain
-public_url: "https://grafana.lv3.org"
+public_url: "https://grafana.example.com"
 ```
 
 **In docs/tests/workstreams** — Always use `example.com`:
@@ -84,7 +84,7 @@ public_url: "https://grafana.lv3.org"
 Visit https://grafana.example.com to view dashboards.
 
 # BAD: deployment-specific domain
-Visit https://grafana.lv3.org to view dashboards.
+Visit https://grafana.example.com to view dashboards.
 ```
 
 **In inventory/config** — Real values are acceptable here (the publish pipeline

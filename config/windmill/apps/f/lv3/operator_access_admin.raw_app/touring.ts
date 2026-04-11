@@ -51,7 +51,7 @@ const DEFAULT_PROGRESS: TourProgress = {
   updatedAt: null,
 };
 
-const DOCS_BASE_URL = "https://docs.lv3.org";
+const DOCS_BASE_URL = "https://docs.example.com";
 const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;
 const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;
 const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;

@@ -106,7 +106,7 @@
     {% if charts.dependency_focus %}
     <div class="chart-canvas chart-canvas-tall" data-echart-target="overview-dependency-focus-chart"></div>
     <script id="overview-dependency-focus-chart" type="application/json">{{ charts.dependency_focus|tojson }}</script>
-    <p class="muted chart-caption">The graph is derived from `config/dependency-graph.json` and highlights the control-plane path behind `ops.lv3.org`.</p>
+    <p class="muted chart-caption">The graph is derived from `config/dependency-graph.json` and highlights the control-plane path behind `ops.example.com`.</p>
     {% else %}
     <p class="muted">Dependency graph data is not mirrored into this portal runtime yet.</p>
     {% endif %}

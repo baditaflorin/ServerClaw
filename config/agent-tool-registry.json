@@ -412,7 +412,7 @@
       "description": "Query the private platform-context API for cited RAG matches grounded in ADRs, runbooks, receipts, and platform catalogs.",
       "category": "observe",
       "transport": "http",
-      "endpoint": "https://api.lv3.org/v1/platform-context/v1/context/query",
+      "endpoint": "https://api.example.com/v1/platform-context/v1/context/query",
       "auth": "platform-context-api-token",
       "approval_required": false,
       "audit_on_call": true,
@@ -1637,7 +1637,7 @@
     {
       "name": "list-outline-collections",
       "title": "List Outline Collections",
-      "description": "List all document collections in the Outline wiki (wiki.lv3.org).",
+      "description": "List all document collections in the Outline wiki (wiki.example.com).",
       "category": "observe",
       "transport": "controller_local",
       "approval_required": false,
@@ -1848,7 +1848,7 @@
       "category": "execute",
       "transport": "controller_local",
       "approval_required": true,
-      "description": "Provision a new Outline API token by inserting it into the Outline PostgreSQL database via the bootstrap SSH key. Writes the token to .local/outline/admin-auth.json so all Outline agent tools pick it up automatically. Call this when Outline tools return 401 errors or when .local/outline/admin-auth.json is missing. Uses the outline.automation@lv3.org service account.",
+      "description": "Provision a new Outline API token by inserting it into the Outline PostgreSQL database via the bootstrap SSH key. Writes the token to .local/outline/admin-auth.json so all Outline agent tools pick it up automatically. Call this when Outline tools return 401 errors or when .local/outline/admin-auth.json is missing. Uses the outline.automation@example.com service account.",
       "runbook": "docs/adr/0364-outline-agent-tools.md",
       "endpoint": "service://outline/admin/apiKeys",
       "auth": "bootstrap-ssh",
@@ -2117,7 +2117,7 @@
           },
           "wing": {
             "type": "string",
-            "description": "Memory wing to search (default: 'proxmox_florin')"
+            "description": "Memory wing to search (default: 'proxmox-host')"
           },
           "limit": {
             "type": "integer",
@@ -2186,7 +2186,7 @@
           },
           "wing": {
             "type": "string",
-            "description": "Memory wing (default: 'proxmox_florin')"
+            "description": "Memory wing (default: 'proxmox-host')"
           },
           "room": {
             "type": "string",
@@ -2243,7 +2243,7 @@
         "properties": {
           "wing": {
             "type": "string",
-            "description": "Memory wing to wake up (default: 'proxmox_florin')"
+            "description": "Memory wing to wake up (default: 'proxmox-host')"
           }
         }
       },

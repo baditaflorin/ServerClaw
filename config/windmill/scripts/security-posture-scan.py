@@ -16,7 +16,7 @@ def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_se
             "expected_repo_path": str(repo_root),
         }
     required_paths = [
-        repo_root / "inventory" / "host_vars" / "proxmox_florin.yml",
+        repo_root / "inventory" / "host_vars" / "proxmox-host.yml",
         repo_root / "inventory" / "group_vars" / "all.yml",
         repo_root / "playbooks" / "tasks" / "security-scan.yml",
     ]

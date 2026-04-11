@@ -219,24 +219,24 @@ def collect_edge_route_hostnames(
 
     service_topology = require_mapping(
         host_vars.get("lv3_service_topology"),
-        "inventory/host_vars/proxmox_florin.yml.lv3_service_topology",
+        "inventory/host_vars/proxmox-host.yml.lv3_service_topology",
     )
     for service_id, service in service_topology.items():
         service = require_mapping(
             service,
-            f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}",
+            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}",
         )
         edge = service.get("edge")
         if edge is None:
             continue
         edge = require_mapping(
             edge,
-            f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}.edge",
+            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}.edge",
         )
         enabled = edge.get("enabled", False)
         if not isinstance(enabled, bool):
             raise ValueError(
-                f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}.edge.enabled must be boolean"
+                f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}.edge.enabled must be boolean"
             )
         if not enabled:
             continue
@@ -245,7 +245,7 @@ def collect_edge_route_hostnames(
         hostnames.update(
             collect_site_hostnames(
                 route,
-                f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}",
+                f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}",
                 allow_wildcards=True,
             )
         )

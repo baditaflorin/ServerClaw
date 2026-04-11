@@ -195,7 +195,7 @@
       "id": "headscale",
       "service": "headscale",
       "name": "Headscale",
-      "vm": "proxmox_florin",
+      "vm": "proxmox-host",
       "tier": 1,
       "category": "access",
       "adr": "0144"
@@ -366,7 +366,7 @@
       "id": "ntopng",
       "service": "ntopng",
       "name": "ntopng",
-      "vm": "proxmox_florin",
+      "vm": "proxmox-host",
       "tier": 1,
       "category": "observability",
       "adr": "0059"
@@ -535,7 +535,7 @@
       "id": "proxmox_ui",
       "service": "proxmox_ui",
       "name": "Proxmox UI",
-      "vm": "proxmox_florin",
+      "vm": "proxmox-host",
       "tier": 1,
       "category": "infrastructure",
       "adr": "0004"
@@ -705,7 +705,7 @@
       "from": "api_gateway",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to api.lv3.org depends on the shared edge publication path, but the internal gateway remains reachable directly."
+      "description": "Public access to api.example.com depends on the shared edge publication path, but the internal gateway remains reachable directly."
     },
     {
       "from": "browser_runner",
@@ -759,7 +759,7 @@
       "from": "ntfy",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public operator access to ntfy.lv3.org depends on the shared NGINX edge publication path, while the private runtime remains directly verifiable."
+      "description": "Public operator access to ntfy.example.com depends on the shared NGINX edge publication path, while the private runtime remains directly verifiable."
     },
     {
       "from": "windmill",
@@ -783,13 +783,13 @@
       "from": "coolify",
       "to": "keycloak",
       "type": "soft",
-      "description": "Authenticated browser access to coolify.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller remains reachable over the management network."
+      "description": "Authenticated browser access to coolify.example.com depends on the shared Keycloak-backed edge auth path, while the private controller remains reachable over the management network."
     },
     {
       "from": "coolify",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public dashboard access to coolify.lv3.org depends on the shared NGINX edge publication, while the private controller proxy remains reachable directly."
+      "description": "Public dashboard access to coolify.example.com depends on the shared NGINX edge publication, while the private controller proxy remains reachable directly."
     },
     {
       "from": "coolify_apps",
@@ -801,7 +801,7 @@
       "from": "coolify_apps",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to apps.lv3.org depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
+      "description": "Public access to apps.example.com depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
     },
     {
       "from": "dify",
@@ -825,7 +825,7 @@
       "from": "dify",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for agents.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public reachability for agents.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "dify",
@@ -855,13 +855,13 @@
       "from": "dozzle",
       "to": "keycloak",
       "type": "soft",
-      "description": "Authenticated browser access to logs.lv3.org depends on the shared Keycloak-backed edge auth path, but the private hub remains reachable for controlled operator verification."
+      "description": "Authenticated browser access to logs.example.com depends on the shared Keycloak-backed edge auth path, but the private hub remains reachable for controlled operator verification."
     },
     {
       "from": "dozzle",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public operator access to logs.lv3.org depends on the shared NGINX edge publication while the private runtime remains reachable inside the guest network."
+      "description": "Public operator access to logs.example.com depends on the shared NGINX edge publication while the private runtime remains reachable inside the guest network."
     },
     {
       "from": "excalidraw",
@@ -873,13 +873,13 @@
       "from": "excalidraw",
       "to": "keycloak",
       "type": "soft",
-      "description": "Operator access to draw.lv3.org depends on the shared Keycloak-backed oauth2-proxy edge flow, while the private runtime can still be verified locally."
+      "description": "Operator access to draw.example.com depends on the shared Keycloak-backed oauth2-proxy edge flow, while the private runtime can still be verified locally."
     },
     {
       "from": "excalidraw",
       "to": "nginx_edge",
       "type": "hard",
-      "description": "The private diagram surface is published at draw.lv3.org through the shared NGINX edge, including the routed /socket.io/ collaboration path."
+      "description": "The private diagram surface is published at draw.example.com through the shared NGINX edge, including the routed /socket.io/ collaboration path."
     },
     {
       "from": "flagsmith",
@@ -891,13 +891,13 @@
       "from": "flagsmith",
       "to": "keycloak",
       "type": "soft",
-      "description": "Browser access to flags.lv3.org is gated by the shared oauth2-proxy and Keycloak edge-auth path, while private environment-key consumers continue to use the internal runtime directly."
+      "description": "Browser access to flags.example.com is gated by the shared oauth2-proxy and Keycloak edge-auth path, while private environment-key consumers continue to use the internal runtime directly."
     },
     {
       "from": "flagsmith",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for flags.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public reachability for flags.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "flagsmith",
@@ -963,7 +963,7 @@
       "from": "grafana",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to grafana.lv3.org depends on the shared NGINX edge; private reachability remains available if the edge is degraded."
+      "description": "Public access to grafana.example.com depends on the shared NGINX edge; private reachability remains available if the edge is degraded."
     },
     {
       "from": "grafana",
@@ -975,19 +975,19 @@
       "from": "harbor",
       "to": "keycloak",
       "type": "soft",
-      "description": "Operator browser sign-in to registry.lv3.org depends on the shared Keycloak OIDC path, while robot credentials still support governed automation."
+      "description": "Operator browser sign-in to registry.example.com depends on the shared Keycloak OIDC path, while robot credentials still support governed automation."
     },
     {
       "from": "harbor",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for registry.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public reachability for registry.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "headscale",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public registration and control-plane reachability for headscale.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public registration and control-plane reachability for headscale.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "homepage",
@@ -999,7 +999,7 @@
       "from": "homepage",
       "to": "nginx_edge",
       "type": "hard",
-      "description": "The unified dashboard is published at home.lv3.org through the shared NGINX edge and is not exposed directly on the public internet."
+      "description": "The unified dashboard is published at home.example.com through the shared NGINX edge and is not exposed directly on the public internet."
     },
     {
       "from": "keycloak",
@@ -1011,7 +1011,7 @@
       "from": "keycloak",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for sso.lv3.org depends on the shared edge publication path."
+      "description": "Public reachability for sso.example.com depends on the shared edge publication path."
     },
     {
       "from": "keycloak",
@@ -1041,7 +1041,7 @@
       "from": "langfuse",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to langfuse.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public access to langfuse.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "langfuse",
@@ -1071,7 +1071,7 @@
       "from": "livekit",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public signalling at livekit.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public signalling at livekit.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "livekit",
@@ -1095,7 +1095,7 @@
       "from": "mail_platform",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "The published mail.lv3.org informational surface is exposed through the shared NGINX edge."
+      "description": "The published mail.example.com informational surface is exposed through the shared NGINX edge."
     },
     {
       "from": "mail_platform",
@@ -1113,7 +1113,7 @@
       "from": "matrix_synapse",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for matrix.lv3.org depends on the shared edge publication path."
+      "description": "Public reachability for matrix.example.com depends on the shared edge publication path."
     },
     {
       "from": "matrix_synapse",
@@ -1149,7 +1149,7 @@
       "from": "n8n",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for n8n.lv3.org depends on the shared edge publication path."
+      "description": "Public reachability for n8n.example.com depends on the shared edge publication path."
     },
     {
       "from": "n8n",
@@ -1179,7 +1179,7 @@
       "from": "neko",
       "to": "nginx_edge",
       "type": "hard",
-      "description": "Neko WebRTC signalling is proxied through the shared NGINX edge at browser.lv3.org with TLS termination and WebSocket upgrade support."
+      "description": "Neko WebRTC signalling is proxied through the shared NGINX edge at browser.example.com with TLS termination and WebSocket upgrade support."
     },
     {
       "from": "neko",
@@ -1191,7 +1191,7 @@
       "from": "nextcloud",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for cloud.lv3.org and DAV discovery redirects depends on the shared NGINX edge publication path."
+      "description": "Public reachability for cloud.example.com and DAV discovery redirects depends on the shared NGINX edge publication path."
     },
     {
       "from": "nextcloud",
@@ -1311,13 +1311,13 @@
       "from": "label_studio",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "The shared NGINX edge publishes annotate.lv3.org and enforces the browser auth boundary ahead of Label Studio."
+      "description": "The shared NGINX edge publishes annotate.example.com and enforces the browser auth boundary ahead of Label Studio."
     },
     {
       "from": "label_studio",
       "to": "keycloak",
       "type": "soft",
-      "description": "Browser access to annotate.lv3.org is gated by the shared oauth2-proxy and Keycloak edge-auth flow, while app-local Label Studio tokens remain the current automation path."
+      "description": "Browser access to annotate.example.com is gated by the shared oauth2-proxy and Keycloak edge-auth flow, while app-local Label Studio tokens remain the current automation path."
     },
     {
       "from": "label_studio",
@@ -1347,7 +1347,7 @@
       "from": "paperless",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to paperless.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public access to paperless.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "paperless",
@@ -1383,7 +1383,7 @@
       "from": "ops_portal",
       "to": "keycloak",
       "type": "hard",
-      "description": "ops.lv3.org is gated behind oauth2-proxy and Keycloak-backed browser authentication."
+      "description": "ops.example.com is gated behind oauth2-proxy and Keycloak-backed browser authentication."
     },
     {
       "from": "ops_portal",
@@ -1401,7 +1401,7 @@
       "from": "grist",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to grist.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public access to grist.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "grist",
@@ -1419,7 +1419,7 @@
       "from": "outline",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to wiki.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public access to wiki.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "outline",
@@ -1437,7 +1437,7 @@
       "from": "lago",
       "to": "api_gateway",
       "type": "soft",
-      "description": "Public producer ingest at billing.lv3.org/api/v1/events is brokered by the platform API gateway adapter and canonical error-handling path."
+      "description": "Public producer ingest at billing.example.com/api/v1/events is brokered by the platform API gateway adapter and canonical error-handling path."
     },
     {
       "from": "lago",
@@ -1449,13 +1449,13 @@
       "from": "lago",
       "to": "keycloak",
       "type": "soft",
-      "description": "Operator browser access to billing.lv3.org is gated by the shared oauth2-proxy and Keycloak edge-auth path."
+      "description": "Operator browser access to billing.example.com is gated by the shared oauth2-proxy and Keycloak edge-auth path."
     },
     {
       "from": "lago",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for billing.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public reachability for billing.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "lago",
@@ -1467,13 +1467,13 @@
       "from": "plane",
       "to": "keycloak",
       "type": "soft",
-      "description": "Authenticated browser access to tasks.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller path remains available for governed automation."
+      "description": "Authenticated browser access to tasks.example.com depends on the shared Keycloak-backed edge auth path, while the private controller path remains available for governed automation."
     },
     {
       "from": "plane",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to tasks.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public access to tasks.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "plane",
@@ -1521,7 +1521,7 @@
       "from": "plausible",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Dashboard publication at analytics.lv3.org and tracker injection on selected public hostnames depend on the shared NGINX edge publication path."
+      "description": "Dashboard publication at analytics.example.com and tracker injection on selected public hostnames depend on the shared NGINX edge publication path."
     },
     {
       "from": "plausible",
@@ -1545,13 +1545,13 @@
       "from": "superset",
       "to": "keycloak",
       "type": "soft",
-      "description": "Routine browser sign-in to bi.lv3.org depends on the repo-managed Keycloak OIDC client and realm configuration."
+      "description": "Routine browser sign-in to bi.example.com depends on the repo-managed Keycloak OIDC client and realm configuration."
     },
     {
       "from": "superset",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public publication at bi.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public publication at bi.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "superset",
@@ -1581,7 +1581,7 @@
       "from": "serverclaw",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to chat.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public access to chat.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "serverclaw",
@@ -1605,7 +1605,7 @@
       "from": "status_page",
       "to": "nginx_edge",
       "type": "hard",
-      "description": "The public status page is published at status.lv3.org through the shared NGINX edge hostname."
+      "description": "The public status page is published at status.example.com through the shared NGINX edge hostname."
     },
     {
       "from": "status_page",
@@ -1659,7 +1659,7 @@
       "from": "directus",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "The shared NGINX edge publishes data.lv3.org directly to Directus on docker-runtime."
+      "description": "The shared NGINX edge publishes data.example.com directly to Directus on docker-runtime."
     },
     {
       "from": "directus",
@@ -1695,7 +1695,7 @@
       "from": "woodpecker",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public operator access to ci.lv3.org depends on the shared NGINX edge, while the controller path remains reachable on the Proxmox host tailnet."
+      "description": "Public operator access to ci.example.com depends on the shared NGINX edge, while the controller path remains reachable on the Proxmox host tailnet."
     },
     {
       "from": "woodpecker",
@@ -1737,7 +1737,7 @@
       "from": "glitchtip",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public access to errors.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public access to errors.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "glitchtip",

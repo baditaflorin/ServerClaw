@@ -135,7 +135,7 @@ groups:
   - name: lv3-platform-capacity
     rules:
       - alert: HostRamCommittedHigh
-        expr: lv3_capacity_committed_ram_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_ram_gb{host="proxmox_florin"} > 0.90
+        expr: lv3_capacity_committed_ram_gb{scope="active",host="proxmox-host"} / lv3_capacity_target_ram_gb{host="proxmox-host"} > 0.90
         for: 30m
         labels:
           severity: warning
@@ -143,7 +143,7 @@ groups:
           summary: Host RAM commitment is above 90 percent of the configured target
           runbook_url: https://docs.{{ platform_domain }}/runbooks/capacity-model/
       - alert: HostDiskCommittedHigh
-        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_disk_gb{host="proxmox_florin"} > 0.80
+        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox-host"} / lv3_capacity_target_disk_gb{host="proxmox-host"} > 0.80
         for: 30m
         labels:
           severity: warning
@@ -151,7 +151,7 @@ groups:
           summary: Host disk commitment is above 80 percent of the configured target
           runbook_url: https://docs.{{ platform_domain }}/runbooks/capacity-model/
       - alert: HostDiskCommittedCritical
-        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_disk_gb{host="proxmox_florin"} > 0.90
+        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox-host"} / lv3_capacity_target_disk_gb{host="proxmox-host"} > 0.90
         for: 15m
         labels:
           severity: critical

@@ -61,7 +61,7 @@ const FORM_HTML = `
     <div class="form-row-group">
       <div class="form-row">
         <label class="form-label" for="story-domain">Public Domain (optional)</label>
-        <input id="story-domain" name="domain" type="text" placeholder="my-app.apps.lv3.org" class="form-input">
+        <input id="story-domain" name="domain" type="text" placeholder="my-app.apps.example.com" class="form-input">
       </div>
       <div class="form-row">
         <label class="form-label" for="story-ports">Exposed Ports</label>
@@ -157,7 +157,7 @@ export const WithCatalogProfiles = {
               <div><dt>Branch</dt><dd>main</dd></div>
               <div><dt>Build pack</dt><dd>dockercompose</dd></div>
               <div><dt>LLM assistance</dt><dd>prohibited</dd></div>
-              <div><dt>Domain</dt><dd><a href="#">education-wemeshup.apps.lv3.org</a></dd></div>
+              <div><dt>Domain</dt><dd><a href="#">education-wemeshup.apps.example.com</a></dd></div>
             </dl>
             <div class="service-card-actions">
               <button class="action-button action-button--primary" type="button">Deploy education-wemeshup</button>

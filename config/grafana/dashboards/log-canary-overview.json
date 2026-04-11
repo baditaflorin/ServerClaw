@@ -18,7 +18,7 @@
         "y": 0
       },
       "options": {
-        "content": "### LV3 Log Canary\n\nThis dashboard proves that the production Loki path can still ingest and query its own recurring canary stream.\n\nRunbook: [Log Queryability Canary](https://docs.lv3.org/runbooks/log-queryability-canary/)",
+        "content": "### LV3 Log Canary\n\nThis dashboard proves that the production Loki path can still ingest and query its own recurring canary stream.\n\nRunbook: [Log Queryability Canary](https://docs.example.com/runbooks/log-queryability-canary/)",
         "mode": "markdown"
       }
     },

@@ -73,7 +73,7 @@
       },
       "targets": [
         {
-          "expr": "100 * lv3_capacity_committed_ram_gb{scope=\"active\",host=\"proxmox_florin\"} / lv3_capacity_target_ram_gb{host=\"proxmox_florin\"}",
+          "expr": "100 * lv3_capacity_committed_ram_gb{scope=\"active\",host=\"proxmox-host\"} / lv3_capacity_target_ram_gb{host=\"proxmox-host\"}",
           "refId": "A"
         }
       ],
@@ -133,7 +133,7 @@
       },
       "targets": [
         {
-          "expr": "100 * lv3_capacity_committed_vcpu{scope=\"active\",host=\"proxmox_florin\"} / lv3_capacity_target_vcpu{host=\"proxmox_florin\"}",
+          "expr": "100 * lv3_capacity_committed_vcpu{scope=\"active\",host=\"proxmox-host\"} / lv3_capacity_target_vcpu{host=\"proxmox-host\"}",
           "refId": "A"
         }
       ],
@@ -193,7 +193,7 @@
       },
       "targets": [
         {
-          "expr": "100 * lv3_capacity_committed_disk_gb{scope=\"active\",host=\"proxmox_florin\"} / lv3_capacity_target_disk_gb{host=\"proxmox_florin\"}",
+          "expr": "100 * lv3_capacity_committed_disk_gb{scope=\"active\",host=\"proxmox-host\"} / lv3_capacity_target_disk_gb{host=\"proxmox-host\"}",
           "refId": "A"
         }
       ],

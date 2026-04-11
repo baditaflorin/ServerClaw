@@ -22,7 +22,7 @@
           "endpoint": "ops@100.64.0.1",
           "auth": "Named SSH key for ops plus sudo on the Proxmox host.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "install-proxmox",
@@ -90,7 +90,7 @@
         {
           "id": "platform-api-gateway",
           "kind": "service_api",
-          "endpoint": "https://api.lv3.org/v1",
+          "endpoint": "https://api.example.com/v1",
           "auth": "Keycloak-issued bearer tokens validated against the LV3 realm JWKS by the gateway before request forwarding.",
           "service_refs": [
             "api_gateway"
@@ -109,7 +109,7 @@
           "workflow_refs": [
             "provision-api-access"
           ],
-          "notes": "The Proxmox management API is operator-only and private-first even though proxmox.lv3.org exists as an informational hostname."
+          "notes": "The Proxmox management API is operator-only and private-first even though proxmox.example.com exists as an informational hostname."
         },
         {
           "id": "step-ca-api",
@@ -180,7 +180,7 @@
         {
           "id": "vaultwarden-api",
           "kind": "service_api",
-          "endpoint": "https://vault.lv3.org",
+          "endpoint": "https://vault.example.com",
           "auth": "Named Vaultwarden operator accounts for routine use; the controller-local admin token is reserved for bounded bootstrap and recovery-safe automation.",
           "service_refs": [
             "vaultwarden"
@@ -219,7 +219,7 @@
         {
           "id": "headscale-control-plane",
           "kind": "service_api",
-          "endpoint": "https://headscale.lv3.org",
+          "endpoint": "https://headscale.example.com",
           "auth": "Headscale node registration keys for mesh clients and controller-local API keys for administrative automation.",
           "service_refs": [
             "headscale"
@@ -232,7 +232,7 @@
         {
           "id": "langfuse-observability-api",
           "kind": "service_api",
-          "endpoint": "https://langfuse.lv3.org/api/public",
+          "endpoint": "https://langfuse.example.com/api/public",
           "auth": "Project-scoped Langfuse public and secret API keys mirrored under .local/langfuse plus Keycloak-backed browser sign-in for interactive operator use.",
           "service_refs": [
             "langfuse"
@@ -304,7 +304,7 @@
           "endpoint": "lv3-ops-email sendmail endpoint with catch-all matcher to operator@example.com",
           "auth": "Repo-managed Proxmox notification target and matcher configuration.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "harden-security"
@@ -360,7 +360,7 @@
           "endpoint": "platform.findings.*",
           "auth": "Internal NATS publication from ADR 0071 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "check-platform-drift",
@@ -374,7 +374,7 @@
           "endpoint": "platform.watchdog.*",
           "auth": "Internal NATS publication from ADR 0172 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "scheduler-watchdog-loop"
@@ -398,7 +398,7 @@
           "endpoint": "platform.drift.*",
           "auth": "Internal NATS publication from ADR 0091 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "continuous-drift-detection"
@@ -411,7 +411,7 @@
           "endpoint": "platform.db.*",
           "auth": "Internal NATS publication from ADR 0304 through the private docker-runtime event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "atlas-drift-check"
@@ -424,7 +424,7 @@
           "endpoint": "platform.security.*",
           "auth": "Internal NATS publication from ADR 0102 and ADR 0142 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "security-posture-scan",
@@ -438,7 +438,7 @@
           "endpoint": "platform.slo.*",
           "auth": "Internal NATS publication from ADR 0305 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "k6-load",
@@ -452,7 +452,7 @@
           "endpoint": "platform.maintenance.*",
           "auth": "Internal NATS publication for ADR 0080 platform.maintenance.opened, platform.maintenance.closed, and platform.maintenance.force_closed events through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "open-maintenance-window",
@@ -466,7 +466,7 @@
           "endpoint": "platform.backup.*",
           "auth": "Internal NATS publication from ADR 0099 and ADR 0302 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "restore-verification"
@@ -479,7 +479,7 @@
           "endpoint": "platform.world_state.refreshed",
           "auth": "Internal NATS publication from ADR 0113 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [],
           "notes": "Each successful world-state materialization refresh emits one canonical platform.world_state.refreshed event for downstream graph, health, and automation consumers."
@@ -490,7 +490,7 @@
           "endpoint": "platform.mutation.recorded",
           "auth": "Internal NATS publication from ADR 0115 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [],
           "notes": "Each committed mutation-ledger row fans out on the canonical platform.mutation.recorded subject for downstream mirrors and reactive consumers."
@@ -501,7 +501,7 @@
           "endpoint": "platform.agent.*",
           "auth": "Internal NATS publication from ADR 0161 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "converge-windmill"
@@ -514,7 +514,7 @@
           "endpoint": "platform.execution.*",
           "auth": "Internal NATS publication from ADR 0119 and ADR 0162 through the private runtime-control event bus runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "converge-windmill"
@@ -527,7 +527,7 @@
           "endpoint": "platform.config.*",
           "auth": "Internal NATS publication from ADR 0158 through the private runtime-control Windmill worker runtime.",
           "owner_refs": [
-            "proxmox_florin"
+            "proxmox-host"
           ],
           "workflow_refs": [
             "merge-config-changes"
