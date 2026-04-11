@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T18:30:08Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "6e3122546499684d87ab3d23f4b1ad8faa10416f",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "runner image not cached locally; live-apply stack.yaml update only",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Windmill convergence ok=387 changed=52 failed=0 \u2014 live-apply receipt only",
+      "no logic changes"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "Pull check-runner images on build server after next maintenance window"
+  }
+}

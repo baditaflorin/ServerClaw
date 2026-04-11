@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-11T05:58:06Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "c3baff9f66e348663bb98cfefd31584f18612a91",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Publication preparation for public ServerClaw release",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "manual-review: PII scrub for public GitHub publication"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-13",
+    "remediation_ref": "github.com/baditaflorin/ServerClaw"
+  }
+}
