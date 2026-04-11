@@ -1,8 +1,9 @@
-# Release 0.178.114
+# Release 0.178.115
 
 - Date: 2026-04-11
 
 ## Summary
+- fix: Correct postmortem RAM claims — 5 MB/container reflects idle SSH only, not converged services; ADR 0410 estimates (4–32 GB) remain valid projections; measurement meaningless without service deployment
 - fix: Docker dev end-to-end tested — 7 bugs found and fixed: subnet changed to 10.99.10.0/24 (Tailscale + Docker IPAM collision), SSH port mappings added for macOS (bridge IPs unreachable), base image switched from Ubuntu to Debian Bookworm (playbook assertion), SSH key path fixed (inventory_dir), all 7 containers verified with Ansible ping; convergence blocked by playbook host pattern mismatch (documented, P1 fix needed)
 - [adr-0410] Docker isolation testing and IoC completion — proposed architecture for parallel test topologies (micro/minimal/standard/extended profiles), subnet isolation, Docker-native CA/TLS via step-ca + Pebble, cert validator identity awareness, generator identity overlay, test scenario catalog with CI integration; ~41h estimated across 8 phases
 - fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars

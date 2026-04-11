@@ -26,7 +26,7 @@ Validate that:
 | Ansible fact gathering | PASS | PASS | Debian 12 Bookworm confirmed |
 | IoC variable override | PASS | PASS | All 6 key values overridden |
 | Ansible convergence | BLOCKED | BLOCKED | Playbook host patterns don't match Docker inventory names |
-| Resource usage | ~15 MB | ~35 MB | ~5 MB per container (SSH only) |
+| Resource usage (idle) | ~15 MB | ~35 MB | ~5 MB per container (SSH only — no services deployed) |
 
 ## Findings (in discovery order)
 
@@ -198,8 +198,15 @@ no real certificate, producing `cert_mismatch` and blocking push.
 | SSH verify (all hosts) | 3s | 7s |
 | Ansible ping (all hosts) | 2s | 3s |
 | Ansible check mode (site.yml) | 8s | — |
-| RAM usage (idle) | 15 MB | 35 MB |
-| Per-container RAM | 5 MB | 5 MB |
+| RAM usage (idle, SSH only) | 15 MB | 35 MB |
+| Per-container RAM (idle) | 5 MB | 5 MB |
+
+**Important**: These RAM figures reflect idle containers running only the SSH
+daemon. No platform services (PostgreSQL, Keycloak, Nginx, etc.) were deployed
+because convergence is blocked by host pattern mismatch (Finding 7). Actual
+service RAM will be significantly higher — see ADR 0410 estimates:
+micro 2 GB, minimal 4 GB, standard 16 GB, extended 32 GB. These projections
+remain valid and should not be compared to the idle measurements above.
 
 ## User Journey Gaps
 
@@ -278,6 +285,10 @@ docker-dev-converge-check: ## Dry-run convergence (check mode)
    is correctly implemented and all values override as expected. The
    infrastructure layer (Docker) has the bugs, not the IoC architecture.
 
-7. **5 MB per container is great**: The vm-base image (Debian + SSH) uses
-   almost no resources. Even 12 containers would only use ~60 MB RAM idle.
-   Resource limits in ADR 0410 were overestimated.
+7. **Idle RAM is not service RAM**: The vm-base image (Debian + SSH) uses
+   ~5 MB per container idle, but this is meaningless for capacity planning.
+   No platform services were deployed (convergence blocked by Finding 7).
+   The ADR 0410 RAM estimates (4 GB minimal, 16 GB standard, 32 GB extended)
+   are projections for converged services and remain valid. Real service
+   RAM can only be measured after the host pattern mismatch is resolved
+   and actual convergence completes.
