@@ -1996,7 +1996,7 @@ route_dns_assertion_extra_records:
 route_dns_assertion_retired_records:
   - name: "@"
     type: AAAA
-    value: "2a01:4f8:d0a:27bd::2"
+    value: "2001:db8::3"
     ttl: 60
     state: absent
   - name: autoconfig
@@ -2012,7 +2012,7 @@ route_dns_assertion_retired_records:
     state: absent
   - name: www
     type: AAAA
-    value: "2a01:4f8:d0a:27bd::2"
+    value: "2001:db8::3"
     ttl: 60
     state: absent
 

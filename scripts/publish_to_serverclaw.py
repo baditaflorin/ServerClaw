@@ -20,6 +20,12 @@ from pathlib import Path
 
 import yaml
 
+from audit_sanitization_coverage import (
+    check_coverage,
+    derive_leak_markers,
+    extract_sensitive_values,
+)
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = REPO_ROOT / "config" / "publication-sanitization.yaml"
 REMOTE_NAME = "serverclaw"
@@ -249,10 +255,10 @@ def commit_and_push(worktree: Path, source_sha: str, push: bool) -> None:
     )
 
     if push:
-        # The worktree shares remotes with the parent repo, so just push directly
-        result = run(["git", "remote", "get-url", REMOTE_NAME], cwd=worktree)
+        # The worktree shares remotes with the parent repo, so just push directly.
         # Skip pre-push hooks — the sanitized worktree may not pass the
         # validation gate (changed domains, IPs, etc.)
+        run(["git", "remote", "get-url", REMOTE_NAME], cwd=worktree)
         run(
             ["git", "push", "--force", "--no-verify", REMOTE_NAME, "HEAD:main"],
             cwd=worktree,
@@ -274,6 +280,32 @@ def main() -> int:
         return 1
 
     config = load_config()
+
+    # Pre-publish coverage audit
+    print("Pre-publish coverage audit...")
+    values = extract_sensitive_values()
+    _covered, gaps = check_coverage(values, config)
+    critical = [g for g in gaps if g.severity == "CRITICAL"]
+    warnings = [g for g in gaps if g.severity == "WARNING"]
+    if critical:
+        print(f"\nABORT: {len(critical)} CRITICAL coverage gap(s):", file=sys.stderr)
+        for g in critical:
+            print(f"  {g.value}  ({g.category}, from {g.source})", file=sys.stderr)
+        print("\nFix config/publication-sanitization.yaml or run:", file=sys.stderr)
+        print("  python3 scripts/audit_sanitization_coverage.py", file=sys.stderr)
+        return 1
+    if warnings:
+        print(f"  {len(warnings)} WARNING gap(s) — deployment names without patterns")
+        for g in warnings:
+            print(f"    {g.value}  (from {g.source})")
+
+    # Merge auto-derived leak markers with manual ones
+    auto_markers = derive_leak_markers(values)
+    manual_markers = config.get("leak_markers", [])
+    config["leak_markers"] = sorted(set(auto_markers) | set(manual_markers))
+    print(
+        f"  Leak markers: {len(config['leak_markers'])} ({len(auto_markers)} auto + {len(manual_markers)} manual, {len(config['leak_markers'])} unique)"
+    )
 
     # Get current source SHA
     source_sha = run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT).stdout.strip()

@@ -1800,3 +1800,9 @@ publish-serverclaw: ## Dry-run: sanitize repo and check for leaks (no push)
 
 publish-serverclaw-push: ## Sanitize and push to public ServerClaw repo
 	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/publish_to_serverclaw.py --push
+
+audit-sanitization: ## Check publication sanitization coverage for drift
+	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/audit_sanitization_coverage.py
+
+audit-sanitization-strict: ## Same as audit-sanitization but exit 1 on any gap
+	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/audit_sanitization_coverage.py --strict
