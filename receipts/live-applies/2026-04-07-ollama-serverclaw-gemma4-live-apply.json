@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-07-ollama-serverclaw-gemma4-live-apply",
+  "applied_on": "2026-04-07",
+  "recorded_on": "2026-04-07",
+  "recorded_by": "claude",
+  "source_commit": "d5fc71c17f807d0456943fb61aa7babe0fda4b39",
+  "repo_version_context": "0.178.45",
+  "workflow_id": "converge-ollama",
+  "summary": "Deployed Ollama 0.20.2 upgrade and pulled gemma4:e4b model via serverclaw for AI inference.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "runtime-ai-lv3",
+      "address": "10.10.10.20"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Ollama version upgraded",
+      "result": "pass",
+      "observed": "Ollama 0.20.2 running, gemma4:e4b model available via serverclaw."
+    }
+  ],
+  "evidence_refs": [
+    "versions/stack.yaml"
+  ],
+  "notes": []
+}
