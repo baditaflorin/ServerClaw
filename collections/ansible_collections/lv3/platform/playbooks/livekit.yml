@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - LiveKit is running on docker-runtime-lv3 with repo-managed API credentials, the Proxmox host forwards public TCP/UDP media traffic, and livekit.{{ platform_domain }} is published through the shared NGINX edge.
+#   - LiveKit is running on docker-runtime with repo-managed API credentials, the Proxmox host forwards public TCP/UDP media traffic, and livekit.{{ platform_domain }} is published through the shared NGINX edge.
 #
 # Idempotency: Fully idempotent
 #
@@ -105,7 +105,7 @@
     - role: lv3.platform.proxmox_network
 
 - name: Converge LiveKit on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 
@@ -136,7 +136,7 @@
         playbook_execution_notification_service: livekit
 
 - name: Publish LiveKit through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

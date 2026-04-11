@@ -39,7 +39,7 @@
 # --- Directus-specific plays ---
 
 - name: Seed the Directus access model in PostgreSQL
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
 

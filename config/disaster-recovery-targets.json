@@ -23,7 +23,7 @@
       "keep_monthly": 12
     },
     "notes": [
-      "The off-site copy protects the backup-lv3 PBS VM as a complete recovery unit, including the PBS datastore disk.",
+      "The off-site copy protects the backup PBS VM as a complete recovery unit, including the PBS datastore disk.",
       "Hetzner Storage Box is mounted through Proxmox-managed CIFS storage on the hypervisor.",
       "Native PBS remote sync is intentionally not used here because it requires another PBS endpoint."
     ]
@@ -48,21 +48,21 @@
       "name": "Stateless VM failure",
       "rto_minutes": 30,
       "rpo_minutes": 0,
-      "notes": "Applies to nginx-lv3 and monitoring-lv3 once restored or reprovisioned from IaC."
+      "notes": "Applies to nginx and monitoring once restored or reprovisioned from IaC."
     },
     {
       "id": "vm_failure_stateful_no_ha",
       "name": "Stateful VM failure without HA",
       "rto_minutes": 120,
       "rpo_hours": 24,
-      "notes": "Applies to docker-runtime-lv3 and backup-lv3 restore from the most recent backup set."
+      "notes": "Applies to docker-runtime and backup restore from the most recent backup set."
     },
     {
       "id": "full_host_recovery_offsite_backup_vm",
-      "name": "Full host recovery with off-site backup-lv3 copy",
+      "name": "Full host recovery with off-site backup copy",
       "rto_minutes": 240,
       "rpo_hours": 24,
-      "notes": "Restore backup-lv3 from external storage first, then restore the remaining VMs from PBS."
+      "notes": "Restore backup from external storage first, then restore the remaining VMs from PBS."
     },
     {
       "id": "full_host_recovery_no_backup",
@@ -81,7 +81,7 @@
     },
     {
       "id": "tier_1",
-      "name": "Restore backup-lv3 from off-site storage",
+      "name": "Restore backup from off-site storage",
       "deadline_minutes": 90,
       "dependencies": [
         "tier_0"

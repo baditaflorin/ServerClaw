@@ -27,7 +27,7 @@
 # Last Updated: 2026-04-02
 
 - name: Converge Tesseract OCR on the runtime-ai pool guest
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-ai' }}"
   become: true
   gather_facts: true
   tags:

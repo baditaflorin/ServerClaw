@@ -1,4 +1,4 @@
-# Purpose: Converge the private Apache Tika compose stack on docker-runtime-lv3.
+# Purpose: Converge the private Apache Tika compose stack on docker-runtime.
 # Use case: Run during Tika deployment, recovery, or image refresh when the private extraction runtime must match repo truth.
 # Inputs: Pinned image catalog entry, private service URL, compose paths, recovery metadata, and verification fixtures.
 # Outputs: Rendered compose file plus a running Apache Tika container with version, text, and metadata endpoints verified.

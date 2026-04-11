@@ -896,7 +896,7 @@
     "available_workflows": [
       {
         "id": "adr-0077-compose-runtime-secrets-live-apply",
-        "description": "Converge the OpenBao Agent runtime-secret injection path across the migrated docker-runtime-lv3 platform applications and verify that the services now consume `/run/lv3-secrets/<service>/runtime.env` instead of compose-directory `.env` files.",
+        "description": "Converge the OpenBao Agent runtime-secret injection path across the migrated docker-runtime platform applications and verify that the services now consume `/run/lv3-secrets/<service>/runtime.env` instead of compose-directory `.env` files.",
         "tags": [
           "adr-0077-compose-runtime-secrets-live-apply",
           "guest-live",
@@ -1128,7 +1128,7 @@
       },
       {
         "id": "configure-backup-vm",
-        "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup-lv3.",
+        "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup.",
         "tags": [
           "configure-backup-vm",
           "host-and-guest-live",
@@ -1310,7 +1310,7 @@
       },
       {
         "id": "converge-api-gateway",
-        "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.",
+        "description": "Converge the unified platform API gateway on docker-runtime and publish it at api.lv3.org through the shared NGINX edge.",
         "tags": [
           "converge-api-gateway",
           "guest-live",
@@ -1336,7 +1336,7 @@
       },
       {
         "id": "converge-browser-runner",
-        "description": "Converge the private Playwright browser runner on docker-runtime-lv3, refresh the shared API gateway route, and verify the governed browser-session execution surface for operators and Dify.",
+        "description": "Converge the private Playwright browser runner on docker-runtime, refresh the shared API gateway route, and verify the governed browser-session execution surface for operators and Dify.",
         "tags": [
           "converge-browser-runner",
           "guest-live",
@@ -1362,7 +1362,7 @@
       },
       {
         "id": "converge-changedetection",
-        "description": "Deploy the private Changedetection.io runtime on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
+        "description": "Deploy the private Changedetection.io runtime on docker-runtime, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
         "tags": [
           "converge-changedetection",
           "guest-live",
@@ -1388,7 +1388,7 @@
       },
       {
         "id": "converge-control-plane-recovery",
-        "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, validate recurring restore drills on backup-lv3, and publish a verified off-host witness bundle.",
+        "description": "Converge scheduled control-plane backups on docker-runtime, stage controller recovery references, validate recurring restore drills on backup, and publish a verified off-host witness bundle.",
         "tags": [
           "converge-control-plane-recovery",
           "guest-live",
@@ -1414,7 +1414,7 @@
       },
       {
         "id": "converge-coolify",
-        "description": "Converge Coolify on coolify-lv3, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
+        "description": "Converge Coolify on coolify, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
         "tags": [
           "converge-coolify",
           "host-and-guest-live",
@@ -1440,7 +1440,7 @@
       },
       {
         "id": "converge-crawl4ai",
-        "description": "Deploy the private Crawl4AI runtime on docker-runtime-lv3 and verify the local, monitor, Markdown, and guest-network crawl contracts end to end.",
+        "description": "Deploy the private Crawl4AI runtime on docker-runtime and verify the local, monitor, Markdown, and guest-network crawl contracts end to end.",
         "tags": [
           "converge-crawl4ai",
           "guest-live",
@@ -1465,7 +1465,7 @@
       },
       {
         "id": "converge-dify",
-        "description": "Converge Dify on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
+        "description": "Converge Dify on docker-runtime, provision its PostgreSQL backend on postgres, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
         "tags": [
           "converge-dify",
           "guest-live",
@@ -1543,7 +1543,7 @@
       },
       {
         "id": "converge-docker-runtime",
-        "description": "Converge the Docker runtime baseline on docker-runtime-lv3.",
+        "description": "Converge the Docker runtime baseline on docker-runtime.",
         "tags": [
           "converge-docker-runtime",
           "guest-live",
@@ -1569,7 +1569,7 @@
       },
       {
         "id": "converge-dozzle",
-        "description": "Deploy the Dozzle hub on docker-runtime-lv3, join remote log agents from docker-build-lv3 and monitoring-lv3, and publish logs.lv3.org through the shared authenticated edge.",
+        "description": "Deploy the Dozzle hub on docker-runtime, join remote log agents from docker-build and monitoring, and publish logs.lv3.org through the shared authenticated edge.",
         "tags": [
           "converge-dozzle",
           "guest-live",
@@ -1595,7 +1595,7 @@
       },
       {
         "id": "converge-excalidraw",
-        "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime-lv3 and publish draw.lv3.org through the shared authenticated edge.",
+        "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime and publish draw.lv3.org through the shared authenticated edge.",
         "tags": [
           "converge-excalidraw",
           "guest-live",
@@ -1621,7 +1621,7 @@
       },
       {
         "id": "converge-falco",
-        "description": "Converge the private Falco event bridge on docker-runtime-lv3 plus Falco syscall monitoring on the selected production guests.",
+        "description": "Converge the private Falco event bridge on docker-runtime plus Falco syscall monitoring on the selected production guests.",
         "tags": [
           "converge-falco",
           "guest-live",
@@ -1647,7 +1647,7 @@
       },
       {
         "id": "converge-flagsmith",
-        "description": "Converge Flagsmith on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
+        "description": "Converge Flagsmith on docker-runtime, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
         "tags": [
           "converge-flagsmith",
           "guest-live",
@@ -1673,7 +1673,7 @@
       },
       {
         "id": "converge-gitea",
-        "description": "Converge private Gitea on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and register the self-hosted Actions runner on docker-build-lv3.",
+        "description": "Converge private Gitea on docker-runtime, provision its PostgreSQL backend on postgres, and register the self-hosted Actions runner on docker-build.",
         "tags": [
           "converge-gitea",
           "host-and-guest-live",
@@ -1699,7 +1699,7 @@
       },
       {
         "id": "converge-glitchtip",
-        "description": "Converge GlitchTip on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at errors.lv3.org, and verify public DSN ingestion end to end.",
+        "description": "Converge GlitchTip on docker-runtime, provision its PostgreSQL backend on postgres, publish it at errors.lv3.org, and verify public DSN ingestion end to end.",
         "tags": [
           "converge-glitchtip",
           "guest-live",
@@ -1725,7 +1725,7 @@
       },
       {
         "id": "converge-gotenberg",
-        "description": "Deploy the private Gotenberg runtime on runtime-ai-lv3 and verify the shared API gateway route that now targets the dedicated runtime-ai pool upstream.",
+        "description": "Deploy the private Gotenberg runtime on runtime-ai and verify the shared API gateway route that now targets the dedicated runtime-ai pool upstream.",
         "tags": [
           "converge-gotenberg",
           "guest-live",
@@ -1777,7 +1777,7 @@
       },
       {
         "id": "converge-harbor",
-        "description": "Converge Harbor on docker-runtime-lv3, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
+        "description": "Converge Harbor on docker-runtime, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
         "tags": [
           "converge-harbor",
           "guest-live",
@@ -1829,7 +1829,7 @@
       },
       {
         "id": "converge-homepage",
-        "description": "Deploy the Homepage unified service dashboard on runtime-general-lv3 and publish it at home.lv3.org through the shared authenticated edge.",
+        "description": "Deploy the Homepage unified service dashboard on runtime-general and publish it at home.lv3.org through the shared authenticated edge.",
         "tags": [
           "converge-homepage",
           "guest-live",
@@ -1855,7 +1855,7 @@
       },
       {
         "id": "converge-identity-core-watchdog",
-        "description": "Deploy the identity-core health watchdog on runtime-control-lv3: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
+        "description": "Deploy the identity-core health watchdog on runtime-control: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
         "tags": [
           "converge-identity-core-watchdog",
           "guest-live",
@@ -1881,7 +1881,7 @@
       },
       {
         "id": "converge-keycloak",
-        "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
+        "description": "Converge Keycloak on docker-runtime, provision its PostgreSQL backend on postgres, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
         "tags": [
           "converge-keycloak",
           "guest-live",
@@ -1907,7 +1907,7 @@
       },
       {
         "id": "converge-label-studio",
-        "description": "Converge Label Studio on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
+        "description": "Converge Label Studio on docker-runtime, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
         "tags": [
           "converge-label-studio",
           "guest-live",
@@ -1933,7 +1933,7 @@
       },
       {
         "id": "converge-lago",
-        "description": "Converge Lago on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
+        "description": "Converge Lago on docker-runtime, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
         "tags": [
           "converge-lago",
           "guest-live",
@@ -1959,7 +1959,7 @@
       },
       {
         "id": "converge-langfuse",
-        "description": "Converge Langfuse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
+        "description": "Converge Langfuse on docker-runtime, provision its PostgreSQL backend on postgres, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
         "tags": [
           "converge-langfuse",
           "guest-live",
@@ -1985,7 +1985,7 @@
       },
       {
         "id": "converge-librechat",
-        "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge.",
+        "description": "Deploy LibreChat on coolify, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge.",
         "tags": [
           "converge-librechat",
           "host-and-guest-live",
@@ -2011,7 +2011,7 @@
       },
       {
         "id": "converge-litellm",
-        "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend.",
+        "description": "Converge LiteLLM Proxy on docker-runtime with PostgreSQL backend.",
         "tags": [
           "converge-litellm",
           "host-and-guest-live",
@@ -2037,7 +2037,7 @@
       },
       {
         "id": "converge-livekit",
-        "description": "Converge LiveKit on docker-runtime-lv3, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
+        "description": "Converge LiveKit on docker-runtime, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
         "tags": [
           "converge-livekit",
           "host-and-guest-live",
@@ -2089,7 +2089,7 @@
       },
       {
         "id": "converge-mailpit",
-        "description": "Deploy the private Mailpit SMTP interceptor on runtime-general-lv3 for staging and development mail capture plus REST-API assertions.",
+        "description": "Deploy the private Mailpit SMTP interceptor on runtime-general for staging and development mail capture plus REST-API assertions.",
         "tags": [
           "converge-mailpit",
           "guest-live",
@@ -2115,7 +2115,7 @@
       },
       {
         "id": "converge-matrix-synapse",
-        "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend plus bridge databases on postgres-lv3, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
+        "description": "Converge Matrix Synapse on docker-runtime, provision its PostgreSQL backend plus bridge databases on postgres, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
         "tags": [
           "converge-matrix-synapse",
           "host-and-guest-live",
@@ -2141,7 +2141,7 @@
       },
       {
         "id": "converge-mattermost",
-        "description": "Converge Mattermost on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
+        "description": "Converge Mattermost on docker-runtime, provision its PostgreSQL backend on postgres, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
         "tags": [
           "converge-mattermost",
           "host-and-guest-live",
@@ -2167,7 +2167,7 @@
       },
       {
         "id": "converge-minio",
-        "description": "Deploy the shared MinIO runtime on docker-runtime-lv3, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
+        "description": "Deploy the shared MinIO runtime on docker-runtime, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
         "tags": [
           "converge-minio",
           "guest-live",
@@ -2219,7 +2219,7 @@
       },
       {
         "id": "converge-n8n",
-        "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
+        "description": "Converge the n8n connector fabric on docker-runtime, provision its PostgreSQL backend on postgres, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
         "tags": [
           "converge-n8n",
           "guest-live",
@@ -2245,7 +2245,7 @@
       },
       {
         "id": "converge-neko",
-        "description": "Converge Neko remote desktop on dedicated runtime-comms-lv3 VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
+        "description": "Converge Neko remote desktop on dedicated runtime-comms VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
         "tags": [
           "converge-neko",
           "host-and-guest-live",
@@ -2271,7 +2271,7 @@
       },
       {
         "id": "converge-netbox",
-        "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
+        "description": "Converge private NetBox on docker-runtime, provision its PostgreSQL backend on postgres, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
         "tags": [
           "converge-netbox",
           "host-and-guest-live",
@@ -2297,7 +2297,7 @@
       },
       {
         "id": "converge-nextcloud",
-        "description": "Converge Nextcloud on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish cloud.lv3.org with DAV redirects and large-upload support.",
+        "description": "Converge Nextcloud on docker-runtime, provision its PostgreSQL backend on postgres, and publish cloud.lv3.org with DAV redirects and large-upload support.",
         "tags": [
           "converge-nextcloud",
           "guest-live",
@@ -2323,7 +2323,7 @@
       },
       {
         "id": "converge-nomad",
-        "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime, runtime-general, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+        "description": "Converge the private Nomad scheduler on monitoring plus the runtime, runtime-general, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
         "tags": [
           "converge-nomad",
           "host-and-guest-live",
@@ -2349,7 +2349,7 @@
       },
       {
         "id": "converge-ntfy",
-        "description": "Deploy the published ntfy push channel on docker-runtime-lv3, publish ntfy.lv3.org through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
+        "description": "Deploy the published ntfy push channel on docker-runtime, publish ntfy.lv3.org through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
         "tags": [
           "converge-ntfy",
           "guest-live",
@@ -2401,7 +2401,7 @@
       },
       {
         "id": "converge-ollama",
-        "description": "Deploy the private Ollama runtime on docker-runtime-lv3, sync the repo-managed startup model catalog, and verify local inference health.",
+        "description": "Deploy the private Ollama runtime on docker-runtime, sync the repo-managed startup model catalog, and verify local inference health.",
         "tags": [
           "converge-ollama",
           "guest-live",
@@ -2427,7 +2427,7 @@
       },
       {
         "id": "converge-openbao",
-        "description": "Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
+        "description": "Deploy private OpenBao on docker-runtime, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
         "tags": [
           "converge-openbao",
           "guest-live",
@@ -2453,7 +2453,7 @@
       },
       {
         "id": "converge-openfga",
-        "description": "Converge OpenFGA on docker-runtime-lv3, publish the Proxmox host controller proxy, and seed the repo-managed ServerClaw delegated authorization graph.",
+        "description": "Converge OpenFGA on docker-runtime, publish the Proxmox host controller proxy, and seed the repo-managed ServerClaw delegated authorization graph.",
         "tags": [
           "converge-openfga",
           "host-and-guest-live",
@@ -2479,7 +2479,7 @@
       },
       {
         "id": "converge-ops-portal",
-        "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
+        "description": "Converge the interactive ops portal on docker-runtime so the browser control plane stays aligned with the shared API gateway contracts.",
         "tags": [
           "converge-ops-portal",
           "guest-live",
@@ -2505,7 +2505,7 @@
       },
       {
         "id": "converge-paperless",
-        "description": "Deploy the public Paperless-ngx archive on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
+        "description": "Deploy the public Paperless-ngx archive on docker-runtime, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
         "tags": [
           "converge-paperless",
           "guest-live",
@@ -2531,7 +2531,7 @@
       },
       {
         "id": "converge-piper",
-        "description": "Deploy the private Piper text-to-speech runtime on docker-runtime-lv3, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
+        "description": "Deploy the private Piper text-to-speech runtime on docker-runtime, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
         "tags": [
           "converge-piper",
           "guest-live",
@@ -2557,7 +2557,7 @@
       },
       {
         "id": "converge-plane",
-        "description": "Converge Plane on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
+        "description": "Converge Plane on docker-runtime, provision its PostgreSQL backend on postgres, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
         "tags": [
           "converge-plane",
           "guest-live",
@@ -2583,7 +2583,7 @@
       },
       {
         "id": "converge-plausible",
-        "description": "Converge Plausible on docker-runtime-lv3, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
+        "description": "Converge Plausible on docker-runtime, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
         "tags": [
           "converge-plausible",
           "guest-live",
@@ -2609,7 +2609,7 @@
       },
       {
         "id": "converge-portainer",
-        "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
+        "description": "Converge the private Portainer runtime on docker-runtime, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
         "tags": [
           "converge-portainer",
           "host-and-guest-live",
@@ -2635,7 +2635,7 @@
       },
       {
         "id": "converge-postgres-vm",
-        "description": "Converge the dedicated PostgreSQL guest baseline on postgres-lv3.",
+        "description": "Converge the dedicated PostgreSQL guest baseline on postgres.",
         "tags": [
           "converge-postgres-vm",
           "guest-live",
@@ -2661,7 +2661,7 @@
       },
       {
         "id": "converge-rag-context",
-        "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
+        "description": "Deploy the private platform context API with Qdrant on docker-runtime, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
         "tags": [
           "converge-rag-context",
           "host-and-guest-live",
@@ -2687,7 +2687,7 @@
       },
       {
         "id": "converge-redpanda",
-        "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime-lv3 and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
+        "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
         "tags": [
           "converge-redpanda",
           "guest-live",
@@ -2713,7 +2713,7 @@
       },
       {
         "id": "converge-restic-config-backup",
-        "description": "Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime-lv3, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.",
+        "description": "Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.",
         "tags": [
           "converge-restic-config-backup",
           "guest-live",
@@ -2739,7 +2739,7 @@
       },
       {
         "id": "converge-searxng",
-        "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render ServerClaw to use the local search endpoint.",
+        "description": "Deploy the private SearXNG runtime on docker-runtime, publish its tailnet-only hostname through the Proxmox host proxy, and re-render ServerClaw to use the local search endpoint.",
         "tags": [
           "converge-searxng",
           "host-and-guest-live",
@@ -2765,7 +2765,7 @@
       },
       {
         "id": "converge-semaphore",
-        "description": "Converge the private Semaphore runtime on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+        "description": "Converge the private Semaphore runtime on docker-runtime, provision its PostgreSQL backend on postgres, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
         "tags": [
           "converge-semaphore",
           "host-and-guest-live",
@@ -2791,7 +2791,7 @@
       },
       {
         "id": "converge-serverclaw",
-        "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
+        "description": "Deploy the first public ServerClaw surface on coolify, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
         "tags": [
           "converge-serverclaw",
           "host-and-guest-live",
@@ -2869,7 +2869,7 @@
       },
       {
         "id": "converge-temporal",
-        "description": "Converge Temporal on docker-runtime-lv3, provision its PostgreSQL history and visibility stores on postgres-lv3, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.",
+        "description": "Converge Temporal on docker-runtime, provision its PostgreSQL history and visibility stores on postgres, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.",
         "tags": [
           "converge-temporal",
           "guest-live",
@@ -2895,7 +2895,7 @@
       },
       {
         "id": "converge-tesseract-ocr",
-        "description": "Build and deploy the private Tesseract OCR fallback runtime on runtime-ai-lv3 and verify direct OCR plus the Tika-first helper path through the dedicated runtime-ai pool.",
+        "description": "Build and deploy the private Tesseract OCR fallback runtime on runtime-ai and verify direct OCR plus the Tika-first helper path through the dedicated runtime-ai pool.",
         "tags": [
           "converge-tesseract-ocr",
           "guest-live",
@@ -2921,7 +2921,7 @@
       },
       {
         "id": "converge-tika",
-        "description": "Deploy the private Apache Tika runtime on runtime-ai-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts through the dedicated runtime-ai pool.",
+        "description": "Deploy the private Apache Tika runtime on runtime-ai and verify the standard `/version`, `/tika`, and `/meta` extraction contracts through the dedicated runtime-ai pool.",
         "tags": [
           "converge-tika",
           "guest-live",
@@ -2947,7 +2947,7 @@
       },
       {
         "id": "converge-typesense",
-        "description": "Deploy the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
+        "description": "Deploy the private Typesense runtime on docker-runtime, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
         "tags": [
           "converge-typesense",
           "host-and-guest-live",
@@ -2973,7 +2973,7 @@
       },
       {
         "id": "converge-vaultwarden",
-        "description": "Converge private Vaultwarden on docker-runtime-lv3, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
+        "description": "Converge private Vaultwarden on docker-runtime, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
         "tags": [
           "converge-vaultwarden",
           "host-and-guest-live",
@@ -2999,7 +2999,7 @@
       },
       {
         "id": "converge-windmill",
-        "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
+        "description": "Converge Windmill on docker-runtime, provision its PostgreSQL backend on postgres, and expose the operator-only Tailscale proxy on the Proxmox host.",
         "tags": [
           "converge-windmill",
           "host-and-guest-live",
@@ -3025,7 +3025,7 @@
       },
       {
         "id": "converge-woodpecker",
-        "description": "Converge Woodpecker on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish ci.lv3.org through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
+        "description": "Converge Woodpecker on docker-runtime, provision its PostgreSQL backend on postgres, publish ci.lv3.org through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
         "tags": [
           "converge-woodpecker",
           "host-and-guest-live",
@@ -3281,7 +3281,7 @@
       },
       {
         "id": "fault-injection",
-        "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3, record a JSON report, and optionally publish failure notifications.",
+        "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime, record a JSON report, and optionally publish failure notifications.",
         "tags": [
           "diagnostic",
           "fault-injection",
@@ -4172,7 +4172,7 @@
       },
       {
         "id": "restic-config-backup",
-        "description": "Run the ADR 0302 Restic file-level backup workflow on docker-runtime-lv3, write one backup receipt, refresh the latest-snapshot ledger, and emit stale-source signals when needed.",
+        "description": "Run the ADR 0302 Restic file-level backup workflow on docker-runtime, write one backup receipt, refresh the latest-snapshot ledger, and emit stale-source signals when needed.",
         "tags": [
           "guest-live",
           "mutation",
@@ -4198,7 +4198,7 @@
       },
       {
         "id": "restic-config-restore-verify",
-        "description": "Run the ADR 0302 restore-verification rehearsal on docker-runtime-lv3 by restoring the latest receipts snapshot into a temporary directory and writing one verification receipt.",
+        "description": "Run the ADR 0302 restore-verification rehearsal on docker-runtime by restoring the latest receipts snapshot into a temporary directory and writing one verification receipt.",
         "tags": [
           "diagnostic",
           "guest-live",

@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path for the live apply.
 #
 # Outputs:
-#   - /opt/tika/docker-compose.yml on runtime-ai-lv3
+#   - /opt/tika/docker-compose.yml on runtime-ai
 #   - a running private Apache Tika container listening on the internal guest network
 #
 # Idempotency: Fully idempotent
@@ -28,7 +28,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-02
 - name: Converge Apache Tika on the runtime-ai pool guest
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-ai' }}"
   become: true
   gather_facts: true
   tags:

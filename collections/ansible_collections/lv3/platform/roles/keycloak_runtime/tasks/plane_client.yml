@@ -18,7 +18,7 @@
     plane_oidc_client_id: lv3-plane-oidc
     plane_oidc_client_name: "LV3 Plane Task Board"
     plane_oidc_public_url: "{{ plane_service_topology.public_base_url | default('https://tasks.{{ platform_domain }}') }}"
-    plane_oidc_internal_url: "{{ plane_service_topology.internal_base_url | default('http://docker-runtime-lv3.internal:8000') }}"
+    plane_oidc_internal_url: "{{ plane_service_topology.internal_base_url | default('http://docker-runtime.internal:8000') }}"
     keycloak_api_url: "{{ keycloak_local_admin_url }}"
 
 - name: Check if Plane OIDC client already exists in Keycloak

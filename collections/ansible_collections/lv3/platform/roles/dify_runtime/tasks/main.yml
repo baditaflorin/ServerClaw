@@ -1,5 +1,5 @@
 # Purpose: Converge the full Dify application stack, secrets, compose assets, and local controller artifacts.
-# Use case: Run when deploying or updating Dify on `docker-runtime-lv3` from repo-managed automation.
+# Use case: Run when deploying or updating Dify on `docker-runtime` from repo-managed automation.
 # Inputs: Runtime paths, image refs, topology URLs, mirrored PostgreSQL password, and OpenBao helper settings.
 # Outputs: Installs the Dify runtime tree, renders compose configuration, mirrors secrets, and starts the stack.
 # Idempotency: Partially idempotent because one-time secret generation and compose restarts occur only when runtime inputs change.

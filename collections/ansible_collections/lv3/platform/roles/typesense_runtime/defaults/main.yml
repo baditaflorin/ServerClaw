@@ -1,5 +1,5 @@
 # Purpose: Define default paths, topology inputs, and image wiring for the repo-managed Typesense runtime.
-# Use case: Loaded whenever the Typesense role converges ADR 0277 on docker-runtime-lv3.
+# Use case: Loaded whenever the Typesense role converges ADR 0277 on docker-runtime.
 # Inputs: Inventory-derived topology, image catalog entries, OpenBao defaults, and controller-local artifact roots.
 # Outputs: Supplies stable defaults consumed by the Typesense runtime tasks and templates.
 # Idempotency: Fully idempotent because this file only declares role defaults.

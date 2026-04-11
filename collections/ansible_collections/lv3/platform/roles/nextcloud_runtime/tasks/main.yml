@@ -1,14 +1,14 @@
 ---
 # Purpose: Converge the Nextcloud runtime, bootstrap local secrets, and enforce the repo-managed DAV publication contract.
 # ADR 0373: derive_service_defaults called at top.
-# Use case: Run during Nextcloud deployment, upgrade, or replay on docker-runtime-lv3 once PostgreSQL, OpenBao, and the shared edge exist.
+# Use case: Run during Nextcloud deployment, upgrade, or replay on docker-runtime once PostgreSQL, OpenBao, and the shared edge exist.
 #
 # Inputs (required):
 #   - nextcloud_site_dir (path, required): Runtime root directory.
 #   - nextcloud_secret_dir (path, required): Guest-side secret directory for the bootstrap passwords.
 #   - nextcloud_public_hostname (str, required): Published Nextcloud hostname.
 #   - nextcloud_public_base_url (str, required): Public URL used for overwrite and verification settings.
-#   - nextcloud_port (int, required): Internal Nextcloud listener port on docker-runtime-lv3.
+#   - nextcloud_port (int, required): Internal Nextcloud listener port on docker-runtime.
 #   - nextcloud_admin_user (str, required): Bootstrap admin username mirrored by the repo.
 #
 # Inputs (optional):
@@ -75,7 +75,7 @@
     common_check_local_secrets_files:
       - path: "{{ nextcloud_database_password_local_file }}"
         description: "Nextcloud database password"
-        prerequisite: "Run the Nextcloud PostgreSQL converge first so the runtime can connect to postgres-lv3"
+        prerequisite: "Run the Nextcloud PostgreSQL converge first so the runtime can connect to postgres"
 
 - name: Ensure the Nextcloud runtime packages are present
   ansible.builtin.apt:

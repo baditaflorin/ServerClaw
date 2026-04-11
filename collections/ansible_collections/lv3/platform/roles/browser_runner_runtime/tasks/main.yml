@@ -1,5 +1,5 @@
 ---
-# Purpose: Build the private Playwright browser runner image from repo-managed sources, start the runtime on docker-runtime-lv3, and verify the local session API.
+# Purpose: Build the private Playwright browser runner image from repo-managed sources, start the runtime on docker-runtime, and verify the local session API.
 - name: Derive Browser Runner conventional defaults from the service registry
   ansible.builtin.include_role:
     name: lv3.platform.common

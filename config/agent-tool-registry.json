@@ -2320,7 +2320,7 @@
     {
       "name": "execute-host-command",
       "title": "Execute Host Command",
-      "description": "Execute a shell command directly on any platform host using the host's own shell and binaries (systemctl, journalctl, docker, free, etc). Defaults to runtime-control-lv3; set 'host' to target other machines (proxmox, postgres-lv3, docker-runtime-lv3, build-server, coolify-lv3, runtime-comms-lv3). Remote hosts are reached via SSH.",
+      "description": "Execute a shell command directly on any platform host using the host's own shell and binaries (systemctl, journalctl, docker, free, etc). Defaults to runtime-control; set 'host' to target other machines (proxmox, postgres, docker-runtime, build-server, coolify, runtime-comms). Remote hosts are reached via SSH.",
       "category": "execute",
       "transport": "controller_local",
       "endpoint": "handler://execute_host_command",
@@ -2345,8 +2345,8 @@
           },
           "host": {
             "type": "string",
-            "enum": ["runtime-control-lv3", "proxmox", "postgres-lv3", "docker-runtime-lv3", "build-server", "coolify-lv3", "runtime-comms-lv3"],
-            "description": "Target host to run the command on (default: runtime-control-lv3)"
+            "enum": ["runtime-control", "proxmox", "postgres", "docker-runtime", "build-server", "coolify", "runtime-comms"],
+            "description": "Target host to run the command on (default: runtime-control)"
           },
           "timeout": {
             "type": "integer",

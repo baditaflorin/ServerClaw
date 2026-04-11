@@ -1,6 +1,6 @@
 ---
 # Playbook: harbor.yml
-# Purpose: Deploy Harbor on runtime-control-lv3 and publish registry.{{ platform_domain }} through the shared NGINX edge.
+# Purpose: Deploy Harbor on runtime-control and publish registry.{{ platform_domain }} through the shared NGINX edge.
 # Use case: Run when provisioning or updating the managed Harbor registry runtime and its public edge publication.
 #
 # Inputs (required):
@@ -10,15 +10,15 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path for the Docker runtime and edge VMs.
 #
 # Outputs:
-#   - Harbor runtime converged on runtime-control-lv3 under /opt/harbor.
-#   - registry.{{ platform_domain }} published through nginx-lv3.
+#   - Harbor runtime converged on runtime-control under /opt/harbor.
+#   - registry.{{ platform_domain }} published through nginx.
 #
 # Idempotency: Fully idempotent
 #              The Harbor installer assets and compose stack are rendered from repo inputs and can be re-applied safely.
 #
 # Dependencies:
 #   - ADR 0201: Harbor with CVE scanning is the service being deployed.
-#   - Requires: runtime-control-lv3, nginx-lv3, and Keycloak on runtime-control-lv3 to be reachable.
+#   - Requires: runtime-control, nginx, and Keycloak on runtime-control to be reachable.
 #   - Role: harbor_runtime — installs Harbor, bootstraps local runtime secrets, and verifies core services.
 #   - Role: nginx_edge_publication — renders the public reverse-proxy publication for registry.{{ platform_domain }}.
 #
@@ -30,7 +30,7 @@
 # =============================================================================
 
 - name: Converge Harbor on the runtime-control VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
   vars:
@@ -59,7 +59,7 @@
     - role: lv3.platform.harbor_runtime
 
 - name: Publish Harbor on the shared NGINX edge
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   vars:

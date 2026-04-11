@@ -18,7 +18,7 @@ USAGE EXAMPLES
   python3 scripts/service_health_tool.py list
 
   # List all services on a specific VM
-  python3 scripts/service_health_tool.py list --vm docker-runtime-lv3
+  python3 scripts/service_health_tool.py list --vm docker-runtime
 
   # Describe a service's full probe config
   python3 scripts/service_health_tool.py describe --service alertmanager
@@ -27,7 +27,7 @@ USAGE EXAMPLES
   python3 scripts/service_health_tool.py probe --service alertmanager
 
   # Probe all services on a VM
-  python3 scripts/service_health_tool.py status-all --vm monitoring-lv3
+  python3 scripts/service_health_tool.py status-all --vm monitoring
 
   # Probe everything (takes ~30s, most will be local_only)
   python3 scripts/service_health_tool.py status-all

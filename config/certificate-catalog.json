@@ -20,7 +20,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -44,7 +44,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -68,7 +68,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -92,7 +92,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -137,7 +137,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -161,7 +161,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3",
+        "host": "nginx",
         "notes": "Renewed by Certbot on the shared public edge VM."
       },
       "material": {
@@ -186,7 +186,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3",
+        "host": "nginx",
         "notes": "Neko uses a dedicated NGINX server block with its own certificate, separate from the shared lv3-edge bundle."
       },
       "material": {
@@ -211,7 +211,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3",
+        "host": "nginx",
         "notes": "Renewed by Certbot on the shared public edge VM."
       },
       "material": {
@@ -236,7 +236,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -260,7 +260,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -284,7 +284,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -308,7 +308,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -332,7 +332,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -356,7 +356,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -380,7 +380,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -404,7 +404,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -428,7 +428,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -452,7 +452,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -476,7 +476,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -500,7 +500,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -524,7 +524,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -548,7 +548,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -572,7 +572,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -596,7 +596,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -620,7 +620,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -644,7 +644,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -668,7 +668,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -692,7 +692,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -716,7 +716,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -740,7 +740,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -764,7 +764,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -788,7 +788,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -812,7 +812,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -836,7 +836,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -860,7 +860,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -884,7 +884,7 @@
       "renewal": {
         "agent": "systemd-step-issue",
         "managed_by_repo": true,
-        "host": "docker-runtime-lv3",
+        "host": "docker-runtime",
         "unit_name": "lv3-openbao-cert-renew",
         "on_calendar": "*:0/15",
         "randomized_delay_seconds": 60,
@@ -923,7 +923,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -947,7 +947,7 @@
       "renewal": {
         "agent": "portainer-self-managed",
         "managed_by_repo": false,
-        "host": "docker-runtime-lv3",
+        "host": "docker-runtime",
         "notes": "Portainer still serves its container-local certificate. A follow-up ADR can replace it with step-ca-managed material."
       }
     },
@@ -969,7 +969,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1015,7 +1015,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1039,7 +1039,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1063,7 +1063,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1087,7 +1087,7 @@
       "renewal": {
         "agent": "certbot-webroot",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/scheduler.lv3.org/fullchain.pem"
@@ -1111,7 +1111,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1135,7 +1135,7 @@
       "renewal": {
         "agent": "step-ca-self",
         "managed_by_repo": false,
-        "host": "docker-runtime-lv3",
+        "host": "docker-runtime",
         "notes": "The CA bootstrap certificate remains a step-ca-managed special case and is only inventoried here."
       }
     },
@@ -1157,7 +1157,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1181,7 +1181,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1205,7 +1205,7 @@
       "renewal": {
         "agent": "systemd-step-issue",
         "managed_by_repo": true,
-        "host": "docker-runtime-lv3",
+        "host": "docker-runtime",
         "unit_name": "lv3-vaultwarden-cert-renew",
         "on_calendar": "*:0/15",
         "randomized_delay_seconds": 60,
@@ -1247,7 +1247,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1271,7 +1271,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -1295,7 +1295,7 @@
       "renewal": {
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "nginx-lv3"
+        "host": "nginx"
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"

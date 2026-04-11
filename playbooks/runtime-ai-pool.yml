@@ -1,5 +1,5 @@
 # Playbook: runtime-ai-pool.yml
-# Purpose: Provision the dedicated runtime-ai guest, converge the Nomad/Traefik/Dapr pool substrate, move the first document-extraction slice onto it, and retire the legacy copies from docker-runtime-lv3.
+# Purpose: Provision the dedicated runtime-ai guest, converge the Nomad/Traefik/Dapr pool substrate, move the first document-extraction slice onto it, and retire the legacy copies from docker-runtime.
 # Use case: Run for ADR 0319 and ADR 0320 live apply when the first production runtime-ai pool must become true end to end.
 #
 # Inputs (required):
@@ -11,7 +11,7 @@
 #   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
 #
 # Outputs:
-#   - Dedicated VM `runtime-ai-lv3` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, a runtime-ai Nomad namespace and client, Traefik plus Dapr substrate services, and the migrated Tika, Gotenberg, and Tesseract OCR workloads.
+#   - Dedicated VM `runtime-ai` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, a runtime-ai Nomad namespace and client, Traefik plus Dapr substrate services, and the migrated Tika, Gotenberg, and Tesseract OCR workloads.
 #
 # Idempotency: Partially idempotent
 #              Provisioning and service converges are idempotent. The Proxmox-side replay intentionally stop/starts VM 190 after `qm set` changes so the cloud-init-backed network and hardware settings become effective.
@@ -22,7 +22,7 @@
 #   - ADR 0232: Provides the private Nomad scheduler and client bootstrap path.
 #   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
 #   - Role: lv3.platform.proxmox_network — replays the Proxmox host firewall so the new pool guest and the Nomad scheduler can reach each other.
-#   - Role: lv3.platform.linux_guest_firewall — refreshes the in-guest nftables policy on `monitoring-lv3` after the canonical guest catalog changes so the Nomad scheduler admits the new runtime-ai peer without replaying the fragile shared runtime.
+#   - Role: lv3.platform.linux_guest_firewall — refreshes the in-guest nftables policy on `monitoring` after the canonical guest catalog changes so the Nomad scheduler admits the new runtime-ai peer without replaying the fragile shared runtime.
 #   - Role: lv3.platform.nomad_cluster_member — enrolls the runtime-ai guest into the private Nomad cluster.
 #   - Role: lv3.platform.nomad_namespace — ensures the runtime-ai namespace exists on the scheduler.
 #   - Role: lv3.platform.runtime_pool_substrate — converges the Traefik and Dapr pool substrate.
@@ -80,7 +80,7 @@
         - runtime-ai-pool
 
 - name: Converge the dedicated runtime-ai guest substrate
-  hosts: runtime-ai-lv3
+  hosts: runtime-ai
   become: true
   gather_facts: false
   tags:
@@ -139,7 +139,7 @@
     - role: lv3.platform.runtime_pool_substrate
 
 - name: Refresh monitoring guest firewall policy after the runtime-ai peer catalog changes
-  hosts: monitoring-lv3
+  hosts: monitoring
   become: true
   gather_facts: true
   tags:
@@ -160,7 +160,7 @@
         linux_guest_firewall_recover_missing_docker_bridge_chains: true
 
 - name: Ensure the runtime-ai Nomad namespace exists
-  hosts: monitoring-lv3
+  hosts: monitoring
   become: true
   gather_facts: true
   tags:
@@ -174,8 +174,8 @@
         nomad_namespace_name: runtime-ai
         nomad_namespace_description: Runtime AI pool namespace for the dedicated document-extraction and bursty AI guest.
 
-- name: Converge the document-extraction services on runtime-ai-lv3
-  hosts: runtime-ai-lv3
+- name: Converge the document-extraction services on runtime-ai
+  hosts: runtime-ai
   become: true
   gather_facts: true
   tags:
@@ -242,8 +242,8 @@
       delegate_to: localhost
       delegate_facts: true
 
-- name: Retire the legacy document-extraction copies from docker-runtime-lv3
-  hosts: docker-runtime-lv3
+- name: Retire the legacy document-extraction copies from docker-runtime
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:
@@ -263,8 +263,8 @@
           - hostvars['localhost'].runtime_ai_retirement_ready | default(false)
         fail_msg: >-
           Refusing to retire the legacy runtime-ai document-extraction
-          services on docker-runtime-lv3 until this run verifies the
-          replacement runtime-ai-lv3 routes.
+          services on docker-runtime until this run verifies the
+          replacement runtime-ai routes.
 
     - name: Gather the legacy document-extraction compose files
       ansible.builtin.stat:
@@ -273,7 +273,7 @@
       register: runtime_ai_legacy_compose_stats
 
   tasks:
-    - name: Stop the legacy document-extraction compose stacks on docker-runtime-lv3
+    - name: Stop the legacy document-extraction compose stacks on docker-runtime
       ansible.builtin.command:
         argv:
           - docker
@@ -293,7 +293,7 @@
         or 'Removing' in (runtime_ai_legacy_compose_down.stderr | default(''))
 
 - name: Refresh the shared API gateway after the Gotenberg move
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:

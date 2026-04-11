@@ -1,6 +1,6 @@
 ---
 # Playbook: restic-config-backup.yml
-# Purpose: Converge ADR 0302 restic-backed file-level backup automation on docker-runtime-lv3.
+# Purpose: Converge ADR 0302 restic-backed file-level backup automation on docker-runtime.
 # Use case: Run through make targets, live backup helpers, and guarded automation for the platform configuration backup path.
 #
 # Inputs (required):
@@ -24,7 +24,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 - name: Converge Restic config backup on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   tags:

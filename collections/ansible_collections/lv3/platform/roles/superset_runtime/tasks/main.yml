@@ -1,5 +1,5 @@
 # Purpose: Build the repo-managed Superset image, converge the runtime stack, and bootstrap the governed datasource inventory dashboard.
-# Use case: Run during Superset deployment, recovery, and exact-main replay on docker-runtime-lv3.
+# Use case: Run during Superset deployment, recovery, and exact-main replay on docker-runtime.
 # Inputs: Runtime paths, image pins, PostgreSQL credentials, Keycloak client secret, and the bootstrap verifier.
 # Outputs: The live Superset container, OpenBao-backed runtime env, datasource registration, and seeded landing dashboard match repo truth.
 # Idempotency: Partially idempotent because compose restarts and managed metadata reconciliation occur when the declared runtime or bootstrap inputs change.

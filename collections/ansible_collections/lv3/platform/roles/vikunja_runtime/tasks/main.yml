@@ -1,6 +1,6 @@
 ---
 # Purpose: Converge the Vikunja runtime stack, managed secrets, webhook bridge, and controller-local access files.
-# Use case: Run during Vikunja deployment or replay on docker-runtime-lv3 after the Vikunja PostgreSQL backend is prepared.
+# Use case: Run during Vikunja deployment or replay on docker-runtime after the Vikunja PostgreSQL backend is prepared.
 #
 # Inputs (required):
 #   - vikunja_site_dir (path, required): Runtime root directory.

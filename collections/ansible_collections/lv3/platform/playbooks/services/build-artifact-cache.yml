@@ -1,10 +1,10 @@
 ---
 - name: Converge build artifact cache consumers on the docker build guest
-  hosts: "{{ 'docker-build-staging-lv3' if (env | default('production')) == 'staging' else 'docker-build-lv3' }}"
+  hosts: "{{ 'docker-build-staging' if (env | default('production')) == 'staging' else 'docker-build' }}"
   become: true
   gather_facts: true
   vars:
-    artifact_cache_remote_host: "{{ hostvars['artifact-cache-lv3'].ansible_host }}"
+    artifact_cache_remote_host: "{{ hostvars['artifact-cache'].ansible_host }}"
     docker_runtime_registry_mirrors:
       - "http://{{ artifact_cache_remote_host }}:5001"
       - https://mirror.gcr.io

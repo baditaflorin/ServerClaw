@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "workflows": {
     "converge-plausible": {
-      "description": "Converge Plausible on docker-runtime-lv3, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
+      "description": "Converge Plausible on docker-runtime, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -44,7 +44,7 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed Plausible Community Edition runtime on docker-runtime-lv3 with controller-local mirrored secrets, an edge-authenticated dashboard at analytics.lv3.org, public tracker and health paths, and injected tracking on the declared public LV3 hostnames."
+        "A repo-managed Plausible Community Edition runtime on docker-runtime with controller-local mirrored secrets, an edge-authenticated dashboard at analytics.lv3.org, public tracker and health paths, and injected tracking on the declared public LV3 hostnames."
       ],
       "verification_commands": [
         "make syntax-check-plausible",
@@ -65,7 +65,7 @@
       }
     },
     "converge-flagsmith": {
-      "description": "Converge Flagsmith on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
+      "description": "Converge Flagsmith on docker-runtime, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -111,7 +111,7 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed Flagsmith Community Edition runtime on docker-runtime-lv3 with a shared PostgreSQL backing store, mirrored environment API keys, seeded environments and feature state, and an edge-authenticated UI at flags.lv3.org."
+        "A repo-managed Flagsmith Community Edition runtime on docker-runtime with a shared PostgreSQL backing store, mirrored environment API keys, seeded environments and feature state, and an edge-authenticated UI at flags.lv3.org."
       ],
       "verification_commands": [
         "make syntax-check-flagsmith",
@@ -132,7 +132,7 @@
       }
     },
     "converge-crawl4ai": {
-      "description": "Deploy the private Crawl4AI runtime on docker-runtime-lv3 and verify the local, monitor, Markdown, and guest-network crawl contracts end to end.",
+      "description": "Deploy the private Crawl4AI runtime on docker-runtime and verify the local, monitor, Markdown, and guest-network crawl contracts end to end.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -166,7 +166,7 @@
         "config/workflow-catalog.json"
       ],
       "outputs": [
-        "A private Crawl4AI runtime on docker-runtime-lv3 with repo-managed rate limiting, health and monitor probes, Markdown crawl verification, and guest-network reachability for internal callers."
+        "A private Crawl4AI runtime on docker-runtime with repo-managed rate limiting, health and monitor probes, Markdown crawl verification, and guest-network reachability for internal callers."
       ],
       "verification_commands": [
         "make syntax-check-crawl4ai",
@@ -529,7 +529,7 @@
       }
     },
     "fault-injection": {
-      "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3, record a JSON report, and optionally publish failure notifications.",
+      "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime, record a JSON report, and optionally publish failure notifications.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1047,7 +1047,7 @@
         "collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml"
       ],
       "outputs": [
-        "TCP 80 and 443 forwarding from the public host IP to nginx-lv3."
+        "TCP 80 and 443 forwarding from the public host IP to nginx."
       ],
       "verification_commands": [
         "make syntax-check"
@@ -1092,7 +1092,7 @@
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml"
       ],
       "outputs": [
-        "NGINX virtual hosts, proxy routes, and edge certificate domains updated on nginx-lv3."
+        "NGINX virtual hosts, proxy routes, and edge certificate domains updated on nginx."
       ],
       "verification_commands": [
         "curl -I https://grafana.lv3.org",
@@ -1583,7 +1583,7 @@
       }
     },
     "converge-docker-runtime": {
-      "description": "Converge the Docker runtime baseline on docker-runtime-lv3.",
+      "description": "Converge the Docker runtime baseline on docker-runtime.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1608,7 +1608,7 @@
         "collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml"
       ],
       "outputs": [
-        "Docker Engine, Compose plugin, daemon baseline, and ops group access on docker-runtime-lv3."
+        "Docker Engine, Compose plugin, daemon baseline, and ops group access on docker-runtime."
       ],
       "verification_commands": [
         "make syntax-check-docker-runtime"
@@ -1670,7 +1670,7 @@
       }
     },
     "converge-postgres-vm": {
-      "description": "Converge the dedicated PostgreSQL guest baseline on postgres-lv3.",
+      "description": "Converge the dedicated PostgreSQL guest baseline on postgres.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1694,7 +1694,7 @@
         "collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml"
       ],
       "outputs": [
-        "PostgreSQL runtime, guest firewall policy, and local admin baseline converged on postgres-lv3."
+        "PostgreSQL runtime, guest firewall policy, and local admin baseline converged on postgres."
       ],
       "verification_commands": [
         "psql \"host=database.lv3.org port=5432 dbname=postgres user=ops sslmode=prefer\""
@@ -1750,7 +1750,7 @@
         "make syntax-check-mail-platform",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
         "curl -s -H \"X-API-Key: $(cat $(scripts/resolve_local_overlay_root.sh)/mail-platform/gateway-api-key.txt)\" http://10.10.10.20:8081/v1/profiles",
-        "ansible-playbook -i $(git rev-parse --show-toplevel)/inventory/hosts.yml $(git rev-parse --show-toplevel)/playbooks/mail-platform-notification-profiles-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
+        "ansible-playbook -i $(git rev-parse --show-toplevel)/inventory/hosts.yml $(git rev-parse --show-toplevel)/playbooks/mail-platform-notification-profiles-verify.yml --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime",
         "curl -I https://grafana.lv3.org"
       ],
       "execution_class": "mutation",
@@ -1765,7 +1765,7 @@
       }
     },
     "converge-mailpit": {
-      "description": "Deploy the private Mailpit SMTP interceptor on runtime-general-lv3 for staging and development mail capture plus REST-API assertions.",
+      "description": "Deploy the private Mailpit SMTP interceptor on runtime-general for staging and development mail capture plus REST-API assertions.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1798,7 +1798,7 @@
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Mailpit runtime on runtime-general-lv3 with guest-network HTTP and SMTP listeners plus repo-managed SMTP capture verification."
+        "A private Mailpit runtime on runtime-general with guest-network HTTP and SMTP listeners plus repo-managed SMTP capture verification."
       ],
       "verification_commands": [
         "make syntax-check-mailpit",
@@ -1818,7 +1818,7 @@
       }
     },
     "converge-livekit": {
-      "description": "Converge LiveKit on docker-runtime-lv3, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
+      "description": "Converge LiveKit on docker-runtime, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1859,12 +1859,12 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed LiveKit runtime on docker-runtime-lv3 with controller-local mirrored API credentials, public signalling at livekit.lv3.org, and public TCP plus UDP media forwarding through the Proxmox host."
+        "A repo-managed LiveKit runtime on docker-runtime with controller-local mirrored API credentials, public signalling at livekit.lv3.org, and public TCP plus UDP media forwarding through the Proxmox host."
       ],
       "verification_commands": [
         "make syntax-check-livekit",
         "python3 $(git rev-parse --show-toplevel)/scripts/livekit_tool.py verify-room-lifecycle --url https://livekit.lv3.org --api-key-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-key.txt --api-secret-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-secret.txt --room-prefix livekit-workflow-verify --identity livekit-workflow-probe --timeout-seconds 120",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml docker-runtime -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1878,7 +1878,7 @@
       }
     },
     "converge-neko": {
-      "description": "Converge Neko remote desktop on dedicated runtime-comms-lv3 VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
+      "description": "Converge Neko remote desktop on dedicated runtime-comms VM, program Proxmox public TCP and UDP media forwarding, and publish browser.lv3.org for interactive operator browser access (ADR 0380).",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1919,14 +1919,14 @@
         "docs/adr/0380-neko-for-operator-remote-browser-access.md"
       ],
       "outputs": [
-        "A repo-managed Neko remote desktop runtime on dedicated runtime-comms-lv3 VM with WebRTC signalling at browser.lv3.org, public TCP and UDP media forwarding through the Proxmox host, and firewall concurrency locking to prevent past RTC failures."
+        "A repo-managed Neko remote desktop runtime on dedicated runtime-comms VM with WebRTC signalling at browser.lv3.org, public TCP and UDP media forwarding through the Proxmox host, and firewall concurrency locking to prevent past RTC failures."
       ],
       "verification_commands": [
         "make syntax-check-neko",
         "python3 $(git rev-parse --show-toplevel)/scripts/verify_neko_webrtc_session.py --url browser.lv3.org --timeout 30",
         "python3 $(git rev-parse --show-toplevel)/tests/test_neko_firewall_concurrency.py",
         "python3 $(git rev-parse --show-toplevel)/tests/test_neko_timeout_hierarchy.py",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml runtime-comms-lv3 -m shell -a \"ss -lnt | grep -E ':(8080) ' && ss -lun | grep -E ':(50000|60000) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml runtime-comms -m shell -a \"ss -lnt | grep -E ':(8080) ' && ss -lun | grep -E ':(50000|60000) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1940,7 +1940,7 @@
       }
     },
     "converge-redpanda": {
-      "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime-lv3 and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
+      "description": "Deploy the private Redpanda Kafka-compatible streaming runtime on docker-runtime and verify the Admin API, HTTP Proxy, and Schema Registry contract.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1972,7 +1972,7 @@
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Redpanda runtime on docker-runtime-lv3 with repo-managed users, smoke topics, ACLs, Schema Registry state, and end-to-end HTTP Proxy verification."
+        "A private Redpanda runtime on docker-runtime with repo-managed users, smoke topics, ACLs, Schema Registry state, and end-to-end HTTP Proxy verification."
       ],
       "verification_commands": [
         "make syntax-check-redpanda",
@@ -1992,7 +1992,7 @@
       }
     },
     "converge-openbao": {
-      "description": "Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
+      "description": "Deploy private OpenBao on docker-runtime, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2034,7 +2034,7 @@
         "inventory/group_vars/all/main.yml"
       ],
       "outputs": [
-        "A private OpenBao deployment on docker-runtime-lv3 with controller-local bootstrap artifacts, scoped human and machine auth identities, seeded platform secrets, Transit keys, and PostgreSQL dynamic credentials."
+        "A private OpenBao deployment on docker-runtime with controller-local bootstrap artifacts, scoped human and machine auth identities, seeded platform secrets, Transit keys, and PostgreSQL dynamic credentials."
       ],
       "verification_commands": [
         "make syntax-check-openbao",
@@ -2091,7 +2091,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "A private step-ca deployment on docker-runtime-lv3, a Tailscale-published CA API on the Proxmox host, controller-local bootstrap artifacts, and CA-backed SSH trust on the Proxmox host and managed guests."
+        "A private step-ca deployment on docker-runtime, a Tailscale-published CA API on the Proxmox host, controller-local bootstrap artifacts, and CA-backed SSH trust on the Proxmox host and managed guests."
       ],
       "verification_commands": [
         "make syntax-check-step-ca",
@@ -2110,7 +2110,7 @@
       }
     },
     "converge-identity-core-watchdog": {
-      "description": "Deploy the identity-core health watchdog on runtime-control-lv3: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
+      "description": "Deploy the identity-core health watchdog on runtime-control: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2135,7 +2135,7 @@
         "collections/ansible_collections/lv3/platform/roles/identity_core_watchdog"
       ],
       "outputs": [
-        "A systemd timer lv3-identity-watchdog.timer active on runtime-control-lv3, probing identity-core services every 15 seconds and auto-restarting on failure."
+        "A systemd timer lv3-identity-watchdog.timer active on runtime-control, probing identity-core services every 15 seconds and auto-restarting on failure."
       ],
       "verification_commands": [
         "ssh -i .local/ssh/bootstrap.id_ed25519 -J ops@100.64.0.1 ops@10.10.10.92 'systemctl is-active lv3-identity-watchdog.timer'",
@@ -2228,7 +2228,7 @@
       }
     },
     "converge-tika": {
-      "description": "Deploy the private Apache Tika runtime on runtime-ai-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts through the dedicated runtime-ai pool.",
+      "description": "Deploy the private Apache Tika runtime on runtime-ai and verify the standard `/version`, `/tika`, and `/meta` extraction contracts through the dedicated runtime-ai pool.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2260,7 +2260,7 @@
         "config/contracts/runtime-pools/runtime-ai/tika.openapi.yaml"
       ],
       "outputs": [
-        "A private Apache Tika runtime on runtime-ai-lv3 with version, plaintext extraction, and metadata extraction verified on the standard REST endpoints."
+        "A private Apache Tika runtime on runtime-ai with version, plaintext extraction, and metadata extraction verified on the standard REST endpoints."
       ],
       "verification_commands": [
         "make syntax-check-tika",
@@ -2280,7 +2280,7 @@
       }
     },
     "converge-nomad": {
-      "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime, runtime-general, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+      "description": "Converge the private Nomad scheduler on monitoring plus the runtime, runtime-general, runtime-ai, and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2316,7 +2316,7 @@
         "scripts/generate_platform_vars.py"
       ],
       "outputs": [
-        "A private Nomad API published on the Proxmox Tailscale proxy, a Nomad server on monitoring-lv3, Nomad clients on docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, and docker-build-lv3, and repo-managed smoke jobs verified across the runtime, runtime-general, runtime-ai, and build client classes."
+        "A private Nomad API published on the Proxmox Tailscale proxy, a Nomad server on monitoring, Nomad clients on docker-runtime, runtime-general, runtime-ai, and docker-build, and repo-managed smoke jobs verified across the runtime, runtime-general, runtime-ai, and build client classes."
       ],
       "verification_commands": [
         "make syntax-check-nomad",
@@ -2335,7 +2335,7 @@
       }
     },
     "converge-openfga": {
-      "description": "Converge OpenFGA on docker-runtime-lv3, publish the Proxmox host controller proxy, and seed the repo-managed ServerClaw delegated authorization graph.",
+      "description": "Converge OpenFGA on docker-runtime, publish the Proxmox host controller proxy, and seed the repo-managed ServerClaw delegated authorization graph.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2370,7 +2370,7 @@
         "config/serverclaw-authz/model.json"
       ],
       "outputs": [
-        "A private OpenFGA runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Proxmox-host controller proxy, mirrored operator and runtime Keycloak client secrets, and a verified delegated authorization store, model, tuple seed, and check set."
+        "A private OpenFGA runtime on docker-runtime with a PostgreSQL backend on postgres, a Proxmox-host controller proxy, mirrored operator and runtime Keycloak client secrets, and a verified delegated authorization store, model, tuple seed, and check set."
       ],
       "verification_commands": [
         "make syntax-check-openfga",
@@ -2390,7 +2390,7 @@
       }
     },
     "converge-temporal": {
-      "description": "Converge Temporal on docker-runtime-lv3, provision its PostgreSQL history and visibility stores on postgres-lv3, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.",
+      "description": "Converge Temporal on docker-runtime, provision its PostgreSQL history and visibility stores on postgres, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2424,11 +2424,11 @@
         "config/dependency-graph.json"
       ],
       "outputs": [
-        "A repo-managed Temporal runtime on docker-runtime-lv3 with PostgreSQL-backed history plus visibility stores on postgres-lv3, loopback-only gRPC/HTTP plus UI endpoints, and an automatically reconciled `lv3` namespace."
+        "A repo-managed Temporal runtime on docker-runtime with PostgreSQL-backed history plus visibility stores on postgres, loopback-only gRPC/HTTP plus UI endpoints, and an automatically reconciled `lv3` namespace."
       ],
       "verification_commands": [
         "make syntax-check-temporal",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml docker-runtime -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2442,7 +2442,7 @@
       }
     },
     "converge-windmill": {
-      "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
+      "description": "Converge Windmill on docker-runtime, provision its PostgreSQL backend on postgres, and expose the operator-only Tailscale proxy on the Proxmox host.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2477,7 +2477,7 @@
         "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml"
       ],
       "outputs": [
-        "Windmill runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, an operator-only Tailscale proxy on the Proxmox host, and the repo-managed config-merge worker plus schedule seeded into the workspace."
+        "Windmill runtime deployed on docker-runtime with a PostgreSQL backend on postgres, an operator-only Tailscale proxy on the Proxmox host, and the repo-managed config-merge worker plus schedule seeded into the workspace."
       ],
       "verification_commands": [
         "make syntax-check-windmill",
@@ -2503,7 +2503,7 @@
       }
     },
     "converge-woodpecker": {
-      "description": "Converge Woodpecker on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish ci.lv3.org through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
+      "description": "Converge Woodpecker on docker-runtime, provision its PostgreSQL backend on postgres, publish ci.lv3.org through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2545,7 +2545,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "Woodpecker CI deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a public ci.lv3.org publication, a private controller URL on the Proxmox host, controller-local auth artifacts under .local/woodpecker, and the ops/proxmox_florin_server seed repository activated with the smoke secret."
+        "Woodpecker CI deployed on docker-runtime with a PostgreSQL backend on postgres, a public ci.lv3.org publication, a private controller URL on the Proxmox host, controller-local auth artifacts under .local/woodpecker, and the ops/proxmox_florin_server seed repository activated with the smoke secret."
       ],
       "verification_commands": [
         "make syntax-check-woodpecker",
@@ -2574,7 +2574,7 @@
       }
     },
     "converge-coolify": {
-      "description": "Converge Coolify on coolify-lv3, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
+      "description": "Converge Coolify on coolify, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2611,7 +2611,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "Coolify runtime on coolify-lv3, the authenticated dashboard at coolify.lv3.org, the public apps ingress at apps.lv3.org, and controller-local bootstrap artifacts under .local/coolify."
+        "Coolify runtime on coolify, the authenticated dashboard at coolify.lv3.org, the public apps ingress at apps.lv3.org, and controller-local bootstrap artifacts under .local/coolify."
       ],
       "verification_commands": [
         "make syntax-check-coolify",
@@ -2981,7 +2981,7 @@
       }
     },
     "converge-restic-config-backup": {
-      "description": "Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime-lv3, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.",
+      "description": "Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3021,7 +3021,7 @@
         "tests/test_restic_config_backup_windmill.py"
       ],
       "outputs": [
-        "A repo-managed Restic runtime on docker-runtime-lv3 with OpenBao-backed runtime credentials, a MinIO-backed repository bucket, an enabled six-hour systemd timer, and seeded Windmill backup plus monthly restore-verification jobs."
+        "A repo-managed Restic runtime on docker-runtime with OpenBao-backed runtime credentials, a MinIO-backed repository bucket, an enabled six-hour systemd timer, and seeded Windmill backup plus monthly restore-verification jobs."
       ],
       "verification_commands": [
         "make syntax-check-restic-config-backup",
@@ -3041,7 +3041,7 @@
       }
     },
     "restic-config-backup": {
-      "description": "Run the ADR 0302 Restic file-level backup workflow on docker-runtime-lv3, write one backup receipt, refresh the latest-snapshot ledger, and emit stale-source signals when needed.",
+      "description": "Run the ADR 0302 Restic file-level backup workflow on docker-runtime, write one backup receipt, refresh the latest-snapshot ledger, and emit stale-source signals when needed.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3091,7 +3091,7 @@
       }
     },
     "restic-config-restore-verify": {
-      "description": "Run the ADR 0302 restore-verification rehearsal on docker-runtime-lv3 by restoring the latest receipts snapshot into a temporary directory and writing one verification receipt.",
+      "description": "Run the ADR 0302 restore-verification rehearsal on docker-runtime by restoring the latest receipts snapshot into a temporary directory and writing one verification receipt.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3689,7 +3689,7 @@
       }
     },
     "adr-0077-compose-runtime-secrets-live-apply": {
-      "description": "Converge the OpenBao Agent runtime-secret injection path across the migrated docker-runtime-lv3 platform applications and verify that the services now consume `/run/lv3-secrets/<service>/runtime.env` instead of compose-directory `.env` files.",
+      "description": "Converge the OpenBao Agent runtime-secret injection path across the migrated docker-runtime platform applications and verify that the services now consume `/run/lv3-secrets/<service>/runtime.env` instead of compose-directory `.env` files.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3725,7 +3725,7 @@
         "collections/ansible_collections/lv3/platform/playbooks/mattermost.yml"
       ],
       "outputs": [
-        "Migrated platform applications on docker-runtime-lv3 consume repo-managed runtime secret files rendered by OpenBao Agent sidecars instead of legacy compose-directory `.env` files."
+        "Migrated platform applications on docker-runtime consume repo-managed runtime secret files rendered by OpenBao Agent sidecars instead of legacy compose-directory `.env` files."
       ],
       "verification_commands": [
         "scripts/validate_repo.sh compose-runtime-envs health-probes",
@@ -3744,7 +3744,7 @@
       }
     },
     "converge-control-plane-recovery": {
-      "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, validate recurring restore drills on backup-lv3, and publish a verified off-host witness bundle.",
+      "description": "Converge scheduled control-plane backups on docker-runtime, stage controller recovery references, validate recurring restore drills on backup, and publish a verified off-host witness bundle.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3784,7 +3784,7 @@
         "inventory/group_vars/all/main.yml"
       ],
       "outputs": [
-        "Scheduled runtime exports for step-ca, OpenBao, Windmill, and the mail platform on docker-runtime-lv3 plus backup-lv3 restore drills, a mirrored controller recovery bundle, and an immutable off-host witness generation with a witness-replication receipt."
+        "Scheduled runtime exports for step-ca, OpenBao, Windmill, and the mail platform on docker-runtime plus backup restore drills, a mirrored controller recovery bundle, and an immutable off-host witness generation with a witness-replication receipt."
       ],
       "verification_commands": [
         "make syntax-check-control-plane-recovery",
@@ -3804,7 +3804,7 @@
       }
     },
     "converge-label-studio": {
-      "description": "Converge Label Studio on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
+      "description": "Converge Label Studio on docker-runtime, prepare the shared PostgreSQL backing database, publish annotate.lv3.org through the shared edge, and verify the repo-managed project catalog plus auth redirects.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3850,7 +3850,7 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed Label Studio runtime on docker-runtime-lv3 with a shared PostgreSQL backing store, repo-managed annotation projects, an operator gateway route, and an edge-authenticated UI at annotate.lv3.org."
+        "A repo-managed Label Studio runtime on docker-runtime with a shared PostgreSQL backing store, repo-managed annotation projects, an operator gateway route, and an edge-authenticated UI at annotate.lv3.org."
       ],
       "verification_commands": [
         "make syntax-check-label-studio",
@@ -3871,7 +3871,7 @@
       }
     },
     "converge-lago": {
-      "description": "Converge Lago on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
+      "description": "Converge Lago on docker-runtime, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3930,7 +3930,7 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed Lago runtime on docker-runtime-lv3 with a shared PostgreSQL backend, protected browser publication at billing.lv3.org, and a governed public producer-ingest adapter that proves current-usage aggregation end to end."
+        "A repo-managed Lago runtime on docker-runtime with a shared PostgreSQL backend, protected browser publication at billing.lv3.org, and a governed public producer-ingest adapter that proves current-usage aggregation end to end."
       ],
       "verification_commands": [
         "make syntax-check-lago",
@@ -3950,7 +3950,7 @@
       }
     },
     "converge-keycloak": {
-      "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
+      "description": "Converge Keycloak on docker-runtime, provision its PostgreSQL backend on postgres, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3991,7 +3991,7 @@
         "config/uptime-kuma/monitors.json"
       ],
       "outputs": [
-        "A repo-managed Keycloak realm on docker-runtime-lv3 with a PostgreSQL backend, the public edge hostname sso.lv3.org, an initial named operator account, an agent confidential client, and Grafana wired to the shared OIDC login flow."
+        "A repo-managed Keycloak realm on docker-runtime with a PostgreSQL backend, the public edge hostname sso.lv3.org, an initial named operator account, an agent confidential client, and Grafana wired to the shared OIDC login flow."
       ],
       "verification_commands": [
         "make syntax-check-keycloak",
@@ -4010,7 +4010,7 @@
       }
     },
     "converge-harbor": {
-      "description": "Converge Harbor on docker-runtime-lv3, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
+      "description": "Converge Harbor on docker-runtime, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4046,7 +4046,7 @@
         "config/controller-local-secrets.json"
       ],
       "outputs": [
-        "A repo-managed Harbor deployment on docker-runtime-lv3 with Trivy scanning enabled, a public registry endpoint at registry.lv3.org, Keycloak-backed browser sign-in, and a generated robot credential for check-runner image publication."
+        "A repo-managed Harbor deployment on docker-runtime with Trivy scanning enabled, a public registry endpoint at registry.lv3.org, Keycloak-backed browser sign-in, and a generated robot credential for check-runner image publication."
       ],
       "verification_commands": [
         "make syntax-check-harbor",
@@ -4066,7 +4066,7 @@
       }
     },
     "converge-api-gateway": {
-      "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.",
+      "description": "Converge the unified platform API gateway on docker-runtime and publish it at api.lv3.org through the shared NGINX edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4099,7 +4099,7 @@
         "config/api-gateway-catalog.json"
       ],
       "outputs": [
-        "A repo-managed FastAPI gateway on docker-runtime-lv3, the public edge hostname api.lv3.org, and an authenticated platform service catalog backed by Keycloak bearer tokens."
+        "A repo-managed FastAPI gateway on docker-runtime, the public edge hostname api.lv3.org, and an authenticated platform service catalog backed by Keycloak bearer tokens."
       ],
       "verification_commands": [
         "make syntax-check-api-gateway",
@@ -4118,7 +4118,7 @@
       }
     },
     "converge-matrix-synapse": {
-      "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend plus bridge databases on postgres-lv3, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
+      "description": "Converge Matrix Synapse on docker-runtime, provision its PostgreSQL backend plus bridge databases on postgres, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4171,7 +4171,7 @@
         "config/alertmanager/rules/matrix-synapse.yml"
       ],
       "outputs": [
-        "A repo-managed Matrix Synapse runtime on docker-runtime-lv3 with PostgreSQL persistence, Discord and WhatsApp mautrix bridges, a private controller proxy on the Proxmox host, and a public client API at matrix.lv3.org while federation remains disabled."
+        "A repo-managed Matrix Synapse runtime on docker-runtime with PostgreSQL persistence, Discord and WhatsApp mautrix bridges, a private controller proxy on the Proxmox host, and a public client API at matrix.lv3.org while federation remains disabled."
       ],
       "verification_commands": [
         "make syntax-check-matrix-synapse",
@@ -4192,7 +4192,7 @@
       }
     },
     "converge-ops-portal": {
-      "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
+      "description": "Converge the interactive ops portal on docker-runtime so the browser control plane stays aligned with the shared API gateway contracts.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4222,7 +4222,7 @@
         "docs/runbooks/ops-portal-down.md"
       ],
       "outputs": [
-        "A repo-managed interactive ops portal on docker-runtime-lv3 that stays aligned with the shared platform API gateway contracts for health, coordination, and runbook operations."
+        "A repo-managed interactive ops portal on docker-runtime that stays aligned with the shared platform API gateway contracts for health, coordination, and runbook operations."
       ],
       "verification_commands": [
         "make syntax-check-ops-portal",
@@ -4254,7 +4254,7 @@
       }
     },
     "converge-dify": {
-      "description": "Converge Dify on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
+      "description": "Converge Dify on docker-runtime, provision its PostgreSQL backend on postgres, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4301,7 +4301,7 @@
         "platform/dify-workflows/"
       ],
       "outputs": [
-        "A repo-managed Dify runtime on docker-runtime-lv3 with PostgreSQL persistence on postgres-lv3, the public agents.lv3.org hostname through the shared authenticated edge, governed LV3 tools exposed through the API gateway, and an exported smoke workflow artifact."
+        "A repo-managed Dify runtime on docker-runtime with PostgreSQL persistence on postgres, the public agents.lv3.org hostname through the shared authenticated edge, governed LV3 tools exposed through the API gateway, and an exported smoke workflow artifact."
       ],
       "verification_commands": [
         "make syntax-check-dify",
@@ -4320,7 +4320,7 @@
       }
     },
     "converge-n8n": {
-      "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
+      "description": "Converge the n8n connector fabric on docker-runtime, provision its PostgreSQL backend on postgres, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4355,7 +4355,7 @@
         "config/uptime-kuma/monitors.json"
       ],
       "outputs": [
-        "A repo-managed n8n runtime on docker-runtime-lv3 with PostgreSQL persistence, public webhook ingress for thin ServerClaw adapters, and a protected editor path behind the shared edge auth flow."
+        "A repo-managed n8n runtime on docker-runtime with PostgreSQL persistence, public webhook ingress for thin ServerClaw adapters, and a protected editor path behind the shared edge auth flow."
       ],
       "verification_commands": [
         "make syntax-check-n8n",
@@ -4376,7 +4376,7 @@
       }
     },
     "converge-nextcloud": {
-      "description": "Converge Nextcloud on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish cloud.lv3.org with DAV redirects and large-upload support.",
+      "description": "Converge Nextcloud on docker-runtime, provision its PostgreSQL backend on postgres, and publish cloud.lv3.org with DAV redirects and large-upload support.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4413,7 +4413,7 @@
         "config/uptime-kuma/monitors.json"
       ],
       "outputs": [
-        "A repo-managed Nextcloud runtime on docker-runtime-lv3 with PostgreSQL metadata, Redis-backed locking, cron execution, and the public cloud.lv3.org DAV surface through the shared edge."
+        "A repo-managed Nextcloud runtime on docker-runtime with PostgreSQL metadata, Redis-backed locking, cron execution, and the public cloud.lv3.org DAV surface through the shared edge."
       ],
       "verification_commands": [
         "make syntax-check-nextcloud",
@@ -4434,7 +4434,7 @@
       }
     },
     "converge-netbox": {
-      "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
+      "description": "Converge private NetBox on docker-runtime, provision its PostgreSQL backend on postgres, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4472,7 +4472,7 @@
         "config/control-plane-lanes.json"
       ],
       "outputs": [
-        "NetBox runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a private Tailscale proxy on the Proxmox host, and repo-managed topology and IPAM inventory synchronized into the NetBox API."
+        "NetBox runtime deployed on docker-runtime with a PostgreSQL backend on postgres, a private Tailscale proxy on the Proxmox host, and repo-managed topology and IPAM inventory synchronized into the NetBox API."
       ],
       "verification_commands": [
         "make syntax-check-netbox",
@@ -4499,11 +4499,11 @@
           "access": "write"
         },
         {
-          "resource": "vm:docker-runtime-lv3",
+          "resource": "vm:docker-runtime",
           "access": "read"
         },
         {
-          "resource": "vm:postgres-lv3",
+          "resource": "vm:postgres",
           "access": "read"
         }
       ],
@@ -4518,7 +4518,7 @@
       }
     },
     "converge-homepage": {
-      "description": "Deploy the Homepage unified service dashboard on runtime-general-lv3 and publish it at home.lv3.org through the shared authenticated edge.",
+      "description": "Deploy the Homepage unified service dashboard on runtime-general and publish it at home.lv3.org through the shared authenticated edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4567,7 +4567,7 @@
       }
     },
     "converge-excalidraw": {
-      "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime-lv3 and publish draw.lv3.org through the shared authenticated edge.",
+      "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime and publish draw.lv3.org through the shared authenticated edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4596,7 +4596,7 @@
         "config/service-capability-catalog.json"
       ],
       "outputs": [
-        "A private Excalidraw runtime on docker-runtime-lv3 with committed generated architecture scenes and authenticated publication at draw.lv3.org."
+        "A private Excalidraw runtime on docker-runtime with committed generated architecture scenes and authenticated publication at draw.lv3.org."
       ],
       "verification_commands": [
         "make syntax-check-excalidraw",
@@ -4616,7 +4616,7 @@
       }
     },
     "converge-langfuse": {
-      "description": "Converge Langfuse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
+      "description": "Converge Langfuse on docker-runtime, provision its PostgreSQL backend on postgres, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4659,7 +4659,7 @@
         "platform/llm/observability.py"
       ],
       "outputs": [
-        "A repo-managed Langfuse runtime on docker-runtime-lv3 with PostgreSQL on postgres-lv3, Keycloak-backed browser sign-in, mirrored bootstrap API credentials, and a live trace smoke-verification path."
+        "A repo-managed Langfuse runtime on docker-runtime with PostgreSQL on postgres, Keycloak-backed browser sign-in, mirrored bootstrap API credentials, and a live trace smoke-verification path."
       ],
       "verification_commands": [
         "make syntax-check-langfuse",
@@ -4678,7 +4678,7 @@
       }
     },
     "converge-minio": {
-      "description": "Deploy the shared MinIO runtime on docker-runtime-lv3, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
+      "description": "Deploy the shared MinIO runtime on docker-runtime, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4718,7 +4718,7 @@
         "config/subdomain-catalog.json"
       ],
       "outputs": [
-        "A shared MinIO runtime on docker-runtime-lv3 with the public S3 API at minio.lv3.org, an authenticated operator console at minio-console.lv3.org, and repo-managed launch buckets for Langfuse, Gitea LFS, Loki, and RAG staging."
+        "A shared MinIO runtime on docker-runtime with the public S3 API at minio.lv3.org, an authenticated operator console at minio-console.lv3.org, and repo-managed launch buckets for Langfuse, Gitea LFS, Loki, and RAG staging."
       ],
       "verification_commands": [
         "make syntax-check-minio",
@@ -4738,7 +4738,7 @@
       }
     },
     "converge-serverclaw": {
-      "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
+      "description": "Deploy the first public ServerClaw surface on coolify, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4771,12 +4771,12 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "A public ServerClaw runtime deployed on coolify-lv3 with a dedicated Keycloak client, repo-managed bootstrap auth, and chat.lv3.org published through the shared edge."
+        "A public ServerClaw runtime deployed on coolify with a dedicated Keycloak client, repo-managed bootstrap auth, and chat.lv3.org published through the shared edge."
       ],
       "verification_commands": [
         "make syntax-check-serverclaw",
         "curl -I https://chat.lv3.org/",
-        "ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml coolify-lv3 -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml coolify -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -4790,7 +4790,7 @@
       }
     },
     "converge-searxng": {
-      "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render ServerClaw to use the local search endpoint.",
+      "description": "Deploy the private SearXNG runtime on docker-runtime, publish its tailnet-only hostname through the Proxmox host proxy, and re-render ServerClaw to use the local search endpoint.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4825,7 +4825,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "A private SearXNG runtime on docker-runtime-lv3, a tailnet-only hostname at search.lv3.org, and an ServerClaw runtime configured to use the local SearXNG search API."
+        "A private SearXNG runtime on docker-runtime, a tailnet-only hostname at search.lv3.org, and an ServerClaw runtime configured to use the local SearXNG search API."
       ],
       "verification_commands": [
         "make syntax-check-searxng",
@@ -4844,7 +4844,7 @@
       }
     },
     "converge-ollama": {
-      "description": "Deploy the private Ollama runtime on docker-runtime-lv3, sync the repo-managed startup model catalog, and verify local inference health.",
+      "description": "Deploy the private Ollama runtime on docker-runtime, sync the repo-managed startup model catalog, and verify local inference health.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4875,7 +4875,7 @@
         "scripts/ollama_probe.py"
       ],
       "outputs": [
-        "A private Ollama inference runtime on docker-runtime-lv3 with the repo-managed startup models available for goal-compiler and ServerClaw local inference."
+        "A private Ollama inference runtime on docker-runtime with the repo-managed startup models available for goal-compiler and ServerClaw local inference."
       ],
       "verification_commands": [
         "make syntax-check-ollama",
@@ -4894,7 +4894,7 @@
       }
     },
     "converge-piper": {
-      "description": "Deploy the private Piper text-to-speech runtime on docker-runtime-lv3, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
+      "description": "Deploy the private Piper text-to-speech runtime on docker-runtime, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4925,7 +4925,7 @@
         "config/slo-catalog.json"
       ],
       "outputs": [
-        "A private Piper runtime on docker-runtime-lv3 with the repo-managed default voice loaded and the health, voices, and WAV synthesis contracts verified."
+        "A private Piper runtime on docker-runtime with the repo-managed default voice loaded and the health, voices, and WAV synthesis contracts verified."
       ],
       "verification_commands": [
         "make syntax-check-piper",
@@ -4945,7 +4945,7 @@
       }
     },
     "converge-dozzle": {
-      "description": "Deploy the Dozzle hub on docker-runtime-lv3, join remote log agents from docker-build-lv3 and monitoring-lv3, and publish logs.lv3.org through the shared authenticated edge.",
+      "description": "Deploy the Dozzle hub on docker-runtime, join remote log agents from docker-build and monitoring, and publish logs.lv3.org through the shared authenticated edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4975,7 +4975,7 @@
         "config/api-gateway-catalog.json"
       ],
       "outputs": [
-        "A Dozzle hub on docker-runtime-lv3 with repo-managed remote agents on docker-build-lv3 and monitoring-lv3, published through the authenticated logs.lv3.org edge surface."
+        "A Dozzle hub on docker-runtime with repo-managed remote agents on docker-build and monitoring, published through the authenticated logs.lv3.org edge surface."
       ],
       "verification_commands": [
         "make syntax-check-dozzle",
@@ -4995,7 +4995,7 @@
       }
     },
     "converge-ntfy": {
-      "description": "Deploy the published ntfy push channel on docker-runtime-lv3, publish ntfy.lv3.org through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
+      "description": "Deploy the published ntfy push channel on docker-runtime, publish ntfy.lv3.org through Hetzner DNS and the shared edge, and persist the repo-managed credential and token bundle used by governed publishers.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5043,7 +5043,7 @@
         "config/service-capability-catalog.json"
       ],
       "outputs": [
-        "A published ntfy runtime on docker-runtime-lv3 with the governed topic registry, controller-local publisher credentials, and ntfy.lv3.org edge contract mirrored from the repository."
+        "A published ntfy runtime on docker-runtime with the governed topic registry, controller-local publisher credentials, and ntfy.lv3.org edge contract mirrored from the repository."
       ],
       "verification_commands": [
         "make syntax-check-ntfy",
@@ -5062,7 +5062,7 @@
       }
     },
     "converge-falco": {
-      "description": "Converge the private Falco event bridge on docker-runtime-lv3 plus Falco syscall monitoring on the selected production guests.",
+      "description": "Converge the private Falco event bridge on docker-runtime plus Falco syscall monitoring on the selected production guests.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5099,7 +5099,7 @@
         "docs/schema/mutation-audit-event.json"
       ],
       "outputs": [
-        "A private Falco bridge on docker-runtime-lv3 plus Falco syscall monitoring on docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, with WARNING+ events forwarded into NATS and CRITICAL events forwarded into ntfy."
+        "A private Falco bridge on docker-runtime plus Falco syscall monitoring on docker-runtime, docker-build, monitoring, and postgres, with WARNING+ events forwarded into NATS and CRITICAL events forwarded into ntfy."
       ],
       "verification_commands": [
         "make syntax-check-falco",
@@ -5118,7 +5118,7 @@
       }
     },
     "converge-gitea": {
-      "description": "Converge private Gitea on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and register the self-hosted Actions runner on docker-build-lv3.",
+      "description": "Converge private Gitea on docker-runtime, provision its PostgreSQL backend on postgres, and register the self-hosted Actions runner on docker-build.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5158,7 +5158,7 @@
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, a dedicated self-hosted Actions runner on docker-build-lv3, and the ADR 0233 release-bundle signing plus repo-token secrets seeded for server-resident publication and verification."
+        "A private Gitea runtime on docker-runtime with Keycloak OIDC login, a PostgreSQL backend on postgres, the bootstrapped ops/proxmox_florin_server repository path, a dedicated self-hosted Actions runner on docker-build, and the ADR 0233 release-bundle signing plus repo-token secrets seeded for server-resident publication and verification."
       ],
       "verification_commands": [
         "make syntax-check-gitea",
@@ -5178,7 +5178,7 @@
       }
     },
     "converge-gotenberg": {
-      "description": "Deploy the private Gotenberg runtime on runtime-ai-lv3 and verify the shared API gateway route that now targets the dedicated runtime-ai pool upstream.",
+      "description": "Deploy the private Gotenberg runtime on runtime-ai and verify the shared API gateway route that now targets the dedicated runtime-ai pool upstream.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5209,7 +5209,7 @@
         "config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml"
       ],
       "outputs": [
-        "A private Gotenberg runtime on runtime-ai-lv3 with Chromium and LibreOffice render paths verified locally, plus an authenticated /v1/gotenberg route on the shared platform API gateway."
+        "A private Gotenberg runtime on runtime-ai with Chromium and LibreOffice render paths verified locally, plus an authenticated /v1/gotenberg route on the shared platform API gateway."
       ],
       "verification_commands": [
         "make syntax-check-gotenberg",
@@ -5230,7 +5230,7 @@
       }
     },
     "converge-typesense": {
-      "description": "Deploy the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
+      "description": "Deploy the private Typesense runtime on docker-runtime, refresh the Proxmox host Tailscale proxy, and repopulate the platform-services structured-search collection used by the shared API gateway.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5265,7 +5265,7 @@
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Typesense runtime on docker-runtime-lv3 reachable through the Proxmox host proxy, plus a live platform-services collection and authenticated /v1/platform/search/structured API gateway surface."
+        "A private Typesense runtime on docker-runtime reachable through the Proxmox host proxy, plus a live platform-services collection and authenticated /v1/platform/search/structured API gateway surface."
       ],
       "verification_commands": [
         "make syntax-check-typesense",
@@ -5285,7 +5285,7 @@
       }
     },
     "converge-rag-context": {
-      "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
+      "description": "Deploy the private platform context API with Qdrant on docker-runtime, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5322,7 +5322,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "A private OpenAPI tool server on docker-runtime-lv3 backed by Qdrant, a local embedding model, and a repo-grounded retrieval corpus, published through the Proxmox host Tailscale proxy."
+        "A private OpenAPI tool server on docker-runtime backed by Qdrant, a local embedding model, and a repo-grounded retrieval corpus, published through the Proxmox host Tailscale proxy."
       ],
       "verification_commands": [
         "make syntax-check-rag-context",
@@ -5342,7 +5342,7 @@
       }
     },
     "converge-portainer": {
-      "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
+      "description": "Converge the private Portainer runtime on docker-runtime, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5376,7 +5376,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "Private Portainer runtime on docker-runtime-lv3 with a Tailscale-published controller URL on the Proxmox host and controller-local bootstrap auth persisted under .local/portainer."
+        "Private Portainer runtime on docker-runtime with a Tailscale-published controller URL on the Proxmox host and controller-local bootstrap auth persisted under .local/portainer."
       ],
       "verification_commands": [
         "make syntax-check-portainer",
@@ -5395,7 +5395,7 @@
       }
     },
     "converge-vaultwarden": {
-      "description": "Converge private Vaultwarden on docker-runtime-lv3, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
+      "description": "Converge private Vaultwarden on docker-runtime, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5429,7 +5429,7 @@
         "config/service-capability-catalog.json"
       ],
       "outputs": [
-        "A private Vaultwarden runtime on docker-runtime-lv3 with a PostgreSQL backend, step-ca issued TLS, a Tailscale-only hostname at vault.lv3.org, and controller-local bootstrap admin artifacts under .local/vaultwarden."
+        "A private Vaultwarden runtime on docker-runtime with a PostgreSQL backend, step-ca issued TLS, a Tailscale-only hostname at vault.lv3.org, and controller-local bootstrap admin artifacts under .local/vaultwarden."
       ],
       "verification_commands": [
         "make syntax-check-vaultwarden",
@@ -5448,7 +5448,7 @@
       }
     },
     "converge-mattermost": {
-      "description": "Converge Mattermost on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
+      "description": "Converge Mattermost on docker-runtime, provision its PostgreSQL backend on postgres, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5485,7 +5485,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "Mattermost runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Tailscale operator entrypoint on the Proxmox host, seeded LV3 collaboration channels, and incoming webhook routes for alerts and workflow events."
+        "Mattermost runtime deployed on docker-runtime with a PostgreSQL backend on postgres, a Tailscale operator entrypoint on the Proxmox host, seeded LV3 collaboration channels, and incoming webhook routes for alerts and workflow events."
       ],
       "verification_commands": [
         "make syntax-check-mattermost",
@@ -5533,7 +5533,7 @@
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml"
       ],
       "outputs": [
-        "Uptime Kuma runtime on runtime-general-lv3, public DNS publication, and edge proxy configuration for uptime.lv3.org."
+        "Uptime Kuma runtime on runtime-general, public DNS publication, and edge proxy configuration for uptime.lv3.org."
       ],
       "verification_commands": [
         "make syntax-check-uptime-kuma",
@@ -5765,7 +5765,7 @@
       }
     },
     "configure-backup-vm": {
-      "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup-lv3.",
+      "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -5795,7 +5795,7 @@
         "collections/ansible_collections/lv3/platform/roles/proxmox_backups/tasks/main.yml"
       ],
       "outputs": [
-        "backup-lv3 guest, PBS datastore, local API credentials, Proxmox host PBS target configuration, and an optional off-site backup of VM 160 when PROXMOX_DR_OFFSITE_* inputs are supplied."
+        "backup guest, PBS datastore, local API credentials, Proxmox host PBS target configuration, and an optional off-site backup of VM 160 when PROXMOX_DR_OFFSITE_* inputs are supplied."
       ],
       "verification_commands": [
         "make syntax-check-backup-vm"
@@ -5839,7 +5839,7 @@
         "collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml"
       ],
       "outputs": [
-        "artifact-cache-lv3 provisioned as VM 180 on 10.10.10.80 with Docker, guest firewall policy, named ops access, and the managed cache-plane runtime listening privately on ports 5001-5004."
+        "artifact-cache provisioned as VM 180 on 10.10.10.80 with Docker, guest firewall policy, named ops access, and the managed cache-plane runtime listening privately on ports 5001-5004."
       ],
       "verification_commands": [
         "make syntax-check-artifact-cache-vm",
@@ -7224,7 +7224,7 @@
       ]
     },
     "converge-semaphore": {
-      "description": "Converge the private Semaphore runtime on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+      "description": "Converge the private Semaphore runtime on docker-runtime, provision its PostgreSQL backend on postgres, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7260,7 +7260,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "Private Semaphore runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Tailscale-published controller URL on the Proxmox host, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
+        "Private Semaphore runtime on docker-runtime with a PostgreSQL backend on postgres, a Tailscale-published controller URL on the Proxmox host, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
       ],
       "verification_commands": [
         "make syntax-check-semaphore",
@@ -7365,7 +7365,7 @@
       }
     },
     "converge-plane": {
-      "description": "Converge Plane on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
+      "description": "Converge Plane on docker-runtime, provision its PostgreSQL backend on postgres, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7406,7 +7406,7 @@
         "platform/ansible/plane.py"
       ],
       "outputs": [
-        "A repo-managed Plane runtime on docker-runtime-lv3 with PostgreSQL on postgres-lv3, public publication at tasks.lv3.org, mirrored bootstrap credentials, and synchronized ADR issues in the seeded project."
+        "A repo-managed Plane runtime on docker-runtime with PostgreSQL on postgres, public publication at tasks.lv3.org, mirrored bootstrap credentials, and synchronized ADR issues in the seeded project."
       ],
       "verification_commands": [
         "make syntax-check-plane",
@@ -7472,7 +7472,7 @@
       }
     },
     "converge-browser-runner": {
-      "description": "Converge the private Playwright browser runner on docker-runtime-lv3, refresh the shared API gateway route, and verify the governed browser-session execution surface for operators and Dify.",
+      "description": "Converge the private Playwright browser runner on docker-runtime, refresh the shared API gateway route, and verify the governed browser-session execution surface for operators and Dify.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7508,7 +7508,7 @@
         "config/agent-tool-registry.json"
       ],
       "outputs": [
-        "A private Playwright browser-session runtime on docker-runtime-lv3, an authenticated `/v1/browser-runner/*` gateway route, and the governed `browser-run-session` Dify tool surface."
+        "A private Playwright browser-session runtime on docker-runtime, an authenticated `/v1/browser-runner/*` gateway route, and the governed `browser-run-session` Dify tool surface."
       ],
       "verification_commands": [
         "make syntax-check-browser-runner",
@@ -7527,7 +7527,7 @@
       }
     },
     "converge-changedetection": {
-      "description": "Deploy the private Changedetection.io runtime on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
+      "description": "Deploy the private Changedetection.io runtime on docker-runtime, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7560,7 +7560,7 @@
         "config/data-catalog.json"
       ],
       "outputs": [
-        "A private Changedetection.io runtime on docker-runtime-lv3 with repo-managed upstream watch groups, mirrored API token, drift-free sync proof, and an authenticated `/v1/changedetection` route on the shared platform API gateway."
+        "A private Changedetection.io runtime on docker-runtime with repo-managed upstream watch groups, mirrored API token, drift-free sync proof, and an authenticated `/v1/changedetection` route on the shared platform API gateway."
       ],
       "verification_commands": [
         "make syntax-check-changedetection",
@@ -7581,7 +7581,7 @@
       }
     },
     "converge-tesseract-ocr": {
-      "description": "Build and deploy the private Tesseract OCR fallback runtime on runtime-ai-lv3 and verify direct OCR plus the Tika-first helper path through the dedicated runtime-ai pool.",
+      "description": "Build and deploy the private Tesseract OCR fallback runtime on runtime-ai and verify direct OCR plus the Tika-first helper path through the dedicated runtime-ai pool.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7617,7 +7617,7 @@
         "config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml"
       ],
       "outputs": [
-        "A private Tesseract OCR runtime on runtime-ai-lv3 with repo-managed direct OCR verification plus a Tika-first fallback extraction helper for scanned-image documents."
+        "A private Tesseract OCR runtime on runtime-ai with repo-managed direct OCR verification plus a Tika-first fallback extraction helper for scanned-image documents."
       ],
       "verification_commands": [
         "make syntax-check-tesseract-ocr",
@@ -7705,7 +7705,7 @@
       }
     },
     "converge-paperless": {
-      "description": "Deploy the public Paperless-ngx archive on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
+      "description": "Deploy the public Paperless-ngx archive on docker-runtime, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7741,7 +7741,7 @@
         "config/data-catalog.json"
       ],
       "outputs": [
-        "A public Paperless runtime on docker-runtime-lv3 with repo-managed taxonomy, durable API token, authenticated `/v1/paperless` gateway access, and end-to-end smoke upload verification."
+        "A public Paperless runtime on docker-runtime with repo-managed taxonomy, durable API token, authenticated `/v1/paperless` gateway access, and end-to-end smoke upload verification."
       ],
       "verification_commands": [
         "make syntax-check-paperless",
@@ -7762,7 +7762,7 @@
       }
     },
     "converge-glitchtip": {
-      "description": "Converge GlitchTip on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at errors.lv3.org, and verify public DSN ingestion end to end.",
+      "description": "Converge GlitchTip on docker-runtime, provision its PostgreSQL backend on postgres, publish it at errors.lv3.org, and verify public DSN ingestion end to end.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7815,7 +7815,7 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed GlitchTip runtime on docker-runtime-lv3 with PostgreSQL on postgres-lv3, Keycloak-backed browser sign-in, mirrored bootstrap credentials, and project-scoped DSNs for first-party producer integrations."
+        "A repo-managed GlitchTip runtime on docker-runtime with PostgreSQL on postgres, Keycloak-backed browser sign-in, mirrored bootstrap credentials, and project-scoped DSNs for first-party producer integrations."
       ],
       "verification_commands": [
         "make syntax-check-glitchtip",
@@ -7835,7 +7835,7 @@
       }
     },
     "converge-litellm": {
-      "description": "Converge LiteLLM Proxy on docker-runtime-lv3 with PostgreSQL backend.",
+      "description": "Converge LiteLLM Proxy on docker-runtime with PostgreSQL backend.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7865,7 +7865,7 @@
         "scripts/litellm_bootstrap.py"
       ],
       "outputs": [
-        "A private LiteLLM Proxy on docker-runtime-lv3:4000 with PostgreSQL backend, YAML-driven model routing, fallback chains, and OpenBao secret injection."
+        "A private LiteLLM Proxy on docker-runtime:4000 with PostgreSQL backend, YAML-driven model routing, fallback chains, and OpenBao secret injection."
       ],
       "verification_commands": [
         "curl -fsS http://100.64.0.1:4000/health/liveliness",
@@ -7884,7 +7884,7 @@
       "owner_runbook": "docs/runbooks/configure-litellm.md"
     },
     "converge-librechat": {
-      "description": "Deploy LibreChat on coolify-lv3, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge.",
+      "description": "Deploy LibreChat on coolify, reconcile Keycloak OIDC client, and publish chat.lv3.org through the shared edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7914,7 +7914,7 @@
         "config/serverclaw/system-prompt.md"
       ],
       "outputs": [
-        "LibreChat deployed on coolify-lv3:8096 with OIDC auth, Ollama + Anthropic backends, ServerClaw system prompt preset, and edge publication at chat.lv3.org."
+        "LibreChat deployed on coolify:8096 with OIDC auth, Ollama + Anthropic backends, ServerClaw system prompt preset, and edge publication at chat.lv3.org."
       ],
       "verification_commands": [
         "curl -fsS https://chat.lv3.org"

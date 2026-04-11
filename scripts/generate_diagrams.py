@@ -125,12 +125,10 @@ def render_network_topology(host_vars: dict[str, Any]) -> dict[str, Any]:
     elements += rectangle(
         f"vmbr10 guest LAN\n{host_vars['proxmox_internal_network']}", x=360, y=300, background="#dcfce7"
     )
-    elements += rectangle(f"nginx-lv3\n{guests['nginx-lv3']['ipv4']}", x=80, y=420, background="#fef9c3")
-    elements += rectangle(
-        f"docker-runtime-lv3\n{guests['docker-runtime-lv3']['ipv4']}", x=360, y=420, background="#ede9fe"
-    )
-    elements += rectangle(f"monitoring-lv3\n{guests['monitoring-lv3']['ipv4']}", x=640, y=420, background="#fee2e2")
-    elements += rectangle(f"postgres-lv3\n{guests['postgres-lv3']['ipv4']}", x=920, y=420, background="#fce7f3")
+    elements += rectangle(f"nginx\n{guests['nginx']['ipv4']}", x=80, y=420, background="#fef9c3")
+    elements += rectangle(f"docker-runtime\n{guests['docker-runtime']['ipv4']}", x=360, y=420, background="#ede9fe")
+    elements += rectangle(f"monitoring\n{guests['monitoring']['ipv4']}", x=640, y=420, background="#fee2e2")
+    elements += rectangle(f"postgres\n{guests['postgres']['ipv4']}", x=920, y=420, background="#fce7f3")
     elements.append(arrow("internet-host", x=280, y=88, dx=80, dy=0))
     elements.append(arrow("host-vmbr0", x=470, y=136, dx=0, dy=44))
     elements.append(arrow("vmbr0-vmbr10", x=470, y=252, dx=0, dy=48))

@@ -7,12 +7,12 @@
 #   - env (str, required): Target environment selector.
 #
 # Outputs:
-#   - LiteLLM Proxy is deployed on docker-runtime-lv3 with PostgreSQL database provisioned.
+#   - LiteLLM Proxy is deployed on docker-runtime with PostgreSQL database provisioned.
 #
 # Idempotency: Fully idempotent
 #
 # Dependencies:
-#   - Requires: docker-runtime-lv3 and postgres-vm-lv3 to be reachable.
+#   - Requires: docker-runtime and postgres-vm to be reachable.
 #   - Role: lv3.platform.litellm_postgres
 #   - Role: lv3.platform.litellm_runtime
 
@@ -31,7 +31,7 @@
     - role: lv3.platform.proxmox_network
 
 - name: Provision the LiteLLM PostgreSQL database
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
   tags:
@@ -52,7 +52,7 @@
     - role: lv3.platform.litellm_postgres
 
 - name: Converge LiteLLM Proxy on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   vars:

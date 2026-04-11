@@ -10,7 +10,7 @@
         msg: "Collecting mail platform diagnostics."
 
 - name: Inspect the mail platform runtime state
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
 

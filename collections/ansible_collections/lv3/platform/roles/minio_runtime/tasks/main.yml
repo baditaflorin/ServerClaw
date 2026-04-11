@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the shared MinIO runtime, launch buckets, and per-consumer access keys on docker-runtime-lv3.
+# Purpose: Converge the shared MinIO runtime, launch buckets, and per-consumer access keys on docker-runtime.
 # Inputs: Pinned image catalog entry, OpenBao env wiring, bucket policy inputs, and controller-local artifact paths.
 # Outputs: Rendered compose file plus a running MinIO runtime with repo-managed users, buckets, policies, default-CORS verification inputs, and lifecycle rules.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack, local secret mirrors, and bucket contracts.

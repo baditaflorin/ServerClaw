@@ -61,12 +61,12 @@
         loki_log_agent_http_listen_address: >-
           {{
             ansible_host ~ ':12345'
-            if monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3'
+            if monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres'
             else '127.0.0.1:12345'
           }}
         loki_log_agent_nginx_logs_enabled: "{{ monitoring_stack_guest_role == 'nginx' }}"
         loki_log_agent_docker_logs_enabled: "{{ monitoring_stack_guest_role == 'docker-runtime' }}"
-        loki_log_agent_postgres_audit_enabled: "{{ monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3' }}"
+        loki_log_agent_postgres_audit_enabled: "{{ monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres' }}"
         loki_log_agent_postgres_audit_approved_roles: >-
           {{
             (
@@ -76,7 +76,7 @@
               )
               | from_yaml
             ).approved_roles
-            if monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3'
+            if monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres'
             else []
           }}
         loki_log_agent_file_scrapes: >-
@@ -114,7 +114,7 @@
         playbook_execution_notification_service: guest-log-shipping
 
 - name: Verify PostgreSQL audit scrape after guest log shipping
-  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: false
   tags:
@@ -124,7 +124,7 @@
 
   vars:
     monitoring_stack_postgres_audit_host: >-
-      {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+      {{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}
     monitoring_stack_postgres_audit_metrics_job_name: postgres-audit-alloy
     monitoring_stack_postgres_audit_metrics_port: 12345
     monitoring_stack_postgres_audit_metrics_target: >-

@@ -23,7 +23,7 @@ semaphore_openbao_approle_name: semaphore-runtime
 
 semaphore_database_name: semaphore
 semaphore_database_user: semaphore_admin
-semaphore_database_inventory_host: postgres-lv3
+semaphore_database_inventory_host: postgres
 semaphore_database_host: "{{ hostvars[semaphore_database_inventory_host].ansible_host }}"
 semaphore_database_port: 5432
 semaphore_database_password_local_file: "{{ playbook_dir }}/../.local/semaphore/database-password.txt"

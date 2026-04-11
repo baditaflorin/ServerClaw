@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the repo-managed Gitea Actions runner and its Renovate bootstrap on docker-runtime-lv3.
+# Purpose: Converge the repo-managed Gitea Actions runner and its Renovate bootstrap on docker-runtime.
 # Use case: Run during Gitea automation convergence to install or refresh the shared runner contract.
 # Inputs: gitea_runner_* paths, runner identity settings, registration token, and Renovate bootstrap credentials.
 # Outputs: Rendered runner config, live runner container, and repo-managed automation bootstrap state.
@@ -359,5 +359,5 @@
     that:
       - gitea_runner_renovate_credential_stat.stat.exists
       - gitea_runner_renovate_credential_stat.stat.size | int > 0
-    fail_msg: "The Renovate credential bundle did not render on docker-build-lv3."
+    fail_msg: "The Renovate credential bundle did not render on docker-build."
   when: gitea_runner_renovate_enabled | bool

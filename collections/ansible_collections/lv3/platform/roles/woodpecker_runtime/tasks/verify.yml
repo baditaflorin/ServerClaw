@@ -1,5 +1,5 @@
 ---
-# Purpose: Verify that the converged Woodpecker runtime is healthy on docker-runtime-lv3 before the controller bootstrap path runs.
+# Purpose: Verify that the converged Woodpecker runtime is healthy on docker-runtime before the controller bootstrap path runs.
 # Use case: Included after Woodpecker convergence to prove the server, agent, and local health endpoints are serving traffic.
 #
 # Inputs (required):

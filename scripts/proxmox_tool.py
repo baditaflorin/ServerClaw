@@ -271,10 +271,10 @@ def _resolve_topology(args: argparse.Namespace, auth: dict) -> dict:
         snapshot_topo = load_topology_snapshot(effective_snapshot, env)
         # Map snapshot VM entries to flat topology keys
         vms = snapshot_topo.get("vms", {})
-        if "coolify-lv3" in vms:
-            topo["coolify_vmid"] = vms["coolify-lv3"].get("vmid", topo["coolify_vmid"])
-        if "coolify-apps-lv3" in vms:
-            topo["coolify_apps_vmid"] = vms["coolify-apps-lv3"].get("vmid", topo["coolify_apps_vmid"])
+        if "coolify" in vms:
+            topo["coolify_vmid"] = vms["coolify"].get("vmid", topo["coolify_vmid"])
+        if "coolify-apps" in vms:
+            topo["coolify_apps_vmid"] = vms["coolify-apps"].get("vmid", topo["coolify_apps_vmid"])
         services = snapshot_topo.get("services", {})
         if "coolify" in services:
             svc = services["coolify"]

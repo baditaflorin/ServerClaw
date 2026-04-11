@@ -39,7 +39,7 @@
 # --- Dify-specific docker runtime play (has post_tasks with post-verify and notify) ---
 
 - name: Converge Dify on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 
@@ -72,7 +72,7 @@
 # --- Dify-specific nginx play (has dify_skip_edge conditional on the role) ---
 
 - name: Publish Dify through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
 

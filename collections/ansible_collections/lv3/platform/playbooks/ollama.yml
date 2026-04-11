@@ -1,6 +1,6 @@
 ---
 - name: Converge Ollama on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:

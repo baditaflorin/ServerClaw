@@ -76,7 +76,7 @@
     msg: >-
       Skipping inline local corpus rebuild during live apply; production rebuilds run as an
       explicit maintenance action because the expanded semantic corpus exceeds the safe
-      synchronous rebuild budget on docker-runtime-lv3.
+      synchronous rebuild budget on docker-runtime.
   when: not (platform_context_verify_rebuild_local | bool)
 
 - name: Wait for the Qdrant API before live query verification

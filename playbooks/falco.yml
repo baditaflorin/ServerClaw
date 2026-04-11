@@ -1,6 +1,6 @@
 ---
 # Playbook: falco.yml
-# Purpose: Converge repo-managed Falco syscall monitoring on the selected production guests and route WARNING+ events through the private bridge on docker-runtime-lv3.
+# Purpose: Converge repo-managed Falco syscall monitoring on the selected production guests and route WARNING+ events through the private bridge on docker-runtime.
 # Use case: Run when the Falco package path, runtime rules, bridge routing, ntfy security topic, or Falco-to-Loki/NATS verification workflow changes.
 #
 # Inputs (required):
@@ -10,8 +10,8 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path used by the shared scoped runner.
 #
 # Outputs:
-#   - A private Falco event bridge on docker-runtime-lv3 listening on the managed internal bridge port
-#   - Falco runtime syscall monitoring enabled on docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3
+#   - A private Falco event bridge on docker-runtime listening on the managed internal bridge port
+#   - Falco runtime syscall monitoring enabled on docker-runtime, docker-build, monitoring, and postgres
 #   - Falco journald events shipped to Loki with a stable `job="falco"` label and WARNING+/CRITICAL events forwarded into NATS plus ntfy
 #
 # Idempotency: Fully idempotent
@@ -32,8 +32,8 @@
 # Last Updated: 2026-03-30
 # =============================================================================
 
-- name: Converge the private Falco event bridge on docker-runtime-lv3
-  hosts: docker-runtime-lv3
+- name: Converge the private Falco event bridge on docker-runtime
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:
@@ -49,10 +49,10 @@
         playbook_execution_audit_action: playbook.start.falco
         playbook_execution_audit_target: falco
         required_hosts:
-          - docker-runtime-lv3
-          - docker-build-lv3
-          - monitoring-lv3
-          - postgres-lv3
+          - docker-runtime
+          - docker-build
+          - monitoring
+          - postgres
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -66,7 +66,7 @@
     - role: lv3.platform.falco_event_bridge_runtime
 
 - name: Converge Falco syscall monitoring across the governed guests
-  hosts: docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3
+  hosts: docker-runtime:docker-build:monitoring:postgres
   become: true
   gather_facts: true
   tags:

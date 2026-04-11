@@ -19,7 +19,7 @@
 # Dependencies:
 #   - ADR 0286: Defines Vikunja as a repo-managed service with a PostgreSQL backend.
 #   - Requires: Controller-local artifact storage under .local/vikunja.
-#   - Role: vikunja_postgres — prepares the Vikunja database and login on postgres-lv3.
+#   - Role: vikunja_postgres — prepares the Vikunja database and login on postgres.
 #
 # Related ADRs: 0165, 0286
 # Related Runbooks: docs/runbooks/configure-vikunja.md

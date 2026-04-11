@@ -20,7 +20,7 @@
 #   - ADR 0165: Requires playbook metadata for governed automation surfaces.
 #   - Role: lv3.platform.gitea_postgres — provisions the PostgreSQL backend and credentials.
 #   - Role: lv3.platform.gitea_runtime — converges the private Gitea runtime and Keycloak integration.
-#   - Role: lv3.platform.gitea_actions_runner — converges the private Actions runner on docker-build-lv3.
+#   - Role: lv3.platform.gitea_actions_runner — converges the private Actions runner on docker-build.
 #
 # Related ADRs: 0143, 0165, 0229
 # Related Runbooks: docs/runbooks/configure-gitea.md
@@ -42,7 +42,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Converge the Gitea PostgreSQL backend
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
   tags:
@@ -62,8 +62,8 @@
   roles:
     - role: lv3.platform.gitea_postgres
 
-- name: Converge private Gitea and its Keycloak client on runtime-control-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+- name: Converge private Gitea and its Keycloak client on runtime-control
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
   tags:
@@ -98,8 +98,8 @@
       vars:
         playbook_execution_notification_service: gitea
 
-- name: Converge the Gitea Actions runner on docker-build-lv3
-  hosts: "{{ 'docker-build-staging-lv3' if (env | default('production')) == 'staging' else 'docker-build-lv3' }}"
+- name: Converge the Gitea Actions runner on docker-build
+  hosts: "{{ 'docker-build-staging' if (env | default('production')) == 'staging' else 'docker-build' }}"
   become: true
   gather_facts: true
   tags:

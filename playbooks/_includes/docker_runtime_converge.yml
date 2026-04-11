@@ -7,7 +7,7 @@
 # Usage: import_playbook with -e @playbooks/vars/<service>.yml
 
 - name: "Converge {{ service_audit_name }} on the Docker runtime VM"
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 

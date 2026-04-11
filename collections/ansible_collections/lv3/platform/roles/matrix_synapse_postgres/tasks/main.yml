@@ -1,6 +1,6 @@
 ---
 # Purpose: Provision the Matrix Synapse PostgreSQL role, database, and mirrored password artifact.
-# Use case: Applied on postgres-lv3 before the Matrix Synapse runtime converges on docker-runtime-lv3.
+# Use case: Applied on postgres before the Matrix Synapse runtime converges on docker-runtime.
 #
 # Inputs (required):
 #   - matrix_synapse_database_name (str, required): Managed PostgreSQL database name.
@@ -14,7 +14,7 @@
 #   - matrix_synapse_bridge_databases (list, optional): Additional bridge databases and password artifacts.
 #
 # Outputs:
-#   - PostgreSQL role and database provisioned for Matrix Synapse and the first mautrix bridges, with passwords mirrored locally and on postgres-lv3.
+#   - PostgreSQL role and database provisioned for Matrix Synapse and the first mautrix bridges, with passwords mirrored locally and on postgres.
 #
 # Idempotency: Fully idempotent
 #              Existing passwords, roles, and databases are reused; repeat runs only reconcile drift.
@@ -23,7 +23,7 @@
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
 #   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 #   - ADR 0359: Declarative PostgreSQL Client Registry
-#   - Requires: postgres-lv3 writable primary state.
+#   - Requires: postgres writable primary state.
 #   - Role: postgres_vm — prepares the managed PostgreSQL host before service provisioning.
 #
 # Related ADRs: 0165, 0255, 0256, 0359

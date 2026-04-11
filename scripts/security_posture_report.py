@@ -45,25 +45,25 @@ ENVIRONMENT_CHOICES = environment_choices()
 DEFAULT_LYNIS_HOSTS = {
     "production": [
         TOPOLOGY_HOST,
-        "docker-build-lv3",
-        "docker-runtime-lv3",
-        "backup-lv3",
-        "coolify-lv3",
-        "postgres-lv3",
-        "nginx-lv3",
-        "monitoring-lv3",
+        "docker-build",
+        "docker-runtime",
+        "backup",
+        "coolify",
+        "postgres",
+        "nginx",
+        "monitoring",
     ],
     "staging": [
         TOPOLOGY_HOST,
-        "docker-runtime-staging-lv3",
-        "postgres-staging-lv3",
-        "nginx-staging-lv3",
-        "monitoring-staging-lv3",
+        "docker-runtime-staging",
+        "postgres-staging",
+        "nginx-staging",
+        "monitoring-staging",
     ],
 }
 DEFAULT_TRIVY_HOSTS = {
-    "production": ["docker-runtime-lv3", "docker-build-lv3"],
-    "staging": ["docker-runtime-staging-lv3", "docker-build-staging-lv3"],
+    "production": ["docker-runtime", "docker-build"],
+    "staging": ["docker-runtime-staging", "docker-build-staging"],
 }
 
 

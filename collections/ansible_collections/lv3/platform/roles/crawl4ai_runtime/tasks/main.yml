@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the private Crawl4AI runtime on docker-runtime-lv3 with repo-managed rate-limit and observability settings.
+# Purpose: Converge the private Crawl4AI runtime on docker-runtime with repo-managed rate-limit and observability settings.
 # Inputs: Pinned image catalog entry, private service URL, config/compose paths, and runtime resource limits.
 # Outputs: Rendered config and compose files plus a running Crawl4AI container that serves health, monitoring, and markdown crawl endpoints.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack, config, and host port binding.

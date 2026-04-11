@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the ADR 0302 restic workflow on docker-runtime-lv3 through the managed SSH path."""
+"""Run the ADR 0302 restic workflow on docker-runtime through the managed SSH path."""
 
 from __future__ import annotations
 
@@ -117,7 +117,7 @@ def build_remote_command(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Trigger ADR 0302 live restic workflows on docker-runtime-lv3.")
+    parser = argparse.ArgumentParser(description="Trigger ADR 0302 live restic workflows on docker-runtime.")
     parser.add_argument("--env", default="production")
     parser.add_argument("--mode", choices=["backup", "restore-verify"], default="backup")
     parser.add_argument("--repo-root", default=DEFAULT_REMOTE_REPO_ROOT)
@@ -203,7 +203,7 @@ def ensure_remote_runtime_credentials(
     *,
     env: str,
     credential_file: str,
-    target: str = "docker-runtime-lv3",
+    target: str = "docker-runtime",
 ) -> None:
     if remote_file_exists(context, target=target, path=credential_file):
         return
@@ -281,7 +281,7 @@ def sync_reported_receipt_artifacts(
     return synced
 
 
-def ensure_remote_runtime_support_files(context: dict, *, repo_root: str, target: str = "docker-runtime-lv3") -> None:
+def ensure_remote_runtime_support_files(context: dict, *, repo_root: str, target: str = "docker-runtime") -> None:
     repo_root_path = PurePosixPath(repo_root)
     for relative_path, mode in REMOTE_RUNTIME_SUPPORT_FILES:
         local_path = LOCAL_REPO_ROOT / relative_path
@@ -327,12 +327,12 @@ def main(argv: list[str] | None = None) -> int:
             credential_file=args.credential_file,
             live_apply_trigger=args.live_apply_trigger,
         )
-        command = build_guest_ssh_command(context, "docker-runtime-lv3", remote_command)
+        command = build_guest_ssh_command(context, "docker-runtime", remote_command)
         outcome = run_command(command)
         report = extract_report_json(outcome.stdout)
         payload = {
             "status": "ok" if outcome.returncode == 0 else "error",
-            "target": "docker-runtime-lv3",
+            "target": "docker-runtime",
             "command": remote_command,
             "returncode": outcome.returncode,
             "stdout": outcome.stdout.strip(),
@@ -341,7 +341,7 @@ def main(argv: list[str] | None = None) -> int:
         if outcome.returncode == 0:
             synced_paths = sync_reported_receipt_artifacts(
                 context,
-                target="docker-runtime-lv3",
+                target="docker-runtime",
                 repo_root=args.repo_root,
                 report=report,
             )

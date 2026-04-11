@@ -17,4 +17,4 @@ groups:
       - prometheus
     workflow_id: converge-monitoring
     hosts:
-      - monitoring-lv3
+      - monitoring

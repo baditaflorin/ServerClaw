@@ -17,7 +17,7 @@
 # Dependencies:
 #   - ADR 0011: Establishes the monitoring VM managed service set.
 #   - ADR 0250: Adds the Loki Canary service restart path.
-#   - Requires: systemd-managed monitoring services to be installed on monitoring-lv3.
+#   - Requires: systemd-managed monitoring services to be installed on monitoring.
 #
 # Related ADRs: 0011, 0250
 # Related Runbooks: docs/runbooks/monitoring-stack.md

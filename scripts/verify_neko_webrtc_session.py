@@ -213,7 +213,7 @@ async def main():
 Examples:
   python3 verify_neko_webrtc_session.py --url localhost:8080
   python3 verify_neko_webrtc_session.py --url 10.10.10.41:8080 --timeout 30
-  python3 verify_neko_webrtc_session.py --url runtime-comms-lv3:8080 --verify-candidates 5
+  python3 verify_neko_webrtc_session.py --url runtime-comms:8080 --verify-candidates 5
         """,
     )
 

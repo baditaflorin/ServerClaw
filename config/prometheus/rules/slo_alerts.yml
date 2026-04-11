@@ -13,7 +13,7 @@ groups:
           indicator: availability
         annotations:
           summary: browser-runner-availability is burning its error budget at 14x
-          description: The private browser runner remains reachable on docker-runtime-lv3
+          description: The private browser runner remains reachable on docker-runtime
             for governed Playwright session execution.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_browser_runner_availability
@@ -26,7 +26,7 @@ groups:
           indicator: availability
         annotations:
           summary: browser-runner-availability is burning its error budget at 3x
-          description: The private browser runner remains reachable on docker-runtime-lv3
+          description: The private browser runner remains reachable on docker-runtime
             for governed Playwright session execution.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_browser_runner_availability
@@ -39,7 +39,7 @@ groups:
           indicator: availability
         annotations:
           summary: browser-runner-availability has less than 10% error budget remaining
-          description: The private browser runner remains reachable on docker-runtime-lv3
+          description: The private browser runner remains reachable on docker-runtime
             for governed Playwright session execution.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_changedetection_availability
@@ -54,7 +54,7 @@ groups:
         annotations:
           summary: changedetection-availability is burning its error budget at 14x
           description: The private Changedetection.io runtime remains reachable on
-            docker-runtime-lv3 for governed upstream release, advisory, and API change
+            docker-runtime for governed upstream release, advisory, and API change
             monitoring.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_changedetection_availability
@@ -68,7 +68,7 @@ groups:
         annotations:
           summary: changedetection-availability is burning its error budget at 3x
           description: The private Changedetection.io runtime remains reachable on
-            docker-runtime-lv3 for governed upstream release, advisory, and API change
+            docker-runtime for governed upstream release, advisory, and API change
             monitoring.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_changedetection_availability
@@ -82,7 +82,7 @@ groups:
         annotations:
           summary: changedetection-availability has less than 10% error budget remaining
           description: The private Changedetection.io runtime remains reachable on
-            docker-runtime-lv3 for governed upstream release, advisory, and API change
+            docker-runtime for governed upstream release, advisory, and API change
             monitoring.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_crawl4ai_availability
@@ -96,7 +96,7 @@ groups:
           indicator: availability
         annotations:
           summary: crawl4ai-availability is burning its error budget at 14x
-          description: The private Crawl4AI runtime remains reachable on docker-runtime-lv3
+          description: The private Crawl4AI runtime remains reachable on docker-runtime
             for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_crawl4ai_availability
@@ -109,7 +109,7 @@ groups:
           indicator: availability
         annotations:
           summary: crawl4ai-availability is burning its error budget at 3x
-          description: The private Crawl4AI runtime remains reachable on docker-runtime-lv3
+          description: The private Crawl4AI runtime remains reachable on docker-runtime
             for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_crawl4ai_availability
@@ -122,7 +122,7 @@ groups:
           indicator: availability
         annotations:
           summary: crawl4ai-availability has less than 10% error budget remaining
-          description: The private Crawl4AI runtime remains reachable on docker-runtime-lv3
+          description: The private Crawl4AI runtime remains reachable on docker-runtime
             for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_directus_availability
@@ -297,7 +297,7 @@ groups:
         annotations:
           summary: gotenberg-availability is burning its error budget at 14x
           description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai-lv3 for synchronous PDF conversion workflows.
+            on runtime-ai for synchronous PDF conversion workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_gotenberg_availability
         expr: slo:gotenberg_availability:error_rate_1h > (3 * 0.010000)
@@ -310,7 +310,7 @@ groups:
         annotations:
           summary: gotenberg-availability is burning its error budget at 3x
           description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai-lv3 for synchronous PDF conversion workflows.
+            on runtime-ai for synchronous PDF conversion workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_gotenberg_availability
         expr: slo:gotenberg_availability:budget_remaining < 0.10
@@ -323,7 +323,7 @@ groups:
         annotations:
           summary: gotenberg-availability has less than 10% error budget remaining
           description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai-lv3 for synchronous PDF conversion workflows.
+            on runtime-ai for synchronous PDF conversion workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_glitchtip_availability
         expr: (slo:glitchtip_availability:error_rate_5m > (14 * 0.005000)) and (slo:glitchtip_availability:error_rate_1h
@@ -887,7 +887,7 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability is burning its error budget at 14x
-          description: The private OpenFGA runtime remains reachable on runtime-control-lv3
+          description: The private OpenFGA runtime remains reachable on runtime-control
             for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_openfga_availability
@@ -900,7 +900,7 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability is burning its error budget at 3x
-          description: The private OpenFGA runtime remains reachable on runtime-control-lv3
+          description: The private OpenFGA runtime remains reachable on runtime-control
             for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_openfga_availability
@@ -913,7 +913,7 @@ groups:
           indicator: availability
         annotations:
           summary: openfga-availability has less than 10% error budget remaining
-          description: The private OpenFGA runtime remains reachable on runtime-control-lv3
+          description: The private OpenFGA runtime remains reachable on runtime-control
             for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_openfga_latency
@@ -1007,7 +1007,7 @@ groups:
           indicator: availability
         annotations:
           summary: label-studio-availability is burning its error budget at 14x
-          description: The private Label Studio runtime remains reachable on docker-runtime-lv3
+          description: The private Label Studio runtime remains reachable on docker-runtime
             for governed annotation queues and API automation.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_label_studio_availability
@@ -1020,7 +1020,7 @@ groups:
           indicator: availability
         annotations:
           summary: label-studio-availability is burning its error budget at 3x
-          description: The private Label Studio runtime remains reachable on docker-runtime-lv3
+          description: The private Label Studio runtime remains reachable on docker-runtime
             for governed annotation queues and API automation.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_label_studio_availability
@@ -1033,7 +1033,7 @@ groups:
           indicator: availability
         annotations:
           summary: label-studio-availability has less than 10% error budget remaining
-          description: The private Label Studio runtime remains reachable on docker-runtime-lv3
+          description: The private Label Studio runtime remains reachable on docker-runtime
             for governed annotation queues and API automation.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_piper_availability
@@ -1048,7 +1048,7 @@ groups:
         annotations:
           summary: piper-availability is burning its error budget at 14x
           description: The private Piper TTS health endpoint remains reachable on
-            docker-runtime-lv3 for real-time voice synthesis workflows.
+            docker-runtime for real-time voice synthesis workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_piper_availability
         expr: slo:piper_availability:error_rate_1h > (3 * 0.010000)
@@ -1061,7 +1061,7 @@ groups:
         annotations:
           summary: piper-availability is burning its error budget at 3x
           description: The private Piper TTS health endpoint remains reachable on
-            docker-runtime-lv3 for real-time voice synthesis workflows.
+            docker-runtime for real-time voice synthesis workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_piper_availability
         expr: slo:piper_availability:budget_remaining < 0.10
@@ -1074,7 +1074,7 @@ groups:
         annotations:
           summary: piper-availability has less than 10% error budget remaining
           description: The private Piper TTS health endpoint remains reachable on
-            docker-runtime-lv3 for real-time voice synthesis workflows.
+            docker-runtime for real-time voice synthesis workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_paperless_availability
         expr: (slo:paperless_availability:error_rate_5m > (14 * 0.010000)) and (slo:paperless_availability:error_rate_1h
@@ -1411,7 +1411,7 @@ groups:
         annotations:
           summary: tika-availability is burning its error budget at 14x
           description: The private Apache Tika extraction API remains reachable on
-            runtime-ai-lv3 for synchronous document text and metadata extraction workflows.
+            runtime-ai for synchronous document text and metadata extraction workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_tika_availability
         expr: slo:tika_availability:error_rate_1h > (3 * 0.010000)
@@ -1424,7 +1424,7 @@ groups:
         annotations:
           summary: tika-availability is burning its error budget at 3x
           description: The private Apache Tika extraction API remains reachable on
-            runtime-ai-lv3 for synchronous document text and metadata extraction workflows.
+            runtime-ai for synchronous document text and metadata extraction workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_tika_availability
         expr: slo:tika_availability:budget_remaining < 0.10
@@ -1437,7 +1437,7 @@ groups:
         annotations:
           summary: tika-availability has less than 10% error budget remaining
           description: The private Apache Tika extraction API remains reachable on
-            runtime-ai-lv3 for synchronous document text and metadata extraction workflows.
+            runtime-ai for synchronous document text and metadata extraction workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_tesseract_ocr_availability
         expr: (slo:tesseract_ocr_availability:error_rate_5m > (14 * 0.010000)) and
@@ -1450,7 +1450,7 @@ groups:
           indicator: availability
         annotations:
           summary: tesseract-ocr-availability is burning its error budget at 14x
-          description: The private Tesseract OCR runtime remains reachable on runtime-ai-lv3
+          description: The private Tesseract OCR runtime remains reachable on runtime-ai
             for scanned-image and image-only document fallback extraction.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_tesseract_ocr_availability
@@ -1463,7 +1463,7 @@ groups:
           indicator: availability
         annotations:
           summary: tesseract-ocr-availability is burning its error budget at 3x
-          description: The private Tesseract OCR runtime remains reachable on runtime-ai-lv3
+          description: The private Tesseract OCR runtime remains reachable on runtime-ai
             for scanned-image and image-only document fallback extraction.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_tesseract_ocr_availability
@@ -1476,7 +1476,7 @@ groups:
           indicator: availability
         annotations:
           summary: tesseract-ocr-availability has less than 10% error budget remaining
-          description: The private Tesseract OCR runtime remains reachable on runtime-ai-lv3
+          description: The private Tesseract OCR runtime remains reachable on runtime-ai
             for scanned-image and image-only document fallback extraction.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_typesense_availability

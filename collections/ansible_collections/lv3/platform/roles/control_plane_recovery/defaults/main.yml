@@ -45,7 +45,7 @@ control_plane_recovery_controller_repo_common_root: >-
     )
   }}
 control_plane_recovery_windmill_backup_database_inventory_host: >-
-  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+  {{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}
 control_plane_recovery_windmill_backup_database_host: >-
   {{
     hostvars[platform_topology_host].proxmox_guests

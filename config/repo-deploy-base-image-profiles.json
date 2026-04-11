@@ -5,7 +5,7 @@
     {
       "id": "coolify-dockercompose-go-static-web",
       "name": "Coolify Docker Compose Go API and static web",
-      "description": "Approved profile for the current education_wemeshup Docker Compose deployment lane on coolify-lv3.",
+      "description": "Approved profile for the current education_wemeshup Docker Compose deployment lane on coolify.",
       "deployment_lane": "coolify",
       "allowed_build_packs": [
         "dockercompose"

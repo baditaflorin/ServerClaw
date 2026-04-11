@@ -42,7 +42,7 @@
       "access_role": "platform-operator",
       "pii_risk": "low",
       "locations": [
-        "Docker volume changedetection-datastore on docker-runtime-lv3",
+        "Docker volume changedetection-datastore on docker-runtime",
         "/etc/lv3/changedetection/watch-catalog.json",
         "/opt/changedetection/watch-sync-report.json"
       ],
@@ -58,8 +58,8 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "Transient request and response buffers inside the crawl4ai container on docker-runtime-lv3",
-        "Ephemeral browser session and temporary extraction state inside the Crawl4AI runtime on docker-runtime-lv3"
+        "Transient request and response buffers inside the crawl4ai container on docker-runtime",
+        "Ephemeral browser session and temporary extraction state inside the Crawl4AI runtime on docker-runtime"
       ],
       "notes": "Crawl4AI is stateless in this deployment and does not persist crawl history after each synchronous Markdown or extraction response completes."
     },
@@ -73,7 +73,7 @@
       "access_role": "platform-operator",
       "pii_risk": "low",
       "locations": [
-        "PostgreSQL database directus on postgres-lv3",
+        "PostgreSQL database directus on postgres",
         "Directus system tables plus governed collections in the public schema of the dedicated directus database"
       ],
       "notes": "Directus persists repo-governed operational metadata in a dedicated PostgreSQL database. Upstream Directus 11.17.0 keeps both system tables and managed collections in the public schema of that dedicated database, so schema isolation is enforced at the database boundary rather than by a separate PostgreSQL schema."
@@ -88,9 +88,9 @@
       "access_role": "platform-read",
       "pii_risk": "medium",
       "locations": [
-        "Docker stdout and stderr log buffers on docker-runtime-lv3",
-        "Docker stdout and stderr log buffers on docker-build-lv3",
-        "Docker stdout and stderr log buffers on monitoring-lv3"
+        "Docker stdout and stderr log buffers on docker-runtime",
+        "Docker stdout and stderr log buffers on docker-build",
+        "Docker stdout and stderr log buffers on monitoring"
       ],
       "notes": "Dozzle is read-only and does not persist its own datastore; it exposes recent container log buffers from the managed Docker hosts for real-time debugging."
     },
@@ -136,7 +136,7 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "Flagsmith PostgreSQL database on postgres-lv3"
+        "Flagsmith PostgreSQL database on postgres"
       ],
       "notes": "Flagsmith persists organisations, projects, environments, feature definitions, segment metadata, and environment-specific flag state in the shared PostgreSQL cluster."
     },
@@ -200,8 +200,8 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "Transient request and response buffers inside the gotenberg container on docker-runtime-lv3",
-        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime-lv3"
+        "Transient request and response buffers inside the gotenberg container on docker-runtime",
+        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime"
       ],
       "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
     },
@@ -215,8 +215,8 @@
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "PostgreSQL database glitchtip on postgres-lv3",
-        "/opt/glitchtip/data/uploads on docker-runtime-lv3",
+        "PostgreSQL database glitchtip on postgres",
+        "/opt/glitchtip/data/uploads on docker-runtime",
         ".local/glitchtip/projects.json on the control machine"
       ],
       "notes": "GlitchTip stores grouped exception payloads, issue metadata, notification state, uploaded artifacts, and the repo-managed DSN project catalogue for first-party producers."
@@ -231,8 +231,8 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "Transient uploaded image and PDF buffers inside the tesseract-ocr container on docker-runtime-lv3",
-        "Ephemeral rendered page images created during PDF OCR on docker-runtime-lv3"
+        "Transient uploaded image and PDF buffers inside the tesseract-ocr container on docker-runtime",
+        "Ephemeral rendered page images created during PDF OCR on docker-runtime"
       ],
       "notes": "The OCR runtime is stateless and discards uploaded source files, rendered page images, and extracted text after each synchronous request completes."
     },
@@ -321,9 +321,9 @@
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Docker volume lv3-redpanda-data on docker-runtime-lv3"
+        "Docker volume lv3-redpanda-data on docker-runtime"
       ],
-      "notes": "Topic retention remains per-topic and repo-managed; the named Docker volume must be covered by docker-runtime-lv3 backup evidence whenever the Redpanda runtime contract changes."
+      "notes": "Topic retention remains per-topic and repo-managed; the named Docker volume must be covered by docker-runtime backup evidence whenever the Redpanda runtime contract changes."
     },
     {
       "id": "langfuse-object-storage",
@@ -398,7 +398,7 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "Mailpit in-memory message store on docker-runtime-lv3"
+        "Mailpit in-memory message store on docker-runtime"
       ],
       "notes": "Mailpit intentionally keeps intercepted staging and development messages in ephemeral in-memory storage so assertion traffic is inspectable but lost on restart."
     },
@@ -412,7 +412,7 @@
       "access_role": "platform-operator",
       "pii_risk": "low",
       "locations": [
-        "Docker volume piper-models on docker-runtime-lv3"
+        "Docker volume piper-models on docker-runtime"
       ],
       "notes": "Piper stores downloaded voice models in a named Docker volume so the private TTS runtime can restart without re-fetching the declared model set."
     },
@@ -426,8 +426,8 @@
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Transient request and response buffers inside the piper container on docker-runtime-lv3",
-        "Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime-lv3"
+        "Transient request and response buffers inside the piper container on docker-runtime",
+        "Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime"
       ],
       "notes": "Piper does not persist input text or synthesized audio after each request completes, but both may contain sensitive operator or agent content while the request is in flight."
     },
@@ -514,7 +514,7 @@
       "access_role": "break_glass",
       "pii_risk": "high",
       "locations": [
-        "Docker volumes paperless-media, paperless-data, paperless-export, and paperless-consume on docker-runtime-lv3"
+        "Docker volumes paperless-media, paperless-data, paperless-export, and paperless-consume on docker-runtime"
       ],
       "notes": "Paperless stores uploaded source files, OCR output, and exportable archive artifacts that must remain recoverable."
     },
@@ -528,7 +528,7 @@
       "access_role": "break_glass",
       "pii_risk": "high",
       "locations": [
-        "Paperless PostgreSQL database on postgres-lv3"
+        "Paperless PostgreSQL database on postgres"
       ],
       "notes": "Paperless stores document metadata, taxonomy, correspondents, and operator actions alongside the archive state."
     },
@@ -585,7 +585,7 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "PostgreSQL openfga database on postgres-lv3",
+        "PostgreSQL openfga database on postgres",
         "serverclaw-authz store, authorization models, and tuples"
       ],
       "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
@@ -603,7 +603,7 @@
         "/opt/grist/persist/docs",
         "/opt/grist/persist/home.sqlite3"
       ],
-      "notes": "Grist persists operator-managed spreadsheet documents and instance metadata as SQLite files under /persist on docker-runtime-lv3."
+      "notes": "Grist persists operator-managed spreadsheet documents and instance metadata as SQLite files under /persist on docker-runtime."
     },
     {
       "id": "temporal-workflow-history",
@@ -615,8 +615,8 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "PostgreSQL temporal database on postgres-lv3",
-        "PostgreSQL temporal_visibility database on postgres-lv3"
+        "PostgreSQL temporal database on postgres",
+        "PostgreSQL temporal_visibility database on postgres"
       ],
       "notes": "Temporal persists workflow event history, timers, and visibility records for the repo-managed `lv3` namespace using the declared retention window."
     },
@@ -632,7 +632,7 @@
       "locations": [
         "http://100.64.0.1:8008"
       ],
-      "notes": "ServerClaw persists conversations, workspace artifacts, prompt history, and user-specific workbench settings in its local runtime data volume on docker-runtime-lv3."
+      "notes": "ServerClaw persists conversations, workspace artifacts, prompt history, and user-specific workbench settings in its local runtime data volume on docker-runtime."
     },
     {
       "id": "outline-attachment-storage",
@@ -672,7 +672,7 @@
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Lago PostgreSQL database on postgres-lv3"
+        "Lago PostgreSQL database on postgres"
       ],
       "notes": "Lago stores billable metrics, plans, customers, subscriptions, invoices, credit notes, and aggregated usage records that may include tenant identifiers and billing contacts."
     },
@@ -686,7 +686,7 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "/opt/lago/data/storage on docker-runtime-lv3"
+        "/opt/lago/data/storage on docker-runtime"
       ],
       "notes": "The Lago storage directory retains generated invoice exports, PDF-ready billing artifacts, and other runtime files needed for billing-history reconstruction."
     },
@@ -702,7 +702,7 @@
       "locations": [
         "/opt/plane/data/minio"
       ],
-      "notes": "Plane attachment uploads and exported artifacts are persisted in the local MinIO-backed object store on docker-runtime-lv3."
+      "notes": "Plane attachment uploads and exported artifacts are persisted in the local MinIO-backed object store on docker-runtime."
     },
     {
       "id": "plane-workspace-store",
@@ -820,7 +820,7 @@
         "/opt/serverclaw/data",
         "https://chat.lv3.org"
       ],
-      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its ServerClaw data volume on coolify-lv3."
+      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its ServerClaw data volume on coolify."
     },
     {
       "id": "tempo-traces",
@@ -847,8 +847,8 @@
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Transient request and response buffers inside the tika container on docker-runtime-lv3",
-        "Ephemeral extracted plaintext and metadata returned synchronously to callers on docker-runtime-lv3"
+        "Transient request and response buffers inside the tika container on docker-runtime",
+        "Ephemeral extracted plaintext and metadata returned synchronously to callers on docker-runtime"
       ],
       "notes": "Apache Tika is stateless and does not persist source documents, extracted text, or metadata after each synchronous request completes, but uploaded documents may contain sensitive content in transit."
     },
@@ -877,7 +877,7 @@
       "access_role": "platform-read",
       "pii_risk": "low",
       "locations": [
-        "Docker volume typesense-data on docker-runtime-lv3",
+        "Docker volume typesense-data on docker-runtime",
         "Typesense collection platform-services"
       ],
       "notes": "The repo-managed platform service catalog is materialized into Typesense as a derived full-text and faceted-search index and can be replayed from git after restore."
@@ -892,7 +892,7 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "PostgreSQL database label_studio on postgres-lv3"
+        "PostgreSQL database label_studio on postgres"
       ],
       "notes": "Label Studio stores project metadata, task assignments, task payload references, and completed annotations in the dedicated PostgreSQL database."
     },
@@ -906,7 +906,7 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "/opt/label-studio/data on docker-runtime-lv3"
+        "/opt/label-studio/data on docker-runtime"
       ],
       "notes": "The Label Studio data directory stores local imports, exports, and attachment cache material that accompanies the repo-managed project catalog."
     },
@@ -920,7 +920,7 @@
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "PostgreSQL database postgres on postgres-lv3, schema superset"
+        "PostgreSQL database postgres on postgres, schema superset"
       ],
       "notes": "Superset persists datasource definitions, saved queries, charts, dashboards, and user-generated BI metadata in the managed superset schema, so the schema should remain recoverable with the shared PostgreSQL backup policy."
     },

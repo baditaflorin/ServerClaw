@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "controller_host": {
-    "inventory_hostname": "docker-runtime-lv3",
+    "inventory_hostname": "docker-runtime",
     "minio": {
       "container_name": "minio",
       "bucket": "restic-config-backup",

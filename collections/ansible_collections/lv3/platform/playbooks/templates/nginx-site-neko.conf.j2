@@ -15,7 +15,7 @@ map $http_upgrade $connection_upgrade {
 # after auth), which is caught by error_page 500 = @neko_no_session below.
 map $auth_email $neko_backend {
 {% for name, inst in neko_instances.items() %}
-    "{{ inst.email }}"  "http://{{ hostvars['runtime-comms-lv3'].ansible_host }}:{{ inst.port }}";
+    "{{ inst.email }}"  "http://{{ hostvars['runtime-comms'].ansible_host }}:{{ inst.port }}";
 {% endfor %}
     default  "";
 }

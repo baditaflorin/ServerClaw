@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the Excalidraw frontend and collaboration room runtime on docker-runtime-lv3.
+# Purpose: Converge the Excalidraw frontend and collaboration room runtime on docker-runtime.
 # Inputs: Excalidraw runtime defaults, pinned container images, and shared-edge publication topology.
 # Outputs: Rendered compose files, patched frontend bootstrap script, and running Excalidraw containers.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and reapply the deterministic frontend patch.

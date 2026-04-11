@@ -42,7 +42,7 @@
 
 # Custom nginx play: adds public_edge_oidc_auth and linux_guest_firewall before nginx_edge_publication
 - name: Publish Label Studio through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

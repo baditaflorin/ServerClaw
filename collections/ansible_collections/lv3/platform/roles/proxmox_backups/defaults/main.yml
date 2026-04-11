@@ -21,7 +21,7 @@ proxmox_backup_storage:
     - "{{ host_public_hostname }}"
 
 proxmox_backup_jobs:
-  - id: backup-lv3-nightly
+  - id: backup-nightly
     enabled: "{{ proxmox_backup_storage.enabled }}"
     storage: "{{ proxmox_backup_storage.id }}"
     schedule: "02:30"

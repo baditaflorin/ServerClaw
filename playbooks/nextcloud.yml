@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0260: Nextcloud as the canonical personal data plane for ServerClaw.
-#   - Requires: postgres-lv3, docker-runtime-lv3, nginx-lv3, and OpenBao to already exist.
+#   - Requires: postgres, docker-runtime, nginx, and OpenBao to already exist.
 #   - Role: lv3.platform.nextcloud_postgres - provisions the Nextcloud database and role.
 #   - Role: lv3.platform.nextcloud_runtime - converges the Nextcloud runtime and local verification flow.
 #   - Role: lv3.platform.nginx_edge_publication - publishes the service through the shared edge.
@@ -37,10 +37,10 @@
 - import_playbook: _includes/postgres_preparation.yml
   when: service_needs_postgres | default(false)
 
-# --- Nextcloud-specific docker runtime play (uses runtime-apps-lv3 host, not docker-runtime-lv3) ---
+# --- Nextcloud-specific docker runtime play (uses runtime-apps host, not docker-runtime) ---
 
 - name: Converge Nextcloud on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-apps-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-apps' }}"
   become: true
   gather_facts: true
 
@@ -65,7 +65,7 @@
 # --- Nextcloud-specific post-verify play ---
 
 - name: Verify Nextcloud publication after edge convergence
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-apps-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-apps' }}"
   become: true
   gather_facts: false
 

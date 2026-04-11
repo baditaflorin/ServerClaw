@@ -19,7 +19,7 @@
 # Dependencies:
 #   - ADR 0093: Interactive ops portal runtime contract
 #   - ADR 0205: Capability contracts before product selection
-#   - Requires: docker-runtime-lv3 topology and platform port assignments
+#   - Requires: docker-runtime topology and platform port assignments
 #   - Role: ops_portal_runtime — converges the managed portal container and synced runtime data
 #
 # Related ADRs: 0093, 0205, 0210

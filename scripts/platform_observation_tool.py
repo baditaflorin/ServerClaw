@@ -1087,7 +1087,7 @@ def publish_nats(context: dict[str, Any], subject: str, payload: dict[str, Any])
         "sock.close()\n"
         "PY"
     )
-    result = execute_runner(context, "guest_jump", "docker-runtime-lv3", remote_command)
+    result = execute_runner(context, "guest_jump", "docker-runtime", remote_command)
     if result.returncode != 0:
         raise RuntimeError(f"NATS publish failed for {subject}: {result.stderr or result.stdout}")
 
@@ -1195,7 +1195,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--publish-nats",
         action="store_true",
-        help="Publish each finding to NATS via docker-runtime-lv3.",
+        help="Publish each finding to NATS via docker-runtime.",
     )
     parser.add_argument(
         "--mattermost-webhook-url",

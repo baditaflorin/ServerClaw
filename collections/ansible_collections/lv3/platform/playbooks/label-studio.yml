@@ -87,7 +87,7 @@
         hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
 
 - name: Prepare PostgreSQL for Label Studio
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
 
@@ -106,7 +106,7 @@
     - role: lv3.platform.label_studio_postgres
 
 - name: Converge Label Studio on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 
@@ -128,7 +128,7 @@
     - role: lv3.platform.api_gateway_runtime
 
 - name: Publish Label Studio through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

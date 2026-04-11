@@ -183,7 +183,7 @@ def nats_tunnel(context: dict[str, Any]) -> int:
     local_port = reserve_local_port()
     command = build_guest_ssh_command(
         context,
-        "docker-runtime-lv3",
+        "docker-runtime",
         "-N",
         "-L",
         f"127.0.0.1:{local_port}:127.0.0.1:4222",

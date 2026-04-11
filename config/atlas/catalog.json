@@ -3,9 +3,9 @@
   "atlas_image_ref": "docker.io/arigaio/atlas:1.1.6-community@sha256:e2aa1cdefb6f48fbe619d4b504777e26b140f4d358344d320ed26c374068ef01",
   "dev_postgres_image": "docker.io/library/postgres:16",
   "runtime": {
-    "openbao_guest": "docker-runtime-lv3",
+    "openbao_guest": "docker-runtime",
     "openbao_url": "http://127.0.0.1:8201",
-    "postgres_guest": "postgres-lv3",
+    "postgres_guest": "postgres",
     "postgres_port": 5432
   },
   "openbao": {

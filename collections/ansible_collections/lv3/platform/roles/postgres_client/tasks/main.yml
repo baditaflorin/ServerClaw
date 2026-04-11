@@ -1,7 +1,7 @@
 # Purpose: Provision a PostgreSQL role, database, and credential files for any platform service (ADR 0359).
 # Use case: Called by each {service}_postgres thin-wrapper role to replace the 27 near-identical implementations.
 # Inputs: postgres_client_* variables; see meta/argument_specs.yml for the full contract.
-# Outputs: Service PostgreSQL role, database, and credential files converged on postgres-lv3.
+# Outputs: Service PostgreSQL role, database, and credential files converged on postgres.
 # Idempotency: Fully idempotent; existence checks guard all create operations; secrets reuse stable generated values.
 # Dependencies: ADR 0359 postgres_client registry, requires a writable PostgreSQL primary.
 ---

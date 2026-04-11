@@ -264,7 +264,7 @@ def submit_remote_payload(
     remote_command = (
         f"sudo python3 {remote_repo_root}/scripts/governed_command_runtime.py submit --payload-base64 {remote_payload}"
     )
-    if runtime_host == "docker-runtime-lv3":
+    if runtime_host == "docker-runtime":
         command = build_guest_ssh_command(controller_context, runtime_host, remote_command)
     elif runtime_host == controller_context["host_vars"]["host_public_hostname"] or runtime_host == TOPOLOGY_HOST:
         command = build_host_ssh_command(controller_context, remote_command)

@@ -10,42 +10,42 @@
     ]
   },
   "guests": {
-    "backup-lv3": {
+    "backup": {
       "classification": "stateful",
       "validation_mode": "restore_preview",
       "cutover_method": "Restore a replacement backup guest from the verified backup seed, validate datastore mounts and Proxmox backup targets privately, then switch scheduled backup jobs to the replacement guest.",
       "rollback_window_minutes": 240,
       "rollback_method": "Keep the previous backup guest and datastore metadata intact until the replacement completes a full backup cycle and the restore probes stay green."
     },
-    "docker-build-lv3": {
+    "docker-build": {
       "classification": "stateful",
       "validation_mode": "preview_guest",
       "cutover_method": "Provision a replacement build guest from the managed Docker-host template, rehydrate the repo workspace and check-runner prerequisites, validate remote builds privately, then move the operator jump target and build workflows to the replacement guest.",
       "rollback_window_minutes": 180,
       "rollback_method": "Keep the previous build guest available so the jump path and build workflows can be pointed back immediately if repo sync, runner bootstrap, or build checks regress."
     },
-    "docker-runtime-lv3": {
+    "docker-runtime": {
       "classification": "edge_and_stateful",
       "validation_mode": "preview_guest",
       "cutover_method": "Provision a replacement runtime guest from the managed Docker-host template, replay the targeted service converges, validate private control-plane paths first, then repoint shared edge publication and host-side proxies to the replacement guest service by service.",
       "rollback_window_minutes": 180,
       "rollback_method": "Retain the previous runtime guest for the rollback window so public edge publication, tailnet proxies, and runtime workloads can be switched back if the replacement misses smoke checks."
     },
-    "monitoring-lv3": {
+    "monitoring": {
       "classification": "edge_and_stateful",
       "validation_mode": "preview_guest",
       "cutover_method": "Provision a replacement monitoring guest, replay the monitoring stack privately, validate Grafana, Prometheus, and exporter health before cutover, then move the published Grafana edge and monitoring writers to the replacement guest.",
       "rollback_window_minutes": 180,
       "rollback_method": "Keep the previous monitoring guest ready for rollback until dashboards, alert evaluations, and guest-writer ingestion stay healthy through the replacement window."
     },
-    "nginx-lv3": {
+    "nginx": {
       "classification": "edge",
       "validation_mode": "inactive_edge_peer",
       "cutover_method": "Provision a replacement edge guest from the managed Debian template, validate the rendered NGINX edge config and published static content while it remains outside public ingress, then switch the host-level TCP 80/443 forwards to the replacement guest.",
       "rollback_window_minutes": 120,
       "rollback_method": "Keep the previous edge guest intact so the host-level public forwards can be switched back immediately if TLS, auth, or published-host smoke tests fail."
     },
-    "postgres-lv3": {
+    "postgres": {
       "classification": "stateful",
       "validation_mode": "warm_standby",
       "cutover_method": "Use the warm replica as the live validation and promotion target, perform a controlled Patroni switchover during cutover, then rebuild the previous primary as the next standby.",

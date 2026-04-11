@@ -121,13 +121,13 @@
           Run 'python3 scripts/sync_docs_to_outline.py bootstrap-token' first.
       when: not outline_token_stat.stat.exists
 
-# --- Phase 3: Converge homepage (runs on runtime-general-lv3) ---
+# --- Phase 3: Converge homepage (runs on runtime-general) ---
 # NOTE: Skipped for now due to pre-existing architectural issue in homepage_runtime role
 # (requires service registry integration per ADR 0373). Will be re-enabled after ADR 0373 implementation.
 # See: https://github.com/baditaflorin/ServerClaw/issues/XXX
 
 # - name: Refresh home.{{ platform_domain }} service listing
-#   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
+#   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
 #   become: true
 #   gather_facts: true
 #   tags:
@@ -138,12 +138,12 @@
 #   roles:
 #     - role: lv3.platform.homepage_runtime
 
-# --- Phase 4: Converge ops portal (runs on docker-runtime-lv3) ---
+# --- Phase 4: Converge ops portal (runs on docker-runtime) ---
 # NOTE: Skipped for now due to pre-existing Docker Compose build-context sync issues.
 # Service catalog changes are regenerated locally; remote convergence disabled pending investigation.
 
 # - name: Refresh ops.{{ platform_domain }} service listing
-#   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+#   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
 #   become: true
 #   gather_facts: true
 #   tags:

@@ -98,7 +98,7 @@ platform_context_shared_local_root: >-
 platform_context_database_name: windmill
 platform_context_database_user: windmill_admin
 platform_context_database_inventory_host: >-
-  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+  {{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}
 platform_context_database_host: "{{ hostvars[platform_context_database_inventory_host].ansible_host }}"
 platform_context_database_port: 5432
 platform_context_database_password_local_file: "{{ platform_context_shared_local_root }}/windmill/database-password.txt"

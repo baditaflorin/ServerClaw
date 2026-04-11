@@ -138,7 +138,7 @@ except Exception:
 # qm guest exec serializes on the QGA socket per VM.
 
 recover_vm_120() {
-    recover_from_vm_batch 120 docker-runtime-lv3 \
+    recover_from_vm_batch 120 docker-runtime \
         /etc/lv3/keycloak/bootstrap-admin-password       keycloak/bootstrap-admin-password.txt \
         /etc/lv3/keycloak/admin-client-secret             keycloak/admin-client-secret.txt \
         /etc/lv3/keycloak/florin.badita-password           keycloak/florin.badita-password.txt \
@@ -236,12 +236,12 @@ recover_vm_120() {
         /etc/lv3/step-ca/hosts-password.txt               step-ca/secrets/provisioners/hosts-password.txt
 
     # OpenBao on the same VM — runs sequentially (same QGA socket)
-    recover_from_vm_batch 120 docker-runtime-lv3-openbao \
+    recover_from_vm_batch 120 docker-runtime-openbao \
         /etc/lv3/openbao/init.json                        openbao/init.json
 }
 
 recover_vm_150() {
-    recover_from_vm_batch 150 postgres-lv3 \
+    recover_from_vm_batch 150 postgres \
         /etc/lv3/postgres/keycloak-password.txt           keycloak/database-password.txt \
         /etc/lv3/postgres/dify-password.txt               dify/database-password.txt \
         /etc/lv3/postgres/directus-password.txt           directus/database-password.txt \
@@ -272,14 +272,14 @@ recover_vm_150() {
 }
 
 recover_vm_110() {
-    recover_from_vm_batch 110 nginx-lv3 \
+    recover_from_vm_batch 110 nginx \
         /etc/lv3/ntfy/alertmanager-password               ntfy/alertmanager-password.txt \
         /etc/lv3/headscale/api-key                        headscale/api-key.txt
 }
 
 recover_vm_160() {
-    recover_from_vm_batch 160 backup-lv3 \
-        /etc/lv3/proxmox-backup/backup-lv3-token.json     proxmox-backup/backup-lv3-token.json
+    recover_from_vm_batch 160 backup \
+        /etc/lv3/proxmox-backup/backup-token.json     proxmox-backup/backup-token.json
 }
 
 # ── Run all VMs in parallel ──────────────────────────────────────────

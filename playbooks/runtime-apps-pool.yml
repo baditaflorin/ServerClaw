@@ -1,5 +1,5 @@
 # Playbook: runtime-apps-pool.yml
-# Purpose: Provision the dedicated runtime-apps guest, converge the Docker pool substrate, and migrate application services (Nextcloud) from docker-runtime-lv3.
+# Purpose: Provision the dedicated runtime-apps guest, converge the Docker pool substrate, and migrate application services (Nextcloud) from docker-runtime.
 # Use case: Run for ADR 0346 follow-on work when the production runtime-apps pool must become true end to end.
 #
 # Inputs (required):
@@ -11,7 +11,7 @@
 #   - platform_trace_id (string, optional): Mutation-audit trace identifier.
 #
 # Outputs:
-#   - Dedicated VM `runtime-apps-lv3` (VMID 122, 10.10.10.22) provisioned on Proxmox with Docker runtime,
+#   - Dedicated VM `runtime-apps` (VMID 122, 10.10.10.22) provisioned on Proxmox with Docker runtime,
 #     guest firewall policy, and ready to receive Nextcloud and other application workloads.
 #
 # Idempotency: Partially idempotent
@@ -74,8 +74,8 @@
         - guests
         - runtime-apps-pool
 
-- name: Converge Docker runtime baseline on runtime-apps-lv3
-  hosts: runtime-apps-lv3
+- name: Converge Docker runtime baseline on runtime-apps
+  hosts: runtime-apps
   become: true
   gather_facts: true
   tags:

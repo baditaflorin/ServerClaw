@@ -3,7 +3,7 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 # Purpose: Declare the default runtime inputs for the Matrix Synapse service role.
-# Use case: Used when converging Matrix Synapse on docker-runtime-lv3 with repo-managed bootstrap secrets, config, and publication contracts.
+# Use case: Used when converging Matrix Synapse on docker-runtime with repo-managed bootstrap secrets, config, and publication contracts.
 #
 # Inputs (required):
 #   - none
@@ -22,7 +22,7 @@
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
 #   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
-#   - Role: matrix_synapse_runtime — deploys the Matrix Synapse runtime on docker-runtime-lv3.
+#   - Role: matrix_synapse_runtime — deploys the Matrix Synapse runtime on docker-runtime.
 #
 # Related ADRs: 0165, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md

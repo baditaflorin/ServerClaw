@@ -31,7 +31,7 @@
     - role: lv3.platform.keycloak_postgres
 
 - name: Converge Keycloak on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
 
@@ -47,7 +47,7 @@
     - role: lv3.platform.keycloak_runtime
 
 - name: Publish Keycloak through the NGINX edge
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   vars_files:
@@ -57,7 +57,7 @@
     - role: lv3.platform.nginx_edge_publication
 
 - name: Converge Grafana SSO against Keycloak
-  hosts: monitoring-lv3
+  hosts: monitoring
   become: true
   gather_facts: true
 

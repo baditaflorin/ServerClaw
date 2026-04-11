@@ -1,6 +1,6 @@
 ---
 # Playbook: excalidraw.yml
-# Purpose: Converge the Excalidraw runtime on docker-runtime-lv3 and publish draw.{{ platform_domain }} through the shared authenticated edge.
+# Purpose: Converge the Excalidraw runtime on docker-runtime and publish draw.{{ platform_domain }} through the shared authenticated edge.
 # Use case: Run when changing ADR 0202 runtime automation, shared-edge publication, or live Excalidraw image pins.
 #
 # Inputs (required):
@@ -10,14 +10,14 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH transport mode for guest access.
 #
 # Outputs:
-#   - Excalidraw frontend and collaboration room containers running on docker-runtime-lv3
+#   - Excalidraw frontend and collaboration room containers running on docker-runtime
 #   - Shared-edge publication for https://draw.{{ platform_domain }} with the repo-managed oauth2-proxy gate
 #
 # Idempotency: Partially idempotent
 #
 # Dependencies:
 #   - ADR 0202: Defines the self-hosted Excalidraw and generated diagram publication model.
-#   - Requires: docker-runtime-lv3, nginx-lv3, and the shared edge auth stack to be reachable.
+#   - Requires: docker-runtime, nginx, and the shared edge auth stack to be reachable.
 #
 # Related ADRs: 0133, 0136, 0165
 # Related Runbooks: docs/runbooks/configure-excalidraw.md
@@ -35,7 +35,7 @@
 # --- Excalidraw-specific plays (fixed hosts, custom preflight) ---
 
 - name: Converge Excalidraw on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   vars:
@@ -58,7 +58,7 @@
     - role: lv3.platform.excalidraw_runtime
 
 - name: Publish Excalidraw on the shared NGINX edge
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   vars_files:

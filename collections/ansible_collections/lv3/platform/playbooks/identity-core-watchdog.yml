@@ -1,10 +1,10 @@
 ---
 # Identity-core health watchdog — ADR 0376
-# Deploys a 15-second systemd timer on runtime-control-lv3 that probes
+# Deploys a 15-second systemd timer on runtime-control that probes
 # Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure.
 
-- name: Converge identity-core watchdog on runtime-control-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+- name: Converge identity-core watchdog on runtime-control
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
   tags:

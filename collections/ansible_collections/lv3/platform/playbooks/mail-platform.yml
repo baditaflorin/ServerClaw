@@ -32,7 +32,7 @@
     - role: lv3.platform.proxmox_network
 
 - name: Converge the mail platform runtime on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   tags:
@@ -66,7 +66,7 @@
         playbook_execution_notification_service: mail_platform
 
 - name: Converge mail platform observability on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   tags:
@@ -88,7 +88,7 @@
     - role: lv3.platform.mail_platform_observability
 
 - name: Refresh the monitoring stack with the managed mail dashboard
-  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: true
   tags:

@@ -1413,7 +1413,7 @@ Remove {service_name} following ADR 0389.
 ### Phase 1: Production Teardown
 
 ```bash
-ssh docker-runtime-lv3 "cd /opt/lv3/{hyphen_name} && docker compose down --remove-orphans"
+ssh docker-runtime "cd /opt/lv3/{hyphen_name} && docker compose down --remove-orphans"
 ```
 {db_section}
 - Remove Keycloak OIDC client: `{runtime_plan.get("keycloak_client_id", service_id)}`

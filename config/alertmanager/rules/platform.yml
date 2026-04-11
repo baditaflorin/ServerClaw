@@ -47,7 +47,7 @@ groups:
           summary: PostgreSQL is unreachable on the private service port.
           description: The PostgreSQL TCP readiness probe has been failing for at least two minutes.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/postgres-down/
-          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres/lv3-vm-postgres
 
       - alert: OpenBaoSealed
         expr: probe_success{service="openbao",probe_kind="readiness"} == 0
@@ -59,7 +59,7 @@ groups:
           summary: OpenBao is sealed or otherwise unavailable on the mTLS endpoint.
           description: The OpenBao readiness probe has been failing for at least two minutes.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/openbao-sealed/
-          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-docker-runtime/lv3-vm-docker-runtime
 
       - alert: CertificateExpiringSoon
         expr: |
@@ -104,7 +104,7 @@ groups:
           summary: PostgreSQL privilege changes are spiking for {% raw %}{{ $labels.db_role }}{% endraw %}.
           description: The pgaudit pipeline on {% raw %}{{ $labels.host }}{% endraw %} observed more than 10 ROLE-class audit events in five minutes for role {% raw %}{{ $labels.db_role }}{% endraw %} against database {% raw %}{{ $labels.db }}{% endraw %}.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/postgres-audit/
-          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres/lv3-vm-postgres
 
       - alert: PostgresUnknownRoleConnection
         expr: |
@@ -130,7 +130,7 @@ groups:
           summary: PostgreSQL accepted a connection for an unapproved login role.
           description: The PostgreSQL audit pipeline on {% raw %}{{ $labels.host }}{% endraw %} observed an authorized connection for role {% raw %}{{ $labels.db_role }}{% endraw %} against database {% raw %}{{ $labels.db }}{% endraw %} outside the approved login-role catalog.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/postgres-audit/
-          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-vm-postgres/lv3-vm-postgres
 
   - name: lv3-platform-capacity
     rules:
@@ -178,7 +178,7 @@ groups:
           component: loki-canary
         annotations:
           summary: Loki Canary is no longer being scraped by Prometheus.
-          description: The managed Loki Canary runtime on monitoring-lv3 is down or its metrics endpoint is unreachable.
+          description: The managed Loki Canary runtime on monitoring is down or its metrics endpoint is unreachable.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/log-queryability-canary/
           dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-log-canary-overview/lv3-log-canary-overview
 

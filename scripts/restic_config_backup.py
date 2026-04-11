@@ -1324,7 +1324,7 @@ def main(argv: list[str] | None = None) -> int:
             live_apply_trigger=args.live_apply_trigger,
             timeout_seconds=args.lock_timeout_seconds,
         ):
-            host_name = str(catalog.get("controller_host", {}).get("inventory_hostname") or "docker-runtime-lv3")
+            host_name = str(catalog.get("controller_host", {}).get("inventory_hostname") or "docker-runtime")
             _, endpoint = resolve_minio_endpoint(catalog)
             ensure_restic_repository(
                 catalog=catalog,

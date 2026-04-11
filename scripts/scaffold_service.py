@@ -966,7 +966,7 @@ def update_platform_services_registry(path: Path, spec: ServiceSpec) -> None:
             f"      records:\n"
             f'        - fqdn: "{hostname_var}"\n'
             f"          type: public\n"
-            f"          target_host: nginx-lv3\n"
+            f"          target_host: nginx\n"
             f"          ttl: 60\n"
         )
 
@@ -1088,7 +1088,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--type", dest="service_type", choices=["compose", "vm-service", "nginx-plugin"], default="compose"
     )
-    parser.add_argument("--vm", default="docker-runtime-lv3")
+    parser.add_argument("--vm", default="docker-runtime")
     parser.add_argument("--vmid", type=int)
     parser.add_argument("--depends-on", default="")
     parser.add_argument("--port", type=int, default=8080)

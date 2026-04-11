@@ -19,7 +19,7 @@
 # Dependencies:
 #   - ADR 0193: Defines Plane as a repo-managed service with a PostgreSQL backend.
 #   - Requires: Controller-local artifact storage under .local/plane.
-#   - Role: plane_postgres — prepares the Plane database and login on postgres-lv3.
+#   - Role: plane_postgres — prepares the Plane database and login on postgres.
 #
 # Related ADRs: 0165, 0193
 # Related Runbooks: docs/runbooks/configure-plane.md

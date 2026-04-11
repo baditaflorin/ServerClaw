@@ -11,71 +11,71 @@
       "node": "Debian-trixie-latest-amd64-base",
       "api_url": "https://proxmox.lv3.org:8006/api2/json",
       "vms": {
-        "nginx-lv3": {
+        "nginx": {
           "vmid": 110,
           "ip": "10.10.10.10"
         },
-        "docker-runtime-lv3": {
+        "docker-runtime": {
           "vmid": 120,
           "ip": "10.10.10.20"
         },
-        "docker-build-lv3": {
+        "docker-build": {
           "vmid": 130,
           "ip": "10.10.10.30"
         },
-        "monitoring-lv3": {
+        "monitoring": {
           "vmid": 140,
           "ip": "10.10.10.40"
         },
-        "postgres-lv3": {
+        "postgres": {
           "vmid": 150,
           "ip": "10.10.10.50"
         },
-        "postgres-replica-lv3": {
+        "postgres-replica": {
           "vmid": 151,
           "ip": "10.10.10.51"
         },
-        "backup-lv3": {
+        "backup": {
           "vmid": 160,
           "ip": "10.10.10.60"
         },
-        "coolify-lv3": {
+        "coolify": {
           "vmid": 170,
           "ip": "10.10.10.70"
         },
-        "coolify-apps-lv3": {
+        "coolify-apps": {
           "vmid": 171,
           "ip": "10.10.10.71"
         },
-        "artifact-cache-lv3": {
+        "artifact-cache": {
           "vmid": 180,
           "ip": "10.10.10.80"
         },
-        "runtime-ai-lv3": {
+        "runtime-ai": {
           "vmid": 190,
           "ip": "10.10.10.90"
         },
-        "runtime-general-lv3": {
+        "runtime-general": {
           "vmid": 191,
           "ip": "10.10.10.91"
         },
-        "runtime-control-lv3": {
+        "runtime-control": {
           "vmid": 192,
           "ip": "10.10.10.92"
         },
-        "runtime-comms-lv3": {
+        "runtime-comms": {
           "vmid": 121,
           "ip": "10.10.10.21"
         },
-        "runtime-apps-lv3": {
+        "runtime-apps": {
           "vmid": 122,
           "ip": "10.10.10.22"
         },
-        "postgres-apps-lv3": {
+        "postgres-apps": {
           "vmid": 152,
           "ip": "10.10.10.52"
         },
-        "postgres-data-lv3": {
+        "postgres-data": {
           "vmid": 154,
           "ip": "10.10.10.54"
         }

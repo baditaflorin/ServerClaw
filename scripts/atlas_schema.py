@@ -793,7 +793,7 @@ def maybe_publish_drift_events(
         publish_nats_events(records, nats_url=nats_url, credentials=credentials)
         return {"published": True, "count": len(records), "url": nats_url}
 
-    with guest_tunnel(context, "docker-runtime-lv3", remote_bind="127.0.0.1:4222") as local_port:
+    with guest_tunnel(context, "docker-runtime", remote_bind="127.0.0.1:4222") as local_port:
         tunnel_url = f"nats://127.0.0.1:{local_port}"
         publish_nats_events(records, nats_url=tunnel_url, credentials=credentials)
         return {"published": True, "count": len(records), "url": tunnel_url, "tunneled": True}

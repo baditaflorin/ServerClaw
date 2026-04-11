@@ -1,5 +1,5 @@
 {% import "_grafana_dashboard_macros.j2" as dashboard %}
-{% set host_name = "docker-runtime-lv3" %}
+{% set host_name = "docker-runtime" %}
 {% set service_name = "mail-platform" %}
 {% set total_query = 'from(bucket: "' ~ monitoring_influxdb_bucket ~ '") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "mail_platform" and r.host == "' ~ host_name ~ '" and r.service == "' ~ service_name ~ '") |> group(columns: ["_field"])' %}
 {% set rate_query = total_query ~ ' |> derivative(unit: 1s, nonNegative: true)' %}
@@ -33,7 +33,7 @@
     {
       "title": "Docker Runtime Detail",
       "type": "link",
-      "url": "/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3"
+      "url": "/d/lv3-vm-docker-runtime/lv3-vm-docker-runtime"
     }
   ],
   "panels": [

@@ -214,7 +214,7 @@ If your work affects an ADR's implementation status:
 git add docs/adr/0025-compose-managed-runtime-stacks.md
 git commit -m "ADR 0025: Upgrade to Implemented
 
-Deployed compose-managed runtime stacks to docker-runtime-lv3.
+Deployed compose-managed runtime stacks to docker-runtime.
 Multiple recent commits (ab755354d, dcc9aa4fa, d718979ec) implement
 the decision. Code references in keycloak_runtime, nginx_edge_publication roles."
 ```

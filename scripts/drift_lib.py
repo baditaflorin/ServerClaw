@@ -300,10 +300,10 @@ def wait_for_tunnel(process: subprocess.Popen[str], port: int) -> None:
 
 def resolve_nats_tunnel_target(context: dict[str, Any]) -> str:
     guests = context.get("guests", {})
-    if "runtime-control-lv3" in guests:
-        return "runtime-control-lv3"
-    if "docker-runtime-lv3" in guests:
-        return "docker-runtime-lv3"
+    if "runtime-control" in guests:
+        return "runtime-control"
+    if "docker-runtime" in guests:
+        return "docker-runtime"
     raise KeyError("no governed NATS guest was found in the controller context")
 
 

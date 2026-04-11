@@ -11,7 +11,7 @@ locals {
 module "docker_runtime_staging_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "docker-runtime-staging-lv3"
+  name                    = "docker-runtime-staging"
   description             = "docker-runtime staging VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 220
@@ -39,7 +39,7 @@ module "docker_runtime_staging_lv3" {
 module "monitoring_staging_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "monitoring-staging-lv3"
+  name                    = "monitoring-staging"
   description             = "monitoring staging VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 240

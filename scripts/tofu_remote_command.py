@@ -19,17 +19,17 @@ BUILD_SERVER_CONFIG = REPO_ROOT / "config" / "build-server.json"
 DEFAULT_NODE_NAME = "proxmox_florin"
 
 PRODUCTION_VMIDS = {
-    "nginx-lv3": 110,
-    "docker-runtime-lv3": 120,
-    "docker-build-lv3": 130,
-    "monitoring-lv3": 140,
-    "postgres-lv3": 150,
-    "backup-lv3": 160,
+    "nginx": 110,
+    "docker-runtime": 120,
+    "docker-build": 130,
+    "monitoring": 140,
+    "postgres": 150,
+    "backup": 160,
 }
 
 STAGING_VMIDS = {
-    "docker-runtime-staging-lv3": 220,
-    "monitoring-staging-lv3": 240,
+    "docker-runtime-staging": 220,
+    "monitoring-staging": 240,
 }
 
 

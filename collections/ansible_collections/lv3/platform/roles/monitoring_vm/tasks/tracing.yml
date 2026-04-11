@@ -9,7 +9,7 @@
 #   - Retention, canary, and Tempo/OpenTelemetry overrides declared through the monitoring_* role variables.
 #
 # Outputs:
-#   - Rendered Loki, Prometheus, blackbox, Tempo, and OTLP config plus started systemd services on monitoring-lv3.
+#   - Rendered Loki, Prometheus, blackbox, Tempo, and OTLP config plus started systemd services on monitoring.
 #
 # Idempotency: Partially idempotent
 #              Reruns reconcile the same config, services, and Loki storage backend contract.

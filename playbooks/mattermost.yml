@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0150: Mattermost provides the platform collaboration surface.
-#   - Requires: postgres-lv3, docker-runtime-lv3, and the shared edge components to already exist.
+#   - Requires: postgres, docker-runtime, and the shared edge components to already exist.
 #   - Role: lv3.platform.mattermost_postgres - provisions the Mattermost database and role.
 #   - Role: lv3.platform.mattermost_runtime - converges the Mattermost runtime and publication flow.
 #
@@ -36,7 +36,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Converge PostgreSQL access for Mattermost
-  hosts: postgres-apps-lv3
+  hosts: postgres-apps
   become: true
   gather_facts: true
 
@@ -59,7 +59,7 @@
         state: restarted
 
 - name: Converge Mattermost on the Docker runtime VM
-  hosts: runtime-comms-lv3
+  hosts: runtime-comms
   become: true
   gather_facts: true
 
@@ -75,7 +75,7 @@
     - role: lv3.platform.mattermost_runtime
 
 - name: Converge Grafana notification routing for Mattermost
-  hosts: monitoring-lv3
+  hosts: monitoring
   become: true
   gather_facts: true
 

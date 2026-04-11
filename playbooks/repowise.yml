@@ -1,12 +1,12 @@
 ---
 # Deploy the repowise semantic code search service.
-# Target: docker-runtime-lv3 (same host as Qdrant + Ollama)
+# Target: docker-runtime (same host as Qdrant + Ollama)
 #
 # Usage:
-#   ansible-playbook playbooks/repowise.yml -i inventory/hosts.yml --limit docker-runtime-lv3
+#   ansible-playbook playbooks/repowise.yml -i inventory/hosts.yml --limit docker-runtime
 
 - name: Converge repowise on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
 

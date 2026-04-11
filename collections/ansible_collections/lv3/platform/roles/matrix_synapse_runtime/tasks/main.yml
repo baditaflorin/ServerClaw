@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the Matrix Synapse runtime, bootstrap secrets, and verification flow on docker-runtime-lv3.
+# Purpose: Converge the Matrix Synapse runtime, bootstrap secrets, and verification flow on docker-runtime.
 # Use case: Applied when deploying, upgrading, or recovering the repo-managed Matrix Synapse conversation hub.
 #
 # Inputs (required):
@@ -20,7 +20,7 @@
 #   - matrix_synapse_trusted_key_servers (list, optional, default=[matrix.org]): Trusted key servers retained for upstream lookup.
 #
 # Outputs:
-#   - Matrix Synapse deployed on docker-runtime-lv3 with repo-managed config, mirrored bootstrap artifacts, and a verified ops admin login.
+#   - Matrix Synapse deployed on docker-runtime with repo-managed config, mirrored bootstrap artifacts, and a verified ops admin login.
 #
 # Idempotency: Fully idempotent
 #              Existing passwords, signing material, and bootstrap users are reused when present; repeat runs only reconcile drift.
@@ -102,7 +102,7 @@
   ansible.builtin.fail:
     msg: >-
       One or more Matrix bridge database password files are missing on the control machine.
-      Run the Matrix Synapse PostgreSQL converge first so the bridge configs can connect to postgres-lv3.
+      Run the Matrix Synapse PostgreSQL converge first so the bridge configs can connect to postgres.
   when: >-
     (matrix_synapse_bridge_database_password_stats.results | selectattr('stat.exists', 'equalto', false) | list | length) > 0
 

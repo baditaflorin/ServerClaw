@@ -1,5 +1,5 @@
 # Purpose: Deploy the Label Studio runtime, seed the repo-managed annotation projects, and verify the local service contract.
-# Use case: Run during Label Studio deployment, recovery, and exact-main replay on docker-runtime-lv3.
+# Use case: Run during Label Studio deployment, recovery, and exact-main replay on docker-runtime.
 # Inputs: Runtime paths, image refs, PostgreSQL credentials, and repo-managed project catalog defaults.
 # Outputs: The live Label Studio container, OpenBao-backed runtime env, and repo-managed annotation projects match repo truth.
 # Idempotency: Partially idempotent because compose restarts and project syncs are performed when the declared runtime or project catalog changes.

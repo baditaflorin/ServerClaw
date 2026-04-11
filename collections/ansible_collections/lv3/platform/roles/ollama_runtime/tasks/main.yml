@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the private Ollama runtime and its repo-managed model bootstrap on docker-runtime-lv3.
+# Purpose: Converge the private Ollama runtime and its repo-managed model bootstrap on docker-runtime.
 # Use case: Run when provisioning or refreshing the shared LLM inference surface for internal consumers.
 # Inputs: ollama_runtime_* paths, image pin, model catalog, and listener settings.
 # Outputs: Rendered compose runtime, synchronized model bootstrap inputs, and a running Ollama service.

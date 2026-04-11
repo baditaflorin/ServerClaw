@@ -11,7 +11,7 @@
 #   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
 #
 # Outputs:
-#   - Existing guests `docker-build-lv3`, `artifact-cache-lv3`, `coolify-lv3`, and `docker-runtime-lv3` carry the repo-declared reduced memory allocations needed for the remaining runtime-pool rollout.
+#   - Existing guests `docker-build`, `artifact-cache`, `coolify`, and `docker-runtime` carry the repo-declared reduced memory allocations needed for the remaining runtime-pool rollout.
 #
 # Idempotency: Partially idempotent
 #              The Proxmox-side replay is idempotent, but the memory changes require a stop/start cycle for each selected VM so the new allocation becomes effective.
@@ -88,7 +88,7 @@
         - runtime-pool-capacity-rebalance
 
 - name: Verify the rebalanced guests come back with SSH and Docker
-  hosts: docker-build-lv3:artifact-cache-lv3:coolify-lv3:docker-runtime-lv3
+  hosts: docker-build:artifact-cache:coolify:docker-runtime
   become: true
   gather_facts: false
   tags:

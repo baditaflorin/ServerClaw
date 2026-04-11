@@ -1,6 +1,6 @@
 ---
 # Playbook: temporal.yml
-# Purpose: Converge the private Temporal runtime, its PostgreSQL backing stores, and the repo-managed namespace bootstrap on runtime-control-lv3.
+# Purpose: Converge the private Temporal runtime, its PostgreSQL backing stores, and the repo-managed namespace bootstrap on runtime-control.
 # Use case: Run during ADR 0293 rollout, recovery, or later drift reconciliation when the durable workflow engine must match repo truth.
 #
 # Inputs (required):
@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0293: Temporal as the durable workflow and task queue engine.
-#   - Requires: OpenBao, PostgreSQL, and runtime-control-lv3 to already exist.
+#   - Requires: OpenBao, PostgreSQL, and runtime-control to already exist.
 #
 # Related ADRs: 0042, 0077, 0086, 0165, 0293
 # Related Runbooks: docs/runbooks/configure-temporal.md
@@ -25,7 +25,7 @@
 # Last Updated: 2026-03-30
 
 - name: Prepare PostgreSQL for Temporal
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
   vars:
@@ -277,8 +277,8 @@
       become: false
       run_once: true
 
-- name: Converge Temporal on runtime-control-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+- name: Converge Temporal on runtime-control
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
 

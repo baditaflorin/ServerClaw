@@ -1,10 +1,10 @@
 ---
 # Purpose: Converge the private Redpanda runtime that backs ADR 0290 durable Kafka-compatible streaming.
-# Use case: Run during initial deployment, recovery of the stopped runtime, or drift reconciliation on docker-runtime-lv3.
+# Use case: Run during initial deployment, recovery of the stopped runtime, or drift reconciliation on docker-runtime.
 # Inputs: redpanda_* role variables plus controller-local password files for the admin and platform principals.
 # Outputs: /opt/redpanda compose/config assets, a running lv3-redpanda container, seeded smoke topics, and a verified schema-registry + HTTP proxy path.
 # Idempotency: Yes; the role replays docker compose safely, preserves generated passwords, and reapplies topic/auth contracts deterministically.
-# Dependencies: ADR 0077, ADR 0165, ADR 0290, local OpenBao, and docker-runtime-lv3.
+# Dependencies: ADR 0077, ADR 0165, ADR 0290, local OpenBao, and docker-runtime.
 - name: Derive Redpanda conventional defaults from the service registry
   ansible.builtin.include_role:
     name: lv3.platform.common

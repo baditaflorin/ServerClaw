@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0153: Vaultwarden provides the managed password vault surface.
-#   - Requires: postgres-lv3, runtime-control-lv3, and the shared edge components to already exist.
+#   - Requires: postgres, runtime-control, and the shared edge components to already exist.
 #   - Role: lv3.platform.vaultwarden_postgres - provisions the Vaultwarden database and role.
 #   - Role: lv3.platform.vaultwarden_runtime - converges the Vaultwarden runtime and publication flow.
 #
@@ -36,7 +36,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Converge PostgreSQL access for Vaultwarden
-  hosts: postgres-lv3
+  hosts: postgres
   become: true
   gather_facts: true
 
@@ -53,7 +53,7 @@
     - role: lv3.platform.vaultwarden_postgres
 
 - name: Converge Vaultwarden on the runtime-control VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
 

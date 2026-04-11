@@ -318,13 +318,13 @@ def evaluate_service_standby(
                 "required_network_attachment": network_attachment,
             }
 
-    if standby_vm == "backup-lv3":
+    if standby_vm == "backup":
         if mode != "passive":
-            reasons.append("backup-lv3 may host only passive standbys")
+            reasons.append("backup may host only passive standbys")
         category = require_str(service.get("category"), f"service '{service_id}'.category")
         if category not in CONTROL_PLANE_CATEGORIES:
             reasons.append(
-                f"backup-lv3 standby placement is limited to passive control-plane roles, not category '{category}'"
+                f"backup standby placement is limited to passive control-plane roles, not category '{category}'"
             )
 
     if enforce_capacity_target:

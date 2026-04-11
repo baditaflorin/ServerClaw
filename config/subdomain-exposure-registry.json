@@ -22,7 +22,7 @@
           "service_id": "dify",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dify_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dify_port }}",
           "target_port": 443
         }
       },
@@ -65,7 +65,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dify_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dify_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -96,7 +96,7 @@
           "service_id": "plausible",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}",
           "target_port": 443
         }
       },
@@ -145,7 +145,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}",
           "security_headers_enabled": false,
           "preserve_upstream_security_headers": true
         },
@@ -178,7 +178,7 @@
           "service_id": "label_studio",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}",
           "target_port": 443
         }
       },
@@ -219,7 +219,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -250,7 +250,7 @@
           "service_id": "api_gateway",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}",
           "target_port": 443
         }
       },
@@ -290,7 +290,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -321,7 +321,7 @@
           "service_id": "coolify_apps",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}:443",
+          "target": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps') | map(attribute='ipv4') | first) }}:443",
           "target_port": 443
         }
       },
@@ -361,7 +361,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}:443",
+          "upstream": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps') | map(attribute='ipv4') | first) }}:443",
           "crawl_policy_enabled": false,
           "security_headers_enabled": false,
           "preserve_upstream_security_headers": true
@@ -373,7 +373,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps-lv3 (10.10.10.71) \u2014 ADR 0340."
+      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps (10.10.10.71) \u2014 ADR 0340."
     },
     {
       "fqdn": "bi.lv3.org",
@@ -395,7 +395,7 @@
           "service_id": "superset",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}",
           "target_port": 443
         }
       },
@@ -436,7 +436,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -467,7 +467,7 @@
           "service_id": "lago",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_front_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_front_port }}",
           "target_port": 443
         }
       },
@@ -508,11 +508,11 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_front_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_front_port }}",
           "prefix_proxy_routes": [
             {
               "path": "/api/",
-              "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_api_port }}"
+              "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.lago_api_port }}"
             }
           ]
         },
@@ -759,7 +759,7 @@
           "service_id": "serverclaw",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port }}",
           "target_port": 443
         }
       },
@@ -800,7 +800,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -831,7 +831,7 @@
           "service_id": "woodpecker",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}",
           "target_port": 443
         }
       },
@@ -872,7 +872,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -903,7 +903,7 @@
           "service_id": "nextcloud",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
           "target_port": 443
         }
       },
@@ -944,7 +944,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
           "client_max_body_size": "16g",
           "proxy_request_buffering": false,
           "proxy_read_timeout_seconds": 3600,
@@ -993,7 +993,7 @@
           "service_id": "coolify",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_dashboard_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_dashboard_port }}",
           "target_port": 443
         }
       },
@@ -1034,7 +1034,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_dashboard_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_dashboard_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -1065,7 +1065,7 @@
           "service_id": "directus",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}",
           "target_port": 443
         }
       },
@@ -1106,7 +1106,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -1423,7 +1423,7 @@
           "service_id": "glitchtip",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.glitchtip_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.glitchtip_port }}",
           "target_port": 443
         }
       },
@@ -1464,7 +1464,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.glitchtip_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.glitchtip_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -1495,7 +1495,7 @@
           "service_id": "flagsmith",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}",
           "target_port": 443
         }
       },
@@ -1538,7 +1538,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -1613,7 +1613,7 @@
         }
       },
       "live_tracking_expected": false,
-      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
+      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime."
     },
     {
       "fqdn": "grafana.lv3.org",
@@ -1635,7 +1635,7 @@
           "service_id": "grafana",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}:3000",
           "target_port": 443
         }
       },
@@ -1676,7 +1676,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}:3000",
           "proxy_hide_headers": [
             "X-Grafana-Version",
             "Via"
@@ -1784,7 +1784,7 @@
           "service_id": "grist",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.grist_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.grist_port }}",
           "target_port": 443
         }
       },
@@ -1825,7 +1825,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.grist_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.grist_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -1927,7 +1927,7 @@
           "service_id": "homepage",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}",
           "target_port": 443
         }
       },
@@ -1967,7 +1967,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.homepage_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -1998,7 +1998,7 @@
           "service_id": "langfuse",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}",
           "target_port": 443
         }
       },
@@ -2041,7 +2041,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -2072,7 +2072,7 @@
           "service_id": "livekit",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}",
           "target_port": 443
         }
       },
@@ -2115,7 +2115,7 @@
           "noindex": true,
           "proxy_read_timeout_seconds": 3600,
           "proxy_send_timeout_seconds": 3600,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -2124,7 +2124,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The shared NGINX edge proxies signalling at https://livekit.lv3.org while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime-lv3 for WebRTC media."
+      "notes": "The shared NGINX edge proxies signalling at https://livekit.lv3.org while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime for WebRTC media."
     },
     {
       "fqdn": "logs.lv3.org",
@@ -2146,7 +2146,7 @@
           "service_id": "dozzle",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}",
           "target_port": 443
         }
       },
@@ -2187,7 +2187,7 @@
           "enabled": true,
           "tls": true,
           "server_sent_events": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -2361,7 +2361,7 @@
           "service_id": "matrix_synapse",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}",
           "target_port": 443
         }
       },
@@ -2402,7 +2402,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -2509,7 +2509,7 @@
           "service_id": "minio",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}",
           "target_port": 443
         }
       },
@@ -2550,7 +2550,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}",
           "client_max_body_size": 0,
           "chunked_transfer_encoding": true,
           "proxy_request_buffering": false,
@@ -2588,7 +2588,7 @@
           "service_id": "n8n",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}",
           "target_port": 443
         }
       },
@@ -2634,7 +2634,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -2739,7 +2739,7 @@
           "service_id": "ntfy",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}",
           "target_port": 443
         }
       },
@@ -2779,7 +2779,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}",
           "chunked_transfer_encoding": true,
           "proxy_request_buffering": false,
           "proxy_read_timeout_seconds": 900,
@@ -2956,7 +2956,7 @@
           "service_id": "paperless",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.paperless_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.paperless_port }}",
           "target_port": 443
         }
       },
@@ -2997,7 +2997,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.paperless_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.paperless_port }}",
           "client_max_body_size": "256m",
           "proxy_request_buffering": false,
           "proxy_read_timeout_seconds": 3600,
@@ -3110,7 +3110,7 @@
           "service_id": "harbor",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}",
           "target_port": 443
         }
       },
@@ -3150,7 +3150,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}",
           "client_max_body_size": 0,
           "chunked_transfer_encoding": true,
           "proxy_request_buffering": false,
@@ -3186,7 +3186,7 @@
           "service_id": "repowise",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:7070",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:7070",
           "target_port": 443
         }
       },
@@ -3226,7 +3226,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:7070"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:7070"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3257,7 +3257,7 @@
           "service_id": "nomad",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:4646",
+          "target": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}:4646",
           "target_port": 443
         }
       },
@@ -3297,7 +3297,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:4646",
+          "upstream": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}:4646",
           "upstream_ssl_verify": false
         },
         "tls": {
@@ -3373,7 +3373,7 @@
         }
       },
       "live_tracking_expected": false,
-      "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime-lv3."
+      "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime."
     },
     {
       "fqdn": "sso.lv3.org",
@@ -3395,7 +3395,7 @@
           "service_id": "keycloak",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}",
           "target_port": 443
         }
       },
@@ -3435,7 +3435,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3533,7 +3533,7 @@
           "service_id": "status_page",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:3001",
           "target_port": 443
         }
       },
@@ -3573,7 +3573,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:3001",
           "root_proxy_path": "/status/lv3-platform"
         },
         "tls": {
@@ -3605,7 +3605,7 @@
           "service_id": "plane",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}",
           "target_port": 443
         }
       },
@@ -3646,7 +3646,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3677,7 +3677,7 @@
           "service_id": "uptime_kuma",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:3001",
           "target_port": 443
         }
       },
@@ -3717,7 +3717,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:3001"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3882,7 +3882,7 @@
           "service_id": "outline",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}",
           "target_port": 443
         }
       },
@@ -3923,7 +3923,7 @@
           "enabled": true,
           "tls": true,
           "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
         },
         "tls": {
           "provider": "letsencrypt",

@@ -1,6 +1,6 @@
 ---
 # Playbook: identity-core-watchdog.yml
-# Purpose: Deploy the identity-core health watchdog on runtime-control-lv3 (ADR 0376).
+# Purpose: Deploy the identity-core health watchdog on runtime-control (ADR 0376).
 # Use case: Run to install or update the systemd timer that probes Keycloak, Step-CA,
 #   OpenBao, and API Gateway every 15 seconds and auto-restarts them on failure.
 #
@@ -11,14 +11,14 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - systemd timer lv3-identity-watchdog.timer active on runtime-control-lv3, probing every 15s.
+#   - systemd timer lv3-identity-watchdog.timer active on runtime-control, probing every 15s.
 #   - Status file /var/lib/lv3-identity-watchdog/status.json updated each cycle.
 #
 # Idempotency: Fully idempotent
 #
 # Dependencies:
 #   - ADR 0376: Identity core VM isolation and aggressive health watchdog.
-#   - Requires: runtime-control-lv3 to be provisioned and reachable.
+#   - Requires: runtime-control to be provisioned and reachable.
 #   - Role: lv3.platform.identity_core_watchdog
 #
 # Related ADRs: 0376, 0056, 0101, 0226
@@ -26,8 +26,8 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-06
 
-- name: Converge identity-core watchdog on runtime-control-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+- name: Converge identity-core watchdog on runtime-control
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
   tags:

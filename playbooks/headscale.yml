@@ -43,7 +43,7 @@
         playbook_execution_notification_service: headscale
 
 - name: Publish Headscale on the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

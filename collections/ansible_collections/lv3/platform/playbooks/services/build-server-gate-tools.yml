@@ -17,7 +17,7 @@
 #   skipped when the version file matches.
 # Dependencies: ADR 0362, ADR 0082 (build server SSH gateway), ADR 0083 (check runner manifest)
 - name: Install native gate validation tools on the build server
-  hosts: "docker-build-lv3"
+  hosts: "docker-build"
   become: true
   gather_facts: true
 

@@ -2,7 +2,7 @@
 # Purpose: Provision the n8n PostgreSQL database using the shared postgres_client role (ADR 0359).
 # Use case: Called during n8n deployment to ensure the database, role, and credentials exist.
 # Inputs: n8n_* variables from defaults/main.yml; resolves registry entry from platform_postgres_clients.
-# Outputs: n8n PostgreSQL role, database, and credential files converged on postgres-lv3.
+# Outputs: n8n PostgreSQL role, database, and credential files converged on postgres.
 # Idempotency: Yes; postgres_client role handles all idempotency.
 # Dependencies: ADR 0359 postgres_client role, platform_postgres_clients registry.
 - name: Provision the n8n database via the shared postgres_client role

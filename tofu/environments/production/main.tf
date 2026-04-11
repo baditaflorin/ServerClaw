@@ -11,7 +11,7 @@ locals {
 module "nginx_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                  = "nginx-lv3"
+  name                  = "nginx"
   description           = "nginx VM for lv3.org platform"
   node_name             = var.node_name
   vm_id                 = 110
@@ -32,13 +32,13 @@ module "nginx_lv3" {
   tags                  = ["ingress", "lv3", "nginx"]
   ci_user               = var.ci_user
   ssh_authorized_keys   = [local.bootstrap_authorized_key]
-  user_data_file_id     = "local:snippets/nginx-lv3-user-data.yml"
+  user_data_file_id     = "local:snippets/nginx-user-data.yml"
 }
 
 module "docker_runtime_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "docker-runtime-lv3"
+  name                    = "docker-runtime"
   description             = "docker-runtime VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 120
@@ -59,13 +59,13 @@ module "docker_runtime_lv3" {
   tags                    = ["docker", "lv3", "runtime"]
   ci_user                 = var.ci_user
   ssh_authorized_keys     = [local.bootstrap_authorized_key]
-  user_data_file_id       = "local:snippets/docker-runtime-lv3-user-data.yml"
+  user_data_file_id       = "local:snippets/docker-runtime-user-data.yml"
 }
 
 module "docker_build_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "docker-build-lv3"
+  name                    = "docker-build"
   description             = "docker-build VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 130
@@ -86,13 +86,13 @@ module "docker_build_lv3" {
   tags                    = ["build", "docker", "lv3"]
   ci_user                 = var.ci_user
   ssh_authorized_keys     = [local.bootstrap_authorized_key]
-  user_data_file_id       = "local:snippets/docker-build-lv3-user-data.yml"
+  user_data_file_id       = "local:snippets/docker-build-user-data.yml"
 }
 
 module "monitoring_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "monitoring-lv3"
+  name                    = "monitoring"
   description             = "monitoring VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 140
@@ -113,13 +113,13 @@ module "monitoring_lv3" {
   tags                    = ["grafana", "lv3", "monitoring"]
   ci_user                 = var.ci_user
   ssh_authorized_keys     = [local.bootstrap_authorized_key]
-  user_data_file_id       = "local:snippets/monitoring-lv3-user-data.yml"
+  user_data_file_id       = "local:snippets/monitoring-user-data.yml"
 }
 
 module "postgres_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "postgres-lv3"
+  name                    = "postgres"
   description             = "postgres VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 150
@@ -140,13 +140,13 @@ module "postgres_lv3" {
   tags                    = ["database", "lv3", "postgres"]
   ci_user                 = var.ci_user
   ssh_authorized_keys     = [local.bootstrap_authorized_key]
-  user_data_file_id       = "local:snippets/postgres-lv3-user-data.yml"
+  user_data_file_id       = "local:snippets/postgres-user-data.yml"
 }
 
 module "postgres_replica_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "postgres-replica-lv3"
+  name                    = "postgres-replica"
   description             = "postgres replica VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 151
@@ -167,13 +167,13 @@ module "postgres_replica_lv3" {
   tags                    = ["database", "ha", "lv3", "postgres"]
   ci_user                 = var.ci_user
   ssh_authorized_keys     = [local.bootstrap_authorized_key]
-  user_data_file_id       = "local:snippets/postgres-replica-lv3-user-data.yml"
+  user_data_file_id       = "local:snippets/postgres-replica-user-data.yml"
 }
 
 module "backup_lv3" {
   source = "../../modules/proxmox-vm"
 
-  name                    = "backup-lv3"
+  name                    = "backup"
   description             = "backup VM for lv3.org platform"
   node_name               = var.node_name
   vm_id                   = 160
@@ -194,7 +194,7 @@ module "backup_lv3" {
   tags                    = ["backup", "lv3", "pbs"]
   ci_user                 = var.ci_user
   ssh_authorized_keys     = [local.bootstrap_authorized_key]
-  user_data_file_id       = "local:snippets/backup-lv3-user-data.yml"
+  user_data_file_id       = "local:snippets/backup-user-data.yml"
   extra_disks = [
     {
       interface    = "scsi1"

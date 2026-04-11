@@ -150,7 +150,7 @@ def _ssh_monitoring_command() -> list[str] | None:
     key_path = _bootstrap_key_path()
     inventory_hosts = _load_inventory_hosts()
     jump_host = inventory_hosts.get(TOPOLOGY_HOST)
-    monitoring_host = inventory_hosts.get("monitoring-lv3")
+    monitoring_host = inventory_hosts.get("monitoring")
     if not key_path or not jump_host or not monitoring_host:
         return None
     proxy = (

@@ -19,6 +19,6 @@ groups:
           severity: warning
           service: glitchtip
         annotations:
-          summary: GlitchTip is unhealthy on docker-runtime-lv3.
-          description: The private GlitchTip liveness probe on docker-runtime-lv3 has been failing for at least two minutes.
+          summary: GlitchTip is unhealthy on docker-runtime.
+          description: The private GlitchTip liveness probe on docker-runtime has been failing for at least two minutes.
           runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-glitchtip/

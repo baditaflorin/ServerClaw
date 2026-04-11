@@ -5,7 +5,7 @@
     "runtime-control": {
       "kind": "runtime_pool_target",
       "phase": "phase-5-runtime-control-migration",
-      "summary": "Target pool for identity, secrets, workflow control, supply-chain, and other high-consequence control-plane anchors. Current VM placement may still be docker-runtime-lv3 until the control migration wave lands.",
+      "summary": "Target pool for identity, secrets, workflow control, supply-chain, and other high-consequence control-plane anchors. Current VM placement may still be docker-runtime until the control migration wave lands.",
       "services": [
         "api_gateway",
         "gitea",
@@ -146,7 +146,7 @@
     "dedicated-coolify-apps": {
       "kind": "dedicated_plane",
       "phase": "already-dedicated",
-      "summary": "Dedicated Coolify apps runtime plane. Hosts all applications deployed through the Coolify deployment server on coolify-apps-lv3, isolated from the control-plane VM.",
+      "summary": "Dedicated Coolify apps runtime plane. Hosts all applications deployed through the Coolify deployment server on coolify-apps, isolated from the control-plane VM.",
       "services": [
         "coolify_apps"
       ]

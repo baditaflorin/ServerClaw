@@ -2,15 +2,15 @@
 # Neko Remote Desktop Deployment Playbook
 #
 # Deploys Neko WebRTC remote desktop for interactive operator browser access.
-# Implements ADR 0380 architecture with dedicated runtime-comms-lv3 VM.
+# Implements ADR 0380 architecture with dedicated runtime-comms VM.
 # Supports N isolated browser containers driven by neko_instances dict.
 #
 # Topology:
 #   Operator (headscale 100.64.0.0/10)
 #       ↓
-#   nginx-lv3 (TLS termination, browser.{{ platform_domain }})
+#   nginx (TLS termination, browser.{{ platform_domain }})
 #       ↓ X-Auth-Request-Email (per-user routing via map)
-#   runtime-comms-lv3 (VMID 121, 10.10.10.21)
+#   runtime-comms (VMID 121, 10.10.10.21)
 #       ├─ neko-<name> signalling (TCP port per instance)
 #       └─ WebRTC media (UDP range per instance)
 #
@@ -23,10 +23,10 @@
 #   make converge-service service=neko env=production
 
 # ---------------------------------------------------------------------------
-# Play 1: Converge Neko runtime (containers) on runtime-comms-lv3
+# Play 1: Converge Neko runtime (containers) on runtime-comms
 # ---------------------------------------------------------------------------
-- name: "Converge Neko Runtime on runtime-comms-lv3"
-  hosts: "runtime-comms-lv3"
+- name: "Converge Neko Runtime on runtime-comms"
+  hosts: "runtime-comms"
   become: true
   gather_facts: true
   tags: [tier-1, automation, service-neko]
@@ -219,7 +219,7 @@
 # Play 3: Publish Neko on NGINX Edge Gateway (email-keyed routing)
 # ---------------------------------------------------------------------------
 - name: "Publish Neko on NGINX Edge Gateway"
-  hosts: "nginx-lv3"
+  hosts: "nginx"
   become: true
   gather_facts: false
   tags: [tier-2, networking, service-neko]
@@ -286,7 +286,7 @@
 # Play 4: Post-Deployment Verification
 # ---------------------------------------------------------------------------
 - name: "Post-Deployment Verification"
-  hosts: "runtime-comms-lv3"
+  hosts: "runtime-comms"
   become: true
   gather_facts: false
   tags: [tier-3, verify, service-neko]

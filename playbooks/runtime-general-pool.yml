@@ -1,5 +1,5 @@
 # Playbook: runtime-general-pool.yml
-# Purpose: Provision the dedicated runtime-general guest, converge the Nomad/Traefik/Dapr pool substrate, move the first lightweight operator and support slice onto it, and retire the legacy copies from docker-runtime-lv3.
+# Purpose: Provision the dedicated runtime-general guest, converge the Nomad/Traefik/Dapr pool substrate, move the first lightweight operator and support slice onto it, and retire the legacy copies from docker-runtime.
 # Use case: Run for ADR 0319 and ADR 0320 follow-on work when the production runtime-general pool must become true end to end.
 #
 # Inputs (required):
@@ -11,7 +11,7 @@
 #   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
 #
 # Outputs:
-#   - Dedicated VM `runtime-general-lv3` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, a runtime-general Nomad namespace and client, Traefik plus Dapr substrate services, and the migrated Uptime Kuma, status-page backing surface, Homepage, and Mailpit workloads.
+#   - Dedicated VM `runtime-general` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, a runtime-general Nomad namespace and client, Traefik plus Dapr substrate services, and the migrated Uptime Kuma, status-page backing surface, Homepage, and Mailpit workloads.
 #
 # Idempotency: Partially idempotent
 #              Provisioning and service converges are idempotent. The Proxmox-side replay intentionally stop/starts VM 191 after `qm set` changes so the cloud-init-backed network and hardware settings become effective.
@@ -23,7 +23,7 @@
 #   - ADR 0232: Provides the private Nomad scheduler and client bootstrap path.
 #   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
 #   - Role: lv3.platform.proxmox_network — replays the Proxmox host firewall so the new pool guest and the Nomad scheduler can reach each other.
-#   - Role: lv3.platform.linux_guest_firewall — refreshes the in-guest nftables policy on monitoring-lv3 after the canonical guest catalog changes so the Nomad scheduler admits the new runtime-general peer.
+#   - Role: lv3.platform.linux_guest_firewall — refreshes the in-guest nftables policy on monitoring after the canonical guest catalog changes so the Nomad scheduler admits the new runtime-general peer.
 #   - Role: lv3.platform.nomad_cluster_member — enrolls the runtime-general guest into the private Nomad cluster.
 #   - Role: lv3.platform.nomad_namespace — ensures the runtime-general namespace exists on the scheduler.
 #   - Role: lv3.platform.runtime_pool_substrate — converges the Traefik and Dapr pool substrate.
@@ -81,7 +81,7 @@
         - runtime-general-pool
 
 - name: Converge the dedicated runtime-general guest substrate
-  hosts: runtime-general-lv3
+  hosts: runtime-general
   become: true
   gather_facts: false
   tags:
@@ -152,7 +152,7 @@
     - role: lv3.platform.runtime_pool_substrate
 
 - name: Refresh monitoring guest firewall policy after the runtime-general peer catalog changes
-  hosts: monitoring-lv3
+  hosts: monitoring
   become: true
   gather_facts: true
   tags:
@@ -173,7 +173,7 @@
         linux_guest_firewall_recover_missing_docker_bridge_chains: true
 
 - name: Ensure the runtime-general Nomad namespace exists
-  hosts: monitoring-lv3
+  hosts: monitoring
   become: true
   gather_facts: true
   tags:
@@ -187,12 +187,12 @@
         nomad_namespace_name: runtime-general
         nomad_namespace_description: Runtime general pool namespace for the dedicated operator and support guest.
 
-- name: Converge the operator and support services on runtime-general-lv3
-  hosts: runtime-general-lv3
+- name: Converge the operator and support services on runtime-general
+  hosts: runtime-general
   become: true
   gather_facts: true
   vars:
-    runtime_general_legacy_uptime_kuma_host: docker-runtime-lv3
+    runtime_general_legacy_uptime_kuma_host: docker-runtime
     runtime_general_legacy_uptime_kuma_data_dir: /opt/uptime-kuma/data
     runtime_general_uptime_kuma_data_dir: /opt/uptime-kuma/data
     runtime_general_uptime_kuma_restore_archive: /tmp/runtime-general-uptime-kuma-data.tar.gz
@@ -208,7 +208,7 @@
         path: "{{ runtime_general_uptime_kuma_restore_marker }}"
       register: runtime_general_uptime_kuma_restore_marker_stat
 
-    - name: Detect whether legacy Uptime Kuma data exists on docker-runtime-lv3
+    - name: Detect whether legacy Uptime Kuma data exists on docker-runtime
       ansible.builtin.stat:
         path: "{{ runtime_general_legacy_uptime_kuma_data_dir }}/kuma.db"
       delegate_to: "{{ runtime_general_legacy_uptime_kuma_host }}"
@@ -225,7 +225,7 @@
         - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
         - runtime_general_legacy_uptime_kuma_db.stat.exists
 
-    - name: Archive legacy Uptime Kuma data on docker-runtime-lv3
+    - name: Archive legacy Uptime Kuma data on docker-runtime
       ansible.builtin.command:
         argv:
           - tar
@@ -278,7 +278,7 @@
         - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
         - runtime_general_legacy_uptime_kuma_db.stat.exists
 
-    - name: Copy archived legacy Uptime Kuma data onto runtime-general-lv3
+    - name: Copy archived legacy Uptime Kuma data onto runtime-general
       ansible.builtin.copy:
         src: "{{ runtime_general_uptime_kuma_staging_dir.path }}/uptime-kuma-data.tar.gz"
         dest: "{{ runtime_general_uptime_kuma_restore_archive }}"
@@ -287,7 +287,7 @@
         - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
         - runtime_general_legacy_uptime_kuma_db.stat.exists
 
-    - name: Restore legacy Uptime Kuma data onto runtime-general-lv3
+    - name: Restore legacy Uptime Kuma data onto runtime-general
       ansible.builtin.unarchive:
         src: "{{ runtime_general_uptime_kuma_restore_archive }}"
         dest: "{{ runtime_general_uptime_kuma_data_dir }}"
@@ -305,7 +305,7 @@
         - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
         - runtime_general_legacy_uptime_kuma_db.stat.exists
 
-    - name: Remove the archived Uptime Kuma migration bundle from runtime-general-lv3
+    - name: Remove the archived Uptime Kuma migration bundle from runtime-general
       ansible.builtin.file:
         path: "{{ runtime_general_uptime_kuma_restore_archive }}"
         state: absent
@@ -313,7 +313,7 @@
         - not runtime_general_uptime_kuma_restore_marker_stat.stat.exists
         - runtime_general_legacy_uptime_kuma_db.stat.exists
 
-    - name: Remove the archived Uptime Kuma migration bundle from docker-runtime-lv3
+    - name: Remove the archived Uptime Kuma migration bundle from docker-runtime
       ansible.builtin.file:
         path: "{{ runtime_general_uptime_kuma_restore_archive }}"
         state: absent
@@ -392,7 +392,7 @@
       changed_when: false
 
 - name: Refresh the shared NGINX edge after the runtime-general move
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   vars_files:
@@ -460,8 +460,8 @@
       delegate_to: localhost
       delegate_facts: true
 
-- name: Retire the legacy support-service copies from docker-runtime-lv3
-  hosts: docker-runtime-lv3
+- name: Retire the legacy support-service copies from docker-runtime
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:
@@ -481,8 +481,8 @@
           - hostvars['localhost'].runtime_general_retirement_ready | default(false)
         fail_msg: >-
           Refusing to retire the legacy runtime-general support services on
-          docker-runtime-lv3 until this run verifies the replacement
-          runtime-general-lv3 routes and the shared edge publication.
+          docker-runtime until this run verifies the replacement
+          runtime-general routes and the shared edge publication.
 
     - name: Gather the legacy support-service compose files
       ansible.builtin.stat:
@@ -491,7 +491,7 @@
       register: runtime_general_legacy_compose_stats
 
   tasks:
-    - name: Stop the legacy support-service compose stacks on docker-runtime-lv3
+    - name: Stop the legacy support-service compose stacks on docker-runtime
       ansible.builtin.command:
         argv:
           - docker

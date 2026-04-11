@@ -12,8 +12,8 @@
     - role: lv3.platform.proxmox_tailscale_proxy
     - role: lv3.platform.proxmox_security
 
-- name: Converge the private step-ca runtime on runtime-control-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+- name: Converge the private step-ca runtime on runtime-control
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: false
   tags:
@@ -79,7 +79,7 @@
           - "{{ management_tailscale_ipv4 }}"
 
 - name: Converge SSH CA trust on managed guests
-  hosts: "{{ 'lv3_guests:&staging:!docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'lv3_guests:&production:!runtime-control-lv3' }}"
+  hosts: "{{ 'lv3_guests:&staging:!docker-runtime-staging' if (env | default('production')) == 'staging' else 'lv3_guests:&production:!runtime-control' }}"
   become: true
   gather_facts: false
   tags:

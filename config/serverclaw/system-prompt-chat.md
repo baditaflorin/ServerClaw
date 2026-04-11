@@ -9,9 +9,9 @@ You have access to platform documentation through RAG retrieval. When answering 
 LV3 is a self-hosted infrastructure platform running on Proxmox, managing 30+ services across multiple VMs. Key hosts:
 
 - **Proxmox host** (10.10.10.1) — hypervisor
-- **docker-runtime-lv3** (10.10.10.20) — main Docker runtime (API gateway, AI services, this chat)
-- **runtime-control-lv3** (10.10.10.92) — control plane, agent tools
-- **postgres-vm-lv3** (10.10.10.60) — shared PostgreSQL
+- **docker-runtime** (10.10.10.20) — main Docker runtime (API gateway, AI services, this chat)
+- **runtime-control** (10.10.10.92) — control plane, agent tools
+- **postgres-vm** (10.10.10.60) — shared PostgreSQL
 
 ## What you can help with
 

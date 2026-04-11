@@ -1,5 +1,5 @@
 ---
-- name: Ensure backup-lv3 allows the runtime backup source over SSH
+- name: Ensure backup allows the runtime backup source over SSH
   hosts: "proxmox_hosts:&{{ env | default('production') }}"
   become: true
   gather_facts: true
@@ -7,7 +7,7 @@
   roles:
     - role: lv3.platform.control_plane_recovery_firewall
 
-- name: Converge the control-plane recovery store on backup-lv3
+- name: Converge the control-plane recovery store on backup
   hosts: "backup_guests:&{{ env | default('production') }}"
   become: true
   gather_facts: true
@@ -46,8 +46,8 @@
   roles:
     - role: lv3.platform.control_plane_recovery_store
 
-- name: Converge scheduled control-plane exports on docker-runtime-lv3
-  hosts: "{{ 'docker-runtime-lv3' if (env | default('production')) == 'production' else 'docker-runtime-staging-lv3' }}"
+- name: Converge scheduled control-plane exports on docker-runtime
+  hosts: "{{ 'docker-runtime' if (env | default('production')) == 'production' else 'docker-runtime-staging' }}"
   become: true
   gather_facts: true
 
@@ -61,7 +61,7 @@
   roles:
     - role: lv3.platform.control_plane_recovery
 
-- name: Refresh the controller recovery bundle on backup-lv3
+- name: Refresh the controller recovery bundle on backup
   hosts: "backup_guests:&{{ env | default('production') }}"
   become: true
   gather_facts: true

@@ -131,7 +131,7 @@ def _build_neko_block(instances: dict[str, dict[str, Any]]) -> str:
         "# ---------------------------------------------------------------------------",
         "# Neko multi-instance browser sessions",
         "# ---------------------------------------------------------------------------",
-        "# Each entry provisions an isolated browser container on runtime-comms-lv3",
+        "# Each entry provisions an isolated browser container on runtime-comms",
         "# and a Keycloak user in the lv3 realm. Removing an entry destroys the",
         "# container and the Keycloak user on the next converge.",
         "#",

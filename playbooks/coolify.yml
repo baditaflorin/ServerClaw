@@ -12,8 +12,8 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path used by scoped runs.
 #
 # Outputs:
-#   - coolify-lv3 VM exists and runs the repo-managed Coolify control-plane stack.
-#   - coolify-apps-lv3 VM exists, runs Docker, and is registered as the Coolify deployment server (ADR 0340).
+#   - coolify VM exists and runs the repo-managed Coolify control-plane stack.
+#   - coolify-apps VM exists, runs Docker, and is registered as the Coolify deployment server (ADR 0340).
 #   - The Proxmox host private controller proxy and NGINX edge publication include both Coolify routes.
 #   - Controller-local Coolify bootstrap artifacts are refreshed under .local/coolify.
 #
@@ -25,7 +25,7 @@
 #   - ADR 0194: Coolify PaaS deploy from repo.
 #   - ADR 0340: Dedicated Coolify apps VM separation.
 #   - Requires: Existing Proxmox host access, shared NGINX edge VM, and Docker-host VM template support.
-#   - Role: lv3.platform.proxmox_guests — ensures both Coolify VMs exist (coolify-lv3 and coolify-apps-lv3).
+#   - Role: lv3.platform.proxmox_guests — ensures both Coolify VMs exist (coolify and coolify-apps).
 #   - Role: lv3.platform.coolify_runtime — converges Coolify control plane, bootstrap auth, and deployment server registration.
 #
 # Related ADRs: 0025, 0056, 0143, 0176, 0340
@@ -141,7 +141,7 @@
       run_once: true
 
 - name: Converge Coolify on the dedicated guest
-  hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
+  hosts: "{{ 'coolify' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
   become: true
   gather_facts: false
   vars_files:
@@ -187,7 +187,7 @@
         playbook_execution_notification_service: coolify
 
 - name: Converge the Coolify apps runtime on the dedicated apps guest
-  hosts: "{{ 'coolify-apps-lv3' if (env | default('production')) == 'production' else 'coolify-apps-staging-lv3' }}"
+  hosts: "{{ 'coolify-apps' if (env | default('production')) == 'production' else 'coolify-apps-staging-lv3' }}"
   become: true
   gather_facts: false
   vars_files:
@@ -232,7 +232,7 @@
       vars:
         playbook_execution_notification_service: coolify-apps
 
-- name: Register coolify-apps-lv3 as the Coolify deployment server
+- name: Register coolify-apps as the Coolify deployment server
   hosts: localhost
   gather_facts: false
   vars_files:
@@ -244,12 +244,12 @@
     - service-coolify-apps
 
   tasks:
-    - name: Register coolify-apps-lv3 as the active Coolify deployment server
+    - name: Register coolify-apps as the active Coolify deployment server
       ansible.builtin.command: >
         python3 scripts/coolify_tool.py
         --auth-file "{{ coolify_admin_auth_local_file }}"
         register-deployment-server
-        --host coolify-apps-lv3
+        --host coolify-apps
         --ip "{{ hostvars[playbook_execution_host_patterns.coolify_apps[playbook_execution_env]]['ansible_host'] }}"
       args:
         chdir: "{{ playbook_dir }}/.."
@@ -261,7 +261,7 @@
       tags:
         - coolify-deploy-server-registration
 
-    - name: Install Coolify SSH deploy key on coolify-apps-lv3
+    - name: Install Coolify SSH deploy key on coolify-apps
       ansible.builtin.command: >
         python3 scripts/coolify_tool.py
         --auth-file "{{ coolify_admin_auth_local_file }}"
@@ -280,15 +280,15 @@
       tags:
         - coolify-deploy-key-install
 
-    - name: Migrate existing app deployments to coolify-apps-lv3 via DB
+    - name: Migrate existing app deployments to coolify-apps via DB
       ansible.builtin.command: >
         python3 scripts/coolify_tool.py
         --auth-file "{{ coolify_admin_auth_local_file }}"
         migrate-apps
         --proxmox-auth-file "{{ proxmox_api_token_local_file }}"
         --vmid "{{ hostvars[playbook_execution_host_patterns.coolify[playbook_execution_env]]['vmid'] | default(170) }}"
-        --from coolify-lv3
-        --to coolify-apps-lv3
+        --from coolify
+        --to coolify-apps
       args:
         chdir: "{{ playbook_dir }}/.."
       delegate_to: localhost
@@ -300,7 +300,7 @@
         - coolify-deploy-server-migration
 
 - name: Publish Coolify on the NGINX edge
-  hosts: "{{ 'nginx-lv3' if (env | default('production')) == 'production' else 'nginx-staging-lv3' }}"
+  hosts: "{{ 'nginx' if (env | default('production')) == 'production' else 'nginx-staging' }}"
   become: true
   gather_facts: true
   vars_files:

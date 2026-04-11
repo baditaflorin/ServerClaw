@@ -8,7 +8,7 @@
       - monitoring_influxdb_org | length > 0
       - monitoring_influxdb_bucket | length > 0
       - hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].ansible_host is defined
-    fail_msg: "proxmox_metrics requires the mirrored writer token plus monitoring-lv3 host metadata."
+    fail_msg: "proxmox_metrics requires the mirrored writer token plus monitoring host metadata."
 
 - name: Check Proxmox metrics prerequisites on the control machine
   ansible.builtin.include_role:

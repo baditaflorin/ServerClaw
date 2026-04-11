@@ -1,6 +1,6 @@
 # Role Task File: monitoring_vm/tasks/main.yml
 # Purpose: Converge the monitoring VM runtime, dashboards, datasources, and Loki Canary service.
-# Use case: Run from the monitoring stack service playbook when establishing or replaying monitoring-lv3 state.
+# Use case: Run from the monitoring stack service playbook when establishing or replaying monitoring state.
 #
 # Inputs (required):
 #   - monitoring_* role defaults and inventory topology: Provide package, endpoint, secret, and dashboard settings.
@@ -17,7 +17,7 @@
 # Dependencies:
 #   - ADR 0011: Defines the monitoring VM baseline and service composition.
 #   - ADR 0250: Adds Loki Canary queryability assurance and dashboard import.
-#   - Requires: monitoring-lv3 inventory data, repo-managed dashboards, and monitoring package repositories.
+#   - Requires: monitoring inventory data, repo-managed dashboards, and monitoring package repositories.
 #
 # Related ADRs: 0011, 0250
 # Related Runbooks: docs/runbooks/monitoring-stack.md, docs/runbooks/log-queryability-canary.md

@@ -7,7 +7,7 @@
 #
 # Inputs (optional):
 #   - backup_vm_api_port (int, optional, default=8007): TCP port exposed by the PBS API.
-#   - backup_vm_seed_snapshot_classes (list[str], optional): Snapshot class directories kept on backup-lv3.
+#   - backup_vm_seed_snapshot_classes (list[str], optional): Snapshot class directories kept on backup.
 #
 # Outputs:
 #   - Default variable values consumed by the backup_vm role tasks and verification.
@@ -37,11 +37,11 @@ backup_vm_datastore_mountpoint: /mnt/datastore/proxmox
 backup_vm_datastore_gc_schedule: "03:45"
 backup_vm_api_user: proxmox-host@pbs
 backup_vm_api_user_comment: Proxmox VE host backup client
-backup_vm_api_user_password_local_file: "{{ repo_shared_local_root }}/proxmox-backup/backup-lv3-user-password.txt"
+backup_vm_api_user_password_local_file: "{{ repo_shared_local_root }}/proxmox-backup/backup-user-password.txt"
 backup_vm_api_token_id: pve
 backup_vm_api_token_comment: Proxmox VE host backup token
 backup_vm_api_token_local_dir: "{{ repo_shared_local_root }}/proxmox-backup"
-backup_vm_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-backup/backup-lv3-token.json"
+backup_vm_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-backup/backup-token.json"
 backup_vm_seed_snapshot_store_path: /var/lib/lv3/seed-data-snapshots
 backup_vm_seed_snapshot_store_mode: "0750"
 backup_vm_seed_snapshot_classes:

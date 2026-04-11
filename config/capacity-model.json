@@ -25,10 +25,10 @@
   "guests": [
     {
       "vmid": 110,
-      "name": "nginx-lv3",
+      "name": "nginx",
       "status": "active",
       "environment": "production",
-      "metrics_host": "nginx-lv3",
+      "metrics_host": "nginx",
       "allocated": {
         "ram_gb": 4,
         "vcpu": 2,
@@ -46,10 +46,10 @@
     },
     {
       "vmid": 120,
-      "name": "docker-runtime-lv3",
+      "name": "docker-runtime",
       "status": "active",
       "environment": "production",
-      "metrics_host": "docker-runtime-lv3",
+      "metrics_host": "docker-runtime",
       "allocated": {
         "ram_gb": 18,
         "vcpu": 4,
@@ -67,10 +67,10 @@
     },
     {
       "vmid": 130,
-      "name": "docker-build-lv3",
+      "name": "docker-build",
       "status": "active",
       "environment": "production",
-      "metrics_host": "docker-build-lv3",
+      "metrics_host": "docker-build",
       "allocated": {
         "ram_gb": 12,
         "vcpu": 12,
@@ -88,10 +88,10 @@
     },
     {
       "vmid": 140,
-      "name": "monitoring-lv3",
+      "name": "monitoring",
       "status": "active",
       "environment": "production",
-      "metrics_host": "monitoring-lv3",
+      "metrics_host": "monitoring",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -109,10 +109,10 @@
     },
     {
       "vmid": 150,
-      "name": "postgres-lv3",
+      "name": "postgres",
       "status": "active",
       "environment": "production",
-      "metrics_host": "postgres-lv3",
+      "metrics_host": "postgres",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -130,10 +130,10 @@
     },
     {
       "vmid": 160,
-      "name": "backup-lv3",
+      "name": "backup",
       "status": "active",
       "environment": "production",
-      "metrics_host": "backup-lv3",
+      "metrics_host": "backup",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -152,10 +152,10 @@
     },
     {
       "vmid": 170,
-      "name": "coolify-lv3",
+      "name": "coolify",
       "status": "active",
       "environment": "production",
-      "metrics_host": "coolify-lv3",
+      "metrics_host": "coolify",
       "allocated": {
         "ram_gb": 6,
         "vcpu": 4,
@@ -173,10 +173,10 @@
     },
     {
       "vmid": 171,
-      "name": "coolify-apps-lv3",
+      "name": "coolify-apps",
       "status": "active",
       "environment": "production",
-      "metrics_host": "coolify-apps-lv3",
+      "metrics_host": "coolify-apps",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -194,10 +194,10 @@
     },
     {
       "vmid": 180,
-      "name": "artifact-cache-lv3",
+      "name": "artifact-cache",
       "status": "active",
       "environment": "production",
-      "metrics_host": "artifact-cache-lv3",
+      "metrics_host": "artifact-cache",
       "allocated": {
         "ram_gb": 4,
         "vcpu": 4,
@@ -215,10 +215,10 @@
     },
     {
       "vmid": 190,
-      "name": "runtime-ai-lv3",
+      "name": "runtime-ai",
       "status": "active",
       "environment": "production",
-      "metrics_host": "runtime-ai-lv3",
+      "metrics_host": "runtime-ai",
       "allocated": {
         "ram_gb": 16,
         "vcpu": 6,
@@ -236,10 +236,10 @@
     },
     {
       "vmid": 191,
-      "name": "runtime-general-lv3",
+      "name": "runtime-general",
       "status": "active",
       "environment": "production",
-      "metrics_host": "runtime-general-lv3",
+      "metrics_host": "runtime-general",
       "allocated": {
         "ram_gb": 12,
         "vcpu": 4,
@@ -257,10 +257,10 @@
     },
     {
       "vmid": 192,
-      "name": "runtime-control-lv3",
+      "name": "runtime-control",
       "status": "active",
       "environment": "production",
-      "metrics_host": "runtime-control-lv3",
+      "metrics_host": "runtime-control",
       "allocated": {
         "ram_gb": 12,
         "vcpu": 4,
@@ -278,10 +278,10 @@
     },
     {
       "vmid": 210,
-      "name": "nginx-staging-lv3",
+      "name": "nginx-staging",
       "status": "planned",
       "environment": "staging",
-      "metrics_host": "nginx-staging-lv3",
+      "metrics_host": "nginx-staging",
       "allocated": {
         "ram_gb": 2,
         "vcpu": 1,
@@ -299,10 +299,10 @@
     },
     {
       "vmid": 220,
-      "name": "docker-runtime-staging-lv3",
+      "name": "docker-runtime-staging",
       "status": "planned",
       "environment": "staging",
-      "metrics_host": "docker-runtime-staging-lv3",
+      "metrics_host": "docker-runtime-staging",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 2,
@@ -320,10 +320,10 @@
     },
     {
       "vmid": 230,
-      "name": "docker-build-staging-lv3",
+      "name": "docker-build-staging",
       "status": "planned",
       "environment": "staging",
-      "metrics_host": "docker-build-staging-lv3",
+      "metrics_host": "docker-build-staging",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -341,10 +341,10 @@
     },
     {
       "vmid": 240,
-      "name": "monitoring-staging-lv3",
+      "name": "monitoring-staging",
       "status": "planned",
       "environment": "staging",
-      "metrics_host": "monitoring-staging-lv3",
+      "metrics_host": "monitoring-staging",
       "allocated": {
         "ram_gb": 4,
         "vcpu": 2,
@@ -362,10 +362,10 @@
     },
     {
       "vmid": 250,
-      "name": "postgres-staging-lv3",
+      "name": "postgres-staging",
       "status": "planned",
       "environment": "staging",
-      "metrics_host": "postgres-staging-lv3",
+      "metrics_host": "postgres-staging",
       "allocated": {
         "ram_gb": 4,
         "vcpu": 2,
@@ -383,10 +383,10 @@
     },
     {
       "vmid": 260,
-      "name": "backup-staging-lv3",
+      "name": "backup-staging",
       "status": "planned",
       "environment": "staging",
-      "metrics_host": "backup-staging-lv3",
+      "metrics_host": "backup-staging",
       "allocated": {
         "ram_gb": 4,
         "vcpu": 2,
@@ -404,10 +404,10 @@
     },
     {
       "vmid": 280,
-      "name": "artifact-cache-staging-lv3",
+      "name": "artifact-cache-staging",
       "status": "planned",
       "environment": "staging",
-      "metrics_host": "artifact-cache-staging-lv3",
+      "metrics_host": "artifact-cache-staging",
       "allocated": {
         "ram_gb": 4,
         "vcpu": 2,
@@ -425,10 +425,10 @@
     },
     {
       "vmid": 151,
-      "name": "postgres-replica-lv3",
+      "name": "postgres-replica",
       "status": "planned",
       "environment": "production",
-      "metrics_host": "postgres-replica-lv3",
+      "metrics_host": "postgres-replica",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -447,10 +447,10 @@
     },
     {
       "vmid": 152,
-      "name": "postgres-apps-lv3",
+      "name": "postgres-apps",
       "status": "planned",
       "environment": "production",
-      "metrics_host": "postgres-apps-lv3",
+      "metrics_host": "postgres-apps",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -469,10 +469,10 @@
     },
     {
       "vmid": 154,
-      "name": "postgres-data-lv3",
+      "name": "postgres-data",
       "status": "planned",
       "environment": "production",
-      "metrics_host": "postgres-data-lv3",
+      "metrics_host": "postgres-data",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -491,10 +491,10 @@
     },
     {
       "vmid": 121,
-      "name": "runtime-comms-lv3",
+      "name": "runtime-comms",
       "status": "planned",
       "environment": "production",
-      "metrics_host": "runtime-comms-lv3",
+      "metrics_host": "runtime-comms",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -512,10 +512,10 @@
     },
     {
       "vmid": 122,
-      "name": "runtime-apps-lv3",
+      "name": "runtime-apps",
       "status": "planned",
       "environment": "production",
-      "metrics_host": "runtime-apps-lv3",
+      "metrics_host": "runtime-apps",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -544,7 +544,7 @@
         "baseline_ram_gb": 12,
         "max_ram_gb": 16,
         "admission_priority": 1,
-        "notes": "Control-plane capacity is reserved first and now anchors the dedicated runtime-control-lv3 guest before lower-priority runtime pools can expand."
+        "notes": "Control-plane capacity is reserved first and now anchors the dedicated runtime-control guest before lower-priority runtime pools can expand."
       },
       {
         "id": "runtime-general",

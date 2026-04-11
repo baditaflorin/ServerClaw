@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0287: Defines Woodpecker as the repo-managed CI server.
-#   - Requires: postgres-lv3 to be reachable and writable.
+#   - Requires: postgres to be reachable and writable.
 #
 # Related ADRs: 0165, 0287
 # Related Runbooks: docs/runbooks/configure-woodpecker.md

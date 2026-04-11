@@ -8,7 +8,7 @@
       "description": "Severity-based alert routing, grouping, and silencing service for the monitoring stack.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "vmid": 140,
       "internal_url": "http://10.10.10.40:9093",
       "exposure": "private-only",
@@ -38,7 +38,7 @@
       "description": "Unified authenticated gateway for operator and automation access to platform HTTP APIs.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://10.10.10.92:8083",
       "public_url": "https://api.lv3.org",
@@ -97,7 +97,7 @@
       "description": "Backup datastore and snapshot retention service for the Proxmox estate.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "backup-lv3",
+      "vm": "backup",
       "vmid": 160,
       "internal_url": "https://10.10.10.60:8007",
       "exposure": "private-only",
@@ -131,7 +131,7 @@
       "description": "Private Playwright session runtime for governed web action, extraction, screenshots, and PDF capture.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8096",
       "exposure": "private-only",
@@ -165,7 +165,7 @@
       "description": "Private upstream content, dependency feed, and provider API change monitoring service with repo-governed watch catalogue reconciliation.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:5000",
       "exposure": "private-only",
@@ -191,7 +191,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.20:5000",
-          "notes": "The runtime stays private to docker-runtime-lv3; authenticated operator and automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/changedetection."
+          "notes": "The runtime stays private to docker-runtime; authenticated operator and automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/changedetection."
         }
       }
     },
@@ -201,7 +201,7 @@
       "description": "Private LLM-optimised web content crawler for cleaned Markdown extraction and bounded browser-assisted fetches.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:11235",
       "exposure": "private-only",
@@ -228,7 +228,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.20:11235",
-          "notes": "The runtime stays private to docker-runtime-lv3 and the guest network; there is no public DNS record and no shared API gateway route for Crawl4AI."
+          "notes": "The runtime stays private to docker-runtime and the guest network; there is no public DNS record and no shared API gateway route for Crawl4AI."
         }
       }
     },
@@ -238,7 +238,7 @@
       "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "nginx-lv3",
+      "vm": "nginx",
       "vmid": 110,
       "public_url": "https://changelog.lv3.org",
       "subdomain": "changelog.lv3.org",
@@ -269,7 +269,7 @@
       "description": "Repo-managed PaaS control plane for deploying public applications directly from Git repositories.",
       "category": "infrastructure",
       "lifecycle_status": "active",
-      "vm": "coolify-lv3",
+      "vm": "coolify",
       "vmid": 170,
       "internal_url": "http://100.64.0.1:8012",
       "public_url": "https://coolify.lv3.org",
@@ -305,10 +305,10 @@
     {
       "id": "coolify_apps",
       "name": "Coolify Apps Ingress",
-      "description": "Shared public ingress surface for Coolify-managed applications published from the dedicated coolify-apps-lv3 runtime.",
+      "description": "Shared public ingress surface for Coolify-managed applications published from the dedicated coolify-apps runtime.",
       "category": "infrastructure",
       "lifecycle_status": "active",
-      "vm": "coolify-apps-lv3",
+      "vm": "coolify-apps",
       "vmid": 171,
       "internal_url": "https://10.10.10.71:443",
       "public_url": "https://apps.lv3.org",
@@ -333,7 +333,7 @@
           "status": "active",
           "url": "https://apps.lv3.org",
           "subdomain": "apps.lv3.org",
-          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology on coolify-apps-lv3."
+          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology on coolify-apps."
         }
       }
     },
@@ -343,7 +343,7 @@
       "description": "Visual LLM workflow and agent canvas with governed LV3 tool sync and trace export support.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8094",
       "public_url": "https://agents.lv3.org",
@@ -402,7 +402,7 @@
       "description": "REST and GraphQL operational data API over the dedicated Directus PostgreSQL database.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8055",
       "public_url": "https://data.lv3.org",
@@ -437,7 +437,7 @@
         "rest",
         "oidc"
       ],
-      "notes": "Directus runs on docker-runtime-lv3, uses a dedicated PostgreSQL database named directus, publishes data.lv3.org through the shared NGINX edge, delegates routine browser sign-in to Keycloak, and retains a repo-managed break-glass local admin password for recovery.",
+      "notes": "Directus runs on docker-runtime, uses a dedicated PostgreSQL database named directus, publishes data.lv3.org through the shared NGINX edge, delegates routine browser sign-in to Keycloak, and retains a repo-managed break-glass local admin password for recovery.",
       "environments": {
         "production": {
           "status": "active",
@@ -453,7 +453,7 @@
       "description": "Private build worker for image builds, heavy validation, and repository offload tasks.",
       "category": "infrastructure",
       "lifecycle_status": "active",
-      "vm": "docker-build-lv3",
+      "vm": "docker-build",
       "vmid": 130,
       "internal_url": "ssh://ops@10.10.10.30",
       "public_url": "https://build.lv3.org",
@@ -468,7 +468,7 @@
       "restart_domain": "dedicated-build-core",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/dedicated-build",
       "mobility_tier": "anchor",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-docker-build-lv3/lv3-vm-docker-build-lv3",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-docker-build/lv3-vm-docker-build",
       "tags": [
         "build",
         "docker",
@@ -488,7 +488,7 @@
       "description": "Primary runtime for containerised control-plane and platform services.",
       "category": "infrastructure",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "ssh://ops@10.10.10.20",
       "public_url": "https://docker.lv3.org",
@@ -502,7 +502,7 @@
       "restart_domain": "runtime-general-core",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
       "mobility_tier": "anchor",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-docker-runtime/lv3-vm-docker-runtime",
       "tags": [
         "docker",
         "runtime",
@@ -522,7 +522,7 @@
       "description": "Generated public documentation site for services, ADRs, runbooks, release notes, and platform reference data.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "nginx-lv3",
+      "vm": "nginx",
       "vmid": 110,
       "public_url": "https://docs.lv3.org",
       "subdomain": "docs.lv3.org",
@@ -553,7 +553,7 @@
       "description": "Repo-managed real-time container log hub across the Docker guests.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8089",
       "public_url": "https://logs.lv3.org",
@@ -590,7 +590,7 @@
       "description": "Private collaborative whiteboard and architecture diagram surface backed by repo-generated `.excalidraw` scenes.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:3095",
       "public_url": "https://draw.lv3.org",
@@ -624,10 +624,10 @@
     {
       "id": "gitea",
       "name": "Gitea",
-      "description": "Private self-hosted Git service with Keycloak SSO, repo bootstrap automation, and a dedicated Actions runner on docker-build-lv3.",
+      "description": "Private self-hosted Git service with Keycloak SSO, repo bootstrap automation, and a dedicated Actions runner on docker-build.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://100.64.0.1:3009",
       "subdomain": "git.lv3.org",
@@ -668,7 +668,7 @@
       "description": "Private stateless document rendering service for HTML, Markdown, text, and Office-to-PDF conversion workflows.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-ai-lv3",
+      "vm": "runtime-ai",
       "vmid": 190,
       "internal_url": "http://10.10.10.90:3007",
       "exposure": "private-only",
@@ -694,7 +694,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.90:3007",
-          "notes": "The runtime stays private on runtime-ai-lv3; authenticated operator and automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/gotenberg."
+          "notes": "The runtime stays private on runtime-ai; authenticated operator and automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/gotenberg."
         }
       }
     },
@@ -704,7 +704,7 @@
       "description": "Sentry-compatible application error tracker with repo-managed projects, DSNs, and Keycloak-backed browser sign-in.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "runtime_pool": "runtime-general",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
       "deployment_surface": "playbooks/services/glitchtip.yml",
@@ -759,7 +759,7 @@
       "description": "Metrics dashboards, platform overview, and service detail dashboards.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "vmid": 140,
       "internal_url": "http://10.10.10.40:3000",
       "public_url": "https://grafana.lv3.org",
@@ -805,7 +805,7 @@
       "description": "Private container registry with vulnerability scanning, operator SSO, and scoped robot credentials for repository automation.",
       "category": "security",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://10.10.10.92:8095",
       "public_url": "https://registry.lv3.org",
@@ -885,7 +885,7 @@
       "description": "Feature flag and remote configuration control plane with repo-managed environment and baseline feature seeding.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8017",
       "public_url": "https://flags.lv3.org",
@@ -932,7 +932,7 @@
       "description": "Unified operator-facing dashboard for the current LV3 service inventory, quick links, and live service reachability.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "runtime-general-lv3",
+      "vm": "runtime-general",
       "vmid": 191,
       "internal_url": "http://10.10.10.91:3090",
       "public_url": "https://home.lv3.org",
@@ -970,7 +970,7 @@
       "description": "Shared SSO and OIDC broker for operator-facing and approved agent-facing applications.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://10.10.10.92:8091",
       "public_url": "https://sso.lv3.org",
@@ -1010,7 +1010,7 @@
       "description": "Self-hosted LLM trace, generation, and evaluation observability surface for repo-managed agents.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:3002",
       "public_url": "https://langfuse.lv3.org",
@@ -1058,7 +1058,7 @@
       "description": "Private multi-model chat interface with Keycloak SSO, agent presets, and customizable UI.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "coolify-lv3",
+      "vm": "coolify",
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
       "public_url": "https://chat.lv3.org",
@@ -1093,7 +1093,7 @@
       "description": "Private LLM proxy and router providing unified API access to multiple language model providers.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:4000",
       "exposure": "private-only",
@@ -1126,7 +1126,7 @@
       "description": "Usage metering and billing control plane with a protected operator browser surface and a governed public event-ingest adapter.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8100",
       "public_url": "https://billing.lv3.org",
@@ -1184,7 +1184,7 @@
       "description": "Real-time audio signalling and media relay surface for voice-enabled operator and agent sessions.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:7880",
       "public_url": "https://livekit.lv3.org",
@@ -1212,7 +1212,7 @@
         "webrtc",
         "realtime"
       ],
-      "notes": "Signal traffic is published through the shared NGINX edge at livekit.lv3.org while media TCP and UDP listeners are forwarded directly by the Proxmox host to docker-runtime-lv3.",
+      "notes": "Signal traffic is published through the shared NGINX edge at livekit.lv3.org while media TCP and UDP listeners are forwarded directly by the Proxmox host to docker-runtime.",
       "environments": {
         "production": {
           "status": "active",
@@ -1228,7 +1228,7 @@
       "description": "Managed SMTP, IMAP, and delivery automation surface for platform notifications.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://10.10.10.92:8081",
       "public_url": "https://mail.lv3.org",
@@ -1274,7 +1274,7 @@
       "description": "Private SMTP interception surface for staging, development, and assertion-level email verification.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "runtime-general-lv3",
+      "vm": "runtime-general",
       "vmid": 191,
       "internal_url": "http://10.10.10.91:8025",
       "exposure": "private-only",
@@ -1299,7 +1299,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.91:8025",
-          "notes": "Mailpit runs privately on runtime-general-lv3 for non-production SMTP interception and operator inspection; production services must continue to relay through Stalwart."
+          "notes": "Mailpit runs privately on runtime-general for non-production SMTP interception and operator inspection; production services must continue to relay through Stalwart."
         }
       }
     },
@@ -1309,7 +1309,7 @@
       "description": "Shared S3-compatible object storage runtime for platform buckets, governed bucket policy reconciliation, and browser-based object inspection.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:9010",
       "public_url": "https://minio.lv3.org",
@@ -1352,7 +1352,7 @@
       "description": "Private Kafka-compatible streaming platform for durable, replayable event logs and schema-managed topics.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "kafka://10.10.10.20:9092",
       "exposure": "private-only",
@@ -1378,7 +1378,7 @@
         "redpanda",
         "private"
       ],
-      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime-lv3 reserves 8099 for the Temporal UI.",
+      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime reserves 8099 for the Temporal UI.",
       "environments": {
         "production": {
           "status": "active",
@@ -1393,7 +1393,7 @@
       "description": "Repo-managed Matrix Synapse runtime with Discord and WhatsApp mautrix bridges that serves as the canonical ServerClaw conversation hub.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8008",
       "public_url": "https://matrix.lv3.org",
@@ -1455,7 +1455,7 @@
       "description": "Private operator and agent collaboration surface for ChatOps workflows.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://100.64.0.1:8066",
       "exposure": "private-only",
@@ -1486,7 +1486,7 @@
       "description": "Repo-managed external app connector fabric and webhook automation runtime for ServerClaw, with a public edge hostname and PostgreSQL-backed persistence.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:5678",
       "public_url": "https://n8n.lv3.org",
@@ -1532,7 +1532,7 @@
       "description": "Private internal event bus for platform control-plane, secret-rotation, and RAG lifecycle events.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "nats://10.10.10.92:4222",
       "exposure": "private-only",
@@ -1549,7 +1549,7 @@
         "jetstream",
         "private"
       ],
-      "notes": "The monitoring endpoint stays loopback-only on runtime-control-lv3 at http://127.0.0.1:8222/healthz.",
+      "notes": "The monitoring endpoint stays loopback-only on runtime-control at http://127.0.0.1:8222/healthz.",
       "environments": {
         "production": {
           "status": "active",
@@ -1563,7 +1563,7 @@
       "description": "Private topology, IPAM, and inventory system for the platform.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://100.64.0.1:8004",
       "exposure": "private-only",
@@ -1602,7 +1602,7 @@
       "description": "WebRTC-based interactive remote desktop for operator browser debugging and exploration of platform integrations.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-comms-lv3",
+      "vm": "runtime-comms",
       "vmid": 121,
       "internal_url": "http://10.10.10.21:8080",
       "public_url": "https://browser.lv3.org",
@@ -1636,7 +1636,7 @@
       "description": "Repo-managed personal data plane for durable files, attachments, and DAV-backed calendars, contacts, and tasks.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8084",
       "public_url": "https://cloud.lv3.org",
@@ -1682,7 +1682,7 @@
       "description": "Private full-text search engine for structured internal platform data and faceted operator lookups.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://100.64.0.1:8016",
       "exposure": "private-only",
@@ -1720,7 +1720,7 @@
       "description": "Public ingress edge that terminates TLS and publishes selected services.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "nginx-lv3",
+      "vm": "nginx",
       "vmid": 110,
       "internal_url": "http://10.10.10.10",
       "public_url": "https://nginx.lv3.org",
@@ -1735,7 +1735,7 @@
       "restart_domain": "dedicated-edge-publication",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge",
       "mobility_tier": "anchor",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-nginx-lv3/lv3-vm-nginx-lv3",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-nginx/lv3-vm-nginx",
       "tags": [
         "nginx",
         "edge",
@@ -1756,7 +1756,7 @@
       "description": "Distributed scheduler for durable batch jobs and long-running internal workloads with operator dashboard at scheduler.lv3.org.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "vmid": 140,
       "internal_url": "https://100.64.0.1:8013",
       "public_url": "https://scheduler.lv3.org",
@@ -1782,7 +1782,7 @@
           "dependency_type": "soft",
           "degraded_behaviour": "Runtime-targeted jobs cannot place while the docker-runtime Nomad client is unavailable. The Nomad server and build-targeted jobs continue to operate.",
           "degraded_for_seconds_max": -1,
-          "recovery_signal": "docker-runtime-lv3 rejoins the Nomad client set",
+          "recovery_signal": "docker-runtime rejoins the Nomad client set",
           "tested_by": "fault:docker-runtime-unavailable"
         },
         {
@@ -1790,7 +1790,7 @@
           "dependency_type": "soft",
           "degraded_behaviour": "Build-targeted or long-running helper jobs pinned to the build pool cannot place while the docker-build Nomad client is unavailable. The Nomad server and runtime-targeted jobs continue to operate.",
           "degraded_for_seconds_max": -1,
-          "recovery_signal": "docker-build-lv3 rejoins the Nomad client set",
+          "recovery_signal": "docker-build rejoins the Nomad client set",
           "tested_by": "fault:docker-build-unavailable"
         }
       ],
@@ -1814,7 +1814,7 @@
       "description": "Repo-governed self-hosted push notification channel published at ntfy.lv3.org for operator-targeted automation alerts.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:2586",
       "public_url": "https://ntfy.lv3.org",
@@ -1893,7 +1893,7 @@
       "description": "Private local LLM inference runtime for platform agents and operator workbenches.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:11434",
       "exposure": "private-only",
@@ -1926,7 +1926,7 @@
       "description": "Private CPU neural text-to-speech runtime for agent voice output, narrated notifications, and LiveKit-bound spoken responses.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8100",
       "exposure": "private-only",
@@ -1950,7 +1950,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.20:8100",
-          "notes": "Piper remains private to docker-runtime-lv3 and the managed guest network; there is no public hostname or shared API gateway route."
+          "notes": "Piper remains private to docker-runtime and the managed guest network; there is no public hostname or shared API gateway route."
         }
       }
     },
@@ -1960,7 +1960,7 @@
       "description": "Private secrets authority for controller automation and runtime credentials.",
       "category": "security",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "https://100.64.0.1:8200",
       "exposure": "private-only",
@@ -2008,7 +2008,7 @@
       "description": "Private delegated authorization graph for ServerClaw workspace, assistant, skill, connector, and data-scope capability checks.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://10.10.10.92:8098",
       "exposure": "private-only",
@@ -2039,7 +2039,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.92:8098",
-          "notes": "The guest-reachable runtime now lives on runtime-control-lv3 for SLO probes and delegated-auth validation. Controller-local bootstrap and bearer-key verification continue to use the Proxmox host Tailscale proxy at http://100.64.0.1:8014."
+          "notes": "The guest-reachable runtime now lives on runtime-control for SLO probes and delegated-auth validation. Controller-local bootstrap and bearer-key verification continue to use the Proxmox host Tailscale proxy at http://100.64.0.1:8014."
         }
       }
     },
@@ -2049,7 +2049,7 @@
       "description": "Private durable workflow and task queue engine for long-running platform automation that must survive worker crashes and retries.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "grpc://127.0.0.1:7233",
       "exposure": "private-only",
@@ -2076,7 +2076,7 @@
         "temporal",
         "private"
       ],
-      "notes": "The frontend gRPC port, HTTP port, and UI are intentionally loopback-only on runtime-control-lv3; operators reach them through SSH tunneling or repo-managed admin-tools commands.",
+      "notes": "The frontend gRPC port, HTTP port, and UI are intentionally loopback-only on runtime-control; operators reach them through SSH tunneling or repo-managed admin-tools commands.",
       "environments": {
         "production": {
           "status": "active",
@@ -2091,7 +2091,7 @@
       "description": "Interactive operator portal with live service actions, drift visibility, runbook launchers, and deployment streaming.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8092",
       "public_url": "https://ops.lv3.org",
@@ -2132,7 +2132,7 @@
       "description": "Self-hosted no-code spreadsheet database for operator-managed structured data, formulas, and governed workflow tables.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8484",
       "public_url": "https://grist.lv3.org",
@@ -2177,7 +2177,7 @@
       "description": "Self-hosted living knowledge wiki that publishes repo-managed ADR, runbook, and architecture indexes through Outline.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:3006",
       "public_url": "https://wiki.lv3.org",
@@ -2227,7 +2227,7 @@
       "description": "Repo-managed human-in-the-loop data annotation platform with deterministic project catalog reconciliation.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8110",
       "public_url": "https://annotate.lv3.org",
@@ -2258,7 +2258,7 @@
         "edge-authenticated",
         "ml-data"
       ],
-      "notes": "Label Studio runs on docker-runtime-lv3 with a dedicated PostgreSQL database and repo-managed project catalog sync. Browser access is enforced by the shared edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain the current Community Edition-compatible recovery and automation path.",
+      "notes": "Label Studio runs on docker-runtime with a dedicated PostgreSQL database and repo-managed project catalog sync. Browser access is enforced by the shared edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain the current Community Edition-compatible recovery and automation path.",
       "environments": {
         "production": {
           "status": "active",
@@ -2274,7 +2274,7 @@
       "description": "Self-hosted document archive and metadata API with OCR, taxonomy reconciliation, and Keycloak-backed operator sign-in.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8018",
       "public_url": "https://paperless.lv3.org",
@@ -2325,7 +2325,7 @@
       "description": "Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8093",
       "public_url": "https://tasks.lv3.org",
@@ -2380,7 +2380,7 @@
       "description": "Private retrieval-augmented query API for repository and platform context.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://100.64.0.1:8010",
       "exposure": "private-only",
@@ -2415,7 +2415,7 @@
       "description": "Privacy-first cookie-free web analytics dashboard and tracker for selected public LV3 pages.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8016",
       "public_url": "https://analytics.lv3.org",
@@ -2463,7 +2463,7 @@
       "description": "Private read-mostly Docker runtime operations UI and API.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "https://100.64.0.1:9444",
       "exposure": "private-only",
@@ -2500,7 +2500,7 @@
       "description": "Managed high-availability PostgreSQL service for control-plane and future application state.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "postgres-lv3",
+      "vm": "postgres",
       "vmid": 150,
       "internal_url": "postgres://database.lv3.org:5432",
       "subdomain": "database.lv3.org",
@@ -2514,18 +2514,18 @@
       "restart_domain": "dedicated-postgres-core",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/dedicated-postgres",
       "mobility_tier": "anchor",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres/lv3-vm-postgres",
       "redundancy": {
         "tier": "R2",
         "rto_target": "60s planned switchover, 5m unplanned failover",
         "rpo_target": "0s synchronous replication target",
         "backup_source": "backup_pbs",
-        "standby_location": "postgres-replica-lv3 on the same Proxmox host",
-        "failover_trigger": "Patroni health loss on postgres-lv3 or operator-initiated switchover.",
+        "standby_location": "postgres-replica on the same Proxmox host",
+        "failover_trigger": "Patroni health loss on postgres or operator-initiated switchover.",
         "failback_method": "Reinitialize the former primary as a Patroni standby before a planned switchover back.",
         "standby": {
           "mode": "warm",
-          "vm": "postgres-replica-lv3",
+          "vm": "postgres-replica",
           "vmid": 151,
           "reservation": {
             "resources": {
@@ -2537,15 +2537,15 @@
             "required_network_attachment": "vmbr10"
           },
           "placement": {
-            "primary_compose_project": "systemd:patroni-postgres-lv3",
-            "standby_compose_project": "systemd:patroni-postgres-replica-lv3",
-            "primary_namespace": "guest:postgres-lv3:patroni",
-            "standby_namespace": "guest:postgres-replica-lv3:patroni",
+            "primary_compose_project": "systemd:patroni-postgres",
+            "standby_compose_project": "systemd:patroni-postgres-replica",
+            "primary_namespace": "guest:postgres:patroni",
+            "standby_namespace": "guest:postgres-replica:patroni",
             "primary_data_paths": [
-              "guest:postgres-lv3:/var/lib/postgresql"
+              "guest:postgres:/var/lib/postgresql"
             ],
             "standby_data_paths": [
-              "guest:postgres-replica-lv3:/var/lib/postgresql"
+              "guest:postgres-replica:/var/lib/postgresql"
             ]
           },
           "failure_domain_honesty": "This warm standby protects against guest-level corruption and software faults, but it does not cover loss of the single Proxmox host."
@@ -2607,7 +2607,7 @@
       "description": "Local semantic code search service over the git repository using Ollama embeddings and Qdrant vector storage.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:7070",
       "public_url": "https://repowise.lv3.org",
@@ -2644,7 +2644,7 @@
       "description": "Private metasearch runtime for operator and agent web lookups with a tailnet-only hostname.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8881",
       "public_url": "http://search.lv3.org",
@@ -2686,7 +2686,7 @@
       "description": "Repo-managed event-driven CI server with Gitea OAuth, a public edge URL, and a private controller path on the Proxmox host.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://100.64.0.1:8017",
       "public_url": "https://ci.lv3.org",
@@ -2743,7 +2743,7 @@
       "description": "Private Semaphore UI and API for bounded Ansible job execution.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://100.118.189.95:8020",
       "exposure": "private-only",
@@ -2782,7 +2782,7 @@
       "description": "Public chat-first ServerClaw assistant surface backed by repo-governed local model and search integrations.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "coolify-lv3",
+      "vm": "coolify",
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
       "public_url": "https://chat.lv3.org",
@@ -2824,7 +2824,7 @@
       "description": "Public-facing platform status page backed by Uptime Kuma and independently checked by Uptime Robot.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "runtime-general-lv3",
+      "vm": "runtime-general",
       "vmid": 191,
       "internal_url": "http://10.10.10.91:3001/status/lv3-platform",
       "public_url": "https://status.lv3.org",
@@ -2857,7 +2857,7 @@
       "description": "Private certificate authority for internal TLS and SSH certificates.",
       "category": "security",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "https://100.64.0.1:9443",
       "exposure": "private-only",
@@ -2892,7 +2892,7 @@
       "description": "SQL-first business intelligence surface for governed read-only exploration of operational PostgreSQL data.",
       "category": "access",
       "lifecycle_status": "active",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8105",
       "public_url": "https://bi.lv3.org",
@@ -2922,7 +2922,7 @@
         "sql",
         "oidc"
       ],
-      "notes": "Superset runs on docker-runtime-lv3, stores metadata in the managed superset schema of the shared postgres database on postgres-lv3, delegates browser sign-in to Keycloak, and seeds a repo-managed PostgreSQL inventory dashboard plus the optional Plausible ClickHouse datasource.",
+      "notes": "Superset runs on docker-runtime, stores metadata in the managed superset schema of the shared postgres database on postgres, delegates browser sign-in to Keycloak, and seeds a repo-managed PostgreSQL inventory dashboard plus the optional Plausible ClickHouse datasource.",
       "environments": {
         "production": {
           "status": "active",
@@ -2938,7 +2938,7 @@
       "description": "Private stateless document text and metadata extraction service for the RAG and ServerClaw memory ingestion pipelines.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-ai-lv3",
+      "vm": "runtime-ai",
       "vmid": 190,
       "internal_url": "http://10.10.10.90:9998",
       "exposure": "private-only",
@@ -2965,7 +2965,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.90:9998",
-          "notes": "The runtime stays private on runtime-ai-lv3 and is consumed directly by repo-managed ingestion workflows; no shared API gateway publication is issued."
+          "notes": "The runtime stays private on runtime-ai and is consumed directly by repo-managed ingestion workflows; no shared API gateway publication is issued."
         }
       }
     },
@@ -2975,7 +2975,7 @@
       "description": "Private OCR fallback API for scanned PDFs and image uploads when Apache Tika returns no embedded text.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "runtime-ai-lv3",
+      "vm": "runtime-ai",
       "vmid": 190,
       "internal_url": "http://10.10.10.90:3008",
       "exposure": "private-only",
@@ -2999,7 +2999,7 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.90:3008",
-          "notes": "Tesseract OCR stays private on runtime-ai-lv3 and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
+          "notes": "Tesseract OCR stays private on runtime-ai and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
         }
       }
     },
@@ -3009,7 +3009,7 @@
       "description": "Synthetic monitoring surface used to track public and internal service reachability.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "runtime-general-lv3",
+      "vm": "runtime-general",
       "vmid": 191,
       "internal_url": "http://10.10.10.91:3001",
       "public_url": "https://uptime.lv3.org",
@@ -3052,7 +3052,7 @@
       "description": "Private Bitwarden-compatible credential vault for operator-managed passwords, recovery codes, and TOTP material.",
       "category": "security",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "https://vault.lv3.org",
       "subdomain": "vault.lv3.org",
@@ -3093,7 +3093,7 @@
       "description": "Operator and agent workflow runtime exposed privately on the management tailnet.",
       "category": "automation",
       "lifecycle_status": "active",
-      "vm": "runtime-control-lv3",
+      "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://100.64.0.1:8005",
       "exposure": "private-only",

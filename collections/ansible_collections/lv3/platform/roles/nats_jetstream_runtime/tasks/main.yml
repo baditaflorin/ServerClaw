@@ -1,10 +1,10 @@
 ---
 # Purpose: Converge the private NATS JetStream runtime that backs ADR 0276 event delivery.
-# Use case: Run during initial deployment, recovery of the stopped runtime, or drift reconciliation on docker-runtime-lv3.
+# Use case: Run during initial deployment, recovery of the stopped runtime, or drift reconciliation on docker-runtime.
 # Inputs: nats_jetstream_* role variables plus the controller-local admin password file.
 # Outputs: /opt/nats-jetstream config and compose files, a running lv3-nats-jetstream container, and a healthy loopback monitor endpoint.
 # Idempotency: Yes; the role re-renders config deterministically and replays docker compose safely.
-# Dependencies: ADR 0079, ADR 0124, ADR 0276, and the docker runtime being available on docker-runtime-lv3.
+# Dependencies: ADR 0079, ADR 0124, ADR 0276, and the docker runtime being available on docker-runtime.
 - name: Derive Nats Jetstream conventional defaults from the service registry
   ansible.builtin.include_role:
     name: lv3.platform.common

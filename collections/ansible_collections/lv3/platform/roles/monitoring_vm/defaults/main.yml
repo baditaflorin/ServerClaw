@@ -6,7 +6,7 @@
 #   - repo root and host facts (generated, required): Supply source paths, hostnames, and topology-derived URLs.
 #
 # Inputs (optional):
-#   - monitoring_stack_packages (list[str], optional): Monitoring packages installed on monitoring-lv3.
+#   - monitoring_stack_packages (list[str], optional): Monitoring packages installed on monitoring.
 #   - monitoring_prometheus_retention_time (str, optional, default=15d): Prometheus retention budget.
 #
 # Outputs:
@@ -157,7 +157,7 @@ monitoring_postgres_audit_metrics_port: 12345
 monitoring_postgres_audit_metrics_target: >-
   {{
     hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name[
-      'postgres-staging-lv3' if inventory_hostname == 'monitoring-staging-lv3' else 'postgres-lv3'
+      'postgres-staging' if inventory_hostname == 'monitoring-staging' else 'postgres'
     ].ipv4
   }}:{{ monitoring_postgres_audit_metrics_port }}
 monitoring_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"

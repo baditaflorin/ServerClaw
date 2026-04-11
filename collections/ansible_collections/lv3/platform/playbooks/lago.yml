@@ -10,14 +10,14 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
 #
 # Outputs:
-#   - A repo-managed Lago runtime on docker-runtime-lv3, a shared PostgreSQL backend on postgres-lv3, gateway-backed public ingest at `billing.{{ platform_domain }}/api/v1/events`, and protected browser access through the shared edge auth flow.
+#   - A repo-managed Lago runtime on docker-runtime, a shared PostgreSQL backend on postgres, gateway-backed public ingest at `billing.{{ platform_domain }}/api/v1/events`, and protected browser access through the shared edge auth flow.
 #
 # Idempotency: Partially idempotent
 #              Re-converges keep the seeded billing catalog stable, but each smoke verification emits a fresh synthetic usage event.
 #
 # Dependencies:
 #   - ADR 0292: Defines Lago as the usage metering and billing API layer.
-#   - Requires: postgres-lv3, docker-runtime-lv3, api-gateway, OpenBao, and the shared NGINX edge to already exist.
+#   - Requires: postgres, docker-runtime, api-gateway, OpenBao, and the shared NGINX edge to already exist.
 #   - Role: lv3.platform.lago_postgres - provisions the Lago database and role.
 #   - Role: lv3.platform.lago_runtime - converges the Lago runtime, seed catalog, and local smoke verification.
 #   - Role: lv3.platform.api_gateway_runtime - deploys the public producer-ingest adapter used by the billing edge routes.
@@ -46,7 +46,7 @@
 # --- Lago-specific plays ---
 
 - name: Verify Lago end to end after edge publication
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   vars_files:

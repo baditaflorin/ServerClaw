@@ -1,6 +1,6 @@
 ---
 # Playbook: api-gateway.yml
-# Purpose: Converge the unified platform API gateway on runtime-control-lv3 with the governed auth, search, and runtime-assurance verification flow used by ADR 0314.
+# Purpose: Converge the unified platform API gateway on runtime-control with the governed auth, search, and runtime-assurance verification flow used by ADR 0314.
 # Use case: Run when the repo-managed API gateway code, service bundle, authentication dependencies, or platform verification checks must be reconciled on production or staging.
 #
 # Inputs (required):
@@ -31,7 +31,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-04
 - name: Converge the unified platform API gateway on the runtime-control VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
   vars:

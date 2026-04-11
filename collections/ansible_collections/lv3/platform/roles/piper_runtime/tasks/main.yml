@@ -1,4 +1,4 @@
-# Purpose: Converge the private Piper compose stack on docker-runtime-lv3.
+# Purpose: Converge the private Piper compose stack on docker-runtime.
 # Use case: Run during Piper deployment, recovery, or voice-catalog changes when the TTS runtime must match repo truth.
 # Inputs: Runtime paths, pinned base image, private service URL, declared voices, and verification fixtures.
 # Outputs: Rendered compose state plus a running Piper container with `/healthz`, `/api/voices`, and `/api/tts` verified.

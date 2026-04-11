@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the Langfuse runtime stack, bootstrap secrets, and shared MinIO upload contract on docker-runtime-lv3.
+# Purpose: Converge the Langfuse runtime stack, bootstrap secrets, and shared MinIO upload contract on docker-runtime.
 # Use case: Run during Langfuse deploys, upgrades, and recovery replays when the observability runtime must match repo truth.
 #
 # Inputs (required):

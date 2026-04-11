@@ -39,9 +39,9 @@
   ansible.builtin.set_fact:
     glitchtip_publication_quiet_hosts: >-
       {{
-        ['docker-runtime-staging-lv3', 'nginx-staging-lv3']
+        ['docker-runtime-staging', 'nginx-staging']
         if (env | default('production')) == 'staging'
-        else ['docker-runtime-lv3', 'nginx-lv3']
+        else ['docker-runtime', 'nginx']
       }}
 
 - name: Verify the GlitchTip public surface with a controller-local quiet-window retry

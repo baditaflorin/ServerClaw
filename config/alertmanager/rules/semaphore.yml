@@ -9,5 +9,5 @@ groups:
           service: semaphore
         annotations:
           summary: "Semaphore private endpoint is failing probes"
-          description: "The repo-managed private Semaphore ping endpoint on docker-runtime-lv3 has failed for at least five minutes."
+          description: "The repo-managed private Semaphore ping endpoint on docker-runtime has failed for at least five minutes."
           runbook_url: "docs/runbooks/configure-semaphore.md"

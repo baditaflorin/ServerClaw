@@ -1520,7 +1520,7 @@ def _strip_docker_log_header(raw: bytes) -> str:
     return "".join(lines)
 
 
-_HOST_COMMAND_LOCAL_HOST: Final[str] = "runtime-control-lv3"
+_HOST_COMMAND_LOCAL_HOST: Final[str] = "runtime-control"
 
 
 def _shell_quote(s: str) -> str:
@@ -1536,20 +1536,20 @@ def _shell_quote(s: str) -> str:
 _HOST_COMMAND_PROXMOX_IP: Final[str] = "10.10.10.1"
 
 _HOST_COMMAND_TARGETS: Final[dict[str, tuple[str, str]]] = {
-    "runtime-control-lv3": ("local", ""),
+    "runtime-control": ("local", ""),
     "proxmox": ("ssh", "10.10.10.1"),
-    "postgres-lv3": ("qm", "150"),
-    "docker-runtime-lv3": ("qm", "120"),
+    "postgres": ("qm", "150"),
+    "docker-runtime": ("qm", "120"),
     "build-server": ("qm", "130"),
-    "coolify-lv3": ("qm", "170"),
-    "runtime-comms-lv3": ("qm", "121"),
+    "coolify": ("qm", "170"),
+    "runtime-comms": ("qm", "121"),
 }
 
 
 def tool_execute_host_command(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     """Execute a shell command directly on a platform host.
 
-    For local execution (runtime-control-lv3): uses nsenter via a privileged
+    For local execution (runtime-control): uses nsenter via a privileged
     temporary Docker container to run commands in the host's own namespaces —
     full access to the host's binaries, systemctl, docker, journalctl, etc.
 

@@ -187,8 +187,8 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       },
-      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps-lv3 (10.10.10.71) \u2014 ADR 0340.",
-      "upstream_vm": "coolify-apps-lv3",
+      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps (10.10.10.71) \u2014 ADR 0340.",
+      "upstream_vm": "coolify-apps",
       "upstream_ip": "10.10.10.71"
     },
     {
@@ -474,7 +474,7 @@
         "provider": "none",
         "auto_renew": false
       },
-      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
+      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime."
     },
     {
       "fqdn": "grafana.lv3.org",
@@ -591,7 +591,7 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       },
-      "notes": "The shared NGINX edge proxies signalling at https://livekit.lv3.org while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime-lv3 for WebRTC media."
+      "notes": "The shared NGINX edge proxies signalling at https://livekit.lv3.org while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime for WebRTC media."
     },
     {
       "fqdn": "logs.lv3.org",
@@ -883,7 +883,7 @@
         "provider": "none",
         "auto_renew": false
       },
-      "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime-lv3."
+      "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime."
     },
     {
       "fqdn": "sso.lv3.org",

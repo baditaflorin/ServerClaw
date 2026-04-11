@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the private Gotenberg runtime on docker-runtime-lv3.
+# Purpose: Converge the private Gotenberg runtime on docker-runtime.
 # Inputs: Pinned image catalog entry, private service URL, compose paths, and runtime resource limits.
 # Outputs: Rendered compose file plus a running Gotenberg container with Chromium and LibreOffice renderers available.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and host port binding.

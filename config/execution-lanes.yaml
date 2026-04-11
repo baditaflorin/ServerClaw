@@ -16,7 +16,7 @@ lanes:
 
   - lane_id: lane:nginx
     vm_id: 110
-    hostname: nginx-lv3
+    hostname: nginx
     services:
       - nginx_edge
       - changelog_portal
@@ -31,7 +31,7 @@ lanes:
 
   - lane_id: lane:docker-runtime
     vm_id: 120
-    hostname: docker-runtime-lv3
+    hostname: docker-runtime
     services:
       - docker_runtime
       - mattermost
@@ -51,7 +51,7 @@ lanes:
 
   - lane_id: lane:runtime-ai
     vm_id: 190
-    hostname: runtime-ai-lv3
+    hostname: runtime-ai
     services:
       - gotenberg
       - tika
@@ -66,7 +66,7 @@ lanes:
 
   - lane_id: lane:runtime-control
     vm_id: 192
-    hostname: runtime-control-lv3
+    hostname: runtime-control
     services:
       - api_gateway
       - gitea
@@ -91,7 +91,7 @@ lanes:
 
   - lane_id: lane:runtime-general
     vm_id: 191
-    hostname: runtime-general-lv3
+    hostname: runtime-general
     services:
       - homepage
       - mailpit
@@ -107,7 +107,7 @@ lanes:
 
   - lane_id: lane:build
     vm_id: 130
-    hostname: docker-build-lv3
+    hostname: docker-build
     services:
       - docker_build
     max_concurrent_ops: 2
@@ -120,7 +120,7 @@ lanes:
 
   - lane_id: lane:monitoring
     vm_id: 140
-    hostname: monitoring-lv3
+    hostname: monitoring
     services:
       - alertmanager
       - grafana
@@ -134,7 +134,7 @@ lanes:
 
   - lane_id: lane:postgres
     vm_id: 150
-    hostname: postgres-lv3
+    hostname: postgres
     services:
       - postgres
     max_concurrent_ops: 1
@@ -147,7 +147,7 @@ lanes:
 
   - lane_id: lane:postgres-replica
     vm_id: 151
-    hostname: postgres-replica-lv3
+    hostname: postgres-replica
     services: []
     max_concurrent_ops: 1
     serialisation: strict
@@ -159,7 +159,7 @@ lanes:
 
   - lane_id: lane:backup
     vm_id: 160
-    hostname: backup-lv3
+    hostname: backup
     services:
       - backup_pbs
     max_concurrent_ops: 1

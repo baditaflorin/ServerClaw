@@ -2,7 +2,7 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-# Purpose: Default inputs for converging the Lago billing runtime on docker-runtime-lv3.
+# Purpose: Default inputs for converging the Lago billing runtime on docker-runtime.
 # Use case: Loaded whenever the platform needs the repo-managed Lago API, web UI, worker, clock, Redis, and PDF companion stack.
 #
 # Inputs (required):

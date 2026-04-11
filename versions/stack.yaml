@@ -321,7 +321,7 @@ desired_state:
         principal: ops-portainer
         owner: Florin Badita
         purpose: Routine read-mostly Docker runtime inspection in Portainer and bounded emergency actions through the governed Portainer surface.
-        scope_boundary: Portainer UI and API on docker-runtime-lv3 only; desired state remains repo-managed and Portainer is not the source of truth for stack definitions.
+        scope_boundary: Portainer UI and API on docker-runtime only; desired state remains repo-managed and Portainer is not the source of truth for stack definitions.
         rotation_or_expiry: Rotate the controller-local Portainer bootstrap password on operator change, compromise, or when narrower SSO-backed identities replace the bootstrap path.
         credential_storage: Controller-local Portainer artifacts under .local/portainer; not committed to git.
         shared_credential_material: false
@@ -347,7 +347,7 @@ desired_state:
         purpose: Confidential client-credentials identity for approved LV3 agent workflows against the shared Keycloak broker.
         scope_boundary: Keycloak token issuance for the `lv3` realm only; not used for interactive login or unrelated services.
         rotation_or_expiry: Rotate the client secret on compromise, workflow ownership change, or broker reconfiguration.
-        credential_storage: Controller-local client secret under .local/keycloak with a mirrored runtime value on docker-runtime-lv3.
+        credential_storage: Controller-local client secret under .local/keycloak with a mirrored runtime value on docker-runtime.
         shared_credential_material: false
         surfaces:
           - keycloak_client_credentials
@@ -358,7 +358,7 @@ desired_state:
         purpose: OIDC client identity that lets Grafana delegate user authentication to Keycloak.
         scope_boundary: Grafana login against the Keycloak `lv3` realm only; not used for Grafana admin API automation or any other application.
         rotation_or_expiry: Rotate the client secret on compromise, Grafana reconfiguration, or broker client-policy changes.
-        credential_storage: Controller-local client secret under .local/keycloak with a mirrored value in Grafana's managed config on monitoring-lv3.
+        credential_storage: Controller-local client secret under .local/keycloak with a mirrored value in Grafana's managed config on monitoring.
         shared_credential_material: false
         surfaces:
           - grafana_oauth
@@ -369,7 +369,7 @@ desired_state:
         purpose: Authenticated mailbox and submission identity for the managed LV3 mail platform.
         scope_boundary: Mailbox access and SMTP submission on the internal mail platform only; not used for host, guest, or Proxmox administration.
         rotation_or_expiry: Rotate the mailbox password and gateway API key during mail-platform rotation, credential compromise, or sender-profile changes.
-        credential_storage: Controller-local mail secrets under .local/mail-platform with mirrored runtime files on docker-runtime-lv3.
+        credential_storage: Controller-local mail secrets under .local/mail-platform with mirrored runtime files on docker-runtime.
         shared_credential_material: false
         surfaces:
           - stalwart_mailbox
@@ -381,7 +381,7 @@ desired_state:
         purpose: Outbound operator alert sender profile for incident and health notifications.
         scope_boundary: Profile-bound outbound sends through the internal mail gateway only; cannot enumerate mail objects or reuse other sender credentials.
         rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or ownership change.
-        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime.
         shared_credential_material: false
         surfaces:
           - stalwart_mailbox
@@ -393,7 +393,7 @@ desired_state:
         purpose: Outbound transactional sender profile for repo-managed service notifications.
         scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for operator alerts or agent reporting.
         rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or service ownership change.
-        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime.
         shared_credential_material: false
         surfaces:
           - stalwart_mailbox
@@ -405,7 +405,7 @@ desired_state:
         purpose: Outbound sender profile for agent-generated reports and workflow summaries.
         scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for human operators or unrelated services.
         rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or workflow ownership change.
-        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime.
         shared_credential_material: false
         surfaces:
           - stalwart_mailbox
@@ -650,71 +650,71 @@ observed_state:
       exists: true
     instances:
       - vmid: 110
-        name: nginx-lv3
+        name: nginx
         ipv4: 10.10.10.10
         running: true
       - vmid: 120
-        name: docker-runtime-lv3
+        name: docker-runtime
         ipv4: 10.10.10.20
         running: true
       - vmid: 121
-        name: runtime-comms-lv3
+        name: runtime-comms
         ipv4: 10.10.10.21
         running: false
       - vmid: 122
-        name: runtime-apps-lv3
+        name: runtime-apps
         ipv4: 10.10.10.22
         running: false
       - vmid: 130
-        name: docker-build-lv3
+        name: docker-build
         ipv4: 10.10.10.30
         running: true
       - vmid: 140
-        name: monitoring-lv3
+        name: monitoring
         ipv4: 10.10.10.40
         running: true
       - vmid: 150
-        name: postgres-lv3
+        name: postgres
         ipv4: 10.10.10.50
         running: true
       - vmid: 151
-        name: postgres-replica-lv3
+        name: postgres-replica
         ipv4: 10.10.10.51
         running: false
       - vmid: 152
-        name: postgres-apps-lv3
+        name: postgres-apps
         ipv4: 10.10.10.52
         running: false
       - vmid: 154
-        name: postgres-data-lv3
+        name: postgres-data
         ipv4: 10.10.10.54
         running: false
       - vmid: 160
-        name: backup-lv3
+        name: backup
         ipv4: 10.10.10.60
         running: true
       - vmid: 170
-        name: coolify-lv3
+        name: coolify
         ipv4: 10.10.10.70
         running: true
       - vmid: 171
-        name: coolify-apps-lv3
+        name: coolify-apps
         ipv4: 10.10.10.71
         running: true
       - vmid: 180
-        name: artifact-cache-lv3
+        name: artifact-cache
         ipv4: 10.10.10.80
         running: true
       - vmid: 190
-        name: runtime-ai-lv3
+        name: runtime-ai
         ipv4: 10.10.10.90
         running: true
       - vmid: 191
-        name: runtime-general-lv3
+        name: runtime-general
         ipv4: 10.10.10.91
         running: false
       - vmid: 192
-        name: runtime-control-lv3
+        name: runtime-control
         ipv4: 10.10.10.92
         running: false
     access:
@@ -749,20 +749,20 @@ observed_state:
       - uid: lv3-log-canary-overview
         title: LV3 Log Canary
         panels: 11
-      - uid: lv3-vm-nginx-lv3
-        title: LV3 nginx-lv3 Detail
+      - uid: lv3-vm-nginx
+        title: LV3 nginx Detail
         panels: 12
-      - uid: lv3-vm-docker-runtime-lv3
-        title: LV3 docker-runtime-lv3 Detail
+      - uid: lv3-vm-docker-runtime
+        title: LV3 docker-runtime Detail
         panels: 16
-      - uid: lv3-vm-docker-build-lv3
-        title: LV3 docker-build-lv3 Detail
+      - uid: lv3-vm-docker-build
+        title: LV3 docker-build Detail
         panels: 14
-      - uid: lv3-vm-monitoring-lv3
-        title: LV3 monitoring-lv3 Detail
+      - uid: lv3-vm-monitoring
+        title: LV3 monitoring Detail
         panels: 8
-      - uid: lv3-vm-postgres-lv3
-        title: LV3 postgres-lv3 Detail
+      - uid: lv3-vm-postgres
+        title: LV3 postgres Detail
         panels: 8
     grafana_dashboards_provisioned: true
     log_queryability_canary_verified: true
@@ -786,19 +786,19 @@ observed_state:
       - lane
       - source
     log_host_labels:
-      - backup-lv3
-      - docker-build-lv3
-      - docker-runtime-lv3
-      - monitoring-lv3
-      - nginx-lv3
-      - postgres-lv3
+      - backup
+      - docker-build
+      - docker-runtime
+      - monitoring
+      - nginx
+      - postgres
       - proxmox_florin
   mutation_audit:
     sink_file: /var/log/platform/mutation-audit.jsonl
     loki_job_label: mutation-audit
     live_hosts:
       - proxmox_florin
-      - docker-runtime-lv3
+      - docker-runtime
     host_file_verified: true
     windmill_helper_path: f/lv3/mutation_audit_emit
     windmill_helper_verified: true
@@ -877,12 +877,12 @@ observed_state:
     ssh_certificate_login_verified: true
     trusted_hosts:
       - proxmox_florin
-      - nginx-lv3
-      - docker-runtime-lv3
-      - docker-build-lv3
-      - monitoring-lv3
-      - postgres-lv3
-      - backup-lv3
+      - nginx
+      - docker-runtime
+      - docker-build
+      - monitoring
+      - postgres
+      - backup
     provisioners:
       - humans
       - agents
@@ -939,7 +939,7 @@ observed_state:
     public_url: https://coolify.lv3.org
     apps_public_url: https://apps.lv3.org
     dashboard_version: 4.0.0-beta.470
-    deployment_server_name: coolify-apps-lv3
+    deployment_server_name: coolify-apps
     deployment_server_uuid: upsaaj0eoynvncqlorp7y2yj
     deployment_server_registered: true
     deployment_server_reachable: true
@@ -1109,16 +1109,16 @@ observed_state:
     offsite_backup:
       configured: false
       storage_id: lv3-backup-offsite
-      protected_vm: backup-lv3
+      protected_vm: backup
       latest_run: not recorded
     control_plane_recovery:
-      runtime_source_vm: docker-runtime-lv3
-      backup_store_vm: backup-lv3
+      runtime_source_vm: docker-runtime
+      backup_store_vm: backup
       runtime_backup_ssh_source: 10.10.10.20
       runtime_backup_timer_active: true
       runtime_backup_schedule_utc: "*-*-* 01,07,13,19:15:00"
       latest_runtime_backup_timestamp: 20260328T164431Z
-      latest_runtime_backup_path: /srv/control-plane-recovery/runtime/docker-runtime-lv3/20260328T164431Z
+      latest_runtime_backup_path: /srv/control-plane-recovery/runtime/docker-runtime/20260328T164431Z
       controller_bundle_path: /srv/control-plane-recovery/controller/controller-recovery-bundle.tar.zst
       restore_drill_timer_active: true
       restore_drill_schedule_utc: "*-*-* 05:45:00"
@@ -1127,7 +1127,7 @@ observed_state:
         result: pass
     restic_file_backup:
       configured: true
-      runtime_source_vm: docker-runtime-lv3
+      runtime_source_vm: docker-runtime
       repository_bucket: restic-config-backup
       repository_endpoint: http://10.200.18.3:9000
       object_lock_mode: governance

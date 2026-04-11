@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the Lago billing runtime, local verification surfaces, and supporting artifacts on docker-runtime-lv3.
+# Purpose: Converge the Lago billing runtime, local verification surfaces, and supporting artifacts on docker-runtime.
 # Use case: Run when provisioning or replaying ADR 0292 on the latest shared mainline baseline.
 # Inputs: lago_* paths, image pins, OpenBao settings, publication URLs, and controller-local secrets.
 # Outputs: Rendered compose runtime, seeded verification artifacts, and a running Lago service set.

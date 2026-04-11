@@ -112,7 +112,7 @@
       "lane": "api",
       "lane_surface_ref": "mail-gateway-api",
       "publication_tier": "internal-only",
-      "reachability": "Reachable only on the LV3 private guest network at docker-runtime-lv3:8081.",
+      "reachability": "Reachable only on the LV3 private guest network at docker-runtime:8081.",
       "approval_notes": "This is the sanctioned machine-facing mail automation API and must stay off the public edge."
     },
     {
@@ -142,7 +142,7 @@
       "lane": "api",
       "lane_surface_ref": "ollama-local-inference-api",
       "publication_tier": "internal-only",
-      "reachability": "Reachable only on the LV3 private guest network at docker-runtime-lv3:11434.",
+      "reachability": "Reachable only on the LV3 private guest network at docker-runtime:11434.",
       "approval_notes": "This private local-inference surface is consumed only by repo-managed internal callers such as bounded goal-compiler fallback routing; do not publish it through public DNS or the NGINX edge."
     },
     {
@@ -160,7 +160,7 @@
       "lane": "event",
       "lane_surface_ref": "stalwart-mail-events",
       "publication_tier": "internal-only",
-      "reachability": "Reachable only from the private mail-platform stack on docker-runtime-lv3.",
+      "reachability": "Reachable only from the private mail-platform stack on docker-runtime.",
       "approval_notes": "Event callbacks stay on private or container-local networks unless a future ADR approves explicit publication."
     },
     {
@@ -169,7 +169,7 @@
       "lane": "event",
       "lane_surface_ref": "mattermost-incoming-webhooks",
       "publication_tier": "internal-only",
-      "reachability": "Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing.",
+      "reachability": "Reachable on the private Mattermost runtime at docker-runtime:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing.",
       "approval_notes": "Treat these webhook ids as secret-bearing internal event sinks even though operator verification can traverse the Proxmox host Tailscale proxy."
     },
     {
@@ -178,7 +178,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-finding-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0071 finding events stay private-first and use one canonical subject so subscribers do not depend on producer-specific topic naming."
     },
     {
@@ -187,7 +187,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-watchdog-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0172 watchdog heartbeat and stale-job abort events stay private-first because they expose live control-plane recovery behavior."
     },
     {
@@ -196,7 +196,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-api-request-events",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0092 request events stay private-first because they expose operator and service call patterns that should not leave the internal event plane."
     },
     {
@@ -205,7 +205,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-drift-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0091 drift subjects stay private-first because they disclose real-time divergence between repo intent and live platform state."
     },
     {
@@ -214,7 +214,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-db-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0304 schema drift subjects stay private-first because they disclose live database topology and divergence between committed Atlas snapshots and production PostgreSQL state."
     },
     {
@@ -223,7 +223,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-security-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0102 security posture subjects stay private-first because they expose active hardening gaps and live image vulnerability findings."
     },
     {
@@ -232,7 +232,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-slo-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0305 load-regression subjects stay private-first because they expose empirical latency drift, remaining budget posture, and service-specific performance regressions."
     },
     {
@@ -241,7 +241,7 @@
       "lane": "event",
       "lane_surface_ref": "maintenance-window-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0080 maintenance subjects stay private-first because they disclose planned change timing and active alert-suppression scope."
     },
     {
@@ -250,7 +250,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-backup-subjects",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0099 and ADR 0302 backup events stay private-first because they disclose restore posture and recent backup health."
     },
     {
@@ -259,7 +259,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-world-state-events",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0113 world-state refresh events stay private-first because they expose live collection cadence and surface freshness for internal automation."
     },
     {
@@ -268,7 +268,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-ledger-events",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0115 ledger fan-out stays private-first because it exposes operator and automation mutations in near real time."
     },
     {
@@ -277,7 +277,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-agent-events",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0161 coordination events stay private-first because they expose live agent activity, target selection, and blocked or escalated session state."
     },
     {
@@ -286,7 +286,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-execution-events",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "Execution lifecycle and deadlock-detection subjects stay private-first because they expose live mutation flow control, blocked work, and retry timing."
     },
     {
@@ -295,7 +295,7 @@
       "lane": "event",
       "lane_surface_ref": "platform-config-merge-events",
       "publication_tier": "internal-only",
-      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "reachability": "Published only on the private docker-runtime NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0158 config-merge events stay private-first because they expose pending registry mutations and merge conflicts in near real time."
     }
   ]

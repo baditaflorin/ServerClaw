@@ -17,7 +17,7 @@
 #
 # Dependencies:
 #   - ADR 0274: Defines MinIO as the shared S3-compatible object-storage layer.
-#   - Requires: docker-runtime-lv3, nginx-lv3, and OpenBao to already exist.
+#   - Requires: docker-runtime, nginx, and OpenBao to already exist.
 #   - Role: lv3.platform.minio_runtime - converges the MinIO runtime, credentials, buckets, and policies.
 #   - Role: lv3.platform.nginx_edge_publication - publishes the API and authenticated console through the shared edge.
 #
@@ -42,7 +42,7 @@
       run_once: true
 
 - name: Converge MinIO on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 
@@ -62,7 +62,7 @@
     - role: lv3.platform.minio_runtime
 
 - name: Publish MinIO through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

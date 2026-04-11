@@ -18,7 +18,7 @@ Environment overrides (all optional):
     LV3_OUTLINE_DB_URL          - Postgres connection URL (default: read from container env)
     LV3_PROXMOX_HOST_ADDR       - Proxmox jump host IP (default: 10.10.10.1)
     LV3_BOOTSTRAP_SSH_PRIVATE_KEY - Path to bootstrap SSH key
-    LV3_OUTLINE_HOST_IP         - docker-runtime-lv3 IP (default: 10.10.10.20)
+    LV3_OUTLINE_HOST_IP         - docker-runtime IP (default: 10.10.10.20)
 """
 
 from __future__ import annotations
@@ -65,7 +65,7 @@ def _ssh_key_path() -> str:
 
 
 def _run_psql(sql: str, db_password: str, dry_run: bool = False) -> str:
-    """Run a psql command on the Outline database via SSH jump to docker-runtime-lv3."""
+    """Run a psql command on the Outline database via SSH jump to docker-runtime."""
     proxmox_host = os.environ.get("LV3_PROXMOX_HOST_ADDR", DEFAULT_PROXMOX_HOST)
     outline_host = os.environ.get("LV3_OUTLINE_HOST_IP", DEFAULT_OUTLINE_HOST)
     ssh_key = _ssh_key_path()

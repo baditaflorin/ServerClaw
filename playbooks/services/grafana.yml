@@ -2,7 +2,7 @@
 #   - playbooks/services/proxmox-metrics.yml
 ---
 - name: Converge monitoring VM stack
-  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: true
   tags:

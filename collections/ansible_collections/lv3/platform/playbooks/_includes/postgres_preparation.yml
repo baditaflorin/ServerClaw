@@ -8,7 +8,7 @@
   vars:
     # Default for Ansible parser validation; overridden by -e @playbooks/vars/<service>.yml
     service_postgres_role: "lv3.platform.postgres_default"
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
 

@@ -83,7 +83,7 @@
         - backups
         - storage
 
-- name: Configure optional off-site backup of backup-lv3
+- name: Configure optional off-site backup of backup
   hosts: proxmox_hosts
   become: true
   gather_facts: true

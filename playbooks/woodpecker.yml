@@ -10,14 +10,14 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Woodpecker runtime converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, ci.{{ platform_domain }} published through the edge, and controller-local auth artifacts refreshed.
+#   - Woodpecker runtime converged on docker-runtime, PostgreSQL access prepared on postgres, ci.{{ platform_domain }} published through the edge, and controller-local auth artifacts refreshed.
 #
 # Idempotency: Fully idempotent
 #              Runtime secrets and OAuth/bootstrap artifacts are reused when present, and repeat runs reconcile the same seed repository activation plus API-secret contract.
 #
 # Dependencies:
 #   - ADR 0287: Woodpecker CI As The API Driven Continuous Integration Server
-#   - Requires: OpenBao, Gitea, docker-runtime-lv3, postgres-lv3, and the shared NGINX edge to be reachable
+#   - Requires: OpenBao, Gitea, docker-runtime, postgres, and the shared NGINX edge to be reachable
 #   - Role: woodpecker_postgres — provisions the Woodpecker database and password material
 #   - Role: woodpecker_runtime — deploys Woodpecker, prepares Gitea OAuth, and renders the controller bootstrap spec
 #
@@ -61,7 +61,7 @@
       run_once: true
 
 - name: Converge PostgreSQL access for Woodpecker
-  hosts: postgres-lv3
+  hosts: postgres
   become: true
   gather_facts: true
   tags:
@@ -76,7 +76,7 @@
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
         required_hosts:
-          - postgres-lv3
+          - postgres
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -84,7 +84,7 @@
     - role: lv3.platform.woodpecker_postgres
 
 - name: Converge Woodpecker on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:
@@ -100,7 +100,7 @@
         playbook_execution_audit_action: playbook.start.woodpecker
         playbook_execution_audit_target: woodpecker
         required_hosts:
-          - docker-runtime-lv3
+          - docker-runtime
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -126,7 +126,7 @@
         playbook_execution_notification_service: woodpecker
 
 - name: Publish Woodpecker through the NGINX edge
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   tags:
@@ -141,7 +141,7 @@
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
         required_hosts:
-          - nginx-lv3
+          - nginx
 
   roles:
     - role: lv3.platform.nginx_edge_publication

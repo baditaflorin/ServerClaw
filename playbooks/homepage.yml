@@ -1,6 +1,6 @@
 ---
 - name: Converge Homepage on the runtime-general VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
   become: true
   gather_facts: true
   vars:
@@ -39,7 +39,7 @@
     - role: lv3.platform.homepage_runtime
 
 - name: Publish Homepage on the shared NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

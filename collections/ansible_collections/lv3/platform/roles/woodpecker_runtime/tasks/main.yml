@@ -1,6 +1,6 @@
 ---
 # Purpose: Converge the Woodpecker runtime stack, managed secrets, Gitea OAuth application, and controller-local bootstrap artifacts.
-# Use case: Run during Woodpecker deployment or replay on docker-runtime-lv3 after the Woodpecker PostgreSQL backend is prepared.
+# Use case: Run during Woodpecker deployment or replay on docker-runtime after the Woodpecker PostgreSQL backend is prepared.
 #
 # Inputs (required):
 #   - woodpecker_site_dir (path, required): Runtime root directory.

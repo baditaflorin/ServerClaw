@@ -450,13 +450,13 @@ def generate_tls_certificates(
 
 # Host-group to internal IP mapping (from inventory/hosts.yml production section)
 _HOST_GROUP_IPS: dict[str, str] = {
-    "docker-runtime-lv3": "10.10.10.20",
-    "runtime-control-lv3": "10.10.10.92",
-    "runtime-general-lv3": "10.10.10.91",
-    "runtime-ai-lv3": "10.10.10.90",
-    "coolify-lv3": "10.10.10.70",
-    "coolify-apps-lv3": "10.10.10.71",
-    "artifact-cache-lv3": "10.10.10.50",
+    "docker-runtime": "10.10.10.20",
+    "runtime-control": "10.10.10.92",
+    "runtime-general": "10.10.10.91",
+    "runtime-ai": "10.10.10.90",
+    "coolify": "10.10.10.70",
+    "coolify-apps": "10.10.10.71",
+    "artifact-cache": "10.10.10.50",
     "backup-vm-lv3": "10.10.10.51",
 }
 

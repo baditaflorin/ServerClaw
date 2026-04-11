@@ -1,6 +1,6 @@
 ---
 # Purpose: Define ADR 0302 restic config backup defaults, runtime paths, and controller-local secret locations.
-# Use case: Loaded whenever the restic_config_backup role converges or validates the backup timer on docker-runtime-lv3.
+# Use case: Loaded whenever the restic_config_backup role converges or validates the backup timer on docker-runtime.
 # Inputs: Repo checkout path, OpenBao helper defaults, controller-local secrets, and MinIO bucket settings.
 # Outputs: Stable defaults consumed by the restic_config_backup role.
 # Idempotency: Fully idempotent because this file only declares defaults.

@@ -30,7 +30,7 @@ def detect_build_network() -> str:
     configured = os.environ.get("CHECK_RUNNER_BUILD_NETWORK")
     if configured is not None:
         return configured
-    return "host" if socket.gethostname() == "docker-build-lv3" else ""
+    return "host" if socket.gethostname() == "docker-build" else ""
 
 
 def run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:

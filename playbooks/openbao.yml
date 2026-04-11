@@ -19,7 +19,7 @@
 # Dependencies:
 #   - ADR 0043: Defines OpenBao as the platform secrets authority and dynamic credential plane.
 #   - ADR 0165: Requires the playbook metadata contract for repo-managed automation.
-#   - Requires: runtime-control-lv3, the target PostgreSQL lane, and the controller-local OpenBao bootstrap artifacts.
+#   - Requires: runtime-control, the target PostgreSQL lane, and the controller-local OpenBao bootstrap artifacts.
 #   - Role: lv3.platform.openbao_postgres_backend - configures PostgreSQL for managed OpenBao dynamic credentials.
 #   - Role: lv3.platform.openbao_runtime - converges OpenBao and restores the unsealed runtime state when needed.
 #
@@ -51,7 +51,7 @@
     - role: lv3.platform.openbao_postgres_backend
 
 - name: Converge OpenBao on the runtime-control VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
   tags:
@@ -85,7 +85,7 @@
         playbook_execution_notification_service: openbao
 
 - name: Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: false
   tags:
@@ -252,7 +252,7 @@
         fail_msg: "The Atlas AppRole could not request the expected PostgreSQL schema-inspection credential."
 
 - name: Refresh persisted OpenBao AppRole artifacts after end-to-end verification
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
   tags:

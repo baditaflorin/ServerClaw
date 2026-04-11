@@ -10,14 +10,14 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Vikunja runtime converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, vikunja.{{ platform_domain }} published through the edge, and controller-local auth artifacts refreshed.
+#   - Vikunja runtime converged on docker-runtime, PostgreSQL access prepared on postgres, vikunja.{{ platform_domain }} published through the edge, and controller-local auth artifacts refreshed.
 #
 # Idempotency: Fully idempotent
 #              Runtime secrets and bootstrap artifacts are reused when present, and repeat runs reconcile the same project, label, and webhook contract.
 #
 # Dependencies:
 #   - ADR 0286: Vikunja as the task and project management REST API
-#   - Requires: OpenBao, docker-runtime-lv3, postgres-lv3, Keycloak, Windmill, and the shared NGINX edge to be reachable
+#   - Requires: OpenBao, docker-runtime, postgres, Keycloak, Windmill, and the shared NGINX edge to be reachable
 #   - Role: vikunja_postgres — provisions the Vikunja database and login
 #   - Role: vikunja_runtime — deploys Vikunja, bootstraps auth, syncs desired state, and verifies controller workflows
 #
@@ -61,7 +61,7 @@
       run_once: true
 
 - name: Converge PostgreSQL access for Vikunja
-  hosts: postgres-lv3
+  hosts: postgres
   become: true
   gather_facts: true
   tags:
@@ -76,7 +76,7 @@
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
         required_hosts:
-          - postgres-lv3
+          - postgres
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -84,7 +84,7 @@
     - role: lv3.platform.vikunja_postgres
 
 - name: Converge Vikunja on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:
@@ -100,7 +100,7 @@
         playbook_execution_audit_action: playbook.start.vikunja
         playbook_execution_audit_target: vikunja
         required_hosts:
-          - docker-runtime-lv3
+          - docker-runtime
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -120,7 +120,7 @@
         playbook_execution_notification_service: vikunja
 
 - name: Publish Vikunja through the NGINX edge
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   tags:
@@ -135,7 +135,7 @@
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
         required_hosts:
-          - nginx-lv3
+          - nginx
 
   roles:
     - role: lv3.platform.nginx_edge_publication

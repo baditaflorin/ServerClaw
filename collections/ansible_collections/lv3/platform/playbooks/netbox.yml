@@ -9,7 +9,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Converge PostgreSQL access for NetBox
-  hosts: postgres-lv3
+  hosts: postgres
   become: true
   gather_facts: true
 
@@ -26,7 +26,7 @@
     - role: lv3.platform.netbox_postgres
 
 - name: Converge NetBox on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
 

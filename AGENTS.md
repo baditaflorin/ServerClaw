@@ -443,8 +443,8 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 |---|---|
 | **UI** | Nomad scheduler web UI (OIDC login via Keycloak) |
 | **API proxy** | Tailscale mesh management proxy (requires management token) |
-| **Server** | monitoring-lv3 (see inventory for host details) |
-| **Clients** | docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, runtime-control-lv3, docker-build-lv3 |
+| **Server** | monitoring (see inventory for host details) |
+| **Clients** | docker-runtime, runtime-general, runtime-ai, runtime-control, docker-build |
 | **CLI wrapper** | `/usr/local/bin/lv3-nomad` on all cluster nodes (auto-loads token) |
 | **Playbook** | `playbooks/nomad.yml` |
 | **Job definitions** | `config/nomad/jobs/` |
@@ -480,4 +480,4 @@ For targeted VM-only runs (`make provision-guests`), apply each service in the t
 - NEVER run `git add .local`, `git add -A`, or `git add .` in any directory containing `.local`. Always name specific files or directories when staging.
 - Agents in worktrees do NOT have `.local/` — this is intentional. If credentials are needed, read from the main worktree path directly. Do not create symlinks, copies, or placeholder credentials.
 - Never hand-maintain a security boundary list (like sanitization patterns) without an automated audit. The initial publication sanitization config missed 7 of 25 VMs (28% miss rate) and an IPv6 address in a template file. The drift detector (`make audit-sanitization`) catches these gaps automatically.
-- Regex patterns for VM names with staging variants need `(-staging)?` optionality — `monitoring-lv3` does NOT match `monitoring-staging-lv3` because `-staging-` is in the middle.
+- Regex patterns for VM names with staging variants need `(-staging)?` optionality — `monitoring` does NOT match `monitoring-staging` because `-staging-` is in the middle.

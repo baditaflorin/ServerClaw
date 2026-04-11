@@ -9,7 +9,7 @@
 #   - env (string, optional, default=production): Inventory environment selector for the shared execution runner.
 #
 # Outputs:
-#   - Repo-managed Typesense runtime on docker-runtime-lv3 plus the private Tailscale TCP proxy on proxmox_florin.
+#   - Repo-managed Typesense runtime on docker-runtime plus the private Tailscale TCP proxy on proxmox_florin.
 #
 # Idempotency: Fully idempotent.
 #
@@ -37,7 +37,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Converge Typesense and refresh the API gateway structured-search catalog on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
 

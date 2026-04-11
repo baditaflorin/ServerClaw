@@ -6,7 +6,7 @@
       "id": "alertmanager",
       "service": "alertmanager",
       "name": "Alertmanager",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "tier": 1,
       "category": "observability",
       "adr": "0097"
@@ -15,7 +15,7 @@
       "id": "api_gateway",
       "service": "api_gateway",
       "name": "Platform API Gateway",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 3,
       "category": "automation",
       "adr": "0092"
@@ -24,7 +24,7 @@
       "id": "backup_pbs",
       "service": "backup_pbs",
       "name": "Proxmox Backup Server",
-      "vm": "backup-lv3",
+      "vm": "backup",
       "tier": 1,
       "category": "data",
       "adr": "0029"
@@ -33,7 +33,7 @@
       "id": "browser_runner",
       "service": "browser_runner",
       "name": "Browser Runner",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0261"
@@ -42,7 +42,7 @@
       "id": "changedetection",
       "service": "changedetection",
       "name": "Changedetection.io",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "observability",
       "adr": "0280"
@@ -51,7 +51,7 @@
       "id": "crawl4ai",
       "service": "crawl4ai",
       "name": "Crawl4AI",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0288"
@@ -60,7 +60,7 @@
       "id": "changelog_portal",
       "service": "changelog_portal",
       "name": "Changelog Portal",
-      "vm": "nginx-lv3",
+      "vm": "nginx",
       "tier": 2,
       "category": "communication",
       "adr": "0081"
@@ -69,7 +69,7 @@
       "id": "coolify",
       "service": "coolify",
       "name": "Coolify",
-      "vm": "coolify-lv3",
+      "vm": "coolify",
       "tier": 1,
       "category": "infrastructure",
       "adr": "0194"
@@ -78,7 +78,7 @@
       "id": "coolify_apps",
       "service": "coolify_apps",
       "name": "Coolify Apps Ingress",
-      "vm": "coolify-lv3",
+      "vm": "coolify",
       "tier": 2,
       "category": "infrastructure",
       "adr": "0194"
@@ -87,7 +87,7 @@
       "id": "dify",
       "service": "dify",
       "name": "Dify",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0197"
@@ -96,7 +96,7 @@
       "id": "directus",
       "service": "directus",
       "name": "Directus",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "access",
       "adr": "0289"
@@ -105,7 +105,7 @@
       "id": "docker_build",
       "service": "docker_build",
       "name": "Docker Build VM",
-      "vm": "docker-build-lv3",
+      "vm": "docker-build",
       "tier": 1,
       "category": "infrastructure",
       "adr": "0028"
@@ -114,7 +114,7 @@
       "id": "docker_runtime",
       "service": "docker_runtime",
       "name": "Docker Runtime VM",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "infrastructure",
       "adr": "0023"
@@ -123,7 +123,7 @@
       "id": "docs_portal",
       "service": "docs_portal",
       "name": "Developer Portal",
-      "vm": "nginx-lv3",
+      "vm": "nginx",
       "tier": 2,
       "category": "access",
       "adr": "0094"
@@ -132,7 +132,7 @@
       "id": "dozzle",
       "service": "dozzle",
       "name": "Dozzle",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "observability",
       "adr": "0150"
@@ -141,7 +141,7 @@
       "id": "excalidraw",
       "service": "excalidraw",
       "name": "Excalidraw",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "access",
       "adr": "0202"
@@ -150,7 +150,7 @@
       "id": "flagsmith",
       "service": "flagsmith",
       "name": "Flagsmith",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0288"
@@ -159,7 +159,7 @@
       "id": "gitea",
       "service": "gitea",
       "name": "Gitea",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0143"
@@ -168,7 +168,7 @@
       "id": "gotenberg",
       "service": "gotenberg",
       "name": "Gotenberg",
-      "vm": "runtime-ai-lv3",
+      "vm": "runtime-ai",
       "tier": 2,
       "category": "automation",
       "adr": "0278"
@@ -177,7 +177,7 @@
       "id": "grafana",
       "service": "grafana",
       "name": "Grafana",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "tier": 1,
       "category": "observability",
       "adr": "0011"
@@ -186,7 +186,7 @@
       "id": "harbor",
       "service": "harbor",
       "name": "Harbor",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "security",
       "adr": "0201"
@@ -204,7 +204,7 @@
       "id": "homepage",
       "service": "homepage",
       "name": "Homepage",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 3,
       "category": "access",
       "adr": "0152"
@@ -213,7 +213,7 @@
       "id": "keycloak",
       "service": "keycloak",
       "name": "Keycloak",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "access",
       "adr": "0056"
@@ -222,7 +222,7 @@
       "id": "langfuse",
       "service": "langfuse",
       "name": "Langfuse",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "observability",
       "adr": "0146"
@@ -231,7 +231,7 @@
       "id": "livekit",
       "service": "livekit",
       "name": "LiveKit",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "communication",
       "adr": "0293"
@@ -240,7 +240,7 @@
       "id": "mail_platform",
       "service": "mail_platform",
       "name": "Mail Platform",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "communication",
       "adr": "0041"
@@ -249,7 +249,7 @@
       "id": "mailpit",
       "service": "mailpit",
       "name": "Mailpit",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "communication",
       "adr": "0282"
@@ -258,7 +258,7 @@
       "id": "minio",
       "service": "minio",
       "name": "MinIO",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "data",
       "adr": "0274"
@@ -267,7 +267,7 @@
       "id": "redpanda",
       "service": "redpanda",
       "name": "Redpanda",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "data",
       "adr": "0290"
@@ -276,7 +276,7 @@
       "id": "matrix_synapse",
       "service": "matrix_synapse",
       "name": "Matrix Synapse",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "communication",
       "adr": "0255"
@@ -285,7 +285,7 @@
       "id": "mattermost",
       "service": "mattermost",
       "name": "Mattermost",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "communication",
       "adr": "0057"
@@ -294,7 +294,7 @@
       "id": "n8n",
       "service": "n8n",
       "name": "n8n",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0151"
@@ -303,7 +303,7 @@
       "id": "nats_jetstream",
       "service": "nats_jetstream",
       "name": "NATS JetStream",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "automation",
       "adr": "0276"
@@ -312,7 +312,7 @@
       "id": "netbox",
       "service": "netbox",
       "name": "NetBox",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "data",
       "adr": "0054"
@@ -321,7 +321,7 @@
       "id": "neko",
       "service": "neko",
       "name": "Neko Remote Desktop",
-      "vm": "runtime-comms-lv3",
+      "vm": "runtime-comms",
       "tier": 2,
       "category": "automation",
       "adr": "0380"
@@ -330,7 +330,7 @@
       "id": "nextcloud",
       "service": "nextcloud",
       "name": "Nextcloud",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "data",
       "adr": "0260"
@@ -339,7 +339,7 @@
       "id": "nginx_edge",
       "service": "nginx_edge",
       "name": "NGINX Edge",
-      "vm": "nginx-lv3",
+      "vm": "nginx",
       "tier": 1,
       "category": "infrastructure",
       "adr": "0021"
@@ -348,7 +348,7 @@
       "id": "nomad",
       "service": "nomad",
       "name": "Nomad",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "tier": 1,
       "category": "automation",
       "adr": "0232"
@@ -357,7 +357,7 @@
       "id": "ntfy",
       "service": "ntfy",
       "name": "ntfy",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "communication",
       "adr": "0299"
@@ -375,7 +375,7 @@
       "id": "ollama",
       "service": "ollama",
       "name": "Ollama",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "automation",
       "adr": "0145"
@@ -384,7 +384,7 @@
       "id": "piper",
       "service": "piper",
       "name": "Piper",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "communication",
       "adr": "0284"
@@ -393,7 +393,7 @@
       "id": "litellm",
       "service": "litellm",
       "name": "LiteLLM Proxy",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation"
     },
@@ -401,7 +401,7 @@
       "id": "librechat",
       "service": "librechat",
       "name": "LibreChat",
-      "vm": "coolify-lv3",
+      "vm": "coolify",
       "tier": 2,
       "category": "automation"
     },
@@ -409,7 +409,7 @@
       "id": "openbao",
       "service": "openbao",
       "name": "OpenBao",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "security",
       "adr": "0043"
@@ -418,7 +418,7 @@
       "id": "openfga",
       "service": "openfga",
       "name": "OpenFGA",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "access",
       "adr": "0262"
@@ -427,7 +427,7 @@
       "id": "temporal",
       "service": "temporal",
       "name": "Temporal",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0293"
@@ -436,7 +436,7 @@
       "id": "ops_portal",
       "service": "ops_portal",
       "name": "Ops Portal",
-      "vm": "nginx-lv3",
+      "vm": "nginx",
       "tier": 4,
       "category": "automation",
       "adr": "0074"
@@ -445,7 +445,7 @@
       "id": "grist",
       "service": "grist",
       "name": "Grist",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "automation",
       "adr": "0279"
@@ -454,7 +454,7 @@
       "id": "label_studio",
       "service": "label_studio",
       "name": "Label Studio",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "data",
       "adr": "0289"
@@ -463,7 +463,7 @@
       "id": "outline",
       "service": "outline",
       "name": "Outline",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "access",
       "adr": "0199"
@@ -472,7 +472,7 @@
       "id": "lago",
       "service": "lago",
       "name": "Lago",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0292"
@@ -481,7 +481,7 @@
       "id": "paperless",
       "service": "paperless",
       "name": "Paperless-ngx",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "data",
       "adr": "0285"
@@ -490,7 +490,7 @@
       "id": "plane",
       "service": "plane",
       "name": "Plane",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0193"
@@ -499,7 +499,7 @@
       "id": "platform_context_api",
       "service": "platform_context_api",
       "name": "Platform Context API",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "automation",
       "adr": "0070"
@@ -508,7 +508,7 @@
       "id": "plausible",
       "service": "plausible",
       "name": "Plausible Analytics",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "observability",
       "adr": "0283"
@@ -517,7 +517,7 @@
       "id": "portainer",
       "service": "portainer",
       "name": "Portainer",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "automation",
       "adr": "0055"
@@ -526,7 +526,7 @@
       "id": "postgres",
       "service": "postgres",
       "name": "Postgres",
-      "vm": "postgres-lv3",
+      "vm": "postgres",
       "tier": 1,
       "category": "data",
       "adr": "0026"
@@ -544,7 +544,7 @@
       "id": "repowise",
       "service": "repowise",
       "name": "Repowise Semantic Code Search",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "automation",
       "adr": "0346"
@@ -553,7 +553,7 @@
       "id": "searxng",
       "service": "searxng",
       "name": "SearXNG",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "automation",
       "adr": "0148"
@@ -562,7 +562,7 @@
       "id": "semaphore",
       "service": "semaphore",
       "name": "Semaphore",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0149"
@@ -571,7 +571,7 @@
       "id": "serverclaw",
       "service": "serverclaw",
       "name": "ServerClaw",
-      "vm": "coolify-lv3",
+      "vm": "coolify",
       "tier": 2,
       "category": "access",
       "adr": "0254"
@@ -580,7 +580,7 @@
       "id": "status_page",
       "service": "status_page",
       "name": "Public Status Page",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "observability",
       "adr": "0109"
@@ -589,7 +589,7 @@
       "id": "step_ca",
       "service": "step_ca",
       "name": "step-ca",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "security",
       "adr": "0042"
@@ -598,7 +598,7 @@
       "id": "superset",
       "service": "superset",
       "name": "Apache Superset",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "access",
       "adr": "0292"
@@ -607,7 +607,7 @@
       "id": "tika",
       "service": "tika",
       "name": "Apache Tika",
-      "vm": "runtime-ai-lv3",
+      "vm": "runtime-ai",
       "tier": 2,
       "category": "automation",
       "adr": "0275"
@@ -616,7 +616,7 @@
       "id": "tesseract_ocr",
       "service": "tesseract_ocr",
       "name": "Tesseract OCR",
-      "vm": "runtime-ai-lv3",
+      "vm": "runtime-ai",
       "tier": 2,
       "category": "data",
       "adr": "0286"
@@ -625,7 +625,7 @@
       "id": "typesense",
       "service": "typesense",
       "name": "Typesense",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "data",
       "adr": "0277"
@@ -634,7 +634,7 @@
       "id": "uptime_kuma",
       "service": "uptime_kuma",
       "name": "Uptime Kuma",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 1,
       "category": "observability",
       "adr": "0027"
@@ -643,7 +643,7 @@
       "id": "vaultwarden",
       "service": "vaultwarden",
       "name": "Vaultwarden",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "security",
       "adr": "0147"
@@ -652,7 +652,7 @@
       "id": "windmill",
       "service": "windmill",
       "name": "Windmill",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "automation",
       "adr": "0044"
@@ -661,7 +661,7 @@
       "id": "woodpecker",
       "service": "woodpecker",
       "name": "Woodpecker CI",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 3,
       "category": "automation",
       "adr": "0287"
@@ -670,7 +670,7 @@
       "id": "glitchtip",
       "service": "glitchtip",
       "name": "GlitchTip",
-      "vm": "docker-runtime-lv3",
+      "vm": "docker-runtime",
       "tier": 2,
       "category": "observability",
       "adr": "0281"
@@ -717,19 +717,19 @@
       "from": "browser_runner",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The private Playwright browser runner is hosted on docker-runtime-lv3."
+      "description": "The private Playwright browser runner is hosted on docker-runtime."
     },
     {
       "from": "changedetection",
       "to": "api_gateway",
       "type": "soft",
-      "description": "Authenticated operator and automation access to Changedetection is brokered through the governed API gateway route, while the private runtime remains directly verifiable on docker-runtime-lv3."
+      "description": "Authenticated operator and automation access to Changedetection is brokered through the governed API gateway route, while the private runtime remains directly verifiable on docker-runtime."
     },
     {
       "from": "changedetection",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Changedetection.io runtime and its datastore volume are hosted on docker-runtime-lv3."
+      "description": "The Changedetection.io runtime and its datastore volume are hosted on docker-runtime."
     },
     {
       "from": "changedetection",
@@ -753,7 +753,7 @@
       "from": "ntfy",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The ntfy runtime, topic registry, and auth state are hosted on docker-runtime-lv3."
+      "description": "The ntfy runtime, topic registry, and auth state are hosted on docker-runtime."
     },
     {
       "from": "ntfy",
@@ -771,13 +771,13 @@
       "from": "crawl4ai",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Crawl4AI runtime and its bounded headless-browser worker pool are hosted on docker-runtime-lv3."
+      "description": "The Crawl4AI runtime and its bounded headless-browser worker pool are hosted on docker-runtime."
     },
     {
       "from": "changelog_portal",
       "to": "nginx_edge",
       "type": "hard",
-      "description": "The changelog portal is served as generated static content on nginx-lv3."
+      "description": "The changelog portal is served as generated static content on nginx."
     },
     {
       "from": "coolify",
@@ -849,7 +849,7 @@
       "from": "docs_portal",
       "to": "nginx_edge",
       "type": "hard",
-      "description": "The generated developer portal is published as static content on nginx-lv3."
+      "description": "The generated developer portal is published as static content on nginx."
     },
     {
       "from": "dozzle",
@@ -867,7 +867,7 @@
       "from": "excalidraw",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Excalidraw frontend and collaboration room are hosted on docker-runtime-lv3."
+      "description": "The Excalidraw frontend and collaboration room are hosted on docker-runtime."
     },
     {
       "from": "excalidraw",
@@ -885,7 +885,7 @@
       "from": "flagsmith",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Flagsmith Community Edition runtime and task processor are hosted on docker-runtime-lv3."
+      "description": "The Flagsmith Community Edition runtime and task processor are hosted on docker-runtime."
     },
     {
       "from": "flagsmith",
@@ -915,7 +915,7 @@
       "from": "gitea",
       "to": "docker_build",
       "type": "soft",
-      "description": "Gitea Actions jobs are delegated to the dedicated runner on docker-build-lv3, but repository hosting remains available without the runner."
+      "description": "Gitea Actions jobs are delegated to the dedicated runner on docker-build, but repository hosting remains available without the runner."
     },
     {
       "from": "gitea",
@@ -951,7 +951,7 @@
       "from": "gotenberg",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Gotenberg Chromium and LibreOffice renderers are hosted on runtime-ai-lv3."
+      "description": "The Gotenberg Chromium and LibreOffice renderers are hosted on runtime-ai."
     },
     {
       "from": "grafana",
@@ -1065,7 +1065,7 @@
       "from": "livekit",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "LiveKit runs as a repo-managed Docker Compose workload on docker-runtime-lv3."
+      "description": "LiveKit runs as a repo-managed Docker Compose workload on docker-runtime."
     },
     {
       "from": "livekit",
@@ -1281,7 +1281,7 @@
       "from": "typesense",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Typesense runtime and its derived index volume are hosted on docker-runtime-lv3."
+      "description": "The Typesense runtime and its derived index volume are hosted on docker-runtime."
     },
     {
       "from": "typesense",
@@ -1293,19 +1293,19 @@
       "from": "label_studio",
       "to": "api_gateway",
       "type": "soft",
-      "description": "The private operator JWT route at /v1/label-studio is published through the shared API gateway on docker-runtime-lv3."
+      "description": "The private operator JWT route at /v1/label-studio is published through the shared API gateway on docker-runtime."
     },
     {
       "from": "label_studio",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Label Studio runtime container and guest-local listener are hosted on docker-runtime-lv3."
+      "description": "The Label Studio runtime container and guest-local listener are hosted on docker-runtime."
     },
     {
       "from": "label_studio",
       "to": "postgres",
       "type": "hard",
-      "description": "Label Studio persists project metadata, task state, and annotations in the dedicated PostgreSQL database label_studio on postgres-lv3."
+      "description": "Label Studio persists project metadata, task state, and annotations in the dedicated PostgreSQL database label_studio on postgres."
     },
     {
       "from": "label_studio",
@@ -1335,7 +1335,7 @@
       "from": "paperless",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "Paperless runs as a compose-managed workload on docker-runtime-lv3."
+      "description": "Paperless runs as a compose-managed workload on docker-runtime."
     },
     {
       "from": "paperless",
@@ -1389,7 +1389,7 @@
       "from": "ops_portal",
       "to": "nginx_edge",
       "type": "hard",
-      "description": "The generated portal is published as static content on nginx-lv3."
+      "description": "The generated portal is published as static content on nginx."
     },
     {
       "from": "grist",
@@ -1443,7 +1443,7 @@
       "from": "lago",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Lago API, front end, worker, clock, Redis, and PDF sidecar run on docker-runtime-lv3."
+      "description": "The Lago API, front end, worker, clock, Redis, and PDF sidecar run on docker-runtime."
     },
     {
       "from": "lago",
@@ -1509,7 +1509,7 @@
       "from": "plausible",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse analytics store run on docker-runtime-lv3."
+      "description": "The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse analytics store run on docker-runtime."
     },
     {
       "from": "plausible",
@@ -1533,13 +1533,13 @@
       "from": "superset",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Superset runtime and its OpenBao-backed compose stack run on docker-runtime-lv3."
+      "description": "The Superset runtime and its OpenBao-backed compose stack run on docker-runtime."
     },
     {
       "from": "superset",
       "to": "postgres",
       "type": "hard",
-      "description": "Superset persists metadata in the managed superset schema of the shared postgres database and registers read-only PostgreSQL datasources from postgres-lv3."
+      "description": "Superset persists metadata in the managed superset schema of the shared postgres database and registers read-only PostgreSQL datasources from postgres."
     },
     {
       "from": "superset",
@@ -1587,7 +1587,7 @@
       "from": "serverclaw",
       "to": "ollama",
       "type": "hard",
-      "description": "ServerClaw routes its default local model connector to the private Ollama runtime on docker-runtime-lv3."
+      "description": "ServerClaw routes its default local model connector to the private Ollama runtime on docker-runtime."
     },
     {
       "from": "serverclaw",
@@ -1617,7 +1617,7 @@
       "from": "tika",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Apache Tika extraction runtime is hosted on runtime-ai-lv3."
+      "description": "The Apache Tika extraction runtime is hosted on runtime-ai."
     },
     {
       "from": "vaultwarden",
@@ -1647,19 +1647,19 @@
       "from": "directus",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Directus runtime container and guest-local listener are hosted on docker-runtime-lv3."
+      "description": "The Directus runtime container and guest-local listener are hosted on docker-runtime."
     },
     {
       "from": "directus",
       "to": "postgres",
       "type": "hard",
-      "description": "Directus persists its system state and governed collections in the dedicated PostgreSQL database directus on postgres-lv3."
+      "description": "Directus persists its system state and governed collections in the dedicated PostgreSQL database directus on postgres."
     },
     {
       "from": "directus",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "The shared NGINX edge publishes data.lv3.org directly to Directus on docker-runtime-lv3."
+      "description": "The shared NGINX edge publishes data.lv3.org directly to Directus on docker-runtime."
     },
     {
       "from": "directus",
@@ -1677,7 +1677,7 @@
       "from": "tesseract_ocr",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Tesseract OCR runtime and its repo-built container image are hosted on runtime-ai-lv3."
+      "description": "The Tesseract OCR runtime and its repo-built container image are hosted on runtime-ai."
     },
     {
       "from": "tesseract_ocr",
@@ -1713,7 +1713,7 @@
       "from": "glitchtip",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The GlitchTip web runtime, project bootstrap flow, and supporting Valkey container run on docker-runtime-lv3."
+      "description": "The GlitchTip web runtime, project bootstrap flow, and supporting Valkey container run on docker-runtime."
     },
     {
       "from": "glitchtip",

@@ -2,7 +2,7 @@
 # Purpose: Converge the LiveKit runtime, OpenBao-backed API credentials, and the repo-managed verification helper.
 # Use case: Run during LiveKit deploys, updates, and recovery when livekit.{{ platform_domain }} and the guest media listeners must match repo truth.
 # Inputs: Runtime paths, image pins, controller-local credential files, and OpenBao integration settings.
-# Outputs: A running LiveKit stack on docker-runtime-lv3 plus controller-local API credentials mirrored for public verification.
+# Outputs: A running LiveKit stack on docker-runtime plus controller-local API credentials mirrored for public verification.
 # Idempotency: Partially idempotent because controller-local API credentials are generated once and the runtime may be recreated during updates.
 # Dependencies: ADR 0165, ADR 0021, ADR 0077, and ADR 0293.
 - name: Derive Livekit conventional defaults from the service registry

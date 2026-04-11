@@ -61,7 +61,7 @@
     if [ ! -s "{{ coolify_server_key_local_file }}" ] || [ ! -s "{{ coolify_server_key_public_local_file }}" ]; then
       rm -f "{{ coolify_server_key_local_file }}" "{{ coolify_server_key_public_local_file }}"
       umask 077
-      ssh-keygen -t ed25519 -N "" -C "coolify-lv3" -f "{{ coolify_server_key_local_file }}" >/dev/null
+      ssh-keygen -t ed25519 -N "" -C "coolify" -f "{{ coolify_server_key_local_file }}" >/dev/null
       echo changed
     fi
   args:

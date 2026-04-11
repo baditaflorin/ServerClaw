@@ -53,7 +53,7 @@ _STACK_YAML = _REPO_ROOT / "versions" / "stack.yaml"
 def _default_deployment_server() -> str:
     """Read the canonical deployment server name from versions/stack.yaml.
 
-    This avoids hardcoding 'coolify-lv3' or 'coolify-apps-lv3' in the tool.
+    This avoids hardcoding 'coolify' or 'coolify-apps' in the tool.
     The stack.yaml is updated atomically on each live apply, so this is always
     consistent with the deployed state (ADR 0340).
     """
@@ -1380,14 +1380,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--from",
         dest="from_server",
         required=True,
-        default=_default_deployment_server() or "coolify-lv3",
+        default=_default_deployment_server() or "coolify",
         help="Source server name to migrate apps away from.",
     )
     migrate_server_parser.add_argument(
         "--to",
         dest="to_server",
         required=True,
-        default=_default_deployment_server() or "coolify-apps-lv3",
+        default=_default_deployment_server() or "coolify-apps",
         help="Target server name to migrate apps to.",
     )
     migrate_server_parser.set_defaults(func=command_migrate_deployment_server)
@@ -1510,14 +1510,14 @@ def build_parser() -> argparse.ArgumentParser:
         dest="from_server",
         required=True,
         metavar="SERVER_NAME",
-        help="Source Coolify server name (e.g. coolify-lv3).",
+        help="Source Coolify server name (e.g. coolify).",
     )
     migrate_apps_parser.add_argument(
         "--to",
         dest="to_server",
         required=True,
         metavar="SERVER_NAME",
-        help="Target Coolify server name (e.g. coolify-apps-lv3).",
+        help="Target Coolify server name (e.g. coolify-apps).",
     )
     migrate_apps_parser.add_argument("--container", help="Postgres container name (default: coolify-db).")
     migrate_apps_parser.add_argument(
@@ -1546,7 +1546,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to Proxmox API token JSON file.",
     )
     install_deploy_key_parser.add_argument(
-        "--vmid", required=True, type=int, help="Target VMID (e.g. coolify-apps-lv3 VMID)."
+        "--vmid", required=True, type=int, help="Target VMID (e.g. coolify-apps VMID)."
     )
     install_deploy_key_parser.add_argument(
         "--pubkey",

@@ -333,7 +333,7 @@ def summarize_retention(job: dict[str, Any] | None, asset: GovernedAsset, dr_tar
         offsite = dr_targets.get("offsite_backup", {}) if isinstance(dr_targets, dict) else {}
         return {
             "source": "disaster_recovery_targets",
-            "job_id": "backup-lv3-offsite",
+            "job_id": "backup-offsite",
             "policy": offsite.get("retention") or {},
         }
     return {

@@ -1,5 +1,5 @@
 ---
-# Purpose: Build the repo-managed Tesseract OCR image, start the private OCR runtime on docker-runtime-lv3, and verify OCR extraction locally.
+# Purpose: Build the repo-managed Tesseract OCR image, start the private OCR runtime on docker-runtime, and verify OCR extraction locally.
 # Inputs: Generated service topology, local image build inputs, runtime port bindings, and a deterministic verification image fixture.
 # Outputs: Rendered compose and Dockerfile state plus a running Tesseract OCR container on the private runtime port.
 # Idempotency: Partially idempotent; reruns reconcile the same compose stack and force-recreate the stateless OCR runtime after local image builds.

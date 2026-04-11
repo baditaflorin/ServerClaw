@@ -4,7 +4,7 @@
     "changedetection_runtime": {
       "kind": "runtime",
       "service_id": "changedetection",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "changedetection",
       "registry_ref": "ghcr.io/dgtlmoon/changedetection.io",
       "tag": "0.54.7",
@@ -32,7 +32,7 @@
     "crawl4ai_runtime": {
       "kind": "runtime",
       "service_id": "crawl4ai",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "crawl4ai",
       "registry_ref": "docker.io/unclecode/crawl4ai",
       "tag": "0.8.0",
@@ -60,7 +60,7 @@
     "dify_api_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-api",
       "registry_ref": "docker.io/langgenius/dify-api",
       "tag": "1.13.3",
@@ -93,7 +93,7 @@
     "dify_nginx_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-nginx",
       "registry_ref": "docker.io/library/nginx",
       "tag": "1.29.1-alpine",
@@ -126,7 +126,7 @@
     "dify_plugin_daemon_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-plugin-daemon",
       "registry_ref": "docker.io/langgenius/dify-plugin-daemon",
       "tag": "0.5.3-local",
@@ -159,7 +159,7 @@
     "dify_qdrant_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-qdrant",
       "registry_ref": "docker.io/qdrant/qdrant",
       "tag": "v1.8.3",
@@ -192,7 +192,7 @@
     "dify_redis_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-redis",
       "registry_ref": "docker.io/library/redis",
       "tag": "6.2.20-alpine",
@@ -225,7 +225,7 @@
     "dify_sandbox_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-sandbox",
       "registry_ref": "docker.io/langgenius/dify-sandbox",
       "tag": "0.2.14",
@@ -247,7 +247,7 @@
     "dify_ssrf_proxy_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-ssrf-proxy",
       "registry_ref": "docker.io/ubuntu/squid",
       "tag": "6.6-24.04_beta",
@@ -269,7 +269,7 @@
     "dify_web_runtime": {
       "kind": "runtime",
       "service_id": "dify",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dify-web",
       "registry_ref": "docker.io/langgenius/dify-web",
       "tag": "1.13.3",
@@ -291,7 +291,7 @@
     "directus_runtime": {
       "kind": "runtime",
       "service_id": "directus",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "directus",
       "registry_ref": "docker.io/directus/directus",
       "tag": "11.17.0",
@@ -319,7 +319,7 @@
     "dozzle_runtime": {
       "kind": "runtime",
       "service_id": "dozzle",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "dozzle",
       "registry_ref": "docker.io/amir20/dozzle",
       "tag": "v10.2.0",
@@ -341,7 +341,7 @@
     "flagsmith_runtime": {
       "kind": "runtime",
       "service_id": "flagsmith",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "flagsmith",
       "registry_ref": "docker.io/flagsmith/flagsmith",
       "tag": "2.224.0",
@@ -363,7 +363,7 @@
     "gotenberg_runtime": {
       "kind": "runtime",
       "service_id": "gotenberg",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "gotenberg",
       "registry_ref": "docker.io/gotenberg/gotenberg",
       "tag": "8.29.0",
@@ -385,7 +385,7 @@
     "grist_runtime": {
       "kind": "runtime",
       "service_id": "grist",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "grist",
       "registry_ref": "docker.io/gristlabs/grist",
       "tag": "1.7.11",
@@ -413,7 +413,7 @@
     "typesense_runtime": {
       "kind": "runtime",
       "service_id": "typesense",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "typesense",
       "registry_ref": "docker.io/typesense/typesense",
       "tag": "29.0",
@@ -435,7 +435,7 @@
     "label_studio_runtime": {
       "kind": "runtime",
       "service_id": "label_studio",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "label-studio",
       "registry_ref": "docker.io/heartexlabs/label-studio",
       "tag": "1.23.0",
@@ -457,7 +457,7 @@
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "homepage",
       "registry_ref": "ghcr.io/gethomepage/homepage",
       "tag": "v1.8.0",
@@ -510,7 +510,7 @@
     "langfuse_clickhouse_runtime": {
       "kind": "runtime",
       "service_id": "langfuse",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "langfuse-clickhouse",
       "registry_ref": "docker.io/clickhouse/clickhouse-server",
       "tag": "25.8",
@@ -532,7 +532,7 @@
     "minio_runtime": {
       "kind": "runtime",
       "service_id": "minio",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "minio",
       "registry_ref": "docker.io/minio/minio",
       "tag": "RELEASE.2025-07-23T15-54-02Z",
@@ -569,7 +569,7 @@
     "langfuse_redis_runtime": {
       "kind": "runtime",
       "service_id": "langfuse",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "langfuse-redis",
       "registry_ref": "docker.io/library/redis",
       "tag": "7",
@@ -602,7 +602,7 @@
     "langfuse_runtime": {
       "kind": "runtime",
       "service_id": "langfuse",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "langfuse-web",
       "registry_ref": "docker.io/langfuse/langfuse",
       "tag": "3",
@@ -635,7 +635,7 @@
     "langfuse_worker_runtime": {
       "kind": "runtime",
       "service_id": "langfuse",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "langfuse-worker",
       "registry_ref": "docker.io/langfuse/langfuse-worker",
       "tag": "3",
@@ -657,7 +657,7 @@
     "lago_api_runtime": {
       "kind": "runtime",
       "service_id": "lago",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lago-api",
       "registry_ref": "docker.io/getlago/api",
       "tag": "v1.44.0",
@@ -679,7 +679,7 @@
     "lago_front_runtime": {
       "kind": "runtime",
       "service_id": "lago",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lago-front",
       "registry_ref": "docker.io/getlago/front",
       "tag": "v1.44.0",
@@ -701,7 +701,7 @@
     "lago_pdf_runtime": {
       "kind": "runtime",
       "service_id": "lago",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lago-pdf",
       "registry_ref": "docker.io/getlago/lago-gotenberg",
       "tag": "7.8.2",
@@ -729,7 +729,7 @@
     "lago_redis_runtime": {
       "kind": "runtime",
       "service_id": "lago",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lago-redis",
       "registry_ref": "docker.io/library/redis",
       "tag": "7-alpine",
@@ -757,7 +757,7 @@
     "livekit_runtime": {
       "kind": "runtime",
       "service_id": "livekit",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lv3-livekit",
       "registry_ref": "docker.io/livekit/livekit-server",
       "tag": "v1.10.1",
@@ -798,7 +798,7 @@
     "mail_platform_stalwart_runtime": {
       "kind": "runtime",
       "service_id": "mail_platform",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lv3-mail-stalwart",
       "registry_ref": "docker.io/stalwartlabs/stalwart",
       "tag": "v0.15.5",
@@ -820,7 +820,7 @@
     "mailpit_runtime": {
       "kind": "runtime",
       "service_id": "mailpit",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "mailpit",
       "registry_ref": "docker.io/axllent/mailpit",
       "tag": "v1.29.5",
@@ -842,7 +842,7 @@
     "redpanda_runtime": {
       "kind": "runtime",
       "service_id": "redpanda",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lv3-redpanda",
       "registry_ref": "docker.redpanda.com/redpandadata/redpanda",
       "tag": "v25.3.11",
@@ -864,7 +864,7 @@
     "matrix_mautrix_discord_runtime": {
       "kind": "runtime",
       "service_id": "matrix_synapse",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "matrix-mautrix-discord",
       "registry_ref": "dock.mau.dev/mautrix/discord",
       "tag": "v0.7.6",
@@ -892,7 +892,7 @@
     "matrix_mautrix_whatsapp_runtime": {
       "kind": "runtime",
       "service_id": "matrix_synapse",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "matrix-mautrix-whatsapp",
       "registry_ref": "dock.mau.dev/mautrix/whatsapp",
       "tag": "v0.2603.0",
@@ -920,7 +920,7 @@
     "matrix_synapse_runtime": {
       "kind": "runtime",
       "service_id": "matrix_synapse",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "matrix-synapse",
       "registry_ref": "docker.io/matrixdotorg/synapse",
       "tag": "v1.150.0",
@@ -948,7 +948,7 @@
     "n8n_runtime": {
       "kind": "runtime",
       "service_id": "n8n",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "n8n",
       "registry_ref": "docker.n8n.io/n8nio/n8n",
       "tag": "2.2.6",
@@ -981,7 +981,7 @@
     "netbox_redis_runtime": {
       "kind": "runtime",
       "service_id": "netbox",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "netbox-redis-1",
       "registry_ref": "docker.io/valkey/valkey",
       "tag": "8.1.5-alpine",
@@ -1003,7 +1003,7 @@
     "netbox_runtime": {
       "kind": "runtime",
       "service_id": "netbox",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "netbox-netbox-1",
       "registry_ref": "docker.io/netboxcommunity/netbox",
       "tag": "v4.5.4",
@@ -1025,7 +1025,7 @@
     "nextcloud_redis_runtime": {
       "kind": "runtime",
       "service_id": "nextcloud",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "nextcloud-redis",
       "registry_ref": "docker.io/library/redis",
       "tag": "7.4-alpine",
@@ -1053,7 +1053,7 @@
     "nextcloud_runtime": {
       "kind": "runtime",
       "service_id": "nextcloud",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "nextcloud-app",
       "registry_ref": "docker.io/library/nextcloud",
       "tag": "33.0.1-apache",
@@ -1075,7 +1075,7 @@
     "ntfy_runtime": {
       "kind": "runtime",
       "service_id": "ntfy",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "ntfy",
       "registry_ref": "docker.io/binwiederhier/ntfy",
       "tag": "v2.21.0",
@@ -1097,7 +1097,7 @@
     "ollama_runtime": {
       "kind": "runtime",
       "service_id": "ollama",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "ollama",
       "registry_ref": "docker.io/ollama/ollama",
       "tag": "0.18.2",
@@ -1119,7 +1119,7 @@
     "litellm_runtime": {
       "kind": "runtime",
       "service_id": "litellm",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "litellm",
       "registry_ref": "ghcr.io/berriai/litellm-database",
       "tag": "main-v1.26.9",
@@ -1139,7 +1139,7 @@
     "librechat_runtime": {
       "kind": "runtime",
       "service_id": "librechat",
-      "runtime_host": "coolify-lv3",
+      "runtime_host": "coolify",
       "container_name": "librechat",
       "registry_ref": "ghcr.io/danny-avila/librechat",
       "tag": "v0.8.4",
@@ -1159,7 +1159,7 @@
     "openbao_runtime": {
       "kind": "runtime",
       "service_id": "openbao",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lv3-openbao",
       "registry_ref": "docker.io/openbao/openbao",
       "tag": "2.5.1",
@@ -1192,7 +1192,7 @@
     "openfga_runtime": {
       "kind": "runtime",
       "service_id": "openfga",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "lv3-openfga",
       "registry_ref": "docker.io/openfga/openfga",
       "tag": "v1.13.1",
@@ -1214,7 +1214,7 @@
     "temporal_server_runtime": {
       "kind": "runtime",
       "service_id": "temporal",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "temporal-frontend",
       "registry_ref": "docker.io/temporalio/server",
       "tag": "1.30.2",
@@ -1236,7 +1236,7 @@
     "temporal_admin_tools_runtime": {
       "kind": "runtime",
       "service_id": "temporal",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "temporal-admin-tools",
       "registry_ref": "docker.io/temporalio/admin-tools",
       "tag": "1.30.2",
@@ -1264,7 +1264,7 @@
     "temporal_ui_runtime": {
       "kind": "runtime",
       "service_id": "temporal",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "temporal-ui",
       "registry_ref": "docker.io/temporalio/ui",
       "tag": "2.43.3",
@@ -1292,7 +1292,7 @@
     "outline_runtime": {
       "kind": "runtime",
       "service_id": "outline",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "outline",
       "registry_ref": "docker.io/outlinewiki/outline",
       "tag": "1.6.1",
@@ -1325,7 +1325,7 @@
     "paperless_runtime": {
       "kind": "runtime",
       "service_id": "paperless",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "paperless",
       "registry_ref": "ghcr.io/paperless-ngx/paperless-ngx",
       "tag": "2.20.4",
@@ -1353,7 +1353,7 @@
     "plane_admin_runtime": {
       "kind": "runtime",
       "service_id": "plane",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plane-admin",
       "registry_ref": "artifacts.plane.so/makeplane/plane-admin",
       "tag": "v1.2.3",
@@ -1381,7 +1381,7 @@
     "plane_backend_runtime": {
       "kind": "runtime",
       "service_id": "plane",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plane-api",
       "registry_ref": "artifacts.plane.so/makeplane/plane-backend",
       "tag": "v1.2.3",
@@ -1403,7 +1403,7 @@
     "plane_frontend_runtime": {
       "kind": "runtime",
       "service_id": "plane",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plane-web",
       "registry_ref": "artifacts.plane.so/makeplane/plane-frontend",
       "tag": "v1.2.3",
@@ -1431,7 +1431,7 @@
     "plane_live_runtime": {
       "kind": "runtime",
       "service_id": "plane",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plane-live",
       "registry_ref": "artifacts.plane.so/makeplane/plane-live",
       "tag": "v1.2.3",
@@ -1459,7 +1459,7 @@
     "plane_proxy_runtime": {
       "kind": "runtime",
       "service_id": "plane",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plane-proxy",
       "registry_ref": "artifacts.plane.so/makeplane/plane-proxy",
       "tag": "v1.2.3",
@@ -1487,7 +1487,7 @@
     "plane_rabbitmq_runtime": {
       "kind": "runtime",
       "service_id": "plane",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plane-rabbitmq",
       "registry_ref": "docker.io/library/rabbitmq",
       "tag": "3.13.6-management-alpine",
@@ -1515,7 +1515,7 @@
     "plane_space_runtime": {
       "kind": "runtime",
       "service_id": "plane",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plane-space",
       "registry_ref": "artifacts.plane.so/makeplane/plane-space",
       "tag": "v1.2.3",
@@ -1543,7 +1543,7 @@
     "plausible_clickhouse_runtime": {
       "kind": "runtime",
       "service_id": "plausible",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plausible-events-db",
       "registry_ref": "docker.io/clickhouse/clickhouse-server",
       "tag": "24.12-alpine",
@@ -1571,7 +1571,7 @@
     "plausible_postgres_runtime": {
       "kind": "runtime",
       "service_id": "plausible",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plausible-db",
       "registry_ref": "docker.io/library/postgres",
       "tag": "16-alpine",
@@ -1599,7 +1599,7 @@
     "plausible_runtime": {
       "kind": "runtime",
       "service_id": "plausible",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "plausible",
       "registry_ref": "ghcr.io/plausible/community-edition",
       "tag": "v3.2.0",
@@ -1627,7 +1627,7 @@
     "portainer_runtime": {
       "kind": "runtime",
       "service_id": "portainer",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "portainer",
       "registry_ref": "docker.io/portainer/portainer-ce",
       "tag": "2.33.6",
@@ -1660,7 +1660,7 @@
     "searxng_runtime": {
       "kind": "runtime",
       "service_id": "searxng",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "searxng",
       "registry_ref": "docker.io/searxng/searxng",
       "tag": "2026.3.24-02ba38786",
@@ -1682,7 +1682,7 @@
     "searxng_valkey_runtime": {
       "kind": "runtime",
       "service_id": "searxng",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "searxng-valkey",
       "registry_ref": "docker.io/valkey/valkey",
       "tag": "8-alpine",
@@ -1704,7 +1704,7 @@
     "semaphore_runtime": {
       "kind": "runtime",
       "service_id": "semaphore",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "semaphore",
       "registry_ref": "docker.io/semaphoreui/semaphore",
       "tag": "v2.17.29",
@@ -1737,7 +1737,7 @@
     "step_ca_runtime": {
       "kind": "runtime",
       "service_id": "step_ca",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "step-ca",
       "registry_ref": "docker.io/smallstep/step-ca",
       "tag": "0.30.1",
@@ -1770,7 +1770,7 @@
     "tika_runtime": {
       "kind": "runtime",
       "service_id": "tika",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "tika",
       "registry_ref": "docker.io/apache/tika",
       "tag": "3.2.3.0",
@@ -1792,7 +1792,7 @@
     "uptime_kuma_runtime": {
       "kind": "runtime",
       "service_id": "uptime_kuma",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "uptime-kuma",
       "registry_ref": "docker.io/louislam/uptime-kuma",
       "tag": "2.0.0",
@@ -1825,7 +1825,7 @@
     "vaultwarden_runtime": {
       "kind": "runtime",
       "service_id": "vaultwarden",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "vaultwarden",
       "registry_ref": "docker.io/vaultwarden/server",
       "tag": "1.35.4",
@@ -1847,7 +1847,7 @@
     "windmill_extra_runtime": {
       "kind": "runtime",
       "service_id": "windmill",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "windmill-windmill_extra-1",
       "registry_ref": "ghcr.io/windmill-labs/windmill-extra",
       "tag": "1.662.0",
@@ -1880,7 +1880,7 @@
     "windmill_runtime": {
       "kind": "runtime",
       "service_id": "windmill",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "windmill-windmill_server-1",
       "registry_ref": "ghcr.io/windmill-labs/windmill",
       "tag": "1.662.0",
@@ -1913,7 +1913,7 @@
     "woodpecker_server_runtime": {
       "kind": "runtime",
       "service_id": "woodpecker",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "woodpecker-server",
       "registry_ref": "docker.io/woodpeckerci/woodpecker-server",
       "tag": "v3.13.0",
@@ -1946,7 +1946,7 @@
     "woodpecker_agent_runtime": {
       "kind": "runtime",
       "service_id": "woodpecker",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "woodpecker-agent",
       "registry_ref": "docker.io/woodpeckerci/woodpecker-agent",
       "tag": "v3.13.0",
@@ -1961,7 +1961,7 @@
         "justification": "The initial Woodpecker agent image rollout keeps the reviewed digest pinned until the vulnerability scan result is re-evaluated during the next image refresh window.",
         "compensating_controls": [
           "Digest pin keeps the deployed Woodpecker agent fixed to the reviewed upstream artifact while the exception is open.",
-          "The agent remains attached only to the repo-managed docker socket and Woodpecker runtime networks on docker-runtime-lv3."
+          "The agent remains attached only to the repo-managed docker socket and Woodpecker runtime networks on docker-runtime."
         ],
         "approved_on": "2026-03-30",
         "expires_on": "2026-04-13",
@@ -1979,7 +1979,7 @@
     "glitchtip_runtime": {
       "kind": "runtime",
       "service_id": "glitchtip",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "glitchtip",
       "registry_ref": "docker.io/glitchtip/glitchtip",
       "tag": "6.1.3",
@@ -2001,7 +2001,7 @@
     "glitchtip_valkey_runtime": {
       "kind": "runtime",
       "service_id": "glitchtip",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "container_name": "glitchtip-valkey",
       "registry_ref": "docker.io/valkey/valkey",
       "tag": "9.0.3-alpine",

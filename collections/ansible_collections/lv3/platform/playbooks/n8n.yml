@@ -60,7 +60,7 @@
         hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
 
 - name: Prepare PostgreSQL for n8n
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
 
@@ -79,7 +79,7 @@
     - role: lv3.platform.n8n_postgres
 
 - name: Converge n8n on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 
@@ -110,7 +110,7 @@
         playbook_execution_notification_service: n8n
 
 - name: Publish n8n through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

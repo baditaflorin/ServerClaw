@@ -59,7 +59,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # api-gateway is a bespoke binary, no catalog entry
     internal_port: 8083
-    host_group: runtime-control-lv3
+    host_group: runtime-control
     site_dir: /opt/api-gateway
     container_name: api-gateway
     needs_openbao: false
@@ -69,7 +69,7 @@ platform_service_registry:
       records:
         - fqdn: "api.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 60
     tls:
       domains:
@@ -89,7 +89,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8080
-      upstream_host: runtime-control-lv3
+      upstream_host: runtime-control
       public_fqdn: api.{{ platform_domain }}
       auth_proxy: false             # upstream handles its own auth
   # END SERVICE: api_gateway
@@ -99,7 +99,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/library/registry — no catalog key
     internal_port: 5001
-    host_group: artifact-cache-lv3
+    host_group: artifact-cache
     site_dir: /opt/artifact-cache
     needs_openbao: false
   # END SERVICE: artifact_cache
@@ -113,7 +113,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # built locally from Dockerfile.j2
     internal_port: 8096
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/browser-runner
     container_name: browser-runner
     needs_openbao: false
@@ -128,7 +128,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: changedetection_runtime
     internal_port: 5000
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/changedetection
     container_name: changedetection
     needs_openbao: false
@@ -139,13 +139,13 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream ghcr.io/coollabsio/coolify
     internal_port: 8000
-    host_group: coolify-lv3
+    host_group: coolify
     site_dir: /opt/coolify
     needs_openbao: false
     proxy:
       enabled: true
       upstream_port: 8000
-      upstream_host: coolify-lv3
+      upstream_host: coolify
       public_fqdn: coolify.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: coolify
@@ -155,7 +155,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: crawl4ai_runtime
     internal_port: 11235
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/crawl4ai
     container_name: crawl4ai
     needs_openbao: false
@@ -170,21 +170,21 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: dify_api_runtime
     internal_port: 8094
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/dify
     container_name: dify-api
     needs_openbao: true
     hairpin:
       publish:
         - hostname: "agents.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "dify.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "agents.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 60
     tls:
       domains:
@@ -207,7 +207,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8094
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: agents.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: dify
@@ -217,7 +217,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: directus_runtime
     internal_port: 8055
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/directus
     container_name: directus
     needs_openbao: true
@@ -231,14 +231,14 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "data.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "data.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 60
     tls:
       domains:
@@ -261,7 +261,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8055
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: data.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
   # END SERVICE: directus
@@ -271,7 +271,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: dozzle_runtime
     internal_port: 8089
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/dozzle
     container_name: dozzle
     needs_openbao: false
@@ -279,7 +279,7 @@ platform_service_registry:
       records:
         - fqdn: "logs.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -290,7 +290,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8089
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: logs.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: dozzle
@@ -304,7 +304,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/excalidraw/excalidraw
     internal_port: 3095
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/excalidraw
     container_name: excalidraw-app
     needs_openbao: false
@@ -312,7 +312,7 @@ platform_service_registry:
       records:
         - fqdn: "draw.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -323,7 +323,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3095
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: draw.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: excalidraw
@@ -337,7 +337,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: flagsmith_runtime
     internal_port: 8017
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/flagsmith
     container_name: flagsmith
     needs_openbao: true
@@ -348,7 +348,7 @@ platform_service_registry:
       records:
         - fqdn: "flags.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -359,7 +359,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8017
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: flags.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: flagsmith
@@ -373,7 +373,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/gitea/gitea — pinned by digest in defaults
     internal_port: 3003
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/gitea
     container_name: gitea
     needs_openbao: true
@@ -382,7 +382,7 @@ platform_service_registry:
       records:
         - fqdn: "git.{{ platform_domain }}"
           type: internal
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     sso:
       enabled: true
@@ -403,7 +403,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: glitchtip_runtime
     internal_port: 3005
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/glitchtip
     container_name: glitchtip
     needs_openbao: true
@@ -412,7 +412,7 @@ platform_service_registry:
       records:
         - fqdn: "errors.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -435,7 +435,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3005
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: errors.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
   # END SERVICE: glitchtip
@@ -445,7 +445,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: gotenberg_runtime
     internal_port: 3007
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/gotenberg
     container_name: gotenberg
     needs_openbao: false
@@ -456,7 +456,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: grist_runtime
     internal_port: 8484
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/grist
     container_name: grist
     needs_openbao: true
@@ -464,14 +464,14 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "grist.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "grist.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -494,7 +494,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8484
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: grist.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
   # END SERVICE: grist
@@ -508,14 +508,14 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # harbor is multi-component, no single catalog key
     internal_port: 8095
-    host_group: runtime-control-lv3
+    host_group: runtime-control
     site_dir: /opt/harbor
     needs_openbao: false
     dns:
       records:
         - fqdn: "registry.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -539,7 +539,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8095
-      upstream_host: runtime-control-lv3
+      upstream_host: runtime-control
       public_fqdn: registry.{{ platform_domain }}
       auth_proxy: false             # harbor has its own auth; OCI clients authenticate directly
   # END SERVICE: harbor
@@ -549,14 +549,14 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: homepage_runtime
     internal_port: 3090
-    host_group: runtime-general-lv3
+    host_group: runtime-general
     site_dir: /opt/homepage
     container_name: homepage
     needs_openbao: false
     proxy:
       enabled: true
       upstream_port: 3090
-      upstream_host: runtime-general-lv3
+      upstream_host: runtime-general
       public_fqdn: home.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: homepage
@@ -570,19 +570,19 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream quay.io/keycloak/keycloak — pinned in defaults
     internal_port: 8091
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/keycloak
     container_name: keycloak
     needs_openbao: true
     hairpin:
       publish:
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "sso.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 60
     tls:
       domains:
@@ -593,7 +593,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8091
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: sso.{{ platform_domain }}
       auth_proxy: false             # Keycloak IS the SSO provider; cannot front itself
       extra_fqdns:
@@ -609,7 +609,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: label_studio_runtime
     internal_port: 8110
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/label-studio
     container_name: label-studio
     needs_openbao: true
@@ -618,7 +618,7 @@ platform_service_registry:
       records:
         - fqdn: "annotate.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -629,7 +629,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8110
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: annotate.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: label_studio
@@ -639,7 +639,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: lago_api_runtime
     internal_port: 8099
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/lago
     container_name: lago-api
     needs_openbao: false
@@ -648,7 +648,7 @@ platform_service_registry:
       records:
         - fqdn: "billing.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -659,7 +659,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8099
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: billing.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: lago
@@ -669,7 +669,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: langfuse_runtime
     internal_port: 3002
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/langfuse
     container_name: langfuse-web
     needs_openbao: true
@@ -677,14 +677,14 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "langfuse.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "langfuse.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -707,7 +707,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3002
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: langfuse.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: langfuse
@@ -717,7 +717,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: livekit_runtime
     internal_port: 7880
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/livekit
     container_name: lv3-livekit
     needs_openbao: true
@@ -725,7 +725,7 @@ platform_service_registry:
       records:
         - fqdn: "livekit.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 60
     tls:
       domains:
@@ -736,7 +736,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 7880
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: livekit.{{ platform_domain }}
       auth_proxy: false             # LiveKit SDK handles token-based auth
       websocket: true               # LiveKit uses WebSockets / WebRTC signalling
@@ -751,7 +751,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: mail_platform_stalwart_runtime
     internal_port: 8081
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/mail-platform
     container_name: lv3-mail-stalwart
     needs_openbao: true
@@ -759,7 +759,7 @@ platform_service_registry:
       records:
         - fqdn: "mail.{{ platform_domain }}"
           type: internal
-          target_host: docker-runtime-lv3
+          target_host: docker-runtime
           ttl: 3600
     tls:
       domains:
@@ -774,7 +774,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: mailpit_runtime
     internal_port: 8025
-    host_group: runtime-general-lv3
+    host_group: runtime-general
     site_dir: /opt/dev-tools/mailpit
     container_name: mailpit
     needs_openbao: false
@@ -785,7 +785,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: matrix_synapse_runtime
     internal_port: 8008
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/matrix-synapse
     container_name: matrix-synapse
     needs_openbao: true
@@ -794,7 +794,7 @@ platform_service_registry:
       records:
         - fqdn: "matrix.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -805,7 +805,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8008
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: matrix.{{ platform_domain }}
       auth_proxy: false             # Matrix handles its own auth via homeserver
       websocket: true               # Matrix client-server API uses WebSockets
@@ -816,7 +816,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream mattermost/mattermost-team-edition — pinned in defaults
     internal_port: 8065
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/mattermost
     container_name: lv3-mattermost
     needs_openbao: true
@@ -828,7 +828,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: minio_runtime
     internal_port: 9010
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/minio
     container_name: minio
     needs_openbao: true
@@ -836,15 +836,15 @@ platform_service_registry:
       records:
         - fqdn: "minio.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
         - fqdn: "minio-console.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
         - fqdn: "s3.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -857,7 +857,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 9010
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: minio.{{ platform_domain }}
       auth_proxy: false             # MinIO S3 API uses access-key auth
   # END SERVICE: minio
@@ -874,7 +874,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: n8n_runtime
     internal_port: 5678
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/n8n
     container_name: n8n
     needs_openbao: true
@@ -883,7 +883,7 @@ platform_service_registry:
       records:
         - fqdn: "n8n.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -894,7 +894,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 5678
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: n8n.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # n8n uses WebSockets for workflow execution events
@@ -905,7 +905,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream nats:2.11-alpine
     internal_port: 4222
-    host_group: runtime-control-lv3
+    host_group: runtime-control
     site_dir: /opt/nats-jetstream
     container_name: lv3-nats-jetstream
     needs_openbao: false
@@ -916,7 +916,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: netbox_runtime
     internal_port: 8082
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/netbox
     container_name: netbox
     needs_openbao: true
@@ -929,7 +929,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: nextcloud_runtime
     internal_port: 8084
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/nextcloud
     container_name: nextcloud-app
     needs_openbao: true
@@ -938,7 +938,7 @@ platform_service_registry:
       records:
         - fqdn: "cloud.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -949,7 +949,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8084
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: cloud.{{ platform_domain }}
       auth_proxy: false             # Nextcloud has native OIDC via Keycloak
       max_body_size: 4096m          # large file uploads
@@ -960,7 +960,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ntfy_runtime
     internal_port: 2586
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/ntfy
     container_name: ntfy
     needs_openbao: false
@@ -968,7 +968,7 @@ platform_service_registry:
       records:
         - fqdn: "ntfy.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -979,7 +979,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 2586
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: ntfy.{{ platform_domain }}
       auth_proxy: false             # ntfy has its own access-control layer
   # END SERVICE: ntfy
@@ -993,7 +993,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ollama_runtime
     internal_port: 11434
-    host_group: runtime-ai-lv3
+    host_group: runtime-ai
     site_dir: /opt/ollama
     container_name: ollama
     needs_openbao: false
@@ -1001,13 +1001,13 @@ platform_service_registry:
 
     service_type: docker_compose
     internal_port: 8088
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     needs_openbao: true
     dns:
       records:
         - fqdn: "chat.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1031,7 +1031,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: openbao_runtime
     internal_port: 8201
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/openbao
     container_name: lv3-openbao
     needs_openbao: false
@@ -1042,7 +1042,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: openfga_runtime
     internal_port: 8098
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/openfga
     container_name: lv3-openfga
     needs_openbao: true
@@ -1053,7 +1053,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # ops-portal is a bespoke container built locally
     internal_port: 8092
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/ops-portal
     container_name: ops-portal
     needs_openbao: false
@@ -1061,7 +1061,7 @@ platform_service_registry:
       records:
         - fqdn: "ops.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1084,7 +1084,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8092
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: ops.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       unauthenticated_prefix_paths:
@@ -1098,7 +1098,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # repo-intake is a bespoke container built locally
     internal_port: 8096
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/repo-intake
     container_name: repo-intake
     needs_openbao: false
@@ -1106,7 +1106,7 @@ platform_service_registry:
       records:
         - fqdn: "repo-intake.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1129,7 +1129,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8096
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: repo-intake.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       unauthenticated_prefix_paths:
@@ -1143,7 +1143,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: outline_runtime
     internal_port: 3006
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/outline
     container_name: outline
     needs_openbao: true
@@ -1151,14 +1151,14 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "wiki.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "wiki.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1181,7 +1181,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3006
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: wiki.{{ platform_domain }}
       auth_proxy: false             # Outline OIDC via Keycloak handles auth
       websocket: true               # Outline real-time collab uses WebSockets
@@ -1196,7 +1196,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: paperless_runtime
     internal_port: 8018
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/paperless
     container_name: paperless
     needs_openbao: true
@@ -1204,14 +1204,14 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "paperless.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "paperless.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1234,7 +1234,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8018
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: paperless.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
       max_body_size: 256m           # large document uploads
@@ -1245,7 +1245,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # built locally from python base image
     internal_port: 8106
-    host_group: runtime-ai-lv3
+    host_group: runtime-ai
     site_dir: /opt/piper
     container_name: piper
     needs_openbao: false
@@ -1256,7 +1256,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: plane_frontend_runtime
     internal_port: 8093
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/plane
     container_name: plane-web
     needs_openbao: true
@@ -1265,7 +1265,7 @@ platform_service_registry:
       records:
         - fqdn: "tasks.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1276,7 +1276,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8093
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: tasks.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # Plane uses WebSockets for real-time updates
@@ -1287,7 +1287,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: plausible_runtime
     internal_port: 8016
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/plausible
     container_name: plausible
     needs_openbao: true
@@ -1295,7 +1295,7 @@ platform_service_registry:
       records:
         - fqdn: "analytics.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1306,7 +1306,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8016
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: analytics.{{ platform_domain }}
       auth_proxy: true              # dashboard gated; /js/ and /api/event are unauthenticated paths
   # END SERVICE: plausible
@@ -1316,7 +1316,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: portainer_runtime
     internal_port: 9443
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/portainer
     container_name: portainer
     needs_openbao: false
@@ -1331,7 +1331,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # rag-context uses qdrant/qdrant — no catalog key for main service
     internal_port: 8010
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/platform-context
     container_name: platform-context
     needs_openbao: true
@@ -1342,7 +1342,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: redpanda_runtime
     internal_port: 9092
-    host_group: runtime-control-lv3
+    host_group: runtime-control
     site_dir: /opt/redpanda
     container_name: lv3-redpanda
     needs_openbao: true
@@ -1353,7 +1353,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream python:3.12-slim
     internal_port: 7070
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/repowise
     container_name: repowise
     needs_openbao: false
@@ -1361,7 +1361,7 @@ platform_service_registry:
       records:
         - fqdn: "repowise.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1372,7 +1372,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 7070
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: repowise.{{ platform_domain }}
       auth_proxy: false             # upstream auth handles its own access control
   # END SERVICE: repowise
@@ -1386,7 +1386,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: searxng_runtime
     internal_port: 8881
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/searxng
     container_name: searxng
     needs_openbao: false
@@ -1394,7 +1394,7 @@ platform_service_registry:
       records:
         - fqdn: "search.{{ platform_domain }}"
           type: internal
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
   # END SERVICE: searxng
 
@@ -1403,7 +1403,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: semaphore_runtime
     internal_port: 3004
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/semaphore
     container_name: semaphore
     needs_openbao: true
@@ -1414,21 +1414,21 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream drakkan/sftpgo — no catalog key
     internal_port: 8080
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/sftpgo
     container_name: sftpgo
     needs_openbao: true
     hairpin:
       publish:
         - hostname: "files.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "files.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1455,7 +1455,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: step_ca_runtime
     internal_port: 9000
-    host_group: runtime-control-lv3
+    host_group: runtime-control
     site_dir: /opt/step-ca
     container_name: step-ca
     needs_openbao: false
@@ -1466,7 +1466,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/apache/superset — pinned in defaults
     internal_port: 8105
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/superset
     container_name: superset
     needs_openbao: true
@@ -1474,14 +1474,14 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "bi.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx-lv3
+          address_host: nginx
     dns:
       records:
         - fqdn: "bi.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1504,7 +1504,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8105
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: bi.{{ platform_domain }}
       auth_proxy: false             # Superset native Keycloak OIDC handles auth
   # END SERVICE: superset
@@ -1518,7 +1518,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: temporal_server_runtime
     internal_port: 7243
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/temporal
     container_name: temporal-server
     needs_openbao: true
@@ -1530,7 +1530,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # built locally from python base image
     internal_port: 3008
-    host_group: runtime-ai-lv3
+    host_group: runtime-ai
     site_dir: /opt/tesseract-ocr
     container_name: tesseract-ocr
     needs_openbao: false
@@ -1541,7 +1541,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: tika_runtime
     internal_port: 9998
-    host_group: runtime-ai-lv3
+    host_group: runtime-ai
     site_dir: /opt/tika
     container_name: tika
     needs_openbao: false
@@ -1552,7 +1552,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: typesense_runtime
     internal_port: 8108
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/typesense
     container_name: typesense
     needs_openbao: true
@@ -1567,7 +1567,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: uptime_kuma_runtime
     internal_port: 3001
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/uptime-kuma
     container_name: uptime-kuma
     needs_openbao: false
@@ -1575,7 +1575,7 @@ platform_service_registry:
       records:
         - fqdn: "uptime.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1586,7 +1586,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3001
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: uptime.{{ platform_domain }}
       auth_proxy: false             # upstream auth handles its own access control
       websocket: true               # Uptime Kuma uses WebSockets for live status updates
@@ -1603,7 +1603,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: vaultwarden_runtime
     internal_port: 8222
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/vaultwarden
     container_name: vaultwarden
     needs_openbao: false
@@ -1611,7 +1611,7 @@ platform_service_registry:
       records:
         - fqdn: "vault.{{ platform_domain }}"
           type: internal
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1626,7 +1626,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream vikunja/api — no catalog key
     internal_port: 3456
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/vikunja
     container_name: vikunja
     needs_openbao: true
@@ -1654,7 +1654,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: windmill_runtime
     internal_port: 8000
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/windmill
     container_name: windmill-server
     needs_openbao: true
@@ -1666,14 +1666,14 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: woodpecker_server_runtime
     internal_port: 8102
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     site_dir: /opt/woodpecker
     container_name: woodpecker-server
     needs_openbao: true
     proxy:
       enabled: true
       upstream_port: 8102
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: ci.{{ platform_domain }}
       auth_proxy: false             # Woodpecker has native Gitea OAuth handles auth
       websocket: true               # Woodpecker uses WebSockets for live build logs
@@ -1681,7 +1681,7 @@ platform_service_registry:
       records:
         - fqdn: "ci.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1700,7 +1700,7 @@ platform_service_registry:
     service_type: system_package
     image_catalog_key: alertmanager_runtime
     internal_port: 9093
-    host_group: monitoring-lv3
+    host_group: monitoring
     container_name: alertmanager
     needs_openbao: false
     needs_postgres: false
@@ -1737,7 +1737,7 @@ platform_service_registry:
     service_type: infrastructure
     image_catalog_key: docker_runtime_observability
     internal_port: null
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     container_name: docker-observability
     needs_openbao: false
     needs_postgres: false
@@ -1761,7 +1761,7 @@ platform_service_registry:
     service_type: infrastructure
     image_catalog_key: falco_event_bridge_runtime
     internal_port: null
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     container_name: falco-event-bridge
     needs_openbao: false
     needs_postgres: false
@@ -1772,14 +1772,14 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: librechat_runtime
     internal_port: 8096
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     container_name: librechat
     needs_openbao: true
     needs_postgres: true
     proxy:
       enabled: true
       upstream_port: 8096
-      upstream_host: docker-runtime-lv3
+      upstream_host: docker-runtime
       public_fqdn: agents.{{ platform_domain }}
       auth_proxy: true
       websocket: true
@@ -1787,7 +1787,7 @@ platform_service_registry:
       records:
         - fqdn: "agents.{{ platform_domain }}"
           type: public
-          target_host: nginx-lv3
+          target_host: nginx
           ttl: 3600
     tls:
       domains:
@@ -1800,7 +1800,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: litellm_runtime
     internal_port: 8000
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     container_name: litellm
     needs_openbao: true
     needs_postgres: false
@@ -1811,7 +1811,7 @@ platform_service_registry:
     service_type: multi_instance
     image_catalog_key: neko_runtime
     internal_port: 8080
-    host_group: runtime-comms-lv3
+    host_group: runtime-comms
     container_name: neko
     needs_openbao: false
     needs_postgres: false

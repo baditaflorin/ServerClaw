@@ -153,19 +153,19 @@ def load_restore_targets() -> list[RestoreTarget]:
     context = load_controller_context()
     guest_map = {guest["name"]: guest for guest in context["host_vars"]["proxmox_guests"]}
     fixture_map = {
-        "docker-runtime-lv3": load_fixture_definition(FIXTURE_DEFINITIONS_DIR / "docker-host-fixture.yml"),
-        "postgres-lv3": load_fixture_definition(FIXTURE_DEFINITIONS_DIR / "postgres-host-fixture.yml"),
-        "backup-lv3": load_fixture_definition(FIXTURE_DEFINITIONS_DIR / "ops-base-fixture.yml"),
+        "docker-runtime": load_fixture_definition(FIXTURE_DEFINITIONS_DIR / "docker-host-fixture.yml"),
+        "postgres": load_fixture_definition(FIXTURE_DEFINITIONS_DIR / "postgres-host-fixture.yml"),
+        "backup": load_fixture_definition(FIXTURE_DEFINITIONS_DIR / "ops-base-fixture.yml"),
     }
-    vmid_map = {"postgres-lv3": 900, "docker-runtime-lv3": 901, "backup-lv3": 902}
+    vmid_map = {"postgres": 900, "docker-runtime": 901, "backup": 902}
     smoke_map = {
-        "postgres-lv3": "postgres",
-        "docker-runtime-lv3": "docker-runtime",
-        "backup-lv3": "backup-vm",
+        "postgres": "postgres",
+        "docker-runtime": "docker-runtime",
+        "backup": "backup-vm",
     }
 
     targets: list[RestoreTarget] = []
-    for vm_name in ("postgres-lv3", "docker-runtime-lv3", "backup-lv3"):
+    for vm_name in ("postgres", "docker-runtime", "backup"):
         guest = guest_map[vm_name]
         fixture = fixture_map[vm_name]
         targets.append(
@@ -1081,7 +1081,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--selection-strategy", default="random", choices=sorted(ALLOWED_SELECTION_STRATEGIES))
     parser.add_argument(
         "--targets",
-        help="Comma-separated target guest names to replay, for example docker-runtime-lv3 or postgres-lv3,docker-runtime-lv3.",
+        help="Comma-separated target guest names to replay, for example docker-runtime or postgres,docker-runtime.",
     )
     parser.add_argument("--seed", type=int)
     parser.add_argument("--ssh-timeout-seconds", type=int, default=300)

@@ -20,7 +20,7 @@
     - role: lv3.platform.openbao_postgres_backend
 
 - name: Converge OpenBao on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   tags:
@@ -131,7 +131,7 @@
         fail_msg: "The OpenBao-issued PostgreSQL dynamic credential could not authenticate successfully."
 
 - name: Refresh persisted OpenBao AppRole artifacts after end-to-end verification
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   tags:

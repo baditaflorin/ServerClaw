@@ -34,7 +34,7 @@ windmill_native_worker_count: 4
 windmill_database_name: windmill
 windmill_database_user: windmill_admin
 windmill_database_inventory_host: >-
-  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+  {{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}
 windmill_database_host: >-
   {{ hostvars[windmill_database_inventory_host].ansible_host }}
 windmill_database_port: 5432
@@ -633,7 +633,7 @@ windmill_seed_scripts:
     local_file: "{{ windmill_seed_script_root_local_dir }}/fault-injection.py"
     language: python3
     summary: ADR 0171 controlled fault injection
-    description: Repo-managed Windmill wrapper that runs the bounded Keycloak and OpenBao fault-injection subset on docker-runtime-lv3.
+    description: Repo-managed Windmill wrapper that runs the bounded Keycloak and OpenBao fault-injection subset on docker-runtime.
   - path: f/lv3/network-impairment-matrix
     local_file: "{{ windmill_seed_script_root_local_dir }}/network-impairment-matrix.py"
     language: python3

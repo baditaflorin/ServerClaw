@@ -11,7 +11,7 @@ vaultwarden_public_base_url: "https://{{ vaultwarden_service_topology.public_hos
 vaultwarden_database_name: vaultwarden
 vaultwarden_database_user: vaultwarden_admin
 vaultwarden_database_inventory_host: >-
-  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+  {{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}
 vaultwarden_database_host: "{{ hostvars[vaultwarden_database_inventory_host].ansible_host }}"
 vaultwarden_database_port: 5432
 vaultwarden_database_password_local_file: "{{ vaultwarden_local_artifact_dir }}/database-password.txt"

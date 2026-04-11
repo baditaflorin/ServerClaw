@@ -4,7 +4,7 @@
 # Copy this file to inventory/hosts.yml and customize for your deployment.
 #
 # Replace:
-#   - Host names (e.g., nginx-lv3 → nginx-yourname)
+#   - Host names (e.g., nginx → nginx-yourname)
 #   - IP addresses to match your network topology
 #   - The Proxmox host entry to match your server
 #

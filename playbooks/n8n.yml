@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0151: n8n provides the managed automation surface.
-#   - Requires: postgres-lv3, docker-runtime-lv3, and the shared edge components to already exist.
+#   - Requires: postgres, docker-runtime, and the shared edge components to already exist.
 #   - Role: lv3.platform.n8n_postgres - provisions the n8n database and role.
 #   - Role: lv3.platform.n8n_runtime - converges the n8n runtime and publication flow.
 #
@@ -39,7 +39,7 @@
 # --- n8n-specific docker runtime play (has post_tasks with post-verify and notify) ---
 
 - name: Converge n8n on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 
@@ -72,7 +72,7 @@
 # --- n8n-specific nginx play (has extra var public_edge_sync_generated_static_dirs) ---
 
 - name: Publish n8n through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

@@ -57,7 +57,7 @@ services:
     env_file:
       - {{ langfuse_env_file }}
     extra_hosts:
-      - "sso.{{ platform_domain }}:{{ hostvars['nginx-lv3'].ansible_host }}"
+      - "sso.{{ platform_domain }}:{{ hostvars['nginx'].ansible_host }}"
 
   langfuse-web:
     image: {{ langfuse_web_image }}
@@ -75,7 +75,7 @@ services:
     env_file:
       - {{ langfuse_env_file }}
     extra_hosts:
-      - "sso.{{ platform_domain }}:{{ hostvars['nginx-lv3'].ansible_host }}"
+      - "sso.{{ platform_domain }}:{{ hostvars['nginx'].ansible_host }}"
     ports:
       - "{{ ansible_host }}:{{ langfuse_internal_port }}:3000"
       - "127.0.0.1:{{ langfuse_internal_port }}:3000"

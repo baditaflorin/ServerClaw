@@ -1,5 +1,5 @@
 # Playbook: runtime-comms-pool.yml
-# Purpose: Provision the dedicated runtime-comms guest, converge the Docker pool substrate, and migrate communications services (Mattermost, Matrix-Synapse, LiveKit, Redpanda) from docker-runtime-lv3.
+# Purpose: Provision the dedicated runtime-comms guest, converge the Docker pool substrate, and migrate communications services (Mattermost, Matrix-Synapse, LiveKit, Redpanda) from docker-runtime.
 # Use case: Run for ADR 0347 follow-on work when the production runtime-comms pool must become true end to end.
 #
 # Inputs (required):
@@ -11,7 +11,7 @@
 #   - platform_trace_id (string, optional): Mutation-audit trace identifier.
 #
 # Outputs:
-#   - Dedicated VM `runtime-comms-lv3` (VMID 121, 10.10.10.21) provisioned on Proxmox with Docker runtime,
+#   - Dedicated VM `runtime-comms` (VMID 121, 10.10.10.21) provisioned on Proxmox with Docker runtime,
 #     guest firewall policy, and ready to receive Mattermost, Matrix-Synapse, LiveKit, and Redpanda.
 #
 # Idempotency: Partially idempotent
@@ -74,8 +74,8 @@
         - guests
         - runtime-comms-pool
 
-- name: Converge Docker runtime baseline on runtime-comms-lv3
-  hosts: runtime-comms-lv3
+- name: Converge Docker runtime baseline on runtime-comms
+  hosts: runtime-comms
   become: true
   gather_facts: true
   tags:

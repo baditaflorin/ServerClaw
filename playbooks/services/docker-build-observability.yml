@@ -1,6 +1,6 @@
 ---
 - name: Converge docker build guest observability
-  hosts: "{{ 'docker-build-staging-lv3' if (env | default('production')) == 'staging' else 'docker-build-lv3' }}"
+  hosts: "{{ 'docker-build-staging' if (env | default('production')) == 'staging' else 'docker-build' }}"
   become: true
   gather_facts: true
   tags:

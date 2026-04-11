@@ -7,12 +7,12 @@
 #   - env (str, required): Target environment selector.
 #
 # Outputs:
-#   - LibreChat is deployed on coolify-lv3, Keycloak OIDC is configured, chat.{{ platform_domain }} is published through the shared edge.
+#   - LibreChat is deployed on coolify, Keycloak OIDC is configured, chat.{{ platform_domain }} is published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #
 # Dependencies:
-#   - Requires: coolify-lv3, docker-runtime-lv3, and nginx-lv3 to be reachable.
+#   - Requires: coolify, docker-runtime, and nginx to be reachable.
 
 - name: Ensure Hetzner DNS publication for LibreChat
   hosts: proxmox_hosts
@@ -50,11 +50,11 @@
 # LibreChat reuses the existing serverclaw OIDC client.
 # Re-enable once Keycloak admin client secret rotation is fixed.
 # - name: Converge the LibreChat Keycloak client on the Docker runtime VM
-#   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+#   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
 #   ...
 
 - name: Converge LibreChat on the Coolify runtime VM
-  hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
+  hosts: "{{ 'coolify' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
   become: true
   gather_facts: true
   vars:
@@ -102,7 +102,7 @@
         playbook_execution_notification_service: librechat
 
 - name: Publish LibreChat through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

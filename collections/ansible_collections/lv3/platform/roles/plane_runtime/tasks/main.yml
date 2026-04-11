@@ -1,6 +1,6 @@
 ---
 # Purpose: Converge the Plane runtime stack, managed secrets, bootstrap artifacts, and controller-local access files.
-# Use case: Run during Plane deployment or replay on docker-runtime-lv3 after the Plane PostgreSQL backend is prepared.
+# Use case: Run during Plane deployment or replay on docker-runtime after the Plane PostgreSQL backend is prepared.
 #
 # Inputs (required):
 #   - plane_site_dir (path, required): Runtime root directory.

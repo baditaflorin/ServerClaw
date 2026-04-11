@@ -18,7 +18,7 @@
         "y": 0
       },
       "options": {
-        "content": "### browser-runner-availability\n\nThe private browser runner remains reachable on docker-runtime-lv3 for governed Playwright session execution.\n\nService: `browser_runner`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=browser-runner-availability)",
+        "content": "### browser-runner-availability\n\nThe private browser runner remains reachable on docker-runtime for governed Playwright session execution.\n\nService: `browser_runner`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=browser-runner-availability)",
         "mode": "markdown"
       }
     },
@@ -229,7 +229,7 @@
         "y": 7
       },
       "options": {
-        "content": "### changedetection-availability\n\nThe private Changedetection.io runtime remains reachable on docker-runtime-lv3 for governed upstream release, advisory, and API change monitoring.\n\nService: `changedetection`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability)",
+        "content": "### changedetection-availability\n\nThe private Changedetection.io runtime remains reachable on docker-runtime for governed upstream release, advisory, and API change monitoring.\n\nService: `changedetection`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability)",
         "mode": "markdown"
       }
     },
@@ -440,7 +440,7 @@
         "y": 14
       },
       "options": {
-        "content": "### crawl4ai-availability\n\nThe private Crawl4AI runtime remains reachable on docker-runtime-lv3 for LLM-oriented Markdown extraction and bounded browser-assisted fetches.\n\nService: `crawl4ai`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability)",
+        "content": "### crawl4ai-availability\n\nThe private Crawl4AI runtime remains reachable on docker-runtime for LLM-oriented Markdown extraction and bounded browser-assisted fetches.\n\nService: `crawl4ai`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability)",
         "mode": "markdown"
       }
     },
@@ -1495,7 +1495,7 @@
         "y": 49
       },
       "options": {
-        "content": "### gotenberg-availability\n\nThe private Gotenberg document rendering API remains reachable on runtime-ai-lv3 for synchronous PDF conversion workflows.\n\nService: `gotenberg`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gotenberg-availability)",
+        "content": "### gotenberg-availability\n\nThe private Gotenberg document rendering API remains reachable on runtime-ai for synchronous PDF conversion workflows.\n\nService: `gotenberg`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gotenberg-availability)",
         "mode": "markdown"
       }
     },
@@ -4660,7 +4660,7 @@
         "y": 154
       },
       "options": {
-        "content": "### openfga-availability\n\nThe private OpenFGA runtime remains reachable on runtime-control-lv3 for delegated authorization queries from the platform guest network.\n\nService: `openfga`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-availability)",
+        "content": "### openfga-availability\n\nThe private OpenFGA runtime remains reachable on runtime-control for delegated authorization queries from the platform guest network.\n\nService: `openfga`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=openfga-availability)",
         "mode": "markdown"
       }
     },
@@ -5293,7 +5293,7 @@
         "y": 175
       },
       "options": {
-        "content": "### label-studio-availability\n\nThe private Label Studio runtime remains reachable on docker-runtime-lv3 for governed annotation queues and API automation.\n\nService: `label_studio`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability)",
+        "content": "### label-studio-availability\n\nThe private Label Studio runtime remains reachable on docker-runtime for governed annotation queues and API automation.\n\nService: `label_studio`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability)",
         "mode": "markdown"
       }
     },
@@ -5504,7 +5504,7 @@
         "y": 182
       },
       "options": {
-        "content": "### piper-availability\n\nThe private Piper TTS health endpoint remains reachable on docker-runtime-lv3 for real-time voice synthesis workflows.\n\nService: `piper`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability)",
+        "content": "### piper-availability\n\nThe private Piper TTS health endpoint remains reachable on docker-runtime for real-time voice synthesis workflows.\n\nService: `piper`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability)",
         "mode": "markdown"
       }
     },
@@ -7403,7 +7403,7 @@
         "y": 245
       },
       "options": {
-        "content": "### tika-availability\n\nThe private Apache Tika extraction API remains reachable on runtime-ai-lv3 for synchronous document text and metadata extraction workflows.\n\nService: `tika`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tika-availability)",
+        "content": "### tika-availability\n\nThe private Apache Tika extraction API remains reachable on runtime-ai for synchronous document text and metadata extraction workflows.\n\nService: `tika`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tika-availability)",
         "mode": "markdown"
       }
     },
@@ -7614,7 +7614,7 @@
         "y": 252
       },
       "options": {
-        "content": "### tesseract-ocr-availability\n\nThe private Tesseract OCR runtime remains reachable on runtime-ai-lv3 for scanned-image and image-only document fallback extraction.\n\nService: `tesseract_ocr`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability)",
+        "content": "### tesseract-ocr-availability\n\nThe private Tesseract OCR runtime remains reachable on runtime-ai for scanned-image and image-only document fallback extraction.\n\nService: `tesseract_ocr`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability)",
         "mode": "markdown"
       }
     },

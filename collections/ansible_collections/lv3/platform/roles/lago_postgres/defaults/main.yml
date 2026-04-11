@@ -1,9 +1,9 @@
 ---
 # Purpose: Default inputs for provisioning the shared PostgreSQL role and database used by Lago.
-# Use case: Loaded whenever the Lago billing runtime needs its database role, database, or mirrored password reconciled on postgres-lv3.
+# Use case: Loaded whenever the Lago billing runtime needs its database role, database, or mirrored password reconciled on postgres.
 #
 # Inputs (required):
-#   - postgres-lv3 access (required): Writable PostgreSQL primary access on the selected database VM.
+#   - postgres access (required): Writable PostgreSQL primary access on the selected database VM.
 #
 # Inputs (optional):
 #   - lago_database_name (str, optional, default=lago): Database name for the Lago runtime.

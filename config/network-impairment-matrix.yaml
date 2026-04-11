@@ -4,10 +4,10 @@ target_classes:
   staging:
     description: Use the dedicated staging lane on vmbr20 before wider preview, standby, or recovery drills.
     inventory_hosts:
-      - docker-runtime-staging-lv3
-      - postgres-staging-lv3
-      - monitoring-staging-lv3
-      - backup-staging-lv3
+      - docker-runtime-staging
+      - postgres-staging
+      - monitoring-staging
+      - backup-staging
     maintenance_window_required: false
     notes: Live staging guests already exist and are the default first stop for ADR 0189 validation.
   preview:
@@ -28,16 +28,16 @@ target_classes:
   recovery:
     description: Use restore-drill and recovery surfaces assembled from backup or replica state.
     inventory_hosts:
-      - backup-lv3
-      - backup-staging-lv3
+      - backup
+      - backup-staging
     maintenance_window_required: false
     notes: Useful when the test includes reconnecting recovered services to impaired dependencies.
   primary:
     description: Use the live production primaries only during explicit maintenance or break-glass validation.
     inventory_hosts:
-      - docker-runtime-lv3
-      - postgres-lv3
-      - backup-lv3
+      - docker-runtime
+      - postgres
+      - backup
     maintenance_window_required: true
     notes: ADR 0189 keeps primary impairments out of routine use.
 

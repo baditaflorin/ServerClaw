@@ -1,6 +1,6 @@
 ---
 - name: Publish Dozzle through the shared NGINX edge
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   vars_files:
@@ -48,7 +48,7 @@
     - role: lv3.platform.proxmox_network
 
 - name: Converge Dozzle across the Docker guests
-  hosts: docker-runtime-lv3:docker-build-lv3:monitoring-lv3
+  hosts: docker-runtime:docker-build:monitoring
   become: true
   gather_facts: true
   tags:

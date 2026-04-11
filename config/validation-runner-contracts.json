@@ -565,7 +565,7 @@
       ]
     },
     "build-server-validation": {
-      "description": "Remote build-server runner that executes validation from the session-scoped workspace on docker-build-lv3.",
+      "description": "Remote build-server runner that executes validation from the session-scoped workspace on docker-build.",
       "execution_surface": "build_server_remote",
       "cpu_architectures": [
         "x86_64"

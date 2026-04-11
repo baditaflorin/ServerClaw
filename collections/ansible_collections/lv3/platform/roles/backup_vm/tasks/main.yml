@@ -1,6 +1,6 @@
 ---
 # Purpose: Install and configure the managed Proxmox Backup Server guest, datastore, automation identity, and seed snapshot storage.
-# Use case: Run when converging backup-lv3 so the platform has a repo-managed PBS endpoint and snapshot staging root.
+# Use case: Run when converging backup so the platform has a repo-managed PBS endpoint and snapshot staging root.
 #
 # Inputs (required):
 #   - backup_vm_repo_file (path, required): PBS repository definition path.

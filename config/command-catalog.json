@@ -70,7 +70,7 @@
   },
   "commands": {
     "adr-0077-compose-runtime-secrets-live-apply": {
-      "description": "Converge the ADR 0077 runtime-secret injection path across the docker-runtime-lv3 platform applications.",
+      "description": "Converge the ADR 0077 runtime-secret injection path across the docker-runtime platform applications.",
       "workflow_id": "adr-0077-compose-runtime-secrets-live-apply",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
@@ -184,7 +184,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-side SSH key used to reach the private docker-runtime-lv3 NATS runtime through the Proxmox jump path."
+          "description": "Controller-side SSH key used to reach the private docker-runtime NATS runtime through the Proxmox jump path."
         },
         {
           "name": "nats_jetstream_admin_password",
@@ -249,7 +249,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=configure-artifact-cache-vm passes",
         "make validate passes before the apply",
-        "Inventory already declares VM 180, 10.10.10.80, and the guest firewall policy for artifact-cache-lv3"
+        "Inventory already declares VM 180, 10.10.10.80, and the guest firewall policy for artifact-cache"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -257,7 +257,7 @@
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the Proxmox guest converge fails or artifact-cache-lv3 never becomes reachable over SSH.",
+          "Stop if the Proxmox guest converge fails or artifact-cache never becomes reachable over SSH.",
           "Stop if cache-plane listeners or the follow-up build-host consumer replay fail after the guest is provisioned."
         ],
         "rollback_guidance": [
@@ -450,7 +450,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the forwarding change and verification for TCP 80 and 443 to nginx-lv3."
+        "notes": "Record the forwarding change and verification for TCP 80 and 443 to nginx."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -544,7 +544,7 @@
       }
     },
     "converge-api-gateway": {
-      "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org.",
+      "description": "Converge the unified platform API gateway on docker-runtime and publish it at api.lv3.org.",
       "workflow_id": "converge-api-gateway",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -589,7 +589,7 @@
       }
     },
     "converge-browser-runner": {
-      "description": "Converge the private Playwright browser runner on docker-runtime-lv3, refresh the governed gateway route, and verify the bounded browser-session execution surface.",
+      "description": "Converge the private Playwright browser runner on docker-runtime, refresh the governed gateway route, and verify the bounded browser-session execution surface.",
       "workflow_id": "converge-browser-runner",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -634,7 +634,7 @@
       }
     },
     "converge-changedetection": {
-      "description": "Converge the private Changedetection.io runtime on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
+      "description": "Converge the private Changedetection.io runtime on docker-runtime, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
       "workflow_id": "converge-changedetection",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -696,7 +696,7 @@
           "kind": "controller_secret",
           "required": false,
           "source": "config/controller-local-secrets.json",
-          "description": "Generated controller recovery bundle mirrored into backup-lv3 during the workflow."
+          "description": "Generated controller recovery bundle mirrored into backup during the workflow."
         }
       ],
       "expected_preconditions": [
@@ -706,7 +706,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record timer status, archive landing, controller bundle refresh, a passing restore drill on backup-lv3, and the latest witness-replication receipt for the immutable off-host generation."
+        "notes": "Record timer status, archive landing, controller bundle refresh, a passing restore drill on backup, and the latest witness-replication receipt for the immutable off-host generation."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -771,7 +771,7 @@
       }
     },
     "converge-crawl4ai": {
-      "description": "Converge the private Crawl4AI runtime on docker-runtime-lv3 and verify the bounded local plus guest-network crawl contract.",
+      "description": "Converge the private Crawl4AI runtime on docker-runtime and verify the bounded local plus guest-network crawl contract.",
       "workflow_id": "converge-crawl4ai",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -809,7 +809,7 @@
       }
     },
     "converge-dify": {
-      "description": "Converge the Dify visual workflow canvas on docker-runtime-lv3, publish it at agents.lv3.org, and verify governed tool sync plus smoke workflow export.",
+      "description": "Converge the Dify visual workflow canvas on docker-runtime, publish it at agents.lv3.org, and verify governed tool sync plus smoke workflow export.",
       "workflow_id": "converge-dify",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -919,7 +919,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the helper installation, declared contract results, and direct verification of repaired Docker publication state on docker-runtime-lv3 and coolify-lv3."
+        "notes": "Record the helper installation, declared contract results, and direct verification of repaired Docker publication state on docker-runtime and coolify."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -957,7 +957,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the runtime converge plus verification that Docker is healthy on docker-runtime-lv3."
+        "notes": "Record the runtime converge plus verification that Docker is healthy on docker-runtime."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -1096,7 +1096,7 @@
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the private bridge is not healthy on docker-runtime-lv3, any Falco runtime service fails to start, or the guest firewall would expose the bridge beyond the intended private callers.",
+          "Stop if the private bridge is not healthy on docker-runtime, any Falco runtime service fails to start, or the guest firewall would expose the bridge beyond the intended private callers.",
           "Stop if the smoke-marker verification does not prove the WARNING+/CRITICAL fan-out path end to end."
         ],
         "rollback_guidance": [
@@ -1155,7 +1155,7 @@
       }
     },
     "converge-gitea": {
-      "description": "Converge private Gitea with Keycloak OIDC, PostgreSQL, the repo bootstrap path, and the docker-build-lv3 self-hosted Actions runner.",
+      "description": "Converge private Gitea with Keycloak OIDC, PostgreSQL, the repo bootstrap path, and the docker-build self-hosted Actions runner.",
       "workflow_id": "converge-gitea",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -1171,7 +1171,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-gitea passes",
         "make validate passes before the apply",
-        "The Keycloak OIDC dependency, bootstrap repository state, and docker-build-lv3 runner impact are reviewed before rollout"
+        "The Keycloak OIDC dependency, bootstrap repository state, and docker-build runner impact are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -1238,7 +1238,7 @@
       }
     },
     "converge-gotenberg": {
-      "description": "Converge the private Gotenberg document-to-PDF runtime on docker-runtime-lv3 and refresh the governed API gateway route for authenticated callers.",
+      "description": "Converge the private Gotenberg document-to-PDF runtime on docker-runtime and refresh the governed API gateway route for authenticated callers.",
       "workflow_id": "converge-gotenberg",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1314,7 +1314,7 @@
       }
     },
     "converge-harbor": {
-      "description": "Converge Harbor on docker-runtime-lv3, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner Harbor project automation credentials.",
+      "description": "Converge Harbor on docker-runtime, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner Harbor project automation credentials.",
       "workflow_id": "converge-harbor",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1341,12 +1341,12 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, registry.lv3.org ping verification, the Harbor check-runner project state, one artifact scan summary, and one successful pull from docker-build-lv3."
+        "notes": "Record the source commit, registry.lv3.org ping verification, the Harbor check-runner project state, one artifact scan summary, and one successful pull from docker-build."
       },
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the Harbor runtime, Keycloak OIDC bootstrap, or shared-edge publication fails.",
-          "Stop if Harbor rejects the generated check-runner robot credential or pushed artifacts do not become pullable from docker-build-lv3.",
+          "Stop if Harbor rejects the generated check-runner robot credential or pushed artifacts do not become pullable from docker-build.",
           "Stop if the change would remove the documented local Harbor admin break-glass recovery path."
         ],
         "rollback_guidance": [
@@ -1443,7 +1443,7 @@
       }
     },
     "converge-identity-core-watchdog": {
-      "description": "Deploy the identity-core health watchdog on runtime-control-lv3 \u2014 probes Keycloak OIDC discovery, Step-CA, OpenBao, and API Gateway every 30s with auto-restart.",
+      "description": "Deploy the identity-core health watchdog on runtime-control \u2014 probes Keycloak OIDC discovery, Step-CA, OpenBao, and API Gateway every 30s with auto-restart.",
       "workflow_id": "converge-identity-core-watchdog",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
@@ -1458,7 +1458,7 @@
       ],
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-identity-core-watchdog passes",
-        "runtime-control-lv3 is reachable"
+        "runtime-control is reachable"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -1591,7 +1591,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-lago passes",
         "make validate passes before the apply",
-        "The billing edge-auth boundary, public producer-ingest contract, and shared docker-runtime-lv3 impact are reviewed before rollout"
+        "The billing edge-auth boundary, public producer-ingest contract, and shared docker-runtime impact are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -1672,7 +1672,7 @@
       }
     },
     "converge-librechat": {
-      "description": "Converge the LibreChat runtime on coolify-lv3 with system prompt presets, agent bootstrap, and OIDC authentication.",
+      "description": "Converge the LibreChat runtime on coolify with system prompt presets, agent bootstrap, and OIDC authentication.",
       "workflow_id": "converge-librechat",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1714,7 +1714,7 @@
       }
     },
     "converge-litellm": {
-      "description": "Converge the LiteLLM proxy on docker-runtime-lv3 with model routing, consumer keys, and PostgreSQL backend.",
+      "description": "Converge the LiteLLM proxy on docker-runtime with model routing, consumer keys, and PostgreSQL backend.",
       "workflow_id": "converge-litellm",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1846,7 +1846,7 @@
       }
     },
     "converge-mailpit": {
-      "description": "Converge the private Mailpit SMTP interceptor and its repo-managed capture verification path on docker-runtime-lv3.",
+      "description": "Converge the private Mailpit SMTP interceptor and its repo-managed capture verification path on docker-runtime.",
       "workflow_id": "converge-mailpit",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
@@ -2095,7 +2095,7 @@
       }
     },
     "converge-neko": {
-      "description": "Converge the Neko remote desktop runtime on runtime-comms-lv3 with WebRTC signalling and NGINX edge publication.",
+      "description": "Converge the Neko remote desktop runtime on runtime-comms with WebRTC signalling and NGINX edge publication.",
       "workflow_id": "converge-neko",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2341,7 +2341,7 @@
       }
     },
     "converge-ollama": {
-      "description": "Converge the private Ollama runtime and repo-managed startup model catalog on docker-runtime-lv3.",
+      "description": "Converge the private Ollama runtime and repo-managed startup model catalog on docker-runtime.",
       "workflow_id": "converge-ollama",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2468,7 +2468,7 @@
       }
     },
     "converge-ops-portal": {
-      "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared platform API gateway contracts.",
+      "description": "Converge the interactive ops portal on docker-runtime so the browser control plane stays aligned with the shared platform API gateway contracts.",
       "workflow_id": "converge-ops-portal",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2513,7 +2513,7 @@
       }
     },
     "converge-paperless": {
-      "description": "Converge the public Paperless-ngx archive, governed API route, and repo-managed taxonomy verification on docker-runtime-lv3.",
+      "description": "Converge the public Paperless-ngx archive, governed API route, and repo-managed taxonomy verification on docker-runtime.",
       "workflow_id": "converge-paperless",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2558,7 +2558,7 @@
       }
     },
     "converge-piper": {
-      "description": "Converge the private Piper text-to-speech runtime and repo-managed voice-model contract on docker-runtime-lv3.",
+      "description": "Converge the private Piper text-to-speech runtime and repo-managed voice-model contract on docker-runtime.",
       "workflow_id": "converge-piper",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2800,7 +2800,7 @@
       }
     },
     "converge-redpanda": {
-      "description": "Converge the private Redpanda streaming runtime and its repo-managed smoke topics, ACLs, and schema contract on docker-runtime-lv3.",
+      "description": "Converge the private Redpanda streaming runtime and its repo-managed smoke topics, ACLs, and schema contract on docker-runtime.",
       "workflow_id": "converge-redpanda",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
@@ -2825,7 +2825,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if Redpanda fails to start, the guest firewall no longer preserves the private-only listener boundary, or the authenticated Admin API, HTTP Proxy, and Schema Registry contract does not verify end to end.",
-          "Stop if the rollout would reuse docker-runtime-lv3 ports 8081 or 8082 that remain reserved for the mail platform gateway and NetBox."
+          "Stop if the rollout would reuse docker-runtime ports 8081 or 8082 that remain reserved for the mail platform gateway and NetBox."
         ],
         "rollback_guidance": [
           "Restore the last known-good Redpanda runtime and firewall state before retrying.",
@@ -2838,7 +2838,7 @@
       }
     },
     "converge-restic-config-backup": {
-      "description": "Converge the ADR 0302 Restic runtime, repository bootstrap, and schedule on docker-runtime-lv3.",
+      "description": "Converge the ADR 0302 Restic runtime, repository bootstrap, and schedule on docker-runtime.",
       "workflow_id": "converge-restic-config-backup",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2884,7 +2884,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the runtime credential provisioning, MinIO repository bootstrap, or systemd timer installation fails.",
-          "Stop if the converge leaves docker-runtime-lv3 without a working ADR 0302 backup entrypoint or without the expected worker checkout path."
+          "Stop if the converge leaves docker-runtime without a working ADR 0302 backup entrypoint or without the expected worker checkout path."
         ],
         "rollback_guidance": [
           "Restore the last known-good repo state and re-converge before retrying.",
@@ -3117,7 +3117,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-temporal passes",
         "make validate passes before the apply",
-        "OpenBao, PostgreSQL, and docker-runtime-lv3 are already converged before the Temporal rollout"
+        "OpenBao, PostgreSQL, and docker-runtime are already converged before the Temporal rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -3139,7 +3139,7 @@
       }
     },
     "converge-tesseract-ocr": {
-      "description": "Converge the private Tesseract OCR runtime and the repo-managed Tika-first fallback extraction helper path on docker-runtime-lv3.",
+      "description": "Converge the private Tesseract OCR runtime and the repo-managed Tika-first fallback extraction helper path on docker-runtime.",
       "workflow_id": "converge-tesseract-ocr",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3176,7 +3176,7 @@
       }
     },
     "converge-tika": {
-      "description": "Converge the private Apache Tika extraction runtime on docker-runtime-lv3 for repo-managed document ingestion workflows.",
+      "description": "Converge the private Apache Tika extraction runtime on docker-runtime for repo-managed document ingestion workflows.",
       "workflow_id": "converge-tika",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3214,7 +3214,7 @@
       }
     },
     "converge-typesense": {
-      "description": "Converge the private Typesense runtime on docker-runtime-lv3, refresh the Proxmox host controller proxy, and repopulate the repo-managed platform-services search collection.",
+      "description": "Converge the private Typesense runtime on docker-runtime, refresh the Proxmox host controller proxy, and repopulate the repo-managed platform-services search collection.",
       "workflow_id": "converge-typesense",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3622,7 +3622,7 @@
       }
     },
     "fault-injection": {
-      "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3 through the governed repo workflow.",
+      "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime through the governed repo workflow.",
       "workflow_id": "fault-injection",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3638,7 +3638,7 @@
       "expected_preconditions": [
         "make validate passes before starting any controlled fault scenario",
         "Operators review the requested ADR 0171 scenario set, blast radius, and change window before execution",
-        "The docker-runtime-lv3 host and required notification hooks are reachable if the selected scenario expects live verification or incident fan-out"
+        "The docker-runtime host and required notification hooks are reachable if the selected scenario expects live verification or incident fan-out"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -4119,7 +4119,7 @@
       "expected_preconditions": [
         "make validate passes before updating or rendering the ADR 0189 matrix",
         "Operators review the selected target class and confirm the run stays on the safe diagnostic path rather than a live network impairment",
-        "The docker-runtime-lv3 Windmill worker is reachable if the selected run should write and verify the live report"
+        "The docker-runtime Windmill worker is reachable if the selected run should write and verify the live report"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -4204,7 +4204,7 @@
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-side SSH key used to reach the private docker-runtime-lv3 NATS runtime through the Proxmox jump path."
+          "description": "Controller-side SSH key used to reach the private docker-runtime NATS runtime through the Proxmox jump path."
         },
         {
           "name": "nats_jetstream_admin_password",
@@ -5140,7 +5140,7 @@
       ],
       "expected_preconditions": [
         "make validate passes before the smoke receipts are used as blocking evidence",
-        "docker-build-lv3 or the current execution host can reach the declared target URLs and the private Prometheus remote-write endpoint",
+        "docker-build or the current execution host can reach the declared target URLs and the private Prometheus remote-write endpoint",
         "Operators understand the smoke probe is intended to remain lightweight and should stay scoped to the declared latency-SLO services"
       ],
       "evidence": {
@@ -5215,7 +5215,7 @@
       }
     },
     "run-restic-config-backup": {
-      "description": "Run the ADR 0302 Restic file-level backup workflow through the managed docker-runtime-lv3 SSH path.",
+      "description": "Run the ADR 0302 Restic file-level backup workflow through the managed docker-runtime SSH path.",
       "workflow_id": "restic-config-backup",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
@@ -5230,8 +5230,8 @@
       ],
       "expected_preconditions": [
         "make validate passes on the repo state used for the backup run",
-        "ADR 0302 has already been converged on docker-runtime-lv3",
-        "The managed worker checkout and runtime credential file are present on docker-runtime-lv3 before the run starts"
+        "ADR 0302 has already been converged on docker-runtime",
+        "The managed worker checkout and runtime credential file are present on docker-runtime before the run starts"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -5253,7 +5253,7 @@
       }
     },
     "run-restic-config-restore-verify": {
-      "description": "Run the ADR 0302 restore-verification rehearsal through the managed docker-runtime-lv3 SSH path.",
+      "description": "Run the ADR 0302 restore-verification rehearsal through the managed docker-runtime SSH path.",
       "workflow_id": "restic-config-restore-verify",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
@@ -5268,7 +5268,7 @@
       ],
       "expected_preconditions": [
         "make validate passes on the repo state used for the restore verification",
-        "ADR 0302 has already been converged on docker-runtime-lv3",
+        "ADR 0302 has already been converged on docker-runtime",
         "At least one successful ADR 0302 receipts snapshot exists in the repository backend before the rehearsal runs"
       ],
       "evidence": {
@@ -5720,7 +5720,7 @@
   "execution_profiles": {
     "docker_runtime_systemd_make": {
       "transport": "ssh_systemd_run_make",
-      "runtime_host": "docker-runtime-lv3",
+      "runtime_host": "docker-runtime",
       "runtime_repo_root": "/srv/proxmox_florin_server",
       "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
       "effective_user": "ops",

@@ -1,6 +1,6 @@
 ---
 - name: Verify notification profiles on the mail platform runtime
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
 

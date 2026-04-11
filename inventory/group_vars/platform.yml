@@ -66,7 +66,7 @@ platform_host:
         listen_port: 3001
         upstream_host: 127.0.0.1
         upstream_port: 3000
-      - name: postgres-lv3
+      - name: postgres
         listen_address: 100.64.0.1
         listen_port: 5432
         upstream_host: 10.10.10.50
@@ -359,7 +359,7 @@ platform_port_assignments:
 platform_guest_catalog:
   list:
     - vmid: 110
-      name: nginx-lv3
+      name: nginx
       role: nginx
       proxmox_firewall_enabled: false
       template_key: lv3-debian-base
@@ -382,7 +382,7 @@ platform_guest_catalog:
       packages:
         - nginx
     - vmid: 120
-      name: docker-runtime-lv3
+      name: docker-runtime
       role: docker-runtime
       proxmox_firewall_enabled: false
       template_key: lv3-docker-host
@@ -405,7 +405,7 @@ platform_guest_catalog:
       packages:
         - docker.io
     - vmid: 130
-      name: docker-build-lv3
+      name: docker-build
       role: docker-build
       template_key: lv3-docker-host
       ipv4: 10.10.10.30
@@ -431,7 +431,7 @@ platform_guest_catalog:
         - build-essential
         - rsync
     - vmid: 140
-      name: monitoring-lv3
+      name: monitoring
       role: monitoring
       template_key: lv3-debian-base
       ipv4: 10.10.10.40
@@ -453,7 +453,7 @@ platform_guest_catalog:
       packages:
         - prometheus-node-exporter
     - vmid: 150
-      name: postgres-lv3
+      name: postgres
       role: postgres
       template_key: lv3-postgres-host
       ipv4: 10.10.10.50
@@ -478,7 +478,7 @@ platform_guest_catalog:
         - postgresql
         - postgresql-contrib
     - vmid: 151
-      name: postgres-replica-lv3
+      name: postgres-replica
       role: postgres-replica
       template_key: lv3-postgres-host
       ipv4: 10.10.10.51
@@ -508,7 +508,7 @@ platform_guest_catalog:
         - postgresql
         - postgresql-contrib
     - vmid: 160
-      name: backup-lv3
+      name: backup
       role: backup
       template_key: lv3-ops-base
       ipv4: 10.10.10.60
@@ -538,7 +538,7 @@ platform_guest_catalog:
         - acl
         - xfsprogs
     - vmid: 170
-      name: coolify-lv3
+      name: coolify
       role: coolify
       template_key: lv3-debian-base
       ipv4: 10.10.10.70
@@ -561,7 +561,7 @@ platform_guest_catalog:
         - docker.io
         - git
     - vmid: 171
-      name: coolify-apps-lv3
+      name: coolify-apps
       role: coolify-apps
       template_key: lv3-debian-base
       ipv4: 10.10.10.71
@@ -584,7 +584,7 @@ platform_guest_catalog:
         - docker.io
         - git
     - vmid: 180
-      name: artifact-cache-lv3
+      name: artifact-cache
       role: artifact-cache
       template_key: lv3-debian-base
       ipv4: 10.10.10.80
@@ -607,7 +607,7 @@ platform_guest_catalog:
       packages:
         - docker.io
     - vmid: 190
-      name: runtime-ai-lv3
+      name: runtime-ai
       role: runtime-ai
       template_key: lv3-debian-base
       ipv4: 10.10.10.90
@@ -629,7 +629,7 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages: []
     - vmid: 191
-      name: runtime-general-lv3
+      name: runtime-general
       role: runtime-general
       template_key: lv3-debian-base
       ipv4: 10.10.10.91
@@ -651,7 +651,7 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages: []
     - vmid: 192
-      name: runtime-control-lv3
+      name: runtime-control
       role: runtime-control
       template_key: lv3-debian-base
       ipv4: 10.10.10.92
@@ -673,7 +673,7 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages: []
     - vmid: 121
-      name: runtime-comms-lv3
+      name: runtime-comms
       role: runtime-comms
       template_key: lv3-debian-base
       ipv4: 10.10.10.21
@@ -695,7 +695,7 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages: []
     - vmid: 122
-      name: runtime-apps-lv3
+      name: runtime-apps
       role: runtime-apps
       template_key: lv3-debian-base
       ipv4: 10.10.10.22
@@ -717,7 +717,7 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages: []
     - vmid: 152
-      name: postgres-apps-lv3
+      name: postgres-apps
       role: postgres-apps
       template_key: lv3-postgres-host
       ipv4: 10.10.10.52
@@ -747,7 +747,7 @@ platform_guest_catalog:
         - postgresql
         - postgresql-contrib
     - vmid: 154
-      name: postgres-data-lv3
+      name: postgres-data
       role: postgres-data
       template_key: lv3-postgres-host
       ipv4: 10.10.10.54
@@ -777,9 +777,9 @@ platform_guest_catalog:
         - postgresql
         - postgresql-contrib
   by_name:
-    nginx-lv3:
+    nginx:
       vmid: 110
-      name: nginx-lv3
+      name: nginx
       role: nginx
       proxmox_firewall_enabled: false
       template_key: lv3-debian-base
@@ -801,9 +801,9 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages:
         - nginx
-    docker-runtime-lv3:
+    docker-runtime:
       vmid: 120
-      name: docker-runtime-lv3
+      name: docker-runtime
       role: docker-runtime
       proxmox_firewall_enabled: false
       template_key: lv3-docker-host
@@ -825,9 +825,9 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages:
         - docker.io
-    docker-build-lv3:
+    docker-build:
       vmid: 130
-      name: docker-build-lv3
+      name: docker-build
       role: docker-build
       template_key: lv3-docker-host
       ipv4: 10.10.10.30
@@ -852,9 +852,9 @@ platform_guest_catalog:
         - make
         - build-essential
         - rsync
-    monitoring-lv3:
+    monitoring:
       vmid: 140
-      name: monitoring-lv3
+      name: monitoring
       role: monitoring
       template_key: lv3-debian-base
       ipv4: 10.10.10.40
@@ -875,9 +875,9 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages:
         - prometheus-node-exporter
-    postgres-lv3:
+    postgres:
       vmid: 150
-      name: postgres-lv3
+      name: postgres
       role: postgres
       template_key: lv3-postgres-host
       ipv4: 10.10.10.50
@@ -901,9 +901,9 @@ platform_guest_catalog:
         - nftables
         - postgresql
         - postgresql-contrib
-    postgres-replica-lv3:
+    postgres-replica:
       vmid: 151
-      name: postgres-replica-lv3
+      name: postgres-replica
       role: postgres-replica
       template_key: lv3-postgres-host
       ipv4: 10.10.10.51
@@ -932,9 +932,9 @@ platform_guest_catalog:
         - nftables
         - postgresql
         - postgresql-contrib
-    backup-lv3:
+    backup:
       vmid: 160
-      name: backup-lv3
+      name: backup
       role: backup
       template_key: lv3-ops-base
       ipv4: 10.10.10.60
@@ -963,9 +963,9 @@ platform_guest_catalog:
       packages:
         - acl
         - xfsprogs
-    coolify-lv3:
+    coolify:
       vmid: 170
-      name: coolify-lv3
+      name: coolify
       role: coolify
       template_key: lv3-debian-base
       ipv4: 10.10.10.70
@@ -987,9 +987,9 @@ platform_guest_catalog:
       packages:
         - docker.io
         - git
-    coolify-apps-lv3:
+    coolify-apps:
       vmid: 171
-      name: coolify-apps-lv3
+      name: coolify-apps
       role: coolify-apps
       template_key: lv3-debian-base
       ipv4: 10.10.10.71
@@ -1011,9 +1011,9 @@ platform_guest_catalog:
       packages:
         - docker.io
         - git
-    artifact-cache-lv3:
+    artifact-cache:
       vmid: 180
-      name: artifact-cache-lv3
+      name: artifact-cache
       role: artifact-cache
       template_key: lv3-debian-base
       ipv4: 10.10.10.80
@@ -1035,9 +1035,9 @@ platform_guest_catalog:
         co_location_exceptions: []
       packages:
         - docker.io
-    runtime-ai-lv3:
+    runtime-ai:
       vmid: 190
-      name: runtime-ai-lv3
+      name: runtime-ai
       role: runtime-ai
       template_key: lv3-debian-base
       ipv4: 10.10.10.90
@@ -1058,9 +1058,9 @@ platform_guest_catalog:
         anti_affinity_group: runtime-ai
         co_location_exceptions: []
       packages: []
-    runtime-general-lv3:
+    runtime-general:
       vmid: 191
-      name: runtime-general-lv3
+      name: runtime-general
       role: runtime-general
       template_key: lv3-debian-base
       ipv4: 10.10.10.91
@@ -1081,9 +1081,9 @@ platform_guest_catalog:
         anti_affinity_group: runtime-general
         co_location_exceptions: []
       packages: []
-    runtime-control-lv3:
+    runtime-control:
       vmid: 192
-      name: runtime-control-lv3
+      name: runtime-control
       role: runtime-control
       template_key: lv3-debian-base
       ipv4: 10.10.10.92
@@ -1104,9 +1104,9 @@ platform_guest_catalog:
         anti_affinity_group: runtime-control
         co_location_exceptions: []
       packages: []
-    runtime-comms-lv3:
+    runtime-comms:
       vmid: 121
-      name: runtime-comms-lv3
+      name: runtime-comms
       role: runtime-comms
       template_key: lv3-debian-base
       ipv4: 10.10.10.21
@@ -1127,9 +1127,9 @@ platform_guest_catalog:
         anti_affinity_group: runtime-comms
         co_location_exceptions: []
       packages: []
-    runtime-apps-lv3:
+    runtime-apps:
       vmid: 122
-      name: runtime-apps-lv3
+      name: runtime-apps
       role: runtime-apps
       template_key: lv3-debian-base
       ipv4: 10.10.10.22
@@ -1150,9 +1150,9 @@ platform_guest_catalog:
         anti_affinity_group: runtime-apps
         co_location_exceptions: []
       packages: []
-    postgres-apps-lv3:
+    postgres-apps:
       vmid: 152
-      name: postgres-apps-lv3
+      name: postgres-apps
       role: postgres-apps
       template_key: lv3-postgres-host
       ipv4: 10.10.10.52
@@ -1181,9 +1181,9 @@ platform_guest_catalog:
         - nftables
         - postgresql
         - postgresql-contrib
-    postgres-data-lv3:
+    postgres-data:
       vmid: 154
-      name: postgres-data-lv3
+      name: postgres-data
       role: postgres-data
       template_key: lv3-postgres-host
       ipv4: 10.10.10.54
@@ -1215,7 +1215,7 @@ platform_guest_catalog:
   by_role:
     nginx:
       vmid: 110
-      name: nginx-lv3
+      name: nginx
       role: nginx
       proxmox_firewall_enabled: false
       template_key: lv3-debian-base
@@ -1239,7 +1239,7 @@ platform_guest_catalog:
         - nginx
     docker-runtime:
       vmid: 120
-      name: docker-runtime-lv3
+      name: docker-runtime
       role: docker-runtime
       proxmox_firewall_enabled: false
       template_key: lv3-docker-host
@@ -1263,7 +1263,7 @@ platform_guest_catalog:
         - docker.io
     docker-build:
       vmid: 130
-      name: docker-build-lv3
+      name: docker-build
       role: docker-build
       template_key: lv3-docker-host
       ipv4: 10.10.10.30
@@ -1290,7 +1290,7 @@ platform_guest_catalog:
         - rsync
     monitoring:
       vmid: 140
-      name: monitoring-lv3
+      name: monitoring
       role: monitoring
       template_key: lv3-debian-base
       ipv4: 10.10.10.40
@@ -1313,7 +1313,7 @@ platform_guest_catalog:
         - prometheus-node-exporter
     postgres:
       vmid: 150
-      name: postgres-lv3
+      name: postgres
       role: postgres
       template_key: lv3-postgres-host
       ipv4: 10.10.10.50
@@ -1339,7 +1339,7 @@ platform_guest_catalog:
         - postgresql-contrib
     postgres-replica:
       vmid: 151
-      name: postgres-replica-lv3
+      name: postgres-replica
       role: postgres-replica
       template_key: lv3-postgres-host
       ipv4: 10.10.10.51
@@ -1370,7 +1370,7 @@ platform_guest_catalog:
         - postgresql-contrib
     backup:
       vmid: 160
-      name: backup-lv3
+      name: backup
       role: backup
       template_key: lv3-ops-base
       ipv4: 10.10.10.60
@@ -1401,7 +1401,7 @@ platform_guest_catalog:
         - xfsprogs
     coolify:
       vmid: 170
-      name: coolify-lv3
+      name: coolify
       role: coolify
       template_key: lv3-debian-base
       ipv4: 10.10.10.70
@@ -1425,7 +1425,7 @@ platform_guest_catalog:
         - git
     coolify-apps:
       vmid: 171
-      name: coolify-apps-lv3
+      name: coolify-apps
       role: coolify-apps
       template_key: lv3-debian-base
       ipv4: 10.10.10.71
@@ -1449,7 +1449,7 @@ platform_guest_catalog:
         - git
     artifact-cache:
       vmid: 180
-      name: artifact-cache-lv3
+      name: artifact-cache
       role: artifact-cache
       template_key: lv3-debian-base
       ipv4: 10.10.10.80
@@ -1473,7 +1473,7 @@ platform_guest_catalog:
         - docker.io
     runtime-ai:
       vmid: 190
-      name: runtime-ai-lv3
+      name: runtime-ai
       role: runtime-ai
       template_key: lv3-debian-base
       ipv4: 10.10.10.90
@@ -1496,7 +1496,7 @@ platform_guest_catalog:
       packages: []
     runtime-general:
       vmid: 191
-      name: runtime-general-lv3
+      name: runtime-general
       role: runtime-general
       template_key: lv3-debian-base
       ipv4: 10.10.10.91
@@ -1519,7 +1519,7 @@ platform_guest_catalog:
       packages: []
     runtime-control:
       vmid: 192
-      name: runtime-control-lv3
+      name: runtime-control
       role: runtime-control
       template_key: lv3-debian-base
       ipv4: 10.10.10.92
@@ -1542,7 +1542,7 @@ platform_guest_catalog:
       packages: []
     runtime-comms:
       vmid: 121
-      name: runtime-comms-lv3
+      name: runtime-comms
       role: runtime-comms
       template_key: lv3-debian-base
       ipv4: 10.10.10.21
@@ -1565,7 +1565,7 @@ platform_guest_catalog:
       packages: []
     runtime-apps:
       vmid: 122
-      name: runtime-apps-lv3
+      name: runtime-apps
       role: runtime-apps
       template_key: lv3-debian-base
       ipv4: 10.10.10.22
@@ -1588,7 +1588,7 @@ platform_guest_catalog:
       packages: []
     postgres-apps:
       vmid: 152
-      name: postgres-apps-lv3
+      name: postgres-apps
       role: postgres-apps
       template_key: lv3-postgres-host
       ipv4: 10.10.10.52
@@ -1619,7 +1619,7 @@ platform_guest_catalog:
         - postgresql-contrib
     postgres-data:
       vmid: 154
-      name: postgres-data-lv3
+      name: postgres-data
       role: postgres-data
       template_key: lv3-postgres-host
       ipv4: 10.10.10.54
@@ -1651,7 +1651,7 @@ platform_guest_catalog:
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
-    owning_vm: nginx-lv3
+    owning_vm: nginx
     private_ip: 10.10.10.10
     public_hostname: nginx.lv3.org
     exposure_model: edge-static
@@ -1686,7 +1686,7 @@ platform_service_topology:
       public: https://nginx.lv3.org
   grafana:
     service_name: grafana
-    owning_vm: monitoring-lv3
+    owning_vm: monitoring
     private_ip: 10.10.10.40
     public_hostname: grafana.lv3.org
     exposure_model: edge-published
@@ -1765,7 +1765,7 @@ platform_service_topology:
       internal: http://10.10.10.1:8080
   alertmanager:
     service_name: alertmanager
-    owning_vm: monitoring-lv3
+    owning_vm: monitoring
     private_ip: 10.10.10.40
     exposure_model: private-only
     observability:
@@ -1821,7 +1821,7 @@ platform_service_topology:
       controller: https://100.64.0.1:8006/
   docker_runtime:
     service_name: docker-runtime
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: docker.lv3.org
     exposure_model: informational-only
@@ -1856,7 +1856,7 @@ platform_service_topology:
       public: https://docker.lv3.org
   docker_build:
     service_name: docker-build
-    owning_vm: docker-build-lv3
+    owning_vm: docker-build
     private_ip: 10.10.10.30
     public_hostname: build.lv3.org
     exposure_model: informational-only
@@ -1891,7 +1891,7 @@ platform_service_topology:
       public: https://build.lv3.org
   uptime_kuma:
     service_name: uptime-kuma
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
@@ -1923,7 +1923,7 @@ platform_service_topology:
       internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     public_hostname: status.lv3.org
     exposure_model: edge-published
@@ -1956,7 +1956,7 @@ platform_service_topology:
       internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: mail.lv3.org
     exposure_model: informational-only
@@ -1993,7 +1993,7 @@ platform_service_topology:
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     exposure_model: private-only
     observability:
@@ -2013,7 +2013,7 @@ platform_service_topology:
       smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: livekit.lv3.org
     exposure_model: edge-published
@@ -2050,7 +2050,7 @@ platform_service_topology:
       internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -2074,7 +2074,7 @@ platform_service_topology:
       schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -2097,7 +2097,7 @@ platform_service_topology:
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
-    owning_vm: runtime-ai-lv3
+    owning_vm: runtime-ai
     private_ip: 10.10.10.90
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/tika.yml
@@ -2115,7 +2115,7 @@ platform_service_topology:
       internal: http://10.10.10.90:9998
   tesseract_ocr:
     service_name: tesseract-ocr
-    owning_vm: runtime-ai-lv3
+    owning_vm: runtime-ai
     private_ip: 10.10.10.90
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/tesseract-ocr.yml
@@ -2133,7 +2133,7 @@ platform_service_topology:
       internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -2156,7 +2156,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -2179,7 +2179,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8005
   nomad:
     service_name: nomad
-    owning_vm: monitoring-lv3
+    owning_vm: monitoring
     private_ip: 10.10.10.40
     public_hostname: scheduler.lv3.org
     exposure_model: edge-published
@@ -2217,7 +2217,7 @@ platform_service_topology:
       controller: 8013
   gitea:
     service_name: gitea
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
     exposure_model: private-only
@@ -2249,7 +2249,7 @@ platform_service_topology:
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -2272,7 +2272,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8066
   matrix_synapse:
     service_name: matrix-synapse
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: matrix.lv3.org
     exposure_model: edge-published
@@ -2310,7 +2310,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -2333,7 +2333,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8004
   typesense:
     service_name: typesense
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -2356,7 +2356,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8016
   searxng:
     service_name: searxng
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: search.lv3.org
     exposure_model: private-only
@@ -2388,7 +2388,7 @@ platform_service_topology:
       controller: http://100.64.0.1:80
   langfuse:
     service_name: langfuse
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: langfuse.lv3.org
     exposure_model: edge-published
@@ -2421,7 +2421,7 @@ platform_service_topology:
       internal: http://10.10.10.20:3002
   flagsmith:
     service_name: flagsmith
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: flags.lv3.org
     exposure_model: edge-published
@@ -2454,7 +2454,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8017
   plausible:
     service_name: plausible
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: analytics.lv3.org
     exposure_model: edge-published
@@ -2489,7 +2489,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8016
   minio:
     service_name: minio
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: minio.lv3.org
     console_public_hostname: minio-console.lv3.org
@@ -2538,7 +2538,7 @@ platform_service_topology:
       console_public: https://minio-console.lv3.org
   glitchtip:
     service_name: glitchtip
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: errors.lv3.org
     exposure_model: edge-published
@@ -2571,7 +2571,7 @@ platform_service_topology:
       internal: http://10.10.10.20:3005
   lago:
     service_name: lago
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: billing.lv3.org
     exposure_model: edge-published
@@ -2609,7 +2609,7 @@ platform_service_topology:
       api: http://10.10.10.20:8099
   dify:
     service_name: dify
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: agents.lv3.org
     exposure_model: edge-published
@@ -2642,7 +2642,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8094
   plane:
     service_name: plane
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: tasks.lv3.org
     exposure_model: edge-published
@@ -2680,7 +2680,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8011
   woodpecker:
     service_name: woodpecker
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: ci.lv3.org
     exposure_model: edge-published
@@ -2718,7 +2718,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8017
   outline:
     service_name: outline
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: wiki.lv3.org
     exposure_model: edge-published
@@ -2751,7 +2751,7 @@ platform_service_topology:
       internal: http://10.10.10.20:3006
   grist:
     service_name: grist
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: grist.lv3.org
     exposure_model: edge-published
@@ -2784,7 +2784,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8484
   paperless:
     service_name: paperless
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: paperless.lv3.org
     exposure_model: edge-published
@@ -2823,7 +2823,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8018
   dozzle:
     service_name: dozzle
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: logs.lv3.org
     exposure_model: edge-published
@@ -2856,7 +2856,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8089
   excalidraw:
     service_name: excalidraw
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: draw.lv3.org
     exposure_model: edge-published
@@ -2891,7 +2891,7 @@ platform_service_topology:
       internal: http://10.10.10.20:3095
   gotenberg:
     service_name: gotenberg
-    owning_vm: runtime-ai-lv3
+    owning_vm: runtime-ai
     private_ip: 10.10.10.90
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/gotenberg.yml
@@ -2909,7 +2909,7 @@ platform_service_topology:
       internal: http://10.10.10.90:3007
   serverclaw:
     service_name: serverclaw
-    owning_vm: coolify-lv3
+    owning_vm: coolify
     private_ip: 10.10.10.70
     public_hostname: chat.lv3.org
     exposure_model: edge-published
@@ -2942,7 +2942,7 @@ platform_service_topology:
       internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -2960,7 +2960,7 @@ platform_service_topology:
       internal: http://10.10.10.20:11434
   piper:
     service_name: piper
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -2978,7 +2978,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8106
   n8n:
     service_name: n8n
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: n8n.lv3.org
     exposure_model: edge-published
@@ -3010,7 +3010,7 @@ platform_service_topology:
       internal: http://10.10.10.20:5678
   nextcloud:
     service_name: nextcloud
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: cloud.lv3.org
     exposure_model: edge-published
@@ -3056,7 +3056,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
-    owning_vm: coolify-lv3
+    owning_vm: coolify
     private_ip: 10.10.10.70
     public_hostname: coolify.lv3.org
     exposure_model: edge-published
@@ -3094,7 +3094,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8012
   coolify_apps:
     service_name: coolify-apps
-    owning_vm: coolify-apps-lv3
+    owning_vm: coolify-apps
     private_ip: 10.10.10.71
     public_hostname: apps.lv3.org
     exposure_model: edge-published
@@ -3131,7 +3131,7 @@ platform_service_topology:
       internal: https://10.10.10.71:443
   api_gateway:
     service_name: api-gateway
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: api.lv3.org
     exposure_model: edge-published
@@ -3163,7 +3163,7 @@ platform_service_topology:
       internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -3181,7 +3181,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8096
   changedetection:
     service_name: changedetection
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -3199,7 +3199,7 @@ platform_service_topology:
       internal: http://10.10.10.20:5000
   crawl4ai:
     service_name: crawl4ai
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -3217,7 +3217,7 @@ platform_service_topology:
       internal: http://10.10.10.20:11235
   platform_context_api:
     service_name: platform-context-api
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -3240,7 +3240,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
@@ -3272,7 +3272,7 @@ platform_service_topology:
       internal: 8091
   harbor:
     service_name: harbor
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: registry.lv3.org
     exposure_model: edge-published
@@ -3309,7 +3309,7 @@ platform_service_topology:
       internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: ops.lv3.org
     exposure_model: edge-published
@@ -3341,7 +3341,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     public_hostname: home.lv3.org
     exposure_model: edge-published
@@ -3373,7 +3373,7 @@ platform_service_topology:
       internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -3396,7 +3396,7 @@ platform_service_topology:
       controller: https://100.64.0.1:8200
   openfga:
     service_name: openfga
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -3419,7 +3419,7 @@ platform_service_topology:
       controller: http://100.64.0.1:8014
   temporal:
     service_name: temporal
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -3438,7 +3438,7 @@ platform_service_topology:
     urls: {}
   ntfy:
     service_name: ntfy
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: ntfy.lv3.org
     exposure_model: edge-published
@@ -3497,7 +3497,7 @@ platform_service_topology:
       controller: http://100.64.0.1:3001
   portainer:
     service_name: portainer
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -3520,7 +3520,7 @@ platform_service_topology:
       controller: https://100.64.0.1:9444
   vaultwarden:
     service_name: vaultwarden
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: vault.lv3.org
     exposure_model: private-only
@@ -3552,7 +3552,7 @@ platform_service_topology:
       controller: https://vault.lv3.org
   postgres:
     service_name: postgres
-    owning_vm: postgres-lv3
+    owning_vm: postgres
     private_ip: 10.10.10.55
     public_hostname: database.lv3.org
     exposure_model: private-only
@@ -3581,7 +3581,7 @@ platform_service_topology:
       controller: postgresql://100.64.0.1:5432
   backup_pbs:
     service_name: backup-pbs
-    owning_vm: backup-lv3
+    owning_vm: backup
     private_ip: 10.10.10.60
     exposure_model: private-only
     observability:
@@ -3597,7 +3597,7 @@ platform_service_topology:
     urls: {}
   directus:
     service_name: directus
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: data.lv3.org
     exposure_model: edge-published
@@ -3630,7 +3630,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8055
   label_studio:
     service_name: label_studio
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: annotate.lv3.org
     exposure_model: edge-published
@@ -3663,7 +3663,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8110
   superset:
     service_name: superset
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: bi.lv3.org
     exposure_model: edge-published
@@ -3696,7 +3696,7 @@ platform_service_topology:
       internal: http://10.10.10.20:8105
   repowise:
     service_name: repowise
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: repowise.lv3.org
     exposure_model: edge-published
@@ -3726,7 +3726,7 @@ platform_service_topology:
       public: https://repowise.lv3.org
   neko:
     service_name: neko
-    owning_vm: runtime-comms-lv3
+    owning_vm: runtime-comms
     private_ip: 10.10.10.21
     public_hostname: browser.lv3.org
     exposure_model: edge-published
@@ -4013,7 +4013,7 @@ platform_management_allowed_tcp_ports:
 public_edge_service_topology:
   nginx_edge:
     service_name: nginx-edge
-    owning_vm: nginx-lv3
+    owning_vm: nginx
     private_ip: 10.10.10.10
     public_hostname: nginx.lv3.org
     exposure_model: edge-static
@@ -4048,7 +4048,7 @@ public_edge_service_topology:
       public: https://nginx.lv3.org
   grafana:
     service_name: grafana
-    owning_vm: monitoring-lv3
+    owning_vm: monitoring
     private_ip: 10.10.10.40
     public_hostname: grafana.lv3.org
     exposure_model: edge-published
@@ -4127,7 +4127,7 @@ public_edge_service_topology:
       internal: http://10.10.10.1:8080
   alertmanager:
     service_name: alertmanager
-    owning_vm: monitoring-lv3
+    owning_vm: monitoring
     private_ip: 10.10.10.40
     exposure_model: private-only
     observability:
@@ -4183,7 +4183,7 @@ public_edge_service_topology:
       controller: https://100.64.0.1:8006/
   docker_runtime:
     service_name: docker-runtime
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: docker.lv3.org
     exposure_model: informational-only
@@ -4218,7 +4218,7 @@ public_edge_service_topology:
       public: https://docker.lv3.org
   docker_build:
     service_name: docker-build
-    owning_vm: docker-build-lv3
+    owning_vm: docker-build
     private_ip: 10.10.10.30
     public_hostname: build.lv3.org
     exposure_model: informational-only
@@ -4253,7 +4253,7 @@ public_edge_service_topology:
       public: https://build.lv3.org
   uptime_kuma:
     service_name: uptime-kuma
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
@@ -4285,7 +4285,7 @@ public_edge_service_topology:
       internal: http://10.10.10.91:3001
   status_page:
     service_name: status-page
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     public_hostname: status.lv3.org
     exposure_model: edge-published
@@ -4318,7 +4318,7 @@ public_edge_service_topology:
       internal: http://10.10.10.91:3001
   mail_platform:
     service_name: mail-platform
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: mail.lv3.org
     exposure_model: informational-only
@@ -4355,7 +4355,7 @@ public_edge_service_topology:
       private_api: http://10.10.10.20:8081
   mailpit:
     service_name: mailpit
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     exposure_model: private-only
     observability:
@@ -4375,7 +4375,7 @@ public_edge_service_topology:
       smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: livekit.lv3.org
     exposure_model: edge-published
@@ -4412,7 +4412,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -4436,7 +4436,7 @@ public_edge_service_topology:
       schema_registry: http://10.10.10.20:8104
   step_ca:
     service_name: step-ca
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -4459,7 +4459,7 @@ public_edge_service_topology:
       controller: https://100.64.0.1:9443
   tika:
     service_name: tika
-    owning_vm: runtime-ai-lv3
+    owning_vm: runtime-ai
     private_ip: 10.10.10.90
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/tika.yml
@@ -4477,7 +4477,7 @@ public_edge_service_topology:
       internal: http://10.10.10.90:9998
   tesseract_ocr:
     service_name: tesseract-ocr
-    owning_vm: runtime-ai-lv3
+    owning_vm: runtime-ai
     private_ip: 10.10.10.90
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/tesseract-ocr.yml
@@ -4495,7 +4495,7 @@ public_edge_service_topology:
       internal: http://10.10.10.90:3008
   semaphore:
     service_name: semaphore
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -4518,7 +4518,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -4541,7 +4541,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8005
   nomad:
     service_name: nomad
-    owning_vm: monitoring-lv3
+    owning_vm: monitoring
     private_ip: 10.10.10.40
     public_hostname: scheduler.lv3.org
     exposure_model: edge-published
@@ -4579,7 +4579,7 @@ public_edge_service_topology:
       controller: 8013
   gitea:
     service_name: gitea
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: git.lv3.org
     exposure_model: private-only
@@ -4611,7 +4611,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:3009
   mattermost:
     service_name: mattermost
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -4634,7 +4634,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8066
   matrix_synapse:
     service_name: matrix-synapse
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: matrix.lv3.org
     exposure_model: edge-published
@@ -4672,7 +4672,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -4695,7 +4695,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8004
   typesense:
     service_name: typesense
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -4718,7 +4718,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8016
   searxng:
     service_name: searxng
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: search.lv3.org
     exposure_model: private-only
@@ -4750,7 +4750,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:80
   langfuse:
     service_name: langfuse
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: langfuse.lv3.org
     exposure_model: edge-published
@@ -4783,7 +4783,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:3002
   flagsmith:
     service_name: flagsmith
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: flags.lv3.org
     exposure_model: edge-published
@@ -4816,7 +4816,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8017
   plausible:
     service_name: plausible
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: analytics.lv3.org
     exposure_model: edge-published
@@ -4851,7 +4851,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8016
   minio:
     service_name: minio
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: minio.lv3.org
     console_public_hostname: minio-console.lv3.org
@@ -4900,7 +4900,7 @@ public_edge_service_topology:
       console_public: https://minio-console.lv3.org
   glitchtip:
     service_name: glitchtip
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: errors.lv3.org
     exposure_model: edge-published
@@ -4933,7 +4933,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:3005
   lago:
     service_name: lago
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: billing.lv3.org
     exposure_model: edge-published
@@ -4971,7 +4971,7 @@ public_edge_service_topology:
       api: http://10.10.10.20:8099
   dify:
     service_name: dify
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: agents.lv3.org
     exposure_model: edge-published
@@ -5004,7 +5004,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8094
   plane:
     service_name: plane
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: tasks.lv3.org
     exposure_model: edge-published
@@ -5042,7 +5042,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8011
   woodpecker:
     service_name: woodpecker
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: ci.lv3.org
     exposure_model: edge-published
@@ -5080,7 +5080,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8017
   outline:
     service_name: outline
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: wiki.lv3.org
     exposure_model: edge-published
@@ -5113,7 +5113,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:3006
   grist:
     service_name: grist
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: grist.lv3.org
     exposure_model: edge-published
@@ -5146,7 +5146,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8484
   paperless:
     service_name: paperless
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: paperless.lv3.org
     exposure_model: edge-published
@@ -5185,7 +5185,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8018
   dozzle:
     service_name: dozzle
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: logs.lv3.org
     exposure_model: edge-published
@@ -5218,7 +5218,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8089
   excalidraw:
     service_name: excalidraw
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: draw.lv3.org
     exposure_model: edge-published
@@ -5253,7 +5253,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:3095
   gotenberg:
     service_name: gotenberg
-    owning_vm: runtime-ai-lv3
+    owning_vm: runtime-ai
     private_ip: 10.10.10.90
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/gotenberg.yml
@@ -5271,7 +5271,7 @@ public_edge_service_topology:
       internal: http://10.10.10.90:3007
   serverclaw:
     service_name: serverclaw
-    owning_vm: coolify-lv3
+    owning_vm: coolify
     private_ip: 10.10.10.70
     public_hostname: chat.lv3.org
     exposure_model: edge-published
@@ -5304,7 +5304,7 @@ public_edge_service_topology:
       internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -5322,7 +5322,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:11434
   piper:
     service_name: piper
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -5340,7 +5340,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8106
   n8n:
     service_name: n8n
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: n8n.lv3.org
     exposure_model: edge-published
@@ -5372,7 +5372,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:5678
   nextcloud:
     service_name: nextcloud
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: cloud.lv3.org
     exposure_model: edge-published
@@ -5418,7 +5418,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
-    owning_vm: coolify-lv3
+    owning_vm: coolify
     private_ip: 10.10.10.70
     public_hostname: coolify.lv3.org
     exposure_model: edge-published
@@ -5456,7 +5456,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8012
   coolify_apps:
     service_name: coolify-apps
-    owning_vm: coolify-apps-lv3
+    owning_vm: coolify-apps
     private_ip: 10.10.10.71
     public_hostname: apps.lv3.org
     exposure_model: edge-published
@@ -5493,7 +5493,7 @@ public_edge_service_topology:
       internal: https://10.10.10.71:443
   api_gateway:
     service_name: api-gateway
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: api.lv3.org
     exposure_model: edge-published
@@ -5525,7 +5525,7 @@ public_edge_service_topology:
       internal: http://10.10.10.92:8083
   browser_runner:
     service_name: browser-runner
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -5543,7 +5543,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8096
   changedetection:
     service_name: changedetection
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -5561,7 +5561,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:5000
   crawl4ai:
     service_name: crawl4ai
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -5579,7 +5579,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:11235
   platform_context_api:
     service_name: platform-context-api
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -5602,7 +5602,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: sso.lv3.org
     exposure_model: edge-published
@@ -5634,7 +5634,7 @@ public_edge_service_topology:
       internal: 8091
   harbor:
     service_name: harbor
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: registry.lv3.org
     exposure_model: edge-published
@@ -5671,7 +5671,7 @@ public_edge_service_topology:
       internal: http://10.10.10.92:8095
   ops_portal:
     service_name: ops-portal
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: ops.lv3.org
     exposure_model: edge-published
@@ -5703,7 +5703,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8092
   homepage:
     service_name: homepage
-    owning_vm: runtime-general-lv3
+    owning_vm: runtime-general
     private_ip: 10.10.10.91
     public_hostname: home.lv3.org
     exposure_model: edge-published
@@ -5735,7 +5735,7 @@ public_edge_service_topology:
       internal: http://10.10.10.91:3090
   openbao:
     service_name: openbao
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -5758,7 +5758,7 @@ public_edge_service_topology:
       controller: https://100.64.0.1:8200
   openfga:
     service_name: openfga
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -5781,7 +5781,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:8014
   temporal:
     service_name: temporal
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     exposure_model: private-only
     observability:
@@ -5800,7 +5800,7 @@ public_edge_service_topology:
     urls: {}
   ntfy:
     service_name: ntfy
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: ntfy.lv3.org
     exposure_model: edge-published
@@ -5859,7 +5859,7 @@ public_edge_service_topology:
       controller: http://100.64.0.1:3001
   portainer:
     service_name: portainer
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
@@ -5882,7 +5882,7 @@ public_edge_service_topology:
       controller: https://100.64.0.1:9444
   vaultwarden:
     service_name: vaultwarden
-    owning_vm: runtime-control-lv3
+    owning_vm: runtime-control
     private_ip: 10.10.10.92
     public_hostname: vault.lv3.org
     exposure_model: private-only
@@ -5914,7 +5914,7 @@ public_edge_service_topology:
       controller: https://vault.lv3.org
   postgres:
     service_name: postgres
-    owning_vm: postgres-lv3
+    owning_vm: postgres
     private_ip: 10.10.10.55
     public_hostname: database.lv3.org
     exposure_model: private-only
@@ -5943,7 +5943,7 @@ public_edge_service_topology:
       controller: postgresql://100.64.0.1:5432
   backup_pbs:
     service_name: backup-pbs
-    owning_vm: backup-lv3
+    owning_vm: backup
     private_ip: 10.10.10.60
     exposure_model: private-only
     observability:
@@ -5959,7 +5959,7 @@ public_edge_service_topology:
     urls: {}
   directus:
     service_name: directus
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: data.lv3.org
     exposure_model: edge-published
@@ -5992,7 +5992,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8055
   label_studio:
     service_name: label_studio
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: annotate.lv3.org
     exposure_model: edge-published
@@ -6025,7 +6025,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8110
   superset:
     service_name: superset
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: bi.lv3.org
     exposure_model: edge-published
@@ -6058,7 +6058,7 @@ public_edge_service_topology:
       internal: http://10.10.10.20:8105
   repowise:
     service_name: repowise
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
     public_hostname: repowise.lv3.org
     exposure_model: edge-published
@@ -6088,7 +6088,7 @@ public_edge_service_topology:
       public: https://repowise.lv3.org
   neko:
     service_name: neko
-    owning_vm: runtime-comms-lv3
+    owning_vm: runtime-comms
     private_ip: 10.10.10.21
     public_hostname: browser.lv3.org
     exposure_model: edge-published
@@ -6119,7 +6119,7 @@ public_edge_service_topology:
       public: https://browser.lv3.org
 uptime_kuma_service_topology:
   service_name: uptime-kuma
-  owning_vm: runtime-general-lv3
+  owning_vm: runtime-general
   private_ip: 10.10.10.91
   public_hostname: uptime.lv3.org
   exposure_model: edge-published

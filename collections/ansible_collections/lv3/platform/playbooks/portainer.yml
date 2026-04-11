@@ -11,7 +11,7 @@
         proxmox_security_manage_acme: false
 
 - name: Converge Portainer on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
 

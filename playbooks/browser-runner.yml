@@ -1,6 +1,6 @@
 ---
 # Playbook: browser-runner.yml
-# Purpose: Converge the private Playwright browser runner on docker-runtime-lv3 for governed web action and extraction.
+# Purpose: Converge the private Playwright browser runner on docker-runtime for governed web action and extraction.
 # Use case: Run when changing ADR 0261 runtime automation, local browser session policy, or the private browser runner service image build.
 #
 # Inputs (required):
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH transport mode for guest access.
 #
 # Outputs:
-#   - Browser runner container running on docker-runtime-lv3
+#   - Browser runner container running on docker-runtime
 #   - Private session artifacts persisted under /opt/browser-runner/data/artifacts
 #
 # Idempotency: Partially idempotent
@@ -18,7 +18,7 @@
 #
 # Dependencies:
 #   - ADR 0261: Defines Playwright browser runners as the governed ServerClaw browser action and extraction runtime.
-#   - Requires: docker-runtime-lv3 and the managed Docker host toolchain to be reachable.
+#   - Requires: docker-runtime and the managed Docker host toolchain to be reachable.
 #   - Role: lv3.platform.browser_runner_runtime — builds and converges the private Playwright runner.
 #
 # Related ADRs: 0165, 0247
@@ -27,7 +27,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-29
 - name: Converge Browser Runner on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   vars:

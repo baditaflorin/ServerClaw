@@ -10,13 +10,13 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - ntfy is running on docker-runtime-lv3 with repo-managed auth, ntfy.{{ platform_domain }} resolves through Hetzner DNS, and the shared NGINX edge publishes the public health endpoint.
+#   - ntfy is running on docker-runtime with repo-managed auth, ntfy.{{ platform_domain }} resolves through Hetzner DNS, and the shared NGINX edge publishes the public health endpoint.
 #
 # Idempotency: Fully idempotent
 #
 # Dependencies:
 #   - ADR 0299: ntfy as the self-hosted push notification channel for programmatic alert delivery.
-#   - Requires: the existing Docker runtime baseline on docker-runtime-lv3, linux_guest_firewall, nginx_edge_publication, and Hetzner DNS access for the public hostname.
+#   - Requires: the existing Docker runtime baseline on docker-runtime, linux_guest_firewall, nginx_edge_publication, and Hetzner DNS access for the public hostname.
 #   - Role: lv3.platform.ntfy_runtime - converges the ntfy runtime plus governed topic and credential contracts, including Docker publication self-heal during ntfy startup.
 #   - Role: lv3.platform.nginx_edge_publication - publishes ntfy.{{ platform_domain }} through the shared edge certificate and proxy path.
 #
@@ -91,7 +91,7 @@
         hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
 
 - name: Converge ntfy on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
   tags:
@@ -125,7 +125,7 @@
         playbook_execution_notification_service: ntfy
 
 - name: Publish ntfy through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   vars_files:

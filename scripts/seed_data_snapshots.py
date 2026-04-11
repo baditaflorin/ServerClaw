@@ -161,8 +161,8 @@ def collect_live_observations(catalog: dict[str, Any]) -> dict[str, Any]:
                 f"-d {shlex.quote(db_name)} -Atqc "
                 '"SELECT COALESCE(sum(n_live_tup),0)::bigint FROM pg_stat_user_tables;"'
             )
-            table_count_result = run_command(build_guest_ssh_command(context, "postgres-lv3", table_count_command))
-            row_count_result = run_command(build_guest_ssh_command(context, "postgres-lv3", row_count_command))
+            table_count_result = run_command(build_guest_ssh_command(context, "postgres", table_count_command))
+            row_count_result = run_command(build_guest_ssh_command(context, "postgres", row_count_command))
             if table_count_result.returncode != 0:
                 raise RuntimeError(table_count_result.stderr or table_count_result.stdout or db_name)
             if row_count_result.returncode != 0:
@@ -584,7 +584,7 @@ def build_parser() -> argparse.ArgumentParser:
     build = subparsers.add_parser("build", help="Build one anonymized seed snapshot locally.")
     build.add_argument("--seed-class", required=True)
 
-    publish = subparsers.add_parser("publish", help="Publish one local snapshot to backup-lv3.")
+    publish = subparsers.add_parser("publish", help="Publish one local snapshot to backup.")
     publish.add_argument("--seed-class", required=True)
     publish.add_argument("--snapshot-id")
 

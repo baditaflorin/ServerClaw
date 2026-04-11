@@ -317,13 +317,13 @@ def build_topology(
     ports = _extract_platform_ports(platform_yml)
 
     # Resolve specific well-known entries
-    coolify_guest = _find_guest(guests, "coolify-lv3")
-    coolify_apps_guest = _find_guest(guests, "coolify-apps-lv3")
+    coolify_guest = _find_guest(guests, "coolify")
+    coolify_apps_guest = _find_guest(guests, "coolify-apps")
 
     coolify_vmid = (coolify_guest or {}).get("vmid", 170)
     coolify_apps_vmid = (coolify_apps_guest or {}).get("vmid", 171)
-    coolify_ip = _resolve_ip("coolify-lv3", coolify_guest)
-    coolify_apps_ip = _resolve_ip("coolify-apps-lv3", coolify_apps_guest)
+    coolify_ip = _resolve_ip("coolify", coolify_guest)
+    coolify_apps_ip = _resolve_ip("coolify-apps", coolify_apps_guest)
 
     coolify_dashboard_port = ports.get("coolify_dashboard_port", 8000)
     coolify_proxy_port = ports.get("coolify_proxy_port", 80)
@@ -344,8 +344,8 @@ def build_topology(
     if not prod_vms:
         _warn("Could not extract VM list from inventory; using hardcoded defaults")
         prod_vms = {
-            "coolify-lv3": {"vmid": 170, "ip": "10.10.10.70"},
-            "coolify-apps-lv3": {"vmid": 171, "ip": "10.10.10.71"},
+            "coolify": {"vmid": 170, "ip": "10.10.10.70"},
+            "coolify-apps": {"vmid": 171, "ip": "10.10.10.71"},
         }
 
     snapshot: dict[str, Any] = {

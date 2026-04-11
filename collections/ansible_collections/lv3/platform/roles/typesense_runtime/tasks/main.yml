@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the private Typesense runtime and controller search contract on docker-runtime-lv3.
+# Purpose: Converge the private Typesense runtime and controller search contract on docker-runtime.
 # Use case: Run when provisioning or replaying ADR 0277 on the latest shared mainline baseline.
 # Inputs: typesense_* paths, image pin, OpenBao inputs, API key material, and listener settings.
 # Outputs: Rendered compose runtime, runtime environment, and a running Typesense service.

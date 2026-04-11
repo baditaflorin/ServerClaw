@@ -1,6 +1,6 @@
 ---
 # Playbook: neko.yml
-# Purpose: Converge the Neko remote desktop runtime for interactive operator browser access on runtime-comms-lv3.
+# Purpose: Converge the Neko remote desktop runtime for interactive operator browser access on runtime-comms.
 # Use case: Run during ADR 0380 rollout, remote desktop recovery, or later drift reconciliation from version-controlled automation.
 #
 # Inputs (required):
@@ -10,14 +10,14 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
 #
 # Outputs:
-#   - Neko is running on runtime-comms-lv3 with WebRTC signalling at browser.{{ platform_domain }}, UDP media forwarding from Proxmox host, and firewall rules preventing concurrent-apply races.
+#   - Neko is running on runtime-comms with WebRTC signalling at browser.{{ platform_domain }}, UDP media forwarding from Proxmox host, and firewall rules preventing concurrent-apply races.
 #
 # Idempotency: Fully idempotent
 #              The playbook re-renders the container stack deterministically and reapplies the firewall contract safely.
 #
 # Dependencies:
 #   - ADR 0380: Defines Neko as the interactive remote desktop platform for operator debugging.
-#   - Requires: runtime-comms-lv3 host access through the Proxmox jump path plus local OpenBao for runtime secret injection.
+#   - Requires: runtime-comms host access through the Proxmox jump path plus local OpenBao for runtime secret injection.
 #   - Role: lv3.platform.neko_runtime — renders, deploys, and verifies the Neko WebRTC runtime stack.
 #   - Role: lv3.platform.nginx_edge_publication — publishes browser.{{ platform_domain }} with HTTPS and WebSocket upgrade.
 #
@@ -36,7 +36,7 @@
 # --- Neko-specific plays ---
 
 - name: Converge Neko Remote Desktop Runtime
-  hosts: "{{ 'runtime-comms-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-comms-lv3' }}"
+  hosts: "{{ 'runtime-comms-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-comms' }}"
   become: true
   gather_facts: true
   tags:
@@ -79,7 +79,7 @@
         playbook_execution_notification_service: neko
 
 - name: Publish Neko through the NGINX edge
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
   tags:

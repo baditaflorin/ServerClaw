@@ -1,6 +1,6 @@
 ---
 # Playbook: piper.yml
-# Purpose: Converge the private Piper text-to-speech runtime on docker-runtime-lv3.
+# Purpose: Converge the private Piper text-to-speech runtime on docker-runtime.
 # Use case: Run when the Piper runtime image, declared voice model set, firewall exposure, or verification contract changes.
 #
 # Inputs (required):
@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path used by the shared scoped runner.
 #
 # Outputs:
-#   - A private Piper runtime on docker-runtime-lv3 with the repo-managed default voice downloaded into a named model volume
+#   - A private Piper runtime on docker-runtime with the repo-managed default voice downloaded into a named model volume
 #   - Local verification proving /healthz, /api/voices, and /api/tts return the expected health and WAV contracts
 #
 # Idempotency: Fully idempotent
@@ -18,7 +18,7 @@
 #
 # Dependencies:
 #   - ADR 0284: Defines Piper as the canonical CPU neural text-to-speech runtime.
-#   - Requires: docker-runtime-lv3 is reachable through the governed Proxmox jump path.
+#   - Requires: docker-runtime is reachable through the governed Proxmox jump path.
 #   - Role: lv3.platform.piper_runtime — builds the repo-managed runtime image and verifies the WAV synthesis contract.
 #
 # Related ADRs: 0086, 0107, 0284
@@ -28,7 +28,7 @@
 # Last Updated: 2026-03-30
 
 - name: Converge Piper on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:

@@ -11,8 +11,8 @@ USAGE EXAMPLES
   # What breaks if postgres goes down?
   python3 scripts/service_impact_tool.py impact --service postgres
 
-  # What breaks if the entire docker-runtime-lv3 VM goes down?
-  python3 scripts/service_impact_tool.py vm-impact --vm docker-runtime-lv3
+  # What breaks if the entire docker-runtime VM goes down?
+  python3 scripts/service_impact_tool.py vm-impact --vm docker-runtime
 
   # What does netbox depend on?
   python3 scripts/service_impact_tool.py depends-on --service netbox
@@ -385,7 +385,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_dep.add_argument("--service", required=True)
 
     p_vm = subs.add_parser("vm-impact", help="Impact of an entire VM going down.")
-    p_vm.add_argument("--vm", required=True, help="VM name (e.g. docker-runtime-lv3).")
+    p_vm.add_argument("--vm", required=True, help="VM name (e.g. docker-runtime).")
 
     p_path = subs.add_parser("path", help="Find dependency path between two services.")
     p_path.add_argument("--from", dest="from_svc", required=True)

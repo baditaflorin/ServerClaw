@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the ADR 0302 restic file-level backup runtime on docker-runtime-lv3.
+# Purpose: Converge the ADR 0302 restic file-level backup runtime on docker-runtime.
 # Use case: Run from playbooks/restic-config-backup.yml to install the systemd timer, OpenBao runtime credential bundle, and initial backup replay.
 # Inputs: Repo checkout path, controller-local password artifacts, and OpenBao helper defaults.
 # Outputs: Managed restic backup service, timer, runtime state directories, and OpenBao-backed credential delivery.
@@ -23,7 +23,7 @@
       - openbao_init_local_file | length > 0
     fail_msg: "restic_config_backup requires runtime paths, the repo checkout mirror, and OpenBao bootstrap inputs."
 
-- name: Ensure the worker checkout exists on docker-runtime-lv3
+- name: Ensure the worker checkout exists on docker-runtime
   ansible.builtin.stat:
     path: "{{ restic_config_backup_repo_checkout_host_path }}"
   register: restic_config_backup_repo_checkout
@@ -34,7 +34,7 @@
       - restic_config_backup_repo_checkout.stat.exists
       - restic_config_backup_repo_checkout.stat.isdir
     fail_msg: >-
-      {{ restic_config_backup_repo_checkout_host_path }} is missing on docker-runtime-lv3.
+      {{ restic_config_backup_repo_checkout_host_path }} is missing on docker-runtime.
       Converge Windmill first so the worker checkout mirror exists before ADR 0302 is enabled.
 
 - name: Ensure controller-local restic password directory exists
@@ -261,7 +261,7 @@
         | length
         == 1
     fail_msg: >-
-      {{ restic_config_backup_minio_container_name }} is missing on docker-runtime-lv3.
+      {{ restic_config_backup_minio_container_name }} is missing on docker-runtime.
       Converge MinIO before enabling ADR 0302 restic backups.
 
 - name: Check whether the shared MinIO container is already running

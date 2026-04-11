@@ -12,7 +12,7 @@
 #
 # Outputs:
 #   - Repo-managed Nomad TLS and ACL bootstrap artifacts exist under .local/nomad on the controller.
-#   - monitoring-lv3 runs the private Nomad server and docker-runtime-lv3 plus runtime-general-lv3 plus runtime-ai-lv3 plus runtime-control-lv3 plus docker-build-lv3 run Nomad clients.
+#   - monitoring runs the private Nomad server and docker-runtime plus runtime-general plus runtime-ai plus runtime-control plus docker-build run Nomad clients.
 #   - The Proxmox host exposes the private Nomad API through the Tailscale TCP proxy catalog.
 #   - Repo-managed long-running and dispatchable smoke jobs are registered and verified end to end.
 #
@@ -21,7 +21,7 @@
 #
 # Dependencies:
 #   - ADR 0232: Nomad for durable batch and long-running internal jobs.
-#   - Requires: Existing Proxmox host access, monitoring-lv3, docker-runtime-lv3, runtime-general-lv3, runtime-ai-lv3, runtime-control-lv3, and docker-build-lv3 guests.
+#   - Requires: Existing Proxmox host access, monitoring, docker-runtime, runtime-general, runtime-ai, runtime-control, and docker-build guests.
 #   - Role: lv3.platform.nomad_cluster_bootstrap — generates controller-local TLS artifacts, bootstraps ACLs, and verifies smoke jobs.
 #   - Role: lv3.platform.nomad_cluster_member — installs and configures the Nomad agent on server and client nodes.
 #
@@ -68,7 +68,7 @@
         proxmox_security_manage_acme: false
 
 - name: Converge the Nomad server on the monitoring guest
-  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: true
   vars_files:
@@ -98,9 +98,9 @@
   hosts: >-
     {{
       (
-        'docker-runtime-staging-lv3:docker-build-staging-lv3'
+        'docker-runtime-staging:docker-build-staging'
         if (env | default('production')) == 'staging'
-        else 'docker-runtime-lv3:runtime-general-lv3:runtime-ai-lv3:runtime-control-lv3:docker-build-lv3'
+        else 'docker-runtime:runtime-general:runtime-ai:runtime-control:docker-build'
       )
     }}
   become: true
@@ -138,11 +138,11 @@
             'build'
             if 'build' in inventory_hostname
             else 'runtime-general'
-            if inventory_hostname == 'runtime-general-lv3'
+            if inventory_hostname == 'runtime-general'
             else 'runtime-ai'
-            if inventory_hostname == 'runtime-ai-lv3'
+            if inventory_hostname == 'runtime-ai'
             else 'runtime-control'
-            if inventory_hostname == 'runtime-control-lv3'
+            if inventory_hostname == 'runtime-control'
             else 'runtime'
           }}
         nomad_cluster_node_meta:
@@ -151,16 +151,16 @@
               'build'
               if 'build' in inventory_hostname
               else 'runtime-general'
-              if inventory_hostname == 'runtime-general-lv3'
+              if inventory_hostname == 'runtime-general'
               else 'runtime-ai'
-              if inventory_hostname == 'runtime-ai-lv3'
+              if inventory_hostname == 'runtime-ai'
               else 'runtime-control'
-              if inventory_hostname == 'runtime-control-lv3'
+              if inventory_hostname == 'runtime-control'
               else 'runtime'
             }}
 
 - name: Bootstrap Nomad ACLs and verify repo-managed smoke jobs
-  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: true
   vars_files:
@@ -201,7 +201,7 @@
         playbook_execution_notification_service: nomad
 
 - name: Configure Nomad OIDC auth method for Keycloak SSO
-  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: true
   vars_files:

@@ -1,6 +1,6 @@
 ---
 # Purpose: Converge the Harbor runtime stack, managed secrets, Keycloak OIDC integration, project policy, and controller-local robot credentials.
-# Use case: Run during Harbor deployment or replay on docker-runtime-lv3 after edge publication and registry network access are prepared.
+# Use case: Run during Harbor deployment or replay on docker-runtime after edge publication and registry network access are prepared.
 #
 # Inputs (required):
 #   - harbor_site_dir (path, required): Harbor runtime root directory.

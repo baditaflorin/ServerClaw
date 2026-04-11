@@ -9,7 +9,7 @@
       "base_domain": "lv3.org",
       "hostname_pattern": "<service>.lv3.org",
       "edge_service_id": "nginx_edge",
-      "edge_vm": "nginx-lv3",
+      "edge_vm": "nginx",
       "ingress_ipv4": "203.0.113.1",
       "topology_model": "single-node-shared-edge",
       "isolation_model": "Production uses the authoritative bare lv3.org hostnames and repo-managed runtime state.",
@@ -30,7 +30,7 @@
       "base_domain": "staging.lv3.org",
       "hostname_pattern": "<service>.staging.lv3.org",
       "edge_service_id": "nginx_edge",
-      "edge_vm": "nginx-lv3",
+      "edge_vm": "nginx",
       "ingress_ipv4": "203.0.113.1",
       "topology_model": "single-node-shared-edge",
       "isolation_model": "Staging reuses the shared host and edge VM but must use separate DNS names, secrets, and mutable service state.",
@@ -56,7 +56,7 @@
           "recovery"
         ]
       },
-      "notes": "Live from 2026-03-27 with docker-runtime-staging-lv3 and monitoring-staging-lv3 on vmbr20; staged guest network policy and service bindings remain follow-up work."
+      "notes": "Live from 2026-03-27 with docker-runtime-staging and monitoring-staging on vmbr20; staged guest network policy and service bindings remain follow-up work."
     }
   ]
 }

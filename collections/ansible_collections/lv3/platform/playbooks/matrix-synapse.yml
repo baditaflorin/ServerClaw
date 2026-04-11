@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Matrix Synapse converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, a host-side Tailscale proxy published on proxmox_florin, and matrix.{{ platform_domain }} published through the shared edge.
+#   - Matrix Synapse converged on docker-runtime, PostgreSQL access prepared on postgres, a host-side Tailscale proxy published on proxmox_florin, and matrix.{{ platform_domain }} published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #              Runtime secrets, signing material, and the bootstrap admin account are reused when present, and repeat runs reconcile the same service contract.
@@ -18,7 +18,7 @@
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
 #   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
-#   - Requires: OpenBao, docker-runtime-lv3, postgres-lv3, the shared NGINX edge, and Hetzner DNS publication to be reachable
+#   - Requires: OpenBao, docker-runtime, postgres, the shared NGINX edge, and Hetzner DNS publication to be reachable
 #   - Role: matrix_synapse_postgres — provisions the Matrix Synapse database and role
 #   - Role: matrix_synapse_runtime — deploys Matrix Synapse, seeds bootstrap secrets, and verifies local login
 #
@@ -105,7 +105,7 @@
         hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
 
 - name: Converge PostgreSQL access for Matrix Synapse
-  hosts: postgres-lv3
+  hosts: postgres
   become: true
   gather_facts: true
   tags:
@@ -120,7 +120,7 @@
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
         required_hosts:
-          - postgres-lv3
+          - postgres
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -128,7 +128,7 @@
     - role: lv3.platform.matrix_synapse_postgres
 
 - name: Converge Matrix Synapse on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags:
@@ -144,7 +144,7 @@
         playbook_execution_audit_action: playbook.start.matrix-synapse
         playbook_execution_audit_target: matrix_synapse
         required_hosts:
-          - docker-runtime-lv3
+          - docker-runtime
 
   roles:
     - role: lv3.platform.linux_guest_firewall
@@ -164,7 +164,7 @@
         playbook_execution_notification_service: matrix_synapse
 
 - name: Publish Matrix Synapse through the NGINX edge
-  hosts: nginx-lv3
+  hosts: nginx
   become: true
   gather_facts: true
   vars_files:
@@ -181,7 +181,7 @@
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
         required_hosts:
-          - nginx-lv3
+          - nginx
 
   roles:
     - role: lv3.platform.nginx_edge_publication

@@ -1,6 +1,6 @@
 ---
 # Purpose: Declare defaults for the identity-core health watchdog (ADR 0376).
-# Use case: Installs a systemd timer on runtime-control-lv3 that probes Keycloak, Step-CA,
+# Use case: Installs a systemd timer on runtime-control that probes Keycloak, Step-CA,
 #   OpenBao, and API Gateway every 15 seconds and auto-restarts on failure.
 # Inputs:
 #   - identity_watchdog_services (list): Services to monitor with health endpoints and compose project info.

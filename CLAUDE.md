@@ -163,8 +163,8 @@ git push origin main
 | Host | IP | Purpose |
 |------|----|---------|
 | Proxmox host | 10.10.10.1 | Hypervisor |
-| runtime-control-lv3 | 10.10.10.92 | API gateway, agent tools, Docker runtime |
-| postgres-vm-lv3 | 10.10.10.60 | Shared PostgreSQL |
+| runtime-control | 10.10.10.92 | API gateway, agent tools, Docker runtime |
+| postgres-vm | 10.10.10.60 | Shared PostgreSQL |
 | build server | 10.10.10.30 | Docker build + pre-push gate runner |
 | Dify internal | 10.10.10.20:8094 | Dify API (bypasses oauth2-proxy) |
 

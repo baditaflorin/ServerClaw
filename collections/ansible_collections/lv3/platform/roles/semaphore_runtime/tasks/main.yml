@@ -36,7 +36,7 @@
     common_check_local_secrets_files:
       - path: "{{ semaphore_database_password_local_file }}"
         description: "Semaphore database password"
-        prerequisite: "Run the Semaphore PostgreSQL converge first so the runtime can connect to postgres-lv3"
+        prerequisite: "Run the Semaphore PostgreSQL converge first so the runtime can connect to postgres"
 
 - name: Ensure the Semaphore runtime packages are present
   ansible.builtin.apt:

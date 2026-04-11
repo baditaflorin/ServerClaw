@@ -11,7 +11,7 @@
 #   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
 #
 # Outputs:
-#   - Dedicated VM `artifact-cache-lv3` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, and the managed cache-plane runtime on ports 5001-5004.
+#   - Dedicated VM `artifact-cache` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, and the managed cache-plane runtime on ports 5001-5004.
 #
 # Idempotency: Partially idempotent
 #              The guest roles are idempotent, but the Proxmox-side replay intentionally stop/starts VM 180 after `qm set` changes so cloud-init-backed network and hardware changes become effective.
@@ -73,7 +73,7 @@
         - artifact-cache-vm
 
 - name: Converge the dedicated artifact cache guest
-  hosts: artifact-cache-lv3
+  hosts: artifact-cache
   become: true
   gather_facts: false
   tags:

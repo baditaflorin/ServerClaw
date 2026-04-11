@@ -34,7 +34,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Prepare PostgreSQL for OpenFGA
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
 
@@ -52,8 +52,8 @@
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.openfga_postgres
 
-- name: Converge OpenFGA and its Keycloak bootstrap on runtime-control-lv3
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+- name: Converge OpenFGA and its Keycloak bootstrap on runtime-control
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
 

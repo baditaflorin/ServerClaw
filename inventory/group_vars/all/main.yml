@@ -321,7 +321,7 @@ dr_offsite_backup_storage:
   smbversion: "3.0"
 
 dr_offsite_backup_jobs:
-  - id: backup-lv3-offsite
+  - id: backup-offsite
     enabled: "{{ dr_offsite_backup_storage.enabled }}"
     storage: "{{ dr_offsite_backup_storage.id }}"
     schedule: "04:00"
@@ -385,41 +385,41 @@ playbook_execution_host_patterns:
     production: "backup_guests:&production"
     staging: "backup_guests:&staging"
   coolify:
-    production: coolify-lv3
+    production: coolify
     staging: coolify-staging-lv3
   coolify_apps:
-    production: coolify-apps-lv3
+    production: coolify-apps
     staging: coolify-apps-staging-lv3
   nginx_edge:
-    production: nginx-lv3
-    staging: nginx-staging-lv3
+    production: nginx
+    staging: nginx-staging
   docker_runtime:
-    production: docker-runtime-lv3
-    staging: docker-runtime-staging-lv3
+    production: docker-runtime
+    staging: docker-runtime-staging
   runtime_ai:
-    production: runtime-ai-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-ai
+    staging: docker-runtime-staging
   runtime_control:
-    production: runtime-control-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-control
+    staging: docker-runtime-staging
   runtime_general:
-    production: runtime-general-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-general
+    staging: docker-runtime-staging
   runtime_comms:
-    production: runtime-comms-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-comms
+    staging: docker-runtime-staging
   docker_build:
-    production: docker-build-lv3
-    staging: docker-build-staging-lv3
+    production: docker-build
+    staging: docker-build-staging
   monitoring:
-    production: monitoring-lv3
-    staging: monitoring-staging-lv3
+    production: monitoring
+    staging: monitoring-staging
   postgres:
-    production: postgres-lv3
-    staging: postgres-staging-lv3
+    production: postgres
+    staging: postgres-staging
   backup:
-    production: backup-lv3
-    staging: backup-staging-lv3
+    production: backup
+    staging: backup-staging
 playbook_execution_required_hosts:
   proxmox_hosts:
     production: proxmox_florin
@@ -428,38 +428,38 @@ playbook_execution_required_hosts:
     production: "lv3_guests:&production"
     staging: "lv3_guests:&staging"
   nginx_edge:
-    production: nginx-lv3
-    staging: nginx-staging-lv3
+    production: nginx
+    staging: nginx-staging
   docker_runtime:
-    production: docker-runtime-lv3
-    staging: docker-runtime-staging-lv3
+    production: docker-runtime
+    staging: docker-runtime-staging
   runtime_control:
-    production: runtime-control-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-control
+    staging: docker-runtime-staging
   docker_build:
-    production: docker-build-lv3
-    staging: docker-build-staging-lv3
+    production: docker-build
+    staging: docker-build-staging
   runtime_ai:
-    production: runtime-ai-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-ai
+    staging: docker-runtime-staging
   runtime_general:
-    production: runtime-general-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-general
+    staging: docker-runtime-staging
   runtime_comms:
-    production: runtime-comms-lv3
-    staging: docker-runtime-staging-lv3
+    production: runtime-comms
+    staging: docker-runtime-staging
   monitoring:
-    production: monitoring-lv3
-    staging: monitoring-staging-lv3
+    production: monitoring
+    staging: monitoring-staging
   postgres:
-    production: postgres-lv3
-    staging: postgres-staging-lv3
+    production: postgres
+    staging: postgres-staging
   backup:
-    production: backup-lv3
-    staging: backup-staging-lv3
+    production: backup
+    staging: backup-staging
   coolify:
-    production: coolify-lv3
+    production: coolify
     staging: coolify-staging-lv3
   coolify_apps:
-    production: coolify-apps-lv3
+    production: coolify-apps
     staging: coolify-apps-staging-lv3

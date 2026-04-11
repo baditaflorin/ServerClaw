@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the private Gitea runtime, SSO wiring, and repo automation baseline on docker-runtime-lv3.
+# Purpose: Converge the private Gitea runtime, SSO wiring, and repo automation baseline on docker-runtime.
 # Use case: Run when provisioning or updating the repo-managed Gitea service and its control-plane integrations.
 # Inputs: gitea_* runtime paths, database credentials, publication URLs, and OIDC/bootstrap secrets.
 # Outputs: Rendered compose runtime, validated service configuration, and Gitea bootstrap state.
