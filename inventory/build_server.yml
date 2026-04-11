@@ -14,7 +14,7 @@ all:
   children:
     build_server:
       hosts:
-        build-lv3:
+        build:
           ansible_host: 10.10.10.30
           ansible_user: ops
           ansible_ssh_private_key_file: "{{ build_server_shared_local_root }}/ssh/bootstrap.id_ed25519"

@@ -386,10 +386,10 @@ playbook_execution_host_patterns:
     staging: "backup_guests:&staging"
   coolify:
     production: coolify
-    staging: coolify-staging-lv3
+    staging: coolify-staging
   coolify_apps:
     production: coolify-apps
-    staging: coolify-apps-staging-lv3
+    staging: coolify-apps-staging
   nginx_edge:
     production: nginx
     staging: nginx-staging
@@ -459,7 +459,7 @@ playbook_execution_required_hosts:
     staging: backup-staging
   coolify:
     production: coolify
-    staging: coolify-staging-lv3
+    staging: coolify-staging
   coolify_apps:
     production: coolify-apps
-    staging: coolify-apps-staging-lv3
+    staging: coolify-apps-staging
