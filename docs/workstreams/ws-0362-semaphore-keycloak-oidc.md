@@ -74,7 +74,7 @@ Comprehensive guide covering:
 
 ```
 Username: ops-semaphore
-Password: 62r4JXGau0hOjYdSLIPJL4yPNkoejC99
+Password: <generated-by-init-local>
 ```
 
 ### Keycloak OIDC Setup
