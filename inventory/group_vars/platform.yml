@@ -3766,6 +3766,8 @@ platform_session_authority:
   shared_proxy_cleanup_url: https://ops.lv3.org/.well-known/lv3/session/proxy-logout
   shared_logged_out_path: /.well-known/lv3/session/logged-out
   shared_logged_out_url: https://ops.lv3.org/.well-known/lv3/session/logged-out
+  cookie_name: _lv3_ops_portal_proxy
+  cookie_domain: .lv3.org
 platform_dns_records:
   public: &id001
     - name: '@'

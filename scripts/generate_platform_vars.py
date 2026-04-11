@@ -879,7 +879,7 @@ def build_tcp_proxies(host_vars: dict[str, Any], ports: dict[str, int]) -> list[
     return resolved
 
 
-def build_platform_session_authority(service_topology: dict[str, Any]) -> dict[str, str]:
+def build_platform_session_authority(service_topology: dict[str, Any], host_vars: dict[str, Any]) -> dict[str, str]:
     keycloak_service = require_mapping(
         service_topology.get("keycloak"),
         "platform_service_topology.keycloak",
@@ -913,6 +913,9 @@ def build_platform_session_authority(service_topology: dict[str, Any]) -> dict[s
         "shared_proxy_cleanup_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH}",
         "shared_logged_out_path": SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH,
         "shared_logged_out_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH}",
+        # oauth2-proxy session cookie name and domain — mirrors public_edge_oidc_auth defaults
+        "cookie_name": "_lv3_ops_portal_proxy",
+        "cookie_domain": f".{host_vars['platform_domain']}",
     }
 
 
@@ -959,7 +962,7 @@ def build_platform_vars(
         resolved_ports,
         service_classification_by_id,
     )
-    session_authority = build_platform_session_authority(service_topology)
+    session_authority = build_platform_session_authority(service_topology, host_vars)
     dns_records = build_dns_records(service_topology, host_vars)
     tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
     monitoring_service = service_topology["grafana"]
