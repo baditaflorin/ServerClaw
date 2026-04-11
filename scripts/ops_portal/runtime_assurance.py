@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime, UTC
+from datetime import datetime
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from typing import Any
 from urllib.parse import urlparse
 

@@ -9,7 +9,12 @@ import os
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, UTC
+from datetime import datetime
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
 

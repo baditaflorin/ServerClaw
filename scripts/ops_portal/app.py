@@ -9,7 +9,12 @@ import uuid
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, UTC
+from datetime import date, datetime, timedelta
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from functools import lru_cache
 from pathlib import Path
 from typing import Any

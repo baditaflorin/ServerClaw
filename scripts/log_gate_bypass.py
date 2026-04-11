@@ -8,7 +8,9 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, UTC
+from datetime import datetime, timezone as _tz
+
+UTC = _tz.utc
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent

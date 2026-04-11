@@ -6,7 +6,12 @@ import json
 import urllib.request
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from typing import Any
 from urllib.parse import urlparse
 

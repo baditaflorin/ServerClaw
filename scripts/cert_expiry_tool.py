@@ -39,7 +39,12 @@ import socket
 import ssl
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, UTC
+from datetime import datetime
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
 

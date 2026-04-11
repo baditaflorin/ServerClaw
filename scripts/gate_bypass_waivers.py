@@ -11,10 +11,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
-try:
-    from datetime import UTC  # Python 3.11+
-except ImportError:
-    UTC = UTC  # type: ignore[assignment]
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 

@@ -36,7 +36,12 @@ import subprocess
 import sys
 import time
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from statistics import median, stdev
 from typing import Any

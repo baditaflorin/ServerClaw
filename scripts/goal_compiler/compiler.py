@@ -45,7 +45,11 @@ from .models import (
     ScoringContext,
 )
 from .resolver import resolve_scope, resolve_target, resolve_workflow_id
-from datetime import UTC
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 
 
 # ---------------------------------------------------------------------------

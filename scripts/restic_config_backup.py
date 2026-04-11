@@ -17,7 +17,12 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
 from collections.abc import Iterator

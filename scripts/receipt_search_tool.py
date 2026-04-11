@@ -37,7 +37,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, UTC
+from datetime import datetime
+try:
+    from datetime import UTC
+except ImportError:  # Python < 3.11
+    from datetime import timezone
+    UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
