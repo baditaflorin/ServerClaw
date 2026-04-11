@@ -72,6 +72,8 @@ exclude_paths:
   - ".local/"
   - "publication/"
   - "config/publication-sanitization.yaml"
+  - "scripts/one-time/"
+  - "scripts/audit_sanitization_coverage.py"
 
 # --- Files to delete from the public copy ---
 delete_paths:

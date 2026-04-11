@@ -16,16 +16,16 @@ modifying **6,482 files**. ADR 0407 (generic-by-default) and ADR 0408 (generic
 inventory hostnames) reduced this to ~128 files, but a residual set of
 deployment-specific literals remained:
 
-- `lv3.org` domain in 73 config catalogs, scripts, and metadata files
-- `proxmox_florin` topology host in 66 files
+- Operator domain in 73 config catalogs, scripts, and metadata files
+- Topology host identifier in 66 files
 - Public IPv4/IPv6 addresses in 8 files
 - Operator PII (names, emails) in 7 files
-- `proxmox_florin_server` repo name in 14 files
+- Repository checkout name in 14 files
 - Generated inventory/monitoring configs (6 files)
 
 These literals existed because the codebase was written deployment-first: real
 values were committed, and the publication pipeline replaced them with generic
-placeholders. This created an ongoing maintenance burden—every new file with a
+placeholders. This created an ongoing maintenance burden — every new file with a
 domain reference required remembering to sanitize it.
 
 ## Decision
@@ -45,9 +45,8 @@ matches.
    `platform_operator_name: "Platform Operator"`,
    `platform_repo_name: platform_server`
 
-2. **Topology host renamed**: `proxmox_florin` → `proxmox-host` in Ansible
-   inventory, host_vars filename, and all references. `TOPOLOGY_HOST` in
-   `platform/repo.py` updated to `"proxmox-host"`.
+2. **Topology host renamed** to `proxmox-host` in Ansible inventory, host_vars
+   filename, and all references. `TOPOLOGY_HOST` in `platform/repo.py` updated.
 
 3. **All source files generalized**: 129 files, 2,581 replacements applying the
    same transformations the publication pipeline used to apply at publish time.
@@ -65,26 +64,27 @@ matches.
 
 ### Hostname Mapping
 
-| Before | After |
+| Before (old) | After (generic) |
 |--------|-------|
-| `proxmox_florin` | `proxmox-host` |
-| `host_vars/proxmox_florin.yml` | `host_vars/proxmox-host.yml` |
-| `Debian-trixie-latest-amd64-base` | `debian-base-template` |
+| deployment-specific topology host | `proxmox-host` |
+| deployment-specific host_vars file | `host_vars/proxmox-host.yml` |
+| deployment-specific template image | `debian-base-template` |
 
 ### Runtime Override Mechanism
 
-`.local/identity.yml` provides deployment-specific values:
+`.local/identity.yml` provides deployment-specific values. Example structure:
+
 ```yaml
-platform_domain: lv3.org
-platform_operator_email: florin@lv3.org
-platform_operator_name: "Florin Badita-Nistor"
-platform_repo_name: proxmox_florin_server
-host_public_hostname: Debian-trixie-latest-amd64-base
-proxmox_node_name: Debian-trixie-latest-amd64-base
-management_ipv4: 65.108.75.123
-management_gateway4: 65.108.75.65
-management_ipv6: "2a01:4f9:6b:4b47::2"
-hetzner_ipv4_route_network: 65.108.75.64
+platform_domain: your-domain.tld
+platform_operator_email: you@your-domain.tld
+platform_operator_name: "Your Name"
+platform_repo_name: your_repo_name
+host_public_hostname: your-server-hostname
+proxmox_node_name: your-proxmox-node
+management_ipv4: YOUR.PUBLIC.IP.ADDR
+management_gateway4: YOUR.GATEWAY.IP
+management_ipv6: "your:ipv6::addr"
+hetzner_ipv4_route_network: YOUR.ROUTE.NETWORK
 ```
 
 Ansible loads this via `-e @.local/identity.yml` (extra-vars have highest
@@ -112,8 +112,8 @@ precedence, overriding group_vars and host_vars).
   `make regenerate-all` before convergence. This is a one-time step after
   cloning.
 - **Historical references remain**: ADR filenames, release notes, and
-  slugified identifiers (e.g., `lv3-org-apex-edge`) retain the original
-  domain slug. These don't match any leak markers.
+  slugified identifiers retain the original domain slug. These don't match
+  any leak markers.
 
 ### Tier A Replacements (retained)
 
