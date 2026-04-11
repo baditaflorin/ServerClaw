@@ -56,17 +56,19 @@ def build_and_push(repo_root: Path, image: str, context: str) -> dict[str, objec
     ]
     if build_network:
         command.extend(["--network", build_network])
-    command.extend([
-        "--build-arg",
-        "BUILDKIT_INLINE_CACHE=1",
-        "--cache-from",
-        f"type=registry,ref={cache_ref}",
-        "--cache-to",
-        f"type=registry,ref={cache_ref},mode=max",
-        "--tag",
-        image,
-        context,
-    ])
+    command.extend(
+        [
+            "--build-arg",
+            "BUILDKIT_INLINE_CACHE=1",
+            "--cache-from",
+            f"type=registry,ref={cache_ref}",
+            "--cache-to",
+            f"type=registry,ref={cache_ref},mode=max",
+            "--tag",
+            image,
+            context,
+        ]
+    )
     result = run(command, repo_root)
     return {
         "command": " ".join(shlex.quote(part) for part in command),
@@ -110,7 +112,7 @@ def maybe_commit(repo_root: Path, manifest_path: Path) -> subprocess.CompletedPr
     )
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server"):
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")):
     repo_root = Path(repo_path)
     manifest_path = repo_root / "config/check-runner-manifest.json"
     build_results = {}

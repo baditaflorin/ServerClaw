@@ -44,9 +44,9 @@ def is_first_monday_of_quarter() -> bool:
 
     # Determine quarter start dates
     quarters = [
-        (1, 1),   # Q1
-        (4, 1),   # Q2
-        (7, 1),   # Q3
+        (1, 1),  # Q1
+        (4, 1),  # Q2
+        (7, 1),  # Q3
         (10, 1),  # Q4
     ]
 
@@ -94,6 +94,7 @@ def parse_adr_frontmatter(adr_path: Path) -> Dict[str, str]:
 def get_adr_number_from_path(path: Path) -> Optional[str]:
     """Extract ADR number from path."""
     import re
+
     match = re.match(r"(\d{4})-", path.name)
     return match.group(1) if match else None
 
@@ -264,14 +265,14 @@ def format_audit_html(audit_report: Dict) -> str:
 
     html = f"""<h2>Quarterly ADR Audit Report</h2>
 <p><strong>Audit Date:</strong> {timestamp}</p>
-<p><strong>Total ADRs Audited:</strong> {audit_report.get('total_adrs_audited', 0)}</p>
+<p><strong>Total ADRs Audited:</strong> {audit_report.get("total_adrs_audited", 0)}</p>
 
 <h3>Confidence Summary</h3>
 <ul>
-<li><strong>High Confidence (5+ markers):</strong> {summary.get('high', 0)} ADRs</li>
-<li><strong>Medium Confidence (2-4 markers):</strong> {summary.get('medium', 0)} ADRs</li>
-<li><strong>Low Confidence (1 marker):</strong> {summary.get('low', 0)} ADRs</li>
-<li><strong>No Evidence:</strong> {summary.get('none', 0)} ADRs</li>
+<li><strong>High Confidence (5+ markers):</strong> {summary.get("high", 0)} ADRs</li>
+<li><strong>Medium Confidence (2-4 markers):</strong> {summary.get("medium", 0)} ADRs</li>
+<li><strong>Low Confidence (1 marker):</strong> {summary.get("low", 0)} ADRs</li>
+<li><strong>No Evidence:</strong> {summary.get("none", 0)} ADRs</li>
 </ul>
 
 <h3>Recommendations</h3>
@@ -318,7 +319,9 @@ def main() -> int:
         # Format and display report
         print(f"\nAudit Report Summary:")
         summary = audit_report.get("confidence_summary", {})
-        print(f"  High: {summary.get('high', 0)} | Medium: {summary.get('medium', 0)} | Low: {summary.get('low', 0)} | None: {summary.get('none', 0)}")
+        print(
+            f"  High: {summary.get('high', 0)} | Medium: {summary.get('medium', 0)} | Low: {summary.get('low', 0)} | None: {summary.get('none', 0)}"
+        )
         print(f"\nRecommendations:")
         for rec in audit_report.get("recommendations", []):
             print(f"  - {rec}")
@@ -326,13 +329,16 @@ def main() -> int:
         if not args.dry_run:
             # Would create Plane issue here
             # For now, just print that we would create it
-            print(f"\n[INFO] Would create Plane audit issue with {len(audit_report.get('recommendations', []))} recommendations")
+            print(
+                f"\n[INFO] Would create Plane audit issue with {len(audit_report.get('recommendations', []))} recommendations"
+            )
 
         return 0
 
     except Exception as e:
         print(f"ERROR: Audit failed: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         return 2
 

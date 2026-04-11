@@ -110,7 +110,7 @@ def _write_ledger_event(
 
 def main(
     event_payload: dict[str, Any] | None = None,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     dsn: str | None = None,
     world_state_dsn: str | None = None,
     ledger_dsn: str | None = None,
@@ -133,7 +133,9 @@ def main(
             dsn=dsn,
             world_state_dsn=world_state_dsn or dsn,
         )
-        health_snapshot = client.world_state_client.get("service_health", allow_stale=True) if client.world_state_client else {}
+        health_snapshot = (
+            client.world_state_client.get("service_health", allow_stale=True) if client.world_state_client else {}
+        )
         services = health_snapshot.get("services", []) if isinstance(health_snapshot, dict) else []
         degraded_sources = [
             service
@@ -197,7 +199,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Run ADR 0117 derived health propagation.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--event-payload", default="")
     parser.add_argument("--dsn")
     parser.add_argument("--world-state-dsn")

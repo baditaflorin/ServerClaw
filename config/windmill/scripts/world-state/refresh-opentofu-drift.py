@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import argparse
 from pathlib import Path
 import sys
@@ -15,7 +17,7 @@ from platform.world_state.windmill_entrypoint import maybe_run_via_uv, render_re
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     dsn: str | None = None,
     publish_nats: bool = True,
 ):
@@ -34,7 +36,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Refresh the world-state opentofu_drift surface.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--dsn")
     parser.add_argument("--output-file", type=Path, help="Optional JSON output file for fallback execution.")
     parser.add_argument("--no-publish-nats", action="store_true")

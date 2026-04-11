@@ -8,7 +8,7 @@ import os
 import sys
 from pathlib import Path
 
-DEFAULT_REPO_PATH = "/srv/proxmox_florin_server"
+DEFAULT_REPO_PATH = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")
 
 
 def _load_deadlock_detector_dependencies(repo_root: Path):
@@ -50,12 +50,16 @@ def main(
     if ledger_file_path:
         os.environ["LV3_LEDGER_FILE"] = ledger_file_path
 
-    AgentCoordinationMap, IntentQueue, LedgerWriter, DeadlockDetector, ResourceLockRegistry = _load_deadlock_detector_dependencies(
-        repo_root
+    AgentCoordinationMap, IntentQueue, LedgerWriter, DeadlockDetector, ResourceLockRegistry = (
+        _load_deadlock_detector_dependencies(repo_root)
     )
 
     ledger_writer = None
-    if ledger_file_path or os.environ.get("LV3_LEDGER_FILE", "").strip() or os.environ.get("LV3_LEDGER_DSN", "").strip():
+    if (
+        ledger_file_path
+        or os.environ.get("LV3_LEDGER_FILE", "").strip()
+        or os.environ.get("LV3_LEDGER_DSN", "").strip()
+    ):
         ledger_writer = LedgerWriter(nats_publisher=None)
 
     detector = DeadlockDetector(
@@ -78,11 +82,11 @@ if __name__ == "__main__":
     print(
         json.dumps(
             main(
-            repo_path=args.repo_path,
-            lock_registry_path=args.lock_registry_path,
-            coordination_map_path=args.coordination_map_path,
-            intent_queue_path=args.intent_queue_path,
-            ledger_file_path=args.ledger_file_path,
+                repo_path=args.repo_path,
+                lock_registry_path=args.lock_registry_path,
+                coordination_map_path=args.coordination_map_path,
+                intent_queue_path=args.intent_queue_path,
+                ledger_file_path=args.ledger_file_path,
             ),
             sort_keys=True,
         )

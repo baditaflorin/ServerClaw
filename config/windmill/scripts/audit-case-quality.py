@@ -12,6 +12,8 @@ Returns a JSON report with summary counts.
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import importlib
 import json
@@ -30,9 +32,7 @@ def _post_json_webhook(url: str, payload: dict[str, Any]) -> None:
     )
     with urllib.request.urlopen(request, timeout=10) as response:
         if response.status >= 300:
-            raise RuntimeError(
-                f"Mattermost webhook POST failed with HTTP {response.status}"
-            )
+            raise RuntimeError(f"Mattermost webhook POST failed with HTTP {response.status}")
 
 
 def _render_summary(report: dict[str, Any]) -> str:
@@ -48,16 +48,10 @@ def _render_summary(report: dict[str, Any]) -> str:
     if flagged:
         lines.append("\n**Resolved cases missing root_cause:**")
         for item in flagged[:10]:
-            lines.append(
-                f"- `{item['case_id']}` — {item['title']} ({item['affected_service']})"
-            )
+            lines.append(f"- `{item['case_id']}` — {item['title']} ({item['affected_service']})")
         if len(flagged) > 10:
             lines.append(f"- … and {len(flagged) - 10} more")
-    failed_verifications = [
-        r
-        for r in report.get("verification_results", [])
-        if r.get("status") == "fail"
-    ]
+    failed_verifications = [r for r in report.get("verification_results", []) if r.get("status") == "fail"]
     if failed_verifications:
         lines.append("\n**Verification failures (fix may have regressed):**")
         for item in failed_verifications[:5]:
@@ -72,9 +66,7 @@ def _load_case_store(repo_root: Path):
         sys.path.remove(scripts_dir)
     sys.path.insert(0, scripts_dir)
     existing = sys.modules.get("cases")
-    if existing is not None and not str(
-        getattr(existing, "__file__", "")
-    ).startswith(scripts_dir):
+    if existing is not None and not str(getattr(existing, "__file__", "")).startswith(scripts_dir):
         for name in list(sys.modules):
             if name == "cases" or name.startswith("cases."):
                 del sys.modules[name]
@@ -86,7 +78,7 @@ def _load_case_store(repo_root: Path):
 # Windmill entrypoint.
 def main(
     *,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     verify_commands: bool = False,
     mattermost_webhook_url: str | None = None,
 ) -> dict[str, Any]:
@@ -102,9 +94,7 @@ def main(
     report["status"] = "ok"
 
     if mattermost_webhook_url:
-        _post_json_webhook(
-            mattermost_webhook_url, {"text": _render_summary(report)}
-        )
+        _post_json_webhook(mattermost_webhook_url, {"text": _render_summary(report)})
         report["mattermost_posted"] = True
     else:
         report["mattermost_posted"] = False
@@ -116,13 +106,12 @@ def main(
 # CLI wrapper
 # ------------------------------------------------------------------
 
+
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Run the ADR 0118 case-quality audit."
-    )
+    parser = argparse.ArgumentParser(description="Run the ADR 0118 case-quality audit.")
     parser.add_argument(
         "--repo-path",
-        default="/srv/proxmox_florin_server",
+        default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
         help="Path to the repo checkout on this machine.",
     )
     parser.add_argument(

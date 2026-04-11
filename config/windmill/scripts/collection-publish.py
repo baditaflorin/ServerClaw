@@ -26,7 +26,7 @@ def load_collection_metadata(galaxy_path: Path) -> dict[str, str]:
 
 
 def main(
-    repo_root: str = "/srv/proxmox_florin_server",
+    repo_root: str = "/srv/platform_server",
     server: str = "",
     dry_run: bool = False,
 ) -> dict[str, object]:
@@ -59,7 +59,15 @@ def main(
     version = metadata.get("version", "0.0.0")
     tarball = build_dir / f"{metadata.get('namespace', 'lv3')}-{metadata.get('name', 'platform')}-{version}.tar.gz"
 
-    build_command = [ansible_galaxy, "collection", "build", str(collection_root), "--output-path", str(build_dir), "--force"]
+    build_command = [
+        ansible_galaxy,
+        "collection",
+        "build",
+        str(collection_root),
+        "--output-path",
+        str(build_dir),
+        "--force",
+    ]
     publish_command = [ansible_galaxy, "collection", "publish", str(tarball), "--server", server_name]
     if token:
         publish_command.extend(["--token", token])
@@ -104,7 +112,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Build and optionally publish the lv3.platform collection.")
-    parser.add_argument("--repo-root", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-root", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--server", default="")
     parser.add_argument("--dry-run", action="store_true")
     return parser

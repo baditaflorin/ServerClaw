@@ -33,7 +33,7 @@ from .materializer import SURFACE_DEFINITIONS, EventPublisher, materialize_surfa
 
 
 Collector = Callable[[Path], Any]
-REPO_ROOT_FALLBACK = Path("/srv/proxmox_florin_server")
+REPO_ROOT_FALLBACK = Path(os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
 FIXTURE_ENV_VARS = {
     "proxmox_vms": "WORLD_STATE_PROXMOX_VMS_FIXTURE",
     "service_health": "WORLD_STATE_SERVICE_HEALTH_FIXTURE",
@@ -341,7 +341,9 @@ def probe_via_contract(service: dict[str, Any], contract: dict[str, Any]) -> dic
         result = {
             "status": legacy_status_for_runtime_state(runtime_state),
             "http_status": primary.get("http_status"),
-            "error": None if runtime_state in {RUNTIME_STATE_READY, RUNTIME_STATE_DEGRADED, RUNTIME_STATE_STARTUP} else detail,
+            "error": None
+            if runtime_state in {RUNTIME_STATE_READY, RUNTIME_STATE_DEGRADED, RUNTIME_STATE_STARTUP}
+            else detail,
             "detail": detail,
             "probe_source": primary.get("phase") or "service_catalog",
             "probe_kind": primary.get("kind") or "url",
@@ -519,7 +521,9 @@ def collect_netbox_topology(repo_root: Path) -> dict[str, Any]:
         return {
             "source": "netbox_api",
             "devices": paginated_netbox_list(netbox_url, netbox_token, "/api/dcim/devices/"),
-            "virtual_machines": paginated_netbox_list(netbox_url, netbox_token, "/api/virtualization/virtual-machines/"),
+            "virtual_machines": paginated_netbox_list(
+                netbox_url, netbox_token, "/api/virtualization/virtual-machines/"
+            ),
             "ip_addresses": paginated_netbox_list(netbox_url, netbox_token, "/api/ipam/ip-addresses/"),
             "vlans": paginated_netbox_list(netbox_url, netbox_token, "/api/ipam/vlans/"),
         }
@@ -532,15 +536,23 @@ def collect_netbox_topology(repo_root: Path) -> dict[str, Any]:
             {
                 "name": "proxmox_florin",
                 "role": "proxmox-host",
-                "management_ip": inventory["all"]["children"]["proxmox_hosts"]["hosts"]["proxmox_florin"]["ansible_host"],
+                "management_ip": inventory["all"]["children"]["proxmox_hosts"]["hosts"]["proxmox_florin"][
+                    "ansible_host"
+                ],
             }
         ],
         "virtual_machines": [
-            {"name": name, "ansible_host": data.get("ansible_host"), "environment": data.get("environment", "production")}
+            {
+                "name": name,
+                "ansible_host": data.get("ansible_host"),
+                "environment": data.get("environment", "production"),
+            }
             for name, data in guests.items()
         ],
         "ip_addresses": [
-            {"name": name, "address": data.get("ansible_host")} for name, data in guests.items() if data.get("ansible_host")
+            {"name": name, "address": data.get("ansible_host")}
+            for name, data in guests.items()
+            if data.get("ansible_host")
         ],
         "vlans": [{"name": "guest-network", "vid": 10, "prefix": "10.10.10.0/24"}],
     }
@@ -693,7 +705,9 @@ def publish_refresh_event_best_effort(subject: str, payload: dict[str, Any]) -> 
             connect_kwargs.update({"user": username, "password": password})
         client = await nats.connect(nats_url, **connect_kwargs)
         try:
-            envelope = build_envelope(subject, payload, actor_id="service/world-state-worker", ts=payload.get("collected_at"))
+            envelope = build_envelope(
+                subject, payload, actor_id="service/world-state-worker", ts=payload.get("collected_at")
+            )
             await client.publish(subject, json.dumps(envelope).encode())
             await client.flush()
         finally:

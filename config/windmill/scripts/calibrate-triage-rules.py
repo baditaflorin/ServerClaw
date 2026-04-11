@@ -49,7 +49,7 @@ def build_summary(payload: dict[str, Any]) -> str:
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     cases_path: str | None = None,
     mattermost_webhook_url: str | None = None,
 ) -> dict[str, Any]:
@@ -79,7 +79,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0114 triage calibration wrapper.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--cases-path", help="Optional resolved-case JSON or JSONL file.")
     parser.add_argument("--mattermost-webhook-url", help="Optional Mattermost webhook override.")
     return parser

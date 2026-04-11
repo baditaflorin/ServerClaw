@@ -9,7 +9,7 @@ Windmill inputs:
   lookback_hours  int   default=2    Hours of history to scan per run
   min_score       float default=0.7  Import traces with any score below this
   dry_run         bool  default=False If true, report plan without importing
-  repo_path       str   default="/srv/proxmox_florin_server"
+  repo_path       str   default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def main(
     lookback_hours: int = 2,
     min_score: float = 0.7,
     dry_run: bool = False,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
 ) -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
@@ -61,18 +61,30 @@ def main(
         report_path = Path(report_fh.name)
 
     cmd = [
-        "python3", str(script), "sync",
+        "python3",
+        str(script),
+        "sync",
         # Use internal URLs — Windmill workers are on the 10.10.10.x network
-        "--ls-base-url", "http://10.10.10.20:8110",
-        "--ls-token-file", str(ls_token_file),
-        "--ls-project-title", "Langfuse Trace Review",
-        "--langfuse-base-url", "http://10.10.10.20:3002",
-        "--langfuse-public-key", lf_public_key_file.read_text().strip(),
-        "--langfuse-secret-key-file", str(lf_secret_file),
-        "--langfuse-project-id", "lv3-agent-observability",
-        "--lookback-hours", str(lookback_hours),
-        "--min-score", str(min_score),
-        "--report-file", str(report_path),
+        "--ls-base-url",
+        "http://10.10.10.20:8110",
+        "--ls-token-file",
+        str(ls_token_file),
+        "--ls-project-title",
+        "Langfuse Trace Review",
+        "--langfuse-base-url",
+        "http://10.10.10.20:3002",
+        "--langfuse-public-key",
+        lf_public_key_file.read_text().strip(),
+        "--langfuse-secret-key-file",
+        str(lf_secret_file),
+        "--langfuse-project-id",
+        "lv3-agent-observability",
+        "--lookback-hours",
+        str(lookback_hours),
+        "--min-score",
+        str(min_score),
+        "--report-file",
+        str(report_path),
     ]
 
     env = {**os.environ, "PYTHONPATH": f"{repo_root}:{os.environ.get('PYTHONPATH', '')}"}

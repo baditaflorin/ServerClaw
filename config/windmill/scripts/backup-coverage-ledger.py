@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import subprocess
@@ -17,7 +19,7 @@ def extract_report_json(stdout: str) -> dict | None:
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     strict: bool = False,
     write_receipt: bool = True,
 ):
@@ -63,7 +65,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0271 backup coverage ledger from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--strict", action="store_true")
     parser.add_argument(
         "--no-write-receipt",

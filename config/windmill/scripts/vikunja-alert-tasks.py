@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import sys
@@ -74,11 +76,17 @@ def _ensure_task_for_alert(module, client, auth: dict[str, Any], alert: dict[str
     labels = client.list_labels(search="incident")
     label = next((entry for entry in labels if entry.get("title") == "incident"), None)
     if label is None:
-        label = client.create_label({"title": "incident", "description": "Incident response work item", "hex_color": "#862e9c"})
+        label = client.create_label(
+            {"title": "incident", "description": "Incident response work item", "hex_color": "#862e9c"}
+        )
     assignee_username = auth.get("default_assignee_username", "")
     assignee_ids = []
     if assignee_username:
-        assignee_ids = [int(user["id"]) for user in client.search_users(assignee_username) if user.get("username") == assignee_username]
+        assignee_ids = [
+            int(user["id"])
+            for user in client.search_users(assignee_username)
+            if user.get("username") == assignee_username
+        ]
     created = client.create_task(
         int(project["id"]),
         {
@@ -107,7 +115,10 @@ def _resolve_task_for_alert(client, alert: dict[str, Any]) -> dict[str, Any] | N
     return resolved
 
 
-def main(alert_payload: dict[str, Any] | None = None, repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
+def main(
+    alert_payload: dict[str, Any] | None = None,
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
+) -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
         return {
@@ -173,7 +184,7 @@ def main(alert_payload: dict[str, Any] | None = None, repo_path: str = "/srv/pro
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the ADR 0286 alert-to-task Windmill wrapper.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--payload-file", type=Path, help="Optional JSON Alertmanager payload file.")
     args = parser.parse_args()
     payload = json.loads(args.payload_file.read_text(encoding="utf-8")) if args.payload_file else None

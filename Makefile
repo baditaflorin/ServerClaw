@@ -2,7 +2,7 @@ REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 LOCAL_OVERLAY_ROOT ?= $(shell $(REPO_ROOT)/scripts/resolve_local_overlay_root.sh)
 ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml
 BOOTSTRAP_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
-ANSIBLE_LOCAL_TEMP ?= /tmp/proxmox_florin_server-ansible-local
+ANSIBLE_LOCAL_TEMP ?= /tmp/platform_server-ansible-local
 ANSIBLE_REMOTE_TEMP ?= /tmp
 ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
 ANSIBLE_SCOPED_RUN = $(RUN_ID_ENV) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP) $(REPO_ROOT)/scripts/run_with_namespace.sh uv run --with pyyaml python $(REPO_ROOT)/scripts/ansible_scope_runner.py run --inventory $(ANSIBLE_INVENTORY) $(if $(strip $(PLATFORM_TRACE_ID)),--run-id $(PLATFORM_TRACE_ID),)

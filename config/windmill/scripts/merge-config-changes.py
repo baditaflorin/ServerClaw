@@ -54,7 +54,7 @@ def build_command(workflow: Path, repo_root: Path, resolved_dsn: str, publish_na
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     dsn: str | None = None,
     publish_nats: bool = False,
 ):
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Run the ADR 0158 config-merge workflow from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--dsn")
     parser.add_argument("--publish-nats", action="store_true")
     args = parser.parse_args()

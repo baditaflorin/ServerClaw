@@ -1,3 +1,4 @@
+import os
 import json
 import re
 import shutil
@@ -49,9 +50,7 @@ def _load_json(path: Path, default: Any) -> Any:
 
 def collect_check_runner_images(manifest: dict[str, Any]) -> list[str]:
     images = {
-        entry.get("image", "").strip()
-        for entry in manifest.values()
-        if isinstance(entry, dict) and entry.get("image")
+        entry.get("image", "").strip() for entry in manifest.values() if isinstance(entry, dict) and entry.get("image")
     }
     return sorted(image for image in images if image)
 
@@ -69,9 +68,7 @@ def find_cached_packer_plugins(cache_root: Path) -> list[str]:
     if not cache_root.exists():
         return []
     plugins = {
-        path.parent.name
-        for path in cache_root.rglob("*")
-        if path.is_file() and path.name.startswith("packer-plugin-")
+        path.parent.name for path in cache_root.rglob("*") if path.is_file() and path.name.startswith("packer-plugin-")
     }
     return sorted(plugin for plugin in plugins if plugin)
 
@@ -139,7 +136,7 @@ def maybe_commit_manifest(repo_root: Path, manifest_path: Path, message: str) ->
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     manifest_path: str = "config/build-cache-manifest.json",
     check_runner_manifest_path: str = "config/check-runner-manifest.json",
     collection_requirements_path: str = "collections/requirements.yml",
@@ -175,9 +172,7 @@ def main(
             warnings.append(f"docker pull failed for {image}: {pull_result.stderr or pull_result.stdout}")
 
     resolved_requirements = [
-        Path(candidate)
-        for candidate in pip_requirements_paths
-        if (repo_root / candidate).exists()
+        Path(candidate) for candidate in pip_requirements_paths if (repo_root / candidate).exists()
     ]
     if not resolved_requirements:
         warnings.append("no pip requirements files found for cache warming")
@@ -229,9 +224,7 @@ def main(
 
     collection_requirements = repo_root / collection_requirements_path
     requested_collections = (
-        collect_requested_collections(collection_requirements.read_text())
-        if collection_requirements.exists()
-        else []
+        collect_requested_collections(collection_requirements.read_text()) if collection_requirements.exists() else []
     )
     if collection_requirements.exists():
         galaxy_result = _run_command(

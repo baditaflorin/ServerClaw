@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Workstream query tool for the proxmox_florin_server repo.
+"""Workstream query tool for the platform server repo.
 
 LLM guidance — use this tool when you need to:
   - Understand what work is currently in flight, blocked, or complete

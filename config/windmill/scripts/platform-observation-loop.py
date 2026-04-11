@@ -19,7 +19,7 @@ from typing import Any
 def main(
     findings: list[dict[str, Any]] | None = None,
     source: str = "controller-observation-loop",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
 ) -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
@@ -90,7 +90,9 @@ def main(
     closure_loop = importlib.import_module("platform.closure_loop")
     incident_triage = importlib.import_module("scripts.incident_triage")
     coordination_store = agent_module.AgentCoordinationStore(repo_root)
-    context_id = os.environ.get("LV3_CONTEXT_ID", "").strip() or os.environ.get("WM_JOB_ID", "").strip() or str(uuid.uuid4())
+    context_id = (
+        os.environ.get("LV3_CONTEXT_ID", "").strip() or os.environ.get("WM_JOB_ID", "").strip() or str(uuid.uuid4())
+    )
     loop = closure_loop.ClosureLoop(
         repo_root,
         triage_report_builder=incident_triage.build_report,
@@ -166,7 +168,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0126 observation-loop wrapper.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--findings-file", type=Path, help="Optional JSON file containing the finding list.")
     parser.add_argument("--output-file", type=Path, help="Optional JSON output file for fallback execution.")
     parser.add_argument("--source", default="controller-observation-loop")

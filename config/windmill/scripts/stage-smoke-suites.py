@@ -22,7 +22,7 @@ def default_report_file(service: str, environment: str) -> str:
 def main(
     service: str = "windmill",
     environment: str = "production",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     report_file: str = "",
     suite_ids: str = "",
 ):
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run declared stage smoke suites from Windmill.")
     parser.add_argument("--service", default="windmill")
     parser.add_argument("--environment", default="production")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--report-file", default="")
     parser.add_argument("--suite-ids", default="")
     args = parser.parse_args()

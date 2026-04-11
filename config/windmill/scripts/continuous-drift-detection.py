@@ -1,3 +1,4 @@
+import os
 import json
 import shlex
 import subprocess
@@ -13,7 +14,7 @@ def extract_report_json(stdout: str) -> dict | None:
 
 def main(
     environment: str = "production",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     publish_nats: bool = True,
 ):
     repo_root = Path(repo_path)
@@ -67,6 +68,7 @@ def main(
 
 def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     import os, datetime
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = repo_root / ".local" / "outline" / "api-token.txt"
@@ -78,6 +80,7 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     if not outline_tool.exists():
         return
     import sys
+
     date = datetime.date.today().isoformat()
     environment = payload.get("environment", "production")
     title = f"drift-report-{environment}-{date}"
@@ -112,9 +115,20 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     content = "\n".join(md_lines)
     try:
         subprocess.run(
-            [sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Platform Findings", "--title", title, "--stdin"],
-            input=content, text=True, capture_output=True, check=False,
+            [
+                sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Platform Findings",
+                "--title",
+                title,
+                "--stdin",
+            ],
+            input=content,
+            text=True,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

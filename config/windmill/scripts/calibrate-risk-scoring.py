@@ -114,7 +114,9 @@ def post_to_mattermost(webhook_url: str, text: str) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Calibrate ADR 0116 risk scoring weights from recent live-apply receipts.")
+    parser = argparse.ArgumentParser(
+        description="Calibrate ADR 0116 risk scoring weights from recent live-apply receipts."
+    )
     parser.add_argument("--repo-root", default=str(REPO_ROOT))
     parser.add_argument("--lookback-days", type=int, default=30)
     parser.add_argument("--mattermost-webhook-url")

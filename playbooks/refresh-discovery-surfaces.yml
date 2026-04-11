@@ -124,7 +124,7 @@
 # --- Phase 3: Converge homepage (runs on runtime-general-lv3) ---
 # NOTE: Skipped for now due to pre-existing architectural issue in homepage_runtime role
 # (requires service registry integration per ADR 0373). Will be re-enabled after ADR 0373 implementation.
-# See: https://github.com/baditaflorin/proxmox_florin_server/issues/XXX
+# See: https://github.com/baditaflorin/ServerClaw/issues/XXX
 
 # - name: Refresh home.{{ platform_domain }} service listing
 #   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-general-lv3' }}"

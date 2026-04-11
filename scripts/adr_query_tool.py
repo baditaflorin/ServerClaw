@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ADR query tool for the proxmox_florin_server repo.
+"""ADR query tool for the platform server repo.
 
 USE THIS TOOL when you need to find, read, or query Architecture Decision Records.
 Do not manually grep through docs/adr/ — use this tool instead.
@@ -437,7 +437,7 @@ def command_allocate(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Query the ADR library in the proxmox_florin_server repo.",
+        description="Query the ADR library in the platform server repo.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="command", required=True)

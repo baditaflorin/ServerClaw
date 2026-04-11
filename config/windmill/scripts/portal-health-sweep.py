@@ -59,12 +59,14 @@ def _http_get(url: str, timeout: int = 15) -> tuple[int, str]:
 
 def _post_ntfy(ntfy_url: str, title: str, message: str, priority: str = "default") -> None:
     """Post an alert to ntfy."""
-    payload = json.dumps({
-        "topic": ntfy_url.rsplit("/", 1)[-1] if "/" in ntfy_url else "platform-reconciliation",
-        "title": title,
-        "message": message,
-        "priority": priority,
-    }).encode("utf-8")
+    payload = json.dumps(
+        {
+            "topic": ntfy_url.rsplit("/", 1)[-1] if "/" in ntfy_url else "platform-reconciliation",
+            "title": title,
+            "message": message,
+            "priority": priority,
+        }
+    ).encode("utf-8")
     request = urllib.request.Request(
         ntfy_url,
         data=payload,
@@ -147,12 +149,8 @@ def _check_homepage_services(
     # service IDs/names in the body text as a fallback when JSON parsing fails.
     body_lower = body.lower()
 
-    active_services = [
-        s for s in catalog_services if s.get("lifecycle_status") == "active"
-    ]
-    removed_services = [
-        s for s in catalog_services if s.get("lifecycle_status") != "active"
-    ]
+    active_services = [s for s in catalog_services if s.get("lifecycle_status") == "active"]
+    removed_services = [s for s in catalog_services if s.get("lifecycle_status") != "active"]
 
     for svc in active_services:
         svc_id = svc.get("id", "")
@@ -173,14 +171,10 @@ def _check_homepage_services(
 
     if result["missing_active"]:
         count = len(result["missing_active"])
-        result["issues"].append(
-            f"{count} active service(s) missing from homepage"
-        )
+        result["issues"].append(f"{count} active service(s) missing from homepage")
     if result["stale_removed"]:
         count = len(result["stale_removed"])
-        result["issues"].append(
-            f"{count} removed service(s) still appearing on homepage"
-        )
+        result["issues"].append(f"{count} removed service(s) still appearing on homepage")
 
     return result
 
@@ -221,7 +215,7 @@ def _build_markdown(health_results: list[dict[str, Any]], homepage_check: dict[s
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     ntfy_url: str = "http://10.10.10.92:8075/platform-reconciliation",
     mattermost_webhook: str = "",
 ) -> dict[str, Any]:
@@ -246,9 +240,7 @@ def main(
 
     # Step 2: For homepage, run deep content comparison against catalog
     homepage_check: dict[str, Any] | None = None
-    homepage_health = next(
-        (r for r in health_results if r["portal"] == "homepage"), None
-    )
+    homepage_health = next((r for r in health_results if r["portal"] == "homepage"), None)
     if homepage_health and homepage_health["reachable"] and catalog_services:
         homepage_check = _check_homepage_services(
             PORTALS["homepage"]["url"],
@@ -298,7 +290,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Portal health sweep: verify live content against catalogs (ADR 0399 Tier 3).",
     )
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--ntfy-url", default="http://10.10.10.92:8075/platform-reconciliation")
     parser.add_argument("--mattermost-webhook", default="")
     args = parser.parse_args()

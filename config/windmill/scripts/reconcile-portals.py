@@ -33,9 +33,7 @@ def _post_mattermost(webhook_url: str, markdown: str) -> None:
     try:
         with urllib.request.urlopen(request, timeout=10) as response:
             if response.status >= 300:
-                sys.stderr.write(
-                    f"Mattermost webhook returned HTTP {response.status}\n"
-                )
+                sys.stderr.write(f"Mattermost webhook returned HTTP {response.status}\n")
     except Exception as exc:  # noqa: BLE001
         sys.stderr.write(f"Mattermost webhook failed: {exc}\n")
 
@@ -78,13 +76,8 @@ def _build_markdown(
         return "\n".join(lines)
 
     # Drift details
-    drifted_portals = [
-        r["portal"]
-        for r in drift_result.get("results", [])
-        if r.get("drifted")
-    ]
-    lines.append(f"**Drift detected** in {len(drifted_portals)} portal(s): "
-                 f"`{'`, `'.join(drifted_portals)}`")
+    drifted_portals = [r["portal"] for r in drift_result.get("results", []) if r.get("drifted")]
+    lines.append(f"**Drift detected** in {len(drifted_portals)} portal(s): `{'`, `'.join(drifted_portals)}`")
     lines.append("")
 
     if dry_run:
@@ -110,7 +103,7 @@ def _build_markdown(
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     mattermost_webhook: str = "",
     dry_run: bool = False,
 ) -> dict[str, Any]:
@@ -200,7 +193,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Reconcile all platform portal artifacts (ADR 0399 Tier 1).",
     )
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--mattermost-webhook", default="")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

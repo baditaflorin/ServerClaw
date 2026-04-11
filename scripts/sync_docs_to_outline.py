@@ -173,7 +173,7 @@ class KeycloakLoginFormParser(html.parser.HTMLParser):
             self.in_login_form = False
 
 
-GITHUB_REPO_BASE = "https://github.com/baditaflorin/proxmox_florin_server/blob/main"
+GITHUB_REPO_BASE = "https://github.com/baditaflorin/ServerClaw/blob/main"
 
 
 def repo_link(repo_root: Path, path: Path) -> str:

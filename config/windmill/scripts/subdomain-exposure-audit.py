@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import shlex
@@ -10,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")) -> dict[str, Any]:
     repo_root = Path(repo_path)
     audit_script = repo_root / "scripts" / "subdomain_exposure_audit.py"
 
@@ -67,6 +69,6 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the subdomain exposure audit from a worker checkout.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path), indent=2, sort_keys=True))

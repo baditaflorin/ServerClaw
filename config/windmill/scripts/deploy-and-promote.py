@@ -16,10 +16,11 @@ from platform.logging import get_logger, set_context
 
 LOGGER = get_logger("windmill", "deploy_and_promote", name="lv3.windmill.deploy_and_promote")
 
+
 def main(
     service: str,
     staging_receipt: str,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     branch: str = "",
     requester_class: str = "human_operator",
     approver_classes: str = "human_operator",

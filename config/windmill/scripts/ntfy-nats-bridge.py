@@ -16,7 +16,7 @@ def missing_runtime_dependency() -> bool:
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     max_messages_per_subject: int = 10,
 ):
     repo_root = Path(repo_path)
@@ -84,7 +84,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the repo-managed ntfy NATS bridge from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--max-messages-per-subject", type=int, default=10)
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path, max_messages_per_subject=args.max_messages_per_subject), indent=2))

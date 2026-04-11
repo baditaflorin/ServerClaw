@@ -421,7 +421,7 @@ Platform hosts once on VPN:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CODEBASE TOUR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Repo: https://gitea.localhost/platform/proxmox_florin_server
+Repo: https://gitea.localhost/platform/platform_server
 
   config/                   operators.yaml, schemas, service catalog
   docs/adr/                 Architecture Decision Records — READ FIRST

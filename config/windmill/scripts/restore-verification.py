@@ -1,3 +1,4 @@
+import os
 import json
 import subprocess
 from pathlib import Path
@@ -11,7 +12,7 @@ def extract_report_json(stdout: str) -> dict | None:
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     publish_nats: bool = True,
     triggered_by: str = "windmill-schedule",
 ):

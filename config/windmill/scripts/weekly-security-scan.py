@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server"):
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")):
     repo_root = Path(repo_path)
     report_script = repo_root / "scripts" / "public_surface_scan.py"
     if not report_script.exists():
@@ -47,13 +47,14 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     if not outline_tool.exists():
         return
     from datetime import datetime, timezone
+
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     stdout = payload.get("stdout", "")
     report_json: dict = {}
     for line in stdout.splitlines():
         if line.startswith("REPORT_JSON="):
             try:
-                report_json = json.loads(line[len("REPORT_JSON="):])
+                report_json = json.loads(line[len("REPORT_JSON=") :])
             except (json.JSONDecodeError, ValueError):
                 pass
             break
@@ -78,9 +79,19 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     markdown = "\n".join(lines)
     try:
         subprocess.run(
-            [sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Security & Compliance", "--title", title],
-            input=markdown, text=True, capture_output=True, check=False,
+            [
+                sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Security & Compliance",
+                "--title",
+                title,
+            ],
+            input=markdown,
+            text=True,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:
@@ -89,6 +100,6 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the ADR 0142 public surface security scan from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path), indent=2))

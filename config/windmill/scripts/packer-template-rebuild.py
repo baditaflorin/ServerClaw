@@ -16,7 +16,9 @@ TEMPLATE_ORDER = [
 ]
 
 
-def run_command(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+def run_command(
+    command: list[str], *, cwd: Path, env: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
         cwd=cwd,
@@ -134,7 +136,7 @@ def maybe_commit_manifest(repo_root: Path, manifest_path: Path) -> subprocess.Co
     return run_command(["git", "commit", "-m", "Update VM template manifest after Packer rebuild"], cwd=repo_root)
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, object]:
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")) -> dict[str, object]:
     repo_root = resolve_repo_root(repo_path)
     manifest_path = repo_root / "config" / "vm-template-manifest.json"
     manifest = load_manifest(manifest_path)

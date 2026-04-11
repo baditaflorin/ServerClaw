@@ -1,3 +1,4 @@
+import os
 import argparse
 import json
 import subprocess
@@ -21,7 +22,7 @@ def main(
     token_id: str = "",
     exposure_source: str = "",
     notes: str = "",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     dry_run: bool = False,
 ):
     repo_root = Path(repo_path)
@@ -86,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--token-id", required=True)
     parser.add_argument("--exposure-source", default="")
     parser.add_argument("--notes", default="")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     print(

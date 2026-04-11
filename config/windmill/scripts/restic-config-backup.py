@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import subprocess
@@ -83,7 +85,7 @@ def build_command(
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     mode: str = "backup",
     triggered_by: str = "windmill-schedule",
     live_apply_trigger: bool = False,
@@ -126,7 +128,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0302 restic workflow from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--mode", choices=["backup", "restore-verify"], default="backup")
     parser.add_argument("--triggered-by", default="windmill-schedule")
     parser.add_argument("--live-apply-trigger", action="store_true")

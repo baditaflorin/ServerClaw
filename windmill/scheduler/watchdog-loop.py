@@ -115,7 +115,7 @@ def _run_with_uv(repo_root: Path) -> dict[str, Any]:
     return json.loads(result.stdout) if result.stdout.strip() else {"status": "ok"}
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")) -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
         return {
@@ -172,7 +172,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run one ADR 0119 watchdog scan.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     return parser
 
 

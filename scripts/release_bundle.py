@@ -32,7 +32,7 @@ from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, R
 
 REPO_ROOT = repo_path()
 CANONICAL_CONTROLLER_ROOT = Path(
-    os.environ.get("LV3_CONTROLLER_REPO_ROOT", "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server")
+    os.environ.get("LV3_CONTROLLER_REPO_ROOT", str(Path(__file__).resolve().parent.parent))
 )
 DEFAULT_PRIVATE_KEY_PATH = CANONICAL_CONTROLLER_ROOT / ".local" / "gitea" / "release-bundle-cosign.key"
 DEFAULT_PASSWORD_PATH = CANONICAL_CONTROLLER_ROOT / ".local" / "gitea" / "release-bundle-cosign.password.txt"
@@ -1087,9 +1087,7 @@ def build_parser() -> argparse.ArgumentParser:
         ("publish", "Build, sign, and publish a bundle to a Gitea Release.", command_publish),
     ):
         command_parser = subparsers.add_parser(name, help=help_text)
-        command_parser.add_argument(
-            "--repository", default=os.environ.get("GITHUB_REPOSITORY", "ops/proxmox_florin_server")
-        )
+        command_parser.add_argument("--repository", default=os.environ.get("GITHUB_REPOSITORY", "ops/platform_server"))
         command_parser.add_argument("--ref-name", default=os.environ.get("GITHUB_REF_NAME", "main"))
         command_parser.add_argument("--ref-type", default=os.environ.get("GITHUB_REF_TYPE", "branch"))
         command_parser.add_argument("--commit", default=os.environ.get("GITHUB_SHA", "unknown"))
@@ -1116,7 +1114,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Download a published bundle release from Gitea and verify it with Cosign.",
     )
     verify_parser.add_argument("--gitea-url", default=os.environ.get("GITHUB_SERVER_URL", "http://100.64.0.1:3009"))
-    verify_parser.add_argument("--repository", default=os.environ.get("GITHUB_REPOSITORY", "ops/proxmox_florin_server"))
+    verify_parser.add_argument("--repository", default=os.environ.get("GITHUB_REPOSITORY", "ops/platform_server"))
     verify_parser.add_argument("--release-tag", required=True)
     verify_parser.add_argument("--api-token")
     verify_parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)

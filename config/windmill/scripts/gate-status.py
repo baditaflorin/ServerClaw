@@ -91,7 +91,7 @@ def build_gate_status_command(repo_root: Path) -> list[str]:
     return [sys.executable, str(script_path), "--format", "json"]
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")) -> dict[str, Any]:
     repo_root = Path(repo_path)
     script_path = repo_root / "scripts" / "gate_status.py"
     if not script_path.exists():
@@ -166,6 +166,6 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Show repository validation gate status from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path), indent=2, sort_keys=True))

@@ -1,3 +1,4 @@
+import os
 import argparse
 import json
 import subprocess
@@ -18,7 +19,7 @@ def _prepare_runtime_directory(path: Path) -> Path:
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     execute_remediations: bool = False,
     dry_run: bool = False,
 ):
@@ -74,7 +75,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the ADR 0141 token inventory audit from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--execute-remediations", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

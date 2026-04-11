@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import subprocess
@@ -64,7 +66,9 @@ print(json.dumps({
     }
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server", no_live_metrics: bool = False) -> dict[str, object]:
+def main(
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"), no_live_metrics: bool = False
+) -> dict[str, object]:
     repo_root = Path(repo_path)
     model_path = repo_root / "config" / "capacity-model.json"
     if not model_path.exists():
@@ -93,6 +97,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server", no_live_metrics: bool = 
 
 def _publish_to_outline(markdown: str, repo_root: Path) -> None:
     import os, datetime
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = repo_root / ".local" / "outline" / "api-token.txt"
@@ -107,9 +112,20 @@ def _publish_to_outline(markdown: str, repo_root: Path) -> None:
     title = f"capacity-report-{date}"
     try:
         subprocess.run(
-            [sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Platform Findings", "--title", title, "--stdin"],
-            input=markdown, text=True, capture_output=True, check=False,
+            [
+                sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Platform Findings",
+                "--title",
+                title,
+                "--stdin",
+            ],
+            input=markdown,
+            text=True,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:
@@ -118,7 +134,7 @@ def _publish_to_outline(markdown: str, repo_root: Path) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Render the weekly LV3 capacity report payload.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--no-live-metrics", action="store_true")
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path, no_live_metrics=args.no_live_metrics), indent=2))

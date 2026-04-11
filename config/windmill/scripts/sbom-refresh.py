@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import argparse
 import json
 import shlex
@@ -7,7 +8,7 @@ import subprocess
 from pathlib import Path
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server"):
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")):
     repo_root = Path(repo_path)
     refresh_script = repo_root / "scripts" / "sbom_refresh.py"
     if not refresh_script.exists():
@@ -59,6 +60,6 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the ADR 0298 SBOM refresh workflow from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path), indent=2))

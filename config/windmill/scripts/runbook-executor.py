@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import importlib.util
 import json
@@ -25,7 +27,7 @@ def main(
     run_id: str | None = None,
     action: str = "execute",
     actor_id: str = "automation:windmill-runbook-executor",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
 ) -> dict[str, Any]:
     repo_root = Path(repo_path)
     workflow = repo_root / "scripts" / "runbook_executor.py"
@@ -60,7 +62,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0129 runbook executor Windmill wrapper.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--action", choices=["execute", "approve", "status"], default="execute")
     parser.add_argument("--runbook-id")
     parser.add_argument("--run-id")

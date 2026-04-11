@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from pathlib import Path
 
 from platform.health import HealthCompositeClient
@@ -9,7 +11,7 @@ from platform.world_state.workers import publish_refresh_event_best_effort
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     dsn: str | None = None,
     world_state_dsn: str | None = None,
     ledger_dsn: str | None = None,

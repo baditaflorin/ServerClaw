@@ -1,3 +1,4 @@
+import os
 import argparse
 import json
 import shlex
@@ -5,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server"):
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")):
     repo_root = Path(repo_path)
     report_script = repo_root / "scripts" / "security_posture_report.py"
     if not report_script.exists():
@@ -61,6 +62,6 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the ADR 0102 security posture workflow from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path), indent=2))

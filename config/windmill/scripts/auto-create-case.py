@@ -22,6 +22,8 @@ or {"status": "blocked", "reason": "..."} when the repo checkout is missing.
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import importlib
 import json
@@ -38,16 +40,12 @@ def _load_case_store(repo_root: Path):
     sys.path.insert(0, scripts_dir)
     # Evict any stale module cached from a different path.
     existing = sys.modules.get("cases")
-    if existing is not None and not str(
-        getattr(existing, "__file__", "")
-    ).startswith(scripts_dir):
+    if existing is not None and not str(getattr(existing, "__file__", "")).startswith(scripts_dir):
         for name in list(sys.modules):
             if name == "cases" or name.startswith("cases."):
                 del sys.modules[name]
     module = importlib.import_module("cases")
-    return module.CaseStore(
-        path=repo_root / ".local" / "state" / "cases" / "failure_cases.json"
-    )
+    return module.CaseStore(path=repo_root / ".local" / "state" / "cases" / "failure_cases.json")
 
 
 def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
@@ -59,11 +57,7 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
         or payload.get("project")
         or "unknown-service"
     )
-    incident_id = (
-        payload.get("incident_id")
-        or payload.get("id")
-        or payload.get("fingerprint")
-    )
+    incident_id = payload.get("incident_id") or payload.get("id") or payload.get("fingerprint")
     title = payload.get("title") or payload.get("name") or f"{service_id} incident"
 
     symptoms = payload.get("symptoms")
@@ -74,9 +68,7 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
             if isinstance(value, str) and value.strip():
                 symptoms.append(value.strip())
 
-    correlated_signals = (
-        payload.get("signal_set") or payload.get("correlated_signals") or {}
-    )
+    correlated_signals = payload.get("signal_set") or payload.get("correlated_signals") or {}
 
     triage_report_id = payload.get("triage_report_id")
     if triage_report_id is None and isinstance(payload.get("triage_report"), dict):
@@ -90,9 +82,7 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "correlated_signals": correlated_signals,
         "triage_report_id": triage_report_id,
         "ledger_event_ids": payload.get("ledger_event_ids", []),
-        "first_observed_at": (
-            payload.get("first_observed_at") or payload.get("started_at")
-        ),
+        "first_observed_at": (payload.get("first_observed_at") or payload.get("started_at")),
     }
 
 
@@ -100,7 +90,7 @@ def _normalize_payload(payload: dict[str, Any]) -> dict[str, Any]:
 def main(
     incident_payload: dict[str, Any] | None = None,
     *,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
 ) -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not (repo_root / "scripts").exists():
@@ -121,13 +111,12 @@ def main(
 # CLI wrapper for local testing / manual invocation
 # ------------------------------------------------------------------
 
+
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Create an ADR 0118 failure case from an incident payload."
-    )
+    parser = argparse.ArgumentParser(description="Create an ADR 0118 failure case from an incident payload.")
     parser.add_argument(
         "--repo-path",
-        default="/srv/proxmox_florin_server",
+        default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
         help="Path to the repo checkout on this machine.",
     )
     parser.add_argument(

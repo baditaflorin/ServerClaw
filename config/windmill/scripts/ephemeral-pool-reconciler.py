@@ -6,7 +6,7 @@ from pathlib import Path
 from types import ModuleType
 
 
-DEFAULT_REPO_PATH = "/srv/proxmox_florin_server"
+DEFAULT_REPO_PATH = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")
 PROXMOX_ENV_KEYS = ("TF_VAR_proxmox_endpoint", "TF_VAR_proxmox_api_token")
 REPO_LOCAL_PROXMOX_API_TOKEN_PAYLOAD = Path(".local/proxmox-api/lv3-automation-primary.json")
 REPO_LOCAL_BOOTSTRAP_PRIVATE_KEYS = (
@@ -73,8 +73,8 @@ def main(repo_path: str | None = DEFAULT_REPO_PATH):
         fixture_manager.vmid_allocator.read_api_credentials = lambda **_: proxmox_credentials
     elif repo_local_proxmox_payload.exists():
         original_read_api_credentials = fixture_manager.vmid_allocator.read_api_credentials
-        fixture_manager.vmid_allocator.read_api_credentials = (
-            lambda **kwargs: original_read_api_credentials(token_file=repo_local_proxmox_payload, **kwargs)
+        fixture_manager.vmid_allocator.read_api_credentials = lambda **kwargs: original_read_api_credentials(
+            token_file=repo_local_proxmox_payload, **kwargs
         )
         fixture_manager.proxmox_api_credentials = lambda: fixture_manager.vmid_allocator.read_api_credentials()
     fixture_manager.REPO_ROOT = repo_root
@@ -91,9 +91,7 @@ def main(repo_path: str | None = DEFAULT_REPO_PATH):
     fixture_manager.HOST_VARS_PATH = repo_root / "inventory" / "host_vars" / "proxmox_florin.yml"
     fixture_manager.CAPACITY_MODEL_PATH = repo_root / "config" / "capacity-model.json"
     fixture_manager.EPHEMERAL_POOL_CATALOG_PATH = repo_root / "config" / "ephemeral-capacity-pools.json"
-    for worker_bootstrap_private_key in (
-        repo_root / candidate for candidate in REPO_LOCAL_BOOTSTRAP_PRIVATE_KEYS
-    ):
+    for worker_bootstrap_private_key in (repo_root / candidate for candidate in REPO_LOCAL_BOOTSTRAP_PRIVATE_KEYS):
         if worker_bootstrap_private_key.exists():
             fixture_manager.bootstrap_private_key = lambda: worker_bootstrap_private_key
             break

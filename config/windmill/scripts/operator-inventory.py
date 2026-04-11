@@ -35,7 +35,7 @@ def build_subprocess_env(repo_root: Path) -> dict[str, str]:
 
 def main(
     operator_id: str = "",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     offline: bool = False,
     dry_run: bool = False,
 ):

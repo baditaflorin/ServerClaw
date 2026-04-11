@@ -23,6 +23,9 @@ file_replacements:
 # --- Tier C: Regex replacements ---
 # Applied to ALL text files not in tier A. Order matters: longer patterns first.
 string_replacements:
+  # Repo checkout path (must come before proxmox[_-]florin pattern)
+  - pattern: "proxmox_florin_server"
+    replacement: "platform_server"
   # Domain (must come before shorter patterns)
   - pattern: "lv3\\.org"
     replacement: "example.com"

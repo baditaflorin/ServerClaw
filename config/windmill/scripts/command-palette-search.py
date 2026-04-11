@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import importlib.util
 import sys
 from pathlib import Path
@@ -59,10 +61,7 @@ def docs_href_for_source_path(source_path: str) -> str:
 def lane_for_result(collection: str, source_path: str) -> str:
     if collection == "runbooks":
         lowered = source_path.lower()
-        if any(
-            token in lowered
-            for token in ("break-glass", "recover", "recovery", "repair", "incident", "offboard")
-        ):
+        if any(token in lowered for token in ("break-glass", "recover", "recovery", "repair", "incident", "offboard")):
             return "recover"
     return "learn"
 
@@ -101,7 +100,7 @@ def format_result(result: dict[str, Any]) -> dict[str, Any]:
 
 def main(
     query: str = "",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     limit: int = 8,
 ) -> dict[str, Any]:
     query_text = query.strip()

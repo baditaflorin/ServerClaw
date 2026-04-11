@@ -18,10 +18,12 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -36,7 +38,7 @@ from platform.events import build_envelope
 from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
-DEFAULT_REPO_ROOT = Path("/srv/proxmox_florin_server")
+DEFAULT_REPO_ROOT = Path(os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
 DEFAULT_CATALOG_PATH = repo_path("config", "restic-file-backup-catalog.json")
 DEFAULT_BACKUP_RECEIPT_DIR = repo_path("receipts", "restic-backups")
 DEFAULT_LATEST_RECEIPT_PATH = repo_path("receipts", "restic-snapshots-latest.json")

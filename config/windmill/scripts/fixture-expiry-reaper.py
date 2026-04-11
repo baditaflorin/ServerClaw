@@ -6,7 +6,7 @@ from pathlib import Path
 from types import ModuleType
 
 
-DEFAULT_REPO_PATH = "/srv/proxmox_florin_server"
+DEFAULT_REPO_PATH = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")
 PROXMOX_ENV_KEYS = ("TF_VAR_proxmox_endpoint", "TF_VAR_proxmox_api_token")
 REPO_LOCAL_PROXMOX_API_TOKEN_PAYLOAD = Path(".local/proxmox-api/lv3-automation-primary.json")
 
@@ -113,8 +113,8 @@ def main(repo_path: str | None = DEFAULT_REPO_PATH):
         fixture_manager.vmid_allocator.read_api_credentials = lambda **_: proxmox_credentials
     elif repo_local_proxmox_payload.exists():
         original_read_api_credentials = fixture_manager.vmid_allocator.read_api_credentials
-        fixture_manager.vmid_allocator.read_api_credentials = (
-            lambda **kwargs: original_read_api_credentials(token_file=repo_local_proxmox_payload, **kwargs)
+        fixture_manager.vmid_allocator.read_api_credentials = lambda **kwargs: original_read_api_credentials(
+            token_file=repo_local_proxmox_payload, **kwargs
         )
         fixture_manager.proxmox_api_credentials = lambda: fixture_manager.vmid_allocator.read_api_credentials()
     fixture_manager.REPO_ROOT = repo_root

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import shlex
@@ -16,7 +18,7 @@ from drift_lib import build_guest_ssh_command, load_controller_context, run_comm
 
 
 LOCAL_REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REMOTE_REPO_ROOT = "/srv/proxmox_florin_server"
+DEFAULT_REMOTE_REPO_ROOT = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")
 DEFAULT_REMOTE_CATALOG_PATH = f"{DEFAULT_REMOTE_REPO_ROOT}/config/restic-file-backup-catalog.json"
 DEFAULT_REMOTE_BACKUP_RECEIPTS_DIR = f"{DEFAULT_REMOTE_REPO_ROOT}/receipts/restic-backups"
 DEFAULT_REMOTE_LATEST_SNAPSHOT_RECEIPT = f"{DEFAULT_REMOTE_REPO_ROOT}/receipts/restic-snapshots-latest.json"

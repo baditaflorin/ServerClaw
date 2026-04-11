@@ -14,7 +14,10 @@ RequestJson = Callable[[str, str, dict[str, Any] | None, dict[str, str] | None, 
 
 DEFAULT_PLATFORM_CONTEXT_URL = "http://100.64.0.1:8010"
 DEFAULT_PLATFORM_CONTEXT_TOKEN_PATH = Path(
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt"
+    os.environ.get(
+        "PLATFORM_CONTEXT_TOKEN_PATH",
+        str(Path(__file__).resolve().parent.parent.parent / ".local" / "platform-context" / "api-token.txt"),
+    )
 )
 
 
@@ -108,7 +111,9 @@ class PlatformContextRetriever:
                     source_path=str(item.get("source_path", "") or ""),
                     document_kind=str(item.get("document_kind")) if item.get("document_kind") is not None else None,
                     document_title=str(item.get("document_title")) if item.get("document_title") is not None else None,
-                    section_heading=str(item.get("section_heading")) if item.get("section_heading") is not None else None,
+                    section_heading=str(item.get("section_heading"))
+                    if item.get("section_heading") is not None
+                    else None,
                     adr_number=str(item.get("adr_number")) if item.get("adr_number") is not None else None,
                     content=str(item.get("content", "") or ""),
                 )

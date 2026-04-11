@@ -15,7 +15,7 @@
       "principal": "principal:keycloak-client__serverclaw-runtime",
       "grant_type": "client_credentials",
       "client_id": "serverclaw-runtime",
-      "client_secret_file": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt",
+      "client_secret_file": ".local/keycloak/serverclaw-runtime-client-secret.txt",
       "expected_claims": {
         "azp": "serverclaw-runtime"
       }

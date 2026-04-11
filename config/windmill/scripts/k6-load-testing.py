@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import subprocess
@@ -9,7 +11,7 @@ from pathlib import Path
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     scenario: str = "load",
     service: str = "",
     publish_nats: bool = False,
@@ -78,6 +80,7 @@ def main(
 
 def _publish_receipt_to_outline(receipt_path: Path, repo_root: Path) -> None:
     import os, sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = repo_root / ".local" / "outline" / "api-token.txt"
@@ -91,7 +94,8 @@ def _publish_receipt_to_outline(receipt_path: Path, repo_root: Path) -> None:
     try:
         subprocess.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:
@@ -100,7 +104,7 @@ def _publish_receipt_to_outline(receipt_path: Path, repo_root: Path) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the repo-managed k6 wrapper from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--scenario", choices=["smoke", "load", "soak"], default="load")
     parser.add_argument("--service", default="")
     parser.add_argument("--publish-nats", action="store_true")

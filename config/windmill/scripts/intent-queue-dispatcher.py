@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import os
+
 import importlib.util
 import json
 from pathlib import Path
 from types import ModuleType
 
 
-DEFAULT_REPO_ROOT = Path("/srv/proxmox_florin_server")
+DEFAULT_REPO_ROOT = Path(os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
 
 
 def _load_impl(repo_root: Path) -> ModuleType:

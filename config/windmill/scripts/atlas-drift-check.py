@@ -80,7 +80,7 @@ def set_default_env_from_text_paths(env: dict[str, str], name: str, paths: tuple
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     publish_nats: bool = True,
     publish_ntfy: bool = True,
     write_receipts: bool = True,
@@ -180,6 +180,7 @@ def main(
 
 def _publish_drift_to_outline(payload: dict, repo_root: Path) -> None:
     import sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = repo_root / ".local" / "outline" / "api-token.txt"
@@ -191,6 +192,7 @@ def _publish_drift_to_outline(payload: dict, repo_root: Path) -> None:
     if not outline_tool.exists():
         return
     from datetime import datetime, timezone
+
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     status = payload.get("status", "unknown")
     report = payload.get("report") or {}
@@ -213,9 +215,19 @@ def _publish_drift_to_outline(payload: dict, repo_root: Path) -> None:
     markdown = "\n".join(lines)
     try:
         proc = subprocess.run(
-            [_sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Platform Findings", "--title", title],
-            input=markdown, text=True, capture_output=True, check=False,
+            [
+                _sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Platform Findings",
+                "--title",
+                title,
+            ],
+            input=markdown,
+            text=True,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
         _ = proc
@@ -225,7 +237,7 @@ def _publish_drift_to_outline(payload: dict, repo_root: Path) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the repo-managed Atlas drift check from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--no-publish-nats", action="store_true")
     parser.add_argument("--no-publish-ntfy", action="store_true")
     parser.add_argument("--no-write-receipts", action="store_true")

@@ -3,13 +3,15 @@
 
 from __future__ import annotations
 
+import os
+
 import json
 import subprocess
 from pathlib import Path
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     window_days: int = 30,
     write_latest: bool = True,
 ) -> dict[str, object]:

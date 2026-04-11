@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server"):
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")):
     repo_root = Path(repo_path)
     roster_path = repo_root / "config" / "operators.yaml"
     if not roster_path.exists():
@@ -101,6 +101,7 @@ def _publish_roster_to_outline(result: dict, repo_root: Path) -> None:
     if not outline_tool.exists():
         return
     from datetime import datetime, timezone
+
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     operators = result.get("operators", [])
     lines = [
@@ -115,17 +116,27 @@ def _publish_roster_to_outline(result: dict, repo_root: Path) -> None:
     ]
     for op in operators:
         lines.append(
-            f"| {op.get('id','')} | {op.get('name','')} | {op.get('email','')} "
-            f"| {op.get('role','')} | {op.get('status','')} "
-            f"| {'yes' if op.get('ssh_enabled') else 'no'} | {op.get('onboarded_at','')} |"
+            f"| {op.get('id', '')} | {op.get('name', '')} | {op.get('email', '')} "
+            f"| {op.get('role', '')} | {op.get('status', '')} "
+            f"| {'yes' if op.get('ssh_enabled') else 'no'} | {op.get('onboarded_at', '')} |"
         )
     title = f"operator-roster-{date}"[:100]
     markdown = "\n".join(lines)
     try:
         subprocess.run(
-            [sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Platform Findings", "--title", title],
-            input=markdown, text=True, capture_output=True, check=False,
+            [
+                sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Platform Findings",
+                "--title",
+                title,
+            ],
+            input=markdown,
+            text=True,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

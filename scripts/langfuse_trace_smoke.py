@@ -90,7 +90,7 @@ def main() -> int:
             trace_context={"trace_id": trace_id},
             name="lv3-langfuse-smoke",
             input={"task": "smoke"},
-            metadata={"source": "codex", "repo": "proxmox_florin_server", "user_id": "codex"},
+            metadata={"source": "codex", "repo": "platform_server", "user_id": "codex"},
             as_type="span",
         ) as root:
             root.set_trace_io(

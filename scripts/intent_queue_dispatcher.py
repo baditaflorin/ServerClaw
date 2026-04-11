@@ -86,7 +86,7 @@ def _resolve_windmill_token(repo_root: Path) -> str | None:
 
 def main(
     *,
-    repo_root: str = "/srv/proxmox_florin_server",
+    repo_root: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     resource_hints: list[str] | None = None,
     workflow_hints: list[str] | None = None,
     max_items: int = 5,
@@ -182,7 +182,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Dispatch queued ADR 0155 intents.")
-    parser.add_argument("--repo-root", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-root", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--resource-hint", action="append", default=[])
     parser.add_argument("--workflow-hint", action="append", default=[])
     parser.add_argument("--max-items", type=int, default=5)

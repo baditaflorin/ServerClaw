@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import importlib.util
 import json
@@ -22,7 +24,7 @@ def load_module(name: str, path: Path):
 
 def main(
     alert_payload: dict[str, Any] | None = None,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     emit: bool = True,
     mattermost_webhook_url: str | None = None,
     loki_query_url: str | None = None,
@@ -66,7 +68,7 @@ def main(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0114 triage Windmill wrapper.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--payload-file", type=Path, help="Optional JSON alert payload file.")
     parser.add_argument("--no-emit", action="store_true", help="Do not emit the report after building it.")
     parser.add_argument("--mattermost-webhook-url", help="Optional Mattermost webhook override.")

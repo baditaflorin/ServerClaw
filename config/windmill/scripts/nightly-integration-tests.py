@@ -169,8 +169,16 @@ def publish_to_outline(repo_root: Path, payload: dict[str, Any]) -> None:
     md_content = "".join(md_lines)
     try:
         subprocess.run(
-            [sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Automation Runs", "--title", title, "--stdin"],
+            [
+                sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Automation Runs",
+                "--title",
+                title,
+                "--stdin",
+            ],
             input=md_content,
             text=True,
             capture_output=True,
@@ -183,9 +191,8 @@ def publish_to_outline(repo_root: Path, payload: dict[str, Any]) -> None:
 
 
 def publish_notifications(repo_root: Path, payload: dict[str, Any]) -> None:
-    mattermost_url = (
-        os.environ.get("LV3_MATTERMOST_INTEGRATION_TEST_WEBHOOK_URL")
-        or maybe_read_secret_path(repo_root, "mattermost_platform_findings_webhook_url")
+    mattermost_url = os.environ.get("LV3_MATTERMOST_INTEGRATION_TEST_WEBHOOK_URL") or maybe_read_secret_path(
+        repo_root, "mattermost_platform_findings_webhook_url"
     )
     if mattermost_url:
         post_json_webhook(mattermost_url, {"text": build_summary(payload)})
@@ -193,9 +200,8 @@ def publish_notifications(repo_root: Path, payload: dict[str, Any]) -> None:
     if payload["status"] == "passed":
         return
 
-    glitchtip_url = (
-        os.environ.get("LV3_GLITCHTIP_INTEGRATION_EVENT_URL")
-        or maybe_read_secret_path(repo_root, "glitchtip_platform_findings_event_url")
+    glitchtip_url = os.environ.get("LV3_GLITCHTIP_INTEGRATION_EVENT_URL") or maybe_read_secret_path(
+        repo_root, "glitchtip_platform_findings_event_url"
     )
     if glitchtip_url:
         emit_glitchtip_notification(
@@ -211,11 +217,7 @@ def publish_notifications(repo_root: Path, payload: dict[str, Any]) -> None:
                 },
                 "extra": {
                     "summary": payload["summary"],
-                    "failed_tests": [
-                        test["nodeid"]
-                        for test in payload["tests"]
-                        if test.get("outcome") == "failed"
-                    ],
+                    "failed_tests": [test["nodeid"] for test in payload["tests"] if test.get("outcome") == "failed"],
                 },
             },
         )
@@ -225,7 +227,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0111 nightly integration suite wrapper.")
     parser.add_argument(
         "--repo-path",
-        default="/srv/proxmox_florin_server",
+        default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
         help="Path to the repo checkout mounted on the worker.",
     )
     parser.add_argument(
@@ -236,7 +238,9 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "") -> dict[str, Any]:
+def main(
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"), environment: str = ""
+) -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
         return {

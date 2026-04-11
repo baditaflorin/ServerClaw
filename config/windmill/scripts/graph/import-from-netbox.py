@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import json
 import subprocess
 import sys
@@ -68,7 +70,7 @@ def _run_via_uv(script_path: Path, repo_root: Path, dsn: str | None, world_state
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     dsn: str | None = None,
     world_state_dsn: str | None = None,
 ) -> dict[str, Any]:
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Rebuild the ADR 0117 graph from NetBox world state.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--dsn")
     parser.add_argument("--world-state-dsn")
     args = parser.parse_args()

@@ -43,7 +43,7 @@ def _is_first_monday_of_quarter(now: datetime | None = None) -> bool:
 def main(
     warning_days: int = 45,
     inactive_days: int = 60,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     schedule_guard: str = "",
     dry_run: bool = False,
 ):

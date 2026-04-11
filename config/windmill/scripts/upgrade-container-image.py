@@ -7,7 +7,7 @@ from pathlib import Path
 
 def main(
     image_id: str,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     tag: str = "",
     write: bool = False,
     apply: bool = False,

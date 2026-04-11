@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import importlib.util
 import json
@@ -76,7 +78,7 @@ def _should_fallback_to_uv(exc: Exception) -> bool:
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     target_class: str = "",
     service: str = "",
     report_file: str = "",
@@ -114,7 +116,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Render ADR 0189 from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--target-class", default="")
     parser.add_argument("--service", default="")
     parser.add_argument("--report-file", default="")

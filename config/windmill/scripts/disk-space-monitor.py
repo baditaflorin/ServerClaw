@@ -10,6 +10,8 @@ Schedule: every 6 hours (recommended).
 
 from __future__ import annotations
 
+import os
+
 import json
 import subprocess
 import sys
@@ -75,15 +77,17 @@ def _build_response(
         for mount in vm.get("mounts", []):
             pct = mount.get("used_percent")
             if pct is not None and pct > threshold_percent:
-                alerts.append({
-                    "vm": vm["name"],
-                    "vmid": vm["vmid"],
-                    "path": mount["path"],
-                    "used_percent": pct,
-                    "used_gb": mount.get("used_gb"),
-                    "total_gb": mount.get("total_gb"),
-                    "budget_gb": vm.get("budget_disk_gb"),
-                })
+                alerts.append(
+                    {
+                        "vm": vm["name"],
+                        "vmid": vm["vmid"],
+                        "path": mount["path"],
+                        "used_percent": pct,
+                        "used_gb": mount.get("used_gb"),
+                        "total_gb": mount.get("total_gb"),
+                        "budget_gb": vm.get("budget_disk_gb"),
+                    }
+                )
 
     return {
         "status": "alert" if alerts else "ok",
@@ -97,7 +101,7 @@ def _build_response(
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     threshold_percent: float = 85.0,
 ) -> dict[str, object]:
     repo_root = Path(repo_path)

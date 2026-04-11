@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import json
 import subprocess
 from pathlib import Path
@@ -10,7 +12,7 @@ from pathlib import Path
 
 def main(
     event_json: str = "{}",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
 ) -> dict[str, object]:
     repo_root = Path(repo_path)
     script_path = repo_root / "scripts" / "journey_scorecards.py"

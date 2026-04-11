@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform as pyplatform
 import shutil
 import socket
@@ -12,10 +13,12 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -82,7 +85,7 @@ def _load_build_server_config(path: Path = BUILD_SERVER_CONFIG_PATH) -> dict[str
 
 def _validate_build_server_private_overlay_contract(build_server: dict[str, Any]) -> None:
     ssh_key = require_str(build_server.get("ssh_key"), "config/build-server.json.ssh_key")
-    if "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local" in ssh_key:
+    if os.path.isabs(ssh_key) and "/.local/" in ssh_key:
         raise ValueError(
             "config/build-server.json.ssh_key must not embed an operator workstation path; use a repo-relative .local alias"
         )
@@ -98,7 +101,7 @@ def _validate_build_server_private_overlay_contract(build_server: dict[str, Any]
         )
     ]
     for index, option in enumerate(ssh_options):
-        if "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local" in option:
+        if os.path.isabs(option) and "/.local/" in option:
             raise ValueError(
                 f"config/build-server.json.ssh_options [{index}] must not embed an operator workstation path"
             )

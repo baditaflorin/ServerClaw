@@ -1,3 +1,4 @@
+import os
 import argparse
 import json
 import shlex
@@ -5,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server", timeout_seconds: int = 60):
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"), timeout_seconds: int = 60):
     repo_root = Path(repo_path)
     report_script = repo_root / "scripts" / "https_tls_assurance.py"
     if not report_script.exists():
@@ -43,7 +44,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server", timeout_seconds: int = 6
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the ADR 0249 HTTPS/TLS assurance scan from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--timeout-seconds", type=int, default=60)
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path, timeout_seconds=args.timeout_seconds), indent=2))

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import subprocess
@@ -17,7 +19,7 @@ def _parse_json(stdout: str) -> dict:
 
 
 def main(
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     scenario_names: str = "",
     schedule_guard: str = "",
     dry_run: bool = False,
@@ -63,6 +65,7 @@ def main(
 
 def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     import os, sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = repo_root / ".local" / "outline" / "api-token.txt"
@@ -74,6 +77,7 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     if not outline_tool.exists():
         return
     from datetime import datetime, timezone
+
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     status = payload.get("status", "unknown")
     scenarios = payload.get("scenarios", []) if isinstance(payload.get("scenarios"), list) else []
@@ -95,9 +99,19 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
     markdown = "\n".join(lines)
     try:
         subprocess.run(
-            [_sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Automation Runs", "--title", title],
-            input=markdown, text=True, capture_output=True, check=False,
+            [
+                _sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Automation Runs",
+                "--title",
+                title,
+            ],
+            input=markdown,
+            text=True,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:
@@ -106,7 +120,7 @@ def _publish_to_outline(payload: dict, repo_root: Path) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run ADR 0171 fault injection from Windmill.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     parser.add_argument("--scenario-names", default="")
     parser.add_argument("--schedule-guard", default="")
     parser.add_argument("--dry-run", action="store_true")

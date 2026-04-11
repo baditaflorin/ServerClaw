@@ -1,3 +1,4 @@
+import os
 import json
 import shlex
 import subprocess
@@ -6,7 +7,7 @@ from pathlib import Path
 
 def main(
     tier: str = "all",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     format: str = "json",
     dry_run: bool = False,
 ):

@@ -1,3 +1,4 @@
+import os
 import json
 import shlex
 import subprocess
@@ -10,7 +11,7 @@ def main(
     reason: str = "",
     duration_minutes: int = 30,
     force: bool = False,
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
 ):
     repo_root = Path(repo_path)
     workflow = repo_root / "scripts" / "maintenance_window_tool.py"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Receipt search and browse tool for the proxmox_florin_server repo.
+"""Receipt search and browse tool for the platform server repo.
 
 USE THIS TOOL when you need to find, browse, or inspect operation receipts.
 Do not manually walk the receipts/ directory — use this tool instead.
@@ -38,10 +38,12 @@ import argparse
 import json
 import sys
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 
@@ -266,7 +268,7 @@ def command_summary(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Search and browse operation receipts in the proxmox_florin_server repo.",
+        description="Search and browse operation receipts in the platform server repo.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="command", required=True)

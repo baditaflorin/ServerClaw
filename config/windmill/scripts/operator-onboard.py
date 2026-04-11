@@ -43,7 +43,7 @@ def main(
     tailscale_login_email: str = "",
     tailscale_device_name: str = "",
     bootstrap_password: str = "",
-    repo_path: str = "/srv/proxmox_florin_server",
+    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
     dry_run: bool = False,
 ):
     repo_root = Path(repo_path)

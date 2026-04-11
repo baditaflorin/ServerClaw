@@ -90,9 +90,7 @@ def _load_runner_context(repo_root: Path) -> dict[str, Any]:
     if result.returncode != 0:
         return {
             "id": VALIDATION_RUNNER_ID,
-            "load_error": result.stderr.strip()
-            or result.stdout.strip()
-            or f"command exited {result.returncode}",
+            "load_error": result.stderr.strip() or result.stdout.strip() or f"command exited {result.returncode}",
         }
     try:
         return json.loads(result.stdout)
@@ -223,8 +221,16 @@ def _publish_to_outline(repo_root: Path, payload: dict[str, Any]) -> None:
     md_content = "".join(md_lines)
     try:
         subprocess.run(
-            [sys.executable, str(outline_tool), "document.publish",
-             "--collection", "Automation Runs", "--title", title, "--stdin"],
+            [
+                sys.executable,
+                str(outline_tool),
+                "document.publish",
+                "--collection",
+                "Automation Runs",
+                "--title",
+                title,
+                "--stdin",
+            ],
             input=md_content,
             text=True,
             capture_output=True,
@@ -236,7 +242,7 @@ def _publish_to_outline(repo_root: Path, payload: dict[str, Any]) -> None:
         pass
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
+def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")) -> dict[str, Any]:
     repo_root = Path(repo_path)
     gate_script = repo_root / "scripts" / "run_gate.py"
     manifest_path = repo_root / "config" / "validation-gate.json"
@@ -283,9 +289,9 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
     }
     if gate_status is not None:
         payload["gate_status"] = gate_status
-    runner_startup_failed = _runner_image_pull_failed(result.stdout, result.stderr) or _gate_status_runner_startup_failed(
-        gate_status
-    )
+    runner_startup_failed = _runner_image_pull_failed(
+        result.stdout, result.stderr
+    ) or _gate_status_runner_startup_failed(gate_status)
     if payload["status"] == "error" and runner_startup_failed:
         payload["primary_gate_error"] = {
             "command": payload["command"],
@@ -293,7 +299,9 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
             "stdout": payload["stdout"],
             "stderr": payload["stderr"],
         }
-        result_payload = _run_local_fallback(repo_root, manifest_path, status_path) | {"primary_gate_error": payload["primary_gate_error"]}
+        result_payload = _run_local_fallback(repo_root, manifest_path, status_path) | {
+            "primary_gate_error": payload["primary_gate_error"]
+        }
         _publish_to_outline(repo_root, result_payload)
         return result_payload
     _publish_to_outline(repo_root, payload)
@@ -302,6 +310,6 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the repository validation gate after merge.")
-    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path), indent=2))
