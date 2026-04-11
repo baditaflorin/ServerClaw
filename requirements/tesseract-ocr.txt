@@ -2,5 +2,5 @@ fastapi==0.116.1
 pdf2image==1.17.0
 pillow==12.1.1
 pytesseract==0.3.13
-python-multipart==0.0.20
+python-multipart==0.0.22
 uvicorn[standard]==0.35.0
