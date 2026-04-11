@@ -12,7 +12,7 @@ from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from platform.workstream_registry import load_registry as load_workstream_registry
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
 
 DEPENDENCY_GRAPH_PATH = repo_path("config", "dependency-graph.json")

@@ -29,7 +29,7 @@ from governed_command import execute_governed_command
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
 from maintenance_window_tool import list_active_windows_best_effort
 from platform.use_cases.serverclaw_skills import list_serverclaw_skill_packs
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,

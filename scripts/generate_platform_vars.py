@@ -8,7 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, repo_path

@@ -17,7 +17,7 @@ from platform.root_summary import (
     relative_markdown_link,
 )
 from platform.workstream_registry import load_workstreams
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
 
 REPO_ROOT = repo_path()

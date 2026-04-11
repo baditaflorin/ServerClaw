@@ -1,8 +1,9 @@
-# Release 0.178.106
+# Release 0.178.107
 
 - Date: 2026-04-11
 
 ## Summary
+- [adr-0407] DRY: Consolidate TOPOLOGY_HOST into platform.repo + generalize role docs — centralized TOPOLOGY_HOST and TOPOLOGY_HOST_VARS_PATH constants in platform/repo.py; 25 scripts consolidated from local HOST_VARS_PATH definitions; 11 scripts migrated from hardcoded "proxmox_florin" string to TOPOLOGY_HOST constant; 82 collection files generalized (53 READMEs, 27 argument_specs, 1 test fixture, 1 meta); tracked files with deployment-specific content reduced further
 - [adr-0407] Generic-by-default codebase with local overlay — gitignore receipts/ (6,520 files) and config/generated/ (4 files); generalize docs/ (1,100+ files), tests/ (227 files), workstreams/ (107 files) from lv3.org to example.com; Ansible identity override via `-e @.local/identity.yml` auto-injection; publish pipeline reduced from 6,482 files to ~76 (97% reduction)
 - [adr-0407] Phase 6: Generalize Windmill scripts and remaining repo paths — 74 Windmill scripts + 14 platform scripts converted from hardcoded /srv/proxmox_florin_server to PLATFORM_REPO_ROOT env var; Windmill worker containers now set PLATFORM_REPO_ROOT; tracked files with repo name down from 28 to 10; convergence validated (367 tasks OK)
 - [security] Emergency credential rotation after public release — rotated all 220 platform-generated credentials (ADR 0405), 3 postmortems, rotation script, runbook; removed inline OIDC secret from ws-0362; converged 42 services with zero rotation-caused failures

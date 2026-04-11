@@ -25,7 +25,7 @@ import urllib.request
 from urllib.parse import urlparse
 from dataclasses import dataclass
 from pathlib import Path
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 import vmid_allocator

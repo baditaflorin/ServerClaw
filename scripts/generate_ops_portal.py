@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 import os
 from pathlib import Path
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen

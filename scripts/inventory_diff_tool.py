@@ -40,7 +40,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

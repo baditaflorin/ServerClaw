@@ -77,7 +77,7 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
     del sys.modules["platform"]
 
 from platform.locking import LockType, ResourceLockRegistry
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
 # ---------------------------------------------------------------------------
 # Paths (mirrors fixture_manager.py conventions)

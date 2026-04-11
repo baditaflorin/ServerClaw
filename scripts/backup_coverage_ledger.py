@@ -17,7 +17,7 @@ except ImportError:  # Python < 3.11
 
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path

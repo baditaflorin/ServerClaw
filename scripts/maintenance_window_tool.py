@@ -26,7 +26,7 @@ from validation_toolkit import require_int, require_mapping
 REPO_ROOT = ensure_repo_root_on_path(__file__)
 
 from platform.datetime_compat import UTC, datetime, timedelta
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from controller_automation_toolkit import (
     emit_cli_error,
     load_json,

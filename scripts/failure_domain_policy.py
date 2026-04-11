@@ -7,7 +7,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
 if str(Path(__file__).resolve().parent) not in sys.path:

@@ -12,7 +12,7 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
-from platform.repo import TOPOLOGY_TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from command_catalog import (
