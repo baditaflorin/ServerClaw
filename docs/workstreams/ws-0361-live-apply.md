@@ -4,14 +4,15 @@
 - Title: verify and live-apply the repo-managed Semaphore Keycloak OIDC flow from the latest origin/main
 - Status: blocked
 - Included In Repo Version: not yet
-- Branch-Local Receipt: `receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json`
-- Evidence Summary: `receipts/live-applies/evidence/2026-04-11-ws-0361-summary.txt`
+- Branch-Local Receipt: `receipts/live-applies/2026-04-12-adr-0361-semaphore-keycloak-oidc-live-apply.json`
+- Evidence Summary: `receipts/live-applies/evidence/2026-04-12-ws-0361-summary.txt`
+- Prior Receipt: `receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json`
 - Mainline Receipt: pending
 - Implemented On: 2026-04-11
 - Live Applied On: not yet
 - Live Applied In Platform Version: not yet applied
 - Original Branch Base: `origin/main@86390fcc8a07fca2a58670f60ec4cf6b9d0278eb`
-- Latest Upstream Checked: `origin/main@59fbe662b57c28388e47e784c29f457ffd4ec1d3`
+- Latest Upstream Checked: `origin/main@cdcc806bebd22d18a67c4591049eb2250f488413`
 - Branch: `codex/ws-0361-live-apply`
 - Worktree: `.worktrees/ws-0361-live-apply`
 - Owner: codex
@@ -58,6 +59,10 @@
 - `tailscale status --json` still listed the peer `proxmox-florin-subnet-router` online at `100.64.0.1`, but the local client reported coordination-server health warnings and no viable host or routed-guest management path from this workstation
 - `tailscale ssh` could not be used as a fallback because the macOS App Store/TestFlight build installed on this machine does not provide that subcommand
 - the current controller-local Semaphore auth artifact still points at `http://100.64.0.1:8020`, so the repo changes are ready but the live platform state was not mutated from this session
+- 2026-04-12 follow-up probes confirmed the workstation is currently logged out of the Headscale-managed tailnet:
+  - `tailscale status --json` reported `BackendState: Starting` with no assigned Tailscale IPs
+  - `curl -fsSI --max-time 5 https://headscale.lv3.org/health` timed out
+  - `nc -vz -w 5 65.108.75.123 443` and `nc -vz -w 5 65.108.75.123 22` timed out
 
 ## Remaining Closeout
 

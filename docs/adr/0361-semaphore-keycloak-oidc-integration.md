@@ -80,6 +80,9 @@ as part of the normal Semaphore apply path.
 - `tailscale status --json` still showed the subnet-router peer online, but the
   local client reported coordination-server health warnings and both
   `tailscale ping 100.64.0.1` and `tailscale ping 10.10.10.92` timed out
+- a 2026-04-12 follow-up confirmed the workstation was logged out of the
+  Headscale-managed tailnet and could not reach `https://headscale.lv3.org/health`
+  or the Proxmox management IP on ports `22` and `443`
 
 ## Verification
 

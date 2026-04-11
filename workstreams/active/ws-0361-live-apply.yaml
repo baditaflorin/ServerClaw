@@ -43,6 +43,7 @@ shared_surfaces:
 - tests/test_semaphore_runtime_role.py
 - tests/test_semaphore_playbook.py
 - receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json
+- receipts/live-applies/2026-04-12-adr-0361-semaphore-keycloak-oidc-live-apply.json
 - receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-mainline-live-apply.json
 - receipts/live-applies/evidence/2026-04-11-ws-0361-*
 ownership_manifest:
