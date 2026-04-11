@@ -163,6 +163,7 @@
     group: root
     mode: "0600"
   no_log: true
+  register: coolify_env_template
 
 - name: Render the Coolify compose file
   ansible.builtin.template:
@@ -171,40 +172,20 @@
     owner: root
     group: root
     mode: "0644"
+  register: coolify_compose_template
 
-- name: Pull the Coolify container images
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ coolify_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ coolify_site_dir }}"
-  register: coolify_pull
-  changed_when: >-
-    'Pulling' in coolify_pull.stdout
-    or 'Downloaded newer image' in coolify_pull.stdout
-    or 'Pull complete' in coolify_pull.stdout
-
-- name: Start the Coolify stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ coolify_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ coolify_site_dir }}"
-  register: coolify_up
-  changed_when: >-
-    'Creating' in coolify_up.stdout
-    or 'Recreating' in coolify_up.stdout
-    or 'Starting' in coolify_up.stdout
+- name: Converge the Coolify stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ coolify_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ coolify_site_dir }}"
+    common_docker_compose_converge_service_name: coolify
+    common_docker_compose_converge_template_results:
+      - "{{ coolify_env_template }}"
+      - "{{ coolify_compose_template }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
 
 - name: Wait for Coolify to listen on the guest dashboard port
   ansible.builtin.wait_for:
