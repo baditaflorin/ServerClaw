@@ -42,7 +42,13 @@ map $http_authorization $lv3_logout_id_token {
 
 {% macro render_security_headers(site, tls_enabled) -%}
 {% if site.security_headers_enabled | default(true) %}
-{% set security_headers = public_edge_security_headers_default | combine(public_edge_security_headers_overrides.get(site.hostname, {}), recursive=True) %}
+{# Dict keys from defaults/main.yml are Jinja2 template strings (e.g. "wiki.{{ platform_domain }}").
+   Ansible evaluates Jinja2 in dict values but NOT keys, so site.hostname ("wiki.lv3.org") will
+   never match a stored key ("wiki.{{ platform_domain }}") directly. Convert site.hostname back
+   to the raw key format so the lookup succeeds. #}
+{% set _pd_placeholder = '{{' + ' platform_domain ' + '}}' %}
+{% set _raw_key = site.hostname | replace(platform_domain, _pd_placeholder) %}
+{% set security_headers = public_edge_security_headers_default | combine(public_edge_security_headers_overrides.get(_raw_key, {}), recursive=True) %}
 {% if tls_enabled and security_headers.strict_transport_security is defined and security_headers.strict_transport_security is not none %}
     add_header Strict-Transport-Security "{{ security_headers.strict_transport_security }}" always;
 {% endif %}
@@ -158,7 +164,9 @@ server {
 {% endif %}
 
 {% for site in public_edge_sites %}
-{% set protected_site = public_edge_authenticated_sites[site.hostname] if site.hostname in public_edge_authenticated_sites else none %}
+{% set _pd_placeholder = '{{' + ' platform_domain ' + '}}' %}
+{% set _raw_key = site.hostname | replace(platform_domain, _pd_placeholder) %}
+{% set protected_site = public_edge_authenticated_sites[_raw_key] if _raw_key in public_edge_authenticated_sites else none %}
 {% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
 {% set exact_redirects = site.exact_redirects | default([]) %}
