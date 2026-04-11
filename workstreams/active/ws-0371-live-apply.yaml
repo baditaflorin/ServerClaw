@@ -1,0 +1,60 @@
+id: ws-0371-live-apply
+adr: '0371'
+title: Re-verify parameterized service verification tasks from the latest origin/main
+status: in_progress
+owner: codex
+branch: codex/ws-0371-live-apply
+worktree_path: .worktrees/ws-0371-live-apply
+doc: docs/workstreams/ws-0371-live-apply.md
+depends_on:
+- adr-0165-workflow-idempotency
+- adr-0289-label-studio-service-stack
+conflicts_with: []
+shared_surfaces:
+- collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml
+- collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml
+- collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml
+- collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml
+- docs/adr/0371-parameterized-verify-tasks.md
+- docs/workstreams/ws-0371-live-apply.md
+- docs/runbooks/live-apply-receipts-and-verification-evidence.md
+- workstreams/active/ws-0371-live-apply.yaml
+- workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0371_verify_service_health
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml
+    - collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml
+    - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml
+    - collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml
+    mode: exclusive
+  - id: ws_0371_docs
+    paths:
+    - docs/adr/0371-parameterized-verify-tasks.md
+    - docs/workstreams/ws-0371-live-apply.md
+    - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+    mode: exclusive
+  - id: ws_0371_workstream_registry
+    paths:
+    - workstreams/active/ws-0371-live-apply.yaml
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+blockers: []
+ready_to_merge: false
+live_applied: false
+description: 'Finish ADR 0371 from the latest origin/main by closing the remaining
+
+  verification-task migrations, validating the shared verifier contract, and
+
+  replaying the governed live-apply path for the affected services from an
+
+  isolated Codex worktree with branch-local evidence.
+
+  '
+plane_issue_id: a3900b32-9792-4e8a-8ae4-8555268bab91
