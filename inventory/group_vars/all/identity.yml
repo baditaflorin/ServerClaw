@@ -8,9 +8,9 @@
 # ---------------------------------------------------------------------------
 # Core identity anchors — everything else in this file derives from these
 # ---------------------------------------------------------------------------
-platform_domain: example.com
-platform_operator_email: operator@example.com
-platform_operator_name: "Platform Operator"
+platform_domain: lv3.org
+platform_operator_email: florin@lv3.org
+platform_operator_name: "Florin Badita-Nistor"
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 
 # ---------------------------------------------------------------------------
