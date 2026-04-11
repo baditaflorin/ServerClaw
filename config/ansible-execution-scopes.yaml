@@ -418,8 +418,22 @@ playbooks:
     shared_surfaces:
       - service:litellm
       - inventory/host_vars/proxmox-host.yml
+  playbooks/services/litellm.yml:
+    playbook_id: litellm-service
+    canonical_service_id: litellm
+    mutation_scope: platform
+    shared_surfaces:
+      - service:litellm
+      - inventory/host_vars/proxmox-host.yml
   playbooks/librechat.yml:
     playbook_id: librechat
+    canonical_service_id: librechat
+    mutation_scope: platform
+    shared_surfaces:
+      - service:librechat
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/services/librechat.yml:
+    playbook_id: librechat-service
     canonical_service_id: librechat
     mutation_scope: platform
     shared_surfaces:

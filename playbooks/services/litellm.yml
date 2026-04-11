@@ -1,0 +1,6 @@
+---
+# Service Playbook Wrapper: litellm.yml
+# Purpose: Delegates to the main LiteLLM convergence playbook.
+# This wrapper allows service-level orchestration and cross-service dependencies.
+
+- import_playbook: ../litellm.yml
