@@ -1,0 +1,37 @@
+$schema: config/schemas/operators.schema.json
+schema_version: "1.0.0"
+operators:
+  - id: example-admin
+    name: Example Operator
+    email: operator@example.com
+    role: admin
+    status: active
+    notes: |
+      Example operator entry. Replace with your actual operator details.
+      See ADR 0108 for the operator onboarding process.
+    keycloak:
+      username: example.operator
+      realm_roles:
+        - platform-admin
+      groups:
+        - platform-admins
+        - grafana-admins
+      enabled: true
+    ssh:
+      principal: example.operator
+      certificate_ttl_hours: 24
+      public_keys:
+        - name: bootstrap-ssh
+          public_key: ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_KEY operator@example.com
+          fingerprint: SHA256:REPLACE_WITH_YOUR_FINGERPRINT
+    openbao:
+      entity_name: example.operator
+      policies:
+        - platform-admin
+    tailscale:
+      login_email: operator@example.com
+      tags:
+        - tag:platform-operator
+    audit:
+      onboarded_at: "2026-01-01T00:00:00Z"
+      onboarded_by: manual-bootstrap

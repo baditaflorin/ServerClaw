@@ -1,0 +1,101 @@
+# =============================================================================
+# Operator Identity — ADR 0385
+# =============================================================================
+# Fork operators: change every value in this file to match your deployment.
+# This is the ONLY file you must edit to rebrand the platform.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Core identity anchors — everything else in this file derives from these
+# ---------------------------------------------------------------------------
+platform_domain: example.com
+platform_operator_email: operator@example.com
+platform_operator_name: "Platform Operator"
+platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
+
+# ---------------------------------------------------------------------------
+# Keycloak SSO identity — ADR 0388
+# ---------------------------------------------------------------------------
+keycloak_realm_name: "{{ platform_domain | split('.') | first }}"
+keycloak_oidc_issuer_url: "https://sso.{{ platform_domain }}/realms/{{ keycloak_realm_name }}"
+keycloak_oidc_auth_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/auth"
+keycloak_oidc_token_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/token"
+keycloak_oidc_userinfo_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/userinfo"
+keycloak_oidc_jwks_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/certs"
+keycloak_oidc_logout_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/logout"
+keycloak_oidc_discovery_url: "{{ keycloak_oidc_issuer_url }}/.well-known/openid-configuration"
+
+# ---------------------------------------------------------------------------
+# Proxmox host identity
+# ---------------------------------------------------------------------------
+proxmox_host_admin_comment: "{{ platform_operator_name }} Operations"
+proxmox_notification_email: "{{ platform_operator_email }}"
+proxmox_notification_author: "Proxmox {{ platform_domain | split('.') | first | upper }}"
+proxmox_notification_endpoint_name: "{{ platform_domain | split('.') | first }}-ops-email"
+proxmox_notification_endpoint_comment: "{{ platform_domain | split('.') | first | upper }} operations mailbox"
+proxmox_notification_matcher_name: "{{ platform_domain | split('.') | first }}-all-events"
+proxmox_notification_matcher_comment: "Send all Proxmox notifications to {{ platform_domain | split('.') | first | upper }} operations"
+proxmox_acme_contact_email: "{{ platform_operator_email }}"
+proxmox_acme_domain: "proxmox.{{ platform_domain }}"
+proxmox_api_hostname: "proxmox.{{ platform_domain }}"
+proxmox_guest_searchdomain: "{{ platform_domain }}"
+
+# ---------------------------------------------------------------------------
+# DNS provider
+# ---------------------------------------------------------------------------
+hetzner_dns_zone_name: "{{ platform_domain }}"
+
+# ---------------------------------------------------------------------------
+# Monitoring
+# ---------------------------------------------------------------------------
+monitoring_influxdb_org: "{{ platform_domain | split('.') | first }}"
+
+# ---------------------------------------------------------------------------
+# Mail platform
+# ---------------------------------------------------------------------------
+mail_platform_domain: "{{ platform_domain }}"
+mail_platform_brevo_sender_name: "{{ platform_operator_name }} Mail Bridge"
+
+# ---------------------------------------------------------------------------
+# ServerClaw
+# ---------------------------------------------------------------------------
+serverclaw_admin_email: "{{ platform_operator_email }}"
+serverclaw_admin_name: "{{ platform_operator_name }}"
+serverclaw_public_url: "https://chat.{{ platform_domain }}"
+serverclaw_webui_name: ServerClaw
+serverclaw_oidc_provider_url: "{{ keycloak_oidc_discovery_url }}"
+serverclaw_extra_hosts:
+  - "sso.{{ platform_domain }}:{{ hostvars[platform_topology_host].platform_guest_catalog.by_name[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ipv4 }}"
+
+# ---------------------------------------------------------------------------
+# SearXNG
+# ---------------------------------------------------------------------------
+searxng_controller_url: "http://search.{{ platform_domain }}"
+
+# ---------------------------------------------------------------------------
+# Guest network identity
+# ---------------------------------------------------------------------------
+platform_guest_network_cidr: 10.10.10.0/24
+platform_guest_network_prefix: "10.10.10."
+platform_guest_network_wildcard: "10.10.10.*"
+platform_tailscale_network_cidr: 100.64.0.0/10
+
+# ---------------------------------------------------------------------------
+# Network access control (deployment-specific trusted sources)
+# ---------------------------------------------------------------------------
+proxmox_management_allowed_sources:
+  - "{{ platform_tailscale_network_cidr }}"
+  - "{{ platform_guest_network_cidr }}"
+  # - YOUR_PUBLIC_IP/32
+
+# ---------------------------------------------------------------------------
+# Container registry (used by CI gate check runners)
+# ---------------------------------------------------------------------------
+platform_container_registry: "registry.{{ platform_domain }}"
+
+# ---------------------------------------------------------------------------
+# Repository identity (used by Gitea, CI, server checkouts)
+# ---------------------------------------------------------------------------
+platform_repo_name: proxmox_florin_server
+platform_gitea_org: ops
+platform_repo_checkout_path: "/srv/{{ platform_repo_name }}"
