@@ -17,7 +17,6 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
-
 existing_platform = sys.modules.get("platform")
 if existing_platform is not None and not hasattr(existing_platform, "__path__"):
     del sys.modules["platform"]

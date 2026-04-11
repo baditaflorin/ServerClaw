@@ -254,6 +254,24 @@ playbooks:
       - config/service-capability-catalog.json
       - config/service-redundancy-catalog.json
       - config/slo-catalog.json
+  playbooks/runtime-apps-pool.yml:
+    playbook_id: runtime-apps-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-apps-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
+      - config/execution-lanes.yaml
+      - config/service-capability-catalog.json
+  playbooks/runtime-comms-pool.yml:
+    playbook_id: runtime-comms-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-comms-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
+      - config/execution-lanes.yaml
+      - config/service-capability-catalog.json
   playbooks/mattermost.yml:
     playbook_id: mattermost
     mutation_scope: platform
@@ -773,4 +791,52 @@ playbooks:
     playbook_id: vikunja
     mutation_scope: platform
     shared_surfaces:
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/provision_adr_governance.yml:
+    playbook_id: provision-adr-governance
+    mutation_scope: host
+    shared_surfaces:
+      - service:adr-governance
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/refresh-discovery-surfaces.yml:
+    playbook_id: refresh-discovery-surfaces
+    mutation_scope: platform
+    shared_surfaces:
+      - build/platform-manifest.json
+      - build/onboarding/
+      - config/service-capability-catalog.json
+      - docs/adr/
+      - docs/workstreams/
+  playbooks/repo-intake.yml:
+    playbook_id: repo-intake
+    mutation_scope: host
+    shared_surfaces:
+      - service:repo-intake
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/services/repo_intake.yml:
+    playbook_id: repo-intake-service
+    mutation_scope: host
+    shared_surfaces:
+      - service:repo-intake
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-bootstrap-guests.yml:
+    playbook_id: verify-bootstrap-guests
+    mutation_scope: platform
+    execution_class: diagnostic
+    shared_surfaces:
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-bootstrap-proxmox.yml:
+    playbook_id: verify-bootstrap-proxmox
+    mutation_scope: host
+    execution_class: diagnostic
+    shared_surfaces:
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-platform.yml:
+    playbook_id: verify-platform
+    mutation_scope: platform
+    execution_class: diagnostic
+    shared_surfaces:
+      - inventory/hosts.yml
       - inventory/host_vars/proxmox-host.yml

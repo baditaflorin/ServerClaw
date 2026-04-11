@@ -43,7 +43,7 @@ See [docker-dev/README.md](docker-dev/README.md) for details.
 git clone https://github.com/baditaflorin/ServerClaw.git
 cd ServerClaw
 make init-local              # Generate SSH keys and secrets
-make generate-inventory      # Generate inventory/hosts.yml from proxmox-host.yml
+make generate-inventory      # Generate inventory/hosts.yml from the platform host vars source
 # Edit inventory/group_vars/all/identity.yml (domain, operator name/email)
 make bootstrap               # Full staged bootstrap with validation gates
 ```
@@ -105,9 +105,9 @@ Everything else derives from these values via Ansible templating.
 ### Fork checklist
 
 1. Edit `inventory/group_vars/all/identity.yml` (domain, name, email)
-2. Run `make generate-inventory` — generates `inventory/hosts.yml` from `inventory/host_vars/proxmox-host.yml`
+2. Run `make generate-inventory` — generates `inventory/hosts.yml` from `inventory/host_vars/<platform-host>.yml`
 3. Run `make init-local` to generate secrets
-4. Choose a [provider profile](config/provider-profiles/) (Hetzner, generic Debian, homelab)
+4. Choose a [provider profile](config/provider-profiles/) (cloud, generic Debian, or homelab)
 5. Run `make bootstrap` or `make docker-dev-up`
 
 See [docs/runbooks/bootstrap-from-scratch.md](docs/runbooks/bootstrap-from-scratch.md).
@@ -134,18 +134,18 @@ make docker-dev-down         # Cleanup
 ```
 Proxmox VE Host (Debian 13, bare metal)
   |
-  +-- nginx-edge        (10.10.10.10)  Reverse proxy, TLS termination
-  +-- docker-runtime    (10.10.10.20)  Primary application runtime
-  +-- docker-build      (10.10.10.30)  CI/CD build server
-  +-- monitoring        (10.10.10.40)  Grafana, Prometheus, Alertmanager
-  +-- postgres          (10.10.10.50)  Shared PostgreSQL 16
-  +-- backup            (10.10.10.60)  Proxmox Backup Server
-  +-- runtime-control   (10.10.10.92)  API gateway, agent tools
-  +-- runtime-ai        (10.10.10.90)  GPU workloads (Ollama, inference)
+  +-- nginx-edge        (10.0.0.10)  Reverse proxy, TLS termination
+  +-- docker-runtime    (10.0.0.20)  Primary application runtime
+  +-- docker-build      (10.0.0.30)  CI/CD build server
+  +-- monitoring        (10.0.0.40)  Grafana, Prometheus, Alertmanager
+  +-- postgres          (10.0.0.50)  Shared PostgreSQL 16
+  +-- backup            (10.0.0.60)  Proxmox Backup Server
+  +-- runtime-control   (10.0.0.90)  API gateway, agent tools
+  +-- runtime-ai        (10.0.0.92)  GPU workloads (Ollama, inference)
   +-- [additional VMs per topology]
 ```
 
-All guest VMs are managed declaratively. `inventory/host_vars/proxmox-host.yml`
+All guest VMs are managed declaratively. `inventory/host_vars/<platform-host>.yml`
 is the single source of truth for VM topology (VMID, IP, RAM, cores). Running
 `make generate-inventory` derives `inventory/hosts.yml` and all Ansible host
 variables from it — no manual IP editing.
@@ -160,7 +160,7 @@ variables from it — no manual IP editing.
 - **Derive, don't declare**: `derive_service_defaults` computes 15-25
   variables per service from a registry — roles don't repeat boilerplate.
 - **Generated inventory**: `inventory/hosts.yml` is machine-generated from
-  `proxmox_guests` in `proxmox-host.yml`. Edit the source, not the output.
+  `proxmox_guests` in the platform host vars source file. Edit the source, not the output.
 - **ADR governance**: Every architectural decision is recorded and indexed.
   Pre-commit hooks enforce status transitions.
 - **Verification gates**: `make verify-bootstrap-proxmox`, `make verify-bootstrap-guests`,

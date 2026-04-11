@@ -255,7 +255,8 @@
         "recover"
       ],
       "next_success_lane": "change",
-      "next_failure_lane": "recover"
+      "next_failure_lane": "recover",
+      "service_id": "repowise"
     },
     {
       "service_id": "status_page",
@@ -579,121 +580,6 @@
       ],
       "next_success_lane": "observe",
       "next_failure_lane": "recover"
-    }
-  ],
-  "workbench_surfaces": [
-    {
-      "id": "ops_portal",
-      "title": "Interactive Ops Portal",
-      "url": "https://ops.example.com",
-      "role": "task",
-      "role_description": "Governed actions, runbooks, deployments, and live drift visibility.",
-      "primary_lane": "change",
-      "audience": [
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "homepage",
-      "title": "Platform Homepage",
-      "url": "https://home.example.com",
-      "role": "home",
-      "role_description": "Service discovery, status overview, and orientation for new users.",
-      "primary_lane": "start",
-      "audience": [
-        "viewer",
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "docs_portal",
-      "title": "Documentation Portal",
-      "url": "https://docs.example.com",
-      "role": "reference",
-      "role_description": "Platform runbooks, ADRs, architecture references, and onboarding guides.",
-      "primary_lane": "learn",
-      "audience": [
-        "viewer",
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "outline",
-      "title": "Outline Wiki",
-      "url": "https://outline.example.com",
-      "role": "reference",
-      "role_description": "Living knowledge base \u2014 automation run summaries, changelogs, and team notes.",
-      "primary_lane": "learn",
-      "audience": [
-        "viewer",
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "plane",
-      "title": "Plane",
-      "url": "https://plane.example.com",
-      "role": "task",
-      "role_description": "Project planning, issue tracking, and agent task coordination.",
-      "primary_lane": "change",
-      "audience": [
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "grafana",
-      "title": "Grafana",
-      "url": "https://grafana.example.com",
-      "role": "product_native",
-      "role_description": "Metrics dashboards, log exploration, and alert management.",
-      "primary_lane": "observe",
-      "audience": [
-        "viewer",
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "gitea",
-      "title": "Gitea",
-      "url": "https://git.example.com",
-      "role": "product_native",
-      "role_description": "Source code hosting, CI pipelines, and repository management.",
-      "primary_lane": "change",
-      "audience": [
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "paperless",
-      "title": "Paperless-ngx",
-      "url": "https://paperless.example.com",
-      "role": "product_native",
-      "role_description": "Document management and OCR search.",
-      "primary_lane": "learn",
-      "audience": [
-        "viewer",
-        "operator",
-        "admin"
-      ]
-    },
-    {
-      "id": "windmill",
-      "title": "Windmill",
-      "url": "https://windmill.example.com",
-      "role": "product_native",
-      "role_description": "Workflow automation, scheduled tasks, and script runners.",
-      "primary_lane": "change",
-      "audience": [
-        "operator",
-        "admin"
-      ]
     }
   ]
 }

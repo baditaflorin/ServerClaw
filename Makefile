@@ -404,7 +404,7 @@ install-cli:
 
 update-cli: install-cli
 
-generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/proxmox-host.yml
+generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in the platform host vars source
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write
 
 validate-generated-inventory: ## Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests
@@ -458,7 +458,7 @@ validate-alert-rules:
 	$(REPO_ROOT)/scripts/validate_repo.sh alert-rules
 
 syntax-check-realtime:
-	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/realtime.yml --syntax-check
+	@printf '%s\n' "realtime/Netdata was removed by ADR 0401; use Grafana on monitoring instead."; exit 1
 
 validate-tofu:
 	$(TOFU_EXEC_CMD) validate all
@@ -723,7 +723,7 @@ syntax-check-directus:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/directus.yml --syntax-check
 
 syntax-check-jupyterhub:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/jupyterhub.yml --syntax-check
+	@printf '%s\n' "JupyterHub was removed by ADR 0402; no syntax-check target remains."; exit 1
 
 syntax-check-label-studio:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/label-studio.yml --syntax-check
@@ -830,7 +830,7 @@ syntax-check-ollama:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ollama.yml --syntax-check
 
 syntax-check-one-api:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/one-api.yml --syntax-check
+	@printf '%s\n' "One-API was removed by ADR 0393; no syntax-check target remains."; exit 1
 
 syntax-check-piper:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/piper.yml --syntax-check
@@ -851,7 +851,7 @@ syntax-check-dozzle:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/dozzle.yml --syntax-check
 
 syntax-check-open-webui:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/open-webui.yml --syntax-check
+	@printf '%s\n' "Open WebUI was removed by ADR 0390; no syntax-check target remains."; exit 1
 
 syntax-check-serverclaw:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/serverclaw.yml --syntax-check
@@ -1079,8 +1079,7 @@ converge-directus:
 
 converge-jupyterhub:
 	$(MAKE) preflight WORKFLOW=converge-jupyterhub
-	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/jupyterhub.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/jupyterhub.yml $(ANSIBLE_TRACE_ARGS)
+	@printf '%s\n' "JupyterHub was removed by ADR 0402; use current notebook replacements instead."; exit 1
 
 converge-label-studio:
 	$(MAKE) preflight WORKFLOW=converge-label-studio
@@ -1277,7 +1276,7 @@ converge-ollama:
 
 converge-one-api:
 	$(MAKE) preflight WORKFLOW=converge-one-api
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/one-api.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	@printf '%s\n' "One-API was removed by ADR 0393; no converge target remains."; exit 1
 
 converge-piper:
 	$(MAKE) preflight WORKFLOW=converge-piper
@@ -1312,13 +1311,11 @@ converge-dozzle:
 
 converge-realtime:
 	$(MAKE) preflight WORKFLOW=converge-realtime
-	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/realtime.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	@printf '%s\n' "realtime/Netdata was removed by ADR 0401; use monitoring-stack and Grafana instead."; exit 1
 
 converge-open-webui:
 	$(MAKE) preflight WORKFLOW=converge-open-webui
-	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/open-webui.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/open-webui.yml
+	@printf '%s\n' "Open WebUI was removed by ADR 0390; no converge target remains."; exit 1
 
 converge-serverclaw:
 	$(MAKE) preflight WORKFLOW=converge-serverclaw

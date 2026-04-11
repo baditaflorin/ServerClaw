@@ -1,0 +1,70 @@
+id: ws-0373-live-apply
+adr: '0373'
+title: Live apply service registry and derived defaults from latest origin/main
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/ws-0373-live-apply
+worktree_path: .worktrees/ws-0373-live-apply
+doc: docs/workstreams/ws-0373-live-apply.md
+depends_on:
+- adr-0344-single-source-environment-topology
+- adr-0359-declarative-postgresql-client-registry
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0373-live-apply.yaml
+- docs/workstreams/ws-0373-live-apply.md
+- docs/adr/0373-service-registry-and-derived-defaults.md
+- docs/adr/implementation-status/adr-0373.yaml
+- docs/postmortems/adr-0373-service-registry-adoption-completion.md
+- docs/runbooks/add-new-service-to-platform.md
+- inventory/group_vars/all/platform_services.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+- scripts/validate_service_registry.py
+- scripts/validate_repo.sh
+- tests/test_validate_service_completeness.py
+- tests/test_ansible_execution_scopes.py
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0373_live_apply_tracking
+    paths:
+    - workstreams/active/ws-0373-live-apply.yaml
+    - docs/workstreams/ws-0373-live-apply.md
+    - docs/adr/0373-service-registry-and-derived-defaults.md
+    - docs/adr/implementation-status/adr-0373.yaml
+    - docs/postmortems/adr-0373-service-registry-adoption-completion.md
+    - docs/runbooks/add-new-service-to-platform.md
+    mode: exclusive
+  - id: ws_0373_service_registry_contract
+    paths:
+    - inventory/group_vars/all/platform_services.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+    - scripts/validate_service_registry.py
+    - scripts/validate_repo.sh
+    - tests/test_validate_service_completeness.py
+    - tests/test_ansible_execution_scopes.py
+    mode: shared_contract
+    contract: adr-0373-service-registry-v1
+  - id: ws_0373_live_apply_evidence
+    paths:
+    - receipts/live-applies/
+    mode: shared_contract
+    contract: live-apply-evidence-v1
+notes: 'Replay ADR 0373 from the latest origin/main worktree, verify the
+
+  service-registry automation and governed live-apply path end to end,
+
+  and leave merge-safe evidence after ADR 0407 moved receipts/ out of
+
+  the normal committed surface.
+
+  '
+plane_issue_id: 42ea1e56-38e5-4a5d-a25d-392abad9e3e8

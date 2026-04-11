@@ -1123,11 +1123,12 @@
       "container_name": "litellm",
       "registry_ref": "ghcr.io/berriai/litellm-database",
       "tag": "main-v1.26.9",
-      "digest": "sha256:placeholder-scan-before-deploy",
-      "ref": "ghcr.io/berriai/litellm-database:main-v1.26.9",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "ref": "ghcr.io/berriai/litellm-database:main-v1.26.9@sha256:0000000000000000000000000000000000000000000000000000000000000000",
       "platform": "linux/amd64",
       "pinned_on": "2026-04-07",
-      "scan_status": "pending",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-04-07-litellm-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py"
@@ -1143,11 +1144,12 @@
       "container_name": "librechat",
       "registry_ref": "ghcr.io/danny-avila/librechat",
       "tag": "v0.8.4",
-      "digest": "sha256:placeholder-scan-before-deploy",
-      "ref": "ghcr.io/danny-avila/librechat:v0.8.4",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:0000000000000000000000000000000000000000000000000000000000000000",
       "platform": "linux/amd64",
       "pinned_on": "2026-04-08",
-      "scan_status": "pending",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-04-08-librechat-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py"

@@ -17,14 +17,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str
+from validation_toolkit import load_yaml_with_identity, require_enum, require_int, require_mapping, require_str
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
+INVENTORY_PATH = REPO_ROOT / "inventory" / "hosts.yml"
 IMAGE_CATALOG_PATH = REPO_ROOT / "config" / "image-catalog.json"
 ROLES_DIR = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles"
 
-REQUIRED_FIELDS = ("image_catalog_key", "internal_port", "host_group")
+SERVICE_TYPES = {"docker_compose", "system_package", "infrastructure", "multi_instance"}
+NULLABLE_PORT_SERVICE_TYPES = {"system_package", "infrastructure"}
+CATALOG_VALIDATED_SERVICE_TYPES = {"docker_compose"}
 
 
 def load_registry() -> dict:
@@ -40,6 +43,32 @@ def load_image_catalog() -> dict | None:
     return data.get("images", {})
 
 
+def load_inventory_names() -> set[str]:
+    data = load_yaml_with_identity(INVENTORY_PATH)
+    names: set[str] = set()
+
+    def visit(node: object, *, node_name: str | None = None) -> None:
+        if node_name:
+            names.add(node_name)
+        if not isinstance(node, dict):
+            return
+
+        hosts = node.get("hosts")
+        if isinstance(hosts, dict):
+            names.update(str(host) for host in hosts.keys())
+
+        children = node.get("children")
+        if isinstance(children, dict):
+            for child_name, child_node in children.items():
+                visit(child_node, node_name=str(child_name))
+
+    if isinstance(data, dict):
+        for top_name, top_node in data.items():
+            visit(top_node, node_name=str(top_name))
+
+    return names
+
+
 def discover_runtime_roles() -> list[str]:
     """Return role names for all *_runtime roles found on disk."""
     roles = []
@@ -51,7 +80,12 @@ def discover_runtime_roles() -> list[str]:
     return roles
 
 
-def validate_entry(service_name: str, entry: object, image_catalog: dict | None) -> list[str]:
+def validate_entry(
+    service_name: str,
+    entry: object,
+    image_catalog: dict | None,
+    inventory_names: set[str],
+) -> list[str]:
     """Validate a single registry entry. Returns a list of error strings."""
     errors: list[str] = []
     path = f"platform_service_registry.{service_name}"
@@ -61,33 +95,57 @@ def validate_entry(service_name: str, entry: object, image_catalog: dict | None)
     except ValueError as exc:
         return [str(exc)]
 
-    # Validate required fields
-    for field in REQUIRED_FIELDS:
-        if field not in entry:
-            errors.append(f"{path}.{field} is required but missing")
-
-    # image_catalog_key: may be empty string (no catalog entry) or a valid catalog key
-    image_catalog_key = entry.get("image_catalog_key", "")
-    try:
-        require_str(image_catalog_key, f"{path}.image_catalog_key", allow_empty=True)
-    except ValueError as exc:
-        errors.append(str(exc))
+    service_type_value: str | None = None
+    if "service_type" not in entry:
+        errors.append(f"{path}.service_type is required but missing")
     else:
-        if image_catalog_key and image_catalog is not None:
-            if image_catalog_key not in image_catalog:
-                errors.append(f"{path}.image_catalog_key '{image_catalog_key}' not found in config/image-catalog.json")
-
-    # internal_port: must be a positive integer
-    if "internal_port" in entry:
         try:
-            require_int(entry["internal_port"], f"{path}.internal_port", minimum=1, maximum=65535)
+            service_type_value = require_enum(entry["service_type"], f"{path}.service_type", SERVICE_TYPES)
         except ValueError as exc:
             errors.append(str(exc))
 
-    # host_group: must be a non-empty string
-    if "host_group" in entry:
+    if "host_group" not in entry:
+        errors.append(f"{path}.host_group is required but missing")
+    else:
         try:
-            require_str(entry["host_group"], f"{path}.host_group")
+            host_group = require_str(entry["host_group"], f"{path}.host_group")
+        except ValueError as exc:
+            errors.append(str(exc))
+        else:
+            if host_group not in inventory_names:
+                errors.append(f"{path}.host_group '{host_group}' not found in inventory hosts/groups")
+
+    image_catalog_key = entry.get("image_catalog_key")
+    if service_type_value in CATALOG_VALIDATED_SERVICE_TYPES and "image_catalog_key" not in entry:
+        errors.append(f"{path}.image_catalog_key is required but missing")
+    else:
+        if image_catalog_key is not None:
+            try:
+                image_catalog_key = require_str(image_catalog_key, f"{path}.image_catalog_key", allow_empty=True)
+            except ValueError as exc:
+                errors.append(str(exc))
+            else:
+                if (
+                    service_type_value in CATALOG_VALIDATED_SERVICE_TYPES
+                    and image_catalog_key
+                    and image_catalog is not None
+                    and image_catalog_key not in image_catalog
+                ):
+                    errors.append(
+                        f"{path}.image_catalog_key '{image_catalog_key}' not found in config/image-catalog.json"
+                    )
+
+    if "internal_port" not in entry:
+        errors.append(f"{path}.internal_port is required but missing")
+    elif service_type_value in NULLABLE_PORT_SERVICE_TYPES:
+        if entry["internal_port"] is not None:
+            try:
+                require_int(entry["internal_port"], f"{path}.internal_port", minimum=1, maximum=65535)
+            except ValueError as exc:
+                errors.append(str(exc))
+    else:
+        try:
+            require_int(entry["internal_port"], f"{path}.internal_port", minimum=1, maximum=65535)
         except ValueError as exc:
             errors.append(str(exc))
 
@@ -113,10 +171,32 @@ def validate_entry(service_name: str, entry: object, image_catalog: dict | None)
         except ValueError as exc:
             errors.append(str(exc))
 
+    if "state_dirs" in entry:
+        try:
+            state_dirs = require_mapping(entry["state_dirs"], f"{path}.state_dirs")
+        except ValueError as exc:
+            errors.append(str(exc))
+        else:
+            for key in ("config", "data", "secrets"):
+                if key not in state_dirs:
+                    errors.append(f"{path}.state_dirs.{key} is required but missing")
+                    continue
+                try:
+                    require_str(state_dirs[key], f"{path}.state_dirs.{key}")
+                except ValueError as exc:
+                    errors.append(str(exc))
+    elif service_type_value == "system_package":
+        errors.append(f"{path}.state_dirs is required for system_package services")
+
     return errors
 
 
-def check(registry: dict, image_catalog: dict | None, runtime_roles: list[str]) -> tuple[list[str], list[str]]:
+def check(
+    registry: dict,
+    image_catalog: dict | None,
+    runtime_roles: list[str],
+    inventory_names: set[str],
+) -> tuple[list[str], list[str]]:
     """Validate registry. Returns (errors, warnings)."""
     errors: list[str] = []
     warnings: list[str] = []
@@ -135,18 +215,21 @@ def check(registry: dict, image_catalog: dict | None, runtime_roles: list[str]) 
 
     # Validate each entry
     for service_name, entry in service_map.items():
-        errors.extend(validate_entry(service_name, entry, image_catalog))
+        errors.extend(validate_entry(service_name, entry, image_catalog, inventory_names))
 
     # Check for duplicate keys (YAML itself prevents true dupes, but confirm)
     registered_names = set(service_map.keys())
 
     # Warn about *_runtime roles that have no registry entry
     for role_name in runtime_roles:
-        # Convert role name to registry key: strip _runtime suffix
-        service_key = role_name[: -len("_runtime")]
-        if service_key not in registered_names:
+        candidate_keys = [role_name]
+        if role_name.endswith("_runtime"):
+            candidate_keys.append(role_name[: -len("_runtime")])
+        if not any(candidate in registered_names for candidate in candidate_keys):
             warnings.append(
-                f"Runtime role '{role_name}' has no entry in platform_service_registry (expected key: '{service_key}')"
+                "Runtime role "
+                f"'{role_name}' has no entry in platform_service_registry "
+                f"(expected one of: {', '.join(repr(candidate) for candidate in candidate_keys)})"
             )
 
     return errors, warnings
@@ -155,9 +238,10 @@ def check(registry: dict, image_catalog: dict | None, runtime_roles: list[str]) 
 def cmd_check(args: argparse.Namespace) -> int:
     registry = load_registry()
     image_catalog = load_image_catalog()
+    inventory_names = load_inventory_names()
     runtime_roles = discover_runtime_roles()
 
-    errors, warnings = check(registry, image_catalog, runtime_roles)
+    errors, warnings = check(registry, image_catalog, runtime_roles, inventory_names)
 
     service_count = len(registry.get("platform_service_registry", {}))
     print(f"platform_service_registry: {service_count} service(s) registered")
