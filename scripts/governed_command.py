@@ -12,7 +12,7 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 from command_catalog import (
@@ -266,7 +266,7 @@ def submit_remote_payload(
     )
     if runtime_host == "docker-runtime-lv3":
         command = build_guest_ssh_command(controller_context, runtime_host, remote_command)
-    elif runtime_host == controller_context["host_vars"]["host_public_hostname"] or runtime_host == "proxmox_florin":
+    elif runtime_host == controller_context["host_vars"]["host_public_hostname"] or runtime_host == TOPOLOGY_HOST:
         command = build_host_ssh_command(controller_context, remote_command)
     else:
         command = build_guest_ssh_command(controller_context, runtime_host, remote_command)

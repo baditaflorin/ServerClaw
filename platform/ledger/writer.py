@@ -8,6 +8,8 @@ import uuid
 from pathlib import Path
 from typing import Any, Callable
 
+from platform.repo import TOPOLOGY_HOST
+
 from ._common import (
     REPO_ROOT,
     dumps_jsonb,
@@ -78,7 +80,7 @@ def derive_target_kind(*, surface: str | None = None, action: str | None = None,
         return "secret"
     if lowered_target.startswith("vm-") or lowered_target.startswith("vm/") or lowered_target.startswith("vmid:"):
         return "vm"
-    if lowered_target in {"proxmox_florin", "proxmox-host-lv3"} or "host" in lowered_target:
+    if lowered_target in {TOPOLOGY_HOST, "proxmox-host-lv3"} or "host" in lowered_target:
         return "host"
     if lowered_surface in {"windmill", "command-catalog"}:
         return "workflow"

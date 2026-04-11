@@ -6,7 +6,7 @@ import argparse
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -98,7 +98,7 @@ def active_service_ids(service_catalog_index: dict[str, dict[str, Any]]) -> list
 def known_locations() -> set[str]:
     host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     guests = require_list(host_vars.get("proxmox_guests"), "inventory/host_vars/proxmox_florin.yml.proxmox_guests")
-    locations = {"proxmox_florin"}
+    locations = {TOPOLOGY_HOST}
     for index, guest in enumerate(guests):
         guest = require_mapping(guest, f"inventory/host_vars/proxmox_florin.yml.proxmox_guests[{index}]")
         locations.add(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -15,6 +16,12 @@ REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[1]
 # ADR 0407: centralized here to keep the deployment-specific name in one place.
 TOPOLOGY_HOST: Final[str] = "proxmox_florin"
 TOPOLOGY_HOST_VARS_PATH: Final[Path] = REPO_ROOT / "inventory" / "host_vars" / f"{TOPOLOGY_HOST}.yml"
+# ADR 0407: Windmill workspace name — matches windmill_workspace_id in role defaults.
+WINDMILL_WORKSPACE: Final[str] = os.environ.get("WINDMILL_WORKSPACE", "lv3")
+# ADR 0407: Public GitHub repository base URL for link rewriting.
+GITHUB_REPO_BASE_URL: Final[str] = os.environ.get(
+    "GITHUB_REPO_BASE_URL", "https://github.com/baditaflorin/ServerClaw/blob/main"
+)
 PACKAGED_SIBLING_DIRS: Final[set[str]] = {"config"}
 MAKEFILE_PATH: Final[Path] = REPO_ROOT / "Makefile"
 README_PATH: Final[Path] = REPO_ROOT / "README.md"

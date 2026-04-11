@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from platform.repo import load_json, load_yaml, repo_path
+from platform.repo import TOPOLOGY_HOST, load_json, load_yaml, repo_path
 from platform.world_state._db import (
     ConnectionFactory,
     connection_kind,
@@ -191,7 +191,7 @@ def build_graph_documents(
         GraphNode(
             id="host:proxmox_florin",
             kind="host",
-            label="proxmox_florin",
+            label=TOPOLOGY_HOST,
             metadata={"source": "derived_default", "host_role": "hypervisor"},
         ),
     )
@@ -254,7 +254,7 @@ def build_graph_documents(
                         metadata={"source": "service_catalog", "relationship": "runtime_host"},
                     ),
                 )
-                if vm != "proxmox_florin":
+                if vm != TOPOLOGY_HOST:
                     _ensure_edge(
                         edges,
                         GraphEdge(
@@ -383,7 +383,7 @@ def build_graph_documents(
                         metadata={"source": "world_state.netbox_topology", "ansible_host": vm.get("ansible_host")},
                     ),
                 )
-                if name != "proxmox_florin":
+                if name != TOPOLOGY_HOST:
                     _ensure_edge(
                         edges,
                         GraphEdge(
@@ -413,7 +413,7 @@ def build_graph_documents(
                 )
             if any(node.id == "network:vlan:10" for node in nodes.values()):
                 for host_id in sorted(host_ids):
-                    if host_id == "proxmox_florin":
+                    if host_id == TOPOLOGY_HOST:
                         continue
                     _ensure_edge(
                         edges,

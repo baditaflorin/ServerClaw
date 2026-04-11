@@ -171,7 +171,7 @@ def _load_probe_callable(repo_root: Path, spec: dict[str, str]) -> Callable[[dic
         path = Path(spec["path"])
         if not path.is_absolute():
             path = (repo_root / path).resolve()
-        module_name = f"lv3_speculative_probe_{uuid.uuid4().hex}"
+        module_name = f"speculative_probe_{uuid.uuid4().hex}"
         loader = importlib.util.spec_from_file_location(module_name, path)
         if loader is None or loader.loader is None:
             raise ImportError(f"unable to load speculative probe from {path}")

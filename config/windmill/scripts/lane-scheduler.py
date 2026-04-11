@@ -144,10 +144,11 @@ def main(
             "token_present": bool(token),
         }
 
+    workspace = os.environ.get("WINDMILL_WORKSPACE", "lv3")
     scheduler = build_scheduler(
         base_url=base_url,
         token=token,
-        workspace="lv3",
+        workspace=workspace,
         repo_root=repo_root,
     )
     summary = scheduler.dispatch_queued(max_dispatches=max_dispatches)

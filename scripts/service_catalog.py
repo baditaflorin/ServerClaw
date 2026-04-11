@@ -4,7 +4,7 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -439,7 +439,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
 
         if lifecycle_status == "active":
             active_service_ids.add(service_id)
-            if vm != "proxmox_florin" and vm not in allowed_service_surfaces:
+            if vm != TOPOLOGY_HOST and vm not in allowed_service_surfaces:
                 raise ValueError(f"active service '{service_id}' must reference an observed guest or host surface")
             if service_id in topology:
                 topology_entry = topology[service_id]

@@ -35,7 +35,7 @@ from maintenance_window_tool import list_active_windows_best_effort, suppress_fi
 from glitchtip_event import emit_glitchtip_event
 from platform.degradation import default_state_path
 from platform.events import build_envelope
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from platform.health.semantics import (
     RUNTIME_STATE_DEGRADED,
     RUNTIME_STATE_FAILED,
@@ -289,8 +289,8 @@ def evaluate_probe_result(probe: dict[str, Any], result: CommandResult) -> tuple
 
 
 def build_probe_execution_context(target: str) -> tuple[str, str]:
-    if target == "proxmox_florin":
-        return "host_ssh", "proxmox_florin"
+    if target == TOPOLOGY_HOST:
+        return "host_ssh", TOPOLOGY_HOST
     return "guest_jump", target
 
 
@@ -698,7 +698,7 @@ def check_vm_state(context: dict[str, Any], run_id: str) -> dict[str, Any]:
     result = execute_runner(
         context,
         "host_ssh",
-        "proxmox_florin",
+        TOPOLOGY_HOST,
         "sudo pvesh get /nodes/$(hostname)/qemu --output-format json",
     )
     if result.returncode != 0:
@@ -982,7 +982,7 @@ def check_backup_recency(context: dict[str, Any], run_id: str) -> dict[str, Any]
     result = execute_runner(
         context,
         "host_ssh",
-        "proxmox_florin",
+        TOPOLOGY_HOST,
         "sudo pvesm list lv3-backup-pbs",
     )
     if result.returncode != 0:

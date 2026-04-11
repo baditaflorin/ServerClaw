@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 import os
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -833,7 +833,7 @@ def render_vm_inventory(
             "</tr>"
         )
 
-    host_services = ", ".join(sorted(services_by_vm.get("proxmox_florin", []))) or "none"
+    host_services = ", ".join(sorted(services_by_vm.get(TOPOLOGY_HOST, []))) or "none"
     rows.insert(
         0,
         "<tr>"

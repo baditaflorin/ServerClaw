@@ -73,7 +73,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-GITHUB_REPO_BASE = "https://github.com/baditaflorin/ServerClaw/blob/main"
+GITHUB_REPO_BASE = os.environ.get("GITHUB_REPO_BASE_URL", "https://github.com/baditaflorin/ServerClaw/blob/main")
 _RELATIVE_LINK_RE = re.compile(r"\[([^\]]+)\]\((?!https?://|mailto:|#)([^)]+)\)")
 
 

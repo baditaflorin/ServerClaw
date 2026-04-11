@@ -23,10 +23,12 @@ import subprocess
 import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -41,6 +43,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from controller_automation_toolkit import REPO_ROOT
+from platform.repo import TOPOLOGY_HOST
 
 
 CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
@@ -146,7 +149,7 @@ def _load_inventory_hosts(path: Path | None = None) -> dict[str, str]:
 def _ssh_monitoring_command() -> list[str] | None:
     key_path = _bootstrap_key_path()
     inventory_hosts = _load_inventory_hosts()
-    jump_host = inventory_hosts.get("proxmox_florin")
+    jump_host = inventory_hosts.get(TOPOLOGY_HOST)
     monitoring_host = inventory_hosts.get("monitoring-lv3")
     if not key_path or not jump_host or not monitoring_host:
         return None

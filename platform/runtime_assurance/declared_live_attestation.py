@@ -11,6 +11,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from platform.repo import TOPOLOGY_HOST
 from platform.world_state.client import StaleDataError, SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 
@@ -599,7 +600,7 @@ def host_witness_for_service(
     declared_vm = str(service.get("vm", "")).strip()
     declared_vmid = service.get("vmid")
 
-    if declared_vm == "proxmox_florin":
+    if declared_vm == TOPOLOGY_HOST:
         observed_state = stack.get("observed_state", {})
         proxmox_state = observed_state.get("proxmox", {}) if isinstance(observed_state, dict) else {}
         installed = bool(proxmox_state.get("installed"))
@@ -658,7 +659,7 @@ def runtime_identity_for_service(service: dict[str, Any], host_witness: dict[str
         }
 
     declared_vm = str(service.get("vm", "")).strip()
-    identity_type = "host_instance" if declared_vm == "proxmox_florin" else "vm_instance"
+    identity_type = "host_instance" if declared_vm == TOPOLOGY_HOST else "vm_instance"
     return {
         "status": "pass",
         "required": True,

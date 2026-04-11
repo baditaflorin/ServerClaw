@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import html.parser
+import os
 import sys
 import time
 from dataclasses import dataclass
@@ -173,7 +174,7 @@ class KeycloakLoginFormParser(html.parser.HTMLParser):
             self.in_login_form = False
 
 
-GITHUB_REPO_BASE = "https://github.com/baditaflorin/ServerClaw/blob/main"
+GITHUB_REPO_BASE = os.environ.get("GITHUB_REPO_BASE_URL", "https://github.com/baditaflorin/ServerClaw/blob/main")
 
 
 def repo_link(repo_root: Path, path: Path) -> str:

@@ -16,6 +16,7 @@ from typing import Any, Callable
 
 from platform.degradation import default_state_path
 from platform.events import build_envelope
+from platform.repo import TOPOLOGY_HOST
 from platform.health.semantics import (
     RUNTIME_STATE_DEGRADED,
     RUNTIME_STATE_FAILED,
@@ -143,7 +144,7 @@ def collect_proxmox_vms(repo_root: Path) -> list[dict[str, Any]]:
         {
             "vmid": int(guest["vmid"]),
             "name": guest["name"],
-            "node": "proxmox_florin",
+            "node": TOPOLOGY_HOST,
             "status": "running" if guest.get("running") else "stopped",
             "type": "qemu",
             "cpu": 0,
@@ -534,9 +535,9 @@ def collect_netbox_topology(repo_root: Path) -> dict[str, Any]:
         "source": "inventory_hosts",
         "devices": [
             {
-                "name": "proxmox_florin",
+                "name": TOPOLOGY_HOST,
                 "role": "proxmox-host",
-                "management_ip": inventory["all"]["children"]["proxmox_hosts"]["hosts"]["proxmox_florin"][
+                "management_ip": inventory["all"]["children"]["proxmox_hosts"]["hosts"][TOPOLOGY_HOST][
                     "ansible_host"
                 ],
             }

@@ -1697,9 +1697,13 @@ def build_scheduler(
     *,
     base_url: str,
     token: str,
-    workspace: str = "lv3",
+    workspace: str | None = None,
     repo_root: Path | None = None,
 ) -> BudgetedWorkflowScheduler:
+    if workspace is None:
+        from platform.repo import WINDMILL_WORKSPACE
+
+        workspace = WINDMILL_WORKSPACE
     dsn = os.environ.get("LV3_LEDGER_DSN", "").strip()
     ledger_writer = LedgerWriter(dsn=dsn) if dsn else None
     ledger_reader = LedgerReader(dsn=dsn) if dsn else None

@@ -20,6 +20,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
+from platform.repo import TOPOLOGY_HOST
 from validation_toolkit import require_bool, require_list, require_mapping, require_str
 
 from capacity_report import check_capacity_gate, load_capacity_model
@@ -529,7 +530,7 @@ def build_live_apply_receipt(
 
 def build_service_targets(service_id: str, service: dict[str, Any]) -> list[dict[str, Any]]:
     target = {
-        "kind": "host" if service["vm"] == "proxmox_florin" else "guest",
+        "kind": "host" if service["vm"] == TOPOLOGY_HOST else "guest",
         "name": service["vm"],
     }
     address = extract_address(service)

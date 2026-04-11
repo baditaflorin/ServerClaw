@@ -5,7 +5,7 @@ import ipaddress
 import re
 import sys
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any
 
 if str(Path(__file__).resolve().parent) not in sys.path:
@@ -60,7 +60,7 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
         for guest in require_list(host_vars.get("proxmox_guests"), "proxmox_guests")
         if isinstance(guest, dict) and "name" in guest
     }
-    guest_names.add("proxmox_florin")
+    guest_names.add(TOPOLOGY_HOST)
 
     seen_ids: set[str] = set()
     indexed: dict[str, dict[str, Any]] = {}

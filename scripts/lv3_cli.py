@@ -49,6 +49,7 @@ from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.idempotency import IdempotencyStore
 from platform.llm import PlatformContextRetriever
 from platform.memory import MemorySubstrateClient
+from platform.repo import TOPOLOGY_HOST, WINDMILL_WORKSPACE
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 
@@ -1230,10 +1231,10 @@ def run_windmill_request(
     service_map = load_service_map()
     base_url = windmill_url(service_map)
     token = load_secret_file("windmill_superadmin_secret")
-    script_path = workflow_name if "/" in workflow_name else f"f/lv3/{workflow_name}"
+    script_path = workflow_name if "/" in workflow_name else f"f/{WINDMILL_WORKSPACE}/{workflow_name}"
     encoded_path = urllib.parse.quote(script_path, safe="")
-    metadata_url = f"{base_url}/api/w/lv3/scripts/get/p/{encoded_path}"
-    url = f"{base_url}/api/w/lv3/jobs/run/h/<resolved-hash>"
+    metadata_url = f"{base_url}/api/w/{WINDMILL_WORKSPACE}/scripts/get/p/{encoded_path}"
+    url = f"{base_url}/api/w/{WINDMILL_WORKSPACE}/jobs/run/h/<resolved-hash>"
     encoded_payload = json.dumps(payload).encode("utf-8")
     plan = CommandPlan(
         label=f"run {workflow_name}",
@@ -1260,7 +1261,7 @@ def run_windmill_request(
     scheduler = build_scheduler(
         base_url=base_url,
         token=token,
-        workspace="lv3",
+        workspace=WINDMILL_WORKSPACE,
         repo_root=REPO_ROOT,
     )
     if intent is None:
@@ -2041,7 +2042,7 @@ def ssh_command(vm_name: str, *, dry_run: bool, explain: bool, no_color: bool) -
         if candidate == vm_name:
             address = addr
             break
-    if vm_name == "proxmox_florin" and address is None:
+    if vm_name == TOPOLOGY_HOST and address is None:
         address = "100.118.189.95"
     if not address:
         raise SystemExit(f"Unknown VM '{vm_name}'.")
