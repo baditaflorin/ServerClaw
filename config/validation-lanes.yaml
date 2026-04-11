@@ -20,6 +20,8 @@ lanes:
       - policy-validation
       - alert-rule-validation
       - dependency-direction
+      - cross-catalog-integrity
+      - waiver-escalation-proofs
   generated-artifact-and-canonical-truth:
     title: Generated artifact and canonical-truth lane
     description: Validate generated portals, dependency diagrams, and publication-safe artifact surfaces.
@@ -37,6 +39,7 @@ lanes:
       - iac-policy-scan
       - type-check
       - service-completeness
+      - python-type-safety
   remote-builder:
     title: Remote builder lane
     description: Validate build-runner images, infrastructure roots, and heavyweight scanner surfaces.
