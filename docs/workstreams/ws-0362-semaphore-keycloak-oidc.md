@@ -84,7 +84,7 @@ Password: <generated-by-init-local>
    - Type: Confidential OpenID Connect
    - Redirect: `http://100.64.0.1:8020/auth/oidc/callback`
 
-2. Use generated OIDC secret: `uHb3IJRzJXO0aVsS+mpl/scZDc1/axNqZ9bmm5odh4g=`
+2. Use generated OIDC secret: `<read from .local/semaphore/oidc-client-secret.txt — NEVER commit secrets inline>`
 
 3. Create user in Keycloak realm with email
 
