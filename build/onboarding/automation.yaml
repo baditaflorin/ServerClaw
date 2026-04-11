@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-09'
+generated: '2026-04-11'
 generated_from:
   - docs/discovery/onboarding-packs.yaml
   - docs/discovery/repo-structure/automation-and-infrastructure.yaml
@@ -294,7 +294,7 @@ repo_structure_sections:
             - workflows
             - local
             - primary
-          for_agents: PRIMARY CI - runs on docker-build-lv3 self-hosted runner
+          for_agents: PRIMARY CI - runs on docker-build self-hosted runner
   - id: cross-cutting-concerns
     title: Cross-Cutting Concern Index
     summary: Concern-oriented shortcuts that map common task areas to the most relevant repo surfaces.
@@ -515,7 +515,7 @@ config_location_sections:
         purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
         owner: human
         format: JSON
-        use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup-lv3 store
+        use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup store
         update_when: Adjusting seed classes, dataset volumes, or storage locations
         validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
       config/network-impairment-matrix.yaml:
@@ -671,7 +671,7 @@ config_location_sections:
         owner: human
         format: GitHub Actions-compatible YAML
         use_for: Local CI on self-hosted Gitea runner
-        runs_on: docker-build-lv3 self-hosted runner
+        runs_on: docker-build self-hosted runner
       .github/workflows/:
         purpose: "GitHub Actions workflows (LEGACY \u2014 mirrors Gitea)"
         owner: human
@@ -828,7 +828,7 @@ config_location_sections:
         validation: Manual review
         naming_convention: <git-sha>.json and <git-sha>.sarif.json
       docker/docker-compose.yml:
-        purpose: Docker Compose reference for services on docker-runtime-lv3
+        purpose: Docker Compose reference for services on docker-runtime
         owner: human
         format: Docker Compose YAML
         use_for: Understanding service dependencies and networking

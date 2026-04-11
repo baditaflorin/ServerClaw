@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.103",
-  "platform_version": "0.178.76",
-  "generated_at": "2026-04-11T10:05:59Z",
-  "next_refresh_at": "2026-04-11T11:05:59Z",
+  "repo_version": "0.178.106",
+  "platform_version": "0.178.77",
+  "generated_at": "2026-04-11T13:31:58Z",
+  "next_refresh_at": "2026-04-11T14:31:58Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.102",
+    "last_version": "0.178.103",
     "deployed_at": "2026-04-11",
-    "summary": "[security] Emergency credential rotation after public release \u2014 rotated all 220 platform-generated credentials (ADR 0405), 3 postmortems, rotation script, runbook; removed inline OIDC secret from ws-0362; converged 42 services with zero rotation-caused failures static analysis gate: ruff/bandit/pyright pre-commit hooks; three new validation-gate lanes (python-type-safety, cross-catalog-integrity, waiver-escalation-proofs); Z3 formal verification of waiver escalation state machine (6 proofs + 19 test vectors); cross-catalog referential integrity checker; full ruff format pass across scripts/ and tests/",
-    "release_notes_url": "docs/release-notes/0.178.103.md"
+    "summary": "[adr-0407] Generic-by-default codebase with local overlay \u2014 gitignore receipts/ (6,520 files) and config/generated/ (4 files); generalize docs/ (1,100+ files), tests/ (227 files), workstreams/ (107 files) from lv3.org to example.com; Ansible identity override via `-e @.local/identity.yml` auto-injection; publish pipeline reduced from 6,482 files to ~76 (97% reduction) [adr-0407] Phase 6: Generalize Windmill scripts and remaining repo paths \u2014 74 Windmill scripts + 14 platform scripts converted from hardcoded /srv/proxmox_florin_server to PLATFORM_REPO_ROOT env var; Windmill worker containers now set PLATFORM_REPO_ROOT; tracked files with repo name down from 28 to 10; convergence validated (367 tasks OK)",
+    "release_notes_url": "docs/release-notes/0.178.106.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

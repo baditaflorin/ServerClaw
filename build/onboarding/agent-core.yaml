@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-09'
+generated: '2026-04-11'
 generated_from:
   - docs/discovery/onboarding-packs.yaml
   - docs/discovery/repo-structure/root-entrypoints.yaml
@@ -380,7 +380,7 @@ config_location_sections:
         owner: human
         format: GitHub Actions-compatible YAML
         use_for: Local CI on self-hosted Gitea runner
-        runs_on: docker-build-lv3 self-hosted runner
+        runs_on: docker-build self-hosted runner
       .github/workflows/:
         purpose: "GitHub Actions workflows (LEGACY \u2014 mirrors Gitea)"
         owner: human

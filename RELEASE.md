@@ -1,8 +1,10 @@
-# Release 0.178.103
+# Release 0.178.106
 
 - Date: 2026-04-11
 
 ## Summary
+- [adr-0407] Generic-by-default codebase with local overlay — gitignore receipts/ (6,520 files) and config/generated/ (4 files); generalize docs/ (1,100+ files), tests/ (227 files), workstreams/ (107 files) from lv3.org to example.com; Ansible identity override via `-e @.local/identity.yml` auto-injection; publish pipeline reduced from 6,482 files to ~76 (97% reduction)
+- [adr-0407] Phase 6: Generalize Windmill scripts and remaining repo paths — 74 Windmill scripts + 14 platform scripts converted from hardcoded /srv/proxmox_florin_server to PLATFORM_REPO_ROOT env var; Windmill worker containers now set PLATFORM_REPO_ROOT; tracked files with repo name down from 28 to 10; convergence validated (367 tasks OK)
 - [security] Emergency credential rotation after public release — rotated all 220 platform-generated credentials (ADR 0405), 3 postmortems, rotation script, runbook; removed inline OIDC secret from ws-0362; converged 42 services with zero rotation-caused failures
 - static analysis gate: ruff/bandit/pyright pre-commit hooks; three new validation-gate lanes (python-type-safety, cross-catalog-integrity, waiver-escalation-proofs); Z3 formal verification of waiver escalation state machine (6 proofs + 19 test vectors); cross-catalog referential integrity checker; full ruff format pass across scripts/ and tests/
 - [publish] Prepare repository for public GitHub release at baditaflorin/ServerClaw — scrub PII, replace identity.yml with placeholders, remove credential files, add AI-native README positioning, clean CLAUDE.md for public consumption
@@ -28,9 +30,6 @@
 - chore: regenerate ADR index with 0392 (renamed from duplicate 0382)
 - fix: Resolve Jinja2 template values in subdomain validation scripts (subdomain_catalog.py uses load_yaml_with_identity for host_vars/edge defaults)
 - fix: Add neko to lv3_service_topology (browser.lv3.org) with edge.kind=custom and certificate catalog entry
-- fix: Add tasks symlink in playbooks/_includes for Ansible import_playbook path resolution
-- fix: Remove Jinja2 var from dns_publication.yml play name to prevent import_playbook parse-time failure
-- verified: IoC changes convergence-tested — ntfy playbook reaches 54/55 tasks (blocked only by unrelated missing local secret)
 - fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
 - fix: Remove duplicate repo_intake entry in platform_services.yml registry
 - fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
