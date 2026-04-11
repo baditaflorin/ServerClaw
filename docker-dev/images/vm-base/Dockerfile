@@ -31,16 +31,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Docker CLI (for Docker-in-Docker via socket mount)
-RUN install -m 0755 -d /etc/apt/keyrings \
-    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
-    && chmod a+r /etc/apt/keyrings/docker.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-       > /etc/apt/sources.list.d/docker.list \
-    && apt-get update && apt-get install -y --no-install-recommends \
-       docker-ce-cli \
-       docker-compose-plugin \
-    && rm -rf /var/lib/apt/lists/*
+# Docker CLI is NOT pre-installed — the Ansible docker_runtime role handles
+# Docker installation during convergence, matching the production workflow.
+# This avoids apt keyring format conflicts (.gpg vs .asc / .list vs .sources)
+# between the Dockerfile and the role.
 
 # Create ops user matching production access model
 RUN useradd -m -s /bin/bash -G sudo ops \

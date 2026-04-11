@@ -6,6 +6,10 @@
 #   - nginx-edge    — Public-facing reverse proxy   (SSH: localhost:2210)
 #   - monitoring-vm — Grafana + Prometheus (optional, SSH: localhost:2240)
 #
+# Subnet 10.99.10.0/24 avoids:
+#   - Production Tailscale route (10.10.10.0/24)
+#   - All existing Docker /16 networks in the 172.x.0.0/12 range
+#
 # On macOS Docker Desktop, container bridge IPs are NOT routable from the
 # host. SSH is exposed via localhost port mappings (22xx = SSH to container xx).
 # On Linux, both port mappings and direct bridge IPs work.
@@ -22,8 +26,8 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: ${DOCKER_DEV_SUBNET:-172.30.10.0/24}
-          gateway: ${DOCKER_DEV_GATEWAY:-172.30.10.1}
+        - subnet: ${DOCKER_DEV_SUBNET:-10.99.10.0/24}
+          gateway: ${DOCKER_DEV_GATEWAY:-10.99.10.1}
 
 x-vm-base: &vm-base
   build:
@@ -56,7 +60,7 @@ services:
     container_name: serverclaw-postgres-vm
     networks:
       serverclaw:
-        ipv4_address: ${DOCKER_DEV_POSTGRES_IP:-172.30.10.50}
+        ipv4_address: ${DOCKER_DEV_POSTGRES_IP:-10.99.10.50}
     ports:
       - "2250:22"
     depends_on:
@@ -75,7 +79,7 @@ services:
     container_name: serverclaw-control-plane
     networks:
       serverclaw:
-        ipv4_address: ${DOCKER_DEV_CONTROL_IP:-172.30.10.92}
+        ipv4_address: ${DOCKER_DEV_CONTROL_IP:-10.99.10.92}
     ports:
       - "2292:22"
     volumes:
@@ -93,7 +97,7 @@ services:
     container_name: serverclaw-nginx-edge
     networks:
       serverclaw:
-        ipv4_address: ${DOCKER_DEV_NGINX_IP:-172.30.10.10}
+        ipv4_address: ${DOCKER_DEV_NGINX_IP:-10.99.10.10}
     ports:
       - "${EDGE_HTTPS_PORT:-8443}:443"
       - "${EDGE_HTTP_PORT:-9080}:80"
@@ -108,7 +112,7 @@ services:
     container_name: serverclaw-monitoring-vm
     networks:
       serverclaw:
-        ipv4_address: ${DOCKER_DEV_MONITORING_IP:-172.30.10.40}
+        ipv4_address: ${DOCKER_DEV_MONITORING_IP:-10.99.10.40}
     ports:
       - "2240:22"
     depends_on:

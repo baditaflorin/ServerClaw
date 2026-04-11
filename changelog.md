@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [docker-dev] Fix subnet collision and Debian base — move docker-dev subnet from 172.30.10.0/24 to 10.99.10.0/24 (avoids 172.x network exhaustion on dev machines); switch base image from Ubuntu to debian:bookworm-slim (matches playbook Debian assertion); remove pre-baked Docker from base image (Ansible role installs it during convergence); gate reserved_connections PG param on version ≥ 16 (fixes postgres convergence on Docker PG15); validated guest-access converges 7/7 containers to completion
+
 - [adr-0410] IoC inventory generation + self-generating README — `inventory/hosts.yml` now fully generated from `proxmox_guests` in `proxmox-host.yml` (VMID%100 formula, 30 unit+integration tests); ~30 hardcoded IPs in proxmox-host.yml replaced with selectattr lookups; `README.md` generated from `docs/templates/README.md.j2` with live counts (roles, ADRs, runbooks, scripts) + Makefile `## ` annotations auto-populating the Make Targets table; `make generate-inventory` and `make generate-readme` added
 
 - fix: Correct postmortem RAM claims — 5 MB/container reflects idle SSH only, not converged services; ADR 0410 estimates (4–32 GB) remain valid projections; measurement meaningless without service deployment
@@ -68,10 +70,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.116 release notes](docs/release-notes/0.178.116.md)
+- [0.178.117 release notes](docs/release-notes/0.178.117.md)
 
 ## Previous Releases
 
+- [0.178.116 release notes](docs/release-notes/0.178.116.md)
 - [0.178.115 release notes](docs/release-notes/0.178.115.md)
 - [0.178.114 release notes](docs/release-notes/0.178.114.md)
 - [0.178.113 release notes](docs/release-notes/0.178.113.md)
@@ -83,9 +86,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.107 release notes](docs/release-notes/0.178.107.md)
 - [0.178.106 release notes](docs/release-notes/0.178.106.md)
 - [0.178.103 release notes](docs/release-notes/0.178.103.md)
-- [0.178.102 release notes](docs/release-notes/0.178.102.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (449 releases)](docs/release-notes/index/2026.md)
+- [2026 (450 releases)](docs/release-notes/index/2026.md)

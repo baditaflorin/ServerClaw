@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.116",
+  "repo_version": "0.178.117",
   "platform_version": "0.178.77",
-  "generated_at": "2026-04-11T20:37:22Z",
-  "next_refresh_at": "2026-04-11T21:37:22Z",
+  "generated_at": "2026-04-11T21:38:03Z",
+  "next_refresh_at": "2026-04-11T22:38:03Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.115",
+    "last_version": "0.178.116",
     "deployed_at": "2026-04-11",
-    "summary": "[adr-0410] IoC inventory generation + self-generating README \u2014 `inventory/hosts.yml` now fully generated from `proxmox_guests` in `proxmox-host.yml` (VMID%100 formula, 30 unit+integration tests); ~30 hardcoded IPs in proxmox-host.yml replaced with selectattr lookups; `README.md` generated from `docs/templates/README.md.j2` with live counts (roles, ADRs, runbooks, scripts) + Makefile `## ` annotations auto-populating the Make Targets table; `make generate-inventory` and `make generate-readme` added fix: Correct postmortem RAM claims \u2014 5 MB/container reflects idle SSH only, not converged services; ADR 0410 estimates (4\u201332 GB) remain valid projections; measurement meaningless without service deployment",
-    "release_notes_url": "docs/release-notes/0.178.116.md"
+    "summary": "[docker-dev] Fix subnet collision and Debian base \u2014 move docker-dev subnet from 172.30.10.0/24 to 10.99.10.0/24 (avoids 172.x network exhaustion on dev machines); switch base image from Ubuntu to debian:bookworm-slim (matches playbook Debian assertion); remove pre-baked Docker from base image (Ansible role installs it during convergence); gate reserved_connections PG param on version \u2265 16 (fixes postgres convergence on Docker PG15); validated guest-access converges 7/7 containers to completion [adr-0410] IoC inventory generation + self-generating README \u2014 `inventory/hosts.yml` now fully generated from `proxmox_guests` in `proxmox-host.yml` (VMID%100 formula, 30 unit+integration tests); ~30 hardcoded IPs in proxmox-host.yml replaced with selectattr lookups; `README.md` generated from `docs/templates/README.md.j2` with live counts (roles, ADRs, runbooks, scripts) + Makefile `## ` annotations auto-populating the Make Targets table; `make generate-inventory` and `make generate-readme` added",
+    "release_notes_url": "docs/release-notes/0.178.117.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
