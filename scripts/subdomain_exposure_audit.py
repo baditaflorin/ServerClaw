@@ -98,11 +98,7 @@ def _route_entry(
         "unauthenticated_prefix_paths": list(
             authenticated_sites.get(hostname, {}).get("unauthenticated_prefix_paths", [])
         ),
-        "metadata": {
-            key: value
-            for key, value in site.items()
-            if key not in {"hostname", "aliases", "kind"}
-        },
+        "metadata": {key: value for key, value in site.items() if key not in {"hostname", "aliases", "kind"}},
     }
 
 
@@ -119,14 +115,18 @@ def _publication_entry(
         auth_requirement=entry["auth_requirement"],
     )
     dns_records = subdomain_catalog.expected_dns_records_for_entry(entry, f"subdomains[{entry['fqdn']}]")
-    service_dns = subdomain_catalog.require_mapping(service.get("dns", {}), f"service.{entry['fqdn']}.dns") if service else {}
-    service_access = subdomain_catalog.require_mapping(service.get("access", {}), f"service.{entry['fqdn']}.access") if service else {}
+    service_dns = (
+        subdomain_catalog.require_mapping(service.get("dns", {}), f"service.{entry['fqdn']}.dns") if service else {}
+    )
+    service_access = (
+        subdomain_catalog.require_mapping(service.get("access", {}), f"service.{entry['fqdn']}.access")
+        if service
+        else {}
+    )
     route_target = entry["target"]
     if route:
         route_target = (
-            route["metadata"].get("upstream")
-            or route["metadata"].get("redirect_target_hostname")
-            or route_target
+            route["metadata"].get("upstream") or route["metadata"].get("redirect_target_hostname") or route_target
         )
     return {
         "fqdn": entry["fqdn"],
@@ -263,9 +263,7 @@ def build_edge_route_index(
             routes[hostname] = _route_entry(
                 hostname=hostname,
                 route_source="public_edge_extra_sites",
-                route_kind=subdomain_catalog.require_str(
-                    site.get("kind"), f"public_edge_extra_sites[{index}].kind"
-                ),
+                route_kind=subdomain_catalog.require_str(site.get("kind"), f"public_edge_extra_sites[{index}].kind"),
                 service_id=None,
                 site=site,
                 authenticated_sites=authenticated_sites,
@@ -317,8 +315,7 @@ def resolve_route_for_hostname(
 ) -> dict[str, Any] | None:
     if isinstance(route_index, list):
         route_index = {
-            subdomain_catalog.require_str(entry.get("hostname"), "route.hostname"): entry
-            for entry in route_index
+            subdomain_catalog.require_str(entry.get("hostname"), "route.hostname"): entry for entry in route_index
         }
     route = route_index.get(hostname)
     if route is not None:
@@ -353,7 +350,9 @@ def build_registry(
 
     for entry in sorted(catalog["subdomains"], key=lambda item: item["fqdn"]):
         route = resolve_route_for_hostname(entry["fqdn"], route_index)
-        publication_entries.append(_publication_entry(entry, route, service_topology_index.get(entry.get("service_id"))))
+        publication_entries.append(
+            _publication_entry(entry, route, service_topology_index.get(entry.get("service_id")))
+        )
 
     active_entries = [entry for entry in publication_entries if entry["status"] == "active"]
     summary = {
@@ -614,11 +613,7 @@ def normalize_resolved_address(address: str) -> str:
 
 
 def expected_resolvable_dns_values(entry: dict[str, Any]) -> set[str]:
-    return {
-        record["value"]
-        for record in entry["adapter"]["dns"].get("records", [])
-        if record["type"] in {"A", "AAAA"}
-    }
+    return {record["value"] for record in entry["adapter"]["dns"].get("records", []) if record["type"] in {"A", "AAAA"}}
 
 
 def collect_resolution_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
@@ -773,8 +768,7 @@ def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str,
             continue
 
         expected_dns_records = {
-            dns_record_identity(record)
-            for record in catalog_by_fqdn[fqdn]["adapter"]["dns"].get("records", [])
+            dns_record_identity(record) for record in catalog_by_fqdn[fqdn]["adapter"]["dns"].get("records", [])
         }
         actual_dns_records = {dns_record_identity(record) for record in records}
         missing_dns_records = sorted(expected_dns_records - actual_dns_records)
@@ -789,16 +783,8 @@ def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str,
                     "detail": (
                         f"Expected {sorted(expected_dns_records)} from the catalog; observed "
                         f"{sorted(actual_dns_records)} in Hetzner DNS."
-                        + (
-                            f" Missing {missing_dns_records}."
-                            if missing_dns_records
-                            else ""
-                        )
-                        + (
-                            f" Unexpected {unexpected_dns_records}."
-                            if unexpected_dns_records
-                            else ""
-                        )
+                        + (f" Missing {missing_dns_records}." if missing_dns_records else "")
+                        + (f" Unexpected {unexpected_dns_records}." if unexpected_dns_records else "")
                     ),
                 }
             )
@@ -941,7 +927,9 @@ def collect_tls_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
             )
             continue
 
-        if metadata.get("verification_error") and should_report_tls_verification_error(entry, metadata["verification_error"]):
+        if metadata.get("verification_error") and should_report_tls_verification_error(
+            entry, metadata["verification_error"]
+        ):
             findings.append(
                 {
                     "check": "tls_certificate",
@@ -953,14 +941,14 @@ def collect_tls_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
             )
         expiry_policy = tls_expiry_policy(entry)
         if metadata["seconds_remaining"] < expiry_policy["warn_seconds"]:
-            remaining_value = metadata["hours_remaining"] if expiry_policy["unit"] == "hours" else metadata["days_remaining"]
+            remaining_value = (
+                metadata["hours_remaining"] if expiry_policy["unit"] == "hours" else metadata["days_remaining"]
+            )
             findings.append(
                 {
                     "check": "tls_certificate",
                     "severity": (
-                        "WARN"
-                        if metadata["seconds_remaining"] >= expiry_policy["critical_seconds"]
-                        else "CRITICAL"
+                        "WARN" if metadata["seconds_remaining"] >= expiry_policy["critical_seconds"] else "CRITICAL"
                     ),
                     "subdomain": entry["fqdn"],
                     "finding": "certificate_expiry_imminent",
@@ -1035,9 +1023,7 @@ def build_report(
         and entry["adapter"]["dns"].get("zone_expected", False)
     )
     private_routes_checked = sum(
-        1
-        for entry in registry_entries(registry)
-        if entry.get("evidence_plan", {}).get("private_route", False)
+        1 for entry in registry_entries(registry) if entry.get("evidence_plan", {}).get("private_route", False)
     )
 
     return {
@@ -1061,8 +1047,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--write-registry", action="store_true", help="Write config/subdomain-exposure-registry.json.")
     parser.add_argument("--check-registry", action="store_true", help="Fail if the committed registry is stale.")
     parser.add_argument("--validate", action="store_true", help="Validate the repo-side registry and auth contract.")
-    parser.add_argument("--include-live-dns", action="store_true", help="Resolve production hostnames and report live status drift.")
-    parser.add_argument("--include-http-auth", action="store_true", help="Probe live edge_oidc hostnames and validate redirects into Keycloak.")
+    parser.add_argument(
+        "--include-live-dns", action="store_true", help="Resolve production hostnames and report live status drift."
+    )
+    parser.add_argument(
+        "--include-http-auth",
+        action="store_true",
+        help="Probe live edge_oidc hostnames and validate redirects into Keycloak.",
+    )
     parser.add_argument(
         "--include-private-routes",
         action="store_true",
@@ -1075,7 +1067,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Query the Hetzner DNS API when HETZNER_DNS_API_TOKEN is available and compare the full zone to the catalog.",
     )
     parser.add_argument("--print-report-json", action="store_true", help="Print the audit report JSON.")
-    parser.add_argument("--write-receipt", action="store_true", help="Write a timestamped audit receipt under receipts/subdomain-exposure-audit/.")
+    parser.add_argument(
+        "--write-receipt",
+        action="store_true",
+        help="Write a timestamped audit receipt under receipts/subdomain-exposure-audit/.",
+    )
     return parser
 
 
@@ -1127,12 +1123,14 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(report, indent=2, sort_keys=True))
 
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("subdomain exposure audit", exc)
 
 
 def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import subprocess, sys as _sys
+    import subprocess
+    import sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -1146,7 +1144,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         subprocess.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

@@ -21,24 +21,18 @@ def test_runtime_pool_capacity_rebalance_playbook_covers_host_replay_guest_verif
     assert [role["role"] for role in playbook[0]["roles"]] == ["lv3.platform.proxmox_guests"]
 
     verify_qm_task = next(
-        task
-        for task in playbook[0]["post_tasks"]
-        if task["name"] == "Verify the rebalanced guest memory from Proxmox"
+        task for task in playbook[0]["post_tasks"] if task["name"] == "Verify the rebalanced guest memory from Proxmox"
     )
     assert verify_qm_task["ansible.builtin.command"]["argv"][:2] == ["qm", "config"]
 
     assert playbook[1]["name"] == "Verify the rebalanced guests come back with SSH and Docker"
     assert playbook[1]["hosts"] == "docker-build-lv3:artifact-cache-lv3:coolify-lv3:docker-runtime-lv3"
     start_task = next(
-        task
-        for task in playbook[1]["tasks"]
-        if task["name"] == "Ensure Docker is started on the rebalanced guest"
+        task for task in playbook[1]["tasks"] if task["name"] == "Ensure Docker is started on the rebalanced guest"
     )
     assert start_task["ansible.builtin.service"] == {"name": "docker", "state": "started"}
     docker_task = next(
-        task
-        for task in playbook[1]["tasks"]
-        if task["name"] == "Verify Docker is active on the rebalanced guest"
+        task for task in playbook[1]["tasks"] if task["name"] == "Verify Docker is active on the rebalanced guest"
     )
     assert docker_task["ansible.builtin.command"]["argv"] == ["systemctl", "is-active", "docker.service"]
     assert docker_task["retries"] == 10

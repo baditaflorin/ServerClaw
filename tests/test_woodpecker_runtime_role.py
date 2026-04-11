@@ -32,7 +32,7 @@ def test_woodpecker_templates_export_gitea_oauth_and_agent_settings() -> None:
     assert "WOODPECKER_EXPERT_FORGE_OAUTH_HOST={{ woodpecker_gitea_oauth_url }}" in env_template
     assert "WOODPECKER_GITEA_URL={{ woodpecker_gitea_internal_api_url }}" in env_template
     assert "WOODPECKER_AGENT_SECRET={{ woodpecker_agent_secret }}" in env_template
-    assert '[[ .Data.data.WOODPECKER_AGENT_SECRET ]]' in ctmpl_template
+    assert "[[ .Data.data.WOODPECKER_AGENT_SECRET ]]" in ctmpl_template
     assert "woodpecker-server" in compose_template
     assert "woodpecker-agent" in compose_template
     assert "{{ woodpecker_http_port }}:{{ woodpecker_http_port }}" in compose_template
@@ -52,9 +52,17 @@ def test_woodpecker_runtime_tasks_prepare_oauth_and_render_bootstrap_spec() -> N
     assert "Wait for the Woodpecker local health endpoint" in task_text
     assert "woodpecker_version_path" in verify_text
 
-    gitea_wait_task = next(task for task in task_data if task["name"] == "Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap")
-    local_health_task = next(task for task in task_data if task["name"] == "Wait for the Woodpecker local health endpoint")
-    verify_health_task = next(task for task in verify_data if task["name"] == "Verify the Woodpecker local health endpoint")
+    gitea_wait_task = next(
+        task
+        for task in task_data
+        if task["name"] == "Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap"
+    )
+    local_health_task = next(
+        task for task in task_data if task["name"] == "Wait for the Woodpecker local health endpoint"
+    )
+    verify_health_task = next(
+        task for task in verify_data if task["name"] == "Verify the Woodpecker local health endpoint"
+    )
 
     assert gitea_wait_task["ansible.builtin.uri"]["url"] == "{{ woodpecker_gitea_runtime_url }}/user/login"
     assert gitea_wait_task["retries"] == 48

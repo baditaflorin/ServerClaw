@@ -5,13 +5,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_ROOT = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "roles"
-    / "server_resident_reconciliation"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "server_resident_reconciliation"
 )
 
 
@@ -39,7 +33,7 @@ def test_bootstrap_tasks_create_restricted_user_and_read_token() -> None:
     tasks = (ROLE_ROOT / "tasks" / "bootstrap_gitea_access.yml").read_text(encoding="utf-8")
 
     assert "/api/v1/admin/users" in tasks
-    assert "permission: \"{{ server_resident_reconciliation_gitea_collaborator_permission }}\"" in tasks
+    assert 'permission: "{{ server_resident_reconciliation_gitea_collaborator_permission }}"' in tasks
     assert "/api/v1/users/{{ server_resident_reconciliation_gitea_username }}/tokens" in tasks
     assert "- ls-remote" in tasks
 
@@ -50,7 +44,7 @@ def test_wrapper_uses_ansible_pull_with_git_askpass_and_local_limit() -> None:
     assert "ansible-pull" in wrapper
     assert 'export GIT_ASKPASS="$askpass_path"' in wrapper
     assert '-l "$inventory_host"' in wrapper
-    assert '-c local' in wrapper
+    assert "-c local" in wrapper
     assert 'cp "$receipt_path" "$latest_path"' in wrapper
 
 
@@ -76,6 +70,8 @@ def test_systemd_units_reference_managed_wrapper_and_timer_schedule() -> None:
 def test_playbook_metadata_and_role_reference_are_present() -> None:
     playbook = (REPO_ROOT / "playbooks" / "server-resident-reconciliation.yml").read_text(encoding="utf-8")
 
-    assert "# Purpose: Bootstrap and maintain the Proxmox host's server-resident ansible-pull reconcile loop." in playbook
+    assert (
+        "# Purpose: Bootstrap and maintain the Proxmox host's server-resident ansible-pull reconcile loop." in playbook
+    )
     assert "server_resident_reconciliation_bootstrap_gitea_access" in playbook
     assert "lv3.platform.server_resident_reconciliation" in playbook

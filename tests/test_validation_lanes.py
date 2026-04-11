@@ -167,7 +167,9 @@ def test_live_apply_receipt_change_stays_out_of_service_lane() -> None:
     selection = module.resolve_selection_from_changed_files(
         catalog,
         manifest_checks,
-        changed_files=("receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json",),
+        changed_files=(
+            "receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json",
+        ),
         branch="codex/receipt-only",
         base_ref="origin/main",
     )

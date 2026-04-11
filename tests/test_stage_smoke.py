@@ -66,9 +66,7 @@ def test_latest_matching_smoke_receipt_uses_declared_verification_tokens() -> No
         {
             "receipt_id": "newer",
             "recorded_at": "2026-03-29T10:00:00Z",
-            "verification": [
-                {"check": "Runtime assurance smoke", "result": "pass", "observed": "Overview rendered."}
-            ],
+            "verification": [{"check": "Runtime assurance smoke", "result": "pass", "observed": "Overview rendered."}],
         },
     ]
 

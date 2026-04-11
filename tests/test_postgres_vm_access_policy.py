@@ -31,10 +31,7 @@ def test_postgres_guest_group_vars_allow_docker_runtime_bridge_sources() -> None
 
     assert "playbook_execution_host_patterns.docker_runtime[playbook_execution_env]" in host_source
     assert host_source.endswith("}}/32")
-    assert (
-        "playbook_execution_host_patterns.runtime_control[playbook_execution_env]"
-        in runtime_control_source
-    )
+    assert "playbook_execution_host_patterns.runtime_control[playbook_execution_env]" in runtime_control_source
     assert runtime_control_source.endswith("}}/32")
     assert extra_sources[2:] == [
         "172.16.0.0/12",
@@ -85,18 +82,12 @@ def test_postgres_playbooks_apply_linux_guest_firewall_before_postgres_role() ->
         firewall_before_postgres = False
 
         for play in plays:
-            role_names = [
-                role.get("role")
-                for role in play.get("roles", [])
-                if isinstance(role, dict)
-            ]
+            role_names = [role.get("role") for role in play.get("roles", []) if isinstance(role, dict)]
             if "lv3.platform.postgres_vm" not in role_names:
                 continue
-            firewall_before_postgres = (
-                "lv3.platform.linux_guest_firewall" in role_names
-                and role_names.index("lv3.platform.linux_guest_firewall")
-                < role_names.index("lv3.platform.postgres_vm")
-            )
+            firewall_before_postgres = "lv3.platform.linux_guest_firewall" in role_names and role_names.index(
+                "lv3.platform.linux_guest_firewall"
+            ) < role_names.index("lv3.platform.postgres_vm")
             break
 
         assert firewall_before_postgres, (

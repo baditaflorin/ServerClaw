@@ -116,9 +116,7 @@ def _dynamic_loader_violations(
     script_modules: set[str],
 ) -> list[Violation]:
     violations: list[Violation] = []
-    has_script_path_marker = bool(
-        re.search(r"""['"]scripts['"]|scripts/[^'"]+\.py""", source)
-    )
+    has_script_path_marker = bool(re.search(r"""['"]scripts['"]|scripts/[^'"]+\.py""", source))
 
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):

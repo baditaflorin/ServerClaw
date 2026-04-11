@@ -211,7 +211,9 @@ def test_command_deploy_repo_uses_subdomain_when_domain_not_set(monkeypatch, tmp
 
 def test_normalize_repository_strips_github_url_prefixes() -> None:
     assert tool.normalize_repository("https://github.com/coollabsio/coolify-examples") == "coollabsio/coolify-examples"
-    assert tool.normalize_repository("https://github.com/coollabsio/coolify-examples.git") == "coollabsio/coolify-examples"
+    assert (
+        tool.normalize_repository("https://github.com/coollabsio/coolify-examples.git") == "coollabsio/coolify-examples"
+    )
     assert tool.normalize_repository("git@github.com:coollabsio/coolify-examples.git") == "coollabsio/coolify-examples"
 
 
@@ -223,7 +225,9 @@ def test_resolve_source_auto_treats_ssh_repositories_as_private() -> None:
 
 def test_private_repo_url_converts_github_https_to_ssh() -> None:
     assert (
-        tool.private_repo_url("https://github.com/baditaflorin/education_wemeshup.git", "baditaflorin/education_wemeshup")
+        tool.private_repo_url(
+            "https://github.com/baditaflorin/education_wemeshup.git", "baditaflorin/education_wemeshup"
+        )
         == "git@github.com:baditaflorin/education_wemeshup.git"
     )
 
@@ -452,9 +456,7 @@ def test_command_deploy_repo_bootstraps_private_deploy_key(monkeypatch, tmp_path
     assert output["source"] == "private-deploy-key"
     assert output["repository"] == "git@github.com:baditaflorin/education_wemeshup.git"
     assert output["domains"] == ["https://education-wemeshup.apps.lv3.org"]
-    assert output["compose_domains"] == [
-        {"name": "catalog-web", "domain": "https://education-wemeshup.apps.lv3.org"}
-    ]
+    assert output["compose_domains"] == [{"name": "catalog-web", "domain": "https://education-wemeshup.apps.lv3.org"}]
     assert output["github_deploy_key"]["title"] == "coolify-baditaflorin-education-wemeshup"
     assert output["coolify_private_key"]["uuid"] == "key-1"
 
@@ -659,9 +661,7 @@ def test_register_deployment_server_creates_new_server(monkeypatch, tmp_path: Pa
     """register-deployment-server posts a new server when name is not already registered."""
     client = make_client(tmp_path)
     auth_file = tmp_path / "auth.json"
-    auth_file.write_text(
-        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
-    )
+    auth_file.write_text('{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8")
 
     call_log: list[tuple[str, str]] = []
 
@@ -681,10 +681,13 @@ def test_register_deployment_server_creates_new_server(monkeypatch, tmp_path: Pa
 
     exit_code = tool.main(
         [
-            "--auth-file", str(auth_file),
+            "--auth-file",
+            str(auth_file),
             "register-deployment-server",
-            "--host", "coolify-apps-lv3",
-            "--ip", "10.10.10.71",
+            "--host",
+            "coolify-apps-lv3",
+            "--ip",
+            "10.10.10.71",
         ]
     )
     out = json.loads(capsys.readouterr().out)
@@ -696,9 +699,7 @@ def test_register_deployment_server_is_idempotent(monkeypatch, tmp_path: Path, c
     """register-deployment-server exits 0 without creating a duplicate when name already exists."""
     client = make_client(tmp_path)
     auth_file = tmp_path / "auth.json"
-    auth_file.write_text(
-        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
-    )
+    auth_file.write_text('{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8")
     post_called = {"count": 0}
 
     def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
@@ -712,10 +713,13 @@ def test_register_deployment_server_is_idempotent(monkeypatch, tmp_path: Path, c
 
     exit_code = tool.main(
         [
-            "--auth-file", str(auth_file),
+            "--auth-file",
+            str(auth_file),
             "register-deployment-server",
-            "--host", "coolify-apps-lv3",
-            "--ip", "10.10.10.71",
+            "--host",
+            "coolify-apps-lv3",
+            "--ip",
+            "10.10.10.71",
         ]
     )
     out = json.loads(capsys.readouterr().out)
@@ -727,9 +731,7 @@ def test_register_deployment_server_is_idempotent(monkeypatch, tmp_path: Path, c
 def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsys) -> None:
     """migrate-deployment-server re-assigns applications from source to target server."""
     auth_file = tmp_path / "auth.json"
-    auth_file.write_text(
-        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
-    )
+    auth_file.write_text('{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8")
     patched: list[dict] = []
 
     def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
@@ -752,10 +754,13 @@ def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsy
 
     exit_code = tool.main(
         [
-            "--auth-file", str(auth_file),
+            "--auth-file",
+            str(auth_file),
             "migrate-deployment-server",
-            "--from", "coolify-lv3",
-            "--to", "coolify-apps-lv3",
+            "--from",
+            "coolify-lv3",
+            "--to",
+            "coolify-apps-lv3",
         ]
     )
     out = json.loads(capsys.readouterr().out)
@@ -770,9 +775,7 @@ def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsy
 def test_migrate_deployment_server_returns_2_when_nothing_to_migrate(monkeypatch, tmp_path: Path) -> None:
     """migrate-deployment-server exits 2 when all apps are already on the target server."""
     auth_file = tmp_path / "auth.json"
-    auth_file.write_text(
-        '{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8"
-    )
+    auth_file.write_text('{"controller_url": "http://127.0.0.1:8000", "api_token": "tok"}', encoding="utf-8")
 
     def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         if path == "/api/v1/servers" and method == "GET":
@@ -788,10 +791,13 @@ def test_migrate_deployment_server_returns_2_when_nothing_to_migrate(monkeypatch
 
     exit_code = tool.main(
         [
-            "--auth-file", str(auth_file),
+            "--auth-file",
+            str(auth_file),
             "migrate-deployment-server",
-            "--from", "coolify-lv3",
-            "--to", "coolify-apps-lv3",
+            "--from",
+            "coolify-lv3",
+            "--to",
+            "coolify-apps-lv3",
         ]
     )
     assert exit_code == 2
@@ -870,6 +876,7 @@ def _make_fake_proxmox_client(fake_guest_exec: FakeGuestExec, tmp_path: Path) ->
     # Import ProxmoxClient here since it may be available from proxmox_tool
     try:
         import proxmox_tool as ptool
+
         client = ptool.ProxmoxClient(
             api_url=_PROXMOX_AUTH["api_url"],
             authorization_header=_PROXMOX_AUTH["authorization_header"],
@@ -891,21 +898,29 @@ def test_command_db_exec_success(
         client = _make_fake_proxmox_client(fake, tmp_path)
         if client is not None:
             return client
+
         # Minimal stub if proxmox_tool unavailable
         class Stub:
             def guest_exec(self, vmid, command, timeout=60):
                 return fake(vmid, command, timeout)
+
         return Stub()
 
     monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
 
-    rc = tool.main([
-        "--auth-file", str(_coolify_auth_file(tmp_path)),
-        "db-exec",
-        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
-        "--vmid", "170",
-        "--sql", "UPDATE applications SET destination_id=34 WHERE destination_id=1",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_coolify_auth_file(tmp_path)),
+            "db-exec",
+            "--proxmox-auth-file",
+            str(_proxmox_auth_file(tmp_path)),
+            "--vmid",
+            "170",
+            "--sql",
+            "UPDATE applications SET destination_id=34 WHERE destination_id=1",
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
     assert out["exit_code"] == 0
@@ -927,17 +942,24 @@ def test_command_db_exec_failure(
         class Stub:
             def guest_exec(self, vmid, command, timeout=60):
                 return fake(vmid, command, timeout)
+
         return Stub()
 
     monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
 
-    rc = tool.main([
-        "--auth-file", str(_coolify_auth_file(tmp_path)),
-        "db-exec",
-        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
-        "--vmid", "170",
-        "--sql", "SELECT * FROM nonexistent_table",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_coolify_auth_file(tmp_path)),
+            "db-exec",
+            "--proxmox-auth-file",
+            str(_proxmox_auth_file(tmp_path)),
+            "--vmid",
+            "170",
+            "--sql",
+            "SELECT * FROM nonexistent_table",
+        ]
+    )
     assert rc == 1
 
 
@@ -951,16 +973,22 @@ def test_command_clear_cache_success(
         class Stub:
             def guest_exec(self, vmid, command, timeout=60):
                 return fake(vmid, command, timeout)
+
         return Stub()
 
     monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
 
-    rc = tool.main([
-        "--auth-file", str(_coolify_auth_file(tmp_path)),
-        "clear-cache",
-        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
-        "--vmid", "170",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_coolify_auth_file(tmp_path)),
+            "clear-cache",
+            "--proxmox-auth-file",
+            str(_proxmox_auth_file(tmp_path)),
+            "--vmid",
+            "170",
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
     assert out["container"] == "coolify"
@@ -972,31 +1000,41 @@ def test_command_migrate_apps_success(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
 ) -> None:
     """migrate-apps finds destination IDs, updates the DB, and clears cache."""
-    fake = FakeGuestExec([
-        (0, "1", ""),                                  # from_id lookup
-        (0, "34", ""),                                 # to_id lookup
-        (0, "2", ""),                                  # count
-        (0, "repo-smoke\neducation-wemeshup", ""),     # app names
-        (0, "UPDATE 2", ""),                           # migration UPDATE
-        (0, "Application cache cleared!", ""),         # cache clear
-    ])
+    fake = FakeGuestExec(
+        [
+            (0, "1", ""),  # from_id lookup
+            (0, "34", ""),  # to_id lookup
+            (0, "2", ""),  # count
+            (0, "repo-smoke\neducation-wemeshup", ""),  # app names
+            (0, "UPDATE 2", ""),  # migration UPDATE
+            (0, "Application cache cleared!", ""),  # cache clear
+        ]
+    )
 
     def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
         class Stub:
             def guest_exec(self, vmid, command, timeout=60):
                 return fake(vmid, command, timeout)
+
         return Stub()
 
     monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
 
-    rc = tool.main([
-        "--auth-file", str(_coolify_auth_file(tmp_path)),
-        "migrate-apps",
-        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
-        "--vmid", "170",
-        "--from", "coolify-lv3",
-        "--to", "coolify-apps-lv3",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_coolify_auth_file(tmp_path)),
+            "migrate-apps",
+            "--proxmox-auth-file",
+            str(_proxmox_auth_file(tmp_path)),
+            "--vmid",
+            "170",
+            "--from",
+            "coolify-lv3",
+            "--to",
+            "coolify-apps-lv3",
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
     assert out["status"] == "migrated"
@@ -1012,28 +1050,38 @@ def test_command_migrate_apps_noop(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
 ) -> None:
     """migrate-apps exits 2 (no-op) when count == 0."""
-    fake = FakeGuestExec([
-        (0, "1", ""),    # from_id
-        (0, "34", ""),   # to_id
-        (0, "0", ""),    # count == 0
-    ])
+    fake = FakeGuestExec(
+        [
+            (0, "1", ""),  # from_id
+            (0, "34", ""),  # to_id
+            (0, "0", ""),  # count == 0
+        ]
+    )
 
     def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
         class Stub:
             def guest_exec(self, vmid, command, timeout=60):
                 return fake(vmid, command, timeout)
+
         return Stub()
 
     monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
 
-    rc = tool.main([
-        "--auth-file", str(_coolify_auth_file(tmp_path)),
-        "migrate-apps",
-        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
-        "--vmid", "170",
-        "--from", "coolify-lv3",
-        "--to", "coolify-apps-lv3",
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_coolify_auth_file(tmp_path)),
+            "migrate-apps",
+            "--proxmox-auth-file",
+            str(_proxmox_auth_file(tmp_path)),
+            "--vmid",
+            "170",
+            "--from",
+            "coolify-lv3",
+            "--to",
+            "coolify-apps-lv3",
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 2
     assert out["status"] == "nothing_to_migrate"
@@ -1046,26 +1094,35 @@ def test_command_install_deploy_key_success(
 ) -> None:
     """install-deploy-key installs the key into authorized_keys on the target VM."""
     pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC0gB481 coolify-deploy"
-    fake = FakeGuestExec([
-        (0, "", ""),    # no existing keys
-        (0, "", ""),    # append script
-    ])
+    fake = FakeGuestExec(
+        [
+            (0, "", ""),  # no existing keys
+            (0, "", ""),  # append script
+        ]
+    )
 
     def fake_make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> Any:
         class Stub:
             def guest_exec(self, vmid, command, timeout=60):
                 return fake(vmid, command, timeout)
+
         return Stub()
 
     monkeypatch.setattr(tool, "_make_proxmox_client", fake_make_proxmox_client)
 
-    rc = tool.main([
-        "--auth-file", str(_coolify_auth_file(tmp_path)),
-        "install-deploy-key",
-        "--proxmox-auth-file", str(_proxmox_auth_file(tmp_path)),
-        "--vmid", "171",
-        "--pubkey", pubkey,
-    ])
+    rc = tool.main(
+        [
+            "--auth-file",
+            str(_coolify_auth_file(tmp_path)),
+            "install-deploy-key",
+            "--proxmox-auth-file",
+            str(_proxmox_auth_file(tmp_path)),
+            "--vmid",
+            "171",
+            "--pubkey",
+            pubkey,
+        ]
+    )
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
     assert out["status"] == "installed"

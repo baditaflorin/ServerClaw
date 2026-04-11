@@ -48,7 +48,9 @@ def build_repo(tmp_path: Path) -> tuple[Path, Path]:
     write(repo_root / "inventory" / "group_vars" / "all.yml", "control: true\n")
     write(repo_root / "inventory" / "host_vars" / "proxmox_florin.yml", "host: true\n")
     write(repo_root / "versions" / "stack.yaml", "repo_version: 0.176.0\n")
-    write(repo_root / "receipts" / "live-applies" / "example.json", json.dumps({"receipt_id": "example"}, indent=2) + "\n")
+    write(
+        repo_root / "receipts" / "live-applies" / "example.json", json.dumps({"receipt_id": "example"}, indent=2) + "\n"
+    )
 
     assert git(repo_root, "add", ".").returncode == 0
     assert git(repo_root, "commit", "-m", "seed witness test repo").returncode == 0
@@ -81,7 +83,9 @@ def test_sync_builds_verified_generation_and_receipt(tmp_path: Path) -> None:
     witness.verify_generation(generation_dir)
 
 
-def test_sync_preserves_previous_latest_when_archive_promotion_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_sync_preserves_previous_latest_when_archive_promotion_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     repo_root, _ = build_repo(tmp_path)
     archive_root = tmp_path / "archive"
     staging_root = tmp_path / "staging"
@@ -94,7 +98,9 @@ def test_sync_preserves_previous_latest_when_archive_promotion_fails(tmp_path: P
         receipt_dir=receipt_dir,
     )
 
-    write(repo_root / "receipts" / "live-applies" / "second.json", json.dumps({"receipt_id": "second"}, indent=2) + "\n")
+    write(
+        repo_root / "receipts" / "live-applies" / "second.json", json.dumps({"receipt_id": "second"}, indent=2) + "\n"
+    )
     assert git(repo_root, "add", "receipts/live-applies/second.json").returncode == 0
     assert git(repo_root, "commit", "-m", "second receipt").returncode == 0
     assert git(repo_root, "push", "origin", "main").returncode == 0

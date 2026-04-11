@@ -49,9 +49,9 @@ def test_staging_environment_declares_minimum_vm_set() -> None:
     staging = STAGING_MAIN.read_text()
 
     assert 'module "docker_runtime_staging_lv3"' in staging
-    assert 'vm_id                   = 220' in staging
+    assert "vm_id                   = 220" in staging
     assert 'module "monitoring_staging_lv3"' in staging
-    assert 'vm_id                   = 240' in staging
+    assert "vm_id                   = 240" in staging
 
 
 def test_tofu_environments_target_live_proxmox_node_name() -> None:
@@ -105,7 +105,10 @@ def test_remote_command_builds_production_import_target(tmp_path: Path) -> None:
     assert "TOFU_DOCKER_NETWORK=host" in command
     assert "TF_VAR_proxmox_endpoint=https://proxmox.example.invalid:8006/api2/json" in command
     assert "TF_VAR_proxmox_api_token='lv3-automation@pve!primary=secret-token'" in command
-    assert "./scripts/tofu_exec.sh import production module.nginx_lv3.proxmox_virtual_environment_vm.this proxmox_florin/110" in command
+    assert (
+        "./scripts/tofu_exec.sh import production module.nginx_lv3.proxmox_virtual_environment_vm.this proxmox_florin/110"
+        in command
+    )
 
 
 def test_remote_command_prefers_session_scoped_remote_workspace(tmp_path: Path) -> None:

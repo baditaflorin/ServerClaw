@@ -88,7 +88,7 @@ def main(argv: list[str] | None = None) -> int:
             payload = load_merge_train_state(args.repo_root)
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("live apply merge train", exc)
 
 

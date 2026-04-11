@@ -546,7 +546,9 @@ def ensure_github_deploy_key(*, repo_slug: str, title: str, public_key_path: Pat
         if entry.get("key", "").strip() == normalized_public_key:
             return entry
         if entry.get("title") == title:
-            raise RuntimeError(f"GitHub deploy key title '{title}' already exists on {repo_slug} with different key material")
+            raise RuntimeError(
+                f"GitHub deploy key title '{title}' already exists on {repo_slug} with different key material"
+            )
     run_command(
         [
             "gh",
@@ -796,9 +798,7 @@ def command_migrate_deployment_server(args: argparse.Namespace) -> int:
     if not from_server:
         raise RuntimeError(f"Source server '{from_name}' not found in Coolify")
     if not to_server:
-        raise RuntimeError(
-            f"Target server '{to_name}' not found in Coolify — run register-deployment-server first"
-        )
+        raise RuntimeError(f"Target server '{to_name}' not found in Coolify — run register-deployment-server first")
 
     from_uuid = from_server["uuid"]
     to_uuid = to_server["uuid"]
@@ -811,9 +811,7 @@ def command_migrate_deployment_server(args: argparse.Namespace) -> int:
         app_name = str(app.get("name", app_uuid))
         # Coolify API may return server info under top-level "server" or nested under "destination.server"
         app_server_uuid = (
-            (app.get("server") or {}).get("uuid")
-            or (app.get("destination") or {}).get("server", {}).get("uuid")
-            or ""
+            (app.get("server") or {}).get("uuid") or (app.get("destination") or {}).get("server", {}).get("uuid") or ""
         )
         if app_server_uuid == to_uuid:
             skipped.append(app_name)
@@ -918,9 +916,7 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
     domains_for_api: list[str]
     if args.build_pack == "dockercompose":
         if not compose_domains and (args.domain or args.subdomain or auth.get("smoke_domains")):
-            raise RuntimeError(
-                "dockercompose applications must use --compose-domain SERVICE=DOMAIN for public routing"
-            )
+            raise RuntimeError("dockercompose applications must use --compose-domain SERVICE=DOMAIN for public routing")
         domains = [str(entry["domain"]) for entry in compose_domains]
         domains_for_api = []
     else:
@@ -948,7 +944,11 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
                     "Automatic deploy-key bootstrap currently requires a GitHub repository path or SSH URL; otherwise pass --private-key-uuid"
                 )
             deploy_key_name = args.deploy_key_name or default_deploy_key_name(normalized_repo)
-            deploy_key_path = Path(args.deploy_key_path).expanduser() if args.deploy_key_path else default_deploy_key_path(normalized_repo)
+            deploy_key_path = (
+                Path(args.deploy_key_path).expanduser()
+                if args.deploy_key_path
+                else default_deploy_key_path(normalized_repo)
+            )
             private_key_path, public_key_path = ensure_local_keypair(
                 key_path=deploy_key_path,
                 comment=f"coolify:{repo_slug}",
@@ -986,15 +986,15 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
         publish_directory=args.publish_directory,
     )
     result = {
-      "application_uuid": str(application["uuid"]),
-      "application_name": args.app_name,
-      "domains": domains,
-      "source": source,
-      "repository": repo_for_coolify,
-      "project_uuid": str(project["uuid"]),
-      "environment_uuid": str(environment["uuid"]),
-      "server_uuid": str(server["uuid"]),
-      "destination_uuid": destination_uuid,
+        "application_uuid": str(application["uuid"]),
+        "application_name": args.app_name,
+        "domains": domains,
+        "source": source,
+        "repository": repo_for_coolify,
+        "project_uuid": str(project["uuid"]),
+        "environment_uuid": str(environment["uuid"]),
+        "server_uuid": str(server["uuid"]),
+        "destination_uuid": destination_uuid,
     }
     cancelled_deployments = cancel_active_deployments_for_application(client, application_name=args.app_name)
     if cancelled_deployments:
@@ -1061,27 +1061,20 @@ def _safe_identifier(value: str, field: str) -> str:
     Prevents SQL injection in migrate-apps server name queries.
     """
     if not _SAFE_IDENT_RE.match(value):
-        raise ValueError(
-            f"Unsafe value for {field}: {value!r} "
-            "(only alphanumeric, dash, and underscore are allowed)"
-        )
+        raise ValueError(f"Unsafe value for {field}: {value!r} (only alphanumeric, dash, and underscore are allowed)")
     return value
 
 
-def _make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> "ProxmoxClient":
+def _make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> ProxmoxClient:
     """Build a ProxmoxClient from the given auth file.
 
     Uses load_proxmox_auth from controller_automation_toolkit (ADR 0343).
     Falls back to the local implementation in proxmox_tool if the toolkit is unavailable.
     """
     if ProxmoxClient is None:
-        raise ImportError(
-            "proxmox_tool.py is required for guest-exec operations but could not be imported"
-        )
+        raise ImportError("proxmox_tool.py is required for guest-exec operations but could not be imported")
     if load_proxmox_auth is None:
-        raise ImportError(
-            "controller_automation_toolkit is required for load_proxmox_auth but could not be imported"
-        )
+        raise ImportError("controller_automation_toolkit is required for load_proxmox_auth but could not be imported")
     auth = load_proxmox_auth(proxmox_auth_file)
     return ProxmoxClient(
         api_url=auth["api_url"],
@@ -1092,7 +1085,7 @@ def _make_proxmox_client(proxmox_auth_file: str, node: str = "pve") -> "ProxmoxC
 
 
 def _psql_query(
-    client: "ProxmoxClient",
+    client: ProxmoxClient,
     vmid: int,
     container: str,
     db_user: str,
@@ -1111,9 +1104,7 @@ def _psql_query(
         timeout=timeout,
     )
     if exit_code != 0:
-        raise RuntimeError(
-            f"psql query failed (exit {exit_code}): {stderr.strip() or stdout.strip()}"
-        )
+        raise RuntimeError(f"psql query failed (exit {exit_code}): {stderr.strip() or stdout.strip()}")
     return stdout.strip()
 
 
@@ -1228,9 +1219,7 @@ def command_migrate_apps(args: argparse.Namespace) -> int:
         missing.append(f"target server '{to_name}'")
     if missing:
         print(
-            json.dumps(
-                {"error": f"Could not find standalone_docker destination for: {', '.join(missing)}"}
-            ),
+            json.dumps({"error": f"Could not find standalone_docker destination for: {', '.join(missing)}"}),
             file=sys.stderr,
         )
         return 1
@@ -1240,7 +1229,10 @@ def command_migrate_apps(args: argparse.Namespace) -> int:
 
     # Step 2: Count apps on source
     count_str = _psql_query(
-        client, vmid, db_container, db_user,
+        client,
+        vmid,
+        db_container,
+        db_user,
         f"SELECT count(*) FROM applications WHERE destination_id = {from_id}",
     )
     count = int(count_str) if count_str.isdigit() else 0
@@ -1260,7 +1252,10 @@ def command_migrate_apps(args: argparse.Namespace) -> int:
 
     # Step 3: List app names
     names_raw = _psql_query(
-        client, vmid, db_container, db_user,
+        client,
+        vmid,
+        db_container,
+        db_user,
         f"SELECT name FROM applications WHERE destination_id = {from_id}",
     )
     app_names = [n.strip() for n in names_raw.splitlines() if n.strip()]
@@ -1268,14 +1263,15 @@ def command_migrate_apps(args: argparse.Namespace) -> int:
     # Step 4: Run the migration (skipped in dry-run mode)
     if not args.dry_run:
         _psql_query(
-            client, vmid, db_container, db_user,
+            client,
+            vmid,
+            db_container,
+            db_user,
             f"UPDATE applications SET destination_id = {to_id} WHERE destination_id = {from_id}",
         )
 
         # Step 5: Clear Coolify cache so changes take effect immediately
-        cache_script = (
-            "cd /var/www/html && php artisan cache:clear && php artisan config:clear"
-        )
+        cache_script = "cd /var/www/html && php artisan cache:clear && php artisan config:clear"
         cache_rc, _, cache_err = proxmox_guest_exec(
             client,
             vmid,
@@ -1285,9 +1281,7 @@ def command_migrate_apps(args: argparse.Namespace) -> int:
         if cache_rc != 0:
             # Non-fatal: migration is done, cache miss is recoverable
             print(
-                json.dumps(
-                    {"warning": f"Migration succeeded but cache clear failed: {cache_err.strip()}"}
-                ),
+                json.dumps({"warning": f"Migration succeeded but cache clear failed: {cache_err.strip()}"}),
                 file=sys.stderr,
             )
 
@@ -1343,9 +1337,7 @@ def command_install_deploy_key(args: argparse.Namespace) -> int:
         f"echo {shlex.quote(pubkey)} >> /root/.ssh/authorized_keys && "
         "chmod 600 /root/.ssh/authorized_keys"
     )
-    exit_code, _, stderr = proxmox_guest_exec(
-        client, vmid, ["bash", "-c", script], timeout=15
-    )
+    exit_code, _, stderr = proxmox_guest_exec(client, vmid, ["bash", "-c", script], timeout=15)
     if exit_code != 0:
         print(
             json.dumps({"error": stderr.strip(), "exit_code": exit_code}),
@@ -1400,7 +1392,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     migrate_server_parser.set_defaults(func=command_migrate_deployment_server)
 
-    deploy_parser = subparsers.add_parser("deploy-repo", help="Create or update one repo-backed Coolify application and deploy it.")
+    deploy_parser = subparsers.add_parser(
+        "deploy-repo", help="Create or update one repo-backed Coolify application and deploy it."
+    )
     deploy_parser.add_argument("--repo", required=True, help="Repository URL.")
     deploy_parser.add_argument("--branch", default="main", help="Repository branch.")
     deploy_parser.add_argument(
@@ -1415,20 +1409,30 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_parser.add_argument("--environment", default="production", help="Coolify environment name.")
     deploy_parser.add_argument("--domain", help="Full domain URL, for example http://apps.localhost.")
     deploy_parser.add_argument("--subdomain", help="Subdomain under apps.localhost, for example hello.")
-    deploy_parser.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
+    deploy_parser.add_argument(
+        "--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"]
+    )
     deploy_parser.add_argument("--ports", default="80", help="Comma-separated exposed ports.")
     deploy_parser.add_argument("--description", help="Optional Coolify application description.")
-    deploy_parser.add_argument("--private-key-uuid", help="Existing Coolify private key UUID for private deploy-key applications.")
+    deploy_parser.add_argument(
+        "--private-key-uuid", help="Existing Coolify private key UUID for private deploy-key applications."
+    )
     deploy_parser.add_argument("--deploy-key-name", help="Deploy key label to reuse or create for GitHub and Coolify.")
     deploy_parser.add_argument("--deploy-key-path", help="Local SSH private key path used for deploy-key bootstrap.")
-    deploy_parser.add_argument("--dockerfile-location", help="Repository-relative Dockerfile path for dockerfile build pack.")
-    deploy_parser.add_argument("--docker-compose-location", help="Repository-relative compose file path for dockercompose build pack.")
+    deploy_parser.add_argument(
+        "--dockerfile-location", help="Repository-relative Dockerfile path for dockerfile build pack."
+    )
+    deploy_parser.add_argument(
+        "--docker-compose-location", help="Repository-relative compose file path for dockercompose build pack."
+    )
     deploy_parser.add_argument(
         "--compose-domain",
         action="append",
         help="Map one Docker Compose service to one public domain using SERVICE=DOMAIN. Repeat for multiple services.",
     )
-    deploy_parser.add_argument("--publish-directory", help="Static publish directory for static build pack deployments.")
+    deploy_parser.add_argument(
+        "--publish-directory", help="Static publish directory for static build pack deployments."
+    )
     deploy_parser.add_argument("--wait", action="store_true", help="Wait for the deployment result.")
     deploy_parser.add_argument("--timeout", type=int, default=900, help="Wait timeout in seconds.")
     deploy_parser.add_argument("--force", action="store_true", help="Force a rebuild without cache.")
@@ -1461,12 +1465,8 @@ def build_parser() -> argparse.ArgumentParser:
     db_exec_parser.add_argument("--container", help="Postgres container name (default: coolify-db).")
     db_exec_parser.add_argument("--db-user", dest="db_user", help="Postgres user (default: coolify).")
     db_exec_parser.add_argument("--sql", required=True, help="SQL statement to execute.")
-    db_exec_parser.add_argument(
-        "--timeout", type=int, default=30, help="Exec timeout in seconds (default: 30)."
-    )
-    db_exec_parser.add_argument(
-        "--node", default="pve", help="Proxmox node name (default: pve)."
-    )
+    db_exec_parser.add_argument("--timeout", type=int, default=30, help="Exec timeout in seconds (default: 30).")
+    db_exec_parser.add_argument("--node", default="pve", help="Proxmox node name (default: pve).")
     db_exec_parser.set_defaults(func=command_db_exec)
 
     # --- clear-cache (migrated from proxmox_tool.py, ADR 0345) ---
@@ -1486,9 +1486,7 @@ def build_parser() -> argparse.ArgumentParser:
         dest="coolify_container",
         help="Coolify app container name (default: coolify).",
     )
-    clear_cache_parser.add_argument(
-        "--node", default="pve", help="Proxmox node name (default: pve)."
-    )
+    clear_cache_parser.add_argument("--node", default="pve", help="Proxmox node name (default: pve).")
     clear_cache_parser.set_defaults(func=command_clear_cache)
 
     # --- migrate-apps (migrated from proxmox_tool.py, ADR 0345) ---
@@ -1533,9 +1531,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Preview what would be migrated without making any changes.",
     )
-    migrate_apps_parser.add_argument(
-        "--node", default="pve", help="Proxmox node name (default: pve)."
-    )
+    migrate_apps_parser.add_argument("--node", default="pve", help="Proxmox node name (default: pve).")
     migrate_apps_parser.set_defaults(func=command_migrate_apps)
 
     # --- install-deploy-key (migrated from proxmox_tool.py, ADR 0345) ---
@@ -1557,9 +1553,7 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Coolify deploy public key string (from Coolify UI > Settings > SSH Keys).",
     )
-    install_deploy_key_parser.add_argument(
-        "--node", default="pve", help="Proxmox node name (default: pve)."
-    )
+    install_deploy_key_parser.add_argument("--node", default="pve", help="Proxmox node name (default: pve).")
     install_deploy_key_parser.set_defaults(func=command_install_deploy_key)
 
     return parser

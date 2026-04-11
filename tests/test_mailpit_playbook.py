@@ -5,13 +5,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COLLECTION_PLAYBOOK = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "playbooks"
-    / "mailpit.yml"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "mailpit.yml"
 )
 ROOT_PLAYBOOK = REPO_ROOT / "playbooks" / "mailpit.yml"
 SERVICE_PLAYBOOK = REPO_ROOT / "playbooks" / "services" / "mailpit.yml"

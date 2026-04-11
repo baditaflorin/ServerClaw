@@ -105,9 +105,9 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
     assert task_names.index("Record missing Docker runtime packages") < task_names.index(
         "Install Docker runtime packages"
     )
-    assert task_names.index("Apply Docker bridge forward-compat rules live without reloading nftables") < task_names.index(
-        "Persist required Docker kernel modules across reboot"
-    )
+    assert task_names.index(
+        "Apply Docker bridge forward-compat rules live without reloading nftables"
+    ) < task_names.index("Persist required Docker kernel modules across reboot")
     assert task_names.index("Persist required Docker kernel modules across reboot") < task_names.index(
         "Load required Docker kernel modules before starting Docker"
     )
@@ -119,9 +119,15 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
     )
 
     defaults = load_defaults()
-    persist_modules = next(task for task in tasks if task["name"] == "Persist required Docker kernel modules across reboot")
-    load_modules = next(task for task in tasks if task["name"] == "Load required Docker kernel modules before starting Docker")
-    ensure_docker_socket = next(task for task in tasks if task["name"] == "Ensure Docker socket activation is enabled and listening")
+    persist_modules = next(
+        task for task in tasks if task["name"] == "Persist required Docker kernel modules across reboot"
+    )
+    load_modules = next(
+        task for task in tasks if task["name"] == "Load required Docker kernel modules before starting Docker"
+    )
+    ensure_docker_socket = next(
+        task for task in tasks if task["name"] == "Ensure Docker socket activation is enabled and listening"
+    )
     assert defaults["docker_runtime_kernel_modules"] == ["iptable_nat"]
     assert defaults["docker_runtime_kernel_modules_file"] == "/etc/modules-load.d/lv3-docker-runtime.conf"
     assert persist_modules["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_kernel_modules_file }}"
@@ -150,38 +156,65 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "Record pre-restart containers that remained stopped after Docker restarts" in task_names
     assert "Record whether Docker recovery needs the local OpenBao API unsealed" in task_names
     assert "Flag OpenBao-backed compose services before Docker container recovery" in task_names
-    assert "Load the OpenBao init payload before Docker container recovery touches OpenBao-backed services" in task_names
-    assert "Ensure the local OpenBao API is unsealed before Docker container recovery touches OpenBao-backed services" in task_names
+    assert (
+        "Load the OpenBao init payload before Docker container recovery touches OpenBao-backed services" in task_names
+    )
+    assert (
+        "Ensure the local OpenBao API is unsealed before Docker container recovery touches OpenBao-backed services"
+        in task_names
+    )
     assert "Recover pre-restart containers that remained stopped after Docker restarts" in task_names
     assert "Confirm pre-restart containers recovered after Docker restarts" in task_names
-    inspect_pre_restart = next(task for task in tasks if task["name"] == "Inspect running containers before Docker restarts")
-    record_containers = next(task for task in tasks if task["name"] == "Record containers that were running before Docker restarts")
+    inspect_pre_restart = next(
+        task for task in tasks if task["name"] == "Inspect running containers before Docker restarts"
+    )
+    record_containers = next(
+        task for task in tasks if task["name"] == "Record containers that were running before Docker restarts"
+    )
     ensure_task = next(task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present")
-    recheck_pre_restart = next(task for task in tasks if task["name"] == "Re-inspect pre-restart containers after Docker restarts")
+    recheck_pre_restart = next(
+        task for task in tasks if task["name"] == "Re-inspect pre-restart containers after Docker restarts"
+    )
     record_stopped = next(
-        task for task in tasks if task["name"] == "Record pre-restart containers that remained stopped after Docker restarts"
+        task
+        for task in tasks
+        if task["name"] == "Record pre-restart containers that remained stopped after Docker restarts"
     )
     record_openbao_requirement = next(
         task for task in tasks if task["name"] == "Record whether Docker recovery needs the local OpenBao API unsealed"
     )
     flag_openbao_requirement = next(
-        task for task in tasks if task["name"] == "Flag OpenBao-backed compose services before Docker container recovery"
+        task
+        for task in tasks
+        if task["name"] == "Flag OpenBao-backed compose services before Docker container recovery"
     )
     load_openbao_init = next(
-        task for task in tasks if task["name"] == "Load the OpenBao init payload before Docker container recovery touches OpenBao-backed services"
+        task
+        for task in tasks
+        if task["name"]
+        == "Load the OpenBao init payload before Docker container recovery touches OpenBao-backed services"
     )
     ensure_openbao_unsealed = next(
         task
         for task in tasks
-        if task["name"] == "Ensure the local OpenBao API is unsealed before Docker container recovery touches OpenBao-backed services"
+        if task["name"]
+        == "Ensure the local OpenBao API is unsealed before Docker container recovery touches OpenBao-backed services"
     )
-    recover_containers = next(task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts")
-    confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
+    recover_containers = next(
+        task
+        for task in tasks
+        if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+    )
+    confirm_recovery = next(
+        task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts"
+    )
     include_role = ensure_task["ansible.builtin.include_role"]
     assert include_role["name"] == "lv3.platform.common"
     assert include_role["tasks_from"] == "docker_bridge_chains"
     assert ensure_task["vars"]["common_docker_bridge_chains_service_name"] == "docker"
-    assert ensure_task["vars"]["common_docker_bridge_chains_require_nat_chain"] == "{{ docker_runtime_require_nat_chain }}"
+    assert (
+        ensure_task["vars"]["common_docker_bridge_chains_require_nat_chain"] == "{{ docker_runtime_require_nat_chain }}"
+    )
     assert defaults["docker_runtime_chain_recheck_retries"] == 30
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
     assert defaults["docker_runtime_container_recovery_retries"] == 30
@@ -190,16 +223,26 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert defaults["docker_runtime_openbao_recovery_delay_seconds"] == 5
     assert defaults["docker_runtime_nonpersistent_restart_policies"] == ["", "no"]
     assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
-    assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
-    reset_task = next(task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart")
+    assert (
+        ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    )
+    reset_task = next(
+        task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart"
+    )
     assert reset_task["ansible.builtin.command"] == "systemctl reset-failed docker.service"
     assert reset_task["changed_when"] is False
     assert inspect_pre_restart["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
-    assert inspect_pre_restart["ansible.builtin.command"]["stdin"] == "{{ docker_runtime_pre_restart_container_ids.stdout_lines | to_json }}"
+    assert (
+        inspect_pre_restart["ansible.builtin.command"]["stdin"]
+        == "{{ docker_runtime_pre_restart_container_ids.stdout_lines | to_json }}"
+    )
     assert '["docker", "inspect", container_id]' in inspect_pre_restart["ansible.builtin.command"]["argv"][2]
     assert '"no such object" in stderr' in inspect_pre_restart["ansible.builtin.command"]["argv"][2]
     assert "docker_runtime_pre_restart_container_details" in record_containers["ansible.builtin.set_fact"]
-    assert "RestartPolicy" not in record_containers["ansible.builtin.set_fact"]["docker_runtime_pre_restart_container_names"]
+    assert (
+        "RestartPolicy"
+        not in record_containers["ansible.builtin.set_fact"]["docker_runtime_pre_restart_container_names"]
+    )
     assert recheck_pre_restart["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
     assert recheck_pre_restart["ansible.builtin.command"]["stdin"] == (
         "{{ docker_runtime_pre_restart_container_names | default([]) | to_json }}"
@@ -209,7 +252,9 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert record_openbao_requirement["ansible.builtin.set_fact"] == {
         "docker_runtime_recovery_requires_openbao_unseal": False
     }
-    assert flag_openbao_requirement["loop"] == "{{ docker_runtime_stopped_pre_restart_container_details | default([]) }}"
+    assert (
+        flag_openbao_requirement["loop"] == "{{ docker_runtime_stopped_pre_restart_container_details | default([]) }}"
+    )
     assert any(
         "item.Config.Labels['com.docker.compose.service']" in condition
         for condition in flag_openbao_requirement["when"]
@@ -223,7 +268,9 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
         "name": "lv3.platform.openbao_runtime",
         "tasks_from": "ensure_unsealed",
     }
-    assert ensure_openbao_unsealed["vars"]["openbao_unseal_context"] == "Docker container recovery after Docker restarts"
+    assert (
+        ensure_openbao_unsealed["vars"]["openbao_unseal_context"] == "Docker container recovery after Docker restarts"
+    )
     assert ensure_openbao_unsealed["vars"]["openbao_unseal_init_payload"] == "{{ docker_runtime_openbao_init_payload }}"
     assert ensure_openbao_unsealed["when"] == "docker_runtime_recovery_requires_openbao_unseal | bool"
     assert ensure_openbao_unsealed["no_log"] is True
@@ -233,16 +280,20 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     )
     assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "TRANSIENT_DOCKER_NETWORK_RETRY_ATTEMPTS = 12" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert "TRANSIENT_DOCKER_NETWORK_RETRY_DELAY_SECONDS = 5" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        "TRANSIENT_DOCKER_NETWORK_RETRY_DELAY_SECONDS = 5" in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "retry_on_any_error=False" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def combined_output(stdout, stderr):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def exception_output(exc):" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'DOCKER_NAT_CHAIN_COMMAND = ["iptables", "-t", "nat", "-S", "DOCKER"]' in (
-        recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'DOCKER_NAT_CHAIN_COMMAND = ["iptables", "-t", "nat", "-S", "DOCKER"]'
+        in (recover_containers["ansible.builtin.command"]["argv"][2])
     )
-    assert 'DOCKER_SERVICE_ACTIVE_COMMAND = ["systemctl", "is-active", "docker"]' in (
-        recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'DOCKER_SERVICE_ACTIVE_COMMAND = ["systemctl", "is-active", "docker"]'
+        in (recover_containers["ansible.builtin.command"]["argv"][2])
     )
     assert "OPENBAO_HEALTH_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "OPENBAO_SEAL_STATUS_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -259,8 +310,14 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert '"http://127.0.0.1:8201/v1/sys/health"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"http://127.0.0.1:8201/v1/sys/seal-status"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"http://127.0.0.1:8201/v1/sys/unseal"' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert "OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473, 501, 503}" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert "def wait_for_docker_nat_chain(retries=12, delay_seconds=2):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        "OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473, 501, 503}"
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        "def wait_for_docker_nat_chain(retries=12, delay_seconds=2):"
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert "def docker_service_is_active():" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def restart_docker_service_for_recovery():" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def ensure_docker_service_ready():" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -268,48 +325,71 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "NONPERSISTENT_RESTART_POLICIES" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '["systemctl", "reset-failed", "docker.service"]' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '["systemctl", "restart", "docker.service"]' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'compose_depends_on = labels.get("com.docker.compose.depends_on") or ""' in (
-        recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'compose_depends_on = labels.get("com.docker.compose.depends_on") or ""'
+        in (recover_containers["ansible.builtin.command"]["argv"][2])
     )
-    assert 'compose_group["services"].update(dependency_services)' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'compose_group["services"].update(dependency_services)'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "ensure_docker_service_ready()" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "retry_on_any_error=True" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'attempts=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'delay_seconds=5,' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "attempts=5," in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "delay_seconds=5," in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "run_with_retry(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "cwd=working_dir or None" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "wait_for_docker_nat_chain()" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def is_local_openbao_group(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'normalized_working_dir == "/opt/openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"lv3-openbao" in container_names' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert "restart_policy_name not in NONPERSISTENT_RESTART_POLICIES" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'service == "openbao-agent" or service.endswith("-openbao-agent")' in (
-        recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        "restart_policy_name not in NONPERSISTENT_RESTART_POLICIES"
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'service == "openbao-agent" or service.endswith("-openbao-agent")'
+        in (recover_containers["ansible.builtin.command"]["argv"][2])
     )
     assert 'service == "openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "if services_provide_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "elif services_need_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def compose_group_recovery_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "return compose_group_sort_key(item)" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert "if services_need_local_openbao(services) and not local_openbao_group:" in (
-        recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        "if services_need_local_openbao(services) and not local_openbao_group:"
+        in (recover_containers["ansible.builtin.command"]["argv"][2])
     )
     assert "key=compose_group_recovery_sort_key" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'final_up_command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'remove_command = ["docker", "rm", "-f", *container_names]'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'recovery_command.extend(["up", "-d", "--force-recreate", *services])'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'final_up_command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert "docker_compose_down_remove_orphans" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up_after_down" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_skip_missing_direct_start" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'command.extend(["up", "-d", "--force-recreate", *services])'
+        in recover_containers["ansible.builtin.command"]["argv"][2]
+    )
     assert recover_containers["failed_when"] is False
-    assert 'stopped = [container for container in containers if not container.get("State", {}).get("Running")]' not in (
-        recover_containers["ansible.builtin.command"]["argv"][2]
+    assert (
+        'stopped = [container for container in containers if not container.get("State", {}).get("Running")]'
+        not in (recover_containers["ansible.builtin.command"]["argv"][2])
     )
     assert "for container in containers:" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
@@ -321,17 +401,27 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "SUCCESSFUL_EXIT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "def inspect_container(name):" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "def inspect_compose_replacement(container):" in confirm_recovery["ansible.builtin.command"]["argv"][2]
-    assert 'f"label=com.docker.compose.project={compose_project}"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
-    assert 'f"label=com.docker.compose.service={compose_service}"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert (
+        'f"label=com.docker.compose.project={compose_project}"'
+        in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    )
+    assert (
+        'f"label=com.docker.compose.service={compose_service}"'
+        in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    )
     assert "restart_policy_name" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert (
         'SUCCESSFUL_EXIT_RESTART_POLICIES = NONPERSISTENT_RESTART_POLICIES | {"on-failure"}'
         in confirm_recovery["ansible.builtin.command"]["argv"][2]
     )
-    assert "require_running = restart_policy_name not in SUCCESSFUL_EXIT_RESTART_POLICIES" in (
-        confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert (
+        "require_running = restart_policy_name not in SUCCESSFUL_EXIT_RESTART_POLICIES"
+        in (confirm_recovery["ansible.builtin.command"]["argv"][2])
     )
-    assert "restart_policy_name in SUCCESSFUL_EXIT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert (
+        "restart_policy_name in SUCCESSFUL_EXIT_RESTART_POLICIES"
+        in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    )
     assert 'and status == "exited"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert '"healthy": healthy' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "sys.exit(0 if all_running else 1)" in confirm_recovery["ansible.builtin.command"]["argv"][2]
@@ -342,7 +432,9 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
 
 def test_docker_runtime_accepts_clean_on_failure_exit_after_restart(tmp_path: Path) -> None:
     tasks = load_tasks()
-    confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
+    confirm_recovery = next(
+        task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts"
+    )
     script = confirm_recovery["ansible.builtin.command"]["argv"][2]
     script = script.replace(
         "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
@@ -401,7 +493,9 @@ exit 1
 
 def test_docker_runtime_accepts_compose_managed_replacement_container_after_restart(tmp_path: Path) -> None:
     tasks = load_tasks()
-    confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
+    confirm_recovery = next(
+        task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts"
+    )
     script = confirm_recovery["ansible.builtin.command"]["argv"][2]
     script = script.replace(
         "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
@@ -475,7 +569,9 @@ exit 1
 def test_docker_runtime_unseals_openbao_before_recovering_openbao_agent(tmp_path: Path) -> None:
     tasks = load_tasks()
     recover_containers = next(
-        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+        task
+        for task in tasks
+        if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
     script = script.replace(
@@ -628,7 +724,9 @@ exit 1
 def test_docker_runtime_retries_compose_recovery_long_enough_for_transient_nat_chain_errors(tmp_path: Path) -> None:
     tasks = load_tasks()
     recover_containers = next(
-        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+        task
+        for task in tasks
+        if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
     script = script.replace(
@@ -637,7 +735,7 @@ def test_docker_runtime_retries_compose_recovery_long_enough_for_transient_nat_c
     )
     script = re.sub(
         r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
-        'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+        "OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =",
         script,
         flags=re.DOTALL,
     )
@@ -736,7 +834,9 @@ exit 1
 def test_docker_runtime_restarts_docker_when_daemon_is_not_active(tmp_path: Path) -> None:
     tasks = load_tasks()
     recover_containers = next(
-        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+        task
+        for task in tasks
+        if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
     script = script.replace(
@@ -745,7 +845,7 @@ def test_docker_runtime_restarts_docker_when_daemon_is_not_active(tmp_path: Path
     )
     script = re.sub(
         r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
-        'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+        "OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =",
         script,
         flags=re.DOTALL,
     )
@@ -846,7 +946,9 @@ exit 1
 def test_docker_runtime_recovery_includes_compose_dependencies(tmp_path: Path) -> None:
     tasks = load_tasks()
     recover_containers = next(
-        task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+        task
+        for task in tasks
+        if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
     )
     script = recover_containers["ansible.builtin.command"]["argv"][2]
     script = script.replace(
@@ -855,7 +957,7 @@ def test_docker_runtime_recovery_includes_compose_dependencies(tmp_path: Path) -
     )
     script = re.sub(
         r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
-        'OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+        "OPENBAO_UNSEAL_KEYS = []\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =",
         script,
         flags=re.DOTALL,
     )
@@ -951,18 +1053,30 @@ def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() 
     assert "Wait briefly for Docker bridge chains to recover after daemon activation" in task_names
     assert "Restart Docker when required bridge chains are missing" not in task_names
     assert "Restart Docker when required bridge chains are still missing after the retry loop" not in task_names
-    info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
-    wait_for_ssh = next(task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks")
+    info_ready = next(
+        task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks"
+    )
+    wait_for_ssh = next(
+        task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks"
+    )
     chain_wait = next(
-        task for task in tasks if task["name"] == "Wait briefly for Docker bridge chains to recover after daemon activation"
+        task
+        for task in tasks
+        if task["name"] == "Wait briefly for Docker bridge chains to recover after daemon activation"
     )
     nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after health evaluation")
-    forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after health evaluation")
+    forward_recheck = next(
+        task for task in tasks if task["name"] == "Recheck Docker forward chain after health evaluation"
+    )
     nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
     forward_verify = next(task for task in tasks if task["name"] == "Verify Docker forward chain after retry loop")
     nat_final = next(task for task in tasks if task["name"] == "Capture final Docker nat chain state after retry loop")
-    forward_final = next(task for task in tasks if task["name"] == "Capture final Docker forward chain state after retry loop")
-    nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation")
+    forward_final = next(
+        task for task in tasks if task["name"] == "Capture final Docker forward chain state after retry loop"
+    )
+    nat_assert = next(
+        task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation"
+    )
     forward_assert = next(
         task for task in tasks if task["name"] == "Assert Docker forward chain is present after health evaluation"
     )
@@ -1022,15 +1136,25 @@ def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     tasks = load_tasks()
-    daemon_stat = next(task for task in tasks if task["name"] == "Check whether the current Docker daemon config exists")
+    daemon_stat = next(
+        task for task in tasks if task["name"] == "Check whether the current Docker daemon config exists"
+    )
     daemon_slurp = next(task for task in tasks if task["name"] == "Read the current Docker daemon config")
-    daemon_fact = next(task for task in tasks if task["name"] == "Record whether Docker currently has live-restore enabled")
+    daemon_fact = next(
+        task for task in tasks if task["name"] == "Record whether Docker currently has live-restore enabled"
+    )
     daemon_render = next(task for task in tasks if task["name"] == "Render Docker daemon configuration")
     build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
-    patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
-    assert_rules = next(task for task in tasks if task["name"] == "Assert the Docker bridge forward-compat rule is present")
+    patch_rules = next(
+        task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress"
+    )
+    assert_rules = next(
+        task for task in tasks if task["name"] == "Assert the Docker bridge forward-compat rule is present"
+    )
     live_rules = next(
-        task for task in tasks if task["name"] == "Apply Docker bridge forward-compat rules live without reloading nftables"
+        task
+        for task in tasks
+        if task["name"] == "Apply Docker bridge forward-compat rules live without reloading nftables"
     )
 
     assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
@@ -1058,12 +1182,17 @@ def test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs(
 
 def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
     tasks = load_tasks()
-    pin_hosts = next(task for task in tasks if task["name"] == "Pin public edge hostnames to the internal edge for Docker guests")
+    pin_hosts = next(
+        task for task in tasks if task["name"] == "Pin public edge hostnames to the internal edge for Docker guests"
+    )
 
     config = pin_hosts["ansible.builtin.blockinfile"]
     assert config["path"] == "/etc/hosts"
     assert config["marker"] == "# {mark} ANSIBLE MANAGED BLOCK: lv3 docker public edge aliases"
-    assert "{% for alias in docker_runtime_public_edge_host_aliases | default([]) if alias | length > 0 %}" in config["block"]
+    assert (
+        "{% for alias in docker_runtime_public_edge_host_aliases | default([]) if alias | length > 0 %}"
+        in config["block"]
+    )
     assert "{{ docker_runtime_public_edge_ipv4 }} {{ alias }}" in config["block"]
     assert pin_hosts["when"] == [
         "docker_runtime_public_edge_ipv4 | default('') | length > 0",
@@ -1088,7 +1217,10 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
         defaults["docker_runtime_publication_assurance_script_src"]
         == "{{ docker_runtime_repo_root }}/scripts/docker_publication_assurance.py"
     )
-    assert defaults["docker_runtime_publication_assurance_script_path"] == "/usr/local/bin/lv3-docker-publication-assurance"
+    assert (
+        defaults["docker_runtime_publication_assurance_script_path"]
+        == "/usr/local/bin/lv3-docker-publication-assurance"
+    )
     assert defaults["docker_runtime_publication_assurance_helper_source"] == (
         "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
     )

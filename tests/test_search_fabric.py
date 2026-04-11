@@ -120,7 +120,9 @@ def test_indexer_tolerates_non_utf8_config_text(tmp_path: Path) -> None:
 def test_indexer_tolerates_non_utf8_receipt_json(tmp_path: Path) -> None:
     payload = SearchIndexer(make_repo(tmp_path)).index_all()
     receipt_docs = [document for document in payload["documents"] if document.collection == "receipts"]
-    assert any(document.doc_id == "receipt:receipts/live-applies/2026-03-24-binaryish.json" for document in receipt_docs)
+    assert any(
+        document.doc_id == "receipt:receipts/live-applies/2026-03-24-binaryish.json" for document in receipt_docs
+    )
 
 
 def test_indexer_skips_malformed_receipt_json(tmp_path: Path) -> None:
@@ -128,4 +130,6 @@ def test_indexer_skips_malformed_receipt_json(tmp_path: Path) -> None:
     (repo_root / "receipts" / "live-applies" / "2026-03-25-malformed.json").write_text("{not-json}\n", encoding="utf-8")
     payload = SearchIndexer(repo_root).index_all()
     receipt_docs = [document for document in payload["documents"] if document.collection == "receipts"]
-    assert not any(document.doc_id == "receipt:receipts/live-applies/2026-03-25-malformed.json" for document in receipt_docs)
+    assert not any(
+        document.doc_id == "receipt:receipts/live-applies/2026-03-25-malformed.json" for document in receipt_docs
+    )

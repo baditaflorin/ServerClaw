@@ -176,7 +176,7 @@ class KeycloakLoginFormParser(html.parser.HTMLParser):
 GITHUB_REPO_BASE = "https://github.com/baditaflorin/proxmox_florin_server/blob/main"
 
 
-def repo_link(repo_root: Path, path: Path) -> str:  # noqa: ARG001
+def repo_link(repo_root: Path, path: Path) -> str:
     """Return a publicly-accessible GitHub URL for a repo-relative path."""
     return f"{GITHUB_REPO_BASE}/{path}"
 
@@ -415,8 +415,12 @@ def render_dr_backup_index(repo_root: Path) -> str:
         "",
         "## Key References",
         "",
-        f"- [ADR 0100 — Disaster recovery]({repo_link(repo_root, Path('docs/adr/0100-disaster-recovery-runbook.md'))})" if (repo_root / "docs/adr/0100-disaster-recovery-runbook.md").exists() else "",
-        f"- [config/dr-targets.yaml]({repo_link(repo_root, Path('config/dr-targets.yaml'))})" if (repo_root / "config/dr-targets.yaml").exists() else "",
+        f"- [ADR 0100 — Disaster recovery]({repo_link(repo_root, Path('docs/adr/0100-disaster-recovery-runbook.md'))})"
+        if (repo_root / "docs/adr/0100-disaster-recovery-runbook.md").exists()
+        else "",
+        f"- [config/dr-targets.yaml]({repo_link(repo_root, Path('config/dr-targets.yaml'))})"
+        if (repo_root / "config/dr-targets.yaml").exists()
+        else "",
         "",
         "Use `outline_tool.py receipt.backfill --collection 'DR & Backup Status' --receipt-dir receipts/restore-verifications` to upload existing receipts.",
         "",
@@ -425,33 +429,36 @@ def render_dr_backup_index(repo_root: Path) -> str:
 
 
 def render_platform_findings_index(_repo_root: Path) -> str:
-    return "\n".join([
-        "# Platform Findings Index",
-        "",
-        "Automated findings, digests, and drift reports published by the LV3 platform.",
-        "",
-        "## Sources",
-        "",
-        "| Source | Windmill Script | Cadence |",
-        "|---|---|---|",
-        "| Daily findings digest | `platform-findings-daily-digest.py` | Daily |",
-        "| Weekly capacity report | `weekly-capacity-report.py` | Weekly |",
-        "| Mutation audit summary | `lv3-mutation-audit.py` | Per-event |",
-        "| Drift reports (infra/DNS/Docker/TLS) | `continuous-drift-detection.py` | Scheduled |",
-        "| Weekly security scan | `weekly-security-scan.py` | Weekly |",
-        "",
-        "## Naming Convention",
-        "",
-        "Documents follow the pattern: `{report-type}-{YYYY-MM-DD}`",
-        "",
-        "Examples: `findings-digest-2026-04-05`, `capacity-report-2026-04-05`, `drift-report-2026-04-05`",
-        "",
-    ])
+    return "\n".join(
+        [
+            "# Platform Findings Index",
+            "",
+            "Automated findings, digests, and drift reports published by the LV3 platform.",
+            "",
+            "## Sources",
+            "",
+            "| Source | Windmill Script | Cadence |",
+            "|---|---|---|",
+            "| Daily findings digest | `platform-findings-daily-digest.py` | Daily |",
+            "| Weekly capacity report | `weekly-capacity-report.py` | Weekly |",
+            "| Mutation audit summary | `lv3-mutation-audit.py` | Per-event |",
+            "| Drift reports (infra/DNS/Docker/TLS) | `continuous-drift-detection.py` | Scheduled |",
+            "| Weekly security scan | `weekly-security-scan.py` | Weekly |",
+            "",
+            "## Naming Convention",
+            "",
+            "Documents follow the pattern: `{report-type}-{YYYY-MM-DD}`",
+            "",
+            "Examples: `findings-digest-2026-04-05`, `capacity-report-2026-04-05`, `drift-report-2026-04-05`",
+            "",
+        ]
+    )
 
 
 def _script_docstring(path: Path) -> str:
     """Extract the module docstring from a Python script."""
     import re as _re
+
     try:
         text = path.read_text(encoding="utf-8", errors="replace")[:600]
         # Try triple-double-quoted docstring (single or multi-line — take first line)
@@ -487,7 +494,7 @@ def render_platform_tools_index(repo_root: Path) -> str:
         "",
         "## outline_tool.py — Agent Wiki API",
         "",
-        "All commands output `{\"ok\": true/false, ...}` JSON. Auth via `OUTLINE_API_TOKEN` env var.",
+        'All commands output `{"ok": true/false, ...}` JSON. Auth via `OUTLINE_API_TOKEN` env var.',
         "",
         "| Command | Purpose |",
         "|---|---|",
@@ -541,7 +548,13 @@ def render_platform_tools_index(repo_root: Path) -> str:
     if makefile.exists():
         targets: list[str] = []
         for line in makefile.read_text(encoding="utf-8").splitlines():
-            if line and not line.startswith("\t") and not line.startswith("#") and not line.startswith(".") and ":" in line:
+            if (
+                line
+                and not line.startswith("\t")
+                and not line.startswith("#")
+                and not line.startswith(".")
+                and ":" in line
+            ):
                 target = line.split(":")[0].strip()
                 if target and " " not in target and target not in ("PHONY", "all"):
                     targets.append(target)
@@ -622,13 +635,15 @@ def find_cookie(jar: Any, name: str) -> str | None:
     return None
 
 
-def bootstrap_token(base_url: str, username: str, password_file: Path, token_name: str, token_file: Path, scope: list[str]) -> int:
+def bootstrap_token(
+    base_url: str, username: str, password_file: Path, token_name: str, token_file: Path, scope: list[str]
+) -> int:
     if token_file.exists() and load_file(token_file):
         print(f"api token already present at {token_file}")
         return 0
 
     opener, jar = build_opener()
-    with opener.open(f"{base_url.rstrip('/')}/auth/oidc", timeout=60) as response:  # noqa: S310
+    with opener.open(f"{base_url.rstrip('/')}/auth/oidc", timeout=60) as response:
         login_html = response.read().decode("utf-8", errors="replace")
         login_url = response.geturl()
 
@@ -643,7 +658,7 @@ def bootstrap_token(base_url: str, username: str, password_file: Path, token_nam
     payload = parse.urlencode(form_fields).encode("utf-8")
     login_request = request.Request(parser.form_action, data=payload, method="POST")
     login_request.add_header("Content-Type", "application/x-www-form-urlencoded")
-    with opener.open(login_request, timeout=60) as response:  # noqa: S310
+    with opener.open(login_request, timeout=60) as response:
         _ = response.read()
 
     app_token = find_cookie(jar, "accessToken")
@@ -748,7 +763,9 @@ def build_parser() -> argparse.ArgumentParser:
     bootstrap = subparsers.add_parser("bootstrap-token", help="Create the repo-managed Outline API token through OIDC.")
     bootstrap.add_argument("--base-url", default=DEFAULT_BASE_URL)
     bootstrap.add_argument("--username", default="outline.automation")
-    bootstrap.add_argument("--password-file", type=Path, default=Path(".local/keycloak/outline.automation-password.txt"))
+    bootstrap.add_argument(
+        "--password-file", type=Path, default=Path(".local/keycloak/outline.automation-password.txt")
+    )
     bootstrap.add_argument("--token-name", default="lv3-outline-sync")
     bootstrap.add_argument("--token-file", type=Path, default=DEFAULT_TOKEN_FILE)
     bootstrap.add_argument("--scope", default=",".join(API_TOKEN_SCOPES))
@@ -785,7 +802,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "verify":
             return verify(args.repo_root.resolve(), args.base_url, args.api_token_file)
         raise OutlineError(f"unknown command: {args.command}")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"outline sync error: {exc}", file=sys.stderr)
         return 1
 

@@ -56,9 +56,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
         "lv3.platform.nomad_cluster_member",
         "lv3.platform.runtime_pool_substrate",
     ]
-    assert playbook[1]["roles"][0]["vars"] == {
-        "linux_guest_firewall_recover_missing_docker_bridge_chains": True
-    }
+    assert playbook[1]["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
 
     assert playbook[3]["name"] == "Ensure the runtime-control Nomad namespace exists"
     assert playbook[3]["hosts"] == "monitoring-lv3"
@@ -88,11 +86,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
 
     assert playbook[17]["name"] == "Verify the runtime-control substrate routes after the control-plane migration"
     assert playbook[17]["hosts"] == "runtime-control-lv3"
-    route_urls = [
-        task["ansible.builtin.uri"]["url"]
-        for task in playbook[17]["tasks"]
-        if "ansible.builtin.uri" in task
-    ]
+    route_urls = [task["ansible.builtin.uri"]["url"] for task in playbook[17]["tasks"] if "ansible.builtin.uri" in task]
     assert "http://127.0.0.1:9080/api-gateway/healthz" in route_urls
     assert "http://127.0.0.1:9080/openfga/healthz" in route_urls
     dapr_task = next(

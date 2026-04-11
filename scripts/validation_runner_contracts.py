@@ -11,7 +11,7 @@ import socket
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -88,13 +88,14 @@ def _validate_build_server_private_overlay_contract(build_server: dict[str, Any]
 
     ssh_options = [
         require_str(option, f"config/build-server.json.ssh_options[{index}]")
-        for index, option in enumerate(require_list(build_server.get("ssh_options", []), "config/build-server.json.ssh_options"))
+        for index, option in enumerate(
+            require_list(build_server.get("ssh_options", []), "config/build-server.json.ssh_options")
+        )
     ]
     for index, option in enumerate(ssh_options):
         if "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local" in option:
             raise ValueError(
-                "config/build-server.json.ssh_options "
-                f"[{index}] must not embed an operator workstation path"
+                f"config/build-server.json.ssh_options [{index}] must not embed an operator workstation path"
             )
         if "hetzner_llm_agents_ed25519" in option:
             raise ValueError(
@@ -122,8 +123,7 @@ def validate_contract_catalog(
     missing_gate_lanes = sorted(gate_checks - lane_ids)
     if missing_gate_lanes:
         raise ValueError(
-            "config/validation-runner-contracts.json is missing gate lanes for: "
-            + ", ".join(missing_gate_lanes)
+            "config/validation-runner-contracts.json is missing gate lanes for: " + ", ".join(missing_gate_lanes)
         )
 
     build_server = build_server_config if build_server_config is not None else _load_build_server_config()
@@ -173,7 +173,10 @@ def validate_contract_catalog(
                 raise ValueError(
                     f"runner '{runner_id}' does not support validation lane '{lane_id}' declared by command '{command_label}'"
                 )
-            if fallback_runner_id is not None and lane_id not in runner_catalog[fallback_runner_id]["supported_validation_lanes"]:
+            if (
+                fallback_runner_id is not None
+                and lane_id not in runner_catalog[fallback_runner_id]["supported_validation_lanes"]
+            ):
                 raise ValueError(
                     "local fallback runner "
                     f"'{fallback_runner_id}' does not support validation lane '{lane_id}' declared by command '{command_label}'"
@@ -298,7 +301,7 @@ def attest_runner(
     usage = shutil.disk_usage(workspace_path)
 
     return {
-        "attested_at": datetime.now(timezone.utc).isoformat(),
+        "attested_at": datetime.now(UTC).isoformat(),
         "hostname": socket.gethostname(),
         "platform": sys.platform,
         "cpu_architecture": normalize_cpu_architecture(pyplatform.machine()),
@@ -357,7 +360,9 @@ def evaluate_lane_eligibility(
             f"config/validation-runner-contracts.json.lanes.{lane_id}.allowed_cpu_architectures",
         )
     )
-    attested_architecture = require_str(attestation.get("cpu_architecture"), f"{runner_id} attestation cpu_architecture")
+    attested_architecture = require_str(
+        attestation.get("cpu_architecture"), f"{runner_id} attestation cpu_architecture"
+    )
     if attested_architecture not in allowed_architectures:
         reasons.append(
             f"lane '{lane_id}' requires CPU architecture in {sorted(allowed_architectures)}, not '{attested_architecture}'"
@@ -373,7 +378,10 @@ def evaluate_lane_eligibility(
             f"runner contract '{runner_id}' allows CPU architectures {sorted(declared_architectures)}, not '{attested_architecture}'"
         )
 
-    if require_bool(lane.get("requires_container_runtime"), f"config/validation-runner-contracts.json.lanes.{lane_id}.requires_container_runtime"):
+    if require_bool(
+        lane.get("requires_container_runtime"),
+        f"config/validation-runner-contracts.json.lanes.{lane_id}.requires_container_runtime",
+    ):
         runtime = require_mapping(attestation.get("container_runtime"), f"{runner_id} attestation container_runtime")
         if not require_bool(runtime.get("available"), f"{runner_id} attestation container_runtime.available"):
             reasons.append(
@@ -381,7 +389,9 @@ def evaluate_lane_eligibility(
                 if isinstance(runtime.get("error"), str)
                 else "container runtime binary is unavailable"
             )
-        elif not require_bool(runtime.get("server_reachable"), f"{runner_id} attestation container_runtime.server_reachable"):
+        elif not require_bool(
+            runtime.get("server_reachable"), f"{runner_id} attestation container_runtime.server_reachable"
+        ):
             reasons.append(
                 runtime.get("error", "container runtime daemon is unreachable")
                 if isinstance(runtime.get("error"), str)
@@ -389,12 +399,16 @@ def evaluate_lane_eligibility(
             )
 
     tooling = require_mapping(attestation.get("tooling"), f"{runner_id} attestation tooling")
-    required_tools = require_string_list(lane.get("required_tools"), f"config/validation-runner-contracts.json.lanes.{lane_id}.required_tools")
+    required_tools = require_string_list(
+        lane.get("required_tools"), f"config/validation-runner-contracts.json.lanes.{lane_id}.required_tools"
+    )
     missing_tools = [
         tool_name
         for tool_name in required_tools
         if not require_bool(
-            require_mapping(tooling.get(tool_name, {}), f"{runner_id} attestation tooling.{tool_name}").get("available", False),
+            require_mapping(tooling.get(tool_name, {}), f"{runner_id} attestation tooling.{tool_name}").get(
+                "available", False
+            ),
             f"{runner_id} attestation tooling.{tool_name}.available",
         )
     ]
@@ -423,7 +437,9 @@ def evaluate_lane_eligibility(
         scratch = require_mapping(attestation.get("scratch_space"), f"{runner_id} attestation scratch_space")
         if not require_bool(scratch.get("exists"), f"{runner_id} attestation scratch_space.exists"):
             reasons.append("workspace scratch path does not exist")
-        cleanup = require_str(scratch.get("cleanup_guarantee"), f"{runner_id} attestation scratch_space.cleanup_guarantee")
+        cleanup = require_str(
+            scratch.get("cleanup_guarantee"), f"{runner_id} attestation scratch_space.cleanup_guarantee"
+        )
         if not cleanup:
             reasons.append("runner did not attest a scratch-space cleanup guarantee")
 
@@ -450,7 +466,9 @@ def build_runner_context(
     )
     lane_ids = list(lanes or [])
     lane_evaluations = {
-        lane_id: evaluate_lane_eligibility(catalog, runner_id=runner_id, lane_id=lane_id, attestation=attestation).as_dict()
+        lane_id: evaluate_lane_eligibility(
+            catalog, runner_id=runner_id, lane_id=lane_id, attestation=attestation
+        ).as_dict()
         for lane_id in lane_ids
     }
     return {
@@ -480,10 +498,16 @@ def _print_context_text(payload: dict[str, Any]) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Inspect and validate ADR 0266 validation runner contracts.")
-    parser.add_argument("--contracts", type=Path, default=CONTRACT_CATALOG_PATH, help="Validation runner contract catalog.")
-    parser.add_argument("--validate", action="store_true", help="Validate the contract catalog against schema and call sites.")
+    parser.add_argument(
+        "--contracts", type=Path, default=CONTRACT_CATALOG_PATH, help="Validation runner contract catalog."
+    )
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate the contract catalog against schema and call sites."
+    )
     parser.add_argument("--runner", help="Runner id to attest.")
-    parser.add_argument("--workspace", type=Path, default=REPO_ROOT, help="Workspace used for scratch-space attestation.")
+    parser.add_argument(
+        "--workspace", type=Path, default=REPO_ROOT, help="Workspace used for scratch-space attestation."
+    )
     parser.add_argument("--lane", action="append", default=[], help="Lane id to evaluate against the selected runner.")
     parser.add_argument("--format", choices=("text", "json"), default="text")
     return parser

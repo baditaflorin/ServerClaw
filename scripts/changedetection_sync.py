@@ -122,10 +122,7 @@ class ChangedetectionClient:
 def normalize_time_between_check(value: Any) -> dict[str, int]:
     if not isinstance(value, dict):
         return {field: 0 for field in TIME_FIELDS}
-    return {
-        field: int(value.get(field) or 0)
-        for field in TIME_FIELDS
-    }
+    return {field: int(value.get(field) or 0) for field in TIME_FIELDS}
 
 
 def normalize_scalar(value: Any) -> Any:
@@ -386,7 +383,7 @@ def main(argv: list[str] | None = None) -> int:
         write_report(args.report_file, report)
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"changedetection_sync error: {exc}", file=sys.stderr)
         return 2
 

@@ -27,7 +27,7 @@ class PurgeTarget:
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def cutoff_for_days(retention_days: int, now: dt.datetime) -> dt.datetime:
@@ -76,7 +76,7 @@ def purge_directory(target: PurgeTarget, now: dt.datetime, execute: bool) -> dic
     for candidate in sorted(target.root.rglob("*")):
         if not candidate.is_file() or should_skip_file(candidate):
             continue
-        modified_at = dt.datetime.fromtimestamp(candidate.stat().st_mtime, tz=dt.timezone.utc)
+        modified_at = dt.datetime.fromtimestamp(candidate.stat().st_mtime, tz=dt.UTC)
         relative = str(candidate.relative_to(target.root.parent))
         if modified_at >= cutoff:
             skipped.append(relative)
@@ -106,7 +106,9 @@ def _parse_event_ts(raw_line: str) -> dt.datetime | None:
     return dt.datetime.fromisoformat(raw_ts.replace("Z", "+00:00"))
 
 
-def purge_audit_log(audit_log_path: Path, retention_days: int | None, now: dt.datetime, execute: bool) -> dict[str, Any]:
+def purge_audit_log(
+    audit_log_path: Path, retention_days: int | None, now: dt.datetime, execute: bool
+) -> dict[str, Any]:
     if retention_days is None:
         return {
             "store_id": AUDIT_STORE_ID,
@@ -177,8 +179,7 @@ def run_purge(
 ) -> dict[str, Any]:
     now = utc_now()
     receipt_results = [
-        purge_directory(target, now, execute)
-        for target in load_purge_targets(catalog_path, receipts_root)
+        purge_directory(target, now, execute) for target in load_purge_targets(catalog_path, receipts_root)
     ]
     audit_result = purge_audit_log(
         audit_log_path,

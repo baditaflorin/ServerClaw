@@ -61,7 +61,9 @@ def calibrate(cases_path=None):
     )
 
     captured = {}
-    monkeypatch.setattr(module, "post_json_webhook", lambda url, payload: captured.update({"url": url, "payload": payload}))
+    monkeypatch.setattr(
+        module, "post_json_webhook", lambda url, payload: captured.update({"url": url, "payload": payload})
+    )
 
     payload = module.main(repo_path=str(repo_root), mattermost_webhook_url="https://example.invalid/webhook")
 

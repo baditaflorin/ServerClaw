@@ -67,9 +67,7 @@ def validate_repo_deploy_catalog(payload: dict[str, Any], *, path: Path = CATALO
         require_str(profile.get("ports"), f"{profile_path}.ports")
         llm_assistance = require_str(profile.get("llm_assistance"), f"{profile_path}.llm_assistance")
         if llm_assistance not in ALLOWED_LLM_ASSISTANCE:
-            raise ValueError(
-                f"{profile_path}.llm_assistance must be one of {sorted(ALLOWED_LLM_ASSISTANCE)}"
-            )
+            raise ValueError(f"{profile_path}.llm_assistance must be one of {sorted(ALLOWED_LLM_ASSISTANCE)}")
 
         compose_domains = require_list(profile.get("compose_domains", []), f"{profile_path}.compose_domains")
         seen_services: set[str] = set()

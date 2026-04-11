@@ -244,18 +244,12 @@ def evaluate_service_standby(
     capacity_delta = ZERO_RESOURCES
 
     if primary_compose_project == standby_compose_project:
-        reasons.append(
-            f"service '{service_id}' primary and standby share compose project '{primary_compose_project}'"
-        )
+        reasons.append(f"service '{service_id}' primary and standby share compose project '{primary_compose_project}'")
     if primary_namespace == standby_namespace:
-        reasons.append(
-            f"service '{service_id}' primary and standby share namespace '{primary_namespace}'"
-        )
+        reasons.append(f"service '{service_id}' primary and standby share namespace '{primary_namespace}'")
     overlapping_paths = sorted(primary_data_paths & standby_data_paths)
     if overlapping_paths:
-        reasons.append(
-            f"service '{service_id}' primary and standby share data paths: {', '.join(overlapping_paths)}"
-        )
+        reasons.append(f"service '{service_id}' primary and standby share data paths: {', '.join(overlapping_paths)}")
     if standby_vm == primary_vm:
         warnings.append(f"service '{service_id}' standby shares guest VM '{standby_vm}' with the primary")
     if not failure_domain_statement_is_honest(failure_domain_honesty):
@@ -301,9 +295,7 @@ def evaluate_service_standby(
                 )
             capacity_delta = reserved_total
             if not any(reservation.standby_vm == standby_vm for reservation in reservations):
-                reasons.append(
-                    f"service '{service_id}' standby reservations do not target standby VM '{standby_vm}'"
-                )
+                reasons.append(f"service '{service_id}' standby reservations do not target standby VM '{standby_vm}'")
             if standby_vmid is not None and not any(
                 reservation.standby_vmid == standby_vmid for reservation in reservations
             ):
@@ -314,9 +306,7 @@ def evaluate_service_standby(
                 reasons.append(
                     f"service '{service_id}' standby reservations do not declare storage class '{storage_class}'"
                 )
-            if not any(
-                reservation.required_network_attachment == network_attachment for reservation in reservations
-            ):
+            if not any(reservation.required_network_attachment == network_attachment for reservation in reservations):
                 reasons.append(
                     "service "
                     f"'{service_id}' standby reservations do not declare network attachment '{network_attachment}'"
@@ -338,7 +328,9 @@ def evaluate_service_standby(
             )
 
     if enforce_capacity_target:
-        projected = calculate_committed(loaded_model, include_planned=False, include_reservations=False).add(capacity_delta)
+        projected = calculate_committed(loaded_model, include_planned=False, include_reservations=False).add(
+            capacity_delta
+        )
         target = loaded_model.host.target_absolute
         if projected.ram_gb > target.ram_gb:
             reasons.append(
@@ -372,9 +364,7 @@ def validate_catalog_standby_policies(
     for service_id in sorted(service_index(loaded_catalog)):
         verdict = evaluate_service_standby(service_id, catalog=loaded_catalog, model=loaded_model)
         if verdict["enforced"] and not verdict["approved"]:
-            raise ValueError(
-                f"standby policy for service '{service_id}' is invalid: " + "; ".join(verdict["reasons"])
-            )
+            raise ValueError(f"standby policy for service '{service_id}' is invalid: " + "; ".join(verdict["reasons"]))
 
 
 def render_text(verdict: dict[str, Any]) -> str:
@@ -400,7 +390,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate standby capacity and placement declarations.")
     parser.add_argument("--service", help="Service id from config/service-capability-catalog.json.")
     parser.add_argument("--validate", action="store_true", help="Validate all standby declarations.")
-    parser.add_argument("--enforce-target", action="store_true", help="Fail when the standby reservation would exceed host target capacity.")
+    parser.add_argument(
+        "--enforce-target",
+        action="store_true",
+        help="Fail when the standby reservation would exceed host target capacity.",
+    )
     parser.add_argument("--format", choices=["json", "text"], default="text")
     args = parser.parse_args(argv)
 

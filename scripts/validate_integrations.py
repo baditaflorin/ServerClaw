@@ -12,6 +12,7 @@ Checks:
   - Integration type is a known type
   - (optional) --check-dead: flag integrations whose consumer/provider role no longer exists
 """
+
 from __future__ import annotations
 
 import argparse
@@ -94,7 +95,9 @@ def main() -> int:
         contract_id = data.get("contract_id", "")
         if contract_id:
             if contract_id in seen_ids:
-                all_errors.append(f"{path.name}: duplicate contract_id '{contract_id}' (also in {seen_ids[contract_id].name})")
+                all_errors.append(
+                    f"{path.name}: duplicate contract_id '{contract_id}' (also in {seen_ids[contract_id].name})"
+                )
             else:
                 seen_ids[contract_id] = path
 

@@ -36,6 +36,7 @@ from controller_automation_toolkit import load_json, repo_path
 # Data loading — all from local files, zero network
 # ============================================================================
 
+
 def _load_yaml_lines(path: Path) -> dict[str, Any]:
     """Minimal YAML-like loader for simple key: value files. Not a full parser."""
     result: dict[str, Any] = {}
@@ -70,6 +71,7 @@ def load_platform_services() -> dict[str, Any]:
     """Load platform_services.yml via the repo's YAML loader."""
     try:
         from controller_automation_toolkit import _load_yaml_without_pyyaml
+
         path = repo_path("inventory", "group_vars", "all", "platform_services.yml")
         if path.is_file():
             return _load_yaml_without_pyyaml(path) or {}
@@ -89,6 +91,7 @@ def _service_name_variants(service_id: str) -> list[str]:
 # Subcommand: references
 # ============================================================================
 
+
 def cmd_references(args: argparse.Namespace) -> dict[str, Any]:
     """Find all files referencing a service. Grouped by category."""
     variants = _service_name_variants(args.service)
@@ -99,19 +102,32 @@ def cmd_references(args: argparse.Namespace) -> dict[str, Any]:
 
     # Search specific directories to avoid huge receipts/ and build/ dirs
     search_dirs = [
-        "collections", "inventory", "config", "scripts", "tests",
-        "docs", "workstreams", "versions", "playbooks", "Makefile",
+        "collections",
+        "inventory",
+        "config",
+        "scripts",
+        "tests",
+        "docs",
+        "workstreams",
+        "versions",
+        "playbooks",
+        "Makefile",
     ]
     existing = [d for d in search_dirs if (REPO_ROOT / d).exists()]
 
-    cmd = ["grep", "-rl", "-E", pattern,
-           "--exclude-dir=.git", "--exclude-dir=node_modules",
-           "--exclude-dir=__pycache__", "--exclude-dir=.claude"] + existing
+    cmd = [
+        "grep",
+        "-rl",
+        "-E",
+        pattern,
+        "--exclude-dir=.git",
+        "--exclude-dir=node_modules",
+        "--exclude-dir=__pycache__",
+        "--exclude-dir=.claude",
+    ] + existing
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(REPO_ROOT), timeout=30)
 
-    files = sorted(set(
-        line.lstrip("./") for line in result.stdout.strip().splitlines() if line
-    ))
+    files = sorted(set(line.lstrip("./") for line in result.stdout.strip().splitlines() if line))
 
     grouped: dict[str, list[str]] = defaultdict(list)
     for f in files:
@@ -152,6 +168,7 @@ def cmd_references(args: argparse.Namespace) -> dict[str, Any]:
 # ============================================================================
 # Subcommand: impact
 # ============================================================================
+
 
 def cmd_impact(args: argparse.Namespace) -> dict[str, Any]:
     """Analyze the impact of changing or removing a service."""
@@ -203,6 +220,7 @@ def cmd_impact(args: argparse.Namespace) -> dict[str, Any]:
 # ============================================================================
 # Subcommand: converge-plan
 # ============================================================================
+
 
 def _changed_files_from_git(since: str) -> list[str]:
     """Get list of changed files between ref and HEAD."""
@@ -324,11 +342,13 @@ def cmd_converge_plan(args: argparse.Namespace) -> dict[str, Any]:
 
     plan: list[dict[str, Any]] = []
     if platform_wide:
-        plan.append({
-            "note": "Platform-wide changes detected. Full site convergence recommended.",
-            "trigger_files": service_map.get("__platform_wide__", []) + service_map.get("__docker_runtime__", []),
-            "command": "make converge-site env=production",
-        })
+        plan.append(
+            {
+                "note": "Platform-wide changes detected. Full site convergence recommended.",
+                "trigger_files": service_map.get("__platform_wide__", []) + service_map.get("__docker_runtime__", []),
+                "command": "make converge-site env=production",
+            }
+        )
     else:
         ordered = _dependency_order(specific_services, dep_graph)
         for svc in ordered:
@@ -359,6 +379,7 @@ def cmd_converge_plan(args: argparse.Namespace) -> dict[str, Any]:
 # ============================================================================
 # Subcommand: completeness
 # ============================================================================
+
 
 def cmd_completeness(args: argparse.Namespace) -> dict[str, Any]:
     """Check service completeness against contracts."""
@@ -399,12 +420,14 @@ def cmd_completeness(args: argparse.Namespace) -> dict[str, Any]:
         if args.failing and passing:
             continue
 
-        results.append({
-            "service_id": svc_id,
-            "passing": passing,
-            "checks": checks,
-            "suppressed": list(svc.get("suppressed_checks", {}).keys()),
-        })
+        results.append(
+            {
+                "service_id": svc_id,
+                "passing": passing,
+                "checks": checks,
+                "suppressed": list(svc.get("suppressed_checks", {}).keys()),
+            }
+        )
 
     return {
         "total_checked": len(results),
@@ -417,6 +440,7 @@ def cmd_completeness(args: argparse.Namespace) -> dict[str, Any]:
 # ============================================================================
 # Subcommand: changelog
 # ============================================================================
+
 
 def cmd_changelog(args: argparse.Namespace) -> dict[str, Any]:
     """Generate changelog entries from git log."""
@@ -463,9 +487,11 @@ def cmd_changelog(args: argparse.Namespace) -> dict[str, Any]:
 # Subcommand: decommission-preview
 # ============================================================================
 
+
 def _find_yaml_marker_files(service_id: str) -> list[dict[str, Any]]:
     """Find generated YAML files that have BEGIN/END SERVICE markers for this service."""
     import re
+
     variants = _service_name_variants(service_id)
     candidate_paths = [
         REPO_ROOT / "config" / "prometheus" / "rules" / "slo_alerts.yml",
@@ -490,10 +516,12 @@ def _find_yaml_marker_files(service_id: str) -> list[dict[str, Any]]:
             ):
                 found_variants.append(variant)
         if found_variants:
-            result.append({
-                "file": str(path.relative_to(REPO_ROOT)),
-                "has_markers_for": found_variants,
-            })
+            result.append(
+                {
+                    "file": str(path.relative_to(REPO_ROOT)),
+                    "has_markers_for": found_variants,
+                }
+            )
     return result
 
 
@@ -531,8 +559,7 @@ def _catalog_removals(service_id: str) -> list[dict[str, Any]]:
                 catalog = load_json(repo_path(*entry["path"].split("/")))
                 obj = catalog.get(entry["list_key"], {})
                 would_remove = [
-                    k for k, v in (obj or {}).items()
-                    if isinstance(v, dict) and v.get(entry["id_field"]) == service_id
+                    k for k, v in (obj or {}).items() if isinstance(v, dict) and v.get(entry["id_field"]) == service_id
                 ]
             elif kind in ("workflow_dict", "secrets_dict"):
                 catalog = load_json(repo_path(*entry["path"].split("/")))
@@ -542,16 +569,11 @@ def _catalog_removals(service_id: str) -> list[dict[str, Any]]:
                 catalog = load_json(repo_path(*entry["path"].split("/")))
                 nodes = catalog.get(entry["nodes_key"], [])
                 edges = catalog.get(entry["edges_key"], [])
-                node_ids = [
-                    str(n.get("id", ""))
-                    for n in nodes
-                    if isinstance(n, dict) and n.get("id") in variants_set
-                ]
+                node_ids = [str(n.get("id", "")) for n in nodes if isinstance(n, dict) and n.get("id") in variants_set]
                 edge_ids = [
                     f"{e.get('from')}→{e.get('to')}"
                     for e in edges
-                    if isinstance(e, dict)
-                    and (e.get("from") in variants_set or e.get("to") in variants_set)
+                    if isinstance(e, dict) and (e.get("from") in variants_set or e.get("to") in variants_set)
                 ]
                 would_remove = node_ids + edge_ids
             elif kind == "partitions":
@@ -567,6 +589,7 @@ def _catalog_removals(service_id: str) -> list[dict[str, Any]]:
             elif kind == "yaml_dict_key":
                 try:
                     import yaml
+
                     data = yaml.safe_load(full.read_text()) or {}
                     obj = data.get(entry["list_key"], {})
                     would_remove = [k for k in (obj or {}) if any(v in str(k) for v in variants_set)]
@@ -576,11 +599,13 @@ def _catalog_removals(service_id: str) -> list[dict[str, Any]]:
             pass
 
         if would_remove:
-            removals.append({
-                "catalog": entry["path"],
-                "type": kind,
-                "would_remove": would_remove,
-            })
+            removals.append(
+                {
+                    "catalog": entry["path"],
+                    "type": kind,
+                    "would_remove": would_remove,
+                }
+            )
 
     return removals
 
@@ -592,6 +617,7 @@ def cmd_decommission_preview(args: argparse.Namespace) -> dict[str, Any]:
     # Lazy import: build_code_purge_plan from decommission_service
     try:
         import decommission_service as ds
+
         purge_plan = ds.build_code_purge_plan(service_id)
     except ImportError as exc:
         return {"error": f"Cannot import decommission_service: {exc}"}
@@ -619,8 +645,7 @@ def cmd_decommission_preview(args: argparse.Namespace) -> dict[str, Any]:
         "yaml_marker_files": yaml_marker_files,
         "dependent_services": sorted(set(dependents)),
         "purge_command": (
-            f"python3 scripts/decommission_service.py --service {service_id}"
-            f" --purge-code --confirm {service_id}"
+            f"python3 scripts/decommission_service.py --service {service_id} --purge-code --confirm {service_id}"
         ),
     }
 
@@ -628,6 +653,7 @@ def cmd_decommission_preview(args: argparse.Namespace) -> dict[str, Any]:
 # ============================================================================
 # Main
 # ============================================================================
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(

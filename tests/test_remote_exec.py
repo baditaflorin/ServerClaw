@@ -256,7 +256,9 @@ def run_remote_exec(
 
 
 def extract_run_workspace_root(text: str) -> str:
-    match = re.search(r"(/opt/builds/proxmox_florin_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/[^ ]+/repo)", text)
+    match = re.search(
+        r"(/opt/builds/proxmox_florin_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/[^ ]+/repo)", text
+    )
     assert match is not None, text
     return match.group(1)
 
@@ -378,7 +380,7 @@ def test_remote_exec_syncs_remote_gate_status_before_local_fallback(tmp_path: Pa
             ),
         },
         local_command=(
-            'python3 - <<\'PY\' > "$REMOTE_EXEC_MARKER"\n'
+            "python3 - <<'PY' > \"$REMOTE_EXEC_MARKER\"\n"
             "import json\n"
             "from pathlib import Path\n"
             "payload = json.loads(Path('.local/validation-gate/last-run.json').read_text())\n"
@@ -416,7 +418,7 @@ def test_remote_exec_applies_configured_ssh_options(tmp_path: Path) -> None:
     build_config(
         config_path,
         workspace_root="/opt/builds/proxmox_florin_server",
-        local_command="printf local-fallback > \"$REMOTE_EXEC_MARKER\"",
+        local_command='printf local-fallback > "$REMOTE_EXEC_MARKER"',
         ssh_options=["-o", "ProxyCommand=ssh jump.example -W %h:%p"],
     )
     build_manifest(manifest_path)

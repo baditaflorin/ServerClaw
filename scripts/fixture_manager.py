@@ -137,11 +137,11 @@ def current_owner() -> str:
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def isoformat(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    return value.astimezone(dt.UTC).isoformat().replace("+00:00", "Z")
 
 
 def parse_timestamp(value: str) -> dt.datetime:
@@ -149,7 +149,7 @@ def parse_timestamp(value: str) -> dt.datetime:
 
 
 def compact_timestamp(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return value.astimezone(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
 
 
 def sanitize_tag_component(value: str) -> str:
@@ -216,7 +216,9 @@ def load_ephemeral_pool() -> dict[str, Any]:
     vmid_range = pool.get("vmid_range")
     reserved = pool.get("reserved")
     if not isinstance(vmid_range, dict) or not isinstance(reserved, dict):
-        raise ValueError(f"{CAPACITY_MODEL_PATH} reservations.ephemeral_pool must define vmid_range and reserved mappings")
+        raise ValueError(
+            f"{CAPACITY_MODEL_PATH} reservations.ephemeral_pool must define vmid_range and reserved mappings"
+        )
 
     return {
         "vmid_range": [int(vmid_range["start"]), int(vmid_range["end"])],
@@ -289,9 +291,7 @@ def load_ephemeral_pool_catalog() -> tuple[EphemeralPoolDefaults, dict[str, Ephe
             ip_addresses=ip_addresses,
             placement_domain=str(item.get("placement_domain", "proxmox-local")),
             spillover_domain=str(item.get("spillover_domain", defaults.spillover_domain)),
-            protected_capacity_class=str(
-                item.get("protected_capacity_class", defaults.protected_capacity_class)
-            ),
+            protected_capacity_class=str(item.get("protected_capacity_class", defaults.protected_capacity_class)),
             warm_lifetime_minutes=int(item.get("warm_lifetime_minutes", defaults.warm_lifetime_minutes)),
             notes=str(item.get("notes", "")).strip() or None,
         )
@@ -358,8 +358,7 @@ def default_fixture_context() -> dict[str, str]:
         "nameserver": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_nameserver", "1.1.1.1"),
         "search_domain": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_searchdomain", "localhost"),
         "jump_user": yaml_scalar(GROUP_VARS_PATH, "proxmox_host_admin_user", "ops"),
-        "jump_host": os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
-        or jump_host,
+        "jump_host": os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip() or jump_host,
     }
 
 
@@ -559,11 +558,7 @@ def receipt_path(receipt_id: str) -> Path:
 def list_receipt_paths() -> list[Path]:
     if not FIXTURE_RECEIPTS_DIR.exists():
         return []
-    return sorted(
-        path
-        for path in FIXTURE_RECEIPTS_DIR.glob("*.json")
-        if not path.name.startswith("reaper-run-")
-    )
+    return sorted(path for path in FIXTURE_RECEIPTS_DIR.glob("*.json") if not path.name.startswith("reaper-run-"))
 
 
 def load_receipt(path: Path) -> dict[str, Any]:
@@ -646,7 +641,9 @@ def select_pool_ip_address(pool: EphemeralPoolConfig, *, exclude_receipt_id: str
     )
 
 
-def apply_pool_member_definition(definition: dict[str, Any], pool: EphemeralPoolConfig, *, ip_cidr: str) -> dict[str, Any]:
+def apply_pool_member_definition(
+    definition: dict[str, Any], pool: EphemeralPoolConfig, *, ip_cidr: str
+) -> dict[str, Any]:
     updated = json.loads(json.dumps(definition))
     updated.setdefault("network", {})
     updated["network"]["ip_cidr"] = ip_cidr
@@ -666,11 +663,7 @@ def pool_refill_target(pool: EphemeralPoolConfig) -> int:
 
 
 def available_prewarmed_receipt(pool_id: str) -> dict[str, Any] | None:
-    candidates = [
-        receipt
-        for receipt in prewarmed_receipts(pool_id)
-        if receipt.get("status") == "prewarmed"
-    ]
+    candidates = [receipt for receipt in prewarmed_receipts(pool_id) if receipt.get("status") == "prewarmed"]
     if not candidates:
         return None
     return sorted(candidates, key=lambda item: item["created_at"])[0]
@@ -733,15 +726,15 @@ def build_runtime_main(receipt: dict[str, Any]) -> str:
         "protection": False,
     }
     lines = [
-        'terraform {',
+        "terraform {",
         '  required_version = ">= 1.10.0"',
-        '  required_providers {',
-        '    proxmox = {',
+        "  required_providers {",
+        "    proxmox = {",
         '      source  = "bpg/proxmox"',
         '      version = "= 0.99.0"',
-        '    }',
-        '  }',
-        '}',
+        "    }",
+        "  }",
+        "}",
         "",
         'variable "proxmox_endpoint" {',
         "  type      = string",
@@ -824,7 +817,9 @@ def ensure_ephemeral_lifetime_minutes(
         raise ValueError(f"Unsupported ephemeral policy '{policy}'")
     if policy == "extended-fixture" and not extend:
         raise ValueError("Extended ephemeral fixtures require the explicit --extend flag")
-    minutes = int(round(lifetime_hours * 60)) if lifetime_hours is not None else int(definition.get("lifetime_minutes", 60))
+    minutes = (
+        int(round(lifetime_hours * 60)) if lifetime_hours is not None else int(definition.get("lifetime_minutes", 60))
+    )
     if minutes <= 0:
         raise ValueError("Ephemeral fixture lifetime must be positive")
     maximum = EPHEMERAL_POLICY_LIMITS_MINUTES[policy]
@@ -1120,7 +1115,9 @@ def ssh_base_argv(receipt: dict[str, Any], *, timeout_seconds: int = 5) -> list[
     jump_user = receipt["context"]["jump_user"]
     jump_host = receipt["context"]["jump_host"]
     ssh_user = receipt["definition"].get("ssh_user", receipt["context"]["ci_user"])
-    proxy = f'ssh -i {key_path} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 {jump_user}@{jump_host} -W %h:%p'
+    proxy = (
+        f"ssh -i {key_path} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 {jump_user}@{jump_host} -W %h:%p"
+    )
     return [
         "ssh",
         "-i",
@@ -1253,7 +1250,13 @@ def verify_http(url: str, expected_status: int, timeout_seconds: int) -> dict[st
             observed = response.status
     except urllib.error.URLError as exc:
         return {"ok": False, "kind": "http", "target": url, "error": str(exc)}
-    return {"ok": observed == expected_status, "kind": "http", "target": url, "status": observed, "expected_status": expected_status}
+    return {
+        "ok": observed == expected_status,
+        "kind": "http",
+        "target": url,
+        "status": observed,
+        "expected_status": expected_status,
+    }
 
 
 def verify_tcp(host: str, port: int, timeout_seconds: int) -> dict[str, Any]:
@@ -1288,7 +1291,14 @@ def verify_fixture(receipt: dict[str, Any], definition: dict[str, Any]) -> dict[
         if "command" in item:
             checks.append(verify_command(receipt, item["command"], timeout_seconds))
             continue
-        checks.append({"ok": False, "kind": "unknown", "target": json.dumps(item, sort_keys=True), "error": "Unsupported verify block"})
+        checks.append(
+            {
+                "ok": False,
+                "kind": "unknown",
+                "target": json.dumps(item, sort_keys=True),
+                "error": "Unsupported verify block",
+            }
+        )
     return {"ok": all(check["ok"] for check in checks), "checks": checks}
 
 
@@ -1410,7 +1420,7 @@ def build_receipt(
 
 
 def save_receipt(receipt: dict[str, Any]) -> Path:
-    receipt["expires_at"] = isoformat(dt.datetime.fromtimestamp(int(receipt["expires_epoch"]), tz=dt.timezone.utc))
+    receipt["expires_at"] = isoformat(dt.datetime.fromtimestamp(int(receipt["expires_epoch"]), tz=dt.UTC))
     refresh_receipt_tags(receipt)
     receipt["updated_at"] = isoformat(utc_now())
     path = receipt_path(receipt["receipt_id"])
@@ -1546,7 +1556,9 @@ def provision_prewarmed_fixture(
         fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
         lock_handle.close()
 
-    receipt = cold_provision_receipt(receipt, endpoint=endpoint, api_token=api_token, skip_roles=False, skip_verify=False)
+    receipt = cold_provision_receipt(
+        receipt, endpoint=endpoint, api_token=api_token, skip_roles=False, skip_verify=False
+    )
     resource = cluster_resource_by_vmid(fetch_cluster_resources(endpoint, api_token), int(receipt["vm_id"]))
     if resource is None:
         raise RuntimeError(f"Unable to locate freshly provisioned warm fixture {receipt['vm_id']}")
@@ -1720,7 +1732,9 @@ def fixture_up(
         fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
         lock_handle.close()
 
-    receipt = cold_provision_receipt(receipt, endpoint=endpoint, api_token=api_token, skip_roles=skip_roles, skip_verify=skip_verify)
+    receipt = cold_provision_receipt(
+        receipt, endpoint=endpoint, api_token=api_token, skip_roles=skip_roles, skip_verify=skip_verify
+    )
     mark_receipt_active(
         receipt,
         owner=resolved_owner,
@@ -1847,7 +1861,9 @@ def fixture_down(
     return {"fixture_id": fixture_name, "destroyed": []}
 
 
-def build_cluster_fixture_row(resource: dict[str, Any], receipt: dict[str, Any] | None, *, refresh_health: bool) -> dict[str, Any]:
+def build_cluster_fixture_row(
+    resource: dict[str, Any], receipt: dict[str, Any] | None, *, refresh_health: bool
+) -> dict[str, Any]:
     metadata = parse_ephemeral_tags(resource.get("tags"))
     if metadata is None and receipt is not None:
         metadata = build_ephemeral_tag_metadata(
@@ -1857,7 +1873,7 @@ def build_cluster_fixture_row(resource: dict[str, Any], receipt: dict[str, Any] 
             policy=str(receipt.get("policy") or DEFAULT_EPHEMERAL_POLICY),
         )
     if metadata is not None:
-        expires_at = dt.datetime.fromtimestamp(metadata.expires_epoch, tz=dt.timezone.utc)
+        expires_at = dt.datetime.fromtimestamp(metadata.expires_epoch, tz=dt.UTC)
         owner = metadata.owner
         purpose = metadata.purpose
     else:
@@ -1889,7 +1905,9 @@ def build_cluster_fixture_row(resource: dict[str, Any], receipt: dict[str, Any] 
         "status": receipt["status"] if receipt is not None else str(resource.get("status", "unknown")),
         "owner": owner,
         "purpose": purpose,
-        "lease_purpose": str(receipt.get("lease_purpose") or DEFAULT_LEASE_PURPOSE) if receipt is not None else DEFAULT_LEASE_PURPOSE,
+        "lease_purpose": str(receipt.get("lease_purpose") or DEFAULT_LEASE_PURPOSE)
+        if receipt is not None
+        else DEFAULT_LEASE_PURPOSE,
         "pool_id": str(receipt.get("pool_id") or "") if receipt is not None else "",
         "pool_state": str(receipt.get("pool_state") or "") if receipt is not None else "",
         "policy": metadata.policy if metadata is not None else "grace",
@@ -1932,7 +1950,11 @@ def fixture_list(*, refresh_health: bool = True) -> list[dict[str, Any]]:
         return rows
 
     for resource in cluster_resources:
-        rows.append(build_cluster_fixture_row(resource, find_receipt_by_vmid(int(resource["vmid"])), refresh_health=refresh_health))
+        rows.append(
+            build_cluster_fixture_row(
+                resource, find_receipt_by_vmid(int(resource["vmid"])), refresh_health=refresh_health
+            )
+        )
     return rows
 
 
@@ -1961,7 +1983,7 @@ def reap_expired() -> dict[str, Any]:
             retagged_vmids.append(vmid)
             continue
 
-        if dt.datetime.fromtimestamp(metadata.expires_epoch, tz=dt.timezone.utc) > now:
+        if dt.datetime.fromtimestamp(metadata.expires_epoch, tz=dt.UTC) > now:
             skipped_vmids.append(vmid)
             continue
 
@@ -1987,7 +2009,9 @@ def pool_status() -> list[dict[str, Any]]:
     defaults, pools = load_ephemeral_pool_catalog()
     rows = []
     for pool in pools.values():
-        warm_receipts = [receipt for receipt in prewarmed_receipts(pool.pool_id) if receipt.get("status") == "prewarmed"]
+        warm_receipts = [
+            receipt for receipt in prewarmed_receipts(pool.pool_id) if receipt.get("status") == "prewarmed"
+        ]
         leased_receipts = active_pool_leases(pool.pool_id)
         rows.append(
             {
@@ -2019,7 +2043,9 @@ def reconcile_pools(pool_id: str | None = None) -> dict[str, Any]:
     skipped: list[dict[str, Any]] = []
     spillovers: list[dict[str, Any]] = []
     for pool in selected:
-        warm_receipts = [receipt for receipt in prewarmed_receipts(pool.pool_id) if receipt.get("status") == "prewarmed"]
+        warm_receipts = [
+            receipt for receipt in prewarmed_receipts(pool.pool_id) if receipt.get("status") == "prewarmed"
+        ]
         deficit = max(pool_refill_target(pool) - len(warm_receipts), 0)
         if deficit <= 0:
             skipped.append({"pool_id": pool.pool_id, "reason": "warm target already satisfied"})
@@ -2027,7 +2053,9 @@ def reconcile_pools(pool_id: str | None = None) -> dict[str, Any]:
         for _ in range(deficit):
             try:
                 if len(active_local_leases()) >= defaults.max_local_active_leases and warm_receipts:
-                    skipped.append({"pool_id": pool.pool_id, "reason": "global local lease ceiling already fully committed"})
+                    skipped.append(
+                        {"pool_id": pool.pool_id, "reason": "global local lease ceiling already fully committed"}
+                    )
                     break
                 definition = load_fixture_definition(resolve_fixture_path(pool.fixture_id))
                 definition = apply_pool_member_definition(
@@ -2201,11 +2229,17 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.action == "pool-status":
             rows = pool_status()
-            print(json.dumps(rows, indent=2, sort_keys=True) if args.json else json.dumps(rows, indent=2, sort_keys=True))
+            print(
+                json.dumps(rows, indent=2, sort_keys=True) if args.json else json.dumps(rows, indent=2, sort_keys=True)
+            )
             return 0
         if args.action == "reconcile-pools":
             payload = reconcile_pools(args.pool)
-            print(json.dumps(payload, indent=2, sort_keys=True) if args.json else json.dumps(payload, indent=2, sort_keys=True))
+            print(
+                json.dumps(payload, indent=2, sort_keys=True)
+                if args.json
+                else json.dumps(payload, indent=2, sort_keys=True)
+            )
             return 0
         if args.action == "reap-expired":
             payload = reap_expired()

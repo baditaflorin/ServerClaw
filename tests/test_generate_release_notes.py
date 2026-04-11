@@ -78,9 +78,7 @@ def test_extract_unreleased_items_and_update_changelog(tmp_path: Path) -> None:
     assert "0.95.0 release notes" in updated
 
 
-def test_update_changelog_rolls_older_releases_into_archive_links(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_update_changelog_rolls_older_releases_into_archive_links(monkeypatch, tmp_path: Path) -> None:
     changelog = """# Changelog
 
 ## Unreleased
@@ -132,9 +130,7 @@ def test_render_release_notes_includes_structured_sections() -> None:
     assert "## Upgrade Guide" in rendered
 
 
-def test_update_changelog_preserves_historical_release_links_without_note_files(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_update_changelog_preserves_historical_release_links_without_note_files(monkeypatch, tmp_path: Path) -> None:
     changelog = """# Changelog
 
 ## Unreleased
@@ -164,9 +160,7 @@ def test_update_changelog_preserves_historical_release_links_without_note_files(
     assert "0.0.9 release notes" in updated
 
 
-def test_render_release_index_documents_rolls_older_versions_into_year_pages(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_render_release_index_documents_rolls_older_versions_into_year_pages(monkeypatch, tmp_path: Path) -> None:
     budget_path = tmp_path / "config" / "root-summary-budgets.yaml"
     write_budget(budget_path, previous_release_entries=3, recent_release_entries=2)
     monkeypatch.setattr(root_summary, "ROOT_SUMMARY_BUDGETS_PATH", budget_path)

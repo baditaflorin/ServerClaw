@@ -275,7 +275,7 @@ class FakeGatewayClient:
                     "title": "Converge the ops portal runtime",
                     "description": "Replay the governed ops-portal service converge against the live runtime.",
                     "live_impact": "guest_live",
-                }
+                },
             ]
         }
 
@@ -545,14 +545,14 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "review_cadence": "quarterly",
                         "migration_expectations": {
                             "export_formats": ["realm export JSON"],
-                            "fallback_behaviour": "Existing sessions continue until expiry while new logins fail closed."
+                            "fallback_behaviour": "Existing sessions continue until expiry while new logins fail closed.",
                         },
                         "current_selection": {
                             "product_name": "Keycloak",
                             "service_id": "keycloak",
                             "selection_adr": "0056",
-                            "runbook": "docs/runbooks/configure-keycloak.md"
-                        }
+                            "runbook": "docs/runbooks/configure-keycloak.md",
+                        },
                     }
                 ]
             },
@@ -641,17 +641,50 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
             {
                 "schema_version": "1.0.0",
                 "nodes": [
-                    {"id": "ops_portal", "service": "ops_portal", "name": "Ops Portal", "vm": "docker-runtime-lv3", "tier": 4},
-                    {"id": "api_gateway", "service": "api_gateway", "name": "API Gateway", "vm": "docker-runtime-lv3", "tier": 3},
-                    {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime-lv3", "tier": 2},
+                    {
+                        "id": "ops_portal",
+                        "service": "ops_portal",
+                        "name": "Ops Portal",
+                        "vm": "docker-runtime-lv3",
+                        "tier": 4,
+                    },
+                    {
+                        "id": "api_gateway",
+                        "service": "api_gateway",
+                        "name": "API Gateway",
+                        "vm": "docker-runtime-lv3",
+                        "tier": 3,
+                    },
+                    {
+                        "id": "keycloak",
+                        "service": "keycloak",
+                        "name": "Keycloak",
+                        "vm": "docker-runtime-lv3",
+                        "tier": 2,
+                    },
                     {"id": "nginx_edge", "service": "nginx_edge", "name": "NGINX Edge", "vm": "nginx-lv3", "tier": 1},
                     {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
                 ],
                 "edges": [
-                    {"from": "ops_portal", "to": "api_gateway", "type": "hard", "description": "Portal uses the gateway."},
+                    {
+                        "from": "ops_portal",
+                        "to": "api_gateway",
+                        "type": "hard",
+                        "description": "Portal uses the gateway.",
+                    },
                     {"from": "ops_portal", "to": "keycloak", "type": "hard", "description": "Portal uses shared auth."},
-                    {"from": "ops_portal", "to": "nginx_edge", "type": "hard", "description": "Portal is published at the edge."},
-                    {"from": "keycloak", "to": "postgres", "type": "hard", "description": "Keycloak stores state in Postgres."},
+                    {
+                        "from": "ops_portal",
+                        "to": "nginx_edge",
+                        "type": "hard",
+                        "description": "Portal is published at the edge.",
+                    },
+                    {
+                        "from": "keycloak",
+                        "to": "postgres",
+                        "type": "hard",
+                        "description": "Keycloak stores state in Postgres.",
+                    },
                 ],
             },
             indent=2,
@@ -670,47 +703,284 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                     {"id": "recover", "label": "Recover", "question": "How do I restore, repair, or escalate?"},
                 ],
                 "service_category_defaults": {
-                    "automation": {"primary_lane": "change", "secondary_lanes": ["observe"], "next_success_lane": "observe", "next_failure_lane": "recover"},
-                    "communication": {"primary_lane": "learn", "secondary_lanes": ["change"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    "data": {"primary_lane": "learn", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    "infrastructure": {"primary_lane": "change", "secondary_lanes": ["recover"], "next_success_lane": "observe", "next_failure_lane": "recover"},
-                    "observability": {"primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    "security": {"primary_lane": "recover", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    "access": {"primary_lane": "start", "secondary_lanes": ["learn"], "next_success_lane": "observe", "next_failure_lane": "recover"},
+                    "automation": {
+                        "primary_lane": "change",
+                        "secondary_lanes": ["observe"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
+                    "communication": {
+                        "primary_lane": "learn",
+                        "secondary_lanes": ["change"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    "data": {
+                        "primary_lane": "learn",
+                        "secondary_lanes": ["observe"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    "infrastructure": {
+                        "primary_lane": "change",
+                        "secondary_lanes": ["recover"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
+                    "observability": {
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["recover"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    "security": {
+                        "primary_lane": "recover",
+                        "secondary_lanes": ["observe"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    "access": {
+                        "primary_lane": "start",
+                        "secondary_lanes": ["learn"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
                 },
                 "service_overrides": [
-                    {"service_id": "ops_portal", "primary_lane": "start", "secondary_lanes": ["observe", "change", "learn", "recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    {"service_id": "keycloak", "primary_lane": "recover", "secondary_lanes": ["start", "change"], "next_success_lane": "start", "next_failure_lane": "recover"},
-                    {"service_id": "grafana", "primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"}
+                    {
+                        "service_id": "ops_portal",
+                        "primary_lane": "start",
+                        "secondary_lanes": ["observe", "change", "learn", "recover"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "service_id": "keycloak",
+                        "primary_lane": "recover",
+                        "secondary_lanes": ["start", "change"],
+                        "next_success_lane": "start",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "service_id": "grafana",
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["recover"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
                 ],
                 "workflow_defaults": {
-                    "diagnostic": {"primary_lane": "observe", "secondary_lanes": ["learn"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    "mutation": {"primary_lane": "change", "secondary_lanes": ["observe"], "next_success_lane": "observe", "next_failure_lane": "recover"}
+                    "diagnostic": {
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["learn"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    "mutation": {
+                        "primary_lane": "change",
+                        "secondary_lanes": ["observe"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
                 },
                 "workflow_overrides": [
-                    {"workflow_id": "gate-status", "primary_lane": "observe", "secondary_lanes": ["learn"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    {"workflow_id": "continuous-drift-detection", "primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    {"workflow_id": "converge-ops-portal", "primary_lane": "change", "secondary_lanes": ["recover", "observe"], "next_success_lane": "observe", "next_failure_lane": "recover"}
+                    {
+                        "workflow_id": "gate-status",
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["learn"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "workflow_id": "continuous-drift-detection",
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["recover"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "workflow_id": "converge-ops-portal",
+                        "primary_lane": "change",
+                        "secondary_lanes": ["recover", "observe"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
                 ],
                 "runbook_defaults": {
-                    "diagnostic": {"primary_lane": "learn", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    "mutation": {"primary_lane": "change", "secondary_lanes": ["recover"], "next_success_lane": "observe", "next_failure_lane": "recover"}
+                    "diagnostic": {
+                        "primary_lane": "learn",
+                        "secondary_lanes": ["observe"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    "mutation": {
+                        "primary_lane": "change",
+                        "secondary_lanes": ["recover"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
                 },
                 "runbook_overrides": [
-                    {"runbook_id": "validation-gate-status", "primary_lane": "observe", "secondary_lanes": ["learn"], "next_success_lane": "change", "next_failure_lane": "recover"}
+                    {
+                        "runbook_id": "validation-gate-status",
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["learn"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    }
                 ],
                 "pages": [
-                    {"id": "ops_portal_shell", "title": "Interactive Ops Portal", "surface": "ops_portal", "route": "/", "section_id": "portal_main", "fragment": "overview", "nav_label": "Portal Home", "nav_visible": False, "nav_order": 1, "primary_lane": "start", "secondary_lanes": ["observe", "change", "learn", "recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    {"id": "ops_portal_overview", "title": "Platform Overview", "surface": "ops_portal", "route": "/partials/overview", "section_id": "overview", "fragment": "overview", "nav_label": "Overview", "nav_visible": True, "nav_order": 10, "primary_lane": "start", "secondary_lanes": ["observe", "change"], "next_success_lane": "observe", "next_failure_lane": "recover"},
-                    {"id": "ops_portal_deployments", "title": "Deployment Console", "surface": "ops_portal", "route": "/", "section_id": "deployments", "fragment": "deployments", "nav_label": "Deployment Console", "nav_visible": True, "nav_order": 20, "primary_lane": "change", "secondary_lanes": ["observe", "recover"], "next_success_lane": "observe", "next_failure_lane": "recover"},
-                    {"id": "ops_portal_agents", "title": "Agent Coordination", "surface": "ops_portal", "route": "/partials/agents", "section_id": "agents", "fragment": "agents", "nav_label": "Agent Coordination", "nav_visible": True, "nav_order": 30, "primary_lane": "observe", "secondary_lanes": ["change"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    {"id": "ops_portal_runtime_assurance", "title": "Runtime Assurance", "surface": "ops_portal", "route": "/partials/runtime-assurance", "section_id": "runtime-assurance", "fragment": "runtime-assurance", "nav_label": "Runtime Assurance", "nav_visible": True, "nav_order": 40, "primary_lane": "observe", "secondary_lanes": ["recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    {"id": "ops_portal_drift", "title": "Drift Panel", "surface": "ops_portal", "route": "/partials/drift", "section_id": "drift", "fragment": "drift", "nav_label": "Drift", "nav_visible": True, "nav_order": 50, "primary_lane": "observe", "secondary_lanes": ["change", "recover"], "next_success_lane": "change", "next_failure_lane": "recover"},
-                    {"id": "ops_portal_search", "title": "Search Fabric", "surface": "ops_portal", "route": "/partials/search", "section_id": "search", "fragment": "search", "nav_label": "Search", "nav_visible": True, "nav_order": 60, "primary_lane": "learn", "secondary_lanes": ["start"], "next_success_lane": "change", "next_failure_lane": "learn"},
-                    {"id": "ops_portal_runbooks", "title": "Runbook Launcher", "surface": "ops_portal", "route": "/partials/runbooks", "section_id": "runbooks", "fragment": "runbooks", "nav_label": "Runbooks", "nav_visible": True, "nav_order": 70, "primary_lane": "change", "secondary_lanes": ["learn", "recover"], "next_success_lane": "observe", "next_failure_lane": "recover"},
-                    {"id": "ops_portal_changelog", "title": "Changelog", "surface": "ops_portal", "route": "/partials/changelog", "section_id": "changelog", "fragment": "changelog", "nav_label": "Changelog", "nav_visible": True, "nav_order": 80, "primary_lane": "learn", "secondary_lanes": ["observe"], "next_success_lane": "change", "next_failure_lane": "learn"},
-                    {"id": "ops_portal_launcher", "title": "Application Launcher", "surface": "ops_portal", "route": "/partials/launcher", "section_id": "launcher-shell", "fragment": "launcher-shell", "nav_label": "Application Launcher", "nav_visible": False, "nav_order": 90, "primary_lane": "start", "secondary_lanes": ["change", "learn", "observe"], "next_success_lane": "change", "next_failure_lane": "learn"}
-                ]
+                    {
+                        "id": "ops_portal_shell",
+                        "title": "Interactive Ops Portal",
+                        "surface": "ops_portal",
+                        "route": "/",
+                        "section_id": "portal_main",
+                        "fragment": "overview",
+                        "nav_label": "Portal Home",
+                        "nav_visible": False,
+                        "nav_order": 1,
+                        "primary_lane": "start",
+                        "secondary_lanes": ["observe", "change", "learn", "recover"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "id": "ops_portal_overview",
+                        "title": "Platform Overview",
+                        "surface": "ops_portal",
+                        "route": "/partials/overview",
+                        "section_id": "overview",
+                        "fragment": "overview",
+                        "nav_label": "Overview",
+                        "nav_visible": True,
+                        "nav_order": 10,
+                        "primary_lane": "start",
+                        "secondary_lanes": ["observe", "change"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "id": "ops_portal_deployments",
+                        "title": "Deployment Console",
+                        "surface": "ops_portal",
+                        "route": "/",
+                        "section_id": "deployments",
+                        "fragment": "deployments",
+                        "nav_label": "Deployment Console",
+                        "nav_visible": True,
+                        "nav_order": 20,
+                        "primary_lane": "change",
+                        "secondary_lanes": ["observe", "recover"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "id": "ops_portal_agents",
+                        "title": "Agent Coordination",
+                        "surface": "ops_portal",
+                        "route": "/partials/agents",
+                        "section_id": "agents",
+                        "fragment": "agents",
+                        "nav_label": "Agent Coordination",
+                        "nav_visible": True,
+                        "nav_order": 30,
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["change"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "id": "ops_portal_runtime_assurance",
+                        "title": "Runtime Assurance",
+                        "surface": "ops_portal",
+                        "route": "/partials/runtime-assurance",
+                        "section_id": "runtime-assurance",
+                        "fragment": "runtime-assurance",
+                        "nav_label": "Runtime Assurance",
+                        "nav_visible": True,
+                        "nav_order": 40,
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["recover"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "id": "ops_portal_drift",
+                        "title": "Drift Panel",
+                        "surface": "ops_portal",
+                        "route": "/partials/drift",
+                        "section_id": "drift",
+                        "fragment": "drift",
+                        "nav_label": "Drift",
+                        "nav_visible": True,
+                        "nav_order": 50,
+                        "primary_lane": "observe",
+                        "secondary_lanes": ["change", "recover"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "id": "ops_portal_search",
+                        "title": "Search Fabric",
+                        "surface": "ops_portal",
+                        "route": "/partials/search",
+                        "section_id": "search",
+                        "fragment": "search",
+                        "nav_label": "Search",
+                        "nav_visible": True,
+                        "nav_order": 60,
+                        "primary_lane": "learn",
+                        "secondary_lanes": ["start"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "learn",
+                    },
+                    {
+                        "id": "ops_portal_runbooks",
+                        "title": "Runbook Launcher",
+                        "surface": "ops_portal",
+                        "route": "/partials/runbooks",
+                        "section_id": "runbooks",
+                        "fragment": "runbooks",
+                        "nav_label": "Runbooks",
+                        "nav_visible": True,
+                        "nav_order": 70,
+                        "primary_lane": "change",
+                        "secondary_lanes": ["learn", "recover"],
+                        "next_success_lane": "observe",
+                        "next_failure_lane": "recover",
+                    },
+                    {
+                        "id": "ops_portal_changelog",
+                        "title": "Changelog",
+                        "surface": "ops_portal",
+                        "route": "/partials/changelog",
+                        "section_id": "changelog",
+                        "fragment": "changelog",
+                        "nav_label": "Changelog",
+                        "nav_visible": True,
+                        "nav_order": 80,
+                        "primary_lane": "learn",
+                        "secondary_lanes": ["observe"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "learn",
+                    },
+                    {
+                        "id": "ops_portal_launcher",
+                        "title": "Application Launcher",
+                        "surface": "ops_portal",
+                        "route": "/partials/launcher",
+                        "section_id": "launcher-shell",
+                        "fragment": "launcher-shell",
+                        "nav_label": "Application Launcher",
+                        "nav_visible": False,
+                        "nav_order": 90,
+                        "primary_lane": "start",
+                        "secondary_lanes": ["change", "learn", "observe"],
+                        "next_success_lane": "change",
+                        "next_failure_lane": "learn",
+                    },
+                ],
             },
             indent=2,
         )
@@ -786,7 +1056,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                 "notes": [
                     "Playwright login and logout both passed.",
                     "HTTPS and TLS certificate checks passed.",
-                    "Loki queryability is healthy."
+                    "Loki queryability is healthy.",
                 ],
             }
         )
@@ -984,10 +1254,13 @@ def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestC
     response = client.get("/")
 
     assert response.status_code == 200
-    assert '<link rel="stylesheet" href="https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css">' in response.text
+    assert (
+        '<link rel="stylesheet" href="https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css">'
+        in response.text
+    )
     assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
     assert '<script src="/static/portal.js" defer></script>' in response.text
-    assert 'https://unpkg.com/echarts@5.6.0/dist/echarts.min.js' in response.text
+    assert "https://unpkg.com/echarts@5.6.0/dist/echarts.min.js" in response.text
 
 
 def test_dashboard_ignores_macos_metadata_receipts(
@@ -1028,15 +1301,32 @@ def test_build_dependency_focus_chart_follows_ops_portal_dependencies() -> None:
     option = build_dependency_focus_chart(
         {
             "nodes": [
-                {"id": "ops_portal", "service": "ops_portal", "name": "Ops Portal", "vm": "docker-runtime-lv3", "tier": 4},
-                {"id": "api_gateway", "service": "api_gateway", "name": "API Gateway", "vm": "docker-runtime-lv3", "tier": 3},
+                {
+                    "id": "ops_portal",
+                    "service": "ops_portal",
+                    "name": "Ops Portal",
+                    "vm": "docker-runtime-lv3",
+                    "tier": 4,
+                },
+                {
+                    "id": "api_gateway",
+                    "service": "api_gateway",
+                    "name": "API Gateway",
+                    "vm": "docker-runtime-lv3",
+                    "tier": 3,
+                },
                 {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime-lv3", "tier": 2},
                 {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
             ],
             "edges": [
                 {"from": "ops_portal", "to": "api_gateway", "type": "hard", "description": "Portal uses the gateway."},
                 {"from": "api_gateway", "to": "keycloak", "type": "hard", "description": "Gateway trusts Keycloak."},
-                {"from": "keycloak", "to": "postgres", "type": "hard", "description": "Keycloak stores state in Postgres."},
+                {
+                    "from": "keycloak",
+                    "to": "postgres",
+                    "type": "hard",
+                    "description": "Keycloak stores state in Postgres.",
+                },
             ],
         },
         [
@@ -1200,16 +1490,28 @@ def test_mutating_surfaces_are_blocked_until_activation_completes(
 
     assert overview.status_code == 200
     assert "Mutating service actions are gated" in overview.text
-    assert 'disabled title="Complete the activation checklist or reveal advanced tools for this session before deploying."' in overview.text
+    assert (
+        'disabled title="Complete the activation checklist or reveal advanced tools for this session before deploying."'
+        in overview.text
+    )
     assert runbooks.status_code == 200
     assert "Advanced runbooks remain locked" in runbooks.text
     assert "converge-ops-portal" in runbooks.text
     assert deploy.status_code == 200
-    assert "Complete the activation checklist or explicitly reveal advanced tools for this session before launching mutating service actions." in deploy.text
+    assert (
+        "Complete the activation checklist or explicitly reveal advanced tools for this session before launching mutating service actions."
+        in deploy.text
+    )
     assert rotate.status_code == 200
-    assert "Complete the activation checklist or explicitly reveal advanced tools for this session before rotating production secrets." in rotate.text
+    assert (
+        "Complete the activation checklist or explicitly reveal advanced tools for this session before rotating production secrets."
+        in rotate.text
+    )
     assert runbook.status_code == 200
-    assert "This mutating runbook stays disabled until the activation checklist is complete or advanced tools are explicitly revealed for the session." in runbook.text
+    assert (
+        "This mutating runbook stays disabled until the activation checklist is complete or advanced tools are explicitly revealed for the session."
+        in runbook.text
+    )
     assert gateway.deploy_calls == []
     assert gateway.secret_calls == []
     assert gateway.runbook_calls == []
@@ -1244,9 +1546,7 @@ def test_activation_override_reveals_advanced_tools_for_session(
         {"service_id": "grafana", "restart_only": False, "source": "portal", "token": "test-token"}
     ]
     assert gateway.secret_calls == ["grafana:test-token"]
-    assert gateway.runbook_calls == [
-        {"runbook_id": "converge-ops-portal", "parameters": {}, "token": "test-token"}
-    ]
+    assert gateway.runbook_calls == [{"runbook_id": "converge-ops-portal", "parameters": {}, "token": "test-token"}]
 
 
 def test_entry_renders_start_surface_before_activation(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -1626,7 +1926,9 @@ def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGate
     assert response.status_code == 200
     assert 'data-primary-lane="learn"' in response.text
     assert "Rotate Certificates" in response.text
-    assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8, "token": "test-token"}]
+    assert gateway.search_calls == [
+        {"query": "tls cert expires", "collection": "runbooks", "limit": 8, "token": "test-token"}
+    ]
 
 
 def test_dashboard_keeps_runbooks_visible_when_agent_coordination_degrades(
@@ -1695,7 +1997,9 @@ def test_runbooks_partial_surfaces_gateway_warning(portal_client: tuple[TestClie
     assert gateway.runbook_fetch_tokens == ["test-token"]
 
 
-def test_runtime_assurance_partial_surfaces_gateway_warning(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+def test_runtime_assurance_partial_surfaces_gateway_warning(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
     client, gateway = portal_client
 
     async def degraded_runtime_assurance(token: str | None = None) -> dict[str, object]:
@@ -1741,7 +2045,7 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
 
     (config_dir / "service-capability-catalog.json").write_text('{"services":[]}\n', encoding="utf-8")
     (config_dir / "persona-catalog.json").write_text('{"personas":[]}\n', encoding="utf-8")
-    (config_dir / "workbench-information-architecture.json").write_text('{}\n', encoding="utf-8")
+    (config_dir / "workbench-information-architecture.json").write_text("{}\n", encoding="utf-8")
     (config_dir / "subdomain-exposure-registry.json").write_text('{"publications":[]}\n', encoding="utf-8")
     (config_dir / "workflow-catalog.json").write_text('{"workflows":{}}\n', encoding="utf-8")
     (data_root / "changelog.md").write_text("# Changelog\n", encoding="utf-8")

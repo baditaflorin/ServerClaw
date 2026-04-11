@@ -15,7 +15,9 @@ def test_load_network_impairment_matrix_resolves_catalog() -> None:
     assert "staging" in catalog.target_classes
     assert "added_latency" in catalog.impairments
     assert {entry.service for entry in catalog.entries} == {"api_gateway", "openbao", "windmill"}
-    gateway_keycloak = next(entry for entry in catalog.entries if entry.service == "api_gateway" and entry.dependency == "keycloak")
+    gateway_keycloak = next(
+        entry for entry in catalog.entries if entry.service == "api_gateway" and entry.dependency == "keycloak"
+    )
     assert gateway_keycloak.expected_behaviour == "degrade_gracefully"
     assert gateway_keycloak.service_catalog_tested_by == "fault:keycloak-unavailable"
 

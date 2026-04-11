@@ -61,14 +61,8 @@ def maybe_langfuse_trace_config(repo_root: Path) -> dict[str, str] | None:
     if platform_vars_path.exists():
         platform_vars = yaml.safe_load(platform_vars_path.read_text(encoding="utf-8")) or {}
         langfuse_host = (
-            (
-                platform_vars.get("platform_service_topology", {})
-                .get("langfuse", {})
-                .get("urls", {})
-                .get("internal")
-            )
-            or langfuse_host
-        )
+            platform_vars.get("platform_service_topology", {}).get("langfuse", {}).get("urls", {}).get("internal")
+        ) or langfuse_host
     return {
         "public_key": public_key.read_text(encoding="utf-8").strip(),
         "secret_key": secret_key.read_text(encoding="utf-8").strip(),

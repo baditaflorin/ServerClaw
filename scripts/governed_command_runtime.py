@@ -8,7 +8,6 @@ import base64
 import json
 import os
 import pwd
-import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -25,6 +24,7 @@ from validation_toolkit import require_int, require_list, require_mapping, requi
 
 from platform.datetime_compat import UTC, datetime
 
+
 def utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -39,9 +39,7 @@ def ensure_repo_compat_symlink(repo_root: Path, compat_repo_root: Path) -> None:
     if compat_repo_root.exists() or compat_repo_root.is_symlink():
         if compat_repo_root.resolve() == repo_root.resolve():
             return
-        raise RuntimeError(
-            f"compatibility repo path exists but points elsewhere: {compat_repo_root}"
-        )
+        raise RuntimeError(f"compatibility repo path exists but points elsewhere: {compat_repo_root}")
     compat_repo_root.symlink_to(repo_root)
 
 
@@ -132,9 +130,7 @@ def build_systemd_run_command(payload: dict[str, Any], stdout_log: Path, stderr_
 
 def submit(payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
     repo_root = Path(require_str(payload.get("runtime_repo_root"), "payload.runtime_repo_root"))
-    compat_repo_root = Path(
-        require_str(payload.get("runtime_compat_repo_root"), "payload.runtime_compat_repo_root")
-    )
+    compat_repo_root = Path(require_str(payload.get("runtime_compat_repo_root"), "payload.runtime_compat_repo_root"))
     log_directory = Path(require_str(payload.get("log_directory"), "payload.log_directory"))
     receipt_directory = Path(require_str(payload.get("receipt_directory"), "payload.receipt_directory"))
     log_directory.mkdir(parents=True, exist_ok=True)

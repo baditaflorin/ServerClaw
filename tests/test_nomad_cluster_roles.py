@@ -40,7 +40,9 @@ def test_nomad_member_tasks_install_the_binary_and_cli_wrapper() -> None:
     assert "Verify the Nomad agent" in names
 
     wait_for_ssh = next(
-        task for task in tasks if task["name"] == "Wait for SSH after resetting the connection before installing Nomad TLS artifacts"
+        task
+        for task in tasks
+        if task["name"] == "Wait for SSH after resetting the connection before installing Nomad TLS artifacts"
     )
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["timeout"] == 60
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
@@ -63,13 +65,18 @@ def test_nomad_bootstrap_defaults_track_controller_artifacts_and_smoke_jobs() ->
     assert "bootstrap-management.token" in defaults
     assert "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl" in defaults
     assert "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl" in defaults
-    assert 'nomad_cluster_bootstrap_runtime_host' in defaults
-    assert 'nomad_cluster_bootstrap_build_host' in defaults
-    assert 'nomad_cluster_bootstrap_build_ip' in defaults
-    assert 'nomad_cluster_advertise_address' in defaults
-    assert 'nomad_cluster_bootstrap_smoke_batch_output_dir' in defaults
-    assert 'nomad_cluster_bootstrap_smoke_batch_output_file' in defaults
-    assert 'nomad_cluster_bootstrap_server_host' not in defaults.split("nomad_cluster_bootstrap_expected_nodes:", 1)[1].split("nomad_cluster_bootstrap_smoke_service_job_name:", 1)[0]
+    assert "nomad_cluster_bootstrap_runtime_host" in defaults
+    assert "nomad_cluster_bootstrap_build_host" in defaults
+    assert "nomad_cluster_bootstrap_build_ip" in defaults
+    assert "nomad_cluster_advertise_address" in defaults
+    assert "nomad_cluster_bootstrap_smoke_batch_output_dir" in defaults
+    assert "nomad_cluster_bootstrap_smoke_batch_output_file" in defaults
+    assert (
+        "nomad_cluster_bootstrap_server_host"
+        not in defaults.split("nomad_cluster_bootstrap_expected_nodes:", 1)[1].split(
+            "nomad_cluster_bootstrap_smoke_service_job_name:", 1
+        )[0]
+    )
 
 
 def test_nomad_bootstrap_controller_tasks_generate_ca_server_and_client_material() -> None:
@@ -84,15 +91,26 @@ def test_nomad_bootstrap_controller_tasks_generate_ca_server_and_client_material
 
 def test_nomad_bootstrap_verify_checks_service_and_batch_paths() -> None:
     tasks = load_tasks(BOOTSTRAP_VERIFY_TASKS)
-    delegate_task = next(task for task in tasks if task["name"] == "Verify the smoke service content from the build host")
+    delegate_task = next(
+        task for task in tasks if task["name"] == "Verify the smoke service content from the build host"
+    )
     assert delegate_task["delegate_to"] == "{{ nomad_cluster_bootstrap_build_host }}"
-    assert delegate_task["ansible.builtin.uri"]["url"] == "http://{{ nomad_cluster_bootstrap_build_ip }}:{{ nomad_cluster_bootstrap_smoke_service_port }}/"
+    assert (
+        delegate_task["ansible.builtin.uri"]["url"]
+        == "http://{{ nomad_cluster_bootstrap_build_ip }}:{{ nomad_cluster_bootstrap_smoke_service_port }}/"
+    )
 
-    batch_dir_task = next(task for task in tasks if task["name"] == "Ensure the smoke batch verification directory exists on the runtime host")
+    batch_dir_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Ensure the smoke batch verification directory exists on the runtime host"
+    )
     assert batch_dir_task["delegate_to"] == "{{ nomad_cluster_bootstrap_runtime_host }}"
     assert batch_dir_task["ansible.builtin.file"]["path"] == "{{ nomad_cluster_bootstrap_smoke_batch_output_dir }}"
 
-    batch_file_task = next(task for task in tasks if task["name"] == "Read the smoke batch verification file from the runtime host")
+    batch_file_task = next(
+        task for task in tasks if task["name"] == "Read the smoke batch verification file from the runtime host"
+    )
     assert batch_file_task["delegate_to"] == "{{ nomad_cluster_bootstrap_runtime_host }}"
     assert batch_file_task["ansible.builtin.slurp"]["src"] == "{{ nomad_cluster_bootstrap_smoke_batch_output_file }}"
 
@@ -103,8 +121,8 @@ def test_nomad_templates_enable_acl_tls_and_client_docker_plugin() -> None:
     service_template = SERVICE_TEMPLATE.read_text()
 
     assert "verify_server_hostname = true" in config_template
-    assert "plugin \"docker\"" in config_template
-    assert 'https://{{ nomad_cluster_advertise_address }}:{{ nomad_cluster_http_port }}' in cli_wrapper
+    assert 'plugin "docker"' in config_template
+    assert "https://{{ nomad_cluster_advertise_address }}:{{ nomad_cluster_http_port }}" in cli_wrapper
     assert "NOMAD_CACERT" in cli_wrapper
     assert "User={{ nomad_cluster_service_user }}" in service_template
     assert "Group={{ nomad_cluster_service_group }}" in service_template

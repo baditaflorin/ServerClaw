@@ -7,7 +7,7 @@ import os
 import platform
 import shutil
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +30,7 @@ def load_scanner_config(path: Path = SBOM_SCANNER_CONFIG_PATH) -> dict[str, Any]
 
 
 def now_utc() -> datetime:
-    return datetime.now(timezone.utc).replace(microsecond=0)
+    return datetime.now(UTC).replace(microsecond=0)
 
 
 def isoformat_utc(timestamp: datetime) -> str:
@@ -144,7 +144,9 @@ def artifact_cache_ref(image_ref: str, config: dict[str, Any] | None = None) -> 
     config = config or load_scanner_config()
     registry_host = normalize_registry_host(image_ref)
     mirror_port = config.get("artifact_cache", {}).get("mirrors", {}).get(registry_host)
-    cache_host = os.environ.get("LV3_ARTIFACT_CACHE_HOST", "").strip() or config.get("artifact_cache", {}).get("host", "")
+    cache_host = os.environ.get("LV3_ARTIFACT_CACHE_HOST", "").strip() or config.get("artifact_cache", {}).get(
+        "host", ""
+    )
     if not cache_host or mirror_port is None:
         return image_ref
     return f"{cache_host}:{mirror_port}/{strip_registry_host(image_ref)}"
@@ -421,9 +423,7 @@ def grype_scan_sbom(
         result = run_command(command)
     raw_payload = json.loads(result.stdout)
     normalized_matches = [
-        normalize_grype_match(item)
-        for item in raw_payload.get("matches", [])
-        if isinstance(item, dict)
+        normalize_grype_match(item) for item in raw_payload.get("matches", []) if isinstance(item, dict)
     ]
     receipt = {
         "schema_version": "1.0.0",
@@ -488,14 +488,16 @@ def scan_catalog_image(
     return sbom_path, cve_path, receipt
 
 
-def latest_cve_receipt_for_image(image_id: str, cve_dir: Path, *, exclude: Path | None = None) -> tuple[Path, dict[str, Any]] | None:
+def latest_cve_receipt_for_image(
+    image_id: str, cve_dir: Path, *, exclude: Path | None = None
+) -> tuple[Path, dict[str, Any]] | None:
     candidates = sorted(cve_dir.glob("*.grype.json"), reverse=True)
     for path in candidates:
         if exclude is not None and path.resolve() == exclude.resolve():
             continue
         try:
             payload = load_json(path)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
         if payload.get("image_id") == image_id:
             return path, payload
@@ -506,8 +508,7 @@ def net_new_high_or_critical_findings(previous: dict[str, Any] | None, current: 
     previous_fingerprints = {
         finding_fingerprint(item)
         for item in (previous or {}).get("matches", [])
-        if isinstance(item, dict)
-        and str(item.get("severity", "UNKNOWN")).upper() in {"CRITICAL", "HIGH"}
+        if isinstance(item, dict) and str(item.get("severity", "UNKNOWN")).upper() in {"CRITICAL", "HIGH"}
     }
     findings: list[dict[str, Any]] = []
     for item in current.get("matches", []):

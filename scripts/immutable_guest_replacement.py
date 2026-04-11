@@ -86,7 +86,9 @@ def load_inventory_guest_index() -> dict[str, dict[str, Any]]:
 def load_active_service_records() -> list[dict[str, Any]]:
     service_catalog_index = service_redundancy.load_service_catalog_index()
     redundancy_catalog = service_redundancy.load_redundancy_catalog()
-    redundancy_services = require_mapping(redundancy_catalog.get("services"), "config/service-redundancy-catalog.json.services")
+    redundancy_services = require_mapping(
+        redundancy_catalog.get("services"), "config/service-redundancy-catalog.json.services"
+    )
     active_ids = service_redundancy.active_service_ids(service_catalog_index)
     records: list[dict[str, Any]] = []
     for service_id in active_ids:
@@ -103,7 +105,9 @@ def load_active_service_records() -> list[dict[str, Any]]:
                 "service_id": service_id,
                 "service_name": require_str(service.get("name"), f"service {service_id}.name"),
                 "guest": require_str(service.get("vm"), f"service {service_id}.vm"),
-                "tier": require_enum(redundancy.get("tier"), f"service {service_id}.tier", set(service_redundancy.TIER_ORDER)),
+                "tier": require_enum(
+                    redundancy.get("tier"), f"service {service_id}.tier", set(service_redundancy.TIER_ORDER)
+                ),
                 "exposure": require_str(service.get("exposure"), f"service {service_id}.exposure"),
             }
         )
@@ -141,7 +145,9 @@ def validate_guest_replacement_catalog(catalog: dict[str, Any]) -> None:
     for guest_name, policy in guest_policies.items():
         policy = require_mapping(policy, f"guests.{guest_name}")
         if guest_name not in inventory_guest_index:
-            raise ValueError(f"guests.{guest_name} must reference a known guest in inventory/host_vars/proxmox_florin.yml")
+            raise ValueError(
+                f"guests.{guest_name} must reference a known guest in inventory/host_vars/proxmox_florin.yml"
+            )
 
         hosted_services = active_services_by_guest.get(guest_name, [])
         if not hosted_services:
@@ -165,7 +171,10 @@ def validate_guest_replacement_catalog(catalog: dict[str, Any]) -> None:
         if policy.get("notes") is not None:
             require_string_list(policy.get("notes"), f"guests.{guest_name}.notes")
 
-        if not any(service_redundancy.TIER_ORDER[item["tier"]] >= service_redundancy.TIER_ORDER["R1"] for item in hosted_services):
+        if not any(
+            service_redundancy.TIER_ORDER[item["tier"]] >= service_redundancy.TIER_ORDER["R1"]
+            for item in hosted_services
+        ):
             raise ValueError(f"guests.{guest_name} must host at least one service at redundancy tier R1 or higher")
 
         if classification in {"edge", "edge_and_stateful"} and not any(
@@ -181,7 +190,8 @@ def validate_guest_replacement_catalog(catalog: dict[str, Any]) -> None:
             )
 
         if validation_mode == "warm_standby" and not any(
-            service_redundancy.TIER_ORDER[item["tier"]] >= service_redundancy.TIER_ORDER["R2"] for item in hosted_services
+            service_redundancy.TIER_ORDER[item["tier"]] >= service_redundancy.TIER_ORDER["R2"]
+            for item in hosted_services
         ):
             raise ValueError(
                 f"guests.{guest_name}.validation_mode=warm_standby requires at least one hosted service at redundancy tier R2 or higher"
@@ -222,7 +232,9 @@ def build_service_plan(catalog: dict[str, Any], service_id: str) -> dict[str, An
         raise ValueError(f"unknown service: {service_id}")
 
     redundancy_catalog = service_redundancy.load_redundancy_catalog()
-    redundancy_services = require_mapping(redundancy_catalog.get("services"), "config/service-redundancy-catalog.json.services")
+    redundancy_services = require_mapping(
+        redundancy_catalog.get("services"), "config/service-redundancy-catalog.json.services"
+    )
     service = require_mapping(service_catalog_index[canonical_service_id], f"service {canonical_service_id}")
     redundancy = require_mapping(redundancy_services[canonical_service_id], f"redundancy {canonical_service_id}")
     guest_name = require_str(service.get("vm"), f"service {canonical_service_id}.vm")
@@ -314,10 +326,7 @@ def show_guest_policy(catalog: dict[str, Any], guest_name: str, *, as_json: bool
     print(f"Exception Rule: {plan['exception_rule']}")
     print("Hosted Services:")
     for item in plan["hosted_services"]:
-        print(
-            f"  - {item['service_id']} [{item['service_name']}] "
-            f"tier={item['tier']} exposure={item['exposure']}"
-        )
+        print(f"  - {item['service_id']} [{item['service_name']}] tier={item['tier']} exposure={item['exposure']}")
     for note in plan["notes"]:
         print(f"Note: {note}")
     return 0
@@ -349,10 +358,7 @@ def show_service_policy(catalog: dict[str, Any], service_id: str, *, as_json: bo
     print(f"Exception Rule: {plan['exception_rule']}")
     print("Hosted Services On The Guest:")
     for item in plan["hosted_services"]:
-        print(
-            f"  - {item['service_id']} [{item['service_name']}] "
-            f"tier={item['tier']} exposure={item['exposure']}"
-        )
+        print(f"  - {item['service_id']} [{item['service_name']}] tier={item['tier']} exposure={item['exposure']}")
     return 0
 
 
@@ -394,7 +400,9 @@ def check_live_apply(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Inspect and validate the ADR 0191 immutable guest replacement catalog.")
+    parser = argparse.ArgumentParser(
+        description="Inspect and validate the ADR 0191 immutable guest replacement catalog."
+    )
     parser.add_argument("--validate", action="store_true", help="Validate the catalog and exit.")
     parser.add_argument("--list", action="store_true", help="List all immutable guest replacement policies.")
     parser.add_argument("--guest", help="Show one guest replacement policy.")
@@ -434,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.service:
             return show_service_policy(catalog, args.service, as_json=args.json)
         return list_guest_policies(catalog, as_json=args.json or args.list)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Immutable guest replacement catalog", exc)
 
 

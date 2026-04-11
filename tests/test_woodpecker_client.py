@@ -183,10 +183,13 @@ def test_rewrite_url_if_host_unresolvable_uses_fallback_base_url(monkeypatch) ->
 
     monkeypatch.setattr(woodpecker.socket, "getaddrinfo", fake_getaddrinfo)
 
-    assert woodpecker._rewrite_url_if_host_unresolvable(
-        "http://git.lv3.org:3009/user/login?redirect_to=%2F",
-        "http://100.64.0.1:3009",
-    ) == "http://100.64.0.1:3009/user/login?redirect_to=%2F"
+    assert (
+        woodpecker._rewrite_url_if_host_unresolvable(
+            "http://git.lv3.org:3009/user/login?redirect_to=%2F",
+            "http://100.64.0.1:3009",
+        )
+        == "http://100.64.0.1:3009/user/login?redirect_to=%2F"
+    )
 
 
 def test_rewrite_url_if_host_unresolvable_leaves_resolvable_host_unchanged(monkeypatch) -> None:
@@ -196,10 +199,13 @@ def test_rewrite_url_if_host_unresolvable_leaves_resolvable_host_unchanged(monke
         lambda hostname, *args, **kwargs: [("family", "socktype", "proto", "canonname", ("127.0.0.1", 0))],
     )
 
-    assert woodpecker._rewrite_url_if_host_unresolvable(
-        "https://ci.lv3.org/authorize",
-        "http://100.64.0.1:3009",
-    ) == "https://ci.lv3.org/authorize"
+    assert (
+        woodpecker._rewrite_url_if_host_unresolvable(
+            "https://ci.lv3.org/authorize",
+            "http://100.64.0.1:3009",
+        )
+        == "https://ci.lv3.org/authorize"
+    )
 
 
 def test_pick_oauth_grant_form_prefers_the_positive_submit_button() -> None:

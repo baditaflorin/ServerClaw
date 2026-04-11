@@ -22,7 +22,9 @@ def test_livekit_dns_stage_converges_only_the_livekit_subdomain_record() -> None
     assert dns_play["vars"]["subdomain_fqdn"] == "livekit.lv3.org"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the LiveKit subdomain entry")
-    assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    assert (
+        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    )
 
     converge_task = next(task for task in tasks if task.get("name") == "Converge the LiveKit Hetzner DNS record")
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"

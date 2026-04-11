@@ -28,8 +28,14 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
     assert defaults["glitchtip_service_topology"] == (
         "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('glitchtip') }}"
     )
-    assert defaults["glitchtip_internal_port"] == "{{ platform_service_topology | platform_service_port('glitchtip', 'internal') }}"
-    assert defaults["glitchtip_internal_base_url"] == "{{ platform_service_topology | platform_service_url('glitchtip', 'internal') }}"
+    assert (
+        defaults["glitchtip_internal_port"]
+        == "{{ platform_service_topology | platform_service_port('glitchtip', 'internal') }}"
+    )
+    assert (
+        defaults["glitchtip_internal_base_url"]
+        == "{{ platform_service_topology | platform_service_url('glitchtip', 'internal') }}"
+    )
     assert defaults["glitchtip_public_base_url"] == "https://{{ glitchtip_service_topology.public_hostname }}"
     assert defaults["glitchtip_compose_network_name"] == "glitchtip_default"
     assert defaults["glitchtip_image"] == "{{ container_image_catalog.images.glitchtip_runtime.ref }}"
@@ -37,7 +43,9 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
     assert defaults["glitchtip_database_password_local_file"].endswith("/.local/glitchtip/database-password.txt")
     assert defaults["glitchtip_local_artifact_dir"].endswith("/.local/glitchtip")
     assert defaults["glitchtip_api_token_local_file"] == "{{ glitchtip_local_artifact_dir }}/api-token.txt"
-    assert defaults["glitchtip_keycloak_client_secret_local_file"].endswith("/.local/keycloak/glitchtip-client-secret.txt")
+    assert defaults["glitchtip_keycloak_client_secret_local_file"].endswith(
+        "/.local/keycloak/glitchtip-client-secret.txt"
+    )
     assert defaults["glitchtip_mail_submission_password_local_file"] == (
         "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt"
     )
@@ -55,15 +63,25 @@ def test_glitchtip_runtime_tasks_manage_openbao_bootstrap_and_port_recovery() ->
     openbao_helper = next(
         task for task in tasks if task.get("name") == "Prepare OpenBao agent runtime secret injection for GlitchTip"
     )
-    nat_check = next(task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before GlitchTip startup")
+    nat_check = next(
+        task
+        for task in tasks
+        if task.get("name") == "Check whether the Docker nat chain exists before GlitchTip startup"
+    )
     forward_check = next(
-        task for task in tasks if task.get("name") == "Check whether the Docker forward chain exists before GlitchTip startup"
+        task
+        for task in tasks
+        if task.get("name") == "Check whether the Docker forward chain exists before GlitchTip startup"
     )
     nat_restore = next(
-        task for task in tasks if task.get("name") == "Restore Docker networking when bridge chains are missing before GlitchTip startup"
+        task
+        for task in tasks
+        if task.get("name") == "Restore Docker networking when bridge chains are missing before GlitchTip startup"
     )
     attach_probe = next(
-        task for task in tasks if task.get("name") == "Probe whether GlitchTip can attach a fresh container to its compose bridge network"
+        task
+        for task in tasks
+        if task.get("name") == "Probe whether GlitchTip can attach a fresh container to its compose bridge network"
     )
     force_recreate_down = next(
         task for task in tasks if task.get("name") == "Reset the GlitchTip stack before a force recreate"
@@ -75,20 +93,24 @@ def test_glitchtip_runtime_tasks_manage_openbao_bootstrap_and_port_recovery() ->
         task for task in tasks if task.get("name") == "Remove stale GlitchTip project containers before recovery"
     )
     replace_cleanup = next(
-        task for task in tasks if task.get("name") == "Remove stale GlitchTip compose replacement containers before recovery"
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale GlitchTip compose replacement containers before recovery"
     )
     force_recreate = next(
-        task for task in tasks if task.get("name") == "Force-recreate the GlitchTip runtime stack after Docker networking recovery"
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the GlitchTip runtime stack after Docker networking recovery"
     )
     force_recreate_fact = next(
         task for task in tasks if task.get("name") == "Record whether the GlitchTip startup needs a force recreate"
     )
     bootstrap_task = next(
-        task for task in tasks if task.get("name") == "Bootstrap the GlitchTip repo-managed org, team, and project artifacts"
+        task
+        for task in tasks
+        if task.get("name") == "Bootstrap the GlitchTip repo-managed org, team, and project artifacts"
     )
-    payload_task = next(
-        task for task in tasks if task.get("name") == "Record the GlitchTip bootstrap payload"
-    )
+    payload_task = next(task for task in tasks if task.get("name") == "Record the GlitchTip bootstrap payload")
     token_task = next(
         task for task in tasks if task.get("name") == "Generate the local GlitchTip API token when missing"
     )
@@ -98,7 +120,10 @@ def test_glitchtip_runtime_tasks_manage_openbao_bootstrap_and_port_recovery() ->
     verify_task = next(task for task in tasks if task.get("name") == "Verify the GlitchTip runtime")
 
     assert "Fail if the GlitchTip Keycloak client secret is missing locally" in names
-    assert openbao_helper["ansible.builtin.include_role"] == {"name": "lv3.platform.common", "tasks_from": "openbao_compose_env"}
+    assert openbao_helper["ansible.builtin.include_role"] == {
+        "name": "lv3.platform.common",
+        "tasks_from": "openbao_compose_env",
+    }
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert forward_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "filter", "-S", "DOCKER-FORWARD"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
@@ -128,8 +153,14 @@ def test_glitchtip_runtime_tasks_manage_openbao_bootstrap_and_port_recovery() ->
     assert "glitchtip_health_probe.status" in expression
     assert "glitchtip_network_attach_probe.rc" in expression
     assert "python3 -c 'import secrets; print(secrets.token_hex(32))'" in token_task["ansible.builtin.shell"]
-    assert "docker exec -i {{ glitchtip_container_name }} python manage.py shell < {{ glitchtip_bootstrap_script_file }}" in bootstrap_task["ansible.builtin.shell"]
-    assert "glitchtip_bootstrap_run.stdout_lines" in payload_task["ansible.builtin.set_fact"]["glitchtip_bootstrap_payload"]
+    assert (
+        "docker exec -i {{ glitchtip_container_name }} python manage.py shell < {{ glitchtip_bootstrap_script_file }}"
+        in bootstrap_task["ansible.builtin.shell"]
+    )
+    assert (
+        "glitchtip_bootstrap_run.stdout_lines"
+        in payload_task["ansible.builtin.set_fact"]["glitchtip_bootstrap_payload"]
+    )
     assert "| last" in payload_task["ansible.builtin.set_fact"]["glitchtip_bootstrap_payload"]
     destinations = [item["dest"] for item in mirror_task["loop"]]
     assert "{{ glitchtip_projects_local_file }}" in destinations
@@ -144,21 +175,35 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     verify_tasks = load_yaml(ROLE_PUBLISH_VERIFY)
 
     orchestration_task = next(
-        task for task in publish_tasks if task.get("name") == "Verify the GlitchTip public surface with a controller-local quiet-window retry"
+        task
+        for task in publish_tasks
+        if task.get("name") == "Verify the GlitchTip public surface with a controller-local quiet-window retry"
     )
     quiet_hosts_task = next(
-        task for task in publish_tasks if task.get("name") == "Select controller-local quiet-window hosts for GlitchTip publication"
+        task
+        for task in publish_tasks
+        if task.get("name") == "Select controller-local quiet-window hosts for GlitchTip publication"
     )
     quiet_task = orchestration_task["block"][0]
     retry_quiet_task = orchestration_task["rescue"][0]
     verify_include_task = orchestration_task["block"][1]
     retry_verify_task = orchestration_task["rescue"][1]
 
-    health_task = next(task for task in verify_tasks if task.get("name") == "Wait for the GlitchTip public health endpoint")
-    auth_config_task = next(task for task in verify_tasks if task.get("name") == "Read the GlitchTip public auth config document")
-    provider_task = next(task for task in verify_tasks if task.get("name") == "Record the GlitchTip public Keycloak OIDC provider metadata")
+    health_task = next(
+        task for task in verify_tasks if task.get("name") == "Wait for the GlitchTip public health endpoint"
+    )
+    auth_config_task = next(
+        task for task in verify_tasks if task.get("name") == "Read the GlitchTip public auth config document"
+    )
+    provider_task = next(
+        task
+        for task in verify_tasks
+        if task.get("name") == "Record the GlitchTip public Keycloak OIDC provider metadata"
+    )
     assert_task = next(
-        task for task in verify_tasks if task.get("name") == "Assert the GlitchTip public auth config advertises the Keycloak OIDC issuer"
+        task
+        for task in verify_tasks
+        if task.get("name") == "Assert the GlitchTip public auth config advertises the Keycloak OIDC issuer"
     )
     smoke_task = next(task for task in verify_tasks if task.get("name") == "Run the GlitchTip event smoke verification")
 
@@ -179,7 +224,9 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     assert verify_include_task["ansible.builtin.include_tasks"] == "publish_verify.yml"
     assert retry_verify_task["ansible.builtin.include_tasks"] == "publish_verify.yml"
     assert health_task["ansible.builtin.uri"]["url"] == "{{ glitchtip_public_base_url }}/api/0/internal/health/"
-    assert auth_config_task["ansible.builtin.uri"]["url"] == "{{ glitchtip_public_base_url }}/_allauth/browser/v1/config"
+    assert (
+        auth_config_task["ansible.builtin.uri"]["url"] == "{{ glitchtip_public_base_url }}/_allauth/browser/v1/config"
+    )
     provider_expression = provider_task["ansible.builtin.set_fact"]["glitchtip_publish_keycloak_provider"]
     assert "glitchtip_publish_auth_config.json.data.socialaccount.providers" in provider_expression
     assert "glitchtip_keycloak_provider_id" in provider_expression
@@ -188,7 +235,10 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     )
     assert "glitchtip_keycloak_server_url" in assert_task["ansible.builtin.assert"]["that"][2]
     assert ".well-known/openid-configuration" in assert_task["ansible.builtin.assert"]["that"][2]
-    assert smoke_task["ansible.builtin.command"]["argv"][:2] == ["python3", "{{ inventory_dir }}/../scripts/glitchtip_event_smoke.py"]
+    assert smoke_task["ansible.builtin.command"]["argv"][:2] == [
+        "python3",
+        "{{ inventory_dir }}/../scripts/glitchtip_event_smoke.py",
+    ]
     assert smoke_task["ansible.builtin.command"]["argv"][8:12] == [
         "--dsn-file",
         "{{ glitchtip_platform_findings_event_url_local_file }}",

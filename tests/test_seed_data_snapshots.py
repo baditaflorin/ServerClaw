@@ -73,7 +73,9 @@ def make_repo(tmp_path: Path, monkeypatch) -> Path:
     )
     write(
         tmp_path / "config" / "service-capability-catalog.json",
-        json.dumps({"services": [{"id": "netbox", "public_url": "https://netbox.example"}, {"id": "windmill"}]}, indent=2)
+        json.dumps(
+            {"services": [{"id": "netbox", "public_url": "https://netbox.example"}, {"id": "windmill"}]}, indent=2
+        )
         + "\n",
     )
     write(
@@ -86,9 +88,13 @@ def make_repo(tmp_path: Path, monkeypatch) -> Path:
     def fake_run(command):
         joined = " ".join(command)
         if "count(*)" in joined:
-            completed = real_run_command.run(["/bin/sh", "-lc", "printf '12'"], text=True, capture_output=True, check=False)
+            completed = real_run_command.run(
+                ["/bin/sh", "-lc", "printf '12'"], text=True, capture_output=True, check=False
+            )
         else:
-            completed = real_run_command.run(["/bin/sh", "-lc", "printf '240'"], text=True, capture_output=True, check=False)
+            completed = real_run_command.run(
+                ["/bin/sh", "-lc", "printf '240'"], text=True, capture_output=True, check=False
+            )
         return type(
             "Result",
             (),
@@ -100,7 +106,12 @@ def make_repo(tmp_path: Path, monkeypatch) -> Path:
         "_load_drift_helpers",
         lambda: (
             lambda context, target, command: ["ssh", target, command],
-            lambda: {"bootstrap_key": Path("/tmp/bootstrap"), "host_user": "ops", "host_addr": "100.64.0.1", "guests": {}},
+            lambda: {
+                "bootstrap_key": Path("/tmp/bootstrap"),
+                "host_user": "ops",
+                "host_addr": "100.64.0.1",
+                "guests": {},
+            },
             fake_run,
         ),
     )

@@ -75,5 +75,5 @@ def test_postgres_vm_template_renders_the_managed_connection_limit() -> None:
 def test_postgres_vm_refreshes_apt_cache_before_package_installs() -> None:
     tasks = POSTGRES_VM_TASKS_PATH.read_text()
 
-    assert 'argv:\n      - apt-get\n      - update' in tasks
+    assert "argv:\n      - apt-get\n      - update" in tasks
     assert tasks.count("update_cache: true") == 0

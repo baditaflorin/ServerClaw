@@ -28,7 +28,7 @@ def _read_proc_env_var(*names: str, proc_environ_path: str = "/proc/1/environ") 
     except OSError:
         return ""
     for name in names:
-        prefix = f"{name}=".encode("utf-8")
+        prefix = f"{name}=".encode()
         for entry in entries:
             if entry.startswith(prefix):
                 return entry.split(b"=", 1)[1].decode("utf-8", errors="ignore").strip()

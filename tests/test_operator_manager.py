@@ -107,9 +107,7 @@ def test_service_url_prefers_env_override(monkeypatch: pytest.MonkeyPatch) -> No
     assert operator_manager.service_url("openbao") == "http://127.0.0.1:8201"
 
 
-def test_onboard_writes_roster_and_state(
-    roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_onboard_writes_roster_and_state(roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
     roster_path, state_dir = roster_paths
     monkeypatch.setattr(operator_manager, "select_backend", lambda **kwargs: FakeBackend())
 
@@ -168,9 +166,7 @@ def test_viewer_onboard_does_not_require_or_store_ssh_key(
     assert saved["operators"][0]["ssh"]["public_keys"] == []
 
 
-def test_offboard_marks_operator_inactive(
-    roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_offboard_marks_operator_inactive(roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
     roster_path, state_dir = roster_paths
     monkeypatch.setattr(operator_manager, "select_backend", lambda **kwargs: FakeBackend())
     onboarded = operator_manager.onboard(
@@ -210,9 +206,7 @@ def test_offboard_marks_operator_inactive(
     assert payload["result"]["keycloak"]["status"] == "disabled"
 
 
-def test_recover_totp_persists_state(
-    roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_recover_totp_persists_state(roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
     roster_path, state_dir = roster_paths
     monkeypatch.setattr(operator_manager, "select_backend", lambda **kwargs: FakeBackend())
     onboarded = operator_manager.onboard(
@@ -248,9 +242,7 @@ def test_recover_totp_persists_state(
     assert payload["result"]["keycloak"]["required_actions"] == ["CONFIGURE_TOTP"]
 
 
-def test_reset_password_persists_state(
-    roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_reset_password_persists_state(roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
     roster_path, state_dir = roster_paths
     monkeypatch.setattr(operator_manager, "select_backend", lambda **kwargs: FakeBackend())
     onboarded = operator_manager.onboard(

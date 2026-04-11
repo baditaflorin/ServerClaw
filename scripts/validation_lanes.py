@@ -167,7 +167,9 @@ def load_catalog(
 
     fast_global_checks = tuple(
         _require_str(check_id, f"{catalog_path}.fast_global_checks[{index}]")
-        for index, check_id in enumerate(_require_list(payload.get("fast_global_checks"), f"{catalog_path}.fast_global_checks"))
+        for index, check_id in enumerate(
+            _require_list(payload.get("fast_global_checks"), f"{catalog_path}.fast_global_checks")
+        )
     )
     if not fast_global_checks:
         raise ValueError(f"{catalog_path}.fast_global_checks must not be empty")
@@ -247,9 +249,7 @@ def validate_catalog_against_manifest(catalog: ValidationLaneCatalog, manifest_c
     catalog_checks = set(catalog.all_checks())
     missing_checks = sorted(catalog_checks - manifest_checks)
     if missing_checks:
-        raise ValueError(
-            "validation lane catalog references unknown manifest checks: " + ", ".join(missing_checks)
-        )
+        raise ValueError("validation lane catalog references unknown manifest checks: " + ", ".join(missing_checks))
     unassigned_checks = sorted(manifest_checks - catalog_checks)
     if unassigned_checks:
         raise ValueError(
@@ -281,7 +281,9 @@ def resolve_base_ref(
     if explicit_base_ref:
         return explicit_base_ref
     remote_candidate = f"origin/{primary_branch}"
-    remote_exists = _run_git(repo_root, "show-ref", "--verify", "--quiet", f"refs/remotes/{remote_candidate}", check=False)
+    remote_exists = _run_git(
+        repo_root, "show-ref", "--verify", "--quiet", f"refs/remotes/{remote_candidate}", check=False
+    )
     if remote_exists.returncode == 0:
         return remote_candidate
     return primary_branch
@@ -343,7 +345,9 @@ def resolve_selection_from_changed_files(
         if unknown_checks:
             raise ValueError("explicit checks reference unknown manifest ids: " + ", ".join(unknown_checks))
         selected_lanes = tuple(
-            lane_id for lane_id in ordered_lane_ids if any(check in catalog.lanes[lane_id].checks for check in explicit_checks)
+            lane_id
+            for lane_id in ordered_lane_ids
+            if any(check in catalog.lanes[lane_id].checks for check in explicit_checks)
         )
         blocking_checks = _unique_in_order(list(catalog.fast_global_checks) + list(explicit_checks))
         skipped_checks = tuple(sorted(manifest_checks - set(blocking_checks)))
@@ -386,7 +390,11 @@ def resolve_selection_from_changed_files(
         )
 
     if force_all_lanes or branch in {catalog.primary_branch, "HEAD"} or not changed_files:
-        mode = "all_lanes" if force_all_lanes else ("primary_branch" if branch in {catalog.primary_branch, "HEAD"} else "no_changes")
+        mode = (
+            "all_lanes"
+            if force_all_lanes
+            else ("primary_branch" if branch in {catalog.primary_branch, "HEAD"} else "no_changes")
+        )
         selected_lanes = ordered_lane_ids
         blocking_checks = _unique_in_order(
             list(catalog.fast_global_checks)
@@ -411,7 +419,9 @@ def resolve_selection_from_changed_files(
     known_files: set[str] = set()
     selected_lane_set: set[str] = set()
     for surface in catalog.surface_classes:
-        surface_matches = tuple(sorted(file_path for file_path in changed_files if _matches_any_pattern(file_path, surface.paths)))
+        surface_matches = tuple(
+            sorted(file_path for file_path in changed_files if _matches_any_pattern(file_path, surface.paths))
+        )
         if not surface_matches:
             continue
         known_files.update(surface_matches)
@@ -495,9 +505,7 @@ def render_selection_summary(selection: ValidationLaneSelection) -> str:
     if selection.changed_files:
         lines.append(f"  changed files: {changed_preview}")
     if selection.unknown_files:
-        lines.append(
-            "  widened to all lanes because of unknown surfaces: " + ", ".join(selection.unknown_files)
-        )
+        lines.append("  widened to all lanes because of unknown surfaces: " + ", ".join(selection.unknown_files))
     return "\n".join(lines)
 
 
@@ -544,8 +552,12 @@ def _resolve_and_print(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Inspect or validate the ADR 0264 validation-lane catalog.")
-    parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG_PATH, help="Path to the validation-lane catalog.")
-    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH, help="Path to the validation-gate manifest.")
+    parser.add_argument(
+        "--catalog", type=Path, default=DEFAULT_CATALOG_PATH, help="Path to the validation-lane catalog."
+    )
+    parser.add_argument(
+        "--manifest", type=Path, default=DEFAULT_MANIFEST_PATH, help="Path to the validation-gate manifest."
+    )
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT, help="Repository root for lane resolution.")
     parser.add_argument("--base-ref", help="Explicit git base ref to diff against.")
     parser.add_argument("--validate", action="store_true", help="Validate the lane catalog against the gate manifest.")
@@ -554,7 +566,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--resolve", action="store_true", help="Resolve the selected lanes for the current checkout.")
     parser.add_argument("--all-lanes", action="store_true", help="Resolve all lanes regardless of changed surfaces.")
     parser.add_argument("--check", action="append", help="Resolve using explicit check ids instead of changed files.")
-    parser.add_argument("--select-lane", action="append", help="Resolve using explicit lane ids instead of changed files.")
+    parser.add_argument(
+        "--select-lane", action="append", help="Resolve using explicit lane ids instead of changed files."
+    )
     args = parser.parse_args(argv)
 
     try:

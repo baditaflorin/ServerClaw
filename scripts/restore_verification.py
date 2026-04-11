@@ -111,9 +111,7 @@ def load_fixture_definition(path: Path) -> dict[str, Any]:
         try:
             import yaml
         except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
-            raise RuntimeError(
-                "Missing dependency: PyYAML. Run via 'uv run --with pyyaml ...'."
-            ) from exc
+            raise RuntimeError("Missing dependency: PyYAML. Run via 'uv run --with pyyaml ...'.") from exc
         payload = yaml.safe_load(raw)
         if not isinstance(payload, dict):
             raise ValueError(f"fixture definition must be an object: {path}")
@@ -194,7 +192,9 @@ def load_restore_readiness_profiles() -> dict[str, RestoreReadinessProfile]:
     payload = load_json(RESTORE_READINESS_PROFILES_PATH)
     profiles = payload.get("profiles", {})
     if not isinstance(profiles, dict):
-        raise ValueError("restore-readiness profiles must define an object at config/restore-readiness-profiles.json.profiles")
+        raise ValueError(
+            "restore-readiness profiles must define an object at config/restore-readiness-profiles.json.profiles"
+        )
 
     loaded: dict[str, RestoreReadinessProfile] = {}
     for profile_id, raw_profile in profiles.items():
@@ -213,9 +213,7 @@ def load_restore_readiness_profiles() -> dict[str, RestoreReadinessProfile]:
             network_dependency_checks=tuple(str(item) for item in raw_profile["network_dependency_checks"]),
             synthetic_replay_enabled=bool(synthetic_replay.get("enabled", False)),
             synthetic_replay_target=(
-                str(synthetic_replay["target_id"]).strip()
-                if synthetic_replay.get("target_id")
-                else None
+                str(synthetic_replay["target_id"]).strip() if synthetic_replay.get("target_id") else None
             ),
         )
     return loaded
@@ -239,6 +237,7 @@ def peak_restore_capacity(targets: list[RestoreTarget]) -> ResourceAmount:
         vcpu=max(target.resources.vcpu for target in targets),
         disk_gb=max(target.resources.disk_gb for target in targets),
     )
+
 
 def select_restore_targets(selected_names: list[str] | None = None) -> list[RestoreTarget]:
     targets = load_restore_targets()
@@ -363,9 +362,7 @@ def wait_for_guest_access(
             if qga_outcome.returncode == 0:
                 return "qga", int(time.monotonic() - started)
         time.sleep(5)
-    raise RuntimeError(
-        f"Neither SSH nor qga became ready for restored guest {target.vm_name} ({ip_address})"
-    )
+    raise RuntimeError(f"Neither SSH nor qga became ready for restored guest {target.vm_name} ({ip_address})")
 
 
 def build_restored_guest_ssh_base_command(context: dict[str, Any], ip_address: str) -> list[str]:
@@ -447,10 +444,7 @@ def restore_backup(context: dict[str, Any], target: RestoreTarget, backup: dict[
     started = time.monotonic()
     require_host_command(
         context,
-        (
-            f"sudo qmrestore {shlex.quote(backup['volid'])} {target.target_vmid} "
-            "--storage local --unique 1"
-        ),
+        (f"sudo qmrestore {shlex.quote(backup['volid'])} {target.target_vmid} --storage local --unique 1"),
         action=f"restore {target.vm_name}",
     )
     return int(time.monotonic() - started)
@@ -565,12 +559,8 @@ def build_readiness_profile_payload(
     }
     if warm_up_outcome is not None:
         payload["attempts_used"] = warm_up_outcome.attempts_used
-        payload["network_dependency_ready_after_attempt"] = (
-            warm_up_outcome.network_dependency_ready_after_attempt
-        )
-        payload["service_warm_up_ready_after_attempt"] = (
-            warm_up_outcome.service_warm_up_ready_after_attempt
-        )
+        payload["network_dependency_ready_after_attempt"] = warm_up_outcome.network_dependency_ready_after_attempt
+        payload["service_warm_up_ready_after_attempt"] = warm_up_outcome.service_warm_up_ready_after_attempt
     return payload
 
 
@@ -654,9 +644,7 @@ def execute_smoke_tests(
 
 
 def overall_from_tests(tests: list[dict[str, Any]]) -> str:
-    required_failures = [
-        test for test in tests if test.get("required", True) and test.get("status") != "pass"
-    ]
+    required_failures = [test for test in tests if test.get("required", True) and test.get("status") != "pass"]
     return "fail" if required_failures else "pass"
 
 
@@ -733,7 +721,7 @@ def execute_profiled_smoke_tests(
                 target,
                 execution_mode=execution_mode,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise PlatformRetryError(
                 f"failed to execute warm-up smoke tests for {target.vm_name}: {exc}",
                 code="platform:restore_warm_up_execution_failed",
@@ -747,9 +735,7 @@ def execute_profiled_smoke_tests(
                 "elapsed_seconds": int(time.monotonic() - started),
                 "network_dependency_path_ready": network_dependency_ready,
                 "service_specific_warm_up_completed": service_warm_up_ready,
-                "test_statuses": {
-                    str(test["name"]): str(test.get("status", "unknown")) for test in latest_tests
-                },
+                "test_statuses": {str(test["name"]): str(test.get("status", "unknown")) for test in latest_tests},
             }
         )
         if network_dependency_ready and network_dependency_ready_after_attempt is None:
@@ -848,7 +834,8 @@ def build_target_result(
         "source_vmid": target.source_vmid,
         "target_vmid": target.target_vmid,
         "backup_volid": backup["volid"],
-        "backup_date": backup["timestamp"].astimezone(__import__("datetime").timezone.utc)
+        "backup_date": backup["timestamp"]
+        .astimezone(__import__("datetime").timezone.utc)
         .isoformat()
         .replace("+00:00", "Z"),
         "restore_ip": target.ip_cidr.split("/", 1)[0],
@@ -896,9 +883,7 @@ def build_failure_result(
         "target_vmid": target.target_vmid,
         "backup_volid": backup["volid"] if backup else "",
         "backup_date": (
-            backup["timestamp"].astimezone(__import__("datetime").timezone.utc)
-            .isoformat()
-            .replace("+00:00", "Z")
+            backup["timestamp"].astimezone(__import__("datetime").timezone.utc).isoformat().replace("+00:00", "Z")
             if backup
             else ""
         ),
@@ -929,9 +914,7 @@ def latest_success_age_days(receipt_dir: Path, current_report: dict[str, Any]) -
                 continue
             run_date = payload.get("run_date")
             if isinstance(run_date, str) and run_date.strip():
-                successful_dates.append(
-                    __import__("datetime").datetime.fromisoformat(run_date.replace("Z", "+00:00"))
-                )
+                successful_dates.append(__import__("datetime").datetime.fromisoformat(run_date.replace("Z", "+00:00")))
     if not successful_dates:
         return 9999
     latest = max(successful_dates)
@@ -1005,14 +988,15 @@ def maybe_publish_nats(report: dict[str, Any], *, publish: bool, context: dict[s
 
 
 def build_mattermost_message(report: dict[str, Any], receipt_path: Path) -> str:
-    lines = [f"{'OK' if report['overall'] == 'pass' else 'FAIL'} Restore verification completed ({report['run_date'][:10]})"]
+    lines = [
+        f"{'OK' if report['overall'] == 'pass' else 'FAIL'} Restore verification completed ({report['run_date'][:10]})"
+    ]
     for item in report["results"]:
         backup_date = item.get("backup_date", "")[:10]
         duration = item.get("restore_duration_seconds", 0)
         highest_stage = (
-            (((item.get("readiness_ladder") or {}).get("highest_completed_stage") or {}).get("label"))
-            or "none"
-        )
+            ((item.get("readiness_ladder") or {}).get("highest_completed_stage") or {}).get("label")
+        ) or "none"
         lines.append(
             f"- {item['vm']}: {item['overall'].upper()} "
             f"(backup {backup_date}, restore {duration}s, highest stage: {highest_stage})"
@@ -1061,7 +1045,7 @@ def build_report(results: list[dict[str, Any]], *, triggered_by: str, environmen
     fail_count = len(results) - pass_count
     highest_stage_counts: dict[str, int] = {}
     for item in results:
-        highest_stage = (((item.get("readiness_ladder") or {}).get("highest_completed_stage") or {}).get("id"))
+        highest_stage = ((item.get("readiness_ladder") or {}).get("highest_completed_stage") or {}).get("id")
         if not highest_stage:
             highest_stage = "not_started"
         highest_stage_counts[highest_stage] = highest_stage_counts.get(highest_stage, 0) + 1
@@ -1128,8 +1112,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         if not capacity_verdict["approved"]:
             raise RuntimeError(
-                "restore verification capacity admission rejected: "
-                + "; ".join(capacity_verdict["reasons"])
+                "restore verification capacity admission rejected: " + "; ".join(capacity_verdict["reasons"])
             )
         for target in targets:
             profile = readiness_profile_for_target(target, profiles)
@@ -1266,7 +1249,7 @@ def main(argv: list[str] | None = None) -> int:
                                     execution_mode=execution_mode,
                                     profile=profile,
                                 )
-                            except Exception as exc:  # noqa: BLE001
+                            except Exception as exc:
                                 synthetic_replay = {
                                     "overall": "fail",
                                     "summary": str(exc),
@@ -1280,7 +1263,8 @@ def main(argv: list[str] | None = None) -> int:
                                     "pass",
                                     detail=synthetic_replay.get("summary", "Synthetic replay passed."),
                                     observed={
-                                        "target_id": synthetic_replay.get("target_id") or profile.synthetic_replay_target,
+                                        "target_id": synthetic_replay.get("target_id")
+                                        or profile.synthetic_replay_target,
                                         "execution_mode": synthetic_replay.get("execution_mode", execution_mode),
                                     },
                                 )
@@ -1333,7 +1317,7 @@ def main(argv: list[str] | None = None) -> int:
                         seed_snapshot=staged_seed,
                     )
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 current_stage_id = next(
                     (
                         stage["id"]
@@ -1396,12 +1380,14 @@ def main(argv: list[str] | None = None) -> int:
             print(f"REPORT_JSON={json.dumps(report, separators=(',', ':'))}")
         _publish_receipt_to_outline(receipt_path)
         return 0 if report["overall"] == "pass" else 1
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("restore verification", exc)
 
 
 def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import subprocess, sys as _sys
+    import subprocess
+    import sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -1415,7 +1401,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         subprocess.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

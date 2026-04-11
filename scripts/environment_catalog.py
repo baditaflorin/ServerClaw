@@ -33,7 +33,7 @@ def configured_environment_ids(
 ) -> tuple[str, ...]:
     try:
         payload = load_environment_topology(path)
-    except Exception:  # noqa: BLE001 - safe fallback for local tests and partial repos
+    except Exception:
         return fallback
 
     environments = payload.get("environments")

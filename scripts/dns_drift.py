@@ -30,7 +30,7 @@ def query_records(name: str, record_type: str, dns_server: str | None = None) ->
         resolver.nameservers = [dns_server]
     try:
         answers = resolver.resolve(name, record_type)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return []
     return sorted(str(answer).rstrip(".") for answer in answers)
 

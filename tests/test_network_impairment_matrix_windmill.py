@@ -22,8 +22,7 @@ def test_main_executes_network_impairment_matrix_script(monkeypatch, tmp_path: P
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
     (repo_root / "scripts" / "network_impairment_matrix.py").write_text(
-        "def main(**kwargs):\n"
-        "    return {'status': 'planned', 'entry_count': 4, 'kwargs': kwargs}\n",
+        "def main(**kwargs):\n    return {'status': 'planned', 'entry_count': 4, 'kwargs': kwargs}\n",
         encoding="utf-8",
     )
 
@@ -36,10 +35,13 @@ def test_main_executes_network_impairment_matrix_script(monkeypatch, tmp_path: P
     assert payload["entry_count"] == 4
     assert payload["kwargs"]["output_format"] == "json"
 
+
 def test_main_falls_back_to_uv_when_yaml_is_missing(monkeypatch, tmp_path: Path) -> None:
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "scripts" / "network_impairment_matrix.py").write_text("def main(**kwargs):\n    return kwargs\n", encoding="utf-8")
+    (repo_root / "scripts" / "network_impairment_matrix.py").write_text(
+        "def main(**kwargs):\n    return kwargs\n", encoding="utf-8"
+    )
 
     class Result:
         returncode = 0
@@ -60,7 +62,10 @@ def test_main_falls_back_to_uv_when_yaml_is_missing(monkeypatch, tmp_path: Path)
 def test_main_falls_back_to_uv_when_repo_script_reports_missing_pyyaml(monkeypatch, tmp_path: Path) -> None:
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "scripts" / "network_impairment_matrix.py").write_text("def main(**kwargs):\n    raise RuntimeError('PyYAML is required to load the network impairment matrix')\n", encoding="utf-8")
+    (repo_root / "scripts" / "network_impairment_matrix.py").write_text(
+        "def main(**kwargs):\n    raise RuntimeError('PyYAML is required to load the network impairment matrix')\n",
+        encoding="utf-8",
+    )
 
     class Result:
         returncode = 0

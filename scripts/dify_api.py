@@ -47,7 +47,15 @@ class DifyClient:
             cookie_header = "; ".join(
                 f"{cookie.name}={cookie.value}"
                 for cookie in self.session.cookies
-                if cookie.name in {"access_token", "__Host-access_token", "refresh_token", "__Host-refresh_token", "csrf_token", "__Host-csrf_token"}
+                if cookie.name
+                in {
+                    "access_token",
+                    "__Host-access_token",
+                    "refresh_token",
+                    "__Host-refresh_token",
+                    "csrf_token",
+                    "__Host-csrf_token",
+                }
             )
             if cookie_header:
                 payload["Cookie"] = cookie_header
@@ -120,7 +128,9 @@ class DifyClient:
             json={"email": email, "password": self._encode_field(password), "remember_me": remember_me},
         ).json()
 
-    def list_apps(self, *, name: str | None = None, mode: str = "all", page: int = 1, limit: int = 100) -> list[dict[str, Any]]:
+    def list_apps(
+        self, *, name: str | None = None, mode: str = "all", page: int = 1, limit: int = 100
+    ) -> list[dict[str, Any]]:
         response = self._request(
             "GET",
             "/console/api/apps",

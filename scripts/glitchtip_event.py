@@ -48,11 +48,7 @@ def build_store_url(dsn: ParsedDSN) -> str:
 
 def build_event_payload(payload: dict[str, Any]) -> dict[str, Any]:
     event_id = str(payload.get("event_id") or uuid.uuid4().hex)
-    tags = {
-        str(key): str(value)
-        for key, value in dict(payload.get("tags") or {}).items()
-        if value is not None
-    }
+    tags = {str(key): str(value) for key, value in dict(payload.get("tags") or {}).items() if value is not None}
     event: dict[str, Any] = {
         "event_id": event_id,
         "timestamp": payload.get("timestamp")
@@ -110,8 +106,7 @@ def emit_glitchtip_event(target_url: str, payload: dict[str, Any], *, timeout: i
         headers={
             "Content-Type": "application/json",
             "X-Sentry-Auth": (
-                "Sentry "
-                f"sentry_version=7, sentry_client=lv3-glitchtip/1.0, sentry_key={parsed.public_key}"
+                f"Sentry sentry_version=7, sentry_client=lv3-glitchtip/1.0, sentry_key={parsed.public_key}"
             ),
         },
         method="POST",

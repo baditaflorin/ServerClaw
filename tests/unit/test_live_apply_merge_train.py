@@ -77,7 +77,9 @@ def test_plan_serializes_shared_surfaces_and_keeps_disjoint_workstreams_parallel
                             "surfaces": [{"id": "surface:shared", "mode": "exclusive", "paths": ["feature-a.txt"]}]
                         },
                         "validation_checks": [python_step("check-a", "print('a')")],
-                        "apply_plan": {"waves": [{"wave_id": "deploy", "steps": [python_step("apply-a", "print('a')")]}]},
+                        "apply_plan": {
+                            "waves": [{"wave_id": "deploy", "steps": [python_step("apply-a", "print('a')")]}]
+                        },
                         "rollback_bundle": {
                             "strategy": "git_revert_only",
                             "steps": [python_step("rollback-a", "print('rollback-a')") | {"kind": "shell"}],
@@ -97,7 +99,9 @@ def test_plan_serializes_shared_surfaces_and_keeps_disjoint_workstreams_parallel
                             "surfaces": [{"id": "surface:shared", "mode": "exclusive", "paths": ["feature-b.txt"]}]
                         },
                         "validation_checks": [python_step("check-b", "print('b')")],
-                        "apply_plan": {"waves": [{"wave_id": "deploy", "steps": [python_step("apply-b", "print('b')")]}]},
+                        "apply_plan": {
+                            "waves": [{"wave_id": "deploy", "steps": [python_step("apply-b", "print('b')")]}]
+                        },
                         "rollback_bundle": {
                             "strategy": "git_revert_only",
                             "steps": [python_step("rollback-b", "print('rollback-b')") | {"kind": "shell"}],
@@ -117,7 +121,9 @@ def test_plan_serializes_shared_surfaces_and_keeps_disjoint_workstreams_parallel
                             "surfaces": [{"id": "surface:isolated", "mode": "exclusive", "paths": ["feature-c.txt"]}]
                         },
                         "validation_checks": [python_step("check-c", "print('c')")],
-                        "apply_plan": {"waves": [{"wave_id": "deploy", "steps": [python_step("apply-c", "print('c')")]}]},
+                        "apply_plan": {
+                            "waves": [{"wave_id": "deploy", "steps": [python_step("apply-c", "print('c')")]}]
+                        },
                         "rollback_bundle": {
                             "strategy": "git_revert_only",
                             "steps": [python_step("rollback-c", "print('rollback-c')") | {"kind": "shell"}],

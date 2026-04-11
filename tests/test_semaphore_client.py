@@ -62,14 +62,18 @@ class FakeClient:
 
 
 def test_ensure_project_updates_only_when_values_change() -> None:
-    client = FakeClient(projects=[{"id": 3, "name": "LV3 Semaphore", "type": "", "alert": False, "max_parallel_tasks": 0}])
+    client = FakeClient(
+        projects=[{"id": 3, "name": "LV3 Semaphore", "type": "", "alert": False, "max_parallel_tasks": 0}]
+    )
     result = semaphore.ensure_project(
         client,
         {"name": "LV3 Semaphore", "type": "", "alert": False, "max_parallel_tasks": 2},
     )
 
     assert result["max_parallel_tasks"] == 2
-    assert client.updated == [("project", 3, {"name": "LV3 Semaphore", "type": "", "alert": False, "max_parallel_tasks": 2, "id": 3})]
+    assert client.updated == [
+        ("project", 3, {"name": "LV3 Semaphore", "type": "", "alert": False, "max_parallel_tasks": 2, "id": 3})
+    ]
 
 
 def test_find_none_key_id_uses_builtin_none_key() -> None:
@@ -85,9 +89,45 @@ def test_find_none_key_id_uses_builtin_none_key() -> None:
 
 def test_ensure_repository_inventory_and_template_use_name_matching() -> None:
     client = FakeClient(
-        repositories={1: [{"id": 2, "name": "repo", "project_id": 1, "git_url": "/srv/repo", "git_branch": "main", "ssh_key_id": 1}]},
-        inventories={1: [{"id": 4, "name": "localhost", "project_id": 1, "inventory": "inventory/semaphore-localhost.yml", "ssh_key_id": 1, "type": "file"}]},
-        templates={1: [{"id": 6, "name": "Semaphore Self-Test", "project_id": 1, "playbook": "playbooks/semaphore-self.yml", "arguments": "[]", "app": "ansible", "inventory_id": 4, "repository_id": 2, "task_params": {"allow_debug": False}}]},
+        repositories={
+            1: [
+                {
+                    "id": 2,
+                    "name": "repo",
+                    "project_id": 1,
+                    "git_url": "/srv/repo",
+                    "git_branch": "main",
+                    "ssh_key_id": 1,
+                }
+            ]
+        },
+        inventories={
+            1: [
+                {
+                    "id": 4,
+                    "name": "localhost",
+                    "project_id": 1,
+                    "inventory": "inventory/semaphore-localhost.yml",
+                    "ssh_key_id": 1,
+                    "type": "file",
+                }
+            ]
+        },
+        templates={
+            1: [
+                {
+                    "id": 6,
+                    "name": "Semaphore Self-Test",
+                    "project_id": 1,
+                    "playbook": "playbooks/semaphore-self.yml",
+                    "arguments": "[]",
+                    "app": "ansible",
+                    "inventory_id": 4,
+                    "repository_id": 2,
+                    "task_params": {"allow_debug": False},
+                }
+            ]
+        },
     )
 
     repository = semaphore.ensure_repository(
@@ -122,7 +162,21 @@ def test_ensure_repository_inventory_and_template_use_name_matching() -> None:
 
 def test_ensure_template_updates_when_inventory_changes() -> None:
     client = FakeClient(
-        templates={1: [{"id": 6, "name": "Semaphore Self-Test", "project_id": 1, "playbook": "playbooks/semaphore-self.yml", "arguments": "[]", "app": "ansible", "inventory_id": 4, "repository_id": 2, "task_params": {"allow_debug": False}}]}
+        templates={
+            1: [
+                {
+                    "id": 6,
+                    "name": "Semaphore Self-Test",
+                    "project_id": 1,
+                    "playbook": "playbooks/semaphore-self.yml",
+                    "arguments": "[]",
+                    "app": "ansible",
+                    "inventory_id": 4,
+                    "repository_id": 2,
+                    "task_params": {"allow_debug": False},
+                }
+            ]
+        }
     )
 
     semaphore.ensure_template(

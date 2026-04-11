@@ -45,7 +45,7 @@ class VerificationError(RuntimeError):
 
 
 class NoRedirectHandler(request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
 
 
@@ -79,7 +79,7 @@ def fetch_response(
     for header_name, header_value in (headers or {}).items():
         req.add_header(header_name, header_value)
     try:
-        with opener.open(req, timeout=timeout_seconds) as response:  # noqa: S310
+        with opener.open(req, timeout=timeout_seconds) as response:
             return ResponseSnapshot(
                 status_code=response.getcode(),
                 final_url=response.geturl(),
@@ -121,9 +121,7 @@ def assert_protected_redirect(snapshot: ResponseSnapshot, *, label: str) -> None
 
 def assert_logged_out_destination(snapshot: ResponseSnapshot, *, expected_url: str, label: str) -> None:
     if normalize_url(snapshot.final_url) != normalize_url(expected_url):
-        raise VerificationError(
-            f"{label} should finish on {expected_url}, landed on {snapshot.final_url}"
-        )
+        raise VerificationError(f"{label} should finish on {expected_url}, landed on {snapshot.final_url}")
 
 
 def assert_response_host(snapshot: ResponseSnapshot, *, expected_host: str, label: str) -> None:
@@ -144,9 +142,7 @@ def authenticate_keycloak_session(
     parser.feed(initial.body)
     if not parser.form_action:
         if keycloak_login_form_present(initial.body):
-            raise VerificationError(
-                f"unable to parse the Keycloak login form when starting at {start_url}"
-            )
+            raise VerificationError(f"unable to parse the Keycloak login form when starting at {start_url}")
         return initial
     form_fields = dict(parser.hidden_fields)
     form_fields["username"] = username
@@ -222,7 +218,7 @@ def playwright_cookie_to_cookie(cookie: dict[str, object]) -> cookiejar.Cookie:
 
 
 def submit_keycloak_logout_confirmation(
-    page,  # noqa: ANN001 - imported lazily from Playwright
+    page,
     *,
     timeout_milliseconds: int,
 ) -> ResponseSnapshot:
@@ -265,7 +261,7 @@ def load_playwright_sync_api():
 
 
 def assert_page_requires_keycloak_login(
-    page,  # noqa: ANN001 - imported lazily from Playwright
+    page,
     *,
     label: str,
     timeout_milliseconds: int,
@@ -278,7 +274,7 @@ def assert_page_requires_keycloak_login(
 
 
 def trigger_outline_ui_logout(
-    page,  # noqa: ANN001 - imported lazily from Playwright
+    page,
     *,
     outline_logout_url: str,
     timeout_milliseconds: int,
@@ -295,17 +291,16 @@ def trigger_outline_ui_logout(
         page.get_by_text("Log out", exact=True).click(timeout=timeout_milliseconds)
     except playwright_timeout_error as exc:
         raise VerificationError(
-            "Outline account menu did not expose the Log out action "
-            f"(legacy logout URL: {outline_logout_url})"
+            f"Outline account menu did not expose the Log out action (legacy logout URL: {outline_logout_url})"
         ) from exc
 
 
 def wait_for_logged_out_destination(
-    page,  # noqa: ANN001 - imported lazily from Playwright
+    page,
     *,
     expected_url: str,
     timeout_milliseconds: int,
-    playwright_timeout_error,  # noqa: ANN001
+    playwright_timeout_error,
 ) -> None:
     deadline = time.monotonic() + (timeout_milliseconds / 1000)
     while time.monotonic() < deadline:
@@ -320,8 +315,7 @@ def wait_for_logged_out_destination(
             )
             if normalize_url(snapshot.final_url) != normalize_url(expected_url):
                 raise VerificationError(
-                    f"Keycloak logout confirmation should finish on {expected_url}, "
-                    f"landed on {snapshot.final_url}"
+                    f"Keycloak logout confirmation should finish on {expected_url}, landed on {snapshot.final_url}"
                 )
         page.wait_for_timeout(500)
     raise VerificationError(f"Outline logout should finish on {expected_url}, landed on {page.url}")
@@ -522,7 +516,7 @@ def main(argv: list[str] | None = None) -> int:
         for line in results:
             print(line)
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("session logout verification", exc)
 
 

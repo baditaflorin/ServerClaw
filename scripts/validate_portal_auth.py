@@ -62,9 +62,7 @@ def validate_portal_auth(
             raise ValueError(f"required portal hostname '{fqdn}' is missing from config/subdomain-catalog.json")
         actual = entry["auth_requirement"]
         if actual != expected:
-            raise ValueError(
-                f"portal hostname '{fqdn}' must declare auth_requirement='{expected}', found '{actual}'"
-            )
+            raise ValueError(f"portal hostname '{fqdn}' must declare auth_requirement='{expected}', found '{actual}'")
 
     protected_sites = subdomain_catalog.require_mapping(
         public_edge_defaults.get("public_edge_authenticated_sites", {}),
@@ -75,9 +73,7 @@ def validate_portal_auth(
             raise ValueError(f"protected edge hostname '{fqdn}' is missing from config/subdomain-catalog.json")
         auth_requirement = entries_by_fqdn[fqdn]["auth_requirement"]
         if auth_requirement not in EDGE_OIDC_REQUIREMENTS:
-            raise ValueError(
-                f"protected edge hostname '{fqdn}' must use edge_oidc auth, found '{auth_requirement}'"
-            )
+            raise ValueError(f"protected edge hostname '{fqdn}' must use edge_oidc auth, found '{auth_requirement}'")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -93,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
             subdomain_catalog.load_public_edge_defaults(),
         )
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("portal auth", exc)
 
 

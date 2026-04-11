@@ -37,7 +37,10 @@ def test_renovate_config_targets_main_and_custom_repo_surfaces() -> None:
     assert config["gitAuthor"] == "Renovate Bot <renovate-bot@lv3.internal>"
     assert config["baseBranchPatterns"] == ["main"]
     assert any("image-catalog" in "".join(manager["managerFilePatterns"]) for manager in config["customManagers"])
-    assert any("versions" in "".join(manager["managerFilePatterns"]) and "stack" in "".join(manager["managerFilePatterns"]) for manager in config["customManagers"])
+    assert any(
+        "versions" in "".join(manager["managerFilePatterns"]) and "stack" in "".join(manager["managerFilePatterns"])
+        for manager in config["customManagers"]
+    )
 
 
 def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -> None:
@@ -51,7 +54,7 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "Bootstrap Docker CLI and discover runner host paths" in workflow
     assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
     assert "cgroup_container_id" in workflow
-    assert 'name=WORKFLOW-renovate_JOB-renovate' in workflow
+    assert "name=WORKFLOW-renovate_JOB-renovate" in workflow
     assert ".tmp/docker-bin.path" in workflow
     assert 'docker_bin="$(ensure_docker_bin)"' not in workflow
     assert workflow.count("ensure_docker_bin") >= 8
@@ -60,24 +63,24 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "hash -r" in workflow
     assert 'test -d "${workspace_host_path}"' not in workflow
     assert 'test -s "${bootstrap_host_dir}/renovate.env"' not in workflow
-    assert '.tmp/workspace-host.path' in workflow
-    assert '.tmp/bootstrap-host.path' in workflow
+    assert ".tmp/workspace-host.path" in workflow
+    assert ".tmp/bootstrap-host.path" in workflow
     assert 'renovate_add_host_arg=""' in workflow
-    assert 'RENOVATE_GIT_CLONE_HOST:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_HOST_ADDRESS:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_HOST_PORT:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_TARGET_HOST:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_TARGET_PORT:-' in workflow
-    assert '--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}' in workflow
+    assert "RENOVATE_GIT_CLONE_HOST:-" in workflow
+    assert "RENOVATE_GIT_CLONE_HOST_ADDRESS:-" in workflow
+    assert "RENOVATE_GIT_CLONE_HOST_PORT:-" in workflow
+    assert "RENOVATE_GIT_CLONE_TARGET_HOST:-" in workflow
+    assert "RENOVATE_GIT_CLONE_TARGET_PORT:-" in workflow
+    assert "--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}" in workflow
     assert "cleanup_clone_proxy()" in workflow
     assert "ThreadedTCPServer" in workflow
     assert "Renovate clone relay did not become ready." in workflow
-    assert '-e RENOVATE_GIT_AUTHOR \\' in workflow
-    assert '-e RENOVATE_REQUIRE_CONFIG \\' in workflow
-    assert '-e RENOVATE_ONBOARDING \\' in workflow
-    assert 'RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json' in workflow
+    assert "-e RENOVATE_GIT_AUTHOR \\" in workflow
+    assert "-e RENOVATE_REQUIRE_CONFIG \\" in workflow
+    assert "-e RENOVATE_ONBOARDING \\" in workflow
+    assert "RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json" in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
-    assert 'RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:' in workflow
+    assert "RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:" in workflow
 
 
 def test_validate_renovate_contract_passes_for_repo_files() -> None:
@@ -127,7 +130,9 @@ def test_renovate_runtime_token_writes_runtime_env(monkeypatch: pytest.MonkeyPat
     assert "RENOVATE_GIT_CLONE_TARGET_PORT=3003" in env_payload
 
 
-def test_renovate_stack_digest_guard_flags_missing_catalog_update(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_renovate_stack_digest_guard_flags_missing_catalog_update(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     module = load_module(GUARD_MODULE_PATH, "renovate_stack_digest_guard_test")
     stack_path = tmp_path / "versions" / "stack.yaml"
     image_catalog_path = tmp_path / "config" / "image-catalog.json"
@@ -138,15 +143,7 @@ def test_renovate_stack_digest_guard_flags_missing_catalog_update(monkeypatch: p
         encoding="utf-8",
     )
     image_catalog_path.write_text(
-        json.dumps(
-            {
-                "images": {
-                    "ollama_runtime": {
-                        "ref": "docker.io/ollama/ollama:0.18.2@sha256:current"
-                    }
-                }
-            }
-        ),
+        json.dumps({"images": {"ollama_runtime": {"ref": "docker.io/ollama/ollama:0.18.2@sha256:current"}}}),
         encoding="utf-8",
     )
     monkeypatch.setattr(module, "STACK_PATH", stack_path)

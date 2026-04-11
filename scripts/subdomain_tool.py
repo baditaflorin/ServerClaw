@@ -21,6 +21,7 @@ Examples
   python scripts/subdomain_tool.py check --fqdn git.localhost
   python scripts/subdomain_tool.py summary
 """
+
 from __future__ import annotations
 
 import argparse
@@ -49,6 +50,7 @@ def _load_registry() -> dict:
 # commands
 # ---------------------------------------------------------------------------
 
+
 def cmd_list(args: argparse.Namespace) -> int:
     data = _load_catalog()
     prefixes = data.get("reserved_prefixes", [])
@@ -58,7 +60,7 @@ def cmd_list(args: argparse.Namespace) -> int:
     for p in sorted(prefixes, key=lambda x: x.get("prefix", "")):
         fqdns = ", ".join(p.get("allowed_fqdns", []))
         notes = p.get("notes", "")[:50]
-        print(f"{p.get('prefix',''):<20}  {p.get('owner_adr',''):<8}  {fqdns:<40}  {notes}")
+        print(f"{p.get('prefix', ''):<20}  {p.get('owner_adr', ''):<8}  {fqdns:<40}  {notes}")
     print(f"\n{len(prefixes)} reserved prefix(es)")
     return 0
 
@@ -69,9 +71,7 @@ def cmd_show(args: argparse.Namespace) -> int:
     prefix_lower = args.prefix.lower()
     match = next((p for p in prefixes if p.get("prefix", "").lower() == prefix_lower), None)
     if match is None:
-        match = next(
-            (p for p in prefixes if prefix_lower in p.get("prefix", "").lower()), None
-        )
+        match = next((p for p in prefixes if prefix_lower in p.get("prefix", "").lower()), None)
     if match is None:
         print(f"ERROR: prefix '{args.prefix}' not found in catalog")
         return 1
@@ -91,8 +91,8 @@ def cmd_exposed(args: argparse.Namespace) -> int:
     print("-" * 100)
     for sub in sorted(exposed, key=lambda x: x.get("fqdn", "")):
         print(
-            f"{sub.get('fqdn',''):<40}  {sub.get('tier',''):<10}  "
-            f"{sub.get('auth',''):<20}  {sub.get('notes','')[:40]}"
+            f"{sub.get('fqdn', ''):<40}  {sub.get('tier', ''):<10}  "
+            f"{sub.get('auth', ''):<20}  {sub.get('notes', '')[:40]}"
         )
     print(f"\n{len(exposed)} exposed subdomain(s)")
     return 0
@@ -109,7 +109,7 @@ def cmd_check(args: argparse.Namespace) -> int:
         for allowed in p.get("allowed_fqdns", []):
             if allowed.lower() == fqdn:
                 in_catalog = True
-                print(f"CATALOG: Found as reserved prefix '{p['prefix']}' (ADR {p.get('owner_adr','?')})")
+                print(f"CATALOG: Found as reserved prefix '{p['prefix']}' (ADR {p.get('owner_adr', '?')})")
                 break
 
     # Check exposure registry
@@ -117,7 +117,7 @@ def cmd_check(args: argparse.Namespace) -> int:
     for sub in registry.get("exposed_subdomains", []):
         if sub.get("fqdn", "").lower() == fqdn:
             in_registry = True
-            print(f"REGISTRY: Exposed — tier={sub.get('tier','?')} auth={sub.get('auth','?')}")
+            print(f"REGISTRY: Exposed — tier={sub.get('tier', '?')} auth={sub.get('auth', '?')}")
             break
 
     if not in_catalog and not in_registry:
@@ -133,7 +133,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
     exposed = registry.get("exposed_subdomains", [])
     last_audit = registry.get("last_audit", "unknown")
 
-    print(f"Subdomain Summary\n")
+    print("Subdomain Summary\n")
     print(f"  Reserved prefixes  : {len(prefixes)}")
     total_fqdns = sum(len(p.get("allowed_fqdns", [])) for p in prefixes)
     print(f"  Declared FQDNs     : {total_fqdns}")
@@ -145,6 +145,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

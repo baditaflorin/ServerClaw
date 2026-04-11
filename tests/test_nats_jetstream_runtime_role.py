@@ -27,7 +27,12 @@ def test_defaults_define_expected_runtime_and_preserved_principals() -> None:
     assert defaults["nats_jetstream_container_name"] == "lv3-nats-jetstream"
     assert defaults["nats_jetstream_port"] == 4222
     assert defaults["nats_jetstream_monitor_port"] == 8222
-    assert defaults["nats_jetstream_publish_allow"] == ["$JS.API.>", "platform.>", "rag.document.>", "secret.rotation.>"]
+    assert defaults["nats_jetstream_publish_allow"] == [
+        "$JS.API.>",
+        "platform.>",
+        "rag.document.>",
+        "secret.rotation.>",
+    ]
 
     principals = {entry["user"]: entry for entry in defaults["nats_jetstream_additional_users"]}
     assert set(principals) == {

@@ -12,9 +12,7 @@ from controller_automation_toolkit import load_json, repo_path
 
 
 DEPENDENCY_GRAPH_PATH: Final[Path] = repo_path("config", "dependency-graph.json")
-DEPENDENCY_GRAPH_SCHEMA_PATH: Final[Path] = repo_path(
-    "docs", "schema", "service-dependency-graph.schema.json"
-)
+DEPENDENCY_GRAPH_SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "service-dependency-graph.schema.json")
 SERVICE_CATALOG_PATH: Final[Path] = repo_path("config", "service-capability-catalog.json")
 ALLOWED_EDGE_TYPES: Final[set[str]] = {"hard", "soft", "startup_only", "reads_from"}
 EDGE_TYPE_LABELS: Final[dict[str, str]] = {
@@ -193,9 +191,7 @@ def parse_dependency_graph(
             adr=raw_node.get("adr"),
         )
         if node.service != node.id:
-            raise DependencyGraphError(
-                f"dependency-graph.nodes[{index}].service must match id for '{node.id}'"
-            )
+            raise DependencyGraphError(f"dependency-graph.nodes[{index}].service must match id for '{node.id}'")
         nodes[node.id] = node
 
     edges: list[DependencyEdge] = []
@@ -205,13 +201,9 @@ def parse_dependency_graph(
         source = _require_str(raw_edge.get("from"), f"dependency-graph.edges[{index}].from")
         target = _require_str(raw_edge.get("to"), f"dependency-graph.edges[{index}].to")
         if source not in nodes:
-            raise DependencyGraphError(
-                f"dependency-graph.edges[{index}].from references unknown service '{source}'"
-            )
+            raise DependencyGraphError(f"dependency-graph.edges[{index}].from references unknown service '{source}'")
         if target not in nodes:
-            raise DependencyGraphError(
-                f"dependency-graph.edges[{index}].to references unknown service '{target}'"
-            )
+            raise DependencyGraphError(f"dependency-graph.edges[{index}].to references unknown service '{target}'")
         if source == target:
             raise DependencyGraphError(
                 f"dependency-graph.edges[{index}] must not create a self dependency for '{source}'"
@@ -223,9 +215,7 @@ def parse_dependency_graph(
             )
         signature = (source, target, edge_type)
         if signature in seen_edges:
-            raise DependencyGraphError(
-                f"duplicate dependency edge '{source}' -> '{target}' ({edge_type})"
-            )
+            raise DependencyGraphError(f"duplicate dependency edge '{source}' -> '{target}' ({edge_type})")
         seen_edges.add(signature)
         edges.append(
             DependencyEdge(
@@ -253,13 +243,10 @@ def validate_graph_integrity(
         missing = sorted(service_catalog_ids - set(graph.nodes))
         extra = sorted(set(graph.nodes) - service_catalog_ids)
         if missing:
-            raise DependencyGraphError(
-                "dependency graph is missing nodes for catalog services: " + ", ".join(missing)
-            )
+            raise DependencyGraphError("dependency graph is missing nodes for catalog services: " + ", ".join(missing))
         if extra:
             raise DependencyGraphError(
-                "dependency graph contains unknown services not present in the catalog: "
-                + ", ".join(extra)
+                "dependency graph contains unknown services not present in the catalog: " + ", ".join(extra)
             )
 
     detect_hard_dependency_cycles(graph)
@@ -271,15 +258,13 @@ def validate_graph_integrity(
     ]
     if mismatched_tiers:
         raise DependencyGraphError(
-            "dependency graph node tiers must match hard-dependency ordering: "
-            + ", ".join(mismatched_tiers)
+            "dependency graph node tiers must match hard-dependency ordering: " + ", ".join(mismatched_tiers)
         )
 
 
 def detect_hard_dependency_cycles(graph: DependencyGraph) -> None:
     adjacency = {
-        service_id: [edge.target for edge in graph.dependencies_for(service_id, "hard")]
-        for service_id in graph.nodes
+        service_id: [edge.target for edge in graph.dependencies_for(service_id, "hard")] for service_id in graph.nodes
     }
     visiting: set[str] = set()
     visited: set[str] = set()
@@ -291,9 +276,7 @@ def detect_hard_dependency_cycles(graph: DependencyGraph) -> None:
         if service_id in visiting:
             cycle_start = stack.index(service_id)
             cycle = stack[cycle_start:] + [service_id]
-            raise DependencyGraphError(
-                "hard dependency cycle detected: " + " -> ".join(cycle)
-            )
+            raise DependencyGraphError("hard dependency cycle detected: " + " -> ".join(cycle))
         visiting.add(service_id)
         stack.append(service_id)
         for dependency in adjacency[service_id]:
@@ -356,8 +339,7 @@ def deployment_order(service_ids: list[str], graph: DependencyGraph) -> list[str
     if len(ordered) != len(selected):
         remaining = sorted(service_id for service_id, count in indegree.items() if count > 0)
         raise DependencyGraphError(
-            "cannot determine deployment order because the selected services contain a cycle: "
-            + ", ".join(remaining)
+            "cannot determine deployment order because the selected services contain a cycle: " + ", ".join(remaining)
         )
     return ordered
 
@@ -435,46 +417,50 @@ def render_dependency_markdown(graph: DependencyGraph) -> str:
         "| --- | --- |",
     ]
     for tier in sorted(tier_rows):
-        table_lines.append(
-            f"| `{tier}` | {', '.join(sorted(tier_rows[tier]))} |"
-        )
+        table_lines.append(f"| `{tier}` | {', '.join(sorted(tier_rows[tier]))} |")
 
-    return "\n".join(
-        [
-            "# Service Dependency Graph",
-            "",
-            "Generated from `config/dependency-graph.json`.",
-            "",
-            "## Recovery Tiers",
-            "",
-            *table_lines,
-            "",
-            "## Mermaid Diagram",
-            "",
-            "```mermaid",
-            render_mermaid(graph),
-            "```",
-        ]
-    ).strip() + "\n"
+    return (
+        "\n".join(
+            [
+                "# Service Dependency Graph",
+                "",
+                "Generated from `config/dependency-graph.json`.",
+                "",
+                "## Recovery Tiers",
+                "",
+                *table_lines,
+                "",
+                "## Mermaid Diagram",
+                "",
+                "```mermaid",
+                render_mermaid(graph),
+                "```",
+            ]
+        ).strip()
+        + "\n"
+    )
 
 
 def render_dependency_page(graph: DependencyGraph) -> str:
-    return "\n".join(
-        [
-            "---",
-            "sensitivity: INTERNAL",
-            "portal_display: full",
-            "tags:",
-            "  - architecture",
-            "  - dependency-graph",
-            "---",
-            "",
-            '!!! note "Sensitivity: INTERNAL"',
-            "    This page is intended for authenticated operators and internal collaborators.",
-            "",
-            render_dependency_markdown(graph).lstrip(),
-        ]
-    ).strip() + "\n"
+    return (
+        "\n".join(
+            [
+                "---",
+                "sensitivity: INTERNAL",
+                "portal_display: full",
+                "tags:",
+                "  - architecture",
+                "  - dependency-graph",
+                "---",
+                "",
+                '!!! note "Sensitivity: INTERNAL"',
+                "    This page is intended for authenticated operators and internal collaborators.",
+                "",
+                render_dependency_markdown(graph).lstrip(),
+            ]
+        ).strip()
+        + "\n"
+    )
 
 
 def graph_to_dict(graph: DependencyGraph) -> dict[str, Any]:

@@ -26,7 +26,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Override the workstreams.yaml compatibility artifact path.",
     )
     parser.add_argument("--write", action="store_true", help="Regenerate workstreams.yaml from the shard source.")
-    parser.add_argument("--check", action="store_true", help="Fail when workstreams.yaml is stale versus the shard source.")
+    parser.add_argument(
+        "--check", action="store_true", help="Fail when workstreams.yaml is stale versus the shard source."
+    )
     parser.add_argument(
         "--migrate-from",
         type=Path,

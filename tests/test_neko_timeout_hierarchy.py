@@ -33,7 +33,7 @@ from typing import List, Dict, Optional
 def read_file(path: str) -> Optional[str]:
     """Read file contents."""
     try:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             return f.read()
     except FileNotFoundError:
         return None
@@ -52,9 +52,9 @@ def find_nginx_site_config() -> Optional[str]:
     - Local playbook template path
     """
     paths = [
-        '/etc/nginx/sites-enabled/browser.lv3.org.conf',
-        '/etc/nginx/sites-available/browser.lv3.org.conf',
-        'collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2',
+        "/etc/nginx/sites-enabled/browser.lv3.org.conf",
+        "/etc/nginx/sites-available/browser.lv3.org.conf",
+        "collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2",
     ]
 
     for path in paths:
@@ -75,7 +75,7 @@ def find_adr_0380() -> Optional[str]:
     """
     import glob
 
-    adr_paths = glob.glob('docs/adr/0380-neko-*.md')
+    adr_paths = glob.glob("docs/adr/0380-neko-*.md")
     if adr_paths:
         return read_file(adr_paths[0])
 
@@ -107,10 +107,9 @@ def test_neko_nginx_timeout_is_explicit():
 
     # Match proxy_read_timeout with 3600s
     # Regex: proxy_read_timeout 3600s;
-    pattern = r'^\s*proxy_read_timeout\s+3600s\s*;'
+    pattern = r"^\s*proxy_read_timeout\s+3600s\s*;"
     matches = [
-        line for line in nginx_config.split('\n')
-        if re.search(pattern, line) and not line.strip().startswith('#')
+        line for line in nginx_config.split("\n") if re.search(pattern, line) and not line.strip().startswith("#")
     ]
 
     if not matches:
@@ -118,8 +117,9 @@ def test_neko_nginx_timeout_is_explicit():
 
         # Check if it's set to something else
         other_timeouts = [
-            line for line in nginx_config.split('\n')
-            if 'proxy_read_timeout' in line and not line.strip().startswith('#')
+            line
+            for line in nginx_config.split("\n")
+            if "proxy_read_timeout" in line and not line.strip().startswith("#")
         ]
 
         if other_timeouts:
@@ -140,21 +140,17 @@ def test_neko_nginx_timeout_is_explicit():
 
     # Find location blocks that should have this timeout
     location_patterns = [
-        r'location\s+/',  # Root location
-        r'location\s+/api/health',  # Health endpoint
-        r'location\s+/ws',  # WebSocket endpoint
+        r"location\s+/",  # Root location
+        r"location\s+/api/health",  # Health endpoint
+        r"location\s+/ws",  # WebSocket endpoint
     ]
 
     for pattern in location_patterns:
-        location_blocks = re.findall(
-            f'{pattern}[^{{]*{{([^}}]*?)}}',
-            nginx_config,
-            re.DOTALL
-        )
+        location_blocks = re.findall(f"{pattern}[^{{]*{{([^}}]*?)}}", nginx_config, re.DOTALL)
 
         if location_blocks:
             for block in location_blocks:
-                if 'proxy_read_timeout 3600s' in block:
+                if "proxy_read_timeout 3600s" in block:
                     print(f"  ✓ {pattern} has 3600s timeout")
                 else:
                     print(f"  ⚠ {pattern} may not have explicit timeout in block")
@@ -178,18 +174,15 @@ def test_adr_0380_documents_timeout_exception():
 
     # Check for keywords indicating timeout exception is documented
     keywords = [
-        'ADR 0170',
-        'timeout',
-        '3600',
-        'exception',
-        'long-lived',
-        'WebRTC',
+        "ADR 0170",
+        "timeout",
+        "3600",
+        "exception",
+        "long-lived",
+        "WebRTC",
     ]
 
-    found_keywords = {
-        kw: kw.lower() in adr_content.lower()
-        for kw in keywords
-    }
+    found_keywords = {kw: kw.lower() in adr_content.lower() for kw in keywords}
 
     print("Keywords in ADR 0380:")
     for kw, found in found_keywords.items():
@@ -197,9 +190,8 @@ def test_adr_0380_documents_timeout_exception():
         print(f"  {status} {kw}")
 
     # ADR should mention timeout exception
-    has_timeout_exception = (
-        ('ADR 0170' in adr_content or 'ADR 0170' in adr_content.replace(' ', '')) and
-        ('exception' in adr_content.lower() or 'timeout' in adr_content.lower())
+    has_timeout_exception = ("ADR 0170" in adr_content or "ADR 0170" in adr_content.replace(" ", "")) and (
+        "exception" in adr_content.lower() or "timeout" in adr_content.lower()
     )
 
     if has_timeout_exception:
@@ -228,8 +220,9 @@ def test_no_default_timeout_will_be_used():
 
     # Count how many times proxy_read_timeout is set
     timeout_directives = [
-        line.strip() for line in nginx_config.split('\n')
-        if 'proxy_read_timeout' in line and not line.strip().startswith('#')
+        line.strip()
+        for line in nginx_config.split("\n")
+        if "proxy_read_timeout" in line and not line.strip().startswith("#")
     ]
 
     print(f"proxy_read_timeout directives found: {len(timeout_directives)}")
@@ -242,7 +235,7 @@ def test_no_default_timeout_will_be_used():
         return False
 
     # Verify at least one is 3600s
-    has_3600 = any('3600' in d for d in timeout_directives)
+    has_3600 = any("3600" in d for d in timeout_directives)
     if not has_3600:
         print("\n✗ FAILED: No directive sets 3600s timeout")
         return False
@@ -289,5 +282,5 @@ def main():
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

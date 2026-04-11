@@ -93,6 +93,7 @@ _REQUIRED_AUTH_KEYS = {"api_url", "authorization_header"}
 
 
 if load_auth is None:
+
     def load_auth(auth_file: str) -> dict:  # type: ignore[misc]
         """
         Load a Proxmox API token file.  Accepts the schema written by the
@@ -107,10 +108,7 @@ if load_auth is None:
         data = json.loads(path.read_text(encoding="utf-8"))
         missing = _REQUIRED_AUTH_KEYS - set(data)
         if missing:
-            raise ValueError(
-                f"Proxmox auth file '{auth_file}' is missing required keys: "
-                + ", ".join(sorted(missing))
-            )
+            raise ValueError(f"Proxmox auth file '{auth_file}' is missing required keys: " + ", ".join(sorted(missing)))
         return data
 
 
@@ -125,14 +123,11 @@ def load_topology(topology_file: str, env: str) -> dict:
     if not path.exists():
         return {}
     if _yaml is None:
-        raise ImportError(
-            "PyYAML is required to read topology files: pip install pyyaml"
-        )
+        raise ImportError("PyYAML is required to read topology files: pip install pyyaml")
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if env not in data:
         raise ValueError(
-            f"Environment '{env}' not found in topology file '{topology_file}'. "
-            f"Available: {', '.join(sorted(data))}"
+            f"Environment '{env}' not found in topology file '{topology_file}'. Available: {', '.join(sorted(data))}"
         )
     return data[env]
 
@@ -171,11 +166,7 @@ class ProxmoxClient:
             "Content-Type": "application/json",
         }
         body = json.dumps(payload).encode() if payload is not None else None
-        ctx = (
-            ssl.create_default_context()
-            if self.verify_ssl
-            else ssl._create_unverified_context()
-        )
+        ctx = ssl.create_default_context() if self.verify_ssl else ssl._create_unverified_context()
         req = urllib.request.Request(url, data=body, headers=headers, method=method)
         try:
             with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
@@ -183,9 +174,7 @@ class ProxmoxClient:
                 return raw.get("data", raw)
         except urllib.error.HTTPError as exc:
             body_text = exc.read().decode(errors="replace")
-            raise RuntimeError(
-                f"Proxmox API {method} {path} → HTTP {exc.code}: {body_text}"
-            ) from exc
+            raise RuntimeError(f"Proxmox API {method} {path} → HTTP {exc.code}: {body_text}") from exc
 
     def guest_exec(
         self,
@@ -219,14 +208,10 @@ class ProxmoxClient:
                     status.get("err-data", ""),
                 )
             time.sleep(0.5)
-        raise TimeoutError(
-            f"Command in VM {vmid} (pid={pid}) did not complete within {timeout}s"
-        )
+        raise TimeoutError(f"Command in VM {vmid} (pid={pid}) did not complete within {timeout}s")
 
 
-def _make_client(
-    auth: dict, node: str = "pve", api_url_override: str | None = None
-) -> ProxmoxClient:
+def _make_client(auth: dict, node: str = "pve", api_url_override: str | None = None) -> ProxmoxClient:
     return ProxmoxClient(
         api_url=api_url_override or auth["api_url"],
         authorization_header=auth["authorization_header"],
@@ -235,9 +220,7 @@ def _make_client(
     )
 
 
-def _client_from_args(
-    args: argparse.Namespace, auth: dict, topo: dict
-) -> ProxmoxClient:
+def _client_from_args(args: argparse.Namespace, auth: dict, topo: dict) -> ProxmoxClient:
     """Build a ProxmoxClient from resolved auth + topology + optional --api-url override.
 
     API URL priority (highest wins):
@@ -257,9 +240,7 @@ def _client_from_args(
 # ---------------------------------------------------------------------------
 
 
-def _resolve_topology(
-    args: argparse.Namespace, auth: dict
-) -> dict:
+def _resolve_topology(args: argparse.Namespace, auth: dict) -> dict:
     """
     Merge topology from four sources (lowest to highest priority):
       1. Hardcoded defaults
@@ -354,9 +335,7 @@ def command_guest_exec(args: argparse.Namespace) -> int:
     else:
         cmd = cmd_args
 
-    exit_code, stdout, stderr = client.guest_exec(
-        int(args.vmid), cmd, timeout=args.timeout
-    )
+    exit_code, stdout, stderr = client.guest_exec(int(args.vmid), cmd, timeout=args.timeout)
     result = {
         "vmid": int(args.vmid),
         "exit_code": exit_code,
@@ -390,11 +369,7 @@ def command_docker_ps(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
-    containers = [
-        json.loads(line)
-        for line in stdout.strip().splitlines()
-        if line.strip()
-    ]
+    containers = [json.loads(line) for line in stdout.strip().splitlines() if line.strip()]
     print(json.dumps({"vmid": vmid, "containers": containers}, indent=2))
     return 0
 
@@ -440,9 +415,7 @@ def command_install_key(args: argparse.Namespace) -> int:
         f"echo {shlex.quote(pubkey)} >> /root/.ssh/authorized_keys && "
         "chmod 600 /root/.ssh/authorized_keys"
     )
-    exit_code, _, stderr = client.guest_exec(
-        vmid, ["bash", "-c", script], timeout=15
-    )
+    exit_code, _, stderr = client.guest_exec(vmid, ["bash", "-c", script], timeout=15)
     if exit_code != 0:
         print(
             json.dumps({"error": stderr.strip(), "exit_code": exit_code}),
@@ -523,10 +496,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--api-url",
         metavar="URL",
-        help=(
-            "Override the api_url from the auth file "
-            "(e.g. https://100.64.0.1:8006/api2/json for Tailscale access)."
-        ),
+        help=("Override the api_url from the auth file (e.g. https://100.64.0.1:8006/api2/json for Tailscale access)."),
     )
 
     sub = parser.add_subparsers(dest="command", required=True)
@@ -536,15 +506,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "guest-exec",
         help="Run a command inside a VM via QEMU guest agent (no SSH required).",
         description=(
-            "Executes a command as root inside the VM.  "
-            "Separate the tool arguments from the guest command with --."
+            "Executes a command as root inside the VM.  Separate the tool arguments from the guest command with --."
         ),
     )
 
     p_exec.add_argument("--vmid", required=True, type=int, help="Target VMID.")
-    p_exec.add_argument(
-        "--timeout", type=int, default=60, help="Exec timeout in seconds (default: 60)."
-    )
+    p_exec.add_argument("--timeout", type=int, default=60, help="Exec timeout in seconds (default: 60).")
     p_exec.add_argument(
         "--shell",
         action="store_true",
@@ -574,9 +541,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Append a public SSH key to /root/.ssh/authorized_keys on a VM.",
     )
     p_key.add_argument("--vmid", required=True, type=int, help="Target VMID.")
-    p_key.add_argument(
-        "--pubkey", required=True, help="Public key string (e.g. 'ssh-ed25519 AAAA... comment')."
-    )
+    p_key.add_argument("--pubkey", required=True, help="Public key string (e.g. 'ssh-ed25519 AAAA... comment').")
 
     return parser
 

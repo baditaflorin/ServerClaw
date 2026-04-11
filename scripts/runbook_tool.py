@@ -16,10 +16,10 @@ Examples
   python scripts/runbook_tool.py show break-glass
   python scripts/runbook_tool.py topics
 """
+
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import sys
 from pathlib import Path
@@ -31,6 +31,7 @@ RUNBOOK_DIR = REPO_ROOT / "docs" / "runbooks"
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
 
 def _all_runbooks() -> list[Path]:
     if not RUNBOOK_DIR.exists():
@@ -58,6 +59,7 @@ def _topic_words(stem: str) -> list[str]:
 # ---------------------------------------------------------------------------
 # commands
 # ---------------------------------------------------------------------------
+
 
 def cmd_list(args: argparse.Namespace) -> int:
     runbooks = _all_runbooks()
@@ -145,6 +147,7 @@ def cmd_topics(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

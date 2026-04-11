@@ -247,10 +247,7 @@ def ensure_service_item(
         return True
 
     item = data[0]
-    if (
-        item.get("public_hostname") == public_hostname
-        and item.get("internal_url") == internal_url
-    ):
+    if item.get("public_hostname") == public_hostname and item.get("internal_url") == internal_url:
         return False
 
     api_request(
@@ -378,7 +375,9 @@ def build_parser() -> argparse.ArgumentParser:
     bootstrap_parser.add_argument("--internal-url", required=True)
     bootstrap_parser.set_defaults(func=bootstrap)
 
-    verify_parser = subparsers.add_parser("verify-public", help="Verify the public Directus health, SSO redirect, REST, and GraphQL contracts.")
+    verify_parser = subparsers.add_parser(
+        "verify-public", help="Verify the public Directus health, SSO redirect, REST, and GraphQL contracts."
+    )
     verify_parser.add_argument("--base-url", required=True)
     verify_parser.add_argument("--api-token-file", required=True)
     verify_parser.add_argument("--collection", default="service_registry")
@@ -394,7 +393,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
-      return int(args.func(args))
+        return int(args.func(args))
     except DirectusError as exc:
         print(str(exc), file=sys.stderr)
         return 1

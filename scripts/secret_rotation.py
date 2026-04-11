@@ -16,7 +16,7 @@ from controller_automation_toolkit import emit_cli_error, load_json, repo_path, 
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_int, require_list, require_mapping, require_str
+from validation_toolkit import require_int, require_mapping, require_str
 
 from glitchtip_event import emit_glitchtip_event
 from workflow_catalog import load_secret_manifest, validate_secret_manifest
@@ -89,15 +89,13 @@ def parse_timestamp(value: str, path: str) -> dt.datetime:
     except ValueError as exc:
         raise ValueError(f"{path} must use ISO-8601 timestamp format") from exc
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=dt.timezone.utc)
-    return parsed.astimezone(dt.timezone.utc)
+        parsed = parsed.replace(tzinfo=dt.UTC)
+    return parsed.astimezone(dt.UTC)
 
 
 def validate_secret_catalog(catalog: dict, secret_manifest: dict) -> None:
     if catalog.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
-        raise ValueError(
-            f"secret catalog must declare schema_version '{SUPPORTED_SCHEMA_VERSION}'"
-        )
+        raise ValueError(f"secret catalog must declare schema_version '{SUPPORTED_SCHEMA_VERSION}'")
 
     metadata, secrets = normalize_rotation_contract(catalog)
     require_str(metadata.get("state_source"), "metadata.state_source")
@@ -119,33 +117,23 @@ def validate_secret_catalog(catalog: dict, secret_manifest: dict) -> None:
 
         secret_type = require_str(secret.get("secret_type"), f"secrets.{secret_id}.secret_type")
         if secret_type not in ALLOWED_SECRET_TYPES:
-            raise ValueError(
-                f"secrets.{secret_id}.secret_type must be one of {sorted(ALLOWED_SECRET_TYPES)}"
-            )
+            raise ValueError(f"secrets.{secret_id}.secret_type must be one of {sorted(ALLOWED_SECRET_TYPES)}")
 
         risk_level = require_str(secret.get("risk_level"), f"secrets.{secret_id}.risk_level")
         if risk_level not in ALLOWED_RISK_LEVELS:
-            raise ValueError(
-                f"secrets.{secret_id}.risk_level must be one of {sorted(ALLOWED_RISK_LEVELS)}"
-            )
+            raise ValueError(f"secrets.{secret_id}.risk_level must be one of {sorted(ALLOWED_RISK_LEVELS)}")
 
         approval_mode = require_str(secret.get("approval_mode"), f"secrets.{secret_id}.approval_mode")
         if approval_mode not in ALLOWED_APPROVAL_MODES:
-            raise ValueError(
-                f"secrets.{secret_id}.approval_mode must be one of {sorted(ALLOWED_APPROVAL_MODES)}"
-            )
+            raise ValueError(f"secrets.{secret_id}.approval_mode must be one of {sorted(ALLOWED_APPROVAL_MODES)}")
         if risk_level == "high" and approval_mode != "approval_required":
-            raise ValueError(
-                f"secrets.{secret_id}.approval_mode must be approval_required for high-risk secrets"
-            )
+            raise ValueError(f"secrets.{secret_id}.approval_mode must be approval_required for high-risk secrets")
 
         require_str(secret.get("command_contract"), f"secrets.{secret_id}.command_contract")
         period = require_int(secret.get("rotation_period_days"), f"secrets.{secret_id}.rotation_period_days", minimum=1)
         warning = require_int(secret.get("warning_window_days"), f"secrets.{secret_id}.warning_window_days", minimum=0)
         if warning >= period:
-            raise ValueError(
-                f"secrets.{secret_id}.warning_window_days must be smaller than rotation_period_days"
-            )
+            raise ValueError(f"secrets.{secret_id}.warning_window_days must be smaller than rotation_period_days")
 
         require_nullable_timestamp(secret.get("last_rotated"), f"secrets.{secret_id}.last_rotated")
 
@@ -160,36 +148,26 @@ def validate_secret_catalog(catalog: dict, secret_manifest: dict) -> None:
 
         generator = require_str(secret.get("value_generator"), f"secrets.{secret_id}.value_generator")
         if generator not in ALLOWED_GENERATORS:
-            raise ValueError(
-                f"secrets.{secret_id}.value_generator must be one of {sorted(ALLOWED_GENERATORS)}"
-            )
+            raise ValueError(f"secrets.{secret_id}.value_generator must be one of {sorted(ALLOWED_GENERATORS)}")
 
         require_str(secret.get("openbao_path"), f"secrets.{secret_id}.openbao_path")
         require_str(secret.get("openbao_field"), f"secrets.{secret_id}.openbao_field")
 
         apply_target = require_str(secret.get("apply_target"), f"secrets.{secret_id}.apply_target")
         if apply_target not in ALLOWED_APPLY_TARGETS:
-            raise ValueError(
-                f"secrets.{secret_id}.apply_target must be one of {sorted(ALLOWED_APPLY_TARGETS)}"
-            )
+            raise ValueError(f"secrets.{secret_id}.apply_target must be one of {sorted(ALLOWED_APPLY_TARGETS)}")
 
         apply_field = secret.get("apply_field")
-        if apply_target in {"mail_platform_profile_field", "mail_platform_runtime_field"}:
-            require_str(apply_field, f"secrets.{secret_id}.apply_field")
-        elif apply_field is not None:
+        if apply_target in {"mail_platform_profile_field", "mail_platform_runtime_field"} or apply_field is not None:
             require_str(apply_field, f"secrets.{secret_id}.apply_field")
 
         profile_id = secret.get("profile_id")
-        if apply_target == "mail_platform_profile_field":
-            require_str(profile_id, f"secrets.{secret_id}.profile_id")
-        elif profile_id is not None:
+        if apply_target == "mail_platform_profile_field" or profile_id is not None:
             require_str(profile_id, f"secrets.{secret_id}.profile_id")
 
         compatibility_mirror = secret.get("compatibility_mirror")
         if compatibility_mirror is not None:
-            compatibility_mirror = require_mapping(
-                compatibility_mirror, f"secrets.{secret_id}.compatibility_mirror"
-            )
+            compatibility_mirror = require_mapping(compatibility_mirror, f"secrets.{secret_id}.compatibility_mirror")
             require_str(
                 compatibility_mirror.get("openbao_path"),
                 f"secrets.{secret_id}.compatibility_mirror.openbao_path",
@@ -205,7 +183,7 @@ def validate_secret_catalog(catalog: dict, secret_manifest: dict) -> None:
 
 def normalized_now(now: str | None = None) -> dt.datetime:
     if now is None:
-        return dt.datetime.now(dt.timezone.utc)
+        return dt.datetime.now(dt.UTC)
     return parse_timestamp(now, "now")
 
 
@@ -271,7 +249,7 @@ def build_rotation_event(
     mode: str,
     command: list[str],
 ) -> dict:
-    timestamp = dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    timestamp = dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z")
     status_suffix = {
         "started": "started",
         "succeeded": "completed",
@@ -351,10 +329,7 @@ def list_catalog(catalog: dict, *, now: dt.datetime) -> int:
     for secret_id, secret in sorted(secrets.items()):
         due = "due" if rotation_due(secret, now=now) else "scheduled"
         next_due = next_rotation_due(secret) or "initial rotation required"
-        print(
-            f"  - {secret_id} [{secret['risk_level']}, {secret['command_contract']}, {due}]"
-            f" -> {next_due}"
-        )
+        print(f"  - {secret_id} [{secret['risk_level']}, {secret['command_contract']}, {due}] -> {next_due}")
     return 0
 
 
@@ -393,9 +368,7 @@ def run_rotation(
     new_value: str | None,
 ) -> int:
     if secret["approval_mode"] == "approval_required" and not approve_high_risk:
-        raise ValueError(
-            f"{secret_id} is high-risk and requires the {secret['command_contract']} approval path"
-        )
+        raise ValueError(f"{secret_id} is high-risk and requires the {secret['command_contract']} approval path")
 
     command, env = build_playbook_command(
         secret_id,

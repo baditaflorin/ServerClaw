@@ -56,11 +56,7 @@ def parse_inspect_output(stdout: str) -> dict[str, Any]:
 
 
 def inspect_runtime_image(context: dict[str, Any], runtime_host: str, container_name: str) -> dict[str, Any]:
-    remote_command = (
-        "docker inspect --format "
-        "'{{json .RepoDigests}}|{{.Config.Image}}' "
-        f"{container_name}"
-    )
+    remote_command = f"docker inspect --format '{{{{json .RepoDigests}}}}|{{{{.Config.Image}}}}' {container_name}"
     result = run_command(build_guest_ssh_command(context, runtime_host, remote_command))
     if result.returncode != 0:
         raise RuntimeError(result.stderr or result.stdout or f"docker inspect failed for {container_name}")
@@ -70,7 +66,7 @@ def inspect_runtime_image(context: dict[str, Any], runtime_host: str, container_
 def evaluate_image(image: dict[str, Any], context: dict[str, Any]) -> dict[str, Any] | None:
     try:
         actual = inspect_runtime_image(context, image["runtime_host"], image["container_name"])
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return {
             "source": "docker-image",
             "event": drift_event_topic("critical"),

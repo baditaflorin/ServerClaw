@@ -19,13 +19,19 @@ def load_tasks(path: Path) -> list[dict]:
 def test_directus_defaults_define_runtime_and_publication_contract() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
 
-    assert defaults["directus_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.directus_port }}"
+    assert (
+        defaults["directus_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.directus_port }}"
+    )
     assert defaults["directus_internal_base_url"] == "http://127.0.0.1:{{ directus_internal_port }}"
     assert defaults["directus_public_base_url"] == "https://{{ directus_service_topology.public_hostname }}"
     assert defaults["directus_image"] == "{{ container_image_catalog.images.directus_runtime.ref }}"
     assert defaults["directus_database_password_local_file"].endswith("/.local/directus/database-password.txt")
-    assert defaults["directus_keycloak_client_secret_local_file"].endswith("/.local/keycloak/directus-client-secret.txt")
-    assert defaults["directus_service_registry_token_local_file"].endswith("/.local/directus/service-registry-token.txt")
+    assert defaults["directus_keycloak_client_secret_local_file"].endswith(
+        "/.local/keycloak/directus-client-secret.txt"
+    )
+    assert defaults["directus_service_registry_token_local_file"].endswith(
+        "/.local/directus/service-registry-token.txt"
+    )
     assert defaults["directus_bootstrap_collection_name"] == "service_registry"
 
 
@@ -38,9 +44,13 @@ def test_directus_runtime_requires_database_oidc_and_service_token_inputs() -> N
         task for task in tasks if task.get("name") == "Bootstrap the Directus governed schema against the local runtime"
     )
     nat_verify_task = next(
-        task for task in tasks if task.get("name") == "Verify the Docker nat chain after networking recovery before Directus startup"
+        task
+        for task in tasks
+        if task.get("name") == "Verify the Docker nat chain after networking recovery before Directus startup"
     )
-    nat_assert_task = next(task for task in tasks if task.get("name") == "Assert Docker nat chain is present before Directus startup")
+    nat_assert_task = next(
+        task for task in tasks if task.get("name") == "Assert Docker nat chain is present before Directus startup"
+    )
 
     assert "directus_database_password_local_file | length > 0" in required_inputs
     assert "directus_keycloak_client_secret_local_file | length > 0" in required_inputs
@@ -66,9 +76,13 @@ def test_directus_verify_and_publish_tasks_use_expected_contract_endpoints() -> 
 
     health_task = next(task for task in verify_tasks if task.get("name") == "Verify the Directus health endpoint")
     ping_task = next(task for task in verify_tasks if task.get("name") == "Verify the Directus ping endpoint")
-    openapi_task = next(task for task in verify_tasks if task.get("name") == "Verify the Directus OpenAPI document is served locally")
+    openapi_task = next(
+        task for task in verify_tasks if task.get("name") == "Verify the Directus OpenAPI document is served locally"
+    )
     public_verify_task = next(
-        task for task in publish_tasks if task.get("name") == "Verify the public Directus publication and token-based API paths"
+        task
+        for task in publish_tasks
+        if task.get("name") == "Verify the public Directus publication and token-based API paths"
     )
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ directus_internal_base_url }}{{ directus_health_path }}"

@@ -39,7 +39,9 @@ def test_role_only_starts_socket_units_when_no_proxy_service_owns_the_listener()
     )
     assert state_task["register"] == "proxmox_tailscale_proxy_unit_states"
     assert state_task["become"] is False
-    assert "proxmox_tailscale_proxy_unit_states.results" in start_task["vars"]["proxmox_tailscale_proxy_unit_state_lines"]
+    assert (
+        "proxmox_tailscale_proxy_unit_states.results" in start_task["vars"]["proxmox_tailscale_proxy_unit_state_lines"]
+    )
     assert start_task["when"] == "proxmox_tailscale_service_active_state != 'active'"
 
 
@@ -58,27 +60,23 @@ def test_role_asserts_proxy_listener_remains_available_after_converge() -> None:
 
 def test_host_inventory_proxy_ports_reference_platform_port_assignments() -> None:
     host_vars_text = HOST_VARS.read_text()
-    assert "listen_port: \"{{ platform_port_assignments.windmill_host_proxy_port }}\"" in host_vars_text
-    assert "listen_port: \"{{ platform_port_assignments.nomad_host_proxy_port }}\"" in host_vars_text
-    assert "listen_port: \"{{ platform_port_assignments.platform_context_host_proxy_port }}\"" in host_vars_text
+    assert 'listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"' in host_vars_text
+    assert 'listen_port: "{{ platform_port_assignments.nomad_host_proxy_port }}"' in host_vars_text
+    assert 'listen_port: "{{ platform_port_assignments.platform_context_host_proxy_port }}"' in host_vars_text
 
 
 def test_role_rearms_or_restarts_changed_proxy_units_after_rendering() -> None:
     tasks = load_tasks()
-    enable_task = next(
-        task for task in tasks if task.get("name") == "Enable Proxmox Tailscale proxy sockets"
-    )
+    enable_task = next(task for task in tasks if task.get("name") == "Enable Proxmox Tailscale proxy sockets")
     stop_task = next(
         task
         for task in tasks
-        if task.get("name")
-        == "Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners"
+        if task.get("name") == "Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners"
     )
     restart_task = next(
         task
         for task in tasks
-        if task.get("name")
-        == "Restart active Proxmox Tailscale proxy services when their unit or upstream changes"
+        if task.get("name") == "Restart active Proxmox Tailscale proxy services when their unit or upstream changes"
     )
     rearm_task = next(
         task
@@ -86,9 +84,7 @@ def test_role_rearms_or_restarts_changed_proxy_units_after_rendering() -> None:
         if task.get("name") == "Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners"
     )
     cmdline_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Read active Proxmox Tailscale proxy service command lines"
+        task for task in tasks if task.get("name") == "Read active Proxmox Tailscale proxy service command lines"
     )
 
     assert enable_task["ansible.builtin.systemd"]["enabled"] is True

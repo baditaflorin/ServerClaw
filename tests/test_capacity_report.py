@@ -107,7 +107,7 @@ all:
                         "status": "reserved",
                         "capacity_class": "recovery_reserved",
                         "reserved": {"ram_gb": 4, "vcpu": 2, "disk_gb": 48},
-                    }
+                    },
                 ],
             },
             indent=2,

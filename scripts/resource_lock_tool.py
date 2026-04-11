@@ -181,7 +181,7 @@ def main() -> int:
                 ttl_seconds=args.ttl_seconds,
                 state_path=args.state_path,
             )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Resource lock registry", exc)
 
     print(json.dumps(result, indent=2, sort_keys=True))

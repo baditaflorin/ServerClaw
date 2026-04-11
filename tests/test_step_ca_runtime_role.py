@@ -44,9 +44,17 @@ def test_step_ca_runtime_defaults_anchor_service_topology_to_proxmox_hostvars() 
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text(encoding="utf-8"))
 
     assert defaults["step_ca_service_topology"] == "{{ hostvars['proxmox_florin'].platform_service_topology }}"
-    assert defaults["step_ca_api_port"] == "{{ step_ca_service_topology | platform_service_port('step_ca', 'internal') }}"
-    assert defaults["step_ca_internal_url"] == "{{ step_ca_service_topology | platform_service_url('step_ca', 'internal') }}"
-    assert defaults["step_ca_controller_url"] == "{{ step_ca_service_topology | platform_service_url('step_ca', 'controller') }}"
+    assert (
+        defaults["step_ca_api_port"] == "{{ step_ca_service_topology | platform_service_port('step_ca', 'internal') }}"
+    )
+    assert (
+        defaults["step_ca_internal_url"]
+        == "{{ step_ca_service_topology | platform_service_url('step_ca', 'internal') }}"
+    )
+    assert (
+        defaults["step_ca_controller_url"]
+        == "{{ step_ca_service_topology | platform_service_url('step_ca', 'controller') }}"
+    )
     assert defaults["step_ca_default_network_name"] == "{{ step_ca_site_dir | basename }}_default"
     assert defaults["step_ca_server_names"][2] == "{{ step_ca_service_topology | platform_service_host('step_ca') }}"
     assert defaults["step_ca_pull_recovery_retries"] == 10
@@ -60,7 +68,7 @@ def test_step_ca_runtime_recovers_detached_empty_default_network_before_compose_
     assert "Remove the detached managed step-ca default network before compose up" in tasks
     assert "step_ca_default_network_inspect.stdout | from_json | first" in tasks
     assert ".Containers | default({})" in tasks
-    assert '      - network\n      - rm' in tasks
+    assert "      - network\n      - rm" in tasks
 
 
 def test_runtime_control_network_policy_allows_step_ca_from_peer_guests_and_local_docker_workloads() -> None:
@@ -76,7 +84,9 @@ def test_step_ca_runtime_uses_shared_docker_bridge_chain_checks_before_startup()
     tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
 
     chain_task = next(
-        task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are ready before step-ca startup"
+        task
+        for task in tasks
+        if task["name"] == "Ensure Docker bridge networking chains are ready before step-ca startup"
     )
 
     assert chain_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"

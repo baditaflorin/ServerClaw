@@ -80,9 +80,7 @@ def build_platform_service_documents(catalog: dict[str, Any]) -> list[dict[str, 
             "adr": optional_string(service.get("adr")),
             "runbook": optional_string(service.get("runbook")),
             "tags": sorted(
-                str(tag).strip()
-                for tag in service.get("tags", [])
-                if isinstance(tag, str) and str(tag).strip()
+                str(tag).strip() for tag in service.get("tags", []) if isinstance(tag, str) and str(tag).strip()
             ),
         }
         vmid = service.get("vmid")
@@ -224,10 +222,14 @@ def sync_platform_service_collection(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Sync the Typesense platform-services collection from the service catalog.")
+    parser = argparse.ArgumentParser(
+        description="Sync the Typesense platform-services collection from the service catalog."
+    )
     parser.add_argument("--catalog", type=Path, required=True, help="Path to config/service-capability-catalog.json")
     parser.add_argument("--typesense-url", required=True, help="Typesense base URL, for example http://100.64.0.1:8016")
-    parser.add_argument("--api-key-file", type=Path, required=True, help="Controller-local file containing the Typesense API key")
+    parser.add_argument(
+        "--api-key-file", type=Path, required=True, help="Controller-local file containing the Typesense API key"
+    )
     parser.add_argument("--collection", default=DEFAULT_COLLECTION, help="Typesense collection name to manage")
     return parser.parse_args()
 

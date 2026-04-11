@@ -11,7 +11,6 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -127,11 +126,7 @@ def run_remote_script(
     script_path: Path,
     env: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
-    exports = " ".join(
-        f"{key}={shlex.quote(value)}"
-        for key, value in sorted((env or {}).items())
-        if value
-    )
+    exports = " ".join(f"{key}={shlex.quote(value)}" for key, value in sorted((env or {}).items()) if value)
     remote_command = f"{exports} bash -s --" if exports else "bash -s --"
     command = build_guest_ssh_command(context, host, remote_command)
     result = subprocess.run(
@@ -154,7 +149,7 @@ def load_previous_report(receipt_dir: Path) -> dict[str, Any] | None:
     for path in paths:
         try:
             return load_json(path)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
     return None
 
@@ -173,15 +168,10 @@ def summarize_hosts(reports: list[dict[str, Any]], previous_report: dict[str, An
     for host_report in reports:
         previous = previous_hosts.get(host_report["host"], {})
         previous_findings = {
-            finding_fingerprint(item)
-            for item in previous.get("findings", [])
-            if isinstance(item, dict)
+            finding_fingerprint(item) for item in previous.get("findings", []) if isinstance(item, dict)
         }
         current_findings = host_report.get("findings", [])
-        new_findings = [
-            item for item in current_findings
-            if finding_fingerprint(item) not in previous_findings
-        ]
+        new_findings = [item for item in current_findings if finding_fingerprint(item) not in previous_findings]
         previous_index = previous.get("hardening_index")
         current_index = host_report.get("hardening_index")
         delta = None
@@ -218,11 +208,7 @@ def summarize_images(host_payloads: dict[str, list[dict[str, Any]]]) -> list[dic
 
 
 def build_summary(hosts: list[dict[str, Any]], images: list[dict[str, Any]]) -> dict[str, Any]:
-    hardening_indexes = [
-        host["hardening_index"]
-        for host in hosts
-        if isinstance(host.get("hardening_index"), int)
-    ]
+    hardening_indexes = [host["hardening_index"] for host in hosts if isinstance(host.get("hardening_index"), int)]
     total_critical = sum(int(image.get("severity_counts", {}).get("CRITICAL", 0)) for image in images)
     total_high = sum(int(image.get("severity_counts", {}).get("HIGH", 0)) for image in images)
     new_lynis = sum(int(host.get("new_findings_since_last_scan", 0)) for host in hosts)
@@ -234,12 +220,22 @@ def build_summary(hosts: list[dict[str, Any]], images: list[dict[str, Any]]) -> 
         "lowest_hardening_index": min(hardening_indexes) if hardening_indexes else None,
         "new_lynis_findings": new_lynis,
         "status": "critical"
-        if total_critical > 0 or any((host.get("hardening_index_delta") or 0) <= -10 for host in hosts if host.get("hardening_index_delta") is not None)
+        if total_critical > 0
+        or any(
+            (host.get("hardening_index_delta") or 0) <= -10
+            for host in hosts
+            if host.get("hardening_index_delta") is not None
+        )
         else "warn"
         if total_high > 0 or new_lynis > 0
         else "clean",
         "status_code": 2
-        if total_critical > 0 or any((host.get("hardening_index_delta") or 0) <= -10 for host in hosts if host.get("hardening_index_delta") is not None)
+        if total_critical > 0
+        or any(
+            (host.get("hardening_index_delta") or 0) <= -10
+            for host in hosts
+            if host.get("hardening_index_delta") is not None
+        )
         else 1
         if total_high > 0 or new_lynis > 0
         else 0,
@@ -342,12 +338,10 @@ def maybe_write_metrics(report: dict[str, Any]) -> None:
         delta = host.get("hardening_index_delta")
         delta_value = 0 if delta is None else delta
         lines.append(
-            (
-                f"platform_security_posture_host,environment={report['environment']},host={host['host']} "
-                f"hardening_index={hardening_index}i,"
-                f"hardening_index_delta={delta_value}i,"
-                f"new_findings_since_last_scan={host['new_findings_since_last_scan']}i"
-            )
+            f"platform_security_posture_host,environment={report['environment']},host={host['host']} "
+            f"hardening_index={hardening_index}i,"
+            f"hardening_index_delta={delta_value}i,"
+            f"new_findings_since_last_scan={host['new_findings_since_last_scan']}i"
         )
     request = urllib.request.Request(
         f"{influx_url.rstrip('/')}/api/v2/write?org={urllib.parse.quote(influx_org)}&bucket={urllib.parse.quote(influx_bucket)}&precision=s",
@@ -452,9 +446,7 @@ def main(argv: list[str] | None = None) -> int:
                 include_suppressed=False,
             )
         else:
-            raise RuntimeError(
-                f"skip-lynis requested but no cached Lynis reports were found in {args.lynis_dir}"
-            )
+            raise RuntimeError(f"skip-lynis requested but no cached Lynis reports were found in {args.lynis_dir}")
 
         trivy_payloads: dict[str, list[dict[str, Any]]] = {}
         if not args.skip_trivy:
@@ -511,7 +503,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"REPORT_JSON={json.dumps(report, separators=(',', ':'))}")
         _publish_receipt_to_outline(receipt_path)
         return 0 if report["summary"]["status"] == "clean" else 2 if report["summary"]["status"] == "warn" else 1
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("security posture", exc)
 
 
@@ -529,7 +521,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         subprocess.run(
             [sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

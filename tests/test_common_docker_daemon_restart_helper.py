@@ -60,12 +60,14 @@ def test_common_docker_daemon_restart_helper_protects_shared_runtime_hosts_by_de
     options = specs["argument_specs"]["docker_daemon_restart"]["options"]
 
     assert task_names[0] == "Validate common docker_daemon_restart entrypoint inputs"
-    assert "inventory_hostname in common_docker_daemon_restart_protected_hosts" in block_fact["ansible.builtin.set_fact"][
-        "common_docker_daemon_restart_blocked"
-    ]
-    assert "common_docker_daemon_restart_force | bool" in block_fact["ansible.builtin.set_fact"][
-        "common_docker_daemon_restart_blocked"
-    ]
+    assert (
+        "inventory_hostname in common_docker_daemon_restart_protected_hosts"
+        in block_fact["ansible.builtin.set_fact"]["common_docker_daemon_restart_blocked"]
+    )
+    assert (
+        "common_docker_daemon_restart_force | bool"
+        in block_fact["ansible.builtin.set_fact"]["common_docker_daemon_restart_blocked"]
+    )
     assert fail_task["when"] == "common_docker_daemon_restart_blocked | bool"
     assert "common_docker_daemon_restart_force=true" in fail_task["ansible.builtin.fail"]["msg"]
     assert restart_task["ansible.builtin.systemd_service"]["state"] == "restarted"

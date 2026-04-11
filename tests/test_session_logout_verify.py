@@ -78,7 +78,9 @@ def test_find_cookie_value_filters_by_name_and_domain() -> None:
     )
 
     assert session_logout_verify.find_cookie_value(jar, "accessToken") == "outline-session"
-    assert session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="wiki.lv3.org") == "outline-session"
+    assert (
+        session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="wiki.lv3.org") == "outline-session"
+    )
     assert session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="home.lv3.org") is None
 
 

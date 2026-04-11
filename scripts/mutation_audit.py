@@ -35,13 +35,11 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.ledger import LedgerWriter  # noqa: E402
+from platform.ledger import LedgerWriter
 
 
 SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "mutation-audit-event.json")
-DEFAULT_LOCAL_SINK_PATH: Final[Path] = repo_path(
-    ".local", "state", "mutation-audit", "mutation-audit.jsonl"
-)
+DEFAULT_LOCAL_SINK_PATH: Final[Path] = repo_path(".local", "state", "mutation-audit", "mutation-audit.jsonl")
 DEFAULT_NTFY_FAILURE_DEDUPE_STATE_PATH: Final[Path] = repo_path(
     ".local", "state", "ntfy", "mutation-audit-failures.json"
 )
@@ -69,11 +67,11 @@ def require_enum(value: Any, path: str, allowed: set[str]) -> str:
 
 
 def utc_now_iso() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def default_correlation_id(surface: str, action: str) -> str:
-    timestamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    timestamp = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
     return f"{surface}:{action}:{timestamp}"
 
 
@@ -144,7 +142,9 @@ def validate_event(event: dict[str, Any]) -> dict[str, Any]:
     require_str(event.get("correlation_id"), "mutation audit event.correlation_id")
     require_str(event.get("evidence_ref"), "mutation audit event.evidence_ref", allow_empty=True)
 
-    unexpected = sorted(set(event.keys()) - {"ts", "actor", "surface", "action", "target", "outcome", "correlation_id", "evidence_ref"})
+    unexpected = sorted(
+        set(event.keys()) - {"ts", "actor", "surface", "action", "target", "outcome", "correlation_id", "evidence_ref"}
+    )
     if unexpected:
         raise ValueError(f"mutation audit event contains unsupported keys: {', '.join(unexpected)}")
     return event
@@ -296,10 +296,7 @@ def emit_event_best_effort(
 
 
 def format_ntfy_failure_message(event: dict[str, Any]) -> str:
-    message = (
-        f"{event['target']} failed during {event['action']}. "
-        f"Correlation id: {event['correlation_id']}."
-    )
+    message = f"{event['target']} failed during {event['action']}. Correlation id: {event['correlation_id']}."
     if event["evidence_ref"]:
         message += f" Evidence: {event['evidence_ref']}."
     return message
@@ -353,7 +350,9 @@ def publish_ntfy_failure_best_effort(
 def parse_loki_labels(value: str) -> dict[str, str]:
     parsed = json.loads(value)
     parsed = require_mapping(parsed, "--loki-labels")
-    return {require_str(key, "--loki-labels key"): require_str(val, f"--loki-labels.{key}") for key, val in parsed.items()}
+    return {
+        require_str(key, "--loki-labels key"): require_str(val, f"--loki-labels.{key}") for key, val in parsed.items()
+    }
 
 
 def main() -> int:

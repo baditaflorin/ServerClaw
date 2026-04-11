@@ -129,9 +129,7 @@ def test_validate_catalog_requires_full_service_coverage(monkeypatch: pytest.Mon
     )
     _write_yaml(
         host_vars_path,
-        "proxmox_guests:\n"
-        "  - name: alpha-vm\n"
-        "  - name: beta-vm\n",
+        "proxmox_guests:\n  - name: alpha-vm\n  - name: beta-vm\n",
     )
 
     monkeypatch.setattr(service_redundancy, "SERVICE_CATALOG_PATH", service_catalog_path)
@@ -196,9 +194,7 @@ def test_validate_catalog_rejects_wrong_standby_kind(monkeypatch: pytest.MonkeyP
     )
     _write_yaml(
         host_vars_path,
-        "proxmox_guests:\n"
-        "  - name: postgres-vm\n"
-        "  - name: postgres-replica-vm\n",
+        "proxmox_guests:\n  - name: postgres-vm\n  - name: postgres-replica-vm\n",
     )
 
     monkeypatch.setattr(service_redundancy, "SERVICE_CATALOG_PATH", service_catalog_path)

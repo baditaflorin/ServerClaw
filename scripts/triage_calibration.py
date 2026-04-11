@@ -115,7 +115,9 @@ def calibrate(
             "reports_reviewed": len(reports),
             "reports_with_hypotheses": matched_reports,
             "cases_reviewed": cases_reviewed,
-            "rules_with_data": sum(1 for bucket in per_rule.values() if bucket["top_hypothesis_count"] or bucket["resolved_case_count"]),
+            "rules_with_data": sum(
+                1 for bucket in per_rule.values() if bucket["top_hypothesis_count"] or bucket["resolved_case_count"]
+            ),
         },
         "rules": sorted(per_rule.values(), key=lambda item: item["rule_id"]),
         "output_path": str(output_path),

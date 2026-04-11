@@ -7,7 +7,6 @@ import argparse
 import json
 import math
 import subprocess
-import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -242,18 +241,18 @@ def run_scenario(
             success_count += 1
         requests.append(
             {
-              "iteration": iteration,
-              "status": status,
-              "latency_ms": latency_ms,
-              "observed_status": payload.get("status", payload.get("returncode")),
-              "observed": _compact(
-                  payload.get("body_excerpt")
-                  or payload.get("stdout_excerpt")
-                  or payload.get("error")
-                  or outcome.stdout
-                  or outcome.stderr
-              ),
-              "stderr": _compact(payload.get("stderr_excerpt") or outcome.stderr),
+                "iteration": iteration,
+                "status": status,
+                "latency_ms": latency_ms,
+                "observed_status": payload.get("status", payload.get("returncode")),
+                "observed": _compact(
+                    payload.get("body_excerpt")
+                    or payload.get("stdout_excerpt")
+                    or payload.get("error")
+                    or outcome.stdout
+                    or outcome.stderr
+                ),
+                "stderr": _compact(payload.get("stderr_excerpt") or outcome.stderr),
             }
         )
 
@@ -366,7 +365,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.print_report_json:
             print(f"REPORT_JSON={json.dumps(report, separators=(',', ':'))}")
         return 0 if report["overall"] == "pass" else 1
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("synthetic transaction replay", exc)
 
 

@@ -31,9 +31,9 @@ if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 SLO_CATALOG_PATH = REPO_ROOT / "config" / "slo-catalog.json"
-SLO_ALERTS_PATH  = REPO_ROOT / "config" / "prometheus" / "rules"    / "slo_alerts.yml"
-SLO_RULES_PATH   = REPO_ROOT / "config" / "prometheus" / "rules"    / "slo_rules.yml"
-SLO_TARGETS_PATH = REPO_ROOT / "config" / "prometheus" / "file_sd"  / "slo_targets.yml"
+SLO_ALERTS_PATH = REPO_ROOT / "config" / "prometheus" / "rules" / "slo_alerts.yml"
+SLO_RULES_PATH = REPO_ROOT / "config" / "prometheus" / "rules" / "slo_rules.yml"
+SLO_TARGETS_PATH = REPO_ROOT / "config" / "prometheus" / "file_sd" / "slo_targets.yml"
 
 GENERATED_HEADER = (
     "# AUTO-GENERATED from config/slo-catalog.json — do not edit manually\n"
@@ -45,6 +45,7 @@ GENERATED_HEADER = (
 # Catalog loading
 # ============================================================================
 
+
 def load_slo_catalog() -> dict[str, Any]:
     if not SLO_CATALOG_PATH.is_file():
         raise FileNotFoundError(f"SLO catalog not found: {SLO_CATALOG_PATH}")
@@ -55,6 +56,7 @@ def load_slo_catalog() -> dict[str, Any]:
 # ============================================================================
 # Helpers
 # ============================================================================
+
 
 def metric_slug(slo_id: str) -> str:
     """Convert slo-id to prometheus metric name component (hyphens → underscores)."""
@@ -69,14 +71,15 @@ def error_budget(objective_percent: float) -> float:
 # Alerts generation
 # ============================================================================
 
+
 def _alerts_block(slo: dict[str, Any]) -> str:
     """Return the YAML text for one SLO's alert rules (fast-burn + slow-burn)."""
-    slo_id   = slo["id"]
-    slug     = metric_slug(slo_id)
+    slo_id = slo["id"]
+    slug = metric_slug(slo_id)
     service_id = slo["service_id"]
-    indicator  = slo["indicator"]
-    desc       = slo.get("description", "")
-    budget     = error_budget(slo["objective_percent"])
+    indicator = slo["indicator"]
+    desc = slo.get("description", "")
+    budget = error_budget(slo["objective_percent"])
     budget_str = f"{budget:.6f}"
 
     lines: list[str] = []
@@ -88,16 +91,16 @@ def _alerts_block(slo: dict[str, Any]) -> str:
         f"        expr: (slo:{slug}:error_rate_5m > (14 * {budget_str})) and"
         f" (slo:{slug}:error_rate_1h > (14 * {budget_str}))"
     )
-    lines.append(f"        for: 2m")
-    lines.append(f"        labels:")
-    lines.append(f"          severity: critical")
+    lines.append("        for: 2m")
+    lines.append("        labels:")
+    lines.append("          severity: critical")
     lines.append(f"          service_id: {service_id}")
     lines.append(f"          slo_id: {slo_id}")
     lines.append(f"          indicator: {indicator}")
-    lines.append(f"        annotations:")
+    lines.append("        annotations:")
     lines.append(f"          summary: {slo_id} is burning its error budget at 14x")
     lines.append(f"          description: {desc}")
-    lines.append(f"          runbook: docs/runbooks/slo-tracking.md")
+    lines.append("          runbook: docs/runbooks/slo-tracking.md")
 
     # --- Slow burn (6x, 15m window) ---
     lines.append(f"      - alert: SLOSlowBurn_{slug}")
@@ -105,16 +108,16 @@ def _alerts_block(slo: dict[str, Any]) -> str:
         f"        expr: (slo:{slug}:error_rate_6h > (6 * {budget_str})) and"
         f" (slo:{slug}:error_rate_30d > (6 * {budget_str}))"
     )
-    lines.append(f"        for: 15m")
-    lines.append(f"        labels:")
-    lines.append(f"          severity: warning")
+    lines.append("        for: 15m")
+    lines.append("        labels:")
+    lines.append("          severity: warning")
     lines.append(f"          service_id: {service_id}")
     lines.append(f"          slo_id: {slo_id}")
     lines.append(f"          indicator: {indicator}")
-    lines.append(f"        annotations:")
+    lines.append("        annotations:")
     lines.append(f"          summary: {slo_id} is burning its error budget at 6x")
     lines.append(f"          description: {desc}")
-    lines.append(f"          runbook: docs/runbooks/slo-tracking.md")
+    lines.append("          runbook: docs/runbooks/slo-tracking.md")
 
     lines.append(f"# END SERVICE: {service_id}")
     return "\n".join(lines)
@@ -137,13 +140,14 @@ def build_slo_alerts(catalog: dict[str, Any]) -> str:
 # Recording rules generation
 # ============================================================================
 
+
 def _rules_block(slo: dict[str, Any]) -> str:
     """Return the YAML text for one SLO's recording rules."""
-    slo_id     = slo["id"]
-    slug       = metric_slug(slo_id)
+    slo_id = slo["id"]
+    slug = metric_slug(slo_id)
     service_id = slo["service_id"]
-    indicator  = slo["indicator"]
-    budget     = error_budget(slo["objective_percent"])
+    indicator = slo["indicator"]
+    budget = error_budget(slo["objective_percent"])
     budget_str = f"{budget:.6f}"
 
     job_selector = f'job="slo-blackbox",slo_id="{slo_id}"'
@@ -154,10 +158,8 @@ def _rules_block(slo: dict[str, Any]) -> str:
     # Success ratio rules — 4 windows
     for window in ("5m", "1h", "6h", "30d"):
         lines.append(f"      - record: slo:{slug}:success_ratio_{window}")
-        lines.append(
-            f"        expr: avg_over_time(probe_success{{{job_selector}}}[{window}])"
-        )
-        lines.append(f"        labels:")
+        lines.append(f"        expr: avg_over_time(probe_success{{{job_selector}}}[{window}])")
+        lines.append("        labels:")
         lines.append(f"          slo_id: {slo_id}")
         lines.append(f"          service_id: {service_id}")
         lines.append(f"          indicator: {indicator}")
@@ -166,7 +168,7 @@ def _rules_block(slo: dict[str, Any]) -> str:
     for window in ("5m", "1h", "6h", "30d"):
         lines.append(f"      - record: slo:{slug}:error_rate_{window}")
         lines.append(f"        expr: 1 - slo:{slug}:success_ratio_{window}")
-        lines.append(f"        labels:")
+        lines.append("        labels:")
         lines.append(f"          slo_id: {slo_id}")
         lines.append(f"          service_id: {service_id}")
         lines.append(f"          indicator: {indicator}")
@@ -192,19 +194,20 @@ def build_slo_rules(catalog: dict[str, Any]) -> str:
 # File-SD targets generation
 # ============================================================================
 
+
 def _target_block(slo: dict[str, Any]) -> str:
     """Return the YAML text for one SLO's file-SD target entry."""
-    slo_id      = slo["id"]
-    service_id  = slo["service_id"]
-    indicator   = slo["indicator"]
-    target_url  = slo["target_url"]
-    probe_mod   = slo["probe_module"]
+    slo_id = slo["id"]
+    service_id = slo["service_id"]
+    indicator = slo["indicator"]
+    target_url = slo["target_url"]
+    probe_mod = slo["probe_module"]
 
     lines: list[str] = []
     lines.append(f"# BEGIN SERVICE: {service_id}")
-    lines.append(f"- targets:")
+    lines.append("- targets:")
     lines.append(f"    - {target_url}")
-    lines.append(f"  labels:")
+    lines.append("  labels:")
     lines.append(f"    service_id: {service_id}")
     lines.append(f"    slo_id: {slo_id}")
     lines.append(f"    indicator: {indicator}")
@@ -224,6 +227,7 @@ def build_slo_targets(catalog: dict[str, Any]) -> str:
 # Write / check helpers
 # ============================================================================
 
+
 def _read_existing(path: Path) -> str:
     if path.is_file():
         return path.read_text()
@@ -239,14 +243,15 @@ def _write_file(path: Path, content: str) -> None:
 # Main
 # ============================================================================
 
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Generate Prometheus SLO config files from config/slo-catalog.json.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--write",   action="store_true", help="Write generated files to disk.")
-    mode.add_argument("--check",   action="store_true", help="Exit non-zero if files would change (CI mode).")
+    mode.add_argument("--write", action="store_true", help="Write generated files to disk.")
+    mode.add_argument("--check", action="store_true", help="Exit non-zero if files would change (CI mode).")
     mode.add_argument("--dry-run", action="store_true", help="Print what would be written; do not write.")
 
     args = parser.parse_args(argv)
@@ -258,8 +263,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     outputs = {
-        SLO_ALERTS_PATH:  build_slo_alerts(catalog),
-        SLO_RULES_PATH:   build_slo_rules(catalog),
+        SLO_ALERTS_PATH: build_slo_alerts(catalog),
+        SLO_RULES_PATH: build_slo_rules(catalog),
         SLO_TARGETS_PATH: build_slo_targets(catalog),
     }
 
@@ -293,12 +298,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     # Default: print summary
-    print(json.dumps({
-        "slo_count": len(catalog["slos"]),
-        "outputs": [str(p.relative_to(REPO_ROOT)) for p in outputs],
-        "would_change": changed,
-        "hint": "Pass --write to write files, --dry-run to preview, --check for CI.",
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "slo_count": len(catalog["slos"]),
+                "outputs": [str(p.relative_to(REPO_ROOT)) for p in outputs],
+                "would_change": changed,
+                "hint": "Pass --write to write files, --dry-run to preview, --check for CI.",
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

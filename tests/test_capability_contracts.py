@@ -52,14 +52,7 @@ def test_validate_rejects_unknown_service_id(tmp_path: Path) -> None:
         tmp_path / "docs" / "runbooks" / "configure-keycloak.md",
         "# Configure Keycloak\n",
     )
-    service_catalog = {
-        "services": [
-            {
-                "id": "windmill",
-                "name": "Windmill"
-            }
-        ]
-    }
+    service_catalog = {"services": [{"id": "windmill", "name": "Windmill"}]}
     catalog = {
         "$schema": "docs/schema/capability-contract-catalog.schema.json",
         "schema_version": "1.0.0",
@@ -82,13 +75,13 @@ def test_validate_rejects_unknown_service_id(tmp_path: Path) -> None:
                 "migration_expectations": {
                     "export_formats": ["realm export"],
                     "import_requirements": ["Replacement can import clients."],
-                    "fallback_behaviour": "New logins fail closed."
+                    "fallback_behaviour": "New logins fail closed.",
                 },
                 "failure_modes": [
                     {
                         "mode": "provider unavailable",
                         "acceptable_degradation": "Existing sessions continue briefly.",
-                        "operator_response": "Use break-glass identities."
+                        "operator_response": "Use break-glass identities.",
                     }
                 ],
                 "current_selection": {
@@ -96,11 +89,13 @@ def test_validate_rejects_unknown_service_id(tmp_path: Path) -> None:
                     "service_id": "keycloak",
                     "selection_adr": "0056",
                     "runbook": "docs/runbooks/configure-keycloak.md",
-                    "notes": "Selected for OIDC."
-                }
+                    "notes": "Selected for OIDC.",
+                },
             }
-        ]
+        ],
     }
 
     with pytest.raises(ValueError, match="unknown service 'keycloak'"):
-        module.validate_capability_contract_catalog(catalog, service_catalog=service_catalog, catalog_path=tmp_path / "catalog.json")
+        module.validate_capability_contract_catalog(
+            catalog, service_catalog=service_catalog, catalog_path=tmp_path / "catalog.json"
+        )

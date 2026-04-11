@@ -59,10 +59,7 @@ def test_validate_provider_profile_catalog_rejects_absolute_overlay_root() -> No
                 "id": "bad-profile",
                 "title": "Bad profile",
                 "description": "Bad",
-                "values": {
-                    key: "value"
-                    for key in module.REQUIRED_PROFILE_VALUE_KEYS
-                },
+                "values": {key: "value" for key in module.REQUIRED_PROFILE_VALUE_KEYS},
             }
         ],
     }

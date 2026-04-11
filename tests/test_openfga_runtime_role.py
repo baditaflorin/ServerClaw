@@ -60,7 +60,9 @@ def test_openfga_runtime_defaults_use_private_controller_url() -> None:
 
     assert defaults["openfga_image"] == "{{ container_image_catalog.images.openfga_runtime.ref }}"
     assert "| urlencode" in defaults["openfga_datastore_uri"]
-    assert defaults["openfga_controller_url"].startswith("http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}")
+    assert defaults["openfga_controller_url"].startswith(
+        "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}"
+    )
     assert "openfga_host_proxy_port" in defaults["openfga_controller_url"]
     assert defaults["openfga_preshared_key_local_file"].endswith("/.local/openfga/preshared-key.txt")
 
@@ -69,7 +71,9 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
     tasks = load_tasks()
 
     secret_payload_task = next(task for task in tasks if task.get("name") == "Record the OpenFGA runtime secrets")
-    openbao_helper = next(task for task in tasks if task.get("name") == "Prepare OpenBao agent runtime secret injection for OpenFGA")
+    openbao_helper = next(
+        task for task in tasks if task.get("name") == "Prepare OpenBao agent runtime secret injection for OpenFGA"
+    )
     openbao_agent_up_task = next(task for task in tasks if task.get("name") == "Start the OpenFGA OpenBao agent")
     runtime_env_wait_task = next(task for task in tasks if task.get("name") == "Wait for the OpenFGA runtime env file")
     migrate_task = next(task for task in tasks if task.get("name") == "Run OpenFGA database migrations")
@@ -81,16 +85,24 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
     nat_chain_recheck_task = next(
         task for task in tasks if task.get("name") == "Recheck the Docker nat chain before OpenFGA startup"
     )
-    docker_info_task = next(task for task in tasks if task.get("name") == "Wait for the Docker daemon to answer after networking recovery")
-    port_probe_task = next(task for task in tasks if task.get("name") == "Check whether the OpenFGA HTTP port is already published locally")
+    docker_info_task = next(
+        task for task in tasks if task.get("name") == "Wait for the Docker daemon to answer after networking recovery"
+    )
+    port_probe_task = next(
+        task for task in tasks if task.get("name") == "Check whether the OpenFGA HTTP port is already published locally"
+    )
     health_probe_task = next(
-        task for task in tasks if task.get("name") == "Check whether the current OpenFGA health endpoint is healthy before startup"
+        task
+        for task in tasks
+        if task.get("name") == "Check whether the current OpenFGA health endpoint is healthy before startup"
     )
     cleanup_task = next(
         task for task in tasks if task.get("name") == "Remove stale OpenFGA compose resources before force recreate"
     )
     force_recreate_task = next(
-        task for task in tasks if task.get("name") == "Force-recreate the OpenFGA runtime stack after Docker networking recovery"
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the OpenFGA runtime stack after Docker networking recovery"
     )
     up_task = next(task for task in tasks if task.get("name") == "Converge the OpenFGA runtime stack")
 
@@ -107,11 +119,13 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
     assert openbao_agent_up_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "openbao-agent"]
     assert runtime_env_wait_task["ansible.builtin.shell"].startswith("set -euo pipefail")
     assert 'test -s "{{ openfga_env_file }}"' in runtime_env_wait_task["ansible.builtin.shell"]
-    assert 'grep -Fqx "OPENFGA_HTTP_ADDR={{ openfga_http_addr }}" "{{ openfga_env_file }}"' in (
-        runtime_env_wait_task["ansible.builtin.shell"]
+    assert (
+        'grep -Fqx "OPENFGA_HTTP_ADDR={{ openfga_http_addr }}" "{{ openfga_env_file }}"'
+        in (runtime_env_wait_task["ansible.builtin.shell"])
     )
-    assert 'grep -Fqx "OPENFGA_GRPC_ADDR={{ openfga_grpc_addr }}" "{{ openfga_env_file }}"' in (
-        runtime_env_wait_task["ansible.builtin.shell"]
+    assert (
+        'grep -Fqx "OPENFGA_GRPC_ADDR={{ openfga_grpc_addr }}" "{{ openfga_env_file }}"'
+        in (runtime_env_wait_task["ansible.builtin.shell"])
     )
     assert runtime_env_wait_task["until"] == "openfga_runtime_env_contract.rc == 0"
     assert migrate_task["ansible.builtin.command"]["argv"][:5] == [
@@ -154,9 +168,15 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
 def test_openfga_verify_task_checks_health_and_authenticated_api() -> None:
     tasks = yaml.safe_load(VERIFY_PATH.read_text(encoding="utf-8"))
 
-    health_task = next(task for task in tasks if task.get("name") == "Verify OpenFGA responds on the local health endpoint")
-    api_task = next(task for task in tasks if task.get("name") == "Verify the OpenFGA API enforces the repo-managed preshared key")
-    assert_task = next(task for task in tasks if task.get("name") == "Assert OpenFGA health and authenticated access are working")
+    health_task = next(
+        task for task in tasks if task.get("name") == "Verify OpenFGA responds on the local health endpoint"
+    )
+    api_task = next(
+        task for task in tasks if task.get("name") == "Verify the OpenFGA API enforces the repo-managed preshared key"
+    )
+    assert_task = next(
+        task for task in tasks if task.get("name") == "Assert OpenFGA health and authenticated access are working"
+    )
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ openfga_local_url }}/healthz"
     assert api_task["ansible.builtin.uri"]["headers"]["Authorization"] == "Bearer {{ openfga_preshared_key }}"
@@ -177,7 +197,11 @@ def test_openfga_compose_template_uses_openbao_agent_and_runtime_env() -> None:
 def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
 
-    bootstrap_play = next(play for play in plays if play["name"] == "Bootstrap the ServerClaw delegated authorization graph from the controller")
+    bootstrap_play = next(
+        play
+        for play in plays
+        if play["name"] == "Bootstrap the ServerClaw delegated authorization graph from the controller"
+    )
     task = bootstrap_play["tasks"][0]
 
     assert task["name"] == "Bootstrap the ServerClaw authorization store, model, and tuples"

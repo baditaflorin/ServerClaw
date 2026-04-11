@@ -170,5 +170,5 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise SystemExit(emit_cli_error("generate https tls assurance", exc))

@@ -86,10 +86,10 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Ensure the synced ops portal application file parent directories exist" in tasks
     assert "Sync the ops portal application files" in tasks
     assert 'src: "{{ item.path }}"' in tasks
-    assert 'unsafe_writes: true' in tasks
+    assert "unsafe_writes: true" in tasks
     assert "Ensure the ops portal overlay directories exist" in tasks
     assert "Gather controller checksums for explicit ops portal runtime files" in tasks
-    assert 'checksum_algorithm: sha1' in tasks
+    assert "checksum_algorithm: sha1" in tasks
     assert "Ensure the parent directories for explicit ops portal runtime files exist" in tasks
     assert "Sync critical ops portal runtime files explicitly" in tasks
     assert 'src: "{{ item.item.src }}"' in tasks
@@ -103,23 +103,23 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "retries: 3" in tasks
     assert "until: search_fabric_copy_result is succeeded" in tasks
     assert "Sync the ops portal service build inputs explicitly" in tasks
-    assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in tasks
-    assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in tasks
-    assert '{{ ops_portal_repo_root }}/scripts/workbench_information_architecture.py' in tasks
-    assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in tasks
-    assert 'patterns:' in defaults
+    assert "{{ ops_portal_repo_root }}/scripts/publication_contract.py" in tasks
+    assert "{{ ops_portal_repo_root }}/scripts/stage_smoke.py" in tasks
+    assert "{{ ops_portal_repo_root }}/scripts/workbench_information_architecture.py" in tasks
+    assert "{{ ops_portal_repo_root }}/requirements/ops-portal.txt" in tasks
+    assert "patterns:" in defaults
     assert '"*.json"' in defaults
-    assert 'depth: 1' in defaults
-    assert 'excludes:' in defaults
-    assert '- evidence' in defaults
-    assert '- preview' in defaults
+    assert "depth: 1" in defaults
+    assert "excludes:" in defaults
+    assert "- evidence" in defaults
+    assert "- preview" in defaults
     assert "receipts/live-applies/staging/" in defaults
     assert "ops_portal_pruned_data_paths:" in defaults
     assert "{{ ops_portal_data_dir }}/receipts/live-applies/evidence" in defaults
     assert "{{ ops_portal_data_dir }}/receipts/live-applies/preview" in defaults
     assert "Remove stale excluded ops portal data directories before sync" in tasks
     assert "Discover the ops portal directory-backed data files on the controller" in tasks
-    assert "depth: \"{{ item.depth | default(omit) }}\"" in tasks
+    assert 'depth: "{{ item.depth | default(omit) }}"' in tasks
     assert "item.excludes | default([])" in tasks
     assert "Ensure the synced ops portal directory-backed data subdirectories exist" in tasks
     assert 'stdin: "{{ ops_portal_directory_source_files.results | to_json }}"' in tasks
@@ -173,21 +173,26 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert "Verify the journey-aware entry surface renders locally" in verify_tasks
     assert "/entry?neutral=1" in verify_tasks
     assert "'Journey-Aware Start Surface' in ops_portal_verify_entry.content" in verify_tasks
-    assert "'Complete the activation checklist or skip it before pinning a preferred home.' in ops_portal_verify_entry.content" in verify_tasks
+    assert (
+        "'Complete the activation checklist or skip it before pinning a preferred home.' in ops_portal_verify_entry.content"
+        in verify_tasks
+    )
     assert "Verify the application launcher partial renders locally" in verify_tasks
-    assert '/partials/launcher' in verify_tasks
+    assert "/partials/launcher" in verify_tasks
     assert "Application Launcher" in verify_tasks
-    assert "Search destinations, pin favorites, and reopen recent paths from one shared masthead control." in verify_tasks
+    assert (
+        "Search destinations, pin favorites, and reopen recent paths from one shared masthead control." in verify_tasks
+    )
     assert "Verify the activation checklist partial renders locally" in verify_tasks
-    assert '/partials/activation' in verify_tasks
+    assert "/partials/activation" in verify_tasks
     assert "First-Run Activation" in verify_tasks
     assert "Checklist progress and progressive capability reveal" in verify_tasks
     assert "Verify the attention center partial renders locally" in verify_tasks
-    assert '/partials/attention' in verify_tasks
+    assert "/partials/attention" in verify_tasks
     assert "Notification Center" in verify_tasks
     assert "Actionable items routed into one shared queue" in verify_tasks
     assert "Verify the runtime assurance matrix partial renders locally" in verify_tasks
-    assert '/partials/runtime-assurance' in verify_tasks
+    assert "/partials/runtime-assurance" in verify_tasks
     assert "Ops portal runtime assurance matrix partial did not render the ADR 0244 view." in verify_tasks
     assert "Assert the runtime assurance matrix panel is not degraded" in verify_tasks
     assert "'Runtime assurance data is degraded:' not in ops_portal_verify_runtime_assurance.content" in verify_tasks

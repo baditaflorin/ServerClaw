@@ -48,11 +48,7 @@ def test_guest_log_shipping_lane_map_covers_all_production_guest_roles() -> None
     assert_guest_log_shipping_lane_map(COLLECTION_PLAYBOOK_PATH)
 
     platform_vars = load_yaml(PROXMOX_HOST_VARS_PATH)
-    production_roles = {
-        guest["role"]
-        for guest in platform_vars["proxmox_guests"]
-        if guest["name"].endswith("-lv3")
-    }
+    production_roles = {guest["role"] for guest in platform_vars["proxmox_guests"] if guest["name"].endswith("-lv3")}
     assert production_roles <= {
         "nginx",
         "docker-runtime",
@@ -65,6 +61,7 @@ def test_guest_log_shipping_lane_map_covers_all_production_guest_roles() -> None
         "backup",
         "coolify",
     }
+
 
 def test_guest_log_shipping_enables_postgres_audit_pipeline_from_repo_catalog() -> None:
     playbook = load_yaml(PLAYBOOK_PATH)
@@ -93,7 +90,9 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
         "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
     )
     assert verify_play["vars"]["monitoring_stack_postgres_audit_metrics_job_name"] == "postgres-audit-alloy"
-    assert "monitoring_stack_postgres_audit_host" in verify_play["vars"]["monitoring_stack_postgres_audit_metrics_target"]
+    assert (
+        "monitoring_stack_postgres_audit_host" in verify_play["vars"]["monitoring_stack_postgres_audit_metrics_target"]
+    )
     assert '\\"' not in verify_task["ansible.builtin.uri"]["url"]
     assert "monitoring_stack_postgres_audit_metrics_target" in verify_task["failed_when"]
 
@@ -104,7 +103,10 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
     )
     assert seed_task["delegate_to"] == "{{ monitoring_stack_postgres_audit_host }}"
     assert seed_task["become_user"] == "postgres"
-    assert "CREATE ROLE {{ monitoring_stack_postgres_audit_metrics_probe_role }} NOLOGIN" in seed_task["ansible.builtin.command"]["argv"][-1]
+    assert (
+        "CREATE ROLE {{ monitoring_stack_postgres_audit_metrics_probe_role }} NOLOGIN"
+        in seed_task["ansible.builtin.command"]["argv"][-1]
+    )
 
     endpoint_task = next(
         task
@@ -123,6 +125,8 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
     assert "loki_process_custom_postgres_unknown_connection_events_total" not in command_script
     assert endpoint_task["until"] == "monitoring_stack_verify_postgres_audit_metrics_endpoint.rc == 0"
     assert endpoint_task["failed_when"] == "monitoring_stack_verify_postgres_audit_metrics_endpoint.rc != 0"
+
+
 def test_openbao_audit_scrape_does_not_manage_service_owned_paths() -> None:
     playbook = load_yaml(PLAYBOOK_PATH)
     role_vars = playbook[0]["roles"][0]["vars"]

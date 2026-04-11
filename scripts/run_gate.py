@@ -8,7 +8,7 @@ import json
 import os
 import sys
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +17,7 @@ if __package__ in {None, ""}:
 
 from scripts import parallel_check
 from scripts.session_workspace import resolve_session_workspace
+
 try:
     from scripts import validation_lanes
 except ModuleNotFoundError as exc:
@@ -47,9 +48,7 @@ DEFAULT_STATUS_FILE = Path(".local/validation-gate/last-run.json")
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run the repository validation gate from config/validation-gate.json."
-    )
+    parser = argparse.ArgumentParser(description="Run the repository validation gate from config/validation-gate.json.")
     parser.add_argument(
         "checks",
         nargs="*",
@@ -170,9 +169,7 @@ def resolve_changed_files_override() -> tuple[str, ...] | None:
     changed_files: list[str] = []
     for index, item in enumerate(payload):
         if not isinstance(item, str) or not item.strip():
-            raise ValueError(
-                f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string"
-            )
+            raise ValueError(f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string")
         changed_files.append(item.strip())
     return tuple(changed_files)
 
@@ -181,7 +178,11 @@ def resolve_gate_selection(
     *,
     args: argparse.Namespace,
     manifest: dict[str, parallel_check.CheckDefinition],
-) -> tuple[list[parallel_check.CheckDefinition], validation_lanes.ValidationLaneCatalog | None, validation_lanes.ValidationLaneSelection | None]:
+) -> tuple[
+    list[parallel_check.CheckDefinition],
+    validation_lanes.ValidationLaneCatalog | None,
+    validation_lanes.ValidationLaneSelection | None,
+]:
     lane_catalog_path = resolve_lane_catalog_path(args)
     requested_lanes = list(args.lane or ())
     if requested_lanes and args.checks:
@@ -325,7 +326,7 @@ def build_status_payload(
             "state_namespace": session_workspace.state_namespace,
         },
         "manifest": str(manifest_path.resolve()),
-        "executed_at": datetime.now(timezone.utc).isoformat(),
+        "executed_at": datetime.now(UTC).isoformat(),
         "runner": runner_context,
         "checks": [
             {
@@ -336,9 +337,7 @@ def build_status_payload(
                 "returncode": result.returncode,
                 "duration_seconds": round(result.duration_seconds, 2),
                 "docker_command": result.docker_command,
-                "runner_unavailable_reason": result.stderr
-                if result.status == "runner_unavailable"
-                else None,
+                "runner_unavailable_reason": result.stderr if result.status == "runner_unavailable" else None,
             }
             for result in results
         ],
@@ -394,9 +393,7 @@ def main(argv: list[str] | None = None) -> int:
             returncode=69,
             duration_seconds=0.0,
             stdout="",
-            stderr="; ".join(
-                runner_context["lane_evaluations"].get(check.label, {}).get("reasons", [])
-            ),
+            stderr="; ".join(runner_context["lane_evaluations"].get(check.label, {}).get("reasons", [])),
             docker_command=[],
         )
         for check in checks

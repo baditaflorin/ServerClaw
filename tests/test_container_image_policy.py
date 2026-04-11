@@ -48,6 +48,7 @@ def test_validate_exception_metadata_accepts_reason_and_review_by() -> None:
         "images.example.exception",
     )
 
+
 def test_validate_scan_receipt_accepts_grype_summary_with_backing_receipts(
     tmp_path: Path,
     monkeypatch,
@@ -78,4 +79,6 @@ def test_validate_scan_receipt_accepts_grype_summary_with_backing_receipts(
         },
     }
 
-    policy.validate_scan_receipt(receipt, repo_root / "receipts" / "image-scans" / "example.json", "example_runtime", ref)
+    policy.validate_scan_receipt(
+        receipt, repo_root / "receipts" / "image-scans" / "example.json", "example_runtime", ref
+    )

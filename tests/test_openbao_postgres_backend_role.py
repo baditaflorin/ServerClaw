@@ -5,13 +5,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_ROOT = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "roles"
-    / "openbao_postgres_backend"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "openbao_postgres_backend"
 )
 DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"

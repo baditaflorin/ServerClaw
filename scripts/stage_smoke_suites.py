@@ -8,7 +8,7 @@ import os
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -42,7 +42,7 @@ def require_string_list(value: Any, path: str) -> list[str]:
 
 
 def iso_now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def load_stage_smoke_catalog(path: Path = CATALOG_PATH) -> dict[str, Any]:
@@ -265,11 +265,7 @@ def suite_report_path(aggregate_path: Path, suite_id: str) -> Path:
 
 
 def build_summary_text(summary: dict[str, Any]) -> str:
-    return (
-        f"{summary.get('passed', 0)} passed, "
-        f"{summary.get('failed', 0)} failed, "
-        f"{summary.get('skipped', 0)} skipped"
-    )
+    return f"{summary.get('passed', 0)} passed, {summary.get('failed', 0)} failed, {summary.get('skipped', 0)} skipped"
 
 
 def build_receipt_smoke_suite_entry(result: dict[str, Any], repo_root: Path) -> dict[str, Any]:
@@ -337,9 +333,7 @@ def execute_integration_suite(
         payload = json.loads(report_file.read_text(encoding="utf-8"))
         return (0 if payload["status"] == "passed" else 1), payload
     raise RuntimeError(
-        completed.stderr.strip()
-        or completed.stdout.strip()
-        or "stage smoke suite integration execution failed"
+        completed.stderr.strip() or completed.stdout.strip() or "stage smoke suite integration execution failed"
     )
 
 
@@ -368,13 +362,9 @@ def run_stage_smoke_suites(
         if suite is None:
             raise ValueError(f"unknown smoke suite '{suite_id}'")
         if suite["service_id"] != service_id:
-            raise ValueError(
-                f"suite '{suite_id}' belongs to service '{suite['service_id']}', not '{service_id}'"
-            )
+            raise ValueError(f"suite '{suite_id}' belongs to service '{suite['service_id']}', not '{service_id}'")
         if suite["environment"] != environment:
-            raise ValueError(
-                f"suite '{suite_id}' belongs to environment '{suite['environment']}', not '{environment}'"
-            )
+            raise ValueError(f"suite '{suite_id}' belongs to environment '{suite['environment']}', not '{environment}'")
 
         integration_report = suite_report_path(aggregate_path, suite_id)
         _exit_code, payload = execute_integration_suite(
@@ -419,9 +409,7 @@ def run_stage_smoke_suites(
         "suite_ids": requested_suite_ids,
         "summary": summary,
         "suites": results,
-        "receipt_smoke_suites": [
-            build_receipt_smoke_suite_entry(result, repo_root) for result in results
-        ],
+        "receipt_smoke_suites": [build_receipt_smoke_suite_entry(result, repo_root) for result in results],
     }
     write_report(aggregate_path, aggregate_payload)
     return (0 if aggregate_status == "passed" else 1), aggregate_payload
@@ -431,16 +419,15 @@ def list_suites(catalog: dict[str, Any] | None = None) -> int:
     suite_index = validate_stage_smoke_catalog(catalog or load_stage_smoke_catalog(), load_service_catalog())
     for suite_id in sorted(suite_index):
         suite = suite_index[suite_id]
-        print(
-            f"{suite_id}: {suite['service_id']} [{suite['environment']}] "
-            f"{suite['runner']} / {suite['mode']}"
-        )
+        print(f"{suite_id}: {suite['service_id']} [{suite['environment']}] {suite['runner']} / {suite['mode']}")
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Validate and run repo-managed stage smoke suites.")
-    parser.add_argument("--validate", action="store_true", help="Validate the smoke suite catalog and service bindings.")
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate the smoke suite catalog and service bindings."
+    )
     parser.add_argument("--list", action="store_true", help="List declared smoke suites.")
     parser.add_argument(
         "--repo-root",
@@ -489,10 +476,7 @@ def main(argv: list[str] | None = None) -> int:
             validate_stage_smoke_catalog(catalog, service_catalog)
             for suite_id in sorted(item["id"] for item in catalog["suites"]):
                 suite = next(entry for entry in catalog["suites"] if entry["id"] == suite_id)
-                print(
-                    f"{suite_id}: {suite['service_id']} [{suite['environment']}] "
-                    f"{suite['runner']} / {suite['mode']}"
-                )
+                print(f"{suite_id}: {suite['service_id']} [{suite['environment']}] {suite['runner']} / {suite['mode']}")
             return 0
 
         explicit_suite_ids = list(args.suite_id)

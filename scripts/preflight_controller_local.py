@@ -24,7 +24,6 @@ from worktree_bootstrap import (
 )
 from workflow_catalog import (
     DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS,
-    WORKFLOW_SECRET_FIELDS,
     load_secret_manifest,
     load_workflow_catalog,
     validate_secret_manifest,
@@ -255,9 +254,7 @@ def run_workflow(secret_manifest: dict, catalog: dict, bootstrap_catalog: dict, 
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Check controller-local secret prerequisites for a workflow."
-    )
+    parser = argparse.ArgumentParser(description="Check controller-local secret prerequisites for a workflow.")
     parser.add_argument("--workflow", help="Workflow id from the controller-local secret manifest.")
     parser.add_argument("--list", action="store_true", help="List available workflows.")
     args = parser.parse_args()

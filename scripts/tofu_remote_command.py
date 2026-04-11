@@ -117,23 +117,31 @@ def main() -> None:
         if not args.vm:
             raise SystemExit("--vm is required for import")
         address, import_id = import_target(args.environment, args.vm)
-        command = [
-            "cd",
-            build_server_workspace(),
-            "&&",
-        ] + command_prefix + [
-            "./scripts/tofu_exec.sh",
-            "import",
-            args.environment,
-            address,
-            import_id,
-        ]
+        command = (
+            [
+                "cd",
+                build_server_workspace(),
+                "&&",
+            ]
+            + command_prefix
+            + [
+                "./scripts/tofu_exec.sh",
+                "import",
+                args.environment,
+                address,
+                import_id,
+            ]
+        )
     else:
-        command = [
-            "cd",
-            build_server_workspace(),
-            "&&",
-        ] + command_prefix + ["./scripts/tofu_exec.sh", args.action, args.environment]
+        command = (
+            [
+                "cd",
+                build_server_workspace(),
+                "&&",
+            ]
+            + command_prefix
+            + ["./scripts/tofu_exec.sh", args.action, args.environment]
+        )
 
     print(" ".join(command))
 

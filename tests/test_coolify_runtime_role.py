@@ -18,9 +18,18 @@ def load_yaml(path: Path) -> list[dict] | dict:
 
 def test_defaults_use_service_topology_urls_and_local_artifact_contract() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
-    assert defaults["coolify_dashboard_port"] == "{{ platform_service_topology | platform_service_port('coolify', 'internal') }}"
-    assert defaults["coolify_proxy_port"] == "{{ platform_service_topology | platform_service_port('coolify_apps', 'internal') }}"
-    assert defaults["coolify_controller_url"] == "{{ platform_service_topology | platform_service_url('coolify', 'controller') }}"
+    assert (
+        defaults["coolify_dashboard_port"]
+        == "{{ platform_service_topology | platform_service_port('coolify', 'internal') }}"
+    )
+    assert (
+        defaults["coolify_proxy_port"]
+        == "{{ platform_service_topology | platform_service_port('coolify_apps', 'internal') }}"
+    )
+    assert (
+        defaults["coolify_controller_url"]
+        == "{{ platform_service_topology | platform_service_url('coolify', 'controller') }}"
+    )
     assert defaults["coolify_private_url"] == "http://{{ ansible_host }}:{{ coolify_dashboard_port }}"
     assert defaults["coolify_public_url"] == "https://coolify.lv3.org"
     assert defaults["coolify_apps_public_url"] == "https://apps.lv3.org"
@@ -52,7 +61,9 @@ def test_main_tasks_bootstrap_api_token_and_local_server_registration() -> None:
     assert "Persist the Coolify controller auth locally" in names
 
     wait_for_port_idx = task_names.index("Wait for Coolify to listen on the guest dashboard port")
-    cache_cleanup_idx = task_names.index("Clear stale Laravel bootstrap cache files before repo-managed Coolify bootstrap")
+    cache_cleanup_idx = task_names.index(
+        "Clear stale Laravel bootstrap cache files before repo-managed Coolify bootstrap"
+    )
     bootstrap_idx = task_names.index("Ensure the Coolify root account and API settings are enforced")
     register_idx = task_names.index("Register the Coolify deployment SSH key and local server")
     assert_local_server_idx = task_names.index("Assert the Coolify local deployment server is usable")
@@ -63,10 +74,16 @@ def test_main_tasks_bootstrap_api_token_and_local_server_registration() -> None:
         for task in tasks
         if task["name"] == "Clear stale Laravel bootstrap cache files before repo-managed Coolify bootstrap"
     )
-    bootstrap_task = next(task for task in tasks if task["name"] == "Ensure the Coolify root account and API settings are enforced")
-    register_task = next(task for task in tasks if task["name"] == "Register the Coolify deployment SSH key and local server")
+    bootstrap_task = next(
+        task for task in tasks if task["name"] == "Ensure the Coolify root account and API settings are enforced"
+    )
+    register_task = next(
+        task for task in tasks if task["name"] == "Register the Coolify deployment SSH key and local server"
+    )
     record_task = next(task for task in tasks if task["name"] == "Record the Coolify server registration payload")
-    emit_assert_task = next(task for task in tasks if task["name"] == "Assert the Coolify server registration payload was emitted")
+    emit_assert_task = next(
+        task for task in tasks if task["name"] == "Assert the Coolify server registration payload was emitted"
+    )
     token_task = next(task for task in tasks if task["name"] == "Rotate the Coolify API token and persist it locally")
     assert wait_for_port_idx < cache_cleanup_idx < bootstrap_idx < register_idx < assert_local_server_idx < health_idx
     assert '-name "config.php"' in cache_cleanup_task["ansible.builtin.shell"]
@@ -80,10 +97,18 @@ def test_main_tasks_bootstrap_api_token_and_local_server_registration() -> None:
     assert "ValidateServer::run($server)" in register_task["ansible.builtin.shell"]
     assert 'StandaloneDocker::where("server_id", $server->id)' in register_task["ansible.builtin.shell"]
     assert '"__LV3_SERVER_REGISTRATION__"' in register_task["ansible.builtin.shell"]
-    assert "coolify_server_registration.stdout_lines" in record_task["ansible.builtin.set_fact"]["coolify_server_registration_payload"]
-    assert "^__LV3_SERVER_REGISTRATION__" in record_task["ansible.builtin.set_fact"]["coolify_server_registration_payload"]
+    assert (
+        "coolify_server_registration.stdout_lines"
+        in record_task["ansible.builtin.set_fact"]["coolify_server_registration_payload"]
+    )
+    assert (
+        "^__LV3_SERVER_REGISTRATION__" in record_task["ansible.builtin.set_fact"]["coolify_server_registration_payload"]
+    )
     assert emit_assert_task["ansible.builtin.assert"]["that"] == ["coolify_server_registration_payload | length > 0"]
-    assert "$user->tokens()->where(\"name\", \"{{ coolify_api_token_name }}\")->delete();" in token_task["ansible.builtin.shell"]
+    assert (
+        '$user->tokens()->where("name", "{{ coolify_api_token_name }}")->delete();'
+        in token_task["ansible.builtin.shell"]
+    )
 
 
 def test_templates_render_upstream_like_runtime_contract() -> None:
@@ -103,16 +128,18 @@ def test_templates_render_upstream_like_runtime_contract() -> None:
     assert "gateway: {{ coolify_bridge_gateway }}" in compose
     assert "coolify-db:/var/lib/postgresql/data" in compose
     assert "redis-server --save 20 1 --loglevel warning --requirepass {{ coolify_redis_password }}" in compose
-    assert 'APP_KEY={{ coolify_app_key | to_json }}' in env_template
-    assert 'DB_PASSWORD={{ coolify_db_password | to_json }}' in env_template
-    assert 'ROOT_USERNAME={{ coolify_root_username | to_json }}' in env_template
-    assert 'ROOT_USER_PASSWORD={{ coolify_root_password | to_json }}' in env_template
+    assert "APP_KEY={{ coolify_app_key | to_json }}" in env_template
+    assert "DB_PASSWORD={{ coolify_db_password | to_json }}" in env_template
+    assert "ROOT_USERNAME={{ coolify_root_username | to_json }}" in env_template
+    assert "ROOT_USER_PASSWORD={{ coolify_root_password | to_json }}" in env_template
 
 
 def test_verify_checks_private_controller_api_visibility() -> None:
     verify = load_yaml(VERIFY_PATH)
     version_task = next(task for task in verify if task["name"] == "Verify the private controller API version endpoint")
-    team_task = next(task for task in verify if task["name"] == "Verify the private controller can read the current team")
+    team_task = next(
+        task for task in verify if task["name"] == "Verify the private controller can read the current team"
+    )
     servers_task = next(task for task in verify if task["name"] == "Read the private controller server inventory")
     assert_task = next(
         task
@@ -120,7 +147,15 @@ def test_verify_checks_private_controller_api_visibility() -> None:
         if task["name"] == "Assert the registered Coolify deployment server is visible through the private controller"
     )
     assert version_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ coolify_dashboard_port }}/api/v1/version"
-    assert team_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ coolify_dashboard_port }}/api/v1/teams/current"
+    assert (
+        team_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ coolify_dashboard_port }}/api/v1/teams/current"
+    )
     assert servers_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ coolify_dashboard_port }}/api/v1/servers"
-    assert "(coolify_controller_version.content | default('') | trim) | length > 0" in assert_task["ansible.builtin.assert"]["that"]
-    assert "(coolify_current_team.json.name | default('') | trim) | length > 0" in assert_task["ansible.builtin.assert"]["that"]
+    assert (
+        "(coolify_controller_version.content | default('') | trim) | length > 0"
+        in assert_task["ansible.builtin.assert"]["that"]
+    )
+    assert (
+        "(coolify_current_team.json.name | default('') | trim) | length > 0"
+        in assert_task["ansible.builtin.assert"]["that"]
+    )

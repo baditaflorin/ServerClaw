@@ -232,7 +232,7 @@ def main() -> int:
 
     try:
         results = asyncio.run(check_streams_async(apply=args.apply))
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("NATS streams", exc)
 
     if args.json:
@@ -244,7 +244,7 @@ def main() -> int:
     if args.smoke_publish:
         try:
             smoke_result = asyncio.run(smoke_publish_async())
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             smoke_failure = True
             if args.json:
                 print(json.dumps({"smoke_publish_error": str(exc)}, indent=2, sort_keys=True))

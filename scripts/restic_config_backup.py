@@ -19,7 +19,8 @@ import urllib.request
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
+from collections.abc import Iterator
 
 from script_bootstrap import ensure_repo_root_on_path
 
@@ -117,8 +118,7 @@ def run_command(
     except subprocess.TimeoutExpired as exc:
         timeout_detail = int(timeout) if isinstance(timeout, (int, float)) else timeout
         raise RuntimeError(
-            " ".join(shlex.quote(item) for item in argv)
-            + f" timed out after {timeout_detail} seconds"
+            " ".join(shlex.quote(item) for item in argv) + f" timed out after {timeout_detail} seconds"
         ) from exc
 
 
@@ -428,10 +428,7 @@ def build_restic_env(
     env["RESTIC_REPOSITORY"] = restic_repository(catalog, endpoint)
     env["RESTIC_PASSWORD"] = credentials["restic_password"]
     env["AWS_ACCESS_KEY_ID"] = str(
-        minio.get("access_key")
-        or credentials.get("minio_access_key")
-        or credentials.get("minio")
-        or "minio"
+        minio.get("access_key") or credentials.get("minio_access_key") or credentials.get("minio") or "minio"
     ).strip()
     env["AWS_SECRET_ACCESS_KEY"] = credentials["minio_secret_key"]
     env["RESTIC_CACHE_DIR"] = str(cache_dir)
@@ -527,9 +524,7 @@ def load_catalog(path: Path) -> tuple[dict[str, Any], list[Source]]:
             raise ValueError(f"restic source {source_id} retention must be an object")
         freshness_policy = str(raw.get("freshness_policy") or "interval").strip().lower()
         if freshness_policy not in {"interval", "event_driven"}:
-            raise ValueError(
-                f"restic source {source_id} freshness_policy must be 'interval' or 'event_driven'"
-            )
+            raise ValueError(f"restic source {source_id} freshness_policy must be 'interval' or 'event_driven'")
         restore_verification = raw.get("restore_verification")
         if restore_verification is not None and not isinstance(restore_verification, dict):
             raise ValueError(f"restic source {source_id} restore_verification must be an object")
@@ -673,7 +668,11 @@ def summarize_latest_snapshots(
                 "host": str(latest_snapshot.get("hostname") or ""),
                 "paths": [display_path(Path(path), repo_root=repo_root) for path in latest_snapshot.get("paths", [])],
                 "files": int(
-                    ((latest_snapshot.get("summary") or {}) if isinstance(latest_snapshot.get("summary"), dict) else {}).get(
+                    (
+                        (latest_snapshot.get("summary") or {})
+                        if isinstance(latest_snapshot.get("summary"), dict)
+                        else {}
+                    ).get(
                         "total_files_processed",
                         0,
                     )
@@ -971,8 +970,8 @@ def publish_stale_event(
                 },
                 separators=(",", ":"),
             )
-            sock.sendall(f"CONNECT {connect_payload}\r\n".encode("utf-8"))
-            sock.sendall(f"PUB {subject} {len(encoded)}\r\n".encode("utf-8"))
+            sock.sendall(f"CONNECT {connect_payload}\r\n".encode())
+            sock.sendall(f"PUB {subject} {len(encoded)}\r\n".encode())
             sock.sendall(encoded + b"\r\nPING\r\n")
             for _ in range(5):
                 response = reader.readline().decode("utf-8", errors="replace").strip()
@@ -1141,8 +1140,10 @@ def run_restore_verification(
         cache_dir=cache_dir,
     )
 
-    expected_path = restore_target / repo_root.relative_to(repo_root.anchor) / str(
-        receipts_source.restore_verification.get("path", "receipts")
+    expected_path = (
+        restore_target
+        / repo_root.relative_to(repo_root.anchor)
+        / str(receipts_source.restore_verification.get("path", "receipts"))
     )
     if not expected_path.exists():
         expected_path = restore_target / str(receipts_source.restore_verification.get("path", "receipts"))
@@ -1434,7 +1435,10 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import os as _os, subprocess as _sp, sys as _sys
+    import os as _os
+    import subprocess as _sp
+    import sys as _sys
+
     token = _os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -1448,7 +1452,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         _sp.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**_os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

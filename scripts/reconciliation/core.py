@@ -15,10 +15,8 @@ Portals
 
 from __future__ import annotations
 
-import json
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -31,7 +29,7 @@ _repo_root: Path | None = None
 
 
 def _get_repo_root() -> Path:
-    global _repo_root  # noqa: PLW0603
+    global _repo_root
     if _repo_root is not None:
         return _repo_root
 
@@ -41,7 +39,7 @@ def _get_repo_root() -> Path:
         from controller_automation_toolkit import REPO_ROOT  # type: ignore[import-untyped]
 
         _repo_root = REPO_ROOT
-    except Exception:  # noqa: BLE001
+    except Exception:
         # Fallback: scripts/reconciliation/core.py -> scripts/ -> repo root
         _repo_root = Path(__file__).resolve().parents[2]
     return _repo_root
@@ -88,7 +86,7 @@ _PORTAL_REGISTRY: dict[str, dict[str, Any]] = {
         "needs_output_dir_arg": False,
         "uv_deps": [],
         "uv_req_file": "requirements/docs.txt",
-        },
+    },
     "changelog": {
         "script": "scripts/generate_changelog_portal.py",
         "output_dir": "build/changelog-portal",
@@ -287,17 +285,21 @@ def validate_all_artifacts() -> dict[str, Any]:
     for portal in KNOWN_PORTALS:
         report = detect_portal_drift(portal)
         if not report["check_supported"]:
-            results.append({
-                "portal": portal,
-                "valid": True,  # can't disprove, so treat as valid
-                "detail": report["summary"],
-            })
+            results.append(
+                {
+                    "portal": portal,
+                    "valid": True,  # can't disprove, so treat as valid
+                    "detail": report["summary"],
+                }
+            )
         else:
-            results.append({
-                "portal": portal,
-                "valid": not report["drifted"],
-                "detail": report["summary"],
-            })
+            results.append(
+                {
+                    "portal": portal,
+                    "valid": not report["drifted"],
+                    "detail": report["summary"],
+                }
+            )
 
     all_valid = all(r["valid"] for r in results)
     return {"all_valid": all_valid, "results": results}

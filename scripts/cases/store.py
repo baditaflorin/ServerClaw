@@ -12,7 +12,7 @@ import copy
 import json
 import subprocess
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from typing import Any
 
@@ -29,11 +29,11 @@ ALLOWED_CASE_STATUSES = {"open", "resolved", "archived"}
 
 
 def utc_now() -> datetime:
-    return datetime.now(timezone.utc).replace(microsecond=0)
+    return datetime.now(UTC).replace(microsecond=0)
 
 
 def isoformat(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def parse_timestamp(value: str | None) -> datetime | None:
@@ -49,8 +49,8 @@ def parse_timestamp(value: str | None) -> datetime | None:
     except ValueError:
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
 
 
 def normalize_list(value: Any) -> list[str]:
@@ -80,14 +80,10 @@ def normalize_signals(value: Any) -> dict[str, Any]:
                 raise ValueError("correlated_signals list entries must be objects")
             key = item.get("key")
             if not isinstance(key, str) or not key.strip():
-                raise ValueError(
-                    "correlated_signals entries require a non-empty key"
-                )
+                raise ValueError("correlated_signals entries require a non-empty key")
             result[key.strip()] = item.get("value")
         return result
-    raise ValueError(
-        "correlated_signals must be an object or list of key/value objects"
-    )
+    raise ValueError("correlated_signals must be an object or list of key/value objects")
 
 
 def normalize_optional_text(value: Any) -> str | None:
@@ -126,9 +122,7 @@ class CaseStore:
         categories: list[str] = []
         for index, item in enumerate(payload):
             if not isinstance(item, str) or not item.strip():
-                raise ValueError(
-                    f"{self.categories_path}[{index}] must be a non-empty string"
-                )
+                raise ValueError(f"{self.categories_path}[{index}] must be a non-empty string")
             categories.append(item.strip())
         return categories
 
@@ -137,9 +131,7 @@ class CaseStore:
     # ------------------------------------------------------------------
 
     def _load_payload(self) -> dict[str, Any]:
-        payload = load_json(
-            self.path, default={"schema_version": "1.0.0", "cases": []}
-        )
+        payload = load_json(self.path, default={"schema_version": "1.0.0", "cases": []})
         if not isinstance(payload, dict):
             raise ValueError(f"{self.path} must contain a JSON object")
         cases = payload.get("cases")
@@ -152,21 +144,12 @@ class CaseStore:
         write_json(self.path, payload, indent=2, sort_keys=False)
 
     def _next_numeric_id(self, payload: dict[str, Any]) -> int:
-        numeric_ids = [
-            int(item.get("id", 0))
-            for item in payload["cases"]
-            if str(item.get("id", "")).isdigit()
-        ]
+        numeric_ids = [int(item.get("id", 0)) for item in payload["cases"] if str(item.get("id", "")).isdigit()]
         return (max(numeric_ids) if numeric_ids else 0) + 1
 
-    def _lookup(
-        self, payload: dict[str, Any], case_id: str
-    ) -> tuple[int, dict[str, Any]]:
+    def _lookup(self, payload: dict[str, Any], case_id: str) -> tuple[int, dict[str, Any]]:
         for index, case in enumerate(payload["cases"]):
-            if (
-                str(case.get("case_id")) == case_id
-                or str(case.get("id")) == case_id
-            ):
+            if str(case.get("case_id")) == case_id or str(case.get("id")) == case_id:
                 return index, case
         raise KeyError(f"case '{case_id}' not found")
 
@@ -188,10 +171,7 @@ class CaseStore:
                 continue
             if affected_service and case.get("affected_service") != affected_service:
                 continue
-            if (
-                root_cause_category
-                and case.get("root_cause_category") != root_cause_category
-            ):
+            if root_cause_category and case.get("root_cause_category") != root_cause_category:
                 continue
             filtered.append(copy.deepcopy(case))
         filtered.sort(
@@ -231,36 +211,20 @@ class CaseStore:
             "title": title,
             "affected_service": affected_service,
             "symptoms": normalize_list(payload.get("symptoms")),
-            "correlated_signals": normalize_signals(
-                payload.get("correlated_signals")
-            ),
+            "correlated_signals": normalize_signals(payload.get("correlated_signals")),
             "root_cause": normalize_optional_text(payload.get("root_cause")),
-            "root_cause_category": normalize_optional_text(
-                payload.get("root_cause_category")
-            ),
+            "root_cause_category": normalize_optional_text(payload.get("root_cause_category")),
             "remediation_steps": normalize_list(payload.get("remediation_steps")),
-            "verification_command": normalize_optional_text(
-                payload.get("verification_command")
-            ),
+            "verification_command": normalize_optional_text(payload.get("verification_command")),
             "incident_duration_minutes": payload.get("incident_duration_minutes"),
-            "first_observed_at": normalize_optional_text(
-                payload.get("first_observed_at")
-            ),
+            "first_observed_at": normalize_optional_text(payload.get("first_observed_at")),
             "resolved_at": normalize_optional_text(payload.get("resolved_at")),
-            "triage_report_id": normalize_optional_text(
-                payload.get("triage_report_id")
-            ),
+            "triage_report_id": normalize_optional_text(payload.get("triage_report_id")),
             "ledger_event_ids": normalize_list(payload.get("ledger_event_ids")),
             "annotations": normalize_list(payload.get("annotations")),
         }
-        if (
-            case["root_cause_category"]
-            and case["root_cause_category"] not in self.categories()
-        ):
-            raise ValueError(
-                "root_cause_category must be declared in "
-                "config/case-root-cause-categories.yaml"
-            )
+        if case["root_cause_category"] and case["root_cause_category"] not in self.categories():
+            raise ValueError("root_cause_category must be declared in config/case-root-cause-categories.yaml")
         if case["status"] == "resolved":
             self._validate_resolution(case)
             case["resolved_at"] = case["resolved_at"] or now
@@ -293,39 +257,23 @@ class CaseStore:
         if "symptoms" in patch:
             updated["symptoms"] = normalize_list(patch.get("symptoms"))
         if "correlated_signals" in patch:
-            updated["correlated_signals"] = normalize_signals(
-                patch.get("correlated_signals")
-            )
+            updated["correlated_signals"] = normalize_signals(patch.get("correlated_signals"))
         if "remediation_steps" in patch:
-            updated["remediation_steps"] = normalize_list(
-                patch.get("remediation_steps")
-            )
+            updated["remediation_steps"] = normalize_list(patch.get("remediation_steps"))
         if "ledger_event_ids" in patch:
-            updated["ledger_event_ids"] = normalize_list(
-                patch.get("ledger_event_ids")
-            )
+            updated["ledger_event_ids"] = normalize_list(patch.get("ledger_event_ids"))
         if "annotations" in patch:
             updated["annotations"] = normalize_list(patch.get("annotations"))
         if "incident_duration_minutes" in patch:
-            updated["incident_duration_minutes"] = patch.get(
-                "incident_duration_minutes"
-            )
+            updated["incident_duration_minutes"] = patch.get("incident_duration_minutes")
 
         status = normalize_optional_text(patch.get("status"))
         if status:
             if status not in ALLOWED_CASE_STATUSES:
-                raise ValueError(
-                    f"status must be one of {sorted(ALLOWED_CASE_STATUSES)}"
-                )
+                raise ValueError(f"status must be one of {sorted(ALLOWED_CASE_STATUSES)}")
             updated["status"] = status
-        if (
-            updated.get("root_cause_category")
-            and updated["root_cause_category"] not in self.categories()
-        ):
-            raise ValueError(
-                "root_cause_category must be declared in "
-                "config/case-root-cause-categories.yaml"
-            )
+        if updated.get("root_cause_category") and updated["root_cause_category"] not in self.categories():
+            raise ValueError("root_cause_category must be declared in config/case-root-cause-categories.yaml")
         updated["updated_at"] = isoformat(utc_now())
         data["cases"][index] = updated
         self._save_payload(data)
@@ -337,19 +285,12 @@ class CaseStore:
             raise ValueError("root_cause is required when resolving a case")
         category = normalize_optional_text(resolution.get("root_cause_category"))
         if not category:
-            raise ValueError(
-                "root_cause_category is required when resolving a case"
-            )
+            raise ValueError("root_cause_category is required when resolving a case")
         if category not in self.categories():
-            raise ValueError(
-                "root_cause_category must be declared in "
-                "config/case-root-cause-categories.yaml"
-            )
+            raise ValueError("root_cause_category must be declared in config/case-root-cause-categories.yaml")
         remediation_steps = normalize_list(resolution.get("remediation_steps"))
         if not remediation_steps:
-            raise ValueError(
-                "at least one remediation_step is required when resolving a case"
-            )
+            raise ValueError("at least one remediation_step is required when resolving a case")
 
     def close(self, case_id: str, resolution: dict[str, Any]) -> dict[str, Any]:
         """Resolve a case, enforcing that all required resolution fields are present."""
@@ -357,28 +298,19 @@ class CaseStore:
         index, case = self._lookup(data, case_id)
         updated = copy.deepcopy(case)
         updated["root_cause"] = normalize_optional_text(resolution.get("root_cause"))
-        updated["root_cause_category"] = normalize_optional_text(
-            resolution.get("root_cause_category")
-        )
-        updated["remediation_steps"] = normalize_list(
-            resolution.get("remediation_steps")
-        )
-        updated["verification_command"] = (
-            normalize_optional_text(resolution.get("verification_command"))
-            or updated.get("verification_command")
-        )
+        updated["root_cause_category"] = normalize_optional_text(resolution.get("root_cause_category"))
+        updated["remediation_steps"] = normalize_list(resolution.get("remediation_steps"))
+        updated["verification_command"] = normalize_optional_text(
+            resolution.get("verification_command")
+        ) or updated.get("verification_command")
         if "ledger_event_ids" in resolution:
-            updated["ledger_event_ids"] = normalize_list(
-                resolution.get("ledger_event_ids")
-            )
+            updated["ledger_event_ids"] = normalize_list(resolution.get("ledger_event_ids"))
         if "annotations" in resolution:
             updated["annotations"] = normalize_list(resolution.get("annotations"))
         self._validate_resolution(updated)
         now = isoformat(utc_now())
         updated["status"] = "resolved"
-        updated["resolved_at"] = (
-            normalize_optional_text(resolution.get("resolved_at")) or now
-        )
+        updated["resolved_at"] = normalize_optional_text(resolution.get("resolved_at")) or now
         updated["updated_at"] = now
 
         first_observed = parse_timestamp(updated.get("first_observed_at"))
@@ -403,9 +335,7 @@ class CaseStore:
         status: str | None = None,
         limit: int = 10,
     ) -> list[dict[str, Any]]:
-        cases = self.list_cases(
-            status=status, affected_service=affected_service
-        )
+        cases = self.list_cases(status=status, affected_service=affected_service)
         return self.retriever.search(
             cases=cases,
             query=query,
@@ -457,9 +387,7 @@ class CaseStore:
         keys = {item for item in keys if item}
         timeline: list[dict[str, Any]] = []
         if self.mutation_audit_path and self.mutation_audit_path.exists():
-            for line in self.mutation_audit_path.read_text(
-                encoding="utf-8"
-            ).splitlines():
+            for line in self.mutation_audit_path.read_text(encoding="utf-8").splitlines():
                 if not line.strip():
                     continue
                 event = json.loads(line)
@@ -494,9 +422,7 @@ class CaseStore:
 
         for case in payload["cases"]:
             # Flag resolved cases without root_cause.
-            if case.get("status") == "resolved" and not normalize_optional_text(
-                case.get("root_cause")
-            ):
+            if case.get("status") == "resolved" and not normalize_optional_text(case.get("root_cause")):
                 report["flagged_missing_root_cause"].append(
                     {
                         "case_id": case["case_id"],
@@ -507,21 +433,12 @@ class CaseStore:
 
             # Archive open cases older than archive_after_days.
             created_at = parse_timestamp(case.get("created_at"))
-            if (
-                case.get("status") == "open"
-                and created_at
-                and created_at <= stale_threshold
-            ):
+            if case.get("status") == "open" and created_at and created_at <= stale_threshold:
                 case["status"] = "archived"
                 case["updated_at"] = isoformat(now)
                 annotations = case.setdefault("annotations", [])
-                annotations.append(
-                    f"Archived automatically after {archive_after_days} days "
-                    "without closure."
-                )
-                report["archived_cases"].append(
-                    {"case_id": case["case_id"], "title": case["title"]}
-                )
+                annotations.append(f"Archived automatically after {archive_after_days} days without closure.")
+                report["archived_cases"].append({"case_id": case["case_id"], "title": case["title"]})
                 changed = True
 
             # Optionally re-execute verification_command.
@@ -543,9 +460,7 @@ class CaseStore:
 
         report["summary"] = {
             "cases_reviewed": len(payload["cases"]),
-            "missing_root_cause_count": len(
-                report["flagged_missing_root_cause"]
-            ),
+            "missing_root_cause_count": len(report["flagged_missing_root_cause"]),
             "verification_count": len(report["verification_results"]),
             "archived_count": len(report["archived_cases"]),
         }

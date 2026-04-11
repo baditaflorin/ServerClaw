@@ -11,7 +11,7 @@ import os
 import subprocess
 import tarfile
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -50,7 +50,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     build = subparsers.add_parser("build", help="Build an immutable repository snapshot.")
     build.add_argument("--repo-root", type=Path, default=Path.cwd())
     build.add_argument("--exclude-file", type=Path, help="Exclude-file with rsync-style simple patterns.")
-    build.add_argument("--output-dir", type=Path, required=True, help="Directory that receives the archive and manifest.")
+    build.add_argument(
+        "--output-dir", type=Path, required=True, help="Directory that receives the archive and manifest."
+    )
     build.add_argument("--format", choices=("json", "shell"), default="json")
 
     return parser.parse_args(argv)
@@ -223,8 +225,7 @@ def write_archive(repo_root: Path, archive_path: Path, manifest: SnapshotManifes
 
 def shell_lines(payload: dict[str, Any]) -> str:
     return "\n".join(
-        f"{key}={json.dumps(str(value) if isinstance(value, Path) else value)}"
-        for key, value in payload.items()
+        f"{key}={json.dumps(str(value) if isinstance(value, Path) else value)}" for key, value in payload.items()
     )
 
 
@@ -237,7 +238,7 @@ def build_snapshot(repo_root: Path, *, exclude_file: Path | None, output_dir: Pa
     branch_override = os.environ.get("LV3_SNAPSHOT_BRANCH", "").strip()
     branch = branch_override or git_value(repo_root, "rev-parse", "--abbrev-ref", "HEAD", default="detached")
     snapshot_id = snapshot_id_for(source_commit=source_commit, branch=branch, entries=entries)
-    generated_at = datetime.now(timezone.utc).isoformat()
+    generated_at = datetime.now(UTC).isoformat()
     manifest = SnapshotManifest(
         schema_version=1,
         snapshot_id=snapshot_id,

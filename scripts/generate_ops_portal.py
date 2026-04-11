@@ -82,7 +82,7 @@ def repo_remote_url() -> str:
             capture_output=True,
             check=False,
         ).stdout.strip()
-    except Exception:  # noqa: BLE001
+    except Exception:
         return ""
 
     if remote.startswith("git@github.com:"):
@@ -130,12 +130,7 @@ def normalized_nav(current: str) -> list[tuple[str, str, bool]]:
     items = []
     for href, label in NAV:
         target = Path(href)
-        relative = Path(
-            *(
-                [".."] * len(current_path.parent.parts)
-                + list(target.parts)
-            )
-        )
+        relative = Path(*([".."] * len(current_path.parent.parts) + list(target.parts)))
         if not current_path.parent.parts:
             relative = target
         items.append((str(relative), label, href == current))
@@ -175,12 +170,12 @@ def probe_url(url: str, timeout: float) -> HealthState:
     if parsed.scheme in {"http", "https"}:
         try:
             request = Request(url, method="HEAD")
-            with urlopen(request, timeout=timeout) as response:  # noqa: S310
+            with urlopen(request, timeout=timeout) as response:
                 code = response.getcode()
             if 200 <= code < 400:
                 return HealthState("healthy", f"HTTP {code}")
             return HealthState("degraded", f"HTTP {code}")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return HealthState("down", str(exc))
     if parsed.scheme in {"ssh", "postgres"}:
         host = parsed.hostname
@@ -190,12 +185,14 @@ def probe_url(url: str, timeout: float) -> HealthState:
         try:
             with socket.create_connection((host, port), timeout=timeout):
                 return HealthState("healthy", f"TCP {port}")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return HealthState("down", str(exc))
     return HealthState("unknown", "no probe strategy")
 
 
-def resolve_health(services: list[dict[str, Any]], snapshot: dict[str, HealthState], timeout: float) -> dict[str, HealthState]:
+def resolve_health(
+    services: list[dict[str, Any]], snapshot: dict[str, HealthState], timeout: float
+) -> dict[str, HealthState]:
     resolved: dict[str, HealthState] = {}
     for service in services:
         if "uptime_monitor_name" in service and service["uptime_monitor_name"] in snapshot:
@@ -255,7 +252,7 @@ def latest_drift_report() -> tuple[Path | None, dict[str, Any] | None]:
     for report in reports:
         try:
             return report, load_json(report)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
     return None, None
 
@@ -269,7 +266,7 @@ def latest_security_report() -> tuple[Path | None, dict[str, Any] | None]:
     for report in reports:
         try:
             return report, load_json(report)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
     return None, None
 
@@ -283,7 +280,7 @@ def latest_agent_coordination_snapshot() -> tuple[Path | None, dict[str, Any] | 
     for report in reports:
         try:
             return report, load_json(report)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
     return None, None
 
@@ -335,11 +332,7 @@ def render_drift_panel() -> str:
         '<div class="card-head">'
         '<div><h2>Drift Status</h2><p class="muted">Latest multi-source drift report from the ADR 0091 receipt stream.</p></div>'
         f"<div>{render_badge(status, badge_tone)}</div>"
-        "</div>"
-        + status_metrics
-        + f'<div class="chip-row">{receipt_link}</div>'
-        + table
-        + "</section>"
+        "</div>" + status_metrics + f'<div class="chip-row">{receipt_link}</div>' + table + "</section>"
     )
 
 
@@ -392,18 +385,14 @@ def render_security_panel() -> str:
         '<div class="card-head">'
         '<div><h2>Security Posture</h2><p class="muted">Latest ADR 0102 receipt covering host hardening and runtime image CVEs.</p></div>'
         f"<div>{render_badge(status, badge_tone)}</div>"
-        "</div>"
-        + status_metrics
-        + f'<div class="chip-row">{receipt_link}</div>'
-        + table
-        + "</section>"
+        "</div>" + status_metrics + f'<div class="chip-row">{receipt_link}</div>' + table + "</section>"
     )
 
 
 def render_release_panel() -> str:
     try:
         snapshot = build_release_status_snapshot(timeout=0.5)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return (
             '<section class="panel">'
             '<div class="card-head"><div><h2>Release Readiness</h2><p class="muted">Unable to render release readiness.</p></div>'
@@ -453,7 +442,7 @@ def active_ephemeral_receipts() -> list[dict[str, Any]]:
             continue
         try:
             payload = load_json(path)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
         if not isinstance(payload, dict):
             continue
@@ -505,7 +494,7 @@ def _latest_reconciliation_receipt() -> tuple[Path | None, dict[str, Any] | None
     for path in candidates:
         try:
             payload = load_json(path)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
         if isinstance(payload, dict):
             return path, payload
@@ -526,7 +515,7 @@ def _run_reconciliation_validate() -> dict[str, Any] | None:
             timeout=120,
         )
         return json.loads(result.stdout)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
 
 
@@ -579,14 +568,18 @@ def render_reconciliation_panel() -> str:
 
     # Links
     links = []
-    links.append(render_external_link(
-        "https://grafana.lv3.org/d/lv3-portal-reconciliation/portal-reconciliation",
-        "Grafana Dashboard",
-    ))
-    links.append(render_external_link(
-        "https://windmill.lv3.org",
-        "Windmill Workflows",
-    ))
+    links.append(
+        render_external_link(
+            "https://grafana.lv3.org/d/lv3-portal-reconciliation/portal-reconciliation",
+            "Grafana Dashboard",
+        )
+    )
+    links.append(
+        render_external_link(
+            "https://windmill.lv3.org",
+            "Windmill Workflows",
+        )
+    )
     if receipt_path:
         links.append(render_external_link(repo_view_link(receipt_path), "Latest Receipt"))
 
@@ -608,14 +601,10 @@ def render_reconciliation_panel() -> str:
     return (
         '<section class="panel">'
         '<div class="card-head">'
-        '<div><h2>Portal Reconciliation</h2>'
+        "<div><h2>Portal Reconciliation</h2>"
         '<p class="muted">Artifact freshness validation for ADR 0399 managed portals.</p></div>'
         f"<div>{render_badge(badge_label, badge_tone)}</div>"
-        "</div>"
-        + meta
-        + f'<div class="chip-row">{"".join(links)}</div>'
-        + table
-        + "</section>"
+        "</div>" + meta + f'<div class="chip-row">{"".join(links)}</div>' + table + "</section>"
     )
 
 
@@ -649,9 +638,7 @@ def render_slo_panel(prometheus_url: str | None = None) -> str:
         '<div class="card-head">'
         '<div><h2>SLO Status</h2><p class="muted">Error budget posture for the ADR 0096 service-level objectives.</p></div>'
         f"<div>{render_badge(str(len(entries)), 'neutral')}</div>"
-        "</div>"
-        + note
-        + '<div class="table-scroll"><table>'
+        "</div>" + note + '<div class="table-scroll"><table>'
         "<thead><tr><th>SLO</th><th>Service</th><th>Status</th><th>30d</th><th>Budget</th><th>Burn</th><th>Days Left</th><th>Dashboard</th></tr></thead>"
         + f"<tbody>{''.join(rows)}</tbody></table></div>"
         + "</section>"
@@ -719,7 +706,7 @@ def render_service_cards(
             cards.append(
                 '<article class="card">'
                 '<div class="card-head">'
-                f"<div><h3>{escape(service['name'])}</h3><p class=\"muted\">{escape(service['description'])}</p></div>"
+                f'<div><h3>{escape(service["name"])}</h3><p class="muted">{escape(service["description"])}</p></div>'
                 f"<div>{''.join(chips)}</div>"
                 "</div>"
                 '<div class="meta-list">'
@@ -727,7 +714,9 @@ def render_service_cards(
                 + (f" (VMID {escape(service['vmid'])})" if "vmid" in service else "")
                 + "</span></div>"
                 + f"<div><strong>Recovery tier</strong><span>{escape(str(summary['tier']))}</span></div>"
-                + (f"<div><strong>Primary</strong><span>{escape(service.get('public_url') or service.get('internal_url') or 'n/a')}</span></div>")
+                + (
+                    f"<div><strong>Primary</strong><span>{escape(service.get('public_url') or service.get('internal_url') or 'n/a')}</span></div>"
+                )
                 + f"<div><strong>Health</strong><span>{escape(state.detail)}</span></div>"
                 + "</div>"
                 + (f'<div class="meta-list">{"".join(dependency_details)}</div>' if dependency_details else "")
@@ -796,7 +785,7 @@ def render_environment_topology(
         blocks.append(
             '<section class="group-block panel">'
             '<div class="card-head">'
-            f"<div><h2>{escape(environment['name'])}</h2><p class=\"muted\">{escape(environment['purpose'])}</p></div>"
+            f'<div><h2>{escape(environment["name"])}</h2><p class="muted">{escape(environment["purpose"])}</p></div>'
             f"<div>{render_badge(environment['status'], 'ok' if environment['status'] == 'active' else 'warn')}"
             f"{render_badge(environment['topology_model'], 'neutral')}</div>"
             "</div>"
@@ -897,17 +886,17 @@ def render_runbooks() -> str:
         adr_match = sorted(set(re.findall(r"ADR\s+(\d{4})", text)))
         cards.append(
             '<article class="card">'
-            f"<div class=\"row-head\"><h3>{escape(title)}</h3><span class=\"muted\">{escape(path.name)}</span></div>"
-            f"<p class=\"muted\">Linked ADRs: {escape(', '.join(adr_match) if adr_match else 'none')}</p>"
+            f'<div class="row-head"><h3>{escape(title)}</h3><span class="muted">{escape(path.name)}</span></div>'
+            f'<p class="muted">Linked ADRs: {escape(", ".join(adr_match) if adr_match else "none")}</p>'
             f'<div class="chip-row">{render_external_link(repo_view_link(path), "Open Markdown")}</div>'
             "</article>"
         )
     return (
         '<section class="panel toolbar">'
         '<input class="search-box" id="runbook-filter" placeholder="Filter runbooks by title or ADR">'
-        '</section>'
+        "</section>"
         f'<section class="card-grid" id="runbook-grid">{"".join(cards)}</section>'
-        '<script>'
+        "<script>"
         'const runbookFilter=document.getElementById("runbook-filter");'
         'const runbookCards=[...document.querySelectorAll("#runbook-grid .card")];'
         'runbookFilter?.addEventListener("input",()=>{const q=runbookFilter.value.toLowerCase();'
@@ -929,7 +918,7 @@ def render_adrs() -> str:
             f"<td>{escape(metadata.get('Implemented In Repo Version', 'n/a'))}</td>"
             f"<td>{escape(metadata.get('Implemented In Platform Version', 'n/a'))}</td>"
             f"<td>{escape(metadata.get('Implemented On', 'n/a'))}</td>"
-            f'<td>{render_external_link(repo_view_link(path), "Open")}</td>'
+            f"<td>{render_external_link(repo_view_link(path), 'Open')}</td>"
             "</tr>"
         )
     return (
@@ -993,7 +982,7 @@ def render_agents(tools: list[dict[str, Any]]) -> str:
             (
                 '<article class="card">'
                 '<div class="card-head">'
-                f"<div><h3>{escape(tool['name'])}</h3><p class=\"muted\">{escape(tool['description'])}</p></div>"
+                f'<div><h3>{escape(tool["name"])}</h3><p class="muted">{escape(tool["description"])}</p></div>'
                 f"<div>{render_badge(tool['category'], 'neutral')}{render_badge(tool['transport'], 'neutral')}</div>"
                 "</div>"
                 '<div class="meta-list">'
@@ -1015,7 +1004,7 @@ def render_agents(tools: list[dict[str, Any]]) -> str:
 def load_agent_registry_best_effort() -> tuple[dict[str, Any], dict[str, Any]]:
     try:
         return load_agent_tool_registry()
-    except Exception:  # noqa: BLE001
+    except Exception:
         return (
             load_json(repo_path("config", "agent-tool-registry.json")),
             load_json(repo_path("config", "workflow-catalog.json")),
@@ -1089,14 +1078,9 @@ def render_portal(
     health = resolve_health(services, snapshot, probe_timeout)
     slo_prometheus_url = os.environ.get("OPS_PORTAL_PROMETHEUS_URL", "")
     graph = load_dependency_graph(validate_schema=False)
-    dependency_summaries = {
-        service["id"]: dependency_summary(service["id"], graph)
-        for service in services
-    }
+    dependency_summaries = {service["id"]: dependency_summary(service["id"], graph) for service in services}
     guest_roles = {
-        guest["name"]: guest["role"]
-        for guest in host_vars["proxmox_guests"]
-        if "name" in guest and "role" in guest
+        guest["name"]: guest["role"] for guest in host_vars["proxmox_guests"] if "name" in guest and "role" in guest
     }
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1225,7 +1209,7 @@ def main(argv: list[str] | None = None) -> int:
 
         render_portal(args.output_dir, args.health_snapshot, args.probe_timeout, args.snapshot_file)
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("ops portal", exc)
 
 

@@ -11,7 +11,12 @@ from pathlib import Path
 import pytest
 
 from platform.world_state.materializer import current_view_rows
-from platform.world_state.workers import collect_dns_records, collect_openbao_secret_expiry, collect_service_health, run_worker
+from platform.world_state.workers import (
+    collect_dns_records,
+    collect_openbao_secret_expiry,
+    collect_service_health,
+    run_worker,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -171,7 +176,9 @@ def load_module(name: str, relative_path: str):
     return module
 
 
-def test_run_worker_materializes_fixture_surface(worker_repo: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_run_worker_materializes_fixture_surface(
+    worker_repo: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     fixture_path = tmp_path / "proxmox-fixture.json"
     fixture_path.write_text(json.dumps([{"vmid": 110, "name": "nginx-lv3", "status": "running"}]) + "\n")
     monkeypatch.setenv("WORLD_STATE_PROXMOX_VMS_FIXTURE", str(fixture_path))
@@ -345,7 +352,9 @@ def test_collect_service_health_marks_reset_probe_as_down_instead_of_crashing(tm
                             "health_probe_id": "windmill",
                             "vm": "docker-runtime-lv3",
                             "vmid": 120,
-                            "environments": {"production": {"status": "active", "url": f"http://127.0.0.1:{port}/api/version"}},
+                            "environments": {
+                                "production": {"status": "active", "url": f"http://127.0.0.1:{port}/api/version"}
+                            },
                         }
                     ]
                 },
@@ -423,7 +432,9 @@ def test_collect_service_health_marks_startup_when_startup_probe_has_not_complet
                             "health_probe_id": "api_gateway",
                             "vm": "docker-runtime-lv3",
                             "vmid": 120,
-                            "environments": {"production": {"status": "active", "url": f"http://127.0.0.1:{port}/healthz"}},
+                            "environments": {
+                                "production": {"status": "active", "url": f"http://127.0.0.1:{port}/healthz"}
+                            },
                         }
                     ]
                 },

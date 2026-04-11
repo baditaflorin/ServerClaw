@@ -27,7 +27,10 @@ def test_alertmanager_runtime_defaults_define_pgaudit_relay_contract() -> None:
     assert defaults["alertmanager_runtime_pgaudit_relay_enabled"] is True
     assert defaults["alertmanager_runtime_pgaudit_relay_service_name"] == "pgaudit-alert-relay"
     assert defaults["alertmanager_runtime_pgaudit_relay_nats_subject"] == "platform.security.pgaudit_unknown_role"
-    assert "/.local/nats/jetstream-admin-password.txt" in defaults["alertmanager_runtime_pgaudit_relay_nats_password_local_file"]
+    assert (
+        "/.local/nats/jetstream-admin-password.txt"
+        in defaults["alertmanager_runtime_pgaudit_relay_nats_password_local_file"]
+    )
 
 
 def test_alertmanager_runtime_tasks_render_and_start_pgaudit_relay() -> None:
@@ -54,7 +57,7 @@ def test_alertmanager_config_routes_unknown_role_alerts_into_the_relay() -> None
 
     assert 'alertname="PostgresUnknownRoleConnection"' in config
     assert "receiver: pgaudit-unknown-role-relay" in config
-    assert "url: \"{{ alertmanager_runtime_pgaudit_relay_webhook_url }}\"" in config
+    assert 'url: "{{ alertmanager_runtime_pgaudit_relay_webhook_url }}"' in config
     assert "send_resolved: false" in config
 
 
@@ -65,7 +68,7 @@ def test_platform_alert_rules_cover_postgres_audit_anomalies() -> None:
     assert "alert: PostgresPrivilegeChangeBurst" in rules
     assert "alert: PostgresUnknownRoleConnection" in rules
     assert "increase(postgres_unknown_connection_events_total" in rules
-    assert "postgres_unknown_connection_events_total{job=\"postgres-audit-alloy\",component=\"pgaudit\"} offset 5m" in rules
+    assert 'postgres_unknown_connection_events_total{job="postgres-audit-alloy",component="pgaudit"} offset 5m' in rules
     assert "unless" in rules
 
 
@@ -118,5 +121,7 @@ def test_pgaudit_relay_templates_pin_local_listener_and_nats_publication_subject
 
     assert "PGAUDIT_RELAY_NATS_SUBJECT={{ alertmanager_runtime_pgaudit_relay_nats_subject }}" in env_template
     assert "ExecStart=/usr/bin/python3 {{ alertmanager_runtime_pgaudit_relay_script_file }}" in service_template
-    assert 'NATS_SUBJECT = env("PGAUDIT_RELAY_NATS_SUBJECT", "platform.security.pgaudit_unknown_role")' in script_template
+    assert (
+        'NATS_SUBJECT = env("PGAUDIT_RELAY_NATS_SUBJECT", "platform.security.pgaudit_unknown_role")' in script_template
+    )
     assert 'if self.path != "/healthz":' in script_template

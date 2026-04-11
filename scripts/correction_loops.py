@@ -108,13 +108,19 @@ def _required_workflow_ids(workflow_catalog: dict[str, Any], catalog: dict[str, 
         for workflow_id, workflow in workflows.items()
         if isinstance(workflow, dict) and workflow.get("execution_class", "mutation") == "mutation"
     }
-    required.update(_require_string_list(catalog.get("required_workflow_ids", []), "config/correction-loops.json.required_workflow_ids"))
+    required.update(
+        _require_string_list(
+            catalog.get("required_workflow_ids", []), "config/correction-loops.json.required_workflow_ids"
+        )
+    )
     return required
 
 
 def validate_correction_loop_catalog(catalog: dict[str, Any], workflow_catalog: dict[str, Any]) -> None:
     if catalog.get("$schema") != "docs/schema/correction-loop-catalog.schema.json":
-        raise ValueError("config/correction-loops.json.$schema must be 'docs/schema/correction-loop-catalog.schema.json'")
+        raise ValueError(
+            "config/correction-loops.json.$schema must be 'docs/schema/correction-loop-catalog.schema.json'"
+        )
     if catalog.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
         raise ValueError(f"config/correction-loops.json.schema_version must be '{SUPPORTED_SCHEMA_VERSION}'")
 
@@ -160,9 +166,7 @@ def validate_correction_loop_catalog(catalog: dict[str, Any], workflow_catalog: 
         if not observation_sources:
             raise ValueError(f"{path}.observation_sources must not be empty")
 
-        diagnosis_taxonomy = set(
-            _require_string_list(loop.get("diagnosis_taxonomy"), f"{path}.diagnosis_taxonomy")
-        )
+        diagnosis_taxonomy = set(_require_string_list(loop.get("diagnosis_taxonomy"), f"{path}.diagnosis_taxonomy"))
         if not REQUIRED_DIAGNOSES.issubset(diagnosis_taxonomy):
             missing = sorted(REQUIRED_DIAGNOSES - diagnosis_taxonomy)
             raise ValueError(f"{path}.diagnosis_taxonomy is missing required diagnoses: {', '.join(missing)}")
@@ -257,9 +261,7 @@ def list_correction_loops(catalog: dict[str, Any], workflow_catalog: dict[str, A
     print("Available correction loops:")
     for loop in _require_list(catalog.get("loops"), "config/correction-loops.json.loops"):
         loop = _require_mapping(loop, "config/correction-loops.json.loops[*]")
-        matches = sorted(
-            workflow_id for workflow_id in workflows if workflow_matches_loop(loop, workflow_id)
-        )
+        matches = sorted(workflow_id for workflow_id in workflows if workflow_matches_loop(loop, workflow_id))
         print(f"  - {loop['id']} ({len(matches)} workflow(s))")
     return 0
 

@@ -128,7 +128,9 @@ def build_registry(merge_repo: dict[str, object], *, publish_nats: bool = False,
 
 def test_stage_append_overlays_pending_entry_and_merges_file(merge_repo: dict[str, object]) -> None:
     published: list[tuple[str, dict[str, object]]] = []
-    registry = build_registry(merge_repo, publish_nats=True, publisher=lambda subject, payload: published.append((subject, payload)))
+    registry = build_registry(
+        merge_repo, publish_nats=True, publisher=lambda subject, payload: published.append((subject, payload))
+    )
     change = registry.stage_append(
         file_path="config/service-capability-catalog.json",
         entry={"id": "netbox", "name": "NetBox", "description": "Source of truth"},
@@ -136,7 +138,9 @@ def test_stage_append_overlays_pending_entry_and_merges_file(merge_repo: dict[st
         context_id=str(uuid.uuid4()),
     )
 
-    on_disk = json.loads((Path(merge_repo["repo_root"]) / "config" / "service-capability-catalog.json").read_text(encoding="utf-8"))
+    on_disk = json.loads(
+        (Path(merge_repo["repo_root"]) / "config" / "service-capability-catalog.json").read_text(encoding="utf-8")
+    )
     assert [item["id"] for item in on_disk["services"]] == ["grafana"]
 
     overlaid = registry.read_file("config/service-capability-catalog.json", include_pending=True)
@@ -145,7 +149,9 @@ def test_stage_append_overlays_pending_entry_and_merges_file(merge_repo: dict[st
     report = registry.merge_pending(actor="agent/config-merge-job")
 
     assert report["merged_files"] == ["config/service-capability-catalog.json"]
-    merged = json.loads((Path(merge_repo["repo_root"]) / "config" / "service-capability-catalog.json").read_text(encoding="utf-8"))
+    merged = json.loads(
+        (Path(merge_repo["repo_root"]) / "config" / "service-capability-catalog.json").read_text(encoding="utf-8")
+    )
     assert [item["id"] for item in merged["services"]] == ["grafana", "netbox"]
     assert report["merged_change_ids"] == [change["change_id"]]
 
@@ -184,7 +190,9 @@ def test_mapping_collections_use_explicit_key_and_drop_it_on_write(merge_repo: d
 
     report = registry.merge_pending()
 
-    payload = json.loads((Path(merge_repo["repo_root"]) / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))
+    payload = json.loads(
+        (Path(merge_repo["repo_root"]) / "config" / "workflow-catalog.json").read_text(encoding="utf-8")
+    )
     assert report["merged_files"] == ["config/workflow-catalog.json"]
     assert "merge-config-changes" in payload["workflows"]
     assert "workflow_id" not in payload["workflows"]["merge-config-changes"]
@@ -206,6 +214,8 @@ def test_root_level_yaml_registry_supports_last_write_wins_updates(merge_repo: d
 
     registry.merge_pending(file_path="config/agent-policies.yaml")
 
-    payload = yaml.safe_load((Path(merge_repo["repo_root"]) / "config" / "agent-policies.yaml").read_text(encoding="utf-8"))
+    payload = yaml.safe_load(
+        (Path(merge_repo["repo_root"]) / "config" / "agent-policies.yaml").read_text(encoding="utf-8")
+    )
     assert payload[0]["agent_id"] == "agent/codex"
     assert payload[0]["trust_tier"] == "T4"

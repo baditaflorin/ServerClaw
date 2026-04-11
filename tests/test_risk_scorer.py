@@ -315,9 +315,7 @@ def test_lv3_run_dry_run_prints_compiled_intent(capsys: pytest.CaptureFixture[st
     assert "<redacted>" in captured.out
 
 
-def test_lv3_run_blocks_critical_workflow_without_override(
-    capsys: pytest.CaptureFixture[str], risk_repo: Path
-) -> None:
+def test_lv3_run_blocks_critical_workflow_without_override(capsys: pytest.CaptureFixture[str], risk_repo: Path) -> None:
     exit_code = lv3_cli.main(["run", "configure-network"])
     captured = capsys.readouterr()
     assert exit_code == 2

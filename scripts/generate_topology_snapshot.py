@@ -21,7 +21,7 @@ import argparse
 import json
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -132,12 +132,12 @@ def _sanitise_jinja2(raw: str) -> str:
     # Pattern: a YAML key followed by a value that is *entirely* a Jinja2 expr
     # e.g.  key: "{{ expr }}"  or  key: {{ expr }}
     entire_value_re = re.compile(
-        r'^(\s*(?:- )?\w[\w\-]*\s*:\s*)'   # key part
-        r'("?\{\{[^}]*\}\}"?)'              # value is purely Jinja2
-        r'(\s*)$'                            # optional trailing whitespace
+        r"^(\s*(?:- )?\w[\w\-]*\s*:\s*)"  # key part
+        r'("?\{\{[^}]*\}\}"?)'  # value is purely Jinja2
+        r"(\s*)$"  # optional trailing whitespace
     )
     # Pattern: Jinja2 expression embedded inside a quoted string value
-    embedded_re = re.compile(r'\{\{[^}]*\}\}')
+    embedded_re = re.compile(r"\{\{[^}]*\}\}")
 
     for line in raw.splitlines(keepends=True):
         m = entire_value_re.match(line)
@@ -165,7 +165,7 @@ def _read_yaml(path: Path) -> dict | list | None:
     cleaned = _sanitise_jinja2(raw)
     try:
         return _load_yaml(cleaned)  # type: ignore[return-value]
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         _warn(f"YAML parse error in {path}: {exc}")
         return None
 
@@ -201,7 +201,7 @@ def _extract_production_hosts(hosts_yml: dict) -> dict[str, str]:
         if isinstance(host_vars, dict):
             ansible_host = host_vars.get("ansible_host", "<dynamic>")
             env = host_vars.get("deployment_environment", "")
-            if env == "production" or hostname.endswith("-lv3") and not hostname.endswith("-staging-lv3"):
+            if env == "production" or (hostname.endswith("-lv3") and not hostname.endswith("-staging-lv3")):
                 result[hostname] = str(ansible_host)
     return result
 
@@ -219,11 +219,13 @@ def _extract_proxmox_guests(host_vars: dict) -> list[dict]:
         name = g.get("name")
         ipv4 = g.get("ipv4")
         if vmid and name:
-            result.append({
-                "vmid": int(vmid) if str(vmid).isdigit() else vmid,
-                "name": str(name),
-                "ipv4": str(ipv4) if ipv4 else "<dynamic>",
-            })
+            result.append(
+                {
+                    "vmid": int(vmid) if str(vmid).isdigit() else vmid,
+                    "name": str(name),
+                    "ipv4": str(ipv4) if ipv4 else "<dynamic>",
+                }
+            )
     return result
 
 
@@ -248,11 +250,13 @@ def _extract_platform_guests(platform_yml: dict) -> list[dict]:
         name = g.get("name")
         ipv4 = g.get("ipv4")
         if vmid and name:
-            result.append({
-                "vmid": int(vmid) if str(vmid).isdigit() else vmid,
-                "name": str(name),
-                "ipv4": str(ipv4) if ipv4 else "<dynamic>",
-            })
+            result.append(
+                {
+                    "vmid": int(vmid) if str(vmid).isdigit() else vmid,
+                    "name": str(name),
+                    "ipv4": str(ipv4) if ipv4 else "<dynamic>",
+                }
+            )
     return result
 
 
@@ -338,7 +342,7 @@ def build_topology(
 
     snapshot: dict[str, Any] = {
         "schema_version": 1,
-        "generated_at": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": datetime.now(tz=UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "generated_from": generated_from,
         "environments": {
             "prod": {

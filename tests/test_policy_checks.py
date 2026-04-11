@@ -136,9 +136,7 @@ def test_managed_tool_path_is_platform_scoped() -> None:
     assert path == install_root / "opa" / module.OPA_VERSION / "linux-amd64" / "opa"
 
 
-def test_ensure_policy_toolchain_replaces_unusable_platform_binaries(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_ensure_policy_toolchain_replaces_unusable_platform_binaries(tmp_path: Path, monkeypatch) -> None:
     toolchain_module = load_module("policy_toolchain_module_refresh", "platform/policy/toolchain.py")
     install_root = tmp_path / "toolchain"
     stale_opa = toolchain_module._managed_tool_path(

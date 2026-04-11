@@ -28,14 +28,18 @@ def load_config() -> tuple[str, int, BridgeConfig]:
     listen_port = env_int("FALCO_EVENT_BRIDGE_LISTEN_PORT", 18084)
     config = BridgeConfig(
         actor_id=os.environ.get("FALCO_EVENT_BRIDGE_ACTOR_ID", "falco-event-bridge").strip() or "falco-event-bridge",
-        source_host=os.environ.get("FALCO_EVENT_BRIDGE_SOURCE_HOST", "docker-runtime-lv3").strip() or "docker-runtime-lv3",
-        event_topic=os.environ.get("FALCO_EVENT_BRIDGE_EVENT_TOPIC", "platform.security.falco").strip() or "platform.security.falco",
-        nats_subject=os.environ.get("FALCO_EVENT_BRIDGE_NATS_SUBJECT", "platform.security.falco").strip() or "platform.security.falco",
+        source_host=os.environ.get("FALCO_EVENT_BRIDGE_SOURCE_HOST", "docker-runtime-lv3").strip()
+        or "docker-runtime-lv3",
+        event_topic=os.environ.get("FALCO_EVENT_BRIDGE_EVENT_TOPIC", "platform.security.falco").strip()
+        or "platform.security.falco",
+        nats_subject=os.environ.get("FALCO_EVENT_BRIDGE_NATS_SUBJECT", "platform.security.falco").strip()
+        or "platform.security.falco",
         nats_host=os.environ.get("FALCO_EVENT_BRIDGE_NATS_HOST", "127.0.0.1").strip() or "127.0.0.1",
         nats_port=env_int("FALCO_EVENT_BRIDGE_NATS_PORT", 4222),
         nats_username=os.environ.get("FALCO_EVENT_BRIDGE_NATS_USERNAME", "").strip(),
         nats_password=os.environ.get("FALCO_EVENT_BRIDGE_NATS_PASSWORD", "").strip(),
-        ntfy_base_url=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_BASE_URL", "http://127.0.0.1:2586").strip() or "http://127.0.0.1:2586",
+        ntfy_base_url=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_BASE_URL", "http://127.0.0.1:2586").strip()
+        or "http://127.0.0.1:2586",
         ntfy_topic=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_TOPIC", "platform-security-critical").strip()
         or "platform-security-critical",
         ntfy_username=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_USERNAME", "").strip(),
@@ -61,13 +65,13 @@ class FalcoBridgeHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         if self.path != "/healthz":
             self._write_json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
             return
         self._write_json(HTTPStatus.OK, {"status": "ok"})
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         if self.path != "/events":
             self._write_json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
             return
@@ -94,7 +98,7 @@ class FalcoBridgeHandler(BaseHTTPRequestHandler):
 
         self._write_json(HTTPStatus.ACCEPTED, {"accepted": len(events), "actions": action_report})
 
-    def log_message(self, format: str, *args: Any) -> None:  # noqa: A003
+    def log_message(self, format: str, *args: Any) -> None:
         print(f"falco-event-bridge {self.address_string()} {format % args}", flush=True)
 
 

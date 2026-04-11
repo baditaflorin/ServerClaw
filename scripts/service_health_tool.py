@@ -38,12 +38,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import socket
 import sys
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -68,6 +67,7 @@ def _load_vm_ip_map() -> dict[str, str]:
     """Build {vm_name: ipv4} from inventory."""
     try:
         import yaml  # type: ignore[import]
+
         data = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
         return {v["name"]: v.get("ipv4", "") for v in data.get("proxmox_vms", [])}
     except ImportError:
@@ -92,11 +92,11 @@ def _ssh_suggestion(vm_name: str, url: str, vm_ip_map: dict[str, str]) -> str:
 
 
 def _http_probe(url: str, method: str, expected_statuses: list[int], timeout: int) -> dict[str, Any]:
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     try:
         req = urllib.request.Request(url, method=method)
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            elapsed_ms = int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+            elapsed_ms = int((datetime.now(UTC) - start).total_seconds() * 1000)
             ok = resp.status in expected_statuses
             return {
                 "reachable": True,
@@ -105,10 +105,10 @@ def _http_probe(url: str, method: str, expected_statuses: list[int], timeout: in
                 "ok": ok,
             }
     except urllib.error.HTTPError as e:
-        elapsed_ms = int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+        elapsed_ms = int((datetime.now(UTC) - start).total_seconds() * 1000)
         ok = e.code in expected_statuses
         return {"reachable": True, "http_status": e.code, "response_time_ms": elapsed_ms, "ok": ok}
-    except (urllib.error.URLError, socket.timeout, OSError) as e:
+    except (TimeoutError, urllib.error.URLError, OSError) as e:
         return {"reachable": False, "error": str(e), "ok": False}
 
 
@@ -162,12 +162,14 @@ def cmd_list(args: argparse.Namespace) -> int:
     for name, svc in catalog["services"].items():
         if args.vm and svc.get("owning_vm", "") != args.vm:
             continue
-        rows.append({
-            "service_name": name,
-            "owning_vm": svc.get("owning_vm"),
-            "role": svc.get("role"),
-            "probe_types": [pt for pt in ("startup", "liveness", "readiness") if pt in svc],
-        })
+        rows.append(
+            {
+                "service_name": name,
+                "owning_vm": svc.get("owning_vm"),
+                "role": svc.get("role"),
+                "probe_types": [pt for pt in ("startup", "liveness", "readiness") if pt in svc],
+            }
+        )
     rows.sort(key=lambda x: (x["owning_vm"] or "", x["service_name"]))
     print(json.dumps({"services": rows, "count": len(rows)}, indent=2))
     return 0
@@ -222,8 +224,7 @@ def cmd_status_all(args: argparse.Namespace) -> int:
     catalog = _load_catalog()
     vm_ip_map = _load_vm_ip_map()
     all_services = [
-        (name, svc) for name, svc in catalog["services"].items()
-        if not args.vm or svc.get("owning_vm") == args.vm
+        (name, svc) for name, svc in catalog["services"].items() if not args.vm or svc.get("owning_vm") == args.vm
     ]
 
     def _probe_one(name: str, svc: dict) -> dict:
@@ -241,15 +242,22 @@ def cmd_status_all(args: argparse.Namespace) -> int:
             results.append(fut.result())
 
     results.sort(key=lambda x: (x.get("status", ""), x.get("service", "")))
-    counts = {s: sum(1 for r in results if r.get("status") == s)
-              for s in ("ok", "fail", "local_only", "unsupported", "not_configured", "unknown")}
+    counts = {
+        s: sum(1 for r in results if r.get("status") == s)
+        for s in ("ok", "fail", "local_only", "unsupported", "not_configured", "unknown")
+    }
 
-    print(json.dumps({
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "results": results,
-        "summary": {k: v for k, v in counts.items() if v > 0},
-        "total": len(results),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "results": results,
+                "summary": {k: v for k, v in counts.items() if v > 0},
+                "total": len(results),
+            },
+            indent=2,
+        )
+    )
     failing = [r for r in results if r.get("status") == "fail"]
     return 2 if failing else 0
 

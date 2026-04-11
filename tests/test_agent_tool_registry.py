@@ -159,7 +159,7 @@ class AgentToolRegistryTests(unittest.TestCase):
                             "opened_at": "2026-03-23T09:50:00Z",
                             "expected_duration_minutes": 30,
                             "auto_close_at": "2099-03-23T10:20:00Z",
-                            "correlation_id": "deploy:grafana"
+                            "correlation_id": "deploy:grafana",
                         }
                     }
                 )
@@ -326,9 +326,7 @@ class AgentToolRegistryTests(unittest.TestCase):
                         "preflight_passed": True,
                         "validation_passed": True,
                         "receipt_planned": True,
-                        "parameters": {
-                            "NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"
-                        },
+                        "parameters": {"NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"},
                         "dry_run": True,
                     }
                 ),

@@ -21,6 +21,7 @@ from pathlib import Path
 import pytest
 
 import sys
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -519,6 +520,7 @@ def test_as_yaml_round_trips_required_fields(compiler_repo: Path) -> None:
     intent = compiler.compile("deploy netbox")
     yml_text = compiler.as_yaml(intent)
     import yaml
+
     loaded = yaml.safe_load(yml_text)
     assert loaded["action"] == "deploy"
     assert loaded["risk_class"] == "MEDIUM"
@@ -589,9 +591,7 @@ def test_resolve_target_workflow_kind(compiler_repo: Path) -> None:
 
 
 def test_resolve_scope_merges_rule_defaults_and_target(compiler_repo: Path) -> None:
-    target = IntentTarget(
-        kind="service", name="netbox", services=["netbox"], hosts=["netbox-lv3"]
-    )
+    target = IntentTarget(kind="service", name="netbox", services=["netbox"], hosts=["netbox-lv3"])
     scope = resolve_scope(
         rule_scope_defaults={"allowed_hosts": ["management-lv3"], "allowed_services": [], "allowed_vmids": []},
         target=target,
@@ -602,9 +602,7 @@ def test_resolve_scope_merges_rule_defaults_and_target(compiler_repo: Path) -> N
 
 
 def test_resolve_scope_deduplicates_hosts(compiler_repo: Path) -> None:
-    target = IntentTarget(
-        kind="service", name="grafana", services=["grafana"], hosts=["monitoring-lv3"]
-    )
+    target = IntentTarget(kind="service", name="grafana", services=["grafana"], hosts=["monitoring-lv3"])
     scope = resolve_scope(
         rule_scope_defaults={"allowed_hosts": ["monitoring-lv3"], "allowed_services": [], "allowed_vmids": []},
         target=target,
@@ -619,9 +617,7 @@ def test_resolve_workflow_id_prefers_group_alias(compiler_repo: Path) -> None:
             "workflow_id": "converge-monitoring",
         }
     }
-    target = IntentTarget(
-        kind="service_group", name="monitoring stack", services=["grafana", "loki", "prometheus"]
-    )
+    target = IntentTarget(kind="service_group", name="monitoring stack", services=["grafana", "loki", "prometheus"])
     wf_id = resolve_workflow_id(
         rule_workflow_id=None,
         rule_workflow_candidates=["converge-{service}"],

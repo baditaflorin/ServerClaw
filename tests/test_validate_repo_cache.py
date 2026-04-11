@@ -15,7 +15,7 @@ def test_validate_repo_supports_shared_ansible_collection_cache() -> None:
     assert "LV3_ANSIBLE_COLLECTIONS_DIR" in script
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE" in script
     assert "LV3_ANSIBLE_GALAXY_SERVER" in script
-    assert "sha256sum \"$requirements_file\"" in script
+    assert 'sha256sum "$requirements_file"' in script
     assert 'galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")' in script
     assert "cmp -s" in script
     assert '"MANIFEST.json"' in script
@@ -68,7 +68,7 @@ def test_validate_repo_runs_public_endpoint_admission_check() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 
     assert "scripts/subdomain_exposure_audit.py" in script
-    assert "subdomain_exposure_audit.py\" --validate" in script
+    assert 'subdomain_exposure_audit.py" --validate' in script
 
 
 def test_validate_repo_supports_architecture_fitness_stage() -> None:
@@ -109,7 +109,7 @@ def test_validate_repo_generated_portals_stage_does_not_require_make() -> None:
 def test_validate_repo_tracked_files_fall_back_without_git_metadata() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 
-    assert 'rev-parse --is-inside-work-tree' in script
+    assert "rev-parse --is-inside-work-tree" in script
     assert 'repo_root.glob(pattern) if "/" in pattern else repo_root.rglob(pattern)' in script
     assert 'skip_dirs = {".ansible", ".git", ".local", ".pytest_cache", ".venv", ".worktrees"}' in script
 
@@ -147,9 +147,9 @@ def test_check_role_argument_specs_handles_missing_merge_base_history() -> None:
 def test_check_role_argument_specs_falls_back_without_git_metadata() -> None:
     script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
 
-    assert 'rev-parse --is-inside-work-tree >/dev/null 2>&1' in script
+    assert "rev-parse --is-inside-work-tree >/dev/null 2>&1" in script
     assert 'find "$REPO_ROOT/$COLLECTION_ROLES_ROOT" -mindepth 1 -maxdepth 1 -type d' in script
-    assert "find \"$REPO_ROOT/$role_dir\" -type f" in script
+    assert 'find "$REPO_ROOT/$role_dir" -type f' in script
 
 
 def _stage_role_argument_specs_repo(tmp_path: Path) -> tuple[Path, Path]:
@@ -206,5 +206,5 @@ def test_check_role_argument_specs_still_flags_populated_roles_without_meta(tmp_
 def test_python_package_runner_handles_pyyaml_module_mapping() -> None:
     script = PYTHON_WITH_PACKAGES_SCRIPT.read_text(encoding="utf-8")
 
-    assert 'pyyaml)' in script
+    assert "pyyaml)" in script
     assert 'echo "yaml"' in script

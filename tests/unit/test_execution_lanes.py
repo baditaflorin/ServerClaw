@@ -266,7 +266,9 @@ class BusyLockManager:
 
 
 class FakeWindmillClient:
-    def submit_workflow(self, workflow_id: str, arguments: dict[str, str], *, timeout_seconds: int | None = None) -> dict[str, str]:
+    def submit_workflow(
+        self, workflow_id: str, arguments: dict[str, str], *, timeout_seconds: int | None = None
+    ) -> dict[str, str]:
         return {"job_id": f"job-{workflow_id}", "running": True}
 
     def get_job(self, job_id: str) -> dict[str, str]:
@@ -290,7 +292,9 @@ def test_scheduler_returns_queued_when_lane_is_busy(tmp_path: Path) -> None:
         wait_for_completion=False,
     )
     second = scheduler.submit(
-        SimpleNamespace(intent_id="intent-b", workflow_id="converge-windmill", arguments={}, target_service_id="windmill"),
+        SimpleNamespace(
+            intent_id="intent-b", workflow_id="converge-windmill", arguments={}, target_service_id="windmill"
+        ),
     )
 
     assert first.status == "submitted"
@@ -312,7 +316,9 @@ def test_scheduler_releases_lane_when_workflow_lock_is_busy(tmp_path: Path) -> N
         wait_for_completion=False,
     )
 
-    registry = LaneRegistry(repo_root=tmp_path, state_path=tmp_path / ".local" / "state" / "execution-lanes" / "registry.json")
+    registry = LaneRegistry(
+        repo_root=tmp_path, state_path=tmp_path / ".local" / "state" / "execution-lanes" / "registry.json"
+    )
     snapshot = registry.snapshot()
 
     assert result.status == "concurrency_limit"

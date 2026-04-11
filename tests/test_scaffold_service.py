@@ -15,14 +15,7 @@ import scaffold_service
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCAFFOLD_TEMPLATE_SRC = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "roles"
-    / "_template"
-    / "service_scaffold"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "_template" / "service_scaffold"
 )
 DOC_TEMPLATES_SRC = REPO_ROOT / "docs" / "templates"
 
@@ -36,15 +29,7 @@ class ScaffoldServiceTests(unittest.TestCase):
         (root / "playbooks" / "services").mkdir(parents=True)
         (root / "config").mkdir(parents=True)
         (root / "inventory" / "host_vars").mkdir(parents=True)
-        (
-            root
-            / "collections"
-            / "ansible_collections"
-            / "lv3"
-            / "platform"
-            / "roles"
-            / "_template"
-        ).mkdir(parents=True)
+        (root / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "_template").mkdir(parents=True)
         shutil.copytree(
             SCAFFOLD_TEMPLATE_SRC,
             root

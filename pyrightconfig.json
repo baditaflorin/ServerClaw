@@ -1,0 +1,31 @@
+{
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+  "include": [
+    "scripts",
+    "collections/ansible_collections/lv3/platform/plugins"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "build",
+    ".ansible",
+    "scripts/validate_repository_data_models.py",
+    "scripts/agent_tool_registry.py"
+  ],
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownParameterType": "none",
+  "reportAny": "none",
+  "reportAttributeAccessIssue": "warning",
+  "reportOperatorIssue": "error",
+  "reportIndexIssue": "error",
+  "reportReturnType": "error",
+  "reportArgumentType": "warning",
+  "reportOptionalMemberAccess": "warning",
+  "reportOptionalSubscript": "warning",
+  "reportOptionalCall": "warning",
+  "reportPossiblyUnbound": "warning"
+}

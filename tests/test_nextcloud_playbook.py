@@ -18,7 +18,9 @@ def test_nextcloud_dns_stage_converges_only_the_nextcloud_subdomain_record() -> 
     assert dns_play["vars"]["subdomain_fqdn"] == "cloud.lv3.org"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Nextcloud subdomain entry")
-    assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    assert (
+        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    )
 
     converge_task = next(task for task in tasks if task.get("name") == "Converge the Nextcloud Hetzner DNS record")
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"
@@ -46,7 +48,10 @@ def test_nextcloud_playbook_converges_postgres_runtime_and_edge_roles() -> None:
     ]
     assert edge_roles == ["lv3.platform.nginx_edge_publication"]
     assert "post_tasks" not in plays[2]
-    assert plays[4]["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    assert (
+        plays[4]["hosts"]
+        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    )
     assert [task["name"] for task in verify_tasks] == [
         "Run shared Nextcloud post-verify checks",
         "Run shared completion notifications",

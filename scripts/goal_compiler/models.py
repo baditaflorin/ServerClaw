@@ -12,7 +12,7 @@ before it is handed to the execution layer.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
@@ -23,7 +23,7 @@ class RiskClass(str, Enum):
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __str__(self) -> str:
         return self.value
 
 
@@ -111,9 +111,7 @@ class ScoringContext:
             "in_maintenance_window": self.in_maintenance_window,
             "active_incident": self.active_incident,
             "hours_since_last_mutation": (
-                None
-                if self.hours_since_last_mutation is None
-                else round(self.hours_since_last_mutation, 2)
+                None if self.hours_since_last_mutation is None else round(self.hours_since_last_mutation, 2)
             ),
             "stale": self.stale,
             "stale_reasons": list(self.stale_reasons),

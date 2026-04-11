@@ -27,7 +27,9 @@ def test_build_ntfy_publish_command_uses_governed_registry_defaults(monkeypatch)
     monkeypatch.delenv("LV3_NTFY_TOPIC", raising=False)
 
     command = sbom_refresh.build_ntfy_publish_command(
-        config={"ntfy": {"base_url": "http://10.10.10.20:2586", "publisher": "windmill", "topic": "platform-security-warn"}},
+        config={
+            "ntfy": {"base_url": "http://10.10.10.20:2586", "publisher": "windmill", "topic": "platform-security-warn"}
+        },
         message="delta detected",
     )
 

@@ -20,7 +20,7 @@ DEFAULT_REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_ARCHIVE_ROOT = DEFAULT_REPO_ROOT / ".local" / "control-metadata-witness" / "archive"
 DEFAULT_STAGING_ROOT = DEFAULT_REPO_ROOT / ".local" / "control-metadata-witness" / "staging"
 DEFAULT_RECEIPT_DIR = DEFAULT_REPO_ROOT / "receipts" / "witness-replication"
-UTC = dt.timezone.utc
+UTC = dt.UTC
 
 REQUIRED_SNAPSHOT_FILES = (
     "VERSION",
@@ -155,8 +155,12 @@ def list_snapshot_entries(snapshot_path: Path) -> list[str]:
 def assert_snapshot_contract(entries: list[str]) -> None:
     entry_set = set(entries)
     missing_files = [path for path in REQUIRED_SNAPSHOT_FILES if path not in entry_set]
-    missing_prefixes = [prefix for prefix in REQUIRED_SNAPSHOT_PREFIXES if not any(name.startswith(prefix) for name in entries)]
-    problems = [f"missing file {path}" for path in missing_files] + [f"missing tree {prefix}" for prefix in missing_prefixes]
+    missing_prefixes = [
+        prefix for prefix in REQUIRED_SNAPSHOT_PREFIXES if not any(name.startswith(prefix) for name in entries)
+    ]
+    problems = [f"missing file {path}" for path in missing_files] + [
+        f"missing tree {prefix}" for prefix in missing_prefixes
+    ]
     if problems:
         raise RuntimeError("snapshot contract failed: " + ", ".join(problems))
 

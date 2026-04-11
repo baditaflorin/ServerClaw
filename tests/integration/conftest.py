@@ -317,8 +317,7 @@ def proxmox_api_headers(integration_config: IntegrationConfig) -> dict[str, str]
         pytest.skip("LV3_PROXMOX_TOKEN_ID and LV3_PROXMOX_TOKEN_SECRET are required")
     return {
         "Authorization": (
-            f"PVEAPIToken={integration_config.proxmox_token_id}"
-            f"={integration_config.proxmox_token_secret}"
+            f"PVEAPIToken={integration_config.proxmox_token_id}={integration_config.proxmox_token_secret}"
         )
     }
 

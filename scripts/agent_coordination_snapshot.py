@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 from script_bootstrap import ensure_repo_root_on_path
 
@@ -28,7 +27,9 @@ def main(*, repo_root: Path, output_dir: Path, write: bool) -> int:
     store = AgentCoordinationStore(repo_root=repo_root)
     payload = store.snapshot()
     payload["receipt_id"] = build_receipt_id(utcnow())
-    payload["summary"]["generated_at"] = payload["summary"].get("generated_at") or utcnow().isoformat().replace("+00:00", "Z")
+    payload["summary"]["generated_at"] = payload["summary"].get("generated_at") or utcnow().isoformat().replace(
+        "+00:00", "Z"
+    )
 
     if write:
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -43,7 +44,9 @@ def main(*, repo_root: Path, output_dir: Path, write: bool) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Read the current agent coordination map and optionally write a receipt.")
+    parser = argparse.ArgumentParser(
+        description="Read the current agent coordination map and optionally write a receipt."
+    )
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--write", action="store_true", help="Write the snapshot into receipts/agent-coordination.")
@@ -51,7 +54,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import os, subprocess, sys as _sys
+    import os
+    import subprocess
+    import sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -65,7 +71,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         subprocess.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

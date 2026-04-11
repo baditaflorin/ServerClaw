@@ -32,7 +32,8 @@ class FakeScheduler:
 def write_repo_basics(repo_root: Path) -> None:
     (repo_root / "config").mkdir(parents=True, exist_ok=True)
     (repo_root / "config" / "service-capability-catalog.json").write_text(
-        json.dumps({"services": [{"id": "netbox", "name": "NetBox", "vm": "netbox-lv3", "lifecycle_status": "active"}]}) + "\n",
+        json.dumps({"services": [{"id": "netbox", "name": "NetBox", "vm": "netbox-lv3", "lifecycle_status": "active"}]})
+        + "\n",
         encoding="utf-8",
     )
     (repo_root / "config" / "workflow-catalog.json").write_text(
@@ -107,7 +108,9 @@ def write_repo_basics(repo_root: Path) -> None:
         + "\n",
         encoding="utf-8",
     )
-    (repo_root / "config" / "controller-local-secrets.json").write_text(json.dumps({"secrets": {}}) + "\n", encoding="utf-8")
+    (repo_root / "config" / "controller-local-secrets.json").write_text(
+        json.dumps({"secrets": {}}) + "\n", encoding="utf-8"
+    )
     (repo_root / "docs" / "runbooks").mkdir(parents=True, exist_ok=True)
     (repo_root / "docs" / "runbooks" / "observation-to-action-closure-loop.md").write_text(
         "# Observation to action\n",
@@ -123,7 +126,9 @@ def test_auto_check_run_resolves_and_stops_on_verification_pass(tmp_path: Path) 
         state_store=store,
         triage_report_builder=lambda _payload: {
             "affected_service": "netbox",
-            "hypotheses": [{"rank": 1, "id": "tls-cert-expiry", "auto_check": True, "cheapest_first_action": "check cert"}],
+            "hypotheses": [
+                {"rank": 1, "id": "tls-cert-expiry", "auto_check": True, "cheapest_first_action": "check cert"}
+            ],
             "auto_check_result": {"status": "executed", "type": "cert_check"},
         },
         verification_provider=lambda _run, _proposal, _execution: {"passed": True, "goal_achieved": True},
@@ -151,7 +156,14 @@ def test_non_auto_check_run_escalates_then_approved_workflow_resolves(tmp_path: 
         state_store=LoopStateStore(tmp_path / ".local" / "state" / "closure-loop" / "runs.json"),
         triage_report_builder=lambda _payload: {
             "affected_service": "netbox",
-            "hypotheses": [{"rank": 1, "id": "dependency-failure", "auto_check": False, "cheapest_first_action": "inspect upstream"}],
+            "hypotheses": [
+                {
+                    "rank": 1,
+                    "id": "dependency-failure",
+                    "auto_check": False,
+                    "cheapest_first_action": "inspect upstream",
+                }
+            ],
             "auto_check_result": None,
         },
         verification_provider=lambda _run, _proposal, _execution: {"passed": True, "goal_achieved": True},
@@ -175,7 +187,9 @@ def test_failed_verification_retries_then_blocks(tmp_path: Path) -> None:
         triage_calls["count"] += 1
         return {
             "affected_service": "netbox",
-            "hypotheses": [{"rank": 1, "id": "resource-exhaustion", "auto_check": True, "cheapest_first_action": "check pressure"}],
+            "hypotheses": [
+                {"rank": 1, "id": "resource-exhaustion", "auto_check": True, "cheapest_first_action": "check pressure"}
+            ],
             "auto_check_result": {"status": "executed", "type": "metric_query"},
         }
 

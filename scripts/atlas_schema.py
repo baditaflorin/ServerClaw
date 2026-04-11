@@ -9,7 +9,6 @@ import difflib
 import hashlib
 import json
 import os
-import shlex
 import socket
 import subprocess
 import sys
@@ -87,9 +86,7 @@ def validate_catalog(
     require_snapshot_files: bool = True,
 ) -> None:
     if catalog.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
-        raise ValueError(
-            f"config/atlas/catalog.json.schema_version must be '{SUPPORTED_SCHEMA_VERSION}'"
-        )
+        raise ValueError(f"config/atlas/catalog.json.schema_version must be '{SUPPORTED_SCHEMA_VERSION}'")
 
     require_str(catalog.get("atlas_image_ref"), "config/atlas/catalog.json.atlas_image_ref")
     require_str(catalog.get("dev_postgres_image"), "config/atlas/catalog.json.dev_postgres_image")
@@ -133,8 +130,7 @@ def validate_catalog(
     topic_spec = load_topic_index().get(nats_subject)
     if topic_spec is None:
         raise ValueError(
-            "config/atlas/catalog.json.notifications.nats_subject "
-            f"references unknown NATS topic '{nats_subject}'"
+            f"config/atlas/catalog.json.notifications.nats_subject references unknown NATS topic '{nats_subject}'"
         )
     if topic_spec.get("status") != "active":
         raise ValueError(
@@ -149,9 +145,7 @@ def validate_catalog(
         "snapshot_sha256",
         "live_sha256",
     }
-    unsupported_required_keys = sorted(
-        set(topic_spec.get("payload_required", ())) - drift_event_payload_keys
-    )
+    unsupported_required_keys = sorted(set(topic_spec.get("payload_required", ())) - drift_event_payload_keys)
     if unsupported_required_keys:
         raise ValueError(
             "config/atlas/catalog.json.notifications.nats_subject "
@@ -233,9 +227,7 @@ def parse_changed_files() -> tuple[str, ...] | None:
     changed_files: list[str] = []
     for index, item in enumerate(payload):
         if not isinstance(item, str) or not item.strip():
-            raise ValueError(
-                f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string"
-            )
+            raise ValueError(f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string")
         changed_files.append(item.strip())
     return tuple(changed_files)
 
@@ -334,7 +326,7 @@ def ensure_image(client: Any, image_ref: str) -> None:
     try:
         client.images.get(image_ref)
         return
-    except Exception:  # noqa: BLE001
+    except Exception:
         client.images.pull(image_ref)
 
 
@@ -372,12 +364,10 @@ def run_atlas(
             volumes=volumes or None,
             extra_hosts={"host.docker.internal": "host-gateway"},
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         if docker_error_matches(docker_sdk, exc, attr_name="ContainerError"):
             stderr = decode_output(getattr(exc, "stderr", None))
-            raise RuntimeError(
-                f"Atlas command failed ({' '.join(command)}): {stderr or str(exc)}"
-            ) from exc
+            raise RuntimeError(f"Atlas command failed ({' '.join(command)}): {stderr or str(exc)}") from exc
         if docker_error_matches(docker_sdk, exc, attr_name="APIError"):
             raise RuntimeError(f"Atlas container API error: {exc}") from exc
         raise
@@ -592,9 +582,7 @@ def ensure_openbao_unsealed(context: dict[str, Any], base_url: str) -> None:
             return
         time.sleep(1)
 
-    raise RuntimeError(
-        f"OpenBao remained sealed at {base_url} after the managed unseal sequence"
-    )
+    raise RuntimeError(f"OpenBao remained sealed at {base_url} after the managed unseal sequence")
 
 
 def openbao_login(context: dict[str, Any], base_url: str, catalog: dict[str, Any]) -> str:
@@ -711,9 +699,7 @@ def dev_postgres(client: Any, image_ref: str, database_name: str):
                 return
             last_output = decode_output(result.output)
             time.sleep(1)
-        raise RuntimeError(
-            f"ephemeral PostgreSQL dev database did not become ready: {last_output or 'timeout'}"
-        )
+        raise RuntimeError(f"ephemeral PostgreSQL dev database did not become ready: {last_output or 'timeout'}")
     finally:
         force_remove_container(container_name)
 
@@ -847,12 +833,9 @@ def maybe_publish_ntfy(
         password = password_path.read_text(encoding="utf-8").strip()
     request = urllib.request.Request(
         url,
-        data=(
-            "Atlas drift detected for database snapshots: " + ", ".join(sorted(drifted_ids))
-        ).encode("utf-8"),
+        data=("Atlas drift detected for database snapshots: " + ", ".join(sorted(drifted_ids))).encode("utf-8"),
         headers={
-            "Authorization": "Basic "
-            + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
+            "Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
             "Title": "Atlas drift detected",
             "Priority": "high",
             "Tags": "warning,atlas,postgres",
@@ -863,7 +846,7 @@ def maybe_publish_ntfy(
         with urllib.request.urlopen(request, timeout=10) as response:
             if response.status >= 300:
                 raise RuntimeError(f"ntfy publish failed with HTTP {response.status}")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return {"published": False, "count": 0, "reason": str(exc)}
     return {"published": True, "count": len(drifted_ids)}
 
@@ -1090,9 +1073,7 @@ def run_drift(
                             write_json(receipt_path, record, indent=2, sort_keys=True)
                         except OSError as exc:
                             receipt_writes_enabled = False
-                            receipt_errors.append(
-                                f"could not write Atlas drift receipt {receipt_path}: {exc}"
-                            )
+                            receipt_errors.append(f"could not write Atlas drift receipt {receipt_path}: {exc}")
                         else:
                             receipt_paths.append(str(receipt_path.relative_to(repo_root)))
                 event_records.append(
@@ -1120,7 +1101,9 @@ def run_drift(
     if publish_nats and event_records:
         nats_result = maybe_publish_drift_events(
             subject=require_str(
-                require_mapping(catalog.get("notifications"), "config/atlas/catalog.json.notifications").get("nats_subject"),
+                require_mapping(catalog.get("notifications"), "config/atlas/catalog.json.notifications").get(
+                    "nats_subject"
+                ),
                 "config/atlas/catalog.json.notifications.nats_subject",
             ),
             records=event_records,

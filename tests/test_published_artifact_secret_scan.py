@@ -159,4 +159,7 @@ def test_makefile_runs_published_artifact_secret_scan_via_uv_python() -> None:
         "\tuv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --write\n"
         "\tuv run python $(REPO_ROOT)/scripts/published_artifact_secret_scan.py --repo-root $(REPO_ROOT) --path build/changelog-portal\n"
     ) in makefile
-    assert "scan-published-artifacts:\n\tuv run python $(REPO_ROOT)/scripts/published_artifact_secret_scan.py --repo-root $(REPO_ROOT)\n" in makefile
+    assert (
+        "scan-published-artifacts:\n\tuv run python $(REPO_ROOT)/scripts/published_artifact_secret_scan.py --repo-root $(REPO_ROOT)\n"
+        in makefile
+    )

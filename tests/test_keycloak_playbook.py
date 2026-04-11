@@ -25,9 +25,7 @@ def test_keycloak_playbook_targets_the_runtime_control_vm() -> None:
     ]
 
     grafana_play = next(play for play in playbook if play["name"] == "Converge Grafana SSO against Keycloak")
-    grafana_role = next(
-        role for role in grafana_play["roles"] if role.get("role") == "lv3.platform.grafana_sso"
-    )
+    grafana_role = next(role for role in grafana_play["roles"] if role.get("role") == "lv3.platform.grafana_sso")
     assert grafana_role["vars"]["grafana_sso_client_secret"] == (
         "{{ hostvars[playbook_execution_host_patterns.runtime_control[playbook_execution_env]].keycloak_grafana_client_secret }}"
     )

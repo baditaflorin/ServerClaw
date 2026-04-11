@@ -84,7 +84,9 @@ def test_tasks_force_recreate_langfuse_when_network_attachment_is_missing() -> N
         task for task in tasks if task.get("name") == "Check whether Langfuse has an attached Docker network"
     )
     recovery_block = next(
-        task for task in tasks if task.get("name") == "Force-recreate Langfuse when Docker network attachment is missing"
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate Langfuse when Docker network attachment is missing"
     )
     network_cleanup = next(
         task
@@ -96,9 +98,7 @@ def test_tasks_force_recreate_langfuse_when_network_attachment_is_missing() -> N
         for task in recovery_block["block"]
         if task.get("name") == "Force-recreate Langfuse after local network attachment recovery"
     )
-    network_recheck = next(
-        task for task in tasks if task.get("name") == "Recheck Langfuse Docker network attachment"
-    )
+    network_recheck = next(task for task in tasks if task.get("name") == "Recheck Langfuse Docker network attachment")
 
     assert "{{json .NetworkSettings.Networks}}" in network_check["ansible.builtin.shell"]
     assert recovery_block["when"] == "langfuse_network_attachment_check.stdout | trim in ['', '{}', 'null']"
@@ -110,9 +110,7 @@ def test_tasks_force_recreate_langfuse_when_network_attachment_is_missing() -> N
 def test_verify_retries_bootstrap_project_api_until_langfuse_db_recovers() -> None:
     verify_tasks = load_verify_tasks()
     verify_task = next(
-        task
-        for task in verify_tasks
-        if task.get("name") == "Verify the Langfuse bootstrap project API is reachable"
+        task for task in verify_tasks if task.get("name") == "Verify the Langfuse bootstrap project API is reachable"
     )
 
     assert verify_task["retries"] == 30

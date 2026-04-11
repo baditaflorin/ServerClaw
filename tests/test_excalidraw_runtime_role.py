@@ -62,11 +62,17 @@ def test_templates_define_bootstrap_patch_and_port_publishing() -> None:
     compose_template = COMPOSE_TEMPLATE.read_text()
     bootstrap_template = BOOTSTRAP_TEMPLATE.read_text()
 
-    assert 'container_name: {{ excalidraw_runtime_app_container_name }}' in compose_template
-    assert 'container_name: {{ excalidraw_runtime_room_container_name }}' in compose_template
-    assert 'ports:' in compose_template
-    assert '{{ excalidraw_runtime_bind_host }}:{{ excalidraw_runtime_app_port }}:{{ excalidraw_runtime_app_container_port }}' in compose_template
-    assert '{{ excalidraw_runtime_bind_host }}:{{ excalidraw_runtime_room_port }}:{{ excalidraw_runtime_room_port }}' in compose_template
+    assert "container_name: {{ excalidraw_runtime_app_container_name }}" in compose_template
+    assert "container_name: {{ excalidraw_runtime_room_container_name }}" in compose_template
+    assert "ports:" in compose_template
+    assert (
+        "{{ excalidraw_runtime_bind_host }}:{{ excalidraw_runtime_app_port }}:{{ excalidraw_runtime_app_container_port }}"
+        in compose_template
+    )
+    assert (
+        "{{ excalidraw_runtime_bind_host }}:{{ excalidraw_runtime_room_port }}:{{ excalidraw_runtime_room_port }}"
+        in compose_template
+    )
     assert "PORT:" in compose_template
     assert "grep -R -l -F" in bootstrap_template
     assert "{{ excalidraw_runtime_upstream_collab_origin }}" in bootstrap_template

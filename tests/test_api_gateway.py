@@ -275,7 +275,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "runbook": "docs/runbooks/configure-windmill.md",
                     "tags": ["workflow"],
                     "environments": {"production": {"status": "active", "url": upstream_base}},
-                }
+                },
             ]
         },
     )
@@ -360,32 +360,17 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
             "dimensions": {
                 "declared_runtime": {
                     "title": "Declared Runtime",
-                    "description": "The service has a current runtime witness."
+                    "description": "The service has a current runtime witness.",
                 },
-                "health": {
-                    "title": "Health",
-                    "description": "The live health composite reports the service."
-                },
-                "route": {
-                    "title": "Route",
-                    "description": "The declared route matches a live surface."
-                },
-                "tls": {
-                    "title": "TLS",
-                    "description": "The service has HTTPS proof where required."
-                },
-                "smoke": {
-                    "title": "Smoke",
-                    "description": "A recent governed smoke receipt exists."
-                },
+                "health": {"title": "Health", "description": "The live health composite reports the service."},
+                "route": {"title": "Route", "description": "The declared route matches a live surface."},
+                "tls": {"title": "TLS", "description": "The service has HTTPS proof where required."},
+                "smoke": {"title": "Smoke", "description": "A recent governed smoke receipt exists."},
                 "browser_journey": {
                     "title": "Browser Journey",
-                    "description": "A recent browser journey receipt exists."
+                    "description": "A recent browser journey receipt exists.",
                 },
-                "log_queryability": {
-                    "title": "Log Queryability",
-                    "description": "A recent log-query receipt exists."
-                },
+                "log_queryability": {"title": "Log Queryability", "description": "A recent log-query receipt exists."},
             },
             "profiles": {
                 "private_service": {
@@ -460,9 +445,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                 "informational-only": "edge_informational_surface",
                 "private-only": "private_service",
             },
-            "service_overrides": {
-                "api_gateway": {"profile": "edge_api_surface"}
-            },
+            "service_overrides": {"api_gateway": {"profile": "edge_api_surface"}},
             "freshness_days_by_dimension": {
                 "smoke": 30,
                 "browser_journey": 30,
@@ -733,7 +716,9 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
     def jwks(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
 
-    transport = httpx.MockTransport(lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request))
+    transport = httpx.MockTransport(
+        lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request)
+    )
     config, token = make_repo(tmp_path, "http://upstream.test")
     app = create_app(config)
 
@@ -756,7 +741,9 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     services = await client.get("/v1/platform/services", headers=headers)
                     assert services.status_code == 200
                     assert services.json()["count"] == 3
-                    api_gateway_service = next(item for item in services.json()["services"] if item["id"] == "api_gateway")
+                    api_gateway_service = next(
+                        item for item in services.json()["services"] if item["id"] == "api_gateway"
+                    )
                     assert api_gateway_service["active_degradations"] == []
 
                     platform_health = await client.get("/v1/platform/health", headers=headers)
@@ -814,9 +801,7 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     assert runtime_assurance.status_code == 200
                     assert runtime_assurance.json()["summary"]["total"] == 3
                     windmill_assurance = next(
-                        item
-                        for item in runtime_assurance.json()["entries"]
-                        if item["service_id"] == "windmill"
+                        item for item in runtime_assurance.json()["entries"] if item["service_id"] == "windmill"
                     )
                     assert windmill_assurance["overall_status"] == "pass"
                     assert windmill_assurance["profile_id"] == "private_service"
@@ -1061,7 +1046,9 @@ def test_billing_event_route_rejects_invalid_token_and_publishes_rejection(tmp_p
     }
     producer_catalog_path = write_billing_producer_catalog(tmp_path, producer_catalog)
 
-    transport = httpx.MockTransport(lambda request: httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text())))
+    transport = httpx.MockTransport(
+        lambda request: httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+    )
     config, _token = make_repo(tmp_path, "http://upstream.test")
     config = replace(
         config,
@@ -1690,19 +1677,22 @@ def test_gateway_dify_tools_route_dispatches_and_returns_structured_content(tmp_
         app.state.runtime = runtime
         transport_app = httpx.ASGITransport(app=app)
         try:
-            with patch.object(gateway_main, "load_agent_tool_registry", return_value=({"tools": []}, {})), patch.object(
-                gateway_main,
-                "call_tool",
-                return_value=(
-                    {
-                        "tool": "get-platform-status",
-                        "structuredContent": {"status": "ok", "source": "dify"},
-                        "content": [],
-                        "isError": False,
-                    },
-                    {"outcome": "success"},
-                ),
-            ) as call_tool_mock:
+            with (
+                patch.object(gateway_main, "load_agent_tool_registry", return_value=({"tools": []}, {})),
+                patch.object(
+                    gateway_main,
+                    "call_tool",
+                    return_value=(
+                        {
+                            "tool": "get-platform-status",
+                            "structuredContent": {"status": "ok", "source": "dify"},
+                            "content": [],
+                            "isError": False,
+                        },
+                        {"outcome": "success"},
+                    ),
+                ) as call_tool_mock,
+            ):
                 async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
                     response = await client.post(
                         "/v1/dify-tools/get-platform-status",
@@ -1739,7 +1729,9 @@ def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
     def jwks(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
 
-    transport = httpx.MockTransport(lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request))
+    transport = httpx.MockTransport(
+        lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request)
+    )
     config, token = make_repo(tmp_path, "http://upstream.test")
     app = create_app(config)
 
@@ -1970,7 +1962,9 @@ def test_gateway_returns_retry_after_when_keycloak_circuit_is_open(tmp_path: Pat
         jwks_calls["count"] += 1
         return httpx.Response(503, json={"error": "keycloak restarting"})
 
-    transport = httpx.MockTransport(lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request))
+    transport = httpx.MockTransport(
+        lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request)
+    )
     config, token = make_repo(tmp_path, "http://upstream.test")
     write_yaml(
         tmp_path / "config" / "circuit-policies.yaml",

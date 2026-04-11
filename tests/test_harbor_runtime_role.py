@@ -54,13 +54,15 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
     oidc_readiness_block = task_by_name["Verify the Harbor admin configuration API is reachable before OIDC bootstrap"]
     config_probe_task = oidc_readiness_block["block"][0]
     rescue_tasks = {task["name"]: task for task in oidc_readiness_block["rescue"]}
-    recovery_down_task = rescue_tasks["Force one Harbor recycle when the published admin configuration API is unavailable"]
+    recovery_down_task = rescue_tasks[
+        "Force one Harbor recycle when the published admin configuration API is unavailable"
+    ]
     recovery_container_cleanup_task = rescue_tasks["Remove stale Harbor containers after the OIDC readiness recycle"]
     recovery_network_cleanup_task = rescue_tasks["Remove stale Harbor networks after the OIDC readiness recycle"]
-    recovery_up_task = rescue_tasks["Force one Harbor recreate when the published admin configuration API is unavailable"]
-    recovery_port_probe_task = rescue_tasks[
-        "Read the Harbor published port bindings after the OIDC readiness recycle"
+    recovery_up_task = rescue_tasks[
+        "Force one Harbor recreate when the published admin configuration API is unavailable"
     ]
+    recovery_port_probe_task = rescue_tasks["Read the Harbor published port bindings after the OIDC readiness recycle"]
     recovery_assert_task = rescue_tasks[
         "Assert the OIDC readiness recycle restored Harbor compose membership and published port bindings"
     ]
@@ -84,7 +86,10 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
     assert recovery_up_task["delay"] == 10
     assert recovery_up_task["until"] == "harbor_compose_oidc_recovery_up.rc == 0"
     assert ".NetworkSettings.Ports" in recovery_port_probe_task["ansible.builtin.command"]["argv"][-1]
-    assert "harbor_oidc_recovery_registry_port_binding_present | bool" in recovery_assert_task["ansible.builtin.assert"]["that"]
+    assert (
+        "harbor_oidc_recovery_registry_port_binding_present | bool"
+        in recovery_assert_task["ansible.builtin.assert"]["that"]
+    )
     assert recovery_ping_task["retries"] == 30
     assert recovery_ping_task["delay"] == 10
     assert recovery_ping_task["until"] == "harbor_ping_after_oidc_recovery.status == 200"
@@ -108,23 +113,33 @@ def test_role_gates_network_recovery_on_boolean_fact() -> None:
     recovery_fact = task_by_name["Record whether Harbor needs one forced network recovery recycle"][
         "ansible.builtin.set_fact"
     ]["harbor_compose_needs_recovery"]
-    stale_cleanup_script = task_by_name["Remove stale Harbor containers after the compose reset"]["ansible.builtin.shell"]
+    stale_cleanup_script = task_by_name["Remove stale Harbor containers after the compose reset"][
+        "ansible.builtin.shell"
+    ]
 
-    assert reset_task["when"] == "(harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)"
+    assert (
+        reset_task["when"]
+        == "(harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)"
+    )
     assert recycle_task["when"] == "harbor_compose_needs_recovery | bool"
     assert recreate_task["when"] == "harbor_compose_needs_recovery | bool"
     assert "ensure_docker_socket()" in stale_cleanup_script
     assert "docker info >/dev/null 2>&1" in stale_cleanup_script
     assert "systemctl restart docker" in stale_cleanup_script
-    assert ".NetworkSettings.Ports" in task_by_name["Read the Harbor published port bindings after reconciliation"][
-        "ansible.builtin.command"
-    ]["argv"][-1]
-    assert "harbor_proxy_port_bindings_raw.stdout" in port_binding_state_task["ansible.builtin.set_fact"][
-        "harbor_proxy_port_bindings"
-    ]
-    assert "selectattr('HostPort', 'equalto', harbor_http_port | string)" in port_binding_task["ansible.builtin.set_fact"][
-        "harbor_registry_port_binding_present"
-    ]
+    assert (
+        ".NetworkSettings.Ports"
+        in task_by_name["Read the Harbor published port bindings after reconciliation"]["ansible.builtin.command"][
+            "argv"
+        ][-1]
+    )
+    assert (
+        "harbor_proxy_port_bindings_raw.stdout"
+        in port_binding_state_task["ansible.builtin.set_fact"]["harbor_proxy_port_bindings"]
+    )
+    assert (
+        "selectattr('HostPort', 'equalto', harbor_http_port | string)"
+        in port_binding_task["ansible.builtin.set_fact"]["harbor_registry_port_binding_present"]
+    )
     assert "or not (harbor_registry_port_binding_present | bool)" in recovery_fact
 
 
@@ -138,7 +153,9 @@ def test_role_only_runs_harbor_prepare_when_compose_assets_need_regeneration() -
     compose_assets_changed_task = task_by_name["Record whether Harbor compose assets changed"]
 
     prepare_needed_fact = prepare_needed_task["ansible.builtin.set_fact"]["harbor_prepare_needed"]
-    compose_assets_changed_fact = compose_assets_changed_task["ansible.builtin.set_fact"]["harbor_compose_assets_changed"]
+    compose_assets_changed_fact = compose_assets_changed_task["ansible.builtin.set_fact"][
+        "harbor_compose_assets_changed"
+    ]
 
     assert compose_stat_task["ansible.builtin.stat"]["path"] == "{{ harbor_generated_compose_file }}"
     assert "harbor_installer_download.changed" in prepare_needed_fact
@@ -174,9 +191,10 @@ def test_role_recovers_retention_policy_id_from_create_location_and_persists_met
     assert create_task["when"] == "harbor_check_runner_retention_id_before == 0"
 
     created_facts = created_fact_task["ansible.builtin.set_fact"]
-    assert "harbor_check_runner_retention_create.location" in created_facts[
-        "harbor_check_runner_retention_create_location"
-    ]
+    assert (
+        "harbor_check_runner_retention_create.location"
+        in created_facts["harbor_check_runner_retention_create_location"]
+    )
     assert "regex_findall('[0-9]+$')" in created_facts["harbor_check_runner_retention_id_created"]
     assert created_fact_task["when"] == "harbor_check_runner_retention_id_before == 0"
 
@@ -222,7 +240,9 @@ def test_verify_accepts_running_services_after_ping() -> None:
 def test_host_network_policy_allows_nginx_edge_access_to_harbor() -> None:
     host_vars = load_yaml(HOST_VARS)
     runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
-    harbor_rule = next(rule for rule in runtime_control_rules if rule["source"] == "nginx-lv3" and 8095 in rule["ports"])
+    harbor_rule = next(
+        rule for rule in runtime_control_rules if rule["source"] == "nginx-lv3" and 8095 in rule["ports"]
+    )
 
     assert "edge access" in harbor_rule["description"].lower()
     assert "harbor" in harbor_rule["description"].lower()

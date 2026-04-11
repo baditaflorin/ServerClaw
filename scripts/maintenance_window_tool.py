@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional
 
 from script_bootstrap import ensure_repo_root_on_path
 
@@ -84,8 +84,6 @@ def require_string(value: object, path: str) -> str:
     return value
 
 
-
-
 def state_file_path() -> Optional[Path]:
     candidate = os.environ.get(MAINTENANCE_STATE_FILE_ENV, "").strip()
     if not candidate:
@@ -97,9 +95,7 @@ def load_controller_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
-    bootstrap_key = resolve_repo_local_path(
-        secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]
-    )
+    bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     return {
         "host_vars": host_vars,
@@ -135,10 +131,7 @@ def resolve_nats_credentials(context: Optional[dict[str, Any]] = None) -> dict[s
 
 
 def direct_nats_url() -> str:
-    return (
-        os.environ.get(MAINTENANCE_NATS_URL_ENV, "").strip()
-        or os.environ.get("LV3_NATS_URL", "").strip()
-    )
+    return os.environ.get(MAINTENANCE_NATS_URL_ENV, "").strip() or os.environ.get("LV3_NATS_URL", "").strip()
 
 
 def build_guest_ssh_command(context: dict[str, Any], target: str, *extra_args: str) -> list[str]:
@@ -380,7 +373,7 @@ async def connect_jetstream(nats_url: str, credentials: Optional[dict[str, str]]
 
     nc = NATS()
     recorded_errors: list[Exception] = []
-    setattr(nc, "_lv3_recorded_errors", recorded_errors)
+    nc._lv3_recorded_errors = recorded_errors
     connect_kwargs: dict[str, Any] = {
         "servers": [nats_url],
         "error_cb": error_cb,
@@ -509,7 +502,7 @@ async def open_window_async(
             "key": key,
             "window": window,
         }
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise_recorded_nats_error(nc, exc)
     finally:
         await nc.drain()
@@ -575,7 +568,7 @@ async def close_window_async(
             "windows": closed_windows,
             "force": force,
         }
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise_recorded_nats_error(nc, exc)
     finally:
         await nc.drain()
@@ -673,7 +666,7 @@ def sync_status_page_maintenance(window: dict[str, Any], *, remove: bool) -> dic
                 monitor_names=monitor_names,
             )
         return {"status": "ok", **result, "title": title}
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return {"status": "warning", "reason": str(exc), "title": title}
     finally:
         client.disconnect()
@@ -788,7 +781,13 @@ def open_window(
         state = load_local_state()
         state[maintenance_key(service_id)] = window
         save_local_state(state)
-        result = {"status": "opened", "action": "created", "bucket": MAINTENANCE_BUCKET, "key": maintenance_key(service_id), "window": window}
+        result = {
+            "status": "opened",
+            "action": "created",
+            "bucket": MAINTENANCE_BUCKET,
+            "key": maintenance_key(service_id),
+            "window": window,
+        }
     else:
         with maintenance_nats_connection(context) as (nats_url, credentials):
             result = asyncio.run(open_window_async(nats_url, window, credentials))
@@ -1017,7 +1016,14 @@ def main() -> int:
 
     try:
         return args.func(args)
-    except (ModuleNotFoundError, OSError, RuntimeError, ValueError, json.JSONDecodeError, subprocess.SubprocessError) as exc:
+    except (
+        ModuleNotFoundError,
+        OSError,
+        RuntimeError,
+        ValueError,
+        json.JSONDecodeError,
+        subprocess.SubprocessError,
+    ) as exc:
         return emit_cli_error("Maintenance window", exc, exit_code=1)
 
 

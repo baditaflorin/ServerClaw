@@ -175,7 +175,10 @@ def test_run_browser_session_executes_steps_and_writes_artifacts(tmp_path: Path)
     assert result["selector_results"][1]["text"] == "BROWSER RUNNER"
     assert [entry["action"] for entry in result["action_log"]] == ["goto", "fill", "click", "wait_for_selector"]
     assert {artifact["kind"] for artifact in result["artifacts"]} == {"screenshot", "pdf"}
-    assert all((tmp_path / artifact["path"]).exists() or artifact["path"].startswith("artifacts/") for artifact in result["artifacts"])
+    assert all(
+        (tmp_path / artifact["path"]).exists() or artifact["path"].startswith("artifacts/")
+        for artifact in result["artifacts"]
+    )
 
 
 def test_health_endpoint_reports_ok(tmp_path: Path, monkeypatch) -> None:

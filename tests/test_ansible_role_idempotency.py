@@ -102,7 +102,9 @@ def test_run_enforced_role_detects_second_run_changes(monkeypatch: pytest.Monkey
                         {
                             "tasks": [
                                 {
-                                    "task": {"name": "lv3.platform.preflight : Assert required preflight variables are present"},
+                                    "task": {
+                                        "name": "lv3.platform.preflight : Assert required preflight variables are present"
+                                    },
                                     "hosts": {"localhost": {"changed": True}},
                                 }
                             ]

@@ -101,7 +101,9 @@ class ChangelogPortalTests(unittest.TestCase):
             + "\n",
             encoding="utf-8",
         )
-        (receipts_dir / "evidence" / "2026-03-29-adr-0251-gate-status-live.json").parent.mkdir(parents=True, exist_ok=True)
+        (receipts_dir / "evidence" / "2026-03-29-adr-0251-gate-status-live.json").parent.mkdir(
+            parents=True, exist_ok=True
+        )
         (receipts_dir / "evidence" / "2026-03-29-adr-0251-gate-status-live.json").write_text(
             json.dumps(
                 {
@@ -160,7 +162,9 @@ class ChangelogPortalTests(unittest.TestCase):
                     "summary": "Grafana live apply.",
                     "targets": [{"kind": "service", "name": "grafana"}],
                     "verification": [{"check": "Smoke", "result": "pass", "observed": "Healthy."}],
-                    "evidence_refs": ["docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md"],
+                    "evidence_refs": [
+                        "docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md"
+                    ],
                     "notes": [],
                 }
             ),

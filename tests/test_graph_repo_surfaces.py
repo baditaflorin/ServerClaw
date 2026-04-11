@@ -10,7 +10,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def test_windmill_defaults_seed_graph_scripts_and_schedules() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
     )
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
     schedules = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}
@@ -40,7 +42,15 @@ def test_windmill_defaults_seed_graph_scripts_and_schedules() -> None:
 def test_graph_migration_declares_schema_and_unique_edges() -> None:
     migration = (REPO_ROOT / "migrations/0012_graph_schema.sql").read_text()
     windmill_runtime_tasks = (
-        REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "windmill_runtime" / "tasks" / "main.yml"
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "tasks"
+        / "main.yml"
     ).read_text()
 
     assert "CREATE SCHEMA IF NOT EXISTS graph" in migration

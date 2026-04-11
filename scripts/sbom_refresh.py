@@ -103,7 +103,9 @@ def build_ntfy_publish_command(*, config: dict[str, Any], message: str) -> list[
     ]
 
 
-def maybe_send_ntfy_alert(events: list[dict[str, Any]], *, context: dict[str, Any], config: dict[str, Any], enabled: bool) -> None:
+def maybe_send_ntfy_alert(
+    events: list[dict[str, Any]], *, context: dict[str, Any], config: dict[str, Any], enabled: bool
+) -> None:
     if not enabled or not events:
         return
     message_lines = [
@@ -197,11 +199,7 @@ def main(argv: list[str] | None = None) -> int:
                 }
             )
 
-        context = (
-            load_controller_context()
-            if delta_events and (args.publish_nats or args.send_ntfy_alerts)
-            else {}
-        )
+        context = load_controller_context() if delta_events and (args.publish_nats or args.send_ntfy_alerts) else {}
         publish_delta_events(delta_events, context=context, enabled=args.publish_nats)
         maybe_send_ntfy_alert(delta_events, context=context, config=config, enabled=args.send_ntfy_alerts)
 
@@ -222,12 +220,15 @@ def main(argv: list[str] | None = None) -> int:
                 if rp:
                     _publish_receipt_to_outline(Path(rp))
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("SBOM refresh", exc)
 
 
 def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import os, subprocess, sys as _sys
+    import os
+    import subprocess
+    import sys as _sys
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
@@ -241,7 +242,8 @@ def _publish_receipt_to_outline(receipt_path: Path) -> None:
     try:
         subprocess.run(
             [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True, check=False,
+            capture_output=True,
+            check=False,
             env={**os.environ, "OUTLINE_API_TOKEN": token},
         )
     except OSError:

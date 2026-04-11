@@ -48,13 +48,9 @@ def render_text(service_id: str) -> str:
             "  Direct soft degradations:",
             "    - " + ", ".join(impact.direct_soft) if impact.direct_soft else "    - none",
             "  Startup-only risk:",
-            "    - " + ", ".join(impact.direct_startup_only)
-            if impact.direct_startup_only
-            else "    - none",
+            "    - " + ", ".join(impact.direct_startup_only) if impact.direct_startup_only else "    - none",
             "  Read-path degradation:",
-            "    - " + ", ".join(impact.direct_reads_from)
-            if impact.direct_reads_from
-            else "    - none",
+            "    - " + ", ".join(impact.direct_reads_from) if impact.direct_reads_from else "    - none",
         ]
     )
     return "\n".join(lines)
@@ -70,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         print(render_text(args.service))
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("dependency impact", exc)
 
 

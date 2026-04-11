@@ -375,7 +375,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
-      return args.func(args)
+        return args.func(args)
     except Exception as exc:  # pragma: no cover - CLI guard
         print(f"livekit_tool error: {exc}", file=sys.stderr)
         return 1

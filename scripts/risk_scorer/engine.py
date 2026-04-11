@@ -66,7 +66,8 @@ def score_intent(
             unknown_count=ctx.unknown_count,
         ),
         "rollback_confidence": float(weights.get("rollback_confidence", 1.0)) * rollback_score(ctx.rollback_verified),
-        "maintenance_window": float(weights.get("maintenance_window", 1.0)) * maintenance_score(ctx.in_maintenance_window),
+        "maintenance_window": float(weights.get("maintenance_window", 1.0))
+        * maintenance_score(ctx.in_maintenance_window),
         "active_incident": float(weights.get("active_incident", 1.0)) * incident_score(ctx.active_incident),
         "recency": float(weights.get("recency", 1.0)) * recency_score(ctx.hours_since_last_mutation),
     }

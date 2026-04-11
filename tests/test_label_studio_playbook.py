@@ -33,7 +33,9 @@ def test_label_studio_playbook_converges_dns_database_runtime_edge_and_public_ve
     postgres_play = next(play for play in plays if play["name"] == "Prepare PostgreSQL for Label Studio")
     runtime_play = next(play for play in plays if play["name"] == "Converge Label Studio on the Docker runtime VM")
     edge_play = next(play for play in plays if play["name"] == "Publish Label Studio through the NGINX edge")
-    publish_play = next(play for play in plays if play["name"] == "Verify the public Label Studio shared-edge publication")
+    publish_play = next(
+        play for play in plays if play["name"] == "Verify the public Label Studio shared-edge publication"
+    )
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
@@ -42,7 +44,9 @@ def test_label_studio_playbook_converges_dns_database_runtime_edge_and_public_ve
     assert dns_play["vars"]["inventory_defaults_path"] == "{{ playbook_dir }}/../inventory/group_vars/all.yml"
 
     select_task = next(task for task in dns_play["tasks"] if task["name"] == "Select the Label Studio subdomain entry")
-    assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    assert (
+        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    )
 
     assert [role["role"] for role in postgres_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
@@ -72,8 +76,13 @@ def test_label_studio_service_wrappers_import_the_canonical_playbook() -> None:
     root_wrapper_text = SERVICE_PLAYBOOK_PATH.read_text()
     collection_wrapper_text = COLLECTION_SERVICE_PLAYBOOK_PATH.read_text()
 
-    assert "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Label Studio." in root_wrapper_text
-    assert "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Label Studio." in collection_wrapper_text
+    assert (
+        "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Label Studio." in root_wrapper_text
+    )
+    assert (
+        "# Purpose: Provide the canonical service-scoped live-apply entrypoint for Label Studio."
+        in collection_wrapper_text
+    )
     assert yaml.safe_load(root_wrapper_text) == [{"import_playbook": "../label-studio.yml"}]
     assert yaml.safe_load(collection_wrapper_text) == [{"import_playbook": "../label-studio.yml"}]
     assert COLLECTION_PLAYBOOK_PATH.exists()
@@ -91,7 +100,9 @@ def test_converge_label_studio_target_and_catalog_entrypoints_match() -> None:
     assert "$(MAKE) generate-edge-static-sites" in converge_block
     assert "$(REPO_ROOT)/playbooks/label-studio.yml" in converge_block
     assert workflows["converge-label-studio"]["preferred_entrypoint"]["target"] == "converge-label-studio"
-    assert workflows["converge-label-studio"]["preflight"]["bootstrap_manifest_ids"] == ["shared-edge-generated-portals"]
+    assert workflows["converge-label-studio"]["preflight"]["bootstrap_manifest_ids"] == [
+        "shared-edge-generated-portals"
+    ]
     assert "syntax-check-label-studio" in workflows["converge-label-studio"]["validation_targets"]
     assert commands["converge-label-studio"]["workflow_id"] == "converge-label-studio"
     assert commands["converge-label-studio"]["approval_policy"] == "sensitive_live_change"

@@ -43,9 +43,7 @@ from platform.retry import MaxRetriesExceeded, RetryPolicy, with_retry
 try:
     from datetime import UTC
 except ImportError:  # pragma: no cover - exercised on older controller Python runtimes
-    from datetime import timezone
-
-    UTC = timezone.utc
+    UTC = UTC
 
 
 def detect_common_repo_root(repo_root: Path) -> Path:
@@ -152,8 +150,9 @@ def http_json(
                     raise AuthzError(f"{method} {url} returned unexpected status {response.status}")
                 return response.status, json.loads(payload) if payload else {}
         except urllib.error.HTTPError as exc:
-            setattr(exc, "_lv3_detail", exc.read().decode("utf-8", errors="replace"))
+            exc._lv3_detail = exc.read().decode("utf-8", errors="replace")
             raise
+
     try:
         return with_retry(
             perform_request,
@@ -179,7 +178,9 @@ def http_json(
                 f"{method} {url} failed after {max(retries, 1)} attempts: "
                 f"{method} {url} failed with status {exc.last_error.code}: {detail}"
             ) from exc.last_error
-        raise AuthzError(f"{method} {url} failed after {max(retries, 1)} attempts: {exc.last_error}") from exc.last_error
+        raise AuthzError(
+            f"{method} {url} failed after {max(retries, 1)} attempts: {exc.last_error}"
+        ) from exc.last_error
 
 
 def bearer_headers(preshared_key: str) -> dict[str, str]:
@@ -276,7 +277,11 @@ def verify_keycloak_principal(base_url: str, principal: KeycloakPrincipal) -> di
         "client_id": principal.client_id,
         "grant_type": principal.grant_type,
         "verification": "token",
-        "claims": {claim: claims.get(claim) for claim in sorted(set(principal.expected_claims) | {"sub", "azp", "preferred_username", "client_id"}) if claims.get(claim) is not None},
+        "claims": {
+            claim: claims.get(claim)
+            for claim in sorted(set(principal.expected_claims) | {"sub", "azp", "preferred_username", "client_id"})
+            if claims.get(claim) is not None
+        },
     }
 
 
@@ -456,7 +461,14 @@ def write_report(path: Path | None, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def run(mode: str, config_path: Path, openfga_url: str, openfga_preshared_key: str, keycloak_url: str, report_path: Path | None) -> dict[str, Any]:
+def run(
+    mode: str,
+    config_path: Path,
+    openfga_url: str,
+    openfga_preshared_key: str,
+    keycloak_url: str,
+    report_path: Path | None,
+) -> dict[str, Any]:
     config = load_json(config_path)
     model = load_json(repo_path(config["model_path"]))
     principal_reports = [verify_keycloak_principal(keycloak_url, item) for item in load_principals(config)]
@@ -481,7 +493,9 @@ def run(mode: str, config_path: Path, openfga_url: str, openfga_preshared_key: s
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Bootstrap and verify the repo-managed ServerClaw delegated authorization model.")
+    parser = argparse.ArgumentParser(
+        description="Bootstrap and verify the repo-managed ServerClaw delegated authorization model."
+    )
     parser.add_argument("mode", choices=("apply", "verify"))
     parser.add_argument("--config", default=str(REPO_ROOT / "config" / "serverclaw-authz" / "bootstrap.json"))
     parser.add_argument("--openfga-url", required=True)

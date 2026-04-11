@@ -6,7 +6,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Iterable
+from collections.abc import Iterable
 
 import yaml
 
@@ -76,11 +76,7 @@ def _validate_text_surfaces() -> list[str]:
     findings: list[str] = []
     generic_paths = set(PUBLIC_GENERIC_ENTRYPOINTS)
     for pattern in PUBLIC_GENERIC_GLOBS:
-        generic_paths.update(
-            path.relative_to(REPO_ROOT)
-            for path in REPO_ROOT.glob(pattern)
-            if path.is_file()
-        )
+        generic_paths.update(path.relative_to(REPO_ROOT) for path in REPO_ROOT.glob(pattern) if path.is_file())
 
     all_paths: list[Path] = []
     seen_paths: set[Path] = set()
@@ -158,9 +154,7 @@ def validate_public_entrypoints() -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate public entrypoints stay generic and machine-portable."
-    )
+    parser = argparse.ArgumentParser(description="Validate public entrypoints stay generic and machine-portable.")
     parser.add_argument("--check", action="store_true", help="Validate and exit non-zero on findings.")
     args = parser.parse_args(argv)
 

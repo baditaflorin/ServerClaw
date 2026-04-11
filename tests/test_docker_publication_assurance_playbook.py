@@ -18,7 +18,10 @@ def test_docker_publication_assurance_playbook_targets_managed_docker_guests() -
     assert len(plays) == 1
     play = plays[0]
     assert play["name"] == "Converge Docker publication assurance on managed Docker guests"
-    assert play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3:coolify-lv3' }}"
+    assert (
+        play["hosts"]
+        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3:coolify-lv3' }}"
+    )
     assert [role["role"] for role in play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
@@ -28,8 +31,14 @@ def test_docker_publication_assurance_playbook_targets_managed_docker_guests() -
 def test_docker_publication_assurance_playbook_selects_declared_contracts_only() -> None:
     play = yaml.safe_load(PLAYBOOK_PATH.read_text())[0]
     task_names = [task["name"] for task in play["tasks"]]
-    select_task = next(task for task in play["tasks"] if task["name"] == "Select Docker publication contracts for this host")
-    run_task = next(task for task in play["tasks"] if task["name"] == "Run Docker publication assurance for each declared service on this host")
+    select_task = next(
+        task for task in play["tasks"] if task["name"] == "Select Docker publication contracts for this host"
+    )
+    run_task = next(
+        task
+        for task in play["tasks"]
+        if task["name"] == "Run Docker publication assurance for each declared service on this host"
+    )
 
     assert task_names == [
         "Load the health probe catalog",

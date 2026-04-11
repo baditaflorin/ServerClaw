@@ -139,7 +139,7 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
             "path": str(runtime_windmill_secret),
             "content_b64": base64.b64encode(b"windmill-secret").decode("utf-8"),
             "mode": "0600",
-        }
+        },
     ]
 
 
@@ -156,9 +156,7 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
         ],
         "execution": {"profile": "runtime", "timeout_seconds": 600},
     }
-    workflow = {
-        "preferred_entrypoint": {"kind": "make_target", "target": "network-impairment-matrix"}
-    }
+    workflow = {"preferred_entrypoint": {"kind": "make_target", "target": "network-impairment-matrix"}}
     command_catalog = {
         "execution_profiles": {
             "runtime": {
@@ -181,7 +179,11 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
     }
     captured: dict[str, object] = {}
 
-    monkeypatch.setattr(command, "load_catalog_context", lambda: ({}, {"workflows": {"network-impairment-matrix": workflow}}, command_catalog))
+    monkeypatch.setattr(
+        command,
+        "load_catalog_context",
+        lambda: ({}, {"workflows": {"network-impairment-matrix": workflow}}, command_catalog),
+    )
     monkeypatch.setattr(
         command,
         "evaluate_approval",
@@ -231,9 +233,7 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
     assert result["executed"] is True
     assert result["returncode"] == 0
     assert result["runtime_host"] == "docker-runtime-lv3"
-    assert result["parameters"] == {
-        "NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"
-    }
+    assert result["parameters"] == {"NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"}
     assert captured["controller_context"] == {"controller": "context"}
     assert captured["runtime_host"] == "docker-runtime-lv3"
     payload = captured["payload"]

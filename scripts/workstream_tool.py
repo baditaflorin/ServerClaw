@@ -20,11 +20,11 @@ Commands:
 
 Output: JSON to stdout.  Errors to stderr.  Exit 0=ok, 1=error.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -42,6 +42,7 @@ IN_PROGRESS_STATUS = "in_progress"
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
+
 
 def _load_workstreams() -> list[dict[str, Any]]:
     return load_workstreams(repo_root=REPO_ROOT, include_archive=True)
@@ -63,6 +64,7 @@ def _ws_status(ws: dict[str, Any]) -> str:
 # Commands
 # ---------------------------------------------------------------------------
 
+
 def cmd_list(args: argparse.Namespace) -> None:
     workstreams = _load_workstreams()
     status_filter = getattr(args, "status", None)
@@ -70,16 +72,18 @@ def cmd_list(args: argparse.Namespace) -> None:
     for ws in workstreams:
         if status_filter and _ws_status(ws) != status_filter:
             continue
-        results.append({
-            "id": _ws_key(ws),
-            "adr": _ws_adr(ws),
-            "title": ws.get("title", ""),
-            "status": _ws_status(ws),
-            "ready_to_merge": ws.get("ready_to_merge", False),
-            "live_applied": ws.get("live_applied", False),
-            "owner": ws.get("owner", ""),
-            "branch": ws.get("branch", ""),
-        })
+        results.append(
+            {
+                "id": _ws_key(ws),
+                "adr": _ws_adr(ws),
+                "title": ws.get("title", ""),
+                "status": _ws_status(ws),
+                "ready_to_merge": ws.get("ready_to_merge", False),
+                "live_applied": ws.get("live_applied", False),
+                "owner": ws.get("owner", ""),
+                "branch": ws.get("branch", ""),
+            }
+        )
     print(json.dumps(results, indent=2))
 
 
@@ -161,13 +165,15 @@ def cmd_blockers(args: argparse.Namespace) -> None:
                 if "status=blocked" in blocked_by
                 else f"Complete or verify these dependencies first: {', '.join(b for b in blocked_by if b != 'status=blocked')}"
             )
-            results.append({
-                "ws_id": ws_id,
-                "title": ws.get("title", ""),
-                "status": status,
-                "blocked_by": blocked_by,
-                "suggestion": suggestion,
-            })
+            results.append(
+                {
+                    "ws_id": ws_id,
+                    "title": ws.get("title", ""),
+                    "status": status,
+                    "blocked_by": blocked_by,
+                    "suggestion": suggestion,
+                }
+            )
 
     print(json.dumps(results, indent=2))
 
@@ -197,33 +203,33 @@ def cmd_conflicts(args: argparse.Namespace) -> None:
             other_surfaces = set(ws.get("shared_surfaces") or [])
             shared = sorted(target_surfaces & other_surfaces)
             # Also check explicit conflicts_with
-            explicit_conflict = (
-                target_id in (ws.get("conflicts_with") or [])
-                or _ws_key(ws) in (matching_ws.get("conflicts_with") or [])
+            explicit_conflict = target_id in (ws.get("conflicts_with") or []) or _ws_key(ws) in (
+                matching_ws.get("conflicts_with") or []
             )
             if shared or explicit_conflict:
-                results.append({
-                    "ws_id": _ws_key(ws),
-                    "title": ws.get("title", ""),
-                    "status": _ws_status(ws),
-                    "shared_files": shared,
-                    "explicit_conflict": explicit_conflict,
-                })
+                results.append(
+                    {
+                        "ws_id": _ws_key(ws),
+                        "title": ws.get("title", ""),
+                        "status": _ws_status(ws),
+                        "shared_files": shared,
+                        "explicit_conflict": explicit_conflict,
+                    }
+                )
     else:
         # Treat query as a file path fragment
         for ws in workstreams:
-            matched_surfaces = [
-                s for s in (ws.get("shared_surfaces") or [])
-                if query in s or s in query
-            ]
+            matched_surfaces = [s for s in (ws.get("shared_surfaces") or []) if query in s or s in query]
             if matched_surfaces:
-                results.append({
-                    "ws_id": _ws_key(ws),
-                    "title": ws.get("title", ""),
-                    "status": _ws_status(ws),
-                    "shared_files": matched_surfaces,
-                    "explicit_conflict": False,
-                })
+                results.append(
+                    {
+                        "ws_id": _ws_key(ws),
+                        "title": ws.get("title", ""),
+                        "status": _ws_status(ws),
+                        "shared_files": matched_surfaces,
+                        "explicit_conflict": False,
+                    }
+                )
 
     print(json.dumps(results, indent=2))
 
@@ -260,13 +266,15 @@ def cmd_next(args: argparse.Namespace) -> None:
         deps = ws.get("depends_on") or []
         unmet = [d for d in deps if not _dep_satisfied(d)]
         if not unmet:
-            candidates.append({
-                "ws_id": _ws_key(ws),
-                "title": ws.get("title", ""),
-                "adr": _ws_adr(ws),
-                "status": status,
-                "reason": "All dependencies satisfied; not yet started.",
-            })
+            candidates.append(
+                {
+                    "ws_id": _ws_key(ws),
+                    "title": ws.get("title", ""),
+                    "adr": _ws_adr(ws),
+                    "status": status,
+                    "reason": "All dependencies satisfied; not yet started.",
+                }
+            )
 
     print(json.dumps(candidates, indent=2))
 
@@ -301,6 +309,7 @@ def cmd_summary(args: argparse.Namespace) -> None:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(

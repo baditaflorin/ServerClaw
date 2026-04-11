@@ -40,7 +40,9 @@ def test_defaults_define_managed_alloy_env_and_postgres_audit_pipeline_inputs() 
 
 def test_tasks_manage_alloy_env_file_and_skip_glob_touch_targets() -> None:
     tasks = load_yaml(TASKS_PATH)
-    stat_task = next(task for task in tasks if task.get("name") == "Check whether extra file-scrape targets already exist")
+    stat_task = next(
+        task for task in tasks if task.get("name") == "Check whether extra file-scrape targets already exist"
+    )
     create_task = next(task for task in tasks if task.get("name") == "Ensure missing extra file-scrape targets exist")
     env_task = next(task for task in tasks if task.get("name") == "Render Alloy environment file")
     resolve_task = next(task for task in tasks if task.get("name") == "Resolve managed extra file-scrape targets")
@@ -60,13 +62,16 @@ def test_tasks_manage_alloy_env_file_and_skip_glob_touch_targets() -> None:
         "not item.stat.exists",
     ]
     assert env_task["ansible.builtin.copy"]["dest"] == "{{ loki_log_agent_env_file }}"
-    assert "--server.http.listen-addr={{ loki_log_agent_http_listen_address }}" in env_task["ansible.builtin.copy"]["content"]
+    assert (
+        "--server.http.listen-addr={{ loki_log_agent_http_listen_address }}"
+        in env_task["ansible.builtin.copy"]["content"]
+    )
 
 
 def test_template_includes_postgres_audit_labels_and_metrics_pipeline() -> None:
     template = (ROLE_ROOT / "templates" / "config.alloy.j2").read_text()
 
-    assert template.count('{% set approved_roles_pattern') == 1
+    assert template.count("{% set approved_roles_pattern") == 1
     assert template.count('loki.process "postgres_audit"') == 1
     assert 'loki.process "postgres_audit"' in template
     assert 'job          = "postgres-audit"' in template

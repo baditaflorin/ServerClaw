@@ -17,7 +17,9 @@ def test_matrix_synapse_dns_stage_converges_only_the_matrix_subdomain_record() -
     assert dns_play["vars"]["subdomain_fqdn"] == "matrix.lv3.org"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Matrix Synapse subdomain entry")
-    assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    assert (
+        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    )
 
     converge_task = next(task for task in tasks if task.get("name") == "Converge the Matrix Synapse Hetzner DNS record")
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"

@@ -25,9 +25,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
 
 
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
-SERVICE_CATALOG_SCHEMA_PATH: Final = repo_path(
-    "docs", "schema", "service-capability-catalog.schema.json"
-)
+SERVICE_CATALOG_SCHEMA_PATH: Final = repo_path("docs", "schema", "service-capability-catalog.schema.json")
 ADR_DIR: Final = repo_path("docs", "adr")
 HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 STACK_PATH: Final = repo_path("versions", "stack.yaml")
@@ -103,9 +101,7 @@ def require_smoke_suites(value: Any, path: str) -> list[dict[str, Any]]:
             f"{path}[{index}].required_verification_checks",
         )
         if not required_receipt_keywords and not required_verification_checks:
-            raise ValueError(
-                f"{path}[{index}] must declare at least one receipt keyword or verification check token"
-            )
+            raise ValueError(f"{path}[{index}] must declare at least one receipt keyword or verification check token")
         normalized.append(
             {
                 "id": suite_id,
@@ -137,15 +133,11 @@ def require_environment_bindings(
         binding = require_mapping(binding, f"{path}.{env_id}")
         status = require_str(binding.get("status"), f"{path}.{env_id}.status")
         if status not in ALLOWED_BINDING_STATUSES:
-            raise ValueError(
-                f"{path}.{env_id}.status must be one of {sorted(ALLOWED_BINDING_STATUSES)}"
-            )
+            raise ValueError(f"{path}.{env_id}.status must be one of {sorted(ALLOWED_BINDING_STATUSES)}")
         url = require_str(binding.get("url"), f"{path}.{env_id}.url")
         normalized_binding: dict[str, str] = {"status": status, "url": url}
         if "subdomain" in binding:
-            normalized_binding["subdomain"] = require_str(
-                binding.get("subdomain"), f"{path}.{env_id}.subdomain"
-            )
+            normalized_binding["subdomain"] = require_str(binding.get("subdomain"), f"{path}.{env_id}.subdomain")
         if "stage_ready" in binding:
             normalized_binding["stage_ready"] = require_bool(
                 binding.get("stage_ready"),
@@ -172,13 +164,9 @@ def require_environment_bindings(
         if env_id == "production":
             expected_url = public_url or internal_url
             if expected_url and url != expected_url:
-                raise ValueError(
-                    f"{path}.production.url must match the service primary URL '{expected_url}'"
-                )
+                raise ValueError(f"{path}.production.url must match the service primary URL '{expected_url}'")
             if subdomain is not None and normalized_binding.get("subdomain") != subdomain:
-                raise ValueError(
-                    f"{path}.production.subdomain must match the service subdomain '{subdomain}'"
-                )
+                raise ValueError(f"{path}.production.subdomain must match the service subdomain '{subdomain}'")
 
         normalized[env_id] = normalized_binding
 
@@ -207,9 +195,7 @@ def require_degradation_modes(value: Any, path: str) -> list[dict[str, Any]]:
         seen_dependencies.add(dependency)
         dependency_type = require_str(mode.get("dependency_type"), f"{path}[{index}].dependency_type")
         if dependency_type not in ALLOWED_DEPENDENCY_TYPES:
-            raise ValueError(
-                f"{path}[{index}].dependency_type must be one of {sorted(ALLOWED_DEPENDENCY_TYPES)}"
-            )
+            raise ValueError(f"{path}[{index}].dependency_type must be one of {sorted(ALLOWED_DEPENDENCY_TYPES)}")
         degraded_behaviour = require_str(
             mode.get("degraded_behaviour"),
             f"{path}[{index}].degraded_behaviour",
@@ -294,8 +280,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
     monitor_catalog = load_json(UPTIME_MONITORS_PATH)
     topology = require_mapping(host_vars.get("lv3_service_topology"), "lv3_service_topology")
     guest_vmids = {
-        guest["name"]: guest["vmid"]
-        for guest in require_list(host_vars.get("proxmox_guests"), "proxmox_guests")
+        guest["name"]: guest["vmid"] for guest in require_list(host_vars.get("proxmox_guests"), "proxmox_guests")
     }
     observed_guests = {
         guest["name"]
@@ -340,18 +325,14 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             f"services[{index}].lifecycle_status",
         )
         if lifecycle_status not in ALLOWED_LIFECYCLE_STATES:
-            raise ValueError(
-                f"services[{index}].lifecycle_status must be one of {sorted(ALLOWED_LIFECYCLE_STATES)}"
-            )
+            raise ValueError(f"services[{index}].lifecycle_status must be one of {sorted(ALLOWED_LIFECYCLE_STATES)}")
 
         vm = require_str(service.get("vm"), f"services[{index}].vm")
         vmid = service.get("vmid")
         if vmid is not None:
             vmid = require_int(vmid, f"services[{index}].vmid", minimum=1)
             if vm in guest_vmids and guest_vmids[vm] != vmid:
-                raise ValueError(
-                    f"services[{index}].vmid must match inventory vmid {guest_vmids[vm]} for {vm}"
-                )
+                raise ValueError(f"services[{index}].vmid must match inventory vmid {guest_vmids[vm]} for {vm}")
 
         exposure = require_str(service.get("exposure"), f"services[{index}].exposure")
         if exposure not in ALLOWED_EXPOSURES:
@@ -392,9 +373,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             if not adr_matches:
                 raise ValueError(f"services[{index}].adr references unknown ADR '{adr}'")
             if len(adr_matches) > 1 and adr_file is None:
-                raise ValueError(
-                    f"services[{index}].adr_file is required because ADR {adr} resolves to multiple files"
-                )
+                raise ValueError(f"services[{index}].adr_file is required because ADR {adr} resolves to multiple files")
 
         require_environment_bindings(
             service.get("environments"),
@@ -410,9 +389,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
         ]
         for env_id in active_environment_ids:
             if not declared_smoke_suites(service, env_id):
-                raise ValueError(
-                    f"services[{index}].environments.{env_id} must resolve at least one stage smoke suite"
-                )
+                raise ValueError(f"services[{index}].environments.{env_id} must resolve at least one stage smoke suite")
 
         runbook = service.get("runbook")
         if runbook is not None and not repo_path(runbook).exists():
@@ -424,9 +401,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                 f"services[{index}].uptime_monitor_name",
             )
             if monitor_name not in monitor_names:
-                raise ValueError(
-                    f"services[{index}].uptime_monitor_name references unknown monitor '{monitor_name}'"
-                )
+                raise ValueError(f"services[{index}].uptime_monitor_name references unknown monitor '{monitor_name}'")
 
         if "health_probe_id" in service:
             health_probe_id = require_str(
@@ -444,18 +419,14 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             f"services[{index}].image_catalog_ids",
         ):
             if image_id not in known_image_ids:
-                raise ValueError(
-                    f"services[{index}].image_catalog_ids references unknown image '{image_id}'"
-                )
+                raise ValueError(f"services[{index}].image_catalog_ids references unknown image '{image_id}'")
 
         for secret_id in require_string_list(
             service.get("secret_catalog_ids", []),
             f"services[{index}].secret_catalog_ids",
         ):
             if secret_id not in known_secret_ids:
-                raise ValueError(
-                    f"services[{index}].secret_catalog_ids references unknown secret '{secret_id}'"
-                )
+                raise ValueError(f"services[{index}].secret_catalog_ids references unknown secret '{secret_id}'")
 
         if "tags" in service:
             require_string_list(service.get("tags"), f"services[{index}].tags")
@@ -469,9 +440,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
         if lifecycle_status == "active":
             active_service_ids.add(service_id)
             if vm != "proxmox_florin" and vm not in allowed_service_surfaces:
-                raise ValueError(
-                    f"active service '{service_id}' must reference an observed guest or host surface"
-                )
+                raise ValueError(f"active service '{service_id}' must reference an observed guest or host surface")
             if service_id in topology:
                 topology_entry = topology[service_id]
                 if topology_entry.get("owning_vm") != vm:
@@ -506,8 +475,7 @@ def list_services(catalog: dict[str, Any]) -> int:
     print("Available services:")
     for service in sorted(catalog["services"], key=lambda item: item["id"]):
         print(
-            f"  - {service['id']} [{service['category']}, {service['exposure']}]: "
-            f"{service.get('internal_url', 'n/a')}"
+            f"  - {service['id']} [{service['category']}, {service['exposure']}]: {service.get('internal_url', 'n/a')}"
         )
     return 0
 
@@ -565,9 +533,7 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
             for env_id in sorted(environments):
                 binding = environments[env_id]
                 subdomain = f" [{binding['subdomain']}]" if "subdomain" in binding else ""
-                print(
-                    f"  - {env_id}: {binding['status']} -> {binding['url']}{subdomain}"
-                )
+                print(f"  - {env_id}: {binding['status']} -> {binding['url']}{subdomain}")
                 smoke_suites = declared_smoke_suites(service, env_id) if binding.get("status") == "active" else []
                 if smoke_suites:
                     explicit = isinstance(binding.get("smoke_suites"), list)
@@ -576,9 +542,7 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
                     for suite in smoke_suites:
                         print(f"      - {suite['id']}: {suite['name']}")
                 elif binding.get("status") == "active":
-                    print(
-                        f"    smoke suites: {DEFAULT_SUITE_ID} ({DEFAULT_SUITE_NAME})"
-                    )
+                    print(f"    smoke suites: {DEFAULT_SUITE_ID} ({DEFAULT_SUITE_NAME})")
         tags = service.get("tags", [])
         if tags:
             print("Tags:")
@@ -611,7 +575,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.service:
             return show_service(catalog, args.service)
         return list_services(catalog)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Service catalog", exc)
 
 

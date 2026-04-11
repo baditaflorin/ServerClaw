@@ -39,9 +39,7 @@ def test_resolve_targets_prefers_active_environment(monkeypatch, tmp_path: Path)
                 {
                     "id": "windmill",
                     "internal_url": "http://10.10.10.20:8005",
-                    "environments": {
-                        "production": {"status": "active", "url": "http://10.10.10.20:8005"}
-                    },
+                    "environments": {"production": {"status": "active", "url": "http://10.10.10.20:8005"}},
                 },
             ]
         },
@@ -65,9 +63,7 @@ def test_resolve_targets_prefers_worker_windmill_base_url_override(monkeypatch, 
                 {
                     "id": "windmill",
                     "internal_url": "http://100.64.0.1:8005",
-                    "environments": {
-                        "production": {"status": "active", "url": "http://100.64.0.1:8005"}
-                    },
+                    "environments": {"production": {"status": "active", "url": "http://100.64.0.1:8005"}},
                 }
             ]
         },
@@ -88,9 +84,7 @@ def test_resolve_targets_prefers_worker_proc_windmill_base_url_override(monkeypa
                 {
                     "id": "windmill",
                     "internal_url": "http://100.64.0.1:8005",
-                    "environments": {
-                        "production": {"status": "active", "url": "http://100.64.0.1:8005"}
-                    },
+                    "environments": {"production": {"status": "active", "url": "http://100.64.0.1:8005"}},
                 }
             ]
         },
@@ -134,9 +128,7 @@ def test_run_suite_invokes_pytest_when_targets_exist(monkeypatch, tmp_path: Path
                 {
                     "id": "keycloak",
                     "public_url": "https://sso.lv3.org",
-                    "environments": {
-                        "staging": {"status": "active", "url": "https://sso.staging.lv3.org"}
-                    },
+                    "environments": {"staging": {"status": "active", "url": "https://sso.staging.lv3.org"}},
                 }
             ]
         },

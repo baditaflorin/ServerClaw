@@ -129,7 +129,7 @@ class OllamaEmbedder:
             headers={"Content-Type": "application/json"},
         )
         try:
-            with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+            with urllib.request.urlopen(request, timeout=300) as response:
                 return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
@@ -212,7 +212,9 @@ class PlatformContextService:
             return TokenHashEmbedder(self.config.embedding_dimension)
         if self.config.embedding_backend == "ollama":
             if not self.config.ollama_url:
-                raise ValueError("PLATFORM_CONTEXT_OLLAMA_URL is required when PLATFORM_CONTEXT_EMBEDDING_BACKEND=ollama")
+                raise ValueError(
+                    "PLATFORM_CONTEXT_OLLAMA_URL is required when PLATFORM_CONTEXT_EMBEDDING_BACKEND=ollama"
+                )
             return OllamaEmbedder(self.config.ollama_url, self.config.embedding_model)
         if self.config.embedding_backend == "sentence-transformers":
             try:
@@ -266,11 +268,7 @@ class PlatformContextService:
             PointStruct(
                 id=chunk["chunk_id"],
                 vector=embeddings[index],
-                payload={
-                    key: value
-                    for key, value in chunk.items()
-                    if key != "chunk_id"
-                },
+                payload={key: value for key, value in chunk.items() if key != "chunk_id"},
             )
             for index, chunk in enumerate(chunks)
         ]
@@ -538,7 +536,7 @@ class PlatformContextService:
                 object_type=request.object_type,
                 limit=request.limit,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             fallback_reason = str(exc)
         keyword_matches = self._memory_keyword_matches(
             request.query,
@@ -651,7 +649,7 @@ class PlatformContextService:
                 ],
                 "retrieval_backend": "vector",
             }
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             fallback_reason = str(exc)
             payload = {
                 "question": question,
@@ -806,9 +804,7 @@ def build_config() -> ServiceConfig:
             "PLATFORM_CONTEXT_EMBEDDING_MODEL",
             "sentence-transformers/all-MiniLM-L6-v2",
         ),
-        embedding_dimension=int(
-            os.environ.get("PLATFORM_CONTEXT_EMBEDDING_DIMENSION", str(DEFAULT_DIMENSION))
-        ),
+        embedding_dimension=int(os.environ.get("PLATFORM_CONTEXT_EMBEDDING_DIMENSION", str(DEFAULT_DIMENSION))),
         ollama_url=os.environ.get("PLATFORM_CONTEXT_OLLAMA_URL"),
         prometheus_url=os.environ.get("PLATFORM_CONTEXT_PROMETHEUS_URL")
         or default_prometheus_url(stack_path=corpus_root / "versions" / "stack.yaml"),
@@ -876,11 +872,7 @@ def require_auth(request: Request, authorization: str | None = Header(default=No
     current_service = get_service()
     if authorization != f"Bearer {current_service.config.api_token}":
         code = "AUTH_TOKEN_MISSING" if authorization is None else "AUTH_TOKEN_INVALID"
-        message = (
-            "Bearer token is required for this endpoint."
-            if authorization is None
-            else "Bearer token is invalid."
-        )
+        message = "Bearer token is required for this endpoint." if authorization is None else "Bearer token is invalid."
         raise_platform_error(request, code, message=message, context={"header": "Authorization"})
     set_context(actor_id="platform-context-client")
 
@@ -993,7 +985,7 @@ def recent_receipts(limit: int = Query(default=5, ge=1, le=20)) -> dict[str, Any
 def workflow_contract(workflow_id: str, request: Request) -> dict[str, Any]:
     try:
         return get_service().workflow_contract(workflow_id)
-    except KeyError as exc:
+    except KeyError:
         raise_platform_error(
             request,
             "INPUT_UNKNOWN_WORKFLOW",
@@ -1006,7 +998,7 @@ def workflow_contract(workflow_id: str, request: Request) -> dict[str, Any]:
 def command_contract(command_id: str, request: Request) -> dict[str, Any]:
     try:
         return get_service().command_contract(command_id)
-    except KeyError as exc:
+    except KeyError:
         raise_platform_error(
             request,
             "INPUT_UNKNOWN_COMMAND",

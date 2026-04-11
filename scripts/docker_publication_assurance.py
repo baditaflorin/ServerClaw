@@ -6,7 +6,6 @@ import argparse
 import base64
 import ipaddress
 import json
-import random
 import socket
 import subprocess
 import sys
@@ -14,12 +13,14 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any
+from collections.abc import Callable, Iterable
 from urllib.parse import urlsplit
 
 try:
     from script_bootstrap import ensure_repo_root_on_path
 except ModuleNotFoundError:
+
     def ensure_repo_root_on_path(script_file: str) -> Path:
         script_path = Path(script_file).resolve()
         repo_root = script_path.parents[1]
@@ -31,17 +32,18 @@ except ModuleNotFoundError:
             del sys.modules["platform"]
         return repo_root
 
+
 ensure_repo_root_on_path(__file__)
 
 try:
     from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 except ModuleNotFoundError:
+
     class RetryClass(str, Enum):
         TRANSIENT = "TRANSIENT"
         BACKOFF = "BACKOFF"
         PERMANENT = "PERMANENT"
         FATAL = "FATAL"
-
 
     class PlatformRetryError(RuntimeError):
         def __init__(
@@ -57,7 +59,6 @@ except ModuleNotFoundError:
             self.retry_class = retry_class
             self.retry_after = retry_after
 
-
     @dataclass(frozen=True)
     class RetryPolicy:
         max_attempts: int = 5
@@ -67,13 +68,11 @@ except ModuleNotFoundError:
         jitter: bool = True
         transient_max: int = 2
 
-
     class MaxRetriesExceeded(RuntimeError):
         def __init__(self, message: str, *, attempts: int, last_error: BaseException | None) -> None:
             super().__init__(message)
             self.attempts = attempts
             self.last_error = last_error
-
 
     def with_retry(
         fn: Callable[[], Any],
@@ -86,7 +85,7 @@ except ModuleNotFoundError:
         for attempt in range(1, policy.max_attempts + 1):
             try:
                 return fn()
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 last_error = exc
                 if not isinstance(exc, PlatformRetryError):
                     raise
@@ -104,6 +103,8 @@ except ModuleNotFoundError:
             attempts=policy.max_attempts,
             last_error=last_error,
         ) from last_error
+
+
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
 DOCKER_ASSURANCE_DEFAULT_PATH = "/usr/local/bin/lv3-docker-publication-assurance"
 
@@ -323,7 +324,9 @@ def _required_networks(contract: dict[str, Any]) -> list[str]:
     return result
 
 
-def _inspect_container(container_name: str, command_runner: CommandRunner) -> tuple[dict[str, Any] | None, CommandResult]:
+def _inspect_container(
+    container_name: str, command_runner: CommandRunner
+) -> tuple[dict[str, Any] | None, CommandResult]:
     result = command_runner(["docker", "inspect", container_name], None)
     if result.returncode != 0:
         return None, result
@@ -424,7 +427,9 @@ def _wait_for_docker_chain_state(
     )
 
 
-def _extract_compose_context(container_inspect: dict[str, Any], contract: dict[str, Any]) -> tuple[str | None, list[str]]:
+def _extract_compose_context(
+    container_inspect: dict[str, Any], contract: dict[str, Any]
+) -> tuple[str | None, list[str]]:
     labels = container_inspect.get("Config", {}).get("Labels", {})
     if not isinstance(labels, dict):
         labels = {}
@@ -543,7 +548,9 @@ def _run_checks(
     missing_port_bindings: list[dict[str, Any]] = []
     if network_mode != "host":
         for binding in expected_bindings:
-            if not any(_binding_matches(str(binding["host"]), int(binding["port"]), item) for item in published_bindings):
+            if not any(
+                _binding_matches(str(binding["host"]), int(binding["port"]), item) for item in published_bindings
+            ):
                 missing_port_bindings.append(binding)
 
     missing_listeners: list[dict[str, Any]] = []
@@ -873,13 +880,18 @@ def assure_docker_publication(
         latest_compose_recreate_returncode: int | None = None
         compose_recreate_needs_project_reset = False
         compose_recreate_had_transport_error = False
-        if before["container_present"] and (before["issues"]["missing_nat_chain"] or before["issues"]["missing_forward_chain"]):
-            healed = _record_docker_restart_and_wait(
-                report=before,
-                contract=contract,
-                actions=actions,
-                command_runner=command_runner,
-            ) or healed
+        if before["container_present"] and (
+            before["issues"]["missing_nat_chain"] or before["issues"]["missing_forward_chain"]
+        ):
+            healed = (
+                _record_docker_restart_and_wait(
+                    report=before,
+                    contract=contract,
+                    actions=actions,
+                    command_runner=command_runner,
+                )
+                or healed
+            )
 
         intermediate = _run_checks(
             service_id=service_id,
@@ -931,17 +943,24 @@ def assure_docker_publication(
                 or after["issues"]["missing_port_bindings"]
             )
         )
-        if compose_recreate_attempted and after["container_present"] and (
-            after["issues"]["missing_nat_chain"]
-            or after["issues"]["missing_forward_chain"]
-            or compose_recreate_failed_with_publication_still_broken
+        if (
+            compose_recreate_attempted
+            and after["container_present"]
+            and (
+                after["issues"]["missing_nat_chain"]
+                or after["issues"]["missing_forward_chain"]
+                or compose_recreate_failed_with_publication_still_broken
+            )
         ):
-            healed = _record_docker_restart_and_wait(
-                report=after,
-                contract=contract,
-                actions=actions,
-                command_runner=command_runner,
-            ) or healed
+            healed = (
+                _record_docker_restart_and_wait(
+                    report=after,
+                    contract=contract,
+                    actions=actions,
+                    command_runner=command_runner,
+                )
+                or healed
+            )
 
             recovery = _run_checks(
                 service_id=service_id,
@@ -1073,7 +1092,9 @@ def assure_docker_publication(
     }
 
 
-def build_remote_command(*, service_id: str, service_probe: dict[str, Any], contract: dict[str, Any], heal: bool) -> list[str]:
+def build_remote_command(
+    *, service_id: str, service_probe: dict[str, Any], contract: dict[str, Any], heal: bool
+) -> list[str]:
     argv = [
         DOCKER_ASSURANCE_DEFAULT_PATH,
         "--service-id",
@@ -1093,7 +1114,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--service-id", required=True, help="Logical service identifier for reporting.")
     parser.add_argument("--service-probe-base64", required=True, help="Base64-encoded JSON service probe contract.")
     parser.add_argument("--contract-base64", required=True, help="Base64-encoded JSON Docker publication contract.")
-    parser.add_argument("--heal", action="store_true", help="Repair missing Docker publication primitives before failing.")
+    parser.add_argument(
+        "--heal", action="store_true", help="Repair missing Docker publication primitives before failing."
+    )
     parser.add_argument(
         "--allow-listener-warmup-after-heal",
         action="store_true",
@@ -1121,7 +1144,7 @@ def main(argv: list[str] | None = None) -> int:
             allow_listener_warmup_after_heal=args.allow_listener_warmup_after_heal,
             listener_timeout=args.listener_timeout,
         )
-    except Exception as exc:  # noqa: BLE001 - CLI should never leak a traceback to operators
+    except Exception as exc:
         error_payload = {"service_id": args.service_id, "ok": False, "summary": str(exc)}
         print(json.dumps(error_payload, indent=2, sort_keys=True))
         return 1

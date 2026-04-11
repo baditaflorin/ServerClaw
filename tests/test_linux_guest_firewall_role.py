@@ -51,7 +51,9 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
         "Ensure Docker bridge networking remains available after firewall evaluation"
     )
     inspect_task = next(task for task in tasks if task["name"] == "Inspect nftables package status on the guest")
-    record_missing_task = next(task for task in tasks if task["name"] == "Record whether nftables is missing on the guest")
+    record_missing_task = next(
+        task for task in tasks if task["name"] == "Record whether nftables is missing on the guest"
+    )
     ensure_nftables_task = next(task for task in tasks if task["name"] == "Ensure nftables is installed on the guest")
     ensure_task = next(
         task
@@ -81,7 +83,8 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
     fail_task = next(
         task
         for task in ensure_task["rescue"]
-        if task["name"] == "Surface Docker bridge-chain failures after guest firewall evaluation when recovery is disabled"
+        if task["name"]
+        == "Surface Docker bridge-chain failures after guest firewall evaluation when recovery is disabled"
     )
     assert inspect_task["ansible.builtin.command"]["argv"] == ["dpkg-query", "-W", "-f=${Status}", "nftables"]
     assert inspect_task["register"] == "linux_guest_firewall_nftables_package_status"
@@ -139,6 +142,7 @@ def test_linux_guest_firewall_only_resets_ssh_when_the_rendered_policy_changes()
     assert wait_task["when"] == "linux_guest_firewall_config.changed"
     assert post_bridge_reset_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
     assert post_bridge_wait_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
+
 
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 TEMPLATE_PATH = (

@@ -28,12 +28,13 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 
 @dataclass
 class FragmentMetadata:
     """Metadata extracted from a fragment file."""
+
     filename: str
     path: Path
     adr_number: Optional[str]
@@ -72,33 +73,21 @@ Examples:
     # list subcommand
     list_parser = subparsers.add_parser("list", help="List all fragments")
     list_parser.add_argument("--vmid", type=int, required=True, help="VM ID")
-    list_parser.add_argument(
-        "--json", action="store_true", help="Output as JSON"
-    )
+    list_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # validate subcommand
-    validate_parser = subparsers.add_parser(
-        "validate", help="Validate nginx config"
-    )
+    validate_parser = subparsers.add_parser("validate", help="Validate nginx config")
     validate_parser.add_argument("--vmid", type=int, required=True, help="VM ID")
 
     # diff subcommand
-    diff_parser = subparsers.add_parser(
-        "diff", help="Diff pending vs applied fragment"
-    )
+    diff_parser = subparsers.add_parser("diff", help="Diff pending vs applied fragment")
     diff_parser.add_argument("--vmid", type=int, required=True, help="VM ID")
-    diff_parser.add_argument(
-        "--service", type=str, required=True, help="Service name"
-    )
+    diff_parser.add_argument("--service", type=str, required=True, help="Service name")
 
     # orphans subcommand
-    orphans_parser = subparsers.add_parser(
-        "orphans", help="Detect orphan fragments"
-    )
+    orphans_parser = subparsers.add_parser("orphans", help="Detect orphan fragments")
     orphans_parser.add_argument("--vmid", type=int, required=True, help="VM ID")
-    orphans_parser.add_argument(
-        "--json", action="store_true", help="Output as JSON"
-    )
+    orphans_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     args = parser.parse_args()
 
@@ -132,7 +121,7 @@ def extract_fragment_metadata(fragment_file: Path) -> FragmentMetadata:
     applied = None
 
     try:
-        with open(fragment_file, "r") as f:
+        with open(fragment_file) as f:
             for line in f:
                 if "Managed by:" in line:
                     managed_by = line.split("Managed by:")[-1].strip()
@@ -147,9 +136,7 @@ def extract_fragment_metadata(fragment_file: Path) -> FragmentMetadata:
         pass
 
     stat_info = fragment_file.stat()
-    modified_time = datetime.fromtimestamp(
-        stat_info.st_mtime
-    ).isoformat()
+    modified_time = datetime.fromtimestamp(stat_info.st_mtime).isoformat()
 
     return FragmentMetadata(
         filename=fragment_file.name,
@@ -205,9 +192,7 @@ def list_fragments(vmid: int, as_json: bool = False) -> int:
             adr_str = f.adr_number or "???"
             service_str = f.service_name or "???"
             size_str = f"{f.size_bytes} B"
-            print(
-                f"{f.filename:<35} {adr_str:<6} {service_str:<20} {size_str:<10} {f.modified_time:<25}"
-            )
+            print(f"{f.filename:<35} {adr_str:<6} {service_str:<20} {size_str:<10} {f.modified_time:<25}")
         print(f"\nTotal: {len(fragments)} fragments")
 
     return 0
@@ -265,9 +250,9 @@ def diff_fragment(vmid: int, service_name: str) -> int:
 
     # Simple diff output
     try:
-        with open(fragment_file, "r") as f:
+        with open(fragment_file) as f:
             applied_content = f.read()
-        with open(staging_file, "r") as f:
+        with open(staging_file) as f:
             pending_content = f.read()
 
         if applied_content == pending_content:

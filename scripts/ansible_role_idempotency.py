@@ -173,7 +173,7 @@ def parse_changed_records_from_text(text: str) -> list[dict[str, Any]]:
 class FixtureHandler(BaseHTTPRequestHandler):
     routes: dict[str, dict[str, Any]] = {}
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         route = self.routes.get(self.path)
         if route is None:
             self.send_response(404)
@@ -196,7 +196,7 @@ class FixtureHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(response_body)
 
-    def log_message(self, fmt: str, *args: Any) -> None:  # noqa: A003
+    def log_message(self, fmt: str, *args: Any) -> None:
         del fmt, args
 
 
@@ -269,8 +269,16 @@ def run_enforced_role(role: str, entry: dict[str, Any]) -> RoleResult:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Validate repo-managed Ansible role idempotency coverage.")
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
-    parser.add_argument("--role", action="append", dest="roles", default=[], help="Restrict runtime checks to one or more enforced roles.")
-    parser.add_argument("--manifest-only", action="store_true", help="Validate policy coverage without running enforced scenarios.")
+    parser.add_argument(
+        "--role",
+        action="append",
+        dest="roles",
+        default=[],
+        help="Restrict runtime checks to one or more enforced roles.",
+    )
+    parser.add_argument(
+        "--manifest-only", action="store_true", help="Validate policy coverage without running enforced scenarios."
+    )
     return parser
 
 
@@ -283,9 +291,7 @@ def main(argv: list[str] | None = None) -> int:
     if requested_roles:
         unknown_roles = sorted(set(requested_roles) - set(enforced))
         if unknown_roles:
-            raise SystemExit(
-                f"--role only supports enforced roles. Unsupported selection: {', '.join(unknown_roles)}"
-            )
+            raise SystemExit(f"--role only supports enforced roles. Unsupported selection: {', '.join(unknown_roles)}")
         enforced = [role for role in enforced if role in requested_roles]
 
     print(

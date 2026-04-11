@@ -42,13 +42,19 @@ def test_inventory_exposes_private_piper_port_to_guests_docker_and_monitoring() 
     assert host_vars["platform_port_assignments"]["piper_port"] == 8100
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
 
-    management_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "management" and 8100 in rule["ports"])
+    management_rule = next(
+        rule for rule in docker_runtime_rules if rule["source"] == "management" and 8100 in rule["ports"]
+    )
     assert 8100 in management_rule["ports"]
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 8100 in rule["ports"])
     assert 8100 in guest_rule["ports"]
-    docker_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 8100 in rule["ports"])
+    docker_rule = next(
+        rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 8100 in rule["ports"]
+    )
     assert 8100 in docker_rule["ports"]
-    monitoring_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 8100 in rule["ports"])
+    monitoring_rule = next(
+        rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 8100 in rule["ports"]
+    )
     assert 8100 in monitoring_rule["ports"]
 
 

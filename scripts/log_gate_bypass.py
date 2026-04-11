@@ -8,7 +8,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -78,7 +78,7 @@ def resolve_owner() -> str:
 
 def main() -> int:
     args = parse_args()
-    created_at = datetime.now(timezone.utc)
+    created_at = datetime.now(UTC)
     created_at_slug = created_at.strftime("%Y%m%dT%H%M%SZ")
     branch = git_output("rev-parse", "--abbrev-ref", "HEAD") or "unknown"
     commit = git_output("rev-parse", "HEAD") or "unknown"
@@ -117,9 +117,7 @@ def main() -> int:
     gate_bypass_waivers.validate_receipt(payload, path="<generated>", catalog=catalog)
 
     args.receipt_dir.mkdir(parents=True, exist_ok=True)
-    receipt_path = args.receipt_dir / (
-        f"{created_at_slug}-{slugify(branch)}-{commit[:7]}-{slugify(args.bypass)}.json"
-    )
+    receipt_path = args.receipt_dir / (f"{created_at_slug}-{slugify(branch)}-{commit[:7]}-{slugify(args.bypass)}.json")
     receipt_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(receipt_path)
     _publish_to_outline(receipt_path)
@@ -129,6 +127,7 @@ def main() -> int:
 def _publish_to_outline(receipt_path: Path) -> None:
     """Best-effort: publish the receipt to the Outline wiki if OUTLINE_API_TOKEN is set."""
     import os
+
     token = os.environ.get("OUTLINE_API_TOKEN", "")
     if not token:
         token_file = REPO_ROOT / ".local" / "outline" / "api-token.txt"

@@ -19,6 +19,7 @@ Examples
   python scripts/secret_rotation_tool.py show --id gitea_admin_password
   python scripts/secret_rotation_tool.py summary
 """
+
 from __future__ import annotations
 
 import argparse
@@ -70,6 +71,7 @@ def _status(days: int | None, warning_window: int) -> str:
 # commands
 # ---------------------------------------------------------------------------
 
+
 def cmd_list(args: argparse.Namespace) -> int:
     secrets = _load()
     today = date.today()
@@ -81,8 +83,8 @@ def cmd_list(args: argparse.Namespace) -> int:
         status = _status(days, warn)
         days_str = str(days) if days is not None else "?"
         print(
-            f"{s['id']:<45}  {s.get('owner_service',''):<25}  "
-            f"{status:<10}  {days_str:>9}  {s.get('rotation_mode','')}"
+            f"{s['id']:<45}  {s.get('owner_service', ''):<25}  "
+            f"{status:<10}  {days_str:>9}  {s.get('rotation_mode', '')}"
         )
     return 0
 
@@ -101,16 +103,14 @@ def cmd_show(args: argparse.Namespace) -> int:
     warn = match.get("warning_window_days", 14)
     status = _status(days, warn)
     print(json.dumps(match, indent=2))
-    print(f"\nStatus today ({today}): {status}"
-          + (f"  ({days} days remaining)" if days is not None else ""))
+    print(f"\nStatus today ({today}): {status}" + (f"  ({days} days remaining)" if days is not None else ""))
     return 0
 
 
 def cmd_overdue(args: argparse.Namespace) -> int:
     secrets = _load()
     today = date.today()
-    overdue = [s for s in secrets if (_days_until_due(s, today) or 0) < 0
-               and _days_until_due(s, today) is not None]
+    overdue = [s for s in secrets if (_days_until_due(s, today) or 0) < 0 and _days_until_due(s, today) is not None]
     if not overdue:
         print("No secrets are overdue")
         return 0
@@ -120,8 +120,8 @@ def cmd_overdue(args: argparse.Namespace) -> int:
     for s in sorted(overdue, key=lambda x: _days_until_due(x, today) or 0):
         days = _days_until_due(s, today)
         print(
-            f"{s['id']:<45}  {s.get('owner_service',''):<25}  "
-            f"{abs(days):>12}  {s.get('last_rotated_at','?'):<15}  {s.get('rotation_mode','')}"
+            f"{s['id']:<45}  {s.get('owner_service', ''):<25}  "
+            f"{abs(days):>12}  {s.get('last_rotated_at', '?'):<15}  {s.get('rotation_mode', '')}"
         )
     print(f"\n{len(overdue)} overdue secret(s)")
     return 1 if overdue else 0
@@ -132,9 +132,9 @@ def cmd_due_soon(args: argparse.Namespace) -> int:
     today = date.today()
     window = args.days
     due = [
-        s for s in secrets
-        if _days_until_due(s, today) is not None
-        and 0 <= (_days_until_due(s, today) or 999) <= window
+        s
+        for s in secrets
+        if _days_until_due(s, today) is not None and 0 <= (_days_until_due(s, today) or 999) <= window
     ]
     if not due:
         print(f"No secrets due within {window} days")
@@ -145,8 +145,8 @@ def cmd_due_soon(args: argparse.Namespace) -> int:
     for s in sorted(due, key=lambda x: _days_until_due(x, today) or 0):
         days = _days_until_due(s, today)
         print(
-            f"{s['id']:<45}  {s.get('owner_service',''):<25}  "
-            f"{days:>9}  {s.get('last_rotated_at','?'):<15}  {s.get('rotation_mode','')}"
+            f"{s['id']:<45}  {s.get('owner_service', ''):<25}  "
+            f"{days:>9}  {s.get('last_rotated_at', '?'):<15}  {s.get('rotation_mode', '')}"
         )
     print(f"\n{len(due)} secret(s) due soon")
     return 0
@@ -168,8 +168,11 @@ def cmd_summary(args: argparse.Namespace) -> int:
     print(f"  Due soon        : {counts['DUE-SOON']}")
     print(f"  Overdue         : {counts['OVERDUE']}")
     print(f"  Unknown         : {counts['UNKNOWN']}")
-    health = "HEALTHY" if counts["OVERDUE"] == 0 and counts["DUE-SOON"] == 0 else \
-             ("DEGRADED" if counts["OVERDUE"] == 0 else "CRITICAL")
+    health = (
+        "HEALTHY"
+        if counts["OVERDUE"] == 0 and counts["DUE-SOON"] == 0
+        else ("DEGRADED" if counts["OVERDUE"] == 0 else "CRITICAL")
+    )
     print(f"\n  Overall health  : {health}")
     return 0
 
@@ -177,6 +180,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
@@ -193,8 +197,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("overdue", help="List overdue secrets")
 
     dsp = sub.add_parser("due-soon", help="List secrets due within N days")
-    dsp.add_argument("--days", type=int, default=14, metavar="N",
-                     help="Lookahead window in days (default 14)")
+    dsp.add_argument("--days", type=int, default=14, metavar="N", help="Lookahead window in days (default 14)")
 
     sub.add_parser("summary", help="Rotation health overview")
     return p

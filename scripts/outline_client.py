@@ -36,6 +36,7 @@ class OutlineClient:
 
     def call(self, endpoint: str, payload: dict[str, Any], *, use_app_token: bool = False) -> dict[str, Any]:
         import time
+
         body = json.dumps(payload).encode("utf-8")
         token = self.app_token if use_app_token else self.api_token
         headers = {
@@ -57,10 +58,10 @@ class OutlineClient:
                 if self.opener is not None:
                     response_ctx = self.opener.open(req, timeout=60)
                 else:
-                    response_ctx = request.urlopen(req, timeout=60)  # noqa: S310
+                    response_ctx = request.urlopen(req, timeout=60)
                 with response_ctx as response:
                     return json.loads(response.read().decode("utf-8"))
-            except error.HTTPError as exc:  # noqa: PERF203
+            except error.HTTPError as exc:
                 if exc.code == 429 and attempt < 3:
                     wait = 30 * (attempt + 1)
                     time.sleep(wait)

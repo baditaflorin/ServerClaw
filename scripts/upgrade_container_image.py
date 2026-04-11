@@ -117,9 +117,14 @@ def main() -> int:
     )
     parser.add_argument("--image-id", required=True, help="Catalog image id to upgrade.")
     parser.add_argument("--tag", help="Override tag instead of reusing the catalog tag.")
-    parser.add_argument("--apply", action="store_true", help="Run the catalog apply_targets after updating the catalog.")
+    parser.add_argument(
+        "--apply", action="store_true", help="Run the catalog apply_targets after updating the catalog."
+    )
     parser.add_argument("--write", action="store_true", help="Persist the updated catalog and scan receipt.")
-    parser.add_argument("--exception-justification", help="Justification for allowing a digest with open vulnerability budget exceptions.")
+    parser.add_argument(
+        "--exception-justification",
+        help="Justification for allowing a digest with open vulnerability budget exceptions.",
+    )
     parser.add_argument("--exception-reason", help="Deprecated alias for --exception-justification.")
     parser.add_argument("--working-root", type=Path, default=DEFAULT_WORKING_ROOT)
     parser.add_argument("--skip-db-update", action="store_true")
@@ -212,11 +217,7 @@ def main() -> int:
             if args.exception_controls_json:
                 controls.extend(json.loads(args.exception_controls_json))
             if not (
-                justification
-                and args.exception_owner
-                and expires_on
-                and controls
-                and args.exception_remediation_plan
+                justification and args.exception_owner and expires_on and controls and args.exception_remediation_plan
             ):
                 raise ValueError(
                     f"{image_ref} has {receipt['summary']['critical']} critical vulnerabilities; "

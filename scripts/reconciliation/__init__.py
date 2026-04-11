@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str):  # noqa: ANN001
+def __getattr__(name: str):
     """Lazy re-export from core to avoid heavyweight imports at package load."""
     if name in __all__:
         from scripts.reconciliation.core import (

@@ -4,12 +4,12 @@ import hashlib
 import json
 import re
 from collections.abc import Iterable
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
 
-UTC = timezone.utc
+UTC = UTC
 
 METADATA_PATTERN = re.compile(r"^-\s+(?P<key>[^:]+):\s+(?P<value>.+?)\s*$")
 H1_PATTERN = re.compile(r"^#\s+(?P<title>.+?)\s*$")

@@ -85,7 +85,10 @@ def test_main_supports_dry_run(tmp_path: Path, capsys) -> None:
                 "targets": {
                     "restore-docker-runtime": {
                         "name": "Restore target",
-                        "validation_window": {"name": "post_restore_recovery", "detail": "Replay ran after restore boot."},
+                        "validation_window": {
+                            "name": "post_restore_recovery",
+                            "detail": "Replay ran after restore boot.",
+                        },
                         "queue_depth": {"status": "not_applicable", "detail": "No queue metrics."},
                         "scenarios": [
                             {

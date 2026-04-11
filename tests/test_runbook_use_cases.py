@@ -5,14 +5,21 @@ from pathlib import Path
 
 import pytest
 
-from platform.use_cases.runbooks import RunbookRunStore, RunbookSurfaceError, RunbookUseCaseService, WindmillWorkflowRunner
+from platform.use_cases.runbooks import (
+    RunbookRunStore,
+    RunbookSurfaceError,
+    RunbookUseCaseService,
+    WindmillWorkflowRunner,
+)
 
 
 class FakeRunner:
     def __init__(self) -> None:
         self.calls: list[tuple[str, dict[str, object], int | None]] = []
 
-    def run_workflow(self, workflow_id: str, payload: dict[str, object], *, timeout_seconds: int | None = None) -> object:
+    def run_workflow(
+        self, workflow_id: str, payload: dict[str, object], *, timeout_seconds: int | None = None
+    ) -> object:
         self.calls.append((workflow_id, payload, timeout_seconds))
         return {"status": "ok"}
 

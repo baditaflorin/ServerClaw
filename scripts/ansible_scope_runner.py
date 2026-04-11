@@ -19,7 +19,6 @@ from platform.ansible.execution_scopes import (
     INVENTORY_PATH,
     plan_playbook_execution,
     run_planned_playbook,
-    run_scoped_playbook,
     validate_scope_catalog,
 )
 
@@ -30,7 +29,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    validate_parser = subparsers.add_parser("validate", help="Validate the execution-scope catalog and Makefile coverage.")
+    validate_parser = subparsers.add_parser(
+        "validate", help="Validate the execution-scope catalog and Makefile coverage."
+    )
     validate_parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
     validate_parser.add_argument("--inventory", type=Path, default=INVENTORY_PATH)
 
@@ -128,8 +129,7 @@ def handle_run(args: argparse.Namespace) -> int:
 def _run_single_plan(plan, passthrough_args, inventory_path):
     """Execute a single planned playbook and return (playbook_path, returncode)."""
     print(
-        f"[lane={plan.target_lane or 'default'}] Running: {plan.playbook_path} "
-        f"limit={plan.limit_expression}",
+        f"[lane={plan.target_lane or 'default'}] Running: {plan.playbook_path} limit={plan.limit_expression}",
         flush=True,
     )
     result = run_planned_playbook(
@@ -186,8 +186,7 @@ def handle_parallel_run(args: argparse.Namespace) -> int:
 
     with ThreadPoolExecutor(max_workers=min(len(lane_groups), args.max_parallel)) as pool:
         futures = {
-            pool.submit(run_lane, lane_key, lane_plans): lane_key
-            for lane_key, lane_plans in lane_groups.items()
+            pool.submit(run_lane, lane_key, lane_plans): lane_key for lane_key, lane_plans in lane_groups.items()
         }
         for future in as_completed(futures):
             lane_key = futures[future]

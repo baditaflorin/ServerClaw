@@ -28,7 +28,9 @@ class FakeDockerClient:
     def pause(self, action):
         target = action.container_name or f"{action.compose_project}/{action.compose_service}"
         self.paused.append(target)
-        return type("Token", (), {"container_id": "abc123", "target_description": target, "restore_action": "unpause"})()
+        return type(
+            "Token", (), {"container_id": "abc123", "target_description": target, "restore_action": "unpause"}
+        )()
 
     def start(self, token) -> None:
         self.started.append(token.target_description)
@@ -137,9 +139,11 @@ def test_fault_injector_runs_host_network_http_probe_via_helper_container() -> N
     docker = FakeDockerClient()
     docker.exec_result = (0, '{"ok":true}')
     injector = FaultInjector(docker_client=docker, sleep=lambda _: None)
-    probe = load_scenario_catalog(REPO_ROOT / "config" / "fault-scenarios.yaml").scenarios[
-        "fault:keycloak-unavailable"
-    ].before_probes[1]
+    probe = (
+        load_scenario_catalog(REPO_ROOT / "config" / "fault-scenarios.yaml")
+        .scenarios["fault:keycloak-unavailable"]
+        .before_probes[1]
+    )
 
     result = injector._run_probe(probe)
 

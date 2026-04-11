@@ -146,7 +146,9 @@ def test_sync_helper_bootstraps_repo_platform_package(monkeypatch: pytest.Monkey
     assert module.REPO_ROOT == REPO_ROOT
 
 
-def test_sync_helper_reports_missing_token(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_sync_helper_reports_missing_token(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     module = load_module("sync_helper_missing_token", SYNC_HELPER_PATH)
     manifest = tmp_path / "manifest.json"
     manifest.write_text("[]\n", encoding="utf-8")
@@ -307,7 +309,9 @@ def test_sync_helper_treats_delete_transport_error_as_converged_when_remote_cont
     }
 
     def fake_delete_script(**kwargs):
-        raise module.SyncTransportError("POST scripts/delete/p/f%2Flv3%2Frunbook_executor transport error: [Errno 54] Connection reset by peer")
+        raise module.SyncTransportError(
+            "POST scripts/delete/p/f%2Flv3%2Frunbook_executor transport error: [Errno 54] Connection reset by peer"
+        )
 
     monkeypatch.setattr(module, "delete_script", fake_delete_script)
     monkeypatch.setattr(
@@ -610,8 +614,7 @@ def test_schedule_sync_helper_uses_configured_http_timeout(monkeypatch: pytest.M
     assert body == "true"
     assert captured["timeout"] == 7.5
     assert captured["url"] == (
-        "http://windmill.internal/api/w/lv3/"
-        "schedules/exists/f%2Flv3%2Fquarterly_access_review_every_monday_0900"
+        "http://windmill.internal/api/w/lv3/schedules/exists/f%2Flv3%2Fquarterly_access_review_every_monday_0900"
     )
 
 
@@ -624,9 +627,7 @@ def test_schedule_sync_helper_retries_sqlerr_backend_disconnect(monkeypatch: pyt
             400,
             "Bad Request",
             None,
-            io.BytesIO(
-                b"SqlErr: error communicating with database: Connection reset by peer (os error 104)"
-            ),
+            io.BytesIO(b"SqlErr: error communicating with database: Connection reset by peer (os error 104)"),
         )
 
     monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
@@ -652,9 +653,7 @@ def test_script_sync_helper_retries_sqlerr_backend_disconnect(monkeypatch: pytes
             400,
             "Bad Request",
             None,
-            io.BytesIO(
-                b"SqlErr: error communicating with database: Connection reset by peer (os error 104)"
-            ),
+            io.BytesIO(b"SqlErr: error communicating with database: Connection reset by peer (os error 104)"),
         )
 
     monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
@@ -864,7 +863,9 @@ def test_sync_helper_retries_remote_disconnect(monkeypatch: pytest.MonkeyPatch, 
     def fake_create_script(**kwargs):
         attempts["count"] += 1
         if attempts["count"] == 1:
-            raise module.SyncTransportError("POST scripts/create transport error: Remote end closed connection without response")
+            raise module.SyncTransportError(
+                "POST scripts/create transport error: Remote end closed connection without response"
+            )
         return 201, ""
 
     monkeypatch.setattr(module, "create_script", fake_create_script)
@@ -998,7 +999,9 @@ def test_intent_queue_wrapper_exposes_module_main(monkeypatch: pytest.MonkeyPatc
 
     monkeypatch.setattr(module, "_load_impl", lambda repo_root: SimpleNamespace(main=fake_main))
 
-    payload = module.main(repo_root="/srv/proxmox_florin_server", resource_hints=["lane"], workflow_hints=["wf"], max_items=0)
+    payload = module.main(
+        repo_root="/srv/proxmox_florin_server", resource_hints=["lane"], workflow_hints=["wf"], max_items=0
+    )
 
     assert payload == {"status": "ok", "source": "impl"}
     assert captured == {
@@ -1150,7 +1153,10 @@ def test_intent_queue_dispatcher_resolves_token_from_proc_environ(tmp_path: Path
     proc_environ = tmp_path / "proc-1-environ"
     proc_environ.write_bytes(b"PATH=/usr/bin\0SUPERADMIN_SECRET=proc-secret\0")
 
-    assert module._read_proc_env_var("LV3_WINDMILL_TOKEN", "SUPERADMIN_SECRET", proc_environ_path=str(proc_environ)) == "proc-secret"
+    assert (
+        module._read_proc_env_var("LV3_WINDMILL_TOKEN", "SUPERADMIN_SECRET", proc_environ_path=str(proc_environ))
+        == "proc-secret"
+    )
 
 
 def test_watchdog_impl_resolves_token_from_proc_environ(tmp_path: Path) -> None:
@@ -1217,7 +1223,9 @@ def test_watchdog_impl_resolves_token_from_worker_checkout(tmp_path: Path) -> No
     assert module._resolve_windmill_token(repo_root) == "worker-secret"
 
 
-def test_run_wait_result_helper_requires_token(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+def test_run_wait_result_helper_requires_token(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     module = load_module("run_wait_result_helper", RUN_WAIT_RESULT_HELPER_PATH)
     monkeypatch.setattr(
         module.sys,

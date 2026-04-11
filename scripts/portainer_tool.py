@@ -3,12 +3,11 @@
 import argparse
 import json
 import sys
-from pathlib import Path
 
 import requests
 import urllib3
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, load_operator_auth
+from controller_automation_toolkit import emit_cli_error, repo_path, load_operator_auth
 
 
 DEFAULT_AUTH_FILE = repo_path(".local", "portainer", "admin-auth.json")

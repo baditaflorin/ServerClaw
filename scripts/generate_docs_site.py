@@ -154,9 +154,9 @@ def normalize_sensitivity(raw_value: str | None) -> str:
 
 def metadata_value(frontmatter: dict[str, str], metadata: dict[str, str], *keys: str) -> str | None:
     for key in keys:
-        if key in frontmatter and frontmatter[key]:
+        if frontmatter.get(key):
             return frontmatter[key]
-        if key in metadata and metadata[key]:
+        if metadata.get(key):
             return metadata[key]
     return None
 
@@ -176,7 +176,9 @@ def default_portal_summary(path: Path, title: str, sensitivity: str) -> str:
         doc_type = "runbook" if path.parent.name == "runbooks" else "architecture decision"
         return f"Sensitive {doc_type} summary for {title}. Full content is reserved for platform administrators."
     if sensitivity == "CONFIDENTIAL":
-        return f"{title} is classified as confidential and is intentionally excluded from the published developer portal."
+        return (
+            f"{title} is classified as confidential and is intentionally excluded from the published developer portal."
+        )
     return ""
 
 
@@ -334,12 +336,7 @@ def render_portal_document(document: PortalDocument, target_path: Path) -> str:
             document.title,
             document.sensitivity,
         )
-        body = (
-            f"# {document.title}\n\n"
-            f"{notice}\n"
-            "## Portal Summary\n\n"
-            f"{summary}\n"
-        )
+        body = f"# {document.title}\n\n{notice}\n## Portal Summary\n\n{summary}\n"
         return frontmatter + body
 
     rewritten = rewrite_markdown_links(document.content, document.source_path, target_path)
@@ -473,12 +470,7 @@ def site_path_for_repo_path(path: Path) -> Path | None:
 
 
 def relative_site_link(current: Path, destination: Path) -> str:
-    return Path(
-        *(
-            [".."] * len(current.parent.parts)
-            + list(destination.parts)
-        )
-    ).as_posix()
+    return Path(*([".."] * len(current.parent.parts) + list(destination.parts))).as_posix()
 
 
 def resolve_repo_target(source_path: Path, raw_target: str) -> Path | None:
@@ -576,10 +568,7 @@ def port_from_url(url: str) -> int | None:
 
 
 def portal_document_lookup(directory: Path) -> dict[Path, PortalDocument]:
-    return {
-        path: build_portal_document(path)
-        for path in sorted(directory.glob("*.md"))
-    }
+    return {path: build_portal_document(path) for path in sorted(directory.glob("*.md"))}
 
 
 def subdomains_by_service(entries: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
@@ -590,10 +579,7 @@ def subdomains_by_service(entries: list[dict[str, Any]]) -> dict[str, list[dict[
 
 
 def secret_lookup() -> dict[str, dict[str, Any]]:
-    return {
-        secret["id"]: secret
-        for secret in load_json(SECRET_CATALOG_PATH)["secrets"]
-    }
+    return {secret["id"]: secret for secret in load_json(SECRET_CATALOG_PATH)["secrets"]}
 
 
 def service_port_rows(
@@ -965,7 +951,13 @@ def render_reference_pages(
 
     subdomains_index = subdomains_by_service(subdomains)
     port_rows = []
-    for service in sorted(services, key=lambda item: (min((row["port"] for row in service_port_rows(item, subdomains_index.get(item["id"], []))), default=0), item["name"])):
+    for service in sorted(
+        services,
+        key=lambda item: (
+            min((row["port"] for row in service_port_rows(item, subdomains_index.get(item["id"], []))), default=0),
+            item["name"],
+        ),
+    ):
         for row in service_port_rows(service, subdomains_index.get(service["id"], [])):
             port_rows.append(
                 {
@@ -980,11 +972,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/ports.md",
-            wrap_generated_page(
-                render_template("reference-ports.md.j2", rows=port_rows),
-                target_path=Path("reference", "ports.md"),
-                sensitivity="INTERNAL",
-                tags=["reference", "ports"],
+        wrap_generated_page(
+            render_template("reference-ports.md.j2", rows=port_rows),
+            target_path=Path("reference", "ports.md"),
+            sensitivity="INTERNAL",
+            tags=["reference", "ports"],
         ),
     )
 
@@ -1008,11 +1000,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/subdomains.md",
-            wrap_generated_page(
-                render_template("reference-subdomains.md.j2", rows=subdomain_rows),
-                target_path=Path("reference", "subdomains.md"),
-                sensitivity="INTERNAL",
-                tags=["reference", "subdomains"],
+        wrap_generated_page(
+            render_template("reference-subdomains.md.j2", rows=subdomain_rows),
+            target_path=Path("reference", "subdomains.md"),
+            sensitivity="INTERNAL",
+            tags=["reference", "subdomains"],
         ),
     )
 
@@ -1041,11 +1033,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/identities.md",
-            wrap_generated_page(
-                render_template("reference-identities.md.j2", classes=classes, identities=identities),
-                target_path=Path("reference", "identities.md"),
-                sensitivity="INTERNAL",
-                tags=["reference", "identities"],
+        wrap_generated_page(
+            render_template("reference-identities.md.j2", classes=classes, identities=identities),
+            target_path=Path("reference", "identities.md"),
+            sensitivity="INTERNAL",
+            tags=["reference", "identities"],
         ),
     )
 
@@ -1064,11 +1056,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/secrets.md",
-            wrap_generated_page(
-                render_template("reference-secrets.md.j2", secrets=secret_rows),
-                target_path=Path("reference", "secrets.md"),
-                sensitivity="INTERNAL",
-                tags=["reference", "secrets"],
+        wrap_generated_page(
+            render_template("reference-secrets.md.j2", secrets=secret_rows),
+            target_path=Path("reference", "secrets.md"),
+            sensitivity="INTERNAL",
+            tags=["reference", "secrets"],
         ),
     )
 
@@ -1084,7 +1076,7 @@ def fetch_openapi_snapshot(url: str | None, *, timeout: float = 5.0) -> tuple[di
     if url:
         try:
             request = Request(url, headers={"User-Agent": "lv3-docs-generator"})
-            with urlopen(request, timeout=timeout) as response:  # noqa: S310
+            with urlopen(request, timeout=timeout) as response:
                 payload = json.loads(response.read().decode("utf-8"))
             return payload, url
         except (URLError, TimeoutError, json.JSONDecodeError, OSError):
@@ -1303,12 +1295,16 @@ def validate_site(output_dir: Path) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate the MkDocs source tree for docs.localhost.")
     parser.add_argument("--write", action="store_true", help="Write generated site source into docs/site-generated.")
-    parser.add_argument("--check", action="store_true", help="Generate into a temp dir and validate the expected artifacts.")
+    parser.add_argument(
+        "--check", action="store_true", help="Generate into a temp dir and validate the expected artifacts."
+    )
     parser.add_argument(
         "--output-dir",
         help="Optional output directory to use with --write instead of docs/site-generated.",
     )
-    parser.add_argument("--openapi-url", default=OPENAPI_DEFAULT_URL, help="OpenAPI schema URL to snapshot before build.")
+    parser.add_argument(
+        "--openapi-url", default=OPENAPI_DEFAULT_URL, help="OpenAPI schema URL to snapshot before build."
+    )
     args = parser.parse_args(argv)
 
     if not args.write and not args.check:

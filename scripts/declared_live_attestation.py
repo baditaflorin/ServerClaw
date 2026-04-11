@@ -46,7 +46,9 @@ def render_table(payload: dict[str, object]) -> str:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Collect declared-to-live service attestation for the active service catalog.")
+    parser = argparse.ArgumentParser(
+        description="Collect declared-to-live service attestation for the active service catalog."
+    )
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--service")
     parser.add_argument("--environment", default="production")

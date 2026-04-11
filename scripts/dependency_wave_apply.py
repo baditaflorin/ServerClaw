@@ -28,7 +28,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional playbook metadata catalog. Defaults to config/dependency-wave-playbooks.yaml under --repo-root.",
     )
     parser.add_argument("--env", default="production")
-    parser.add_argument("--extra-args", default="", help="Literal EXTRA_ARGS passed through to the underlying make targets.")
+    parser.add_argument(
+        "--extra-args", default="", help="Literal EXTRA_ARGS passed through to the underlying make targets."
+    )
     parser.add_argument("--lock-ttl-seconds", type=int, default=1800)
     parser.add_argument("--heartbeat-seconds", type=int)
     parser.add_argument("--dry-run", action="store_true")
@@ -54,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
             heartbeat_seconds=args.heartbeat_seconds,
             dry_run=args.dry_run,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("dependency wave apply", exc)
 
     print(json.dumps(result.as_dict(), indent=2, sort_keys=True))

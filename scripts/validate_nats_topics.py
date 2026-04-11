@@ -84,11 +84,7 @@ def extract_ntfy_topics() -> set[str]:
     configured_topics = payload.get("topics", {})
     if not isinstance(configured_topics, dict):
         raise ValueError(f"{NTFY_TOPIC_REGISTRY_PATH}.topics must be a mapping")
-    topics.update(
-        topic
-        for topic in configured_topics
-        if isinstance(topic, str) and topic.startswith("platform.")
-    )
+    topics.update(topic for topic in configured_topics if isinstance(topic, str) and topic.startswith("platform."))
     return topics
 
 

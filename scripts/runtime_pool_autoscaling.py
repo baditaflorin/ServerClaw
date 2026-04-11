@@ -121,7 +121,10 @@ def validate_runtime_pool_autoscaling_payload(
     execution_lane_ids: set[str],
     eligible_services: dict[str, set[str]],
 ) -> None:
-    if require_str(payload.get("$schema"), "config/runtime-pool-autoscaling.json.$schema") != "docs/schema/runtime-pool-autoscaling.schema.json":
+    if (
+        require_str(payload.get("$schema"), "config/runtime-pool-autoscaling.json.$schema")
+        != "docs/schema/runtime-pool-autoscaling.schema.json"
+    ):
         raise ValueError(
             "config/runtime-pool-autoscaling.json.$schema must reference docs/schema/runtime-pool-autoscaling.schema.json"
         )
@@ -133,7 +136,9 @@ def validate_runtime_pool_autoscaling_payload(
         raise ValueError("config/runtime-pool-autoscaling.json.schema_version must be semver")
 
     if capacity_model.runtime_pool_memory is None:
-        raise ValueError("config/capacity-model.json must define runtime_pool_memory before autoscaling can be validated")
+        raise ValueError(
+            "config/capacity-model.json must define runtime_pool_memory before autoscaling can be validated"
+        )
     governed_pool_ids = {pool.identifier for pool in capacity_model.runtime_pool_memory.pools}
 
     controller = require_mapping(payload.get("controller"), "config/runtime-pool-autoscaling.json.controller")
@@ -174,17 +179,11 @@ def validate_runtime_pool_autoscaling_payload(
             "config/runtime-pool-autoscaling.json.controller.preferred_implementation must be 'nomad-autoscaler'"
         )
     if metrics_source != "prometheus":
-        raise ValueError(
-            "config/runtime-pool-autoscaling.json.controller.metrics_source must be 'prometheus'"
-        )
+        raise ValueError("config/runtime-pool-autoscaling.json.controller.metrics_source must be 'prometheus'")
     if routing_surface != "traefik":
-        raise ValueError(
-            "config/runtime-pool-autoscaling.json.controller.routing_surface must be 'traefik'"
-        )
+        raise ValueError("config/runtime-pool-autoscaling.json.controller.routing_surface must be 'traefik'")
     if invocation_surface != "dapr":
-        raise ValueError(
-            "config/runtime-pool-autoscaling.json.controller.invocation_surface must be 'dapr'"
-        )
+        raise ValueError("config/runtime-pool-autoscaling.json.controller.invocation_surface must be 'dapr'")
     if not (REPO_ROOT / receipt_directory).exists():
         raise ValueError(
             "config/runtime-pool-autoscaling.json.controller.receipt_directory must exist in the repository"
@@ -218,14 +217,11 @@ def validate_runtime_pool_autoscaling_payload(
         )
         if nomad_namespace != pool_id:
             raise ValueError(
-                "config/runtime-pool-autoscaling.json.policies["
-                f"{index}].nomad_namespace must match pool_id"
+                f"config/runtime-pool-autoscaling.json.policies[{index}].nomad_namespace must match pool_id"
             )
         enabled = policy.get("enabled")
         if not isinstance(enabled, bool):
-            raise ValueError(
-                f"config/runtime-pool-autoscaling.json.policies[{index}].enabled must be a boolean"
-            )
+            raise ValueError(f"config/runtime-pool-autoscaling.json.policies[{index}].enabled must be a boolean")
         if not enabled:
             raise ValueError(
                 f"config/runtime-pool-autoscaling.json.policies[{index}].enabled must be true for the current rollout"
@@ -538,12 +534,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.json:
             print(render_summary_json(catalog), end="")
         else:
-            print(
-                "Runtime pool autoscaling catalog OK: "
-                + ", ".join(policy.pool_id for policy in catalog.policies)
-            )
+            print("Runtime pool autoscaling catalog OK: " + ", ".join(policy.pool_id for policy in catalog.policies))
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("runtime-pool-autoscaling", exc)
 
 

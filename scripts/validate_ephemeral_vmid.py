@@ -4,8 +4,6 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
-from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 
@@ -21,7 +19,11 @@ def load_ephemeral_range() -> tuple[int, int]:
     if not isinstance(reservations, list):
         raise ValueError("config/capacity-model.json must define reservations")
     pool = next(
-        (reservation for reservation in reservations if isinstance(reservation, dict) and reservation.get("kind") == "ephemeral_pool"),
+        (
+            reservation
+            for reservation in reservations
+            if isinstance(reservation, dict) and reservation.get("kind") == "ephemeral_pool"
+        ),
         None,
     )
     if not isinstance(pool, dict):
@@ -90,7 +92,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
         violations = validate_ephemeral_vmid_ranges()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("validate ephemeral vmid", exc)
 
     if violations:

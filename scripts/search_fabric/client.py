@@ -208,7 +208,11 @@ class SearchClient:
                 )
             )
         suggestions.sort(key=lambda item: (-item.score, item.title.lower()))
-        return {"prefix": prefix, "count": len(suggestions[:limit]), "results": [item.to_dict() for item in suggestions[:limit]]}
+        return {
+            "prefix": prefix,
+            "count": len(suggestions[:limit]),
+            "results": [item.to_dict() for item in suggestions[:limit]],
+        }
 
     def filter(
         self,

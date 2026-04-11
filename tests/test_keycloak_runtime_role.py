@@ -47,7 +47,10 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     smtp_server = defaults["keycloak_realm_smtp_server"]
     assert defaults["keycloak_session_authority"] == "{{ platform_session_authority }}"
-    assert defaults["keycloak_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+    assert (
+        defaults["keycloak_database_host"]
+        == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+    )
     assert defaults["keycloak_mail_platform_submission_host"] == "{{ smtp_host }}"
     assert defaults["keycloak_mail_platform_submission_port"] == "{{ smtp_port }}"
     assert defaults["keycloak_mail_platform_submission_starttls"] == "{{ smtp_starttls }}"
@@ -57,20 +60,28 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ mail_platform_compose_file | default('/opt/mail-platform/docker-compose.yml') }}"
     )
     assert defaults["keycloak_mail_platform_submission_service_name"] == "stalwart"
-    assert "keycloak_mail_platform_docker_network_name | length > 0" in defaults[
-        "keycloak_mail_platform_submission_recovery_enabled"
-    ]
-    assert "keycloak_mail_platform_compose_file | length > 0" in defaults[
-        "keycloak_mail_platform_submission_recovery_enabled"
-    ]
+    assert (
+        "keycloak_mail_platform_docker_network_name | length > 0"
+        in defaults["keycloak_mail_platform_submission_recovery_enabled"]
+    )
+    assert (
+        "keycloak_mail_platform_compose_file | length > 0"
+        in defaults["keycloak_mail_platform_submission_recovery_enabled"]
+    )
     assert defaults["keycloak_compose_project_name"] == "keycloak"
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
-    assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
+    assert defaults["keycloak_langfuse_client_secret_local_file"].endswith(
+        "/.local/keycloak/langfuse-client-secret.txt"
+    )
     assert defaults["keycloak_superset_client_id"] == "superset"
-    assert defaults["keycloak_superset_client_secret_local_file"].endswith("/.local/keycloak/superset-client-secret.txt")
+    assert defaults["keycloak_superset_client_secret_local_file"].endswith(
+        "/.local/keycloak/superset-client-secret.txt"
+    )
     assert defaults["keycloak_glitchtip_client_id"] == "glitchtip"
-    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith("/.local/keycloak/glitchtip-client-secret.txt")
+    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith(
+        "/.local/keycloak/glitchtip-client-secret.txt"
+    )
     assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
     assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
         "/.local/keycloak/serverclaw-runtime-client-secret.txt"
@@ -81,7 +92,9 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_grist_client_id"] == "grist"
     assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
     assert defaults["keycloak_outline_automation_username"] == "outline.automation"
-    assert defaults["keycloak_outline_automation_password_local_file"].endswith("/.local/keycloak/outline.automation-password.txt")
+    assert defaults["keycloak_outline_automation_password_local_file"].endswith(
+        "/.local/keycloak/outline.automation-password.txt"
+    )
     assert defaults["keycloak_ops_portal_post_logout_redirect_uris"] == [
         "{{ keycloak_ops_portal_root_url }}/",
         "{{ keycloak_ops_portal_root_url }}",
@@ -113,7 +126,9 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_superset_root_url }}/",
     ]
     assert defaults["keycloak_paperless_client_id"] == "paperless"
-    assert defaults["keycloak_paperless_client_secret_local_file"].endswith("/.local/keycloak/paperless-client-secret.txt")
+    assert defaults["keycloak_paperless_client_secret_local_file"].endswith(
+        "/.local/keycloak/paperless-client-secret.txt"
+    )
     assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
     assert defaults["keycloak_paperless_post_logout_redirect_uris"] == [
         "{{ keycloak_paperless_root_url }}",
@@ -123,7 +138,10 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert smtp_server["auth"] == "{{ keycloak_mail_platform_submission_auth_enabled }}"
     assert smtp_server["host"] == "{{ keycloak_mail_platform_submission_host }}"
     assert smtp_server["port"] == "{{ keycloak_mail_platform_submission_port }}"
-    assert smtp_server["user"] == "{{ keycloak_mail_platform_submission_username if keycloak_mail_platform_submission_auth_enabled else '' }}"
+    assert (
+        smtp_server["user"]
+        == "{{ keycloak_mail_platform_submission_username if keycloak_mail_platform_submission_auth_enabled else '' }}"
+    )
     assert smtp_server["starttls"] == "{{ keycloak_mail_platform_submission_starttls }}"
     assert smtp_server["ssl"] is False
 
@@ -133,12 +151,14 @@ def test_role_requires_local_mail_submission_secret() -> None:
     stat_task = next(
         task
         for task in tasks
-        if task.get("name") == "Ensure the Keycloak mail submission password exists on the control machine when SMTP auth is enabled"
+        if task.get("name")
+        == "Ensure the Keycloak mail submission password exists on the control machine when SMTP auth is enabled"
     )
     fail_task = next(
         task
         for task in tasks
-        if task.get("name") == "Fail if the Keycloak mail submission password is missing locally when SMTP auth is enabled"
+        if task.get("name")
+        == "Fail if the Keycloak mail submission password is missing locally when SMTP auth is enabled"
     )
     assert stat_task["ansible.builtin.stat"]["path"] == "{{ keycloak_mail_platform_submission_password_local_file }}"
     assert stat_task["when"] == "keycloak_mail_platform_submission_auth_enabled"
@@ -151,7 +171,9 @@ def test_role_requires_local_mail_submission_secret() -> None:
 
 def test_role_reuses_recent_apt_cache_for_runtime_packages() -> None:
     tasks = load_tasks()
-    package_task = next(task for task in tasks if task.get("name") == "Ensure the Keycloak runtime packages are present")
+    package_task = next(
+        task for task in tasks if task.get("name") == "Ensure the Keycloak runtime packages are present"
+    )
 
     assert package_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
 
@@ -194,14 +216,13 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         if task.get("name") == "Remove stale Keycloak compose replacement containers before recovery"
     )
     project_cleanup = next(
-        task
-        for task in tasks
-        if task.get("name") == "Remove stale Keycloak project containers before network cleanup"
+        task for task in tasks if task.get("name") == "Remove stale Keycloak project containers before network cleanup"
     )
     force_recreate_block = next(
         task
         for task in tasks
-        if task.get("name") == "Force-recreate the Keycloak service and recover Docker bridge-chain loss after networking recovery"
+        if task.get("name")
+        == "Force-recreate the Keycloak service and recover Docker bridge-chain loss after networking recovery"
     )
     openbao_agent_recreate = next(
         task
@@ -214,9 +235,7 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         if task.get("name") == "Wait for the Keycloak runtime env file after OpenBao agent recovery"
     )
     force_recreate_fact = next(
-        task
-        for task in tasks
-        if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
+        task for task in tasks if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
     )
     force_recreate_fact = next(
         task for task in tasks if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
@@ -251,13 +270,24 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert "label=com.docker.compose.project=keycloak" in project_cleanup["ansible.builtin.shell"]
     assert "com.docker.compose.project=keycloak" in replace_cleanup["ansible.builtin.shell"]
     assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
-    assert openbao_agent_recreate["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "openbao-agent"]
-    assert 'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"' in runtime_env_wait["ansible.builtin.shell"]
+    assert openbao_agent_recreate["ansible.builtin.command"]["argv"][-4:] == [
+        "up",
+        "-d",
+        "--force-recreate",
+        "openbao-agent",
+    ]
+    assert (
+        'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"'
+        in runtime_env_wait["ansible.builtin.shell"]
+    )
     assert (
         'grep -Fqx "KC_BOOTSTRAP_ADMIN_USERNAME={{ keycloak_bootstrap_admin_username }}" "{{ keycloak_env_file }}"'
         in runtime_env_wait["ansible.builtin.shell"]
     )
-    assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+    assert (
+        readiness_probe["ansible.builtin.uri"]["url"]
+        == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+    )
     assert force_recreate_down["ansible.builtin.command"]["argv"] == [
         "docker",
         "compose",
@@ -274,7 +304,9 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     rescue_names = [task["name"] for task in force_recreate_block["rescue"]]
     assert "Detect Docker bridge-chain loss during the Keycloak force-recreate" in rescue_names
     assert "Restart Docker to restore bridge networking before retrying the Keycloak force-recreate" in rescue_names
-    assert "Ensure Docker bridge networking chains are present before retrying the Keycloak force-recreate" in rescue_names
+    assert (
+        "Ensure Docker bridge networking chains are present before retrying the Keycloak force-recreate" in rescue_names
+    )
     assert "Retry the Keycloak service force-recreate after Docker networking recovery" in rescue_names
     rescue_restart = next(
         task
@@ -291,7 +323,10 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     force_recreate_shell = force_recreate["ansible.builtin.shell"]
     assert "docker network inspect" in force_recreate_shell
     assert "{{ keycloak_mail_platform_docker_network_name }}" in force_recreate_shell
-    assert "docker compose --file \"{{ keycloak_compose_file }}\" up -d --force-recreate --no-deps keycloak" in force_recreate_shell
+    assert (
+        'docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak'
+        in force_recreate_shell
+    )
     assert "com.docker.compose.project=keycloak" in force_recreate_shell
     assert "com.docker.compose.service=keycloak" in force_recreate_shell
     assert "docker rm -f $stale_ids || true" in force_recreate_shell
@@ -304,7 +339,9 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert "keycloak_env_template.changed" not in force_recreate_expression
     assert "keycloak_compose_template.changed" not in force_recreate_expression
     assert "keycloak_pull.changed" not in force_recreate_expression
-    nat_assert = next(task for task in tasks if task.get("name") == "Assert Docker nat chain is present before Keycloak startup")
+    nat_assert = next(
+        task for task in tasks if task.get("name") == "Assert Docker nat chain is present before Keycloak startup"
+    )
     assert nat_assert["ansible.builtin.assert"]["that"] == [
         "keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_chain_present | default(false))"
     ]
@@ -316,7 +353,9 @@ def test_role_verifies_internal_mail_network_connectivity() -> None:
         task for task in tasks if task.get("name") == "Verify Keycloak resolves the internal mail-platform relay host"
     )
     recovery_task = next(
-        task for task in tasks if task.get("name") == "Recover the internal mail-platform submission relay before Keycloak SMTP verification"
+        task
+        for task in tasks
+        if task.get("name") == "Recover the internal mail-platform submission relay before Keycloak SMTP verification"
     )
     recovery_wait_task = next(
         task
@@ -329,7 +368,9 @@ def test_role_verifies_internal_mail_network_connectivity() -> None:
         if task.get("name") == "Verify Keycloak resolves the internal mail-platform relay host"
     )
     connect_task = next(
-        task for task in tasks if task.get("name") == "Verify Keycloak reaches the internal mail-platform submission listener"
+        task
+        for task in tasks
+        if task.get("name") == "Verify Keycloak reaches the internal mail-platform submission listener"
     )
     assert initial_resolve_task["register"] == "keycloak_mail_submission_host_lookup_initial"
     assert initial_resolve_task["failed_when"] is False
@@ -376,7 +417,9 @@ def test_role_retries_api_gateway_client_reconcile_and_secret_read() -> None:
     api_gateway_client_task = next(
         task for task in realm_block["block"] if task.get("name") == "Ensure the API gateway client exists"
     )
-    api_gateway_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the API gateway client secret")
+    api_gateway_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the API gateway client secret"
+    )
     assert api_gateway_client_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
     assert api_gateway_client_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
     assert api_gateway_client_task["until"] == "keycloak_api_gateway_client_reconcile is succeeded"
@@ -394,17 +437,21 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     admin_access_block = next(
         task
         for task in tasks
-        if task.get("name") == "Ensure the repo-managed Keycloak admin client can authenticate before realm reconciliation"
+        if task.get("name")
+        == "Ensure the repo-managed Keycloak admin client can authenticate before realm reconciliation"
     )
     readiness_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak readiness endpoint")
     admin_api_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak admin API to answer")
     token_probe_task = next(
-        task for task in admin_access_block["block"] if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
+        task
+        for task in admin_access_block["block"]
+        if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
     )
     preflight_admin_probe_task = next(
         task
         for task in admin_access_block["block"]
-        if task.get("name") == "Require an authenticated Keycloak admin realm query before accepting the repo-managed admin client"
+        if task.get("name")
+        == "Require an authenticated Keycloak admin realm query before accepting the repo-managed admin client"
     )
     admin_probe_task = next(
         task for task in tasks if task.get("name") == "Wait for an authenticated Keycloak admin realm query to answer"
@@ -508,7 +555,9 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
         == "Recover repo-managed Keycloak admin access with bootstrap credentials when runtime recovery is insufficient"
     )
     fallback_bootstrap_task = next(
-        task for task in tasks if task.get("name") == "Try the Keycloak bootstrap admin token endpoint as a fallback admin bootstrap path"
+        task
+        for task in tasks
+        if task.get("name") == "Try the Keycloak bootstrap admin token endpoint as a fallback admin bootstrap path"
     )
     recovery_stop_task = next(
         task for task in tasks if task.get("name") == "Stop the Keycloak service before offline admin recovery"
@@ -546,7 +595,10 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     assert preflight_admin_probe_task["failed_when"] == (
         "(keycloak_admin_realm_probe_preflight.status | default(0)) == 403"
     )
-    assert admin_probe_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    assert (
+        admin_probe_task["ansible.builtin.uri"]["url"]
+        == "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    )
     assert admin_probe_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
         "Bearer {{ keycloak_admin_client_token_probe_confirmed.json.access_token }}"
     )
@@ -567,7 +619,10 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     assert recovery_bridge_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert recovery_bridge_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
     assert recovery_bridge_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
-    assert 'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"' in recovery_runtime_env_wait["ansible.builtin.shell"]
+    assert (
+        'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"'
+        in recovery_runtime_env_wait["ansible.builtin.shell"]
+    )
     assert recovery_jgroups_cleanup["ansible.builtin.command"]["argv"] == [
         "psql",
         "-d",
@@ -577,14 +632,17 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
         "-c",
         "DELETE FROM jgroups_ping;",
     ]
-    assert recovery_jgroups_cleanup["delegate_to"] == "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+    assert (
+        recovery_jgroups_cleanup["delegate_to"]
+        == "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+    )
     assert recovery_jgroups_cleanup["become"] is True
     assert recovery_jgroups_cleanup["become_user"] == "postgres"
     assert recovery_jgroups_cleanup["changed_when"] == (
         "'DELETE ' in (keycloak_startup_probe_recovery_jgroups_cleanup.stdout | default(''))"
     )
     assert (
-        "docker compose --file \"{{ keycloak_compose_file }}\" up -d --force-recreate --no-deps keycloak"
+        'docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak'
         in recovery_recreate["ansible.builtin.shell"]
     )
     assert recovery_readiness_task["ansible.builtin.uri"]["return_content"] is True
@@ -664,17 +722,22 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
 def test_admin_client_repair_paths_use_refreshable_credentials() -> None:
     tasks = load_tasks()
     bootstrap_include = next(
-        task for task in tasks if task.get("name") == "Reconcile the repo-managed Keycloak admin client using the bootstrap admin fallback credentials"
+        task
+        for task in tasks
+        if task.get("name")
+        == "Reconcile the repo-managed Keycloak admin client using the bootstrap admin fallback credentials"
     )
     admin_live_secret_include = next(
         task
         for task in tasks
-        if task.get("name") == "Reconcile the repo-managed Keycloak admin client using the live PostgreSQL-backed secret"
+        if task.get("name")
+        == "Reconcile the repo-managed Keycloak admin client using the live PostgreSQL-backed secret"
     )
     recovery_include = next(
         task
         for task in tasks
-        if task.get("name") == "Reconcile the repo-managed Keycloak admin client using the temporary recovery admin service credentials"
+        if task.get("name")
+        == "Reconcile the repo-managed Keycloak admin client using the temporary recovery admin service credentials"
     )
     recovery_live_secret_query = next(
         task
@@ -734,17 +797,21 @@ def test_admin_client_repair_paths_use_refreshable_credentials() -> None:
 def test_reconcile_admin_client_accepts_refreshable_auth_inputs() -> None:
     tasks = load_admin_client_tasks()
     client_task = next(
-        task for task in tasks if task.get("name") == "Ensure the repo-managed Keycloak admin client exists in the master realm"
+        task
+        for task in tasks
+        if task.get("name") == "Ensure the repo-managed Keycloak admin client exists in the master realm"
     )
     post_reconcile_secret_task = next(
         task
         for task in tasks
-        if task.get("name") == "Record the auth client secret that should work after the admin client secret is reconciled"
+        if task.get("name")
+        == "Record the auth client secret that should work after the admin client secret is reconciled"
     )
     role_task = next(
         task
         for task in tasks
-        if task.get("name") == "Ensure the repo-managed Keycloak admin client service account has the master admin composite realm role"
+        if task.get("name")
+        == "Ensure the repo-managed Keycloak admin client service account has the master admin composite realm role"
     )
     assert client_task["community.general.keycloak_client"]["full_scope_allowed"] is True
     assert "client_id" not in role_task["community.general.keycloak_user_rolemapping"]
@@ -753,7 +820,9 @@ def test_reconcile_admin_client_accepts_refreshable_auth_inputs() -> None:
     assert client_module_args["auth_keycloak_url"] == "{{ keycloak_local_admin_url }}"
     assert client_module_args["auth_realm"] == "{{ keycloak_admin_bootstrap_auth_realm | default(omit) }}"
     assert client_module_args["auth_client_id"] == "{{ keycloak_admin_bootstrap_auth_client_id | default(omit) }}"
-    assert client_module_args["auth_client_secret"] == "{{ keycloak_admin_bootstrap_auth_client_secret | default(omit) }}"
+    assert (
+        client_module_args["auth_client_secret"] == "{{ keycloak_admin_bootstrap_auth_client_secret | default(omit) }}"
+    )
     assert client_module_args["auth_username"] == "{{ keycloak_admin_bootstrap_auth_username | default(omit) }}"
     assert client_module_args["auth_password"] == "{{ keycloak_admin_bootstrap_auth_password | default(omit) }}"
     assert client_module_args["token"] == "{{ keycloak_admin_bootstrap_token | default(omit) }}"
@@ -860,14 +929,23 @@ def test_compose_template_joins_the_mail_platform_network() -> None:
 def test_role_manages_langfuse_client_secret() -> None:
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    langfuse_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Langfuse OAuth client exists")
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Langfuse client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Langfuse client secret to the control machine")
+    langfuse_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Langfuse OAuth client exists"
+    )
+    read_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the Langfuse client secret"
+    )
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Langfuse client secret to the control machine"
+    )
     assert langfuse_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_langfuse_client_id }}"
     assert langfuse_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_langfuse_root_url }}/api/auth/callback/keycloak"
     ]
-    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_langfuse_client_id }}"
+    assert (
+        read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"]
+        == "{{ keycloak_langfuse_client_id }}"
+    )
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_langfuse_client_secret_local_file }}"
 
 
@@ -875,23 +953,36 @@ def test_role_manages_directus_client_secret() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    directus_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Directus OAuth client exists")
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Directus client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Directus client secret to the control machine")
+    directus_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Directus OAuth client exists"
+    )
+    read_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the Directus client secret"
+    )
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Directus client secret to the control machine"
+    )
 
     assert defaults["keycloak_directus_client_id"] == "directus"
-    assert defaults["keycloak_directus_client_secret_local_file"].endswith("/.local/keycloak/directus-client-secret.txt")
+    assert defaults["keycloak_directus_client_secret_local_file"].endswith(
+        "/.local/keycloak/directus-client-secret.txt"
+    )
     assert defaults["keycloak_directus_root_url"] == "https://data.lv3.org"
     assert directus_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_directus_client_id }}"
     assert directus_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_directus_root_url }}/auth/login/keycloak/callback"
     ]
-    assert directus_client_task["community.general.keycloak_client"]["web_origins"] == ["{{ keycloak_directus_root_url }}"]
+    assert directus_client_task["community.general.keycloak_client"]["web_origins"] == [
+        "{{ keycloak_directus_root_url }}"
+    ]
     directus_mapper = directus_client_task["community.general.keycloak_client"]["protocol_mappers"][0]
     assert directus_mapper["name"] == "groups"
     assert directus_mapper["config"]["claim.name"] == "groups"
     assert directus_mapper["config"]["full.path"] == "true"
-    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_directus_client_id }}"
+    assert (
+        read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"]
+        == "{{ keycloak_directus_client_id }}"
+    )
     assert read_secret_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
     assert read_secret_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
     assert read_secret_task["until"] == "keycloak_directus_client_secret_info is succeeded"
@@ -902,16 +993,30 @@ def test_role_manages_outline_client_secret() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    grafana_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Grafana OAuth client exists")
+    grafana_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Grafana OAuth client exists"
+    )
     ops_portal_client_task = next(
         task for task in realm_block["block"] if task.get("name") == "Ensure the operations portal OAuth client exists"
     )
-    grist_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Grist OAuth client exists")
-    outline_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Outline OAuth client exists")
-    read_grist_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Grist client secret")
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Outline client secret")
-    mirror_grist_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Grist client secret to the control machine")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Outline client secret to the control machine")
+    grist_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Grist OAuth client exists"
+    )
+    outline_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Outline OAuth client exists"
+    )
+    read_grist_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the Grist client secret"
+    )
+    read_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the Outline client secret"
+    )
+    mirror_grist_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Grist client secret to the control machine"
+    )
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Outline client secret to the control machine"
+    )
     assert defaults["keycloak_grist_client_id"] == "grist"
     assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
     assert defaults["keycloak_grist_root_url"] == "https://grist.lv3.org"
@@ -938,9 +1043,15 @@ def test_role_manages_outline_client_secret() -> None:
     assert outline_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_outline_post_logout_redirect_uris }}"
     )
-    assert read_grist_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_grist_client_id }}"
+    assert (
+        read_grist_secret_task["community.general.keycloak_clientsecret_info"]["client_id"]
+        == "{{ keycloak_grist_client_id }}"
+    )
     assert mirror_grist_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_grist_client_secret_local_file }}"
-    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_outline_client_id }}"
+    assert (
+        read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"]
+        == "{{ keycloak_outline_client_id }}"
+    )
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_client_secret_local_file }}"
 
 
@@ -951,20 +1062,31 @@ def test_role_manages_paperless_client_secret() -> None:
     paperless_client_task = next(
         task for task in realm_block["block"] if task.get("name") == "Ensure the Paperless OAuth client exists"
     )
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Paperless client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Paperless client secret to the control machine")
+    read_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the Paperless client secret"
+    )
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Paperless client secret to the control machine"
+    )
 
     assert defaults["keycloak_paperless_client_id"] == "paperless"
-    assert defaults["keycloak_paperless_client_secret_local_file"].endswith("/.local/keycloak/paperless-client-secret.txt")
+    assert defaults["keycloak_paperless_client_secret_local_file"].endswith(
+        "/.local/keycloak/paperless-client-secret.txt"
+    )
     assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
-    assert paperless_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_paperless_client_id }}"
+    assert (
+        paperless_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_paperless_client_id }}"
+    )
     assert paperless_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_paperless_root_url }}/accounts/oidc/keycloak/login/callback/"
     ]
     assert paperless_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_paperless_post_logout_redirect_uris }}"
     )
-    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_paperless_client_id }}"
+    assert (
+        read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"]
+        == "{{ keycloak_paperless_client_id }}"
+    )
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_paperless_client_secret_local_file }}"
 
 
@@ -975,11 +1097,17 @@ def test_role_manages_superset_client_secret() -> None:
     superset_client_task = next(
         task for task in realm_block["block"] if task.get("name") == "Ensure the Superset OAuth client exists"
     )
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Superset client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Superset client secret to the control machine")
+    read_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the Superset client secret"
+    )
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Superset client secret to the control machine"
+    )
 
     assert defaults["keycloak_superset_client_id"] == "superset"
-    assert defaults["keycloak_superset_client_secret_local_file"].endswith("/.local/keycloak/superset-client-secret.txt")
+    assert defaults["keycloak_superset_client_secret_local_file"].endswith(
+        "/.local/keycloak/superset-client-secret.txt"
+    )
     assert defaults["keycloak_superset_root_url"] == "https://bi.lv3.org"
     assert superset_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_superset_client_id }}"
     assert superset_client_task["community.general.keycloak_client"]["redirect_uris"] == [
@@ -988,12 +1116,17 @@ def test_role_manages_superset_client_secret() -> None:
     assert superset_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_superset_post_logout_redirect_uris }}"
     )
-    assert superset_client_task["community.general.keycloak_client"]["web_origins"] == ["{{ keycloak_superset_root_url }}"]
+    assert superset_client_task["community.general.keycloak_client"]["web_origins"] == [
+        "{{ keycloak_superset_root_url }}"
+    ]
     superset_mapper = superset_client_task["community.general.keycloak_client"]["protocol_mappers"][0]
     assert superset_mapper["name"] == "groups"
     assert superset_mapper["config"]["claim.name"] == "groups"
     assert superset_mapper["config"]["full.path"] == "true"
-    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_superset_client_id }}"
+    assert (
+        read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"]
+        == "{{ keycloak_superset_client_id }}"
+    )
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_superset_client_secret_local_file }}"
 
 
@@ -1004,16 +1137,25 @@ def test_role_manages_serverclaw_client_secret() -> None:
     serverclaw_client_task = next(
         task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw OAuth client exists"
     )
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the ServerClaw client secret to the control machine")
+    read_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw client secret"
+    )
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the ServerClaw client secret to the control machine"
+    )
     assert defaults["keycloak_serverclaw_client_id"] == "serverclaw"
-    assert defaults["keycloak_serverclaw_client_secret_local_file"].endswith("/.local/keycloak/serverclaw-client-secret.txt")
+    assert defaults["keycloak_serverclaw_client_secret_local_file"].endswith(
+        "/.local/keycloak/serverclaw-client-secret.txt"
+    )
     assert defaults["keycloak_serverclaw_root_url"] == "https://chat.lv3.org"
     assert defaults["keycloak_serverclaw_post_logout_redirect_uris"] == [
         "{{ keycloak_serverclaw_root_url }}",
         "{{ keycloak_serverclaw_root_url }}/",
     ]
-    assert serverclaw_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_client_id }}"
+    assert (
+        serverclaw_client_task["community.general.keycloak_client"]["client_id"]
+        == "{{ keycloak_serverclaw_client_id }}"
+    )
     assert serverclaw_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_serverclaw_root_url }}/oauth/oidc/callback"
     ]
@@ -1031,17 +1173,32 @@ def test_serverclaw_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
     readiness_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak readiness endpoint")
     admin_api_task = next(task for task in tasks if task.get("name") == "Wait for the Keycloak admin API to answer")
     token_probe_task = next(
-        task for task in tasks if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
+        task
+        for task in tasks
+        if task.get("name") == "Wait for the repo-managed Keycloak admin client token endpoint to succeed"
     )
-    realm_block = next(task for task in tasks if task.get("name") == "Converge the dedicated ServerClaw Keycloak client")
+    realm_block = next(
+        task for task in tasks if task.get("name") == "Converge the dedicated ServerClaw Keycloak client"
+    )
     serverclaw_client_task = next(
         task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw OAuth client exists"
     )
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the ServerClaw client secret to the control machine")
-    assert readiness_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
-    assert admin_api_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the ServerClaw client secret to the control machine"
+    )
+    assert (
+        readiness_task["ansible.builtin.uri"]["url"]
+        == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+    )
+    assert (
+        admin_api_task["ansible.builtin.uri"]["url"]
+        == "{{ keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+    )
     assert token_probe_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_admin_client_id }}"
-    assert serverclaw_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_client_id }}"
+    assert (
+        serverclaw_client_task["community.general.keycloak_client"]["client_id"]
+        == "{{ keycloak_serverclaw_client_id }}"
+    )
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_client_secret_local_file }}"
 
 
@@ -1049,11 +1206,19 @@ def test_role_manages_the_outline_automation_identity() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
-    password_generation_task = next(task for task in tasks if task.get("name") == "Generate the Outline automation password")
-    password_mirror_task = next(task for task in tasks if task.get("name") == "Mirror the Outline automation password to the control machine")
-    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    password_generation_task = next(
+        task for task in tasks if task.get("name") == "Generate the Outline automation password"
+    )
+    password_mirror_task = next(
+        task for task in tasks if task.get("name") == "Mirror the Outline automation password to the control machine"
+    )
+    repo_user_reconciliation = next(
+        task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users"
+    )
     include_task = next(
-        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+        task
+        for task in repo_user_reconciliation["block"]
+        if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
     )
     recovery_restart_task = next(
         task
@@ -1069,7 +1234,8 @@ def test_role_manages_the_outline_automation_identity() -> None:
     recovery_admin_probe_task = next(
         task
         for task in repo_user_reconciliation["rescue"]
-        if task.get("name") == "Wait for an authenticated Keycloak admin realm query after repo-managed user reconciliation recovery"
+        if task.get("name")
+        == "Wait for an authenticated Keycloak admin realm query after repo-managed user reconciliation recovery"
     )
     recovery_retry_task = next(
         task
@@ -1077,7 +1243,9 @@ def test_role_manages_the_outline_automation_identity() -> None:
         if task.get("name") == "Retry the repo-managed Keycloak user reconciliation tasks after recovery"
     )
     admin_token_task = next(
-        task for task in repo_user_tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
+        task
+        for task in repo_user_tasks
+        if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
     )
     platform_group_lookup_task = next(
         task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
@@ -1089,7 +1257,9 @@ def test_role_manages_the_outline_automation_identity() -> None:
         task for task in repo_user_tasks if task.get("name") == "Reset the named operator password in Keycloak"
     )
     automation_create_task = next(
-        task for task in repo_user_tasks if task.get("name") == "Create the Outline automation user in Keycloak when missing"
+        task
+        for task in repo_user_tasks
+        if task.get("name") == "Create the Outline automation user in Keycloak when missing"
     )
     automation_user_task = next(
         task for task in repo_user_tasks if task.get("name") == "Update the Outline automation user profile in Keycloak"
@@ -1098,7 +1268,9 @@ def test_role_manages_the_outline_automation_identity() -> None:
         task for task in repo_user_tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
     )
     assert password_generation_task["ansible.builtin.shell"].count("openssl rand -base64 24") == 1
-    assert password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
+    assert (
+        password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
+    )
     assert defaults["keycloak_repo_user_reconciliation_retries"] == 24
     assert defaults["keycloak_repo_user_reconciliation_delay"] == 5
     assert defaults["keycloak_admin_connection_timeout"] == 60
@@ -1148,7 +1320,9 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert automation_create_task["retries"] == "{{ keycloak_repo_user_reconciliation_retries }}"
     assert automation_create_task["delay"] == "{{ keycloak_repo_user_reconciliation_delay }}"
     assert automation_create_task["ansible.builtin.uri"]["status_code"] == [201, 204, 409]
-    assert automation_user_task["ansible.builtin.uri"]["body"]["username"] == "{{ keycloak_outline_automation_username }}"
+    assert (
+        automation_user_task["ansible.builtin.uri"]["body"]["username"] == "{{ keycloak_outline_automation_username }}"
+    )
     assert automation_user_task["ansible.builtin.uri"]["body"]["requiredActions"] == []
     assert automation_password_task["ansible.builtin.uri"]["body"]["temporary"] is False
 
@@ -1156,9 +1330,13 @@ def test_role_manages_the_outline_automation_identity() -> None:
 def test_repo_managed_user_reconciliation_is_delegated_to_the_include_file() -> None:
     tasks = load_tasks()
     repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
-    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    repo_user_reconciliation = next(
+        task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users"
+    )
     include_task = next(
-        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+        task
+        for task in repo_user_reconciliation["block"]
+        if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
     )
     retry_task = next(
         task
@@ -1173,7 +1351,9 @@ def test_repo_managed_user_reconciliation_is_delegated_to_the_include_file() -> 
     platform_group_lookup_task = next(
         task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
     )
-    operator_lookup_task = next(task for task in repo_user_tasks if task.get("name") == "Look up the named operator in Keycloak")
+    operator_lookup_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Look up the named operator in Keycloak"
+    )
     outline_lookup_task = next(
         task for task in repo_user_tasks if task.get("name") == "Look up the Outline automation user in Keycloak"
     )
@@ -1209,37 +1389,54 @@ def test_role_manages_serverclaw_runtime_client_and_removes_the_stale_operator_d
         if task.get("name") == "Remove the stale ServerClaw operator CLI client secret from the control machine"
     )
     mirror_runtime_secret_task = next(
-        task for task in tasks if task.get("name") == "Mirror the ServerClaw runtime client secret to the control machine"
+        task
+        for task in tasks
+        if task.get("name") == "Mirror the ServerClaw runtime client secret to the control machine"
     )
     runtime_token_task = next(
         task for task in tasks if task.get("name") == "Request the ServerClaw runtime client-credentials token"
     )
-    assert_task = next(task for task in tasks if task.get("name") == "Assert Keycloak endpoints and automation credentials are working")
+    assert_task = next(
+        task for task in tasks if task.get("name") == "Assert Keycloak endpoints and automation credentials are working"
+    )
 
     assert remove_operator_client_task["community.general.keycloak_client"]["client_id"] == "serverclaw-operator-cli"
     assert remove_operator_client_task["community.general.keycloak_client"]["state"] == "absent"
-    assert runtime_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
+    assert (
+        runtime_client_task["community.general.keycloak_client"]["client_id"]
+        == "{{ keycloak_serverclaw_runtime_client_id }}"
+    )
     assert runtime_client_task["community.general.keycloak_client"]["service_accounts_enabled"] is True
     assert read_runtime_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == (
         "{{ keycloak_serverclaw_runtime_client_id }}"
     )
     assert remove_operator_secret_task["ansible.builtin.file"]["state"] == "absent"
-    assert mirror_runtime_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_runtime_client_secret_local_file }}"
+    assert (
+        mirror_runtime_secret_task["ansible.builtin.copy"]["dest"]
+        == "{{ keycloak_serverclaw_runtime_client_secret_local_file }}"
+    )
     assert runtime_token_task["ansible.builtin.uri"]["body"]["grant_type"] == "client_credentials"
-    assert runtime_token_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
+    assert (
+        runtime_token_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
+    )
     assert "keycloak_serverclaw_runtime_token.json.access_token" in str(assert_task["ansible.builtin.assert"]["that"])
-
 
 
 def test_role_manages_glitchtip_client_secret() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the GlitchTip client secret")
-    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the GlitchTip client secret to the control machine")
+    read_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the GlitchTip client secret"
+    )
+    mirror_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the GlitchTip client secret to the control machine"
+    )
 
     assert defaults["keycloak_glitchtip_client_id"] == "glitchtip"
-    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith("/.local/keycloak/glitchtip-client-secret.txt")
+    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith(
+        "/.local/keycloak/glitchtip-client-secret.txt"
+    )
     assert defaults["keycloak_glitchtip_root_url"] == "https://errors.lv3.org"
     assert defaults["keycloak_glitchtip_post_logout_redirect_uris"] == [
         "{{ keycloak_glitchtip_root_url }}",

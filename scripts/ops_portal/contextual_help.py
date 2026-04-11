@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
+from collections.abc import Mapping
 
 
 GLOSSARY: dict[str, dict[str, str]] = {
@@ -357,7 +358,9 @@ def build_docs_page_help(
     escalation_backout = (
         "If this page leaves any doubt, stop before making live changes and return to the owning runbook or ops portal."
     )
-    escalation_runbook = _docs_root_reference("Platform Operations Portal", "runbooks/platform-operations-portal.md", "runbook")
+    escalation_runbook = _docs_root_reference(
+        "Platform Operations Portal", "runbooks/platform-operations-portal.md", "runbook"
+    )
     audience = ["Operators", "Contributors"]
 
     if target_path == Path("index.md"):
@@ -367,13 +370,17 @@ def build_docs_page_help(
     elif target_path.parts[:1] == ("services",):
         audience = ["Operators", "Administrators"]
         if target_path.name == "index.md":
-            summary = "Use this directory to find the canonical service page before changing runtime state or publication."
+            summary = (
+                "Use this directory to find the canonical service page before changing runtime state or publication."
+            )
             glossary_terms = ("Exposure", "Recovery tier", "Live apply")
             references.insert(0, _docs_root_reference("Port Reference", "reference/ports.md", "reference"))
             references.insert(1, _docs_root_reference("Subdomain Reference", "reference/subdomains.md", "reference"))
         else:
             service_name = _service_name(service, title)
-            summary = f"Use this page to understand how {service_name} is published, where it runs, and which docs govern it."
+            summary = (
+                f"Use this page to understand how {service_name} is published, where it runs, and which docs govern it."
+            )
             glossary_terms = ("Exposure", "Recovery tier", "Live apply", "Handoff")
             references.insert(0, _docs_root_reference("Port Reference", "reference/ports.md", "reference"))
             references.insert(1, _docs_root_reference("Subdomain Reference", "reference/subdomains.md", "reference"))
@@ -390,9 +397,7 @@ def build_docs_page_help(
         summary = "This page is a canonical operator procedure. Follow it instead of inventing shell steps from memory."
         glossary_terms = ("Live apply", "Handoff")
         audience = ["Operators"]
-        escalation_backout = (
-            "Stop at the last confirmed safe step boundary, keep the current system state unchanged, and resume only with the owning runbook or a handoff."
-        )
+        escalation_backout = "Stop at the last confirmed safe step boundary, keep the current system state unchanged, and resume only with the owning runbook or a handoff."
     elif target_path.parts[:2] == ("architecture", "decisions"):
         summary = "This page explains the architectural decision and its implementation status. Treat it as guidance, not as automatic approval to change live state."
         glossary_terms = ("Implementation Status", "Platform version", "Handoff")
@@ -418,9 +423,13 @@ def build_docs_page_help(
         glossary_terms = ("Live apply", "Handoff")
         references.insert(0, _docs_root_reference("Services Directory", "services/index.md", "reference"))
     elif target_path.parts[:1] == ("releases",) or target_path == Path("changelog.md"):
-        summary = "Use this page to separate merged repository truth from unreleased notes and historical rollout evidence."
+        summary = (
+            "Use this page to separate merged repository truth from unreleased notes and historical rollout evidence."
+        )
         glossary_terms = ("Live apply", "Promotion", "Handoff")
-        references.insert(0, _docs_root_reference("Deployment History Portal", "runbooks/deployment-history-portal.md", "runbook"))
+        references.insert(
+            0, _docs_root_reference("Deployment History Portal", "runbooks/deployment-history-portal.md", "runbook")
+        )
 
     return {
         "title": "Contextual Help",

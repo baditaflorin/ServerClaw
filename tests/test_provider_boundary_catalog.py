@@ -38,4 +38,4 @@ def test_validation_paths_run_provider_boundary_catalog_check() -> None:
     validate_script = (REPO_ROOT / "scripts" / "validate_repo.sh").read_text(encoding="utf-8")
 
     assert "scripts/provider_boundary_catalog.py --validate" in validate_gate
-    assert "scripts/provider_boundary_catalog.py\" --validate" in validate_script
+    assert 'scripts/provider_boundary_catalog.py" --validate' in validate_script

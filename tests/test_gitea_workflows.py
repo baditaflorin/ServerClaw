@@ -17,17 +17,12 @@ PYTHON_RUNNER_IMAGE = (
     "@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff"
 )
 SHALLOW_MANUAL_CHECKOUT_FETCH = (
-    'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
-    'fetch --depth=1 origin "${WORKFLOW_REF}"'
+    'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"'
 )
 VALIDATE_CHECKOUT_FETCH = (
-    'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
-    'fetch origin "${WORKFLOW_REF}"'
+    'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin "${WORKFLOW_REF}"'
 )
-VALIDATE_MAIN_FETCH = (
-    'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
-    "fetch origin main"
-)
+VALIDATE_MAIN_FETCH = 'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin main'
 
 
 def extract_run_block(workflow: str, *, step_name: str) -> str:
@@ -75,13 +70,16 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
     assert "cgroup_container_id" in workflow
     assert 'inspect "${candidate}"' in workflow
-    assert 'name=WORKFLOW-validate_JOB-validate' in workflow
+    assert "name=WORKFLOW-validate_JOB-validate" in workflow
     assert "workspace-host.path" in workflow
     assert "Bundle validation artifacts" in workflow
     assert '--docker-binary "${DOCKER_BIN}"' in workflow
     assert 'LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"' in workflow
     assert "Run k6 smoke gate" in workflow
-    assert 'make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service keycloak --service openfga"' in workflow
+    assert (
+        'make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service keycloak --service openfga"'
+        in workflow
+    )
     assert "receipts/k6/raw" in workflow
     assert "gitea-validation-receipts.tar.gz" in workflow
 
@@ -110,23 +108,23 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
     assert "cgroup_container_id" in workflow
     assert 'inspect "${candidate}"' in workflow
-    assert 'name=WORKFLOW-renovate_JOB-renovate' in workflow
-    assert '/var/run/lv3/renovate' in workflow
+    assert "name=WORKFLOW-renovate_JOB-renovate" in workflow
+    assert "/var/run/lv3/renovate" in workflow
     assert ".tmp/docker-bin.path" in workflow
     assert 'docker_bin="$(ensure_docker_bin)"' not in workflow
     assert workflow.count("ensure_docker_bin") >= 8
     assert workflow.count("resolve_docker_bin") >= 8
     assert 'test -d "${workspace_host_path}"' not in workflow
     assert 'test -s "${bootstrap_host_dir}/renovate.env"' not in workflow
-    assert '.tmp/workspace-host.path' in workflow
-    assert '.tmp/bootstrap-host.path' in workflow
+    assert ".tmp/workspace-host.path" in workflow
+    assert ".tmp/bootstrap-host.path" in workflow
     assert 'renovate_add_host_arg=""' in workflow
-    assert 'RENOVATE_GIT_CLONE_HOST:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_HOST_ADDRESS:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_HOST_PORT:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_TARGET_HOST:-' in workflow
-    assert 'RENOVATE_GIT_CLONE_TARGET_PORT:-' in workflow
-    assert '--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}' in workflow
+    assert "RENOVATE_GIT_CLONE_HOST:-" in workflow
+    assert "RENOVATE_GIT_CLONE_HOST_ADDRESS:-" in workflow
+    assert "RENOVATE_GIT_CLONE_HOST_PORT:-" in workflow
+    assert "RENOVATE_GIT_CLONE_TARGET_HOST:-" in workflow
+    assert "RENOVATE_GIT_CLONE_TARGET_PORT:-" in workflow
+    assert "--add-host=${RENOVATE_GIT_CLONE_HOST}:${RENOVATE_GIT_CLONE_HOST_ADDRESS}" in workflow
     assert "cleanup_clone_proxy()" in workflow
     assert "python3 - <<'PY' &" in workflow
     assert "ThreadedTCPServer" in workflow
@@ -134,7 +132,7 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert "destination.shutdown(socket.SHUT_WR)" in workflow
     assert "select.select" not in workflow
     assert "BlockingIOError" not in workflow
-    assert '-e RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json \\' in workflow
+    assert "-e RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json \\" in workflow
     assert "Renovate clone relay did not become ready." in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert '"${docker_bin}" run --rm \\' in workflow

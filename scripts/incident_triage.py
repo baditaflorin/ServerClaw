@@ -54,11 +54,11 @@ TEMPLATE_PATTERN = re.compile(r"{{\s*([^}]+?)\s*}}")
 
 
 def utc_now() -> dt.datetime:
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def isoformat(value: dt.datetime) -> str:
-    return value.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return value.astimezone(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def parse_timestamp(value: str | None) -> dt.datetime | None:
@@ -73,12 +73,12 @@ def parse_timestamp(value: str | None) -> dt.datetime | None:
         parsed = dt.datetime.fromisoformat(normalized)
     except ValueError:
         try:
-            parsed = dt.datetime.combine(dt.date.fromisoformat(value), dt.time(0, tzinfo=dt.timezone.utc))
+            parsed = dt.datetime.combine(dt.date.fromisoformat(value), dt.time(0, tzinfo=dt.UTC))
         except ValueError:
             return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=dt.timezone.utc)
-    return parsed.astimezone(dt.timezone.utc)
+        parsed = parsed.replace(tzinfo=dt.UTC)
+    return parsed.astimezone(dt.UTC)
 
 
 def bool_from_value(value: Any) -> bool:
@@ -277,7 +277,9 @@ def resolve_status(alert_payload: dict[str, Any]) -> str:
     return "firing"
 
 
-def load_recent_deployments(service: dict[str, Any], *, lookback_hours: int = DEFAULT_DEPLOYMENT_LOOKBACK_HOURS) -> list[dict[str, Any]]:
+def load_recent_deployments(
+    service: dict[str, Any], *, lookback_hours: int = DEFAULT_DEPLOYMENT_LOOKBACK_HOURS
+) -> list[dict[str, Any]]:
     if not LIVE_APPLY_RECEIPTS_DIR.exists():
         return []
     cutoff = utc_now() - dt.timedelta(hours=lookback_hours)
@@ -307,7 +309,9 @@ def load_recent_deployments(service: dict[str, Any], *, lookback_hours: int = DE
     return deployments
 
 
-def load_recent_mutation_events(service: dict[str, Any], *, lookback_hours: int = DEFAULT_MUTATION_LOOKBACK_HOURS) -> list[dict[str, Any]]:
+def load_recent_mutation_events(
+    service: dict[str, Any], *, lookback_hours: int = DEFAULT_MUTATION_LOOKBACK_HOURS
+) -> list[dict[str, Any]]:
     sink_path = resolve_local_sink_path(None)
     if sink_path is None or not sink_path.exists():
         return []
@@ -502,11 +506,11 @@ def extract_signals(context: dict[str, Any]) -> dict[str, Any]:
     mutation_events = context["recent_mutations"]
     certificate = context["certificate"]
 
-    unhealthy_upstreams = [
-        item for item in dependencies["upstream"] if bool_from_value(item.get("healthy")) is False
-    ]
+    unhealthy_upstreams = [item for item in dependencies["upstream"] if bool_from_value(item.get("healthy")) is False]
     degraded_downstreams = [
-        item for item in dependencies["downstream"] if bool_from_value(item.get("affected")) or bool_from_value(item.get("healthy")) is False
+        item
+        for item in dependencies["downstream"]
+        if bool_from_value(item.get("affected")) or bool_from_value(item.get("healthy")) is False
     ]
     deployment_actor = recent_deployments[0]["actor"] if recent_deployments else "unknown"
 
@@ -538,7 +542,11 @@ def extract_signals(context: dict[str, Any]) -> dict[str, Any]:
         "recent_drift_detected": recent_drift_detected,
     }
 
-    for key, value in alert_payload.get("signal_overrides", {}).items() if isinstance(alert_payload.get("signal_overrides"), dict) else []:
+    for key, value in (
+        alert_payload.get("signal_overrides", {}).items()
+        if isinstance(alert_payload.get("signal_overrides"), dict)
+        else []
+    ):
         signals[key] = value
 
     return signals
@@ -644,7 +652,9 @@ def render_templates(value: Any, values: dict[str, Any]) -> Any:
     return value
 
 
-def evaluate_rules(rule_payload: dict[str, Any], context: dict[str, Any], signals: dict[str, Any]) -> list[dict[str, Any]]:
+def evaluate_rules(
+    rule_payload: dict[str, Any], context: dict[str, Any], signals: dict[str, Any]
+) -> list[dict[str, Any]]:
     rendered_values = template_context(context, signals)
     hypotheses: list[dict[str, Any]] = []
     for rule in rule_payload["rules"]:
@@ -718,7 +728,11 @@ def execute_auto_check(
         }
     if check_type == "log_query":
         query = str(check.get("query", "")).lower()
-        matched_lines = [entry.get("line", "") for entry in context["logs"] if all(token in str(entry.get("line", "")).lower() for token in query.replace('"', "").split() if token)]
+        matched_lines = [
+            entry.get("line", "")
+            for entry in context["logs"]
+            if all(token in str(entry.get("line", "")).lower() for token in query.replace('"', "").split() if token)
+        ]
         return {
             "status": "executed",
             "type": check_type,
@@ -751,7 +765,7 @@ def derive_web_search_query(context: dict[str, Any]) -> str | None:
         return f'site:github.com OR site:stackoverflow.com "{line[:180]}"'
 
     if context["alert_name"] != "unknown_alert":
-        return f'{context["service_id"]} {context["alert_name"]}'
+        return f"{context['service_id']} {context['alert_name']}"
     return None
 
 
@@ -760,10 +774,7 @@ def search_web_references(query: str, *, max_results: int = 3) -> list[dict[str,
         results = WebSearchClient().search(query, max_results=max_results)
     except Exception:
         return []
-    return [
-        {"title": result.title, "url": result.url, "content": result.content}
-        for result in results
-    ]
+    return [{"title": result.title, "url": result.url, "content": result.content} for result in results]
 
 
 def build_context(alert_payload: dict[str, Any], *, loki_query_url: str | None = None) -> dict[str, Any]:
@@ -946,8 +957,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--alert-name", default="manual_triage", help="Alert name for ad hoc triage.")
     parser.add_argument("--status", default="firing", help="Alert status for ad hoc triage.")
     parser.add_argument("--signal", action="append", default=[], help="Signal override in key=value format.")
-    parser.add_argument("--emit", action="store_true", help="Write the triage report, emit mutation audit, and post webhook summary.")
-    parser.add_argument("--report-dir", type=Path, default=DEFAULT_REPORT_DIR, help="Directory where report JSON files are written.")
+    parser.add_argument(
+        "--emit", action="store_true", help="Write the triage report, emit mutation audit, and post webhook summary."
+    )
+    parser.add_argument(
+        "--report-dir", type=Path, default=DEFAULT_REPORT_DIR, help="Directory where report JSON files are written."
+    )
     parser.add_argument("--mattermost-webhook-url", help="Optional Mattermost incoming webhook URL.")
     parser.add_argument("--loki-query-url", help="Optional Loki query_range URL override.")
     parser.add_argument("--rules-path", type=Path, default=RULES_PATH, help="Override the triage rule table path.")
@@ -976,7 +991,11 @@ def main(argv: list[str] | None = None) -> int:
         signal_overrides = parse_signal_overrides(args.signal)
         if signal_overrides:
             alert_payload["signal_overrides"] = {
-                **(alert_payload.get("signal_overrides", {}) if isinstance(alert_payload.get("signal_overrides"), dict) else {}),
+                **(
+                    alert_payload.get("signal_overrides", {})
+                    if isinstance(alert_payload.get("signal_overrides"), dict)
+                    else {}
+                ),
                 **signal_overrides,
             }
         report = build_report(

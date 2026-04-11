@@ -4,6 +4,7 @@ tests/test_operator_tool_contract.py
 Contract compliance tests for ADR 0343 — Operator Tool Interface Contract.
 All tests use only stdlib + pytest (no extra dependencies).
 """
+
 from __future__ import annotations
 
 import json
@@ -27,6 +28,7 @@ import controller_automation_toolkit as cat
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _write_json(tmp_path: Path, data: dict, filename: str = "auth.json") -> Path:
     p = tmp_path / filename
     p.write_text(json.dumps(data), encoding="utf-8")
@@ -36,6 +38,7 @@ def _write_json(tmp_path: Path, data: dict, filename: str = "auth.json") -> Path
 # ---------------------------------------------------------------------------
 # load_proxmox_auth
 # ---------------------------------------------------------------------------
+
 
 class TestLoadProxmoxAuth:
     def test_good_file(self, tmp_path):
@@ -76,6 +79,7 @@ class TestLoadProxmoxAuth:
 # tool_output
 # ---------------------------------------------------------------------------
 
+
 class TestToolOutput:
     def test_writes_json_with_status(self, capsys):
         cat.tool_output("changed", key="value", count=3)
@@ -103,6 +107,7 @@ class TestToolOutput:
 # tool_exit_noop
 # ---------------------------------------------------------------------------
 
+
 class TestToolExitNoop:
     def test_exits_with_code_2(self, capsys):
         with pytest.raises(SystemExit) as exc_info:
@@ -129,6 +134,7 @@ class TestToolExitNoop:
 # ---------------------------------------------------------------------------
 # tool_exit_error
 # ---------------------------------------------------------------------------
+
 
 class TestToolExitError:
     def test_exits_with_code_1(self, capsys):
@@ -163,6 +169,7 @@ class TestToolExitError:
 # ---------------------------------------------------------------------------
 # load_topology_snapshot
 # ---------------------------------------------------------------------------
+
 
 class TestLoadTopologySnapshot:
     def _make_snapshot(self, tmp_path: Path) -> Path:
@@ -211,6 +218,7 @@ class TestLoadTopologySnapshot:
 # proxmox_guest_exec
 # ---------------------------------------------------------------------------
 
+
 class TestProxmoxGuestExec:
     class _FakeClient:
         """Minimal fake ProxmoxClient for testing proxmox_guest_exec."""
@@ -253,6 +261,7 @@ class TestProxmoxGuestExec:
 # woodpecker_tool — ADR 0343 load_auth compliance
 # ---------------------------------------------------------------------------
 
+
 class TestWoodpeckerToolContract:
     """Verify woodpecker_tool uses toolkit load_operator_auth (ADR 0343)."""
 
@@ -260,12 +269,14 @@ class TestWoodpeckerToolContract:
         """woodpecker_tool must not define its own load_auth."""
         import woodpecker_tool
         import inspect
+
         src = inspect.getsource(woodpecker_tool)
         assert "def load_auth" not in src, "woodpecker_tool must not define its own load_auth"
 
     def test_build_client_fails_on_missing_file(self, tmp_path):
         """build_client must exit 1 on missing auth file (via load_operator_auth)."""
         import woodpecker_tool
+
         with pytest.raises(SystemExit) as exc:
             woodpecker_tool.build_client(str(tmp_path / "nonexistent.json"))
         assert exc.value.code == 1
@@ -275,6 +286,7 @@ class TestWoodpeckerToolContract:
 # portainer_tool — ADR 0343 load_auth compliance
 # ---------------------------------------------------------------------------
 
+
 class TestPortainerToolContract:
     """Verify portainer_tool uses toolkit load_operator_auth (ADR 0343)."""
 
@@ -282,6 +294,7 @@ class TestPortainerToolContract:
         """portainer_tool must not define its own load_auth."""
         import portainer_tool
         import inspect
+
         src = inspect.getsource(portainer_tool)
         assert "def load_auth" not in src, "portainer_tool must not define its own load_auth"
 
@@ -289,6 +302,7 @@ class TestPortainerToolContract:
         """command_whoami must exit 1 on missing auth file (via load_operator_auth)."""
         import portainer_tool
         import argparse
+
         args = argparse.Namespace(auth_file=str(tmp_path / "nonexistent.json"))
         with pytest.raises(SystemExit) as exc:
             portainer_tool.command_whoami(args)
@@ -299,6 +313,7 @@ class TestPortainerToolContract:
 # plane_tool — ADR 0343 load_auth compliance
 # ---------------------------------------------------------------------------
 
+
 class TestPlaneToolContract:
     """Verify plane_tool uses toolkit load_operator_auth (ADR 0343)."""
 
@@ -306,12 +321,14 @@ class TestPlaneToolContract:
         """plane_tool must not define its own load_auth."""
         import plane_tool
         import inspect
+
         src = inspect.getsource(plane_tool)
         assert "def load_auth" not in src, "plane_tool must not define its own load_auth"
 
     def test_build_client_fails_on_missing_file(self, tmp_path):
         """build_client must exit 1 on missing auth file (via load_operator_auth)."""
         import plane_tool
+
         with pytest.raises(SystemExit) as exc:
             plane_tool.build_client(str(tmp_path / "nonexistent.json"))
         assert exc.value.code == 1
@@ -321,6 +338,7 @@ class TestPlaneToolContract:
 # semaphore_tool — ADR 0343 load_auth compliance
 # ---------------------------------------------------------------------------
 
+
 class TestSemaphoreToolContract:
     """Verify semaphore_tool uses toolkit load_operator_auth (ADR 0343)."""
 
@@ -328,12 +346,14 @@ class TestSemaphoreToolContract:
         """semaphore_tool must not define its own load_auth."""
         import semaphore_tool
         import inspect
+
         src = inspect.getsource(semaphore_tool)
         assert "def load_auth" not in src, "semaphore_tool must not define its own load_auth"
 
     def test_build_client_fails_on_missing_file(self, tmp_path):
         """build_client must exit 1 on missing auth file (via load_operator_auth)."""
         import semaphore_tool
+
         with pytest.raises(SystemExit) as exc:
             semaphore_tool.build_client(str(tmp_path / "nonexistent.json"))
         assert exc.value.code == 1
@@ -358,6 +378,7 @@ class TestUptimeKumaToolContract:
         """uptime_kuma_tool must not define its own load_auth_json."""
         import uptime_kuma_tool
         import inspect
+
         src = inspect.getsource(uptime_kuma_tool)
         assert "def load_auth_json" not in src, "uptime_kuma_tool must not define its own load_auth_json"
 
@@ -365,6 +386,7 @@ class TestUptimeKumaToolContract:
         """resolve_auth must exit 1 on missing auth file (via load_operator_auth)."""
         import uptime_kuma_tool
         import argparse
+
         args = argparse.Namespace(
             auth_file=str(tmp_path / "nonexistent.json"),
             base_url=None,

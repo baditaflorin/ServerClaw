@@ -275,7 +275,7 @@ def build_custom_css() -> str:
         "  -webkit-user-select: text !important;\n"
         "  user-select: text !important;\n"
         "}\n\n"
-        "a, button, input, [role=\"button\"] {\n"
+        'a, button, input, [role="button"] {\n'
         "  cursor: pointer;\n"
         "}\n"
     )
@@ -299,14 +299,26 @@ def write_outputs(output_dir: Path) -> None:
 
 def outputs_match(output_dir: Path) -> bool:
     expected = render_outputs()
-    return all((output_dir / name).exists() and (output_dir / name).read_text(encoding="utf-8") == content for name, content in expected.items())
+    return all(
+        (output_dir / name).exists() and (output_dir / name).read_text(encoding="utf-8") == content
+        for name, content in expected.items()
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate Homepage configuration from the canonical LV3 service catalogs.")
-    parser.add_argument("--output-dir", type=Path, required=True, help="Directory where Homepage config files will be written or checked.")
+    parser = argparse.ArgumentParser(
+        description="Generate Homepage configuration from the canonical LV3 service catalogs."
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory where Homepage config files will be written or checked.",
+    )
     parser.add_argument("--write", action="store_true", help="Write generated files to the output directory.")
-    parser.add_argument("--check", action="store_true", help="Fail if generated files differ from the current output directory.")
+    parser.add_argument(
+        "--check", action="store_true", help="Fail if generated files differ from the current output directory."
+    )
     args = parser.parse_args(argv)
 
     if not args.write and not args.check:
@@ -318,9 +330,11 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if outputs_match(args.output_dir):
             return 0
-        print(f"{args.output_dir} is stale; run scripts/generate_homepage_config.py --output-dir {args.output_dir} --write")
+        print(
+            f"{args.output_dir} is stale; run scripts/generate_homepage_config.py --output-dir {args.output_dir} --write"
+        )
         return 1
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"error: {exc}")
         return 1
 

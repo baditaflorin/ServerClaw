@@ -10,11 +10,13 @@ import re
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from controller_automation_toolkit import PYYAML_INSTALL_HINT, load_json, load_yaml, repo_path
 
 import sys
+
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -80,7 +82,9 @@ def validate_slo_catalog(
         catalog = require_mapping(service_catalog, str(SERVICE_CATALOG_PATH))
         known_services = {
             require_str(service.get("id"), f"config/service-capability-catalog.json.services[{index}].id")
-            for index, service in enumerate(require_list(catalog.get("services"), "config/service-capability-catalog.json.services"))
+            for index, service in enumerate(
+                require_list(catalog.get("services"), "config/service-capability-catalog.json.services")
+            )
             if isinstance(service, dict)
         }
 
@@ -170,7 +174,7 @@ def slo_success_expr(slo: dict[str, Any], window: str) -> str:
     threshold_seconds = float(slo["latency_threshold_ms"]) / 1000.0
     # Latency compliance evaluates a comparison expression, so Prometheus
     # requires subquery syntax instead of a plain range selector.
-    return f'avg_over_time((probe_duration_seconds{{{labels}}} < bool {threshold_seconds:g})[{window}:])'
+    return f"avg_over_time((probe_duration_seconds{{{labels}}} < bool {threshold_seconds:g})[{window}:])"
 
 
 def slo_metric_queries(slo: dict[str, Any]) -> dict[str, str]:
@@ -204,7 +208,7 @@ def format_budget_status(value: float | None) -> str:
 def prometheus_query_value(prometheus_url: str, expr: str, *, timeout: float = 5.0) -> float | None:
     query = urllib.parse.urlencode({"query": expr})
     request = urllib.request.Request(f"{prometheus_url}/api/v1/query?{query}", method="GET")
-    with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
+    with urllib.request.urlopen(request, timeout=timeout) as response:
         payload = json.loads(response.read().decode("utf-8"))
     if payload.get("status") != "success":
         raise ValueError(f"Prometheus query failed for expression: {expr}")
@@ -266,7 +270,9 @@ def summarize_k6_receipt(receipt: dict[str, Any], path: Path, *, repo_root: Path
     }
 
 
-def load_latest_k6_receipts(*, repo_root: Path, receipts_dir: Path | None = None) -> dict[str, dict[str, dict[str, Any]]]:
+def load_latest_k6_receipts(
+    *, repo_root: Path, receipts_dir: Path | None = None
+) -> dict[str, dict[str, dict[str, Any]]]:
     target_dir = receipts_dir or (repo_root / "receipts" / "k6")
     if not target_dir.exists():
         return {}
@@ -274,7 +280,7 @@ def load_latest_k6_receipts(*, repo_root: Path, receipts_dir: Path | None = None
     for path in sorted(target_dir.glob("*.json")):
         try:
             receipt = load_json(path)
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
         summary = summarize_k6_receipt(receipt, path, repo_root=repo_root)
         if summary is None:
@@ -330,7 +336,7 @@ def build_slo_status_entries(
                 live_metrics["time_to_budget_exhaustion_days"] = effective_query(
                     queries["time_to_budget_exhaustion_days"]
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 metrics_error = str(exc)
         entries.append(
             {
@@ -349,7 +355,8 @@ def build_slo_status_entries(
                     "time_to_budget_exhaustion_days": queries["time_to_budget_exhaustion_days"],
                 },
                 "metrics": live_metrics,
-                "metrics_available": metrics_error is None and any(value is not None for value in live_metrics.values()),
+                "metrics_available": metrics_error is None
+                and any(value is not None for value in live_metrics.values()),
                 "metrics_error": metrics_error,
                 "status": format_budget_status(live_metrics["budget_remaining"]),
                 "k6": {
@@ -388,7 +395,7 @@ def write_yaml(path: Path, payload: Any) -> None:
         raise RuntimeError(PYYAML_INSTALL_HINT) from exc
 
     class IndentedSafeDumper(yaml.SafeDumper):
-        def increase_indent(self, flow: bool = False, indentless: bool = False) -> Any:  # noqa: ANN401
+        def increase_indent(self, flow: bool = False, indentless: bool = False) -> Any:
             return super().increase_indent(flow, False)
 
     path.parent.mkdir(parents=True, exist_ok=True)

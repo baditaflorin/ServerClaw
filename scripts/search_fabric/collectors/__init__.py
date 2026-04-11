@@ -3,7 +3,16 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 
-from . import adr_collector, alert_collector, case_collector, catalog_collector, config_collector, receipt_collector, runbook_collector, topology_collector
+from . import (
+    adr_collector,
+    alert_collector,
+    case_collector,
+    catalog_collector,
+    config_collector,
+    receipt_collector,
+    runbook_collector,
+    topology_collector,
+)
 from ..models import SearchDocument
 
 

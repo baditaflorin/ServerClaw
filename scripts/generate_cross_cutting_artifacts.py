@@ -41,8 +41,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import yaml  # noqa: E402 — must come after sys.path adjustment
-from validation_toolkit import load_yaml_with_identity, require_bool, require_int, require_list, require_mapping, require_str  # noqa: E402
+import yaml
+from validation_toolkit import (
+    load_yaml_with_identity,
+    require_bool,
+    require_int,
+    require_list,
+    require_mapping,
+    require_str,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
@@ -115,9 +122,7 @@ def generate_dns_declarations(
     declarations: dict[str, dict] = {}
 
     for service_name, service_config in registry.items():
-        service_config = require_mapping(
-            service_config, f"platform_service_registry.{service_name}"
-        )
+        service_config = require_mapping(service_config, f"platform_service_registry.{service_name}")
         dns_config = service_config.get("dns")
         if dns_config is None:
             continue
@@ -127,9 +132,7 @@ def generate_dns_declarations(
 
         records_raw = dns_config.get("records")
         if records_raw is None:
-            raise ValueError(
-                f"{dns_path}.records is required when dns section is present"
-            )
+            raise ValueError(f"{dns_path}.records is required when dns section is present")
         records = require_list(records_raw, f"{dns_path}.records", min_length=1)
 
         for idx, record in enumerate(records):
@@ -141,9 +144,7 @@ def generate_dns_declarations(
 
             dns_type = require_str(record.get("type"), f"{rec_path}.type")
             if dns_type not in VALID_DNS_TYPES:
-                raise ValueError(
-                    f"{rec_path}.type must be one of {VALID_DNS_TYPES!r}, got '{dns_type}'"
-                )
+                raise ValueError(f"{rec_path}.type must be one of {VALID_DNS_TYPES!r}, got '{dns_type}'")
 
             target_host = require_str(record.get("target_host"), f"{rec_path}.target_host")
 
@@ -152,9 +153,7 @@ def generate_dns_declarations(
 
             if fqdn in declarations:
                 existing = declarations[fqdn]["service"]
-                raise ValueError(
-                    f"Duplicate FQDN '{fqdn}': claimed by both '{existing}' and '{service_name}'"
-                )
+                raise ValueError(f"Duplicate FQDN '{fqdn}': claimed by both '{existing}' and '{service_name}'")
 
             declarations[fqdn] = {
                 "service": service_name,
@@ -171,7 +170,7 @@ def generate_dns_declarations(
         print(f"  WARNING: could not load subdomain catalog for cross-check: {exc}")
 
     if write:
-        out_dir = (repo_root / "config" / "generated")
+        out_dir = repo_root / "config" / "generated"
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / "dns-declarations.yaml"
         header = (
@@ -209,10 +208,7 @@ def _warn_catalog_drift(declarations: dict, catalog: dict) -> None:
         else:
             status = catalog_fqdns[fqdn].get("status", "")
             if status != "active":
-                print(
-                    f"  WARN: {fqdn} is in subdomain-catalog.json with "
-                    f"status='{status}' (expected 'active')."
-                )
+                print(f"  WARN: {fqdn} is in subdomain-catalog.json with status='{status}' (expected 'active').")
 
     # In catalog (edge-published) but no dns declaration in registry
     registry_services = {d["service"] for d in declarations.values()}
@@ -266,9 +262,7 @@ def generate_sso_clients(registry: dict, write: bool = False, repo_root: Path = 
             f"{path_prefix}.provider",
         )
         if provider not in VALID_SSO_PROVIDERS:
-            raise ValueError(
-                f"{path_prefix}.provider must be one of: {', '.join(sorted(VALID_SSO_PROVIDERS))}"
-            )
+            raise ValueError(f"{path_prefix}.provider must be one of: {', '.join(sorted(VALID_SSO_PROVIDERS))}")
 
         redirect_uris_raw = sso_config.get("redirect_uris", [])
         redirect_uris = require_list(redirect_uris_raw, f"{path_prefix}.redirect_uris")
@@ -297,8 +291,7 @@ def generate_sso_clients(registry: dict, write: bool = False, repo_root: Path = 
         # Duplicate client_id check
         if client_id in client_owners:
             raise ValueError(
-                f"Duplicate SSO client_id '{client_id}': claimed by "
-                f"'{client_owners[client_id]}' and '{service_name}'"
+                f"Duplicate SSO client_id '{client_id}': claimed by '{client_owners[client_id]}' and '{service_name}'"
             )
 
         client_owners[client_id] = service_name
@@ -343,18 +336,12 @@ def _validate_redirect_uris(redirect_uris: list, path_prefix: str) -> None:
             raise ValueError(f"{uri_path} must be a non-empty string")
 
         # Allow localhost/127.0.0.1 with http (common for CLI OAuth callbacks)
-        _localhost_pattern = re.compile(
-            r"^http://(localhost|127\.0\.0\.1)(:\d+)?(/.*)?$"
-        )
+        _localhost_pattern = re.compile(r"^http://(localhost|127\.0\.0\.1)(:\d+)?(/.*)?$")
         if uri.startswith("http://") and not _localhost_pattern.match(uri):
-            raise ValueError(
-                f"{uri_path}: non-localhost redirect URIs must use HTTPS (got: {uri!r})"
-            )
+            raise ValueError(f"{uri_path}: non-localhost redirect URIs must use HTTPS (got: {uri!r})")
 
         if not (uri.startswith("https://") or uri.startswith("http://")):
-            raise ValueError(
-                f"{uri_path}: redirect URI must start with https:// or http:// (got: {uri!r})"
-            )
+            raise ValueError(f"{uri_path}: redirect URI must start with https:// or http:// (got: {uri!r})")
 
 
 # ---------------------------------------------------------------------------
@@ -398,10 +385,7 @@ def generate_tls_certificates(
             f"{path_prefix}.cert_source",
         )
         if cert_source not in VALID_TLS_SOURCES:
-            raise ValueError(
-                f"{path_prefix}.cert_source must be one of: "
-                f"{', '.join(sorted(VALID_TLS_SOURCES))}"
-            )
+            raise ValueError(f"{path_prefix}.cert_source must be one of: {', '.join(sorted(VALID_TLS_SOURCES))}")
 
         domains_raw = tls_config.get("domains", [])
         domains = require_list(domains_raw, f"{path_prefix}.domains", min_length=1)
@@ -425,9 +409,7 @@ def generate_tls_certificates(
 
         for fqdn in domains:
             # Warn if letsencrypt declared for internal/local domain
-            if cert_source == "letsencrypt" and (
-                ".internal" in fqdn or fqdn.endswith(".local")
-            ):
+            if cert_source == "letsencrypt" and (".internal" in fqdn or fqdn.endswith(".local")):
                 print(
                     f"  WARNING: {path_prefix}: cert_source=letsencrypt but "
                     f"domain '{fqdn}' looks internal (.internal or .local)"
@@ -436,8 +418,7 @@ def generate_tls_certificates(
             # Duplicate domain check
             if fqdn in domain_owners:
                 raise ValueError(
-                    f"Duplicate TLS domain '{fqdn}': claimed by "
-                    f"'{domain_owners[fqdn]}' and '{service_name}'"
+                    f"Duplicate TLS domain '{fqdn}': claimed by '{domain_owners[fqdn]}' and '{service_name}'"
                 )
             domain_owners[fqdn] = service_name
 
@@ -515,9 +496,7 @@ def generate_nginx_upstreams(
 
         upstream_port_raw = proxy_config.get("upstream_port") or service_config.get("internal_port")
         if upstream_port_raw is None:
-            raise ValueError(
-                f"{path_prefix}: proxy.upstream_port or service internal_port is required"
-            )
+            raise ValueError(f"{path_prefix}: proxy.upstream_port or service internal_port is required")
         upstream_port = require_int(
             upstream_port_raw,
             f"{path_prefix}.upstream_port",
@@ -555,35 +534,34 @@ def generate_nginx_upstreams(
         if path_prefix_val is not None:
             require_str(path_prefix_val, f"{path_prefix}.path_prefix")
             if not path_prefix_val.startswith("/"):
-                raise ValueError(
-                    f"{path_prefix}.path_prefix must start with / (got: {path_prefix_val!r})"
-                )
+                raise ValueError(f"{path_prefix}.path_prefix must start with / (got: {path_prefix_val!r})")
 
         # Duplicate FQDN detection
         all_fqdns = [public_fqdn] + list(extra_fqdns)
         for fqdn in all_fqdns:
             if fqdn in fqdn_owners:
                 raise ValueError(
-                    f"Duplicate proxy FQDN '{fqdn}': claimed by "
-                    f"'{fqdn_owners[fqdn]}' and '{service_name}'"
+                    f"Duplicate proxy FQDN '{fqdn}': claimed by '{fqdn_owners[fqdn]}' and '{service_name}'"
                 )
             fqdn_owners[fqdn] = service_name
 
         upstream_name = f"{service_name}_upstream"
 
-        upstreams.append({
-            "name": upstream_name,
-            "service_name": service_name,
-            "fqdn": public_fqdn,
-            "extra_fqdns": list(extra_fqdns),
-            "port": upstream_port,
-            "host": upstream_host,
-            "ip": upstream_ip,
-            "auth_proxy": auth_proxy,
-            "websocket": websocket,
-            "max_body_size": max_body_size,
-            "path_prefix": path_prefix_val,
-        })
+        upstreams.append(
+            {
+                "name": upstream_name,
+                "service_name": service_name,
+                "fqdn": public_fqdn,
+                "extra_fqdns": list(extra_fqdns),
+                "port": upstream_port,
+                "host": upstream_host,
+                "ip": upstream_ip,
+                "auth_proxy": auth_proxy,
+                "websocket": websocket,
+                "max_body_size": max_body_size,
+                "path_prefix": path_prefix_val,
+            }
+        )
 
     if write:
         out_dir = repo_root / "config" / "generated"
@@ -626,7 +604,7 @@ def _write_nginx_upstreams_conf(upstreams: list[dict], out_path: Path) -> None:
 
     for u in upstreams:
         all_fqdns = [u["fqdn"]] + u["extra_fqdns"]
-        is_last = (u is upstreams[-1])
+        is_last = u is upstreams[-1]
         lines.append(f"# {u['service_name']} — {', '.join(all_fqdns)}\n")
         lines.append(f"upstream {u['name']} {{\n")
         lines.append(f"    server {u['ip']}:{u['port']};  # {u['host']}\n")
@@ -650,10 +628,7 @@ def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
     catalog = data.get("platform_guest_catalog", {})
     by_name = catalog.get("by_name", {})
     if not by_name:
-        raise ValueError(
-            "platform_guest_catalog.by_name is empty or missing in "
-            "inventory/group_vars/platform.yml"
-        )
+        raise ValueError("platform_guest_catalog.by_name is empty or missing in inventory/group_vars/platform.yml")
     return by_name
 
 
@@ -870,7 +845,7 @@ def main(argv: list[str] | None = None) -> int:
             msg = f"ERROR ({concern}): {exc}"
             print(f"  {msg}", file=sys.stderr)
             errors.append(msg)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             msg = f"UNEXPECTED ERROR ({concern}): {type(exc).__name__}: {exc}"
             print(f"  {msg}", file=sys.stderr)
             errors.append(msg)

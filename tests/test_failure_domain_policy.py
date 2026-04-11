@@ -16,9 +16,7 @@ import failure_domain_policy  # noqa: E402
 
 def build_host_vars(*, secondary_domain_active: bool = False, standby_has_exception: bool = True) -> dict:
     standby_exceptions = (
-        [{"scope": "failure_domain", "rationale": "single active domain for now"}]
-        if standby_has_exception
-        else []
+        [{"scope": "failure_domain", "rationale": "single active domain for now"}] if standby_has_exception else []
     )
     return {
         "platform_failure_domains": [

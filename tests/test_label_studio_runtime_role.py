@@ -25,9 +25,18 @@ def load_tasks(path: Path) -> list[dict]:
 def test_label_studio_runtime_defaults_reference_service_topology_image_and_local_secrets() -> None:
     defaults = yaml.safe_load(RUNTIME_DEFAULTS_PATH.read_text(encoding="utf-8"))
 
-    assert defaults["label_studio_service_topology"] == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('label_studio') }}"
-    assert defaults["label_studio_internal_port"] == "{{ platform_service_topology | platform_service_port('label_studio', 'internal') }}"
-    assert defaults["label_studio_internal_base_url"] == "{{ platform_service_topology | platform_service_url('label_studio', 'internal') }}"
+    assert (
+        defaults["label_studio_service_topology"]
+        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('label_studio') }}"
+    )
+    assert (
+        defaults["label_studio_internal_port"]
+        == "{{ platform_service_topology | platform_service_port('label_studio', 'internal') }}"
+    )
+    assert (
+        defaults["label_studio_internal_base_url"]
+        == "{{ platform_service_topology | platform_service_url('label_studio', 'internal') }}"
+    )
     assert defaults["label_studio_public_base_url"] == "https://{{ label_studio_service_topology.public_hostname }}"
     assert defaults["label_studio_image"] == "{{ container_image_catalog.images.label_studio_runtime.ref }}"
     assert defaults["label_studio_database_password_local_file"].endswith("/.local/label-studio/database-password.txt")
@@ -65,11 +74,19 @@ def test_label_studio_runtime_tasks_manage_openbao_sync_and_verification_flow() 
     )
     start_task = next(task for task in tasks if task["name"] == "Start the Label Studio stack")
     recreate_task = next(
-        task for task in tasks if task["name"] == "Force-recreate the Label Studio stack after runtime drift or Docker recovery"
+        task
+        for task in tasks
+        if task["name"] == "Force-recreate the Label Studio stack after runtime drift or Docker recovery"
     )
-    sync_task = next(task for task in tasks if task["name"] == "Synchronize the repo-managed Label Studio project catalog")
-    verify_before = next(task for task in tasks if task["name"] == "Verify the Label Studio runtime before project synchronization")
-    verify_after = next(task for task in tasks if task["name"] == "Verify the Label Studio runtime after project synchronization")
+    sync_task = next(
+        task for task in tasks if task["name"] == "Synchronize the repo-managed Label Studio project catalog"
+    )
+    verify_before = next(
+        task for task in tasks if task["name"] == "Verify the Label Studio runtime before project synchronization"
+    )
+    verify_after = next(
+        task for task in tasks if task["name"] == "Verify the Label Studio runtime after project synchronization"
+    )
     required_inputs = validate_task["ansible.builtin.assert"]["that"]
 
     assert "label_studio_database_password_local_file | length > 0" in required_inputs
@@ -85,9 +102,10 @@ def test_label_studio_runtime_tasks_manage_openbao_sync_and_verification_flow() 
     assert pull_task["retries"] == 5
     assert pull_task["delay"] == 5
     assert pull_task["until"] == "label_studio_pull.rc == 0"
-    assert "label_studio_project_catalog_template.changed" in force_recreate_decision["ansible.builtin.set_fact"][
-        "label_studio_force_recreate"
-    ]
+    assert (
+        "label_studio_project_catalog_template.changed"
+        in force_recreate_decision["ansible.builtin.set_fact"]["label_studio_force_recreate"]
+    )
     assert start_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
     assert recreate_task["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "--remove-orphans"]
     assert "{{ label_studio_sync_script }} sync" in sync_task["ansible.builtin.script"]
@@ -106,17 +124,29 @@ def test_label_studio_verify_tasks_cover_local_runtime_public_redirects_and_proj
     public_tasks = load_tasks(VERIFY_PUBLIC_TASKS_PATH)
 
     version_task = next(task for task in verify_tasks if task["name"] == "Verify the Label Studio version endpoint")
-    container_task = next(task for task in verify_tasks if task["name"] == "Verify the Label Studio container is running")
-    health_task = next(task for task in verify_tasks if task["name"] == "Wait for the Label Studio container health check to pass")
-    project_verify_task = next(task for task in verify_tasks if task["name"] == "Verify the repo-managed Label Studio project catalog")
+    container_task = next(
+        task for task in verify_tasks if task["name"] == "Verify the Label Studio container is running"
+    )
+    health_task = next(
+        task for task in verify_tasks if task["name"] == "Wait for the Label Studio container health check to pass"
+    )
+    project_verify_task = next(
+        task for task in verify_tasks if task["name"] == "Verify the repo-managed Label Studio project catalog"
+    )
     ui_redirect_task = next(
-        task for task in public_tasks if task["name"] == "Verify the public Label Studio UI redirects into the shared edge auth boundary"
+        task
+        for task in public_tasks
+        if task["name"] == "Verify the public Label Studio UI redirects into the shared edge auth boundary"
     )
     api_redirect_task = next(
-        task for task in public_tasks if task["name"] == "Verify the public Label Studio API redirects into the shared edge auth boundary"
+        task
+        for task in public_tasks
+        if task["name"] == "Verify the public Label Studio API redirects into the shared edge auth boundary"
     )
     redirect_assert = next(
-        task for task in public_tasks if task["name"] == "Assert the Label Studio public redirects target the shared auth boundary"
+        task
+        for task in public_tasks
+        if task["name"] == "Assert the Label Studio public redirects target the shared auth boundary"
     )
 
     assert container_task["ansible.builtin.command"]["argv"] == [
@@ -136,7 +166,10 @@ def test_label_studio_verify_tasks_cover_local_runtime_public_redirects_and_proj
     assert health_task["retries"] == 36
     assert health_task["delay"] == 5
     assert health_task["until"] == "label_studio_container_health.stdout | trim == 'healthy'"
-    assert version_task["ansible.builtin.uri"]["url"] == "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
+    assert (
+        version_task["ansible.builtin.uri"]["url"]
+        == "{{ label_studio_internal_base_url }}{{ label_studio_health_path }}"
+    )
     assert version_task["retries"] == 12
     assert version_task["delay"] == 5
     assert (
@@ -169,8 +202,14 @@ def test_label_studio_templates_bind_private_port_and_render_expected_env_contra
     assert "LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN=true" in env_template
     assert "POSTGRE_PASSWORD={{ label_studio_database_password }}" in env_template
     assert "USER_TOKEN={{ label_studio_admin_token }}" in env_template
-    assert 'POSTGRE_PASSWORD=[[ with secret "kv/data/{{ label_studio_openbao_secret_path }}" ]][[ .Data.data.POSTGRE_PASSWORD ]][[ end ]]' in openbao_env_template
-    assert 'USER_TOKEN=[[ with secret "kv/data/{{ label_studio_openbao_secret_path }}" ]][[ .Data.data.USER_TOKEN ]][[ end ]]' in openbao_env_template
+    assert (
+        'POSTGRE_PASSWORD=[[ with secret "kv/data/{{ label_studio_openbao_secret_path }}" ]][[ .Data.data.POSTGRE_PASSWORD ]][[ end ]]'
+        in openbao_env_template
+    )
+    assert (
+        'USER_TOKEN=[[ with secret "kv/data/{{ label_studio_openbao_secret_path }}" ]][[ .Data.data.USER_TOKEN ]][[ end ]]'
+        in openbao_env_template
+    )
     assert "{% for project in label_studio_projects %}" in project_template
 
 

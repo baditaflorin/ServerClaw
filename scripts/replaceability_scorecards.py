@@ -132,7 +132,9 @@ def load_replaceability_review_catalog(path: Path = CATALOG_PATH) -> dict[str, A
 
 
 def parse_critical_product_adrs(catalog: dict[str, Any]) -> list[CriticalProductAdr]:
-    entries = _require_list(catalog.get("critical_product_adrs"), "config/replaceability-review-catalog.json.critical_product_adrs")
+    entries = _require_list(
+        catalog.get("critical_product_adrs"), "config/replaceability-review-catalog.json.critical_product_adrs"
+    )
     parsed: list[CriticalProductAdr] = []
     for index, entry in enumerate(entries):
         path = f"config/replaceability-review-catalog.json.critical_product_adrs[{index}]"
@@ -166,7 +168,9 @@ def validate_replaceability_review_catalog(catalog: dict[str, Any]) -> list[Crit
         raise ValueError("config/replaceability-review-catalog.json.policy.adr must reference ADR 0212")
     scope = _require_str(policy.get("scope"), "config/replaceability-review-catalog.json.policy.scope")
     if scope != "critical_integrated_product_adr":
-        raise ValueError("config/replaceability-review-catalog.json.policy.scope must be critical_integrated_product_adr")
+        raise ValueError(
+            "config/replaceability-review-catalog.json.policy.scope must be critical_integrated_product_adr"
+        )
     notes = _require_list(policy.get("notes"), "config/replaceability-review-catalog.json.policy.notes")
     if not notes:
         raise ValueError("config/replaceability-review-catalog.json.policy.notes must not be empty")
@@ -235,9 +239,7 @@ def _require_section_fields(
             raise ValueError(f"{adr_path.name} is missing '{label}' in section '## {section_title}'")
         lowered = value.strip().lower()
         if lowered in PLACEHOLDER_VALUES or lowered.startswith("todo"):
-            raise ValueError(
-                f"{adr_path.name} has a placeholder value for '{label}' in section '## {section_title}'"
-            )
+            raise ValueError(f"{adr_path.name} has a placeholder value for '{label}' in section '## {section_title}'")
     return fields
 
 
@@ -281,10 +283,10 @@ def validate_replaceability_sections(catalog: dict[str, Any]) -> list[Replaceabi
 def render_markdown_report(catalog: dict[str, Any]) -> str:
     reports = validate_replaceability_sections(catalog)
     lines = [
-      "# Replaceability Review Coverage",
-      "",
-      "| ADR | Product | Capability | Owner | Review Cadence | Alternative Product |",
-      "| --- | --- | --- | --- | --- | --- |",
+        "# Replaceability Review Coverage",
+        "",
+        "| ADR | Product | Capability | Owner | Review Cadence | Alternative Product |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for report in reports:
         lines.append(
@@ -296,8 +298,12 @@ def render_markdown_report(catalog: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate ADR 0212 replaceability scorecards and vendor exit plans.")
-    parser.add_argument("--validate", action="store_true", help="Validate the replaceability review catalog and governed ADR sections.")
-    parser.add_argument("--report", action="store_true", help="Print a Markdown summary of the governed replaceability reviews.")
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate the replaceability review catalog and governed ADR sections."
+    )
+    parser.add_argument(
+        "--report", action="store_true", help="Print a Markdown summary of the governed replaceability reviews."
+    )
     args = parser.parse_args(argv)
 
     if not args.validate and not args.report:
@@ -309,8 +315,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.validate:
             reports = validate_replaceability_sections(catalog)
             print(
-                f"Replaceability scorecards OK: {len(reports)} governed ADRs "
-                f"from {CATALOG_PATH.relative_to(REPO_ROOT)}"
+                f"Replaceability scorecards OK: {len(reports)} governed ADRs from {CATALOG_PATH.relative_to(REPO_ROOT)}"
             )
         if args.report:
             sys.stdout.write(render_markdown_report(catalog))

@@ -36,9 +36,13 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
     install_task = next(task for task in tasks if task.get("name") == "Install PostgreSQL guest packages")
     package_task = next(task for task in tasks if task.get("name") == "Ensure PostgreSQL pgaudit package is present")
     extension_check_task = next(
-        task for task in tasks if task.get("name") == "Check whether pgaudit extension already exists in each writable database"
+        task
+        for task in tasks
+        if task.get("name") == "Check whether pgaudit extension already exists in each writable database"
     )
-    extension_task = next(task for task in tasks if task.get("name") == "Create pgaudit extension in writable databases")
+    extension_task = next(
+        task for task in tasks if task.get("name") == "Create pgaudit extension in writable databases"
+    )
 
     assert install_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
     assert package_task["ansible.builtin.apt"]["name"] == "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit"
@@ -61,8 +65,12 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
 def test_main_tasks_load_sensitive_table_catalog_and_grant_audit_role() -> None:
     tasks = load_yaml(TASKS_PATH)
     decode_task = next(task for task in tasks if task.get("name") == "Decode pgaudit sensitive-table catalog")
-    schema_grant_task = next(task for task in tasks if task.get("name") == "Grant schema usage to the pgaudit audit role")
-    grant_task = next(task for task in tasks if task.get("name") == "Grant sensitive-table privileges to the pgaudit audit role")
+    schema_grant_task = next(
+        task for task in tasks if task.get("name") == "Grant schema usage to the pgaudit audit role"
+    )
+    grant_task = next(
+        task for task in tasks if task.get("name") == "Grant sensitive-table privileges to the pgaudit audit role"
+    )
 
     assert "from_yaml" in decode_task["ansible.builtin.set_fact"]["postgres_vm_pgaudit_sensitive_tables"]
     assert schema_grant_task["register"] == "postgres_vm_pgaudit_schema_grant"
@@ -87,7 +95,7 @@ def test_main_tasks_render_from_role_templates_and_restart_preload_libraries_whe
     assert "Check active PostgreSQL preload libraries before verify" in task_file
     assert "Restart PostgreSQL when configured preload libraries are not yet active" in task_file
     assert "postgres_vm_cluster_major_version" in task_file
-    assert 'postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit' in task_file
+    assert "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit" in task_file
     assert "SHOW shared_preload_libraries" in VERIFY_PATH.read_text(encoding="utf-8")
 
 
@@ -117,12 +125,18 @@ def test_template_enables_connection_logging_and_pgaudit_settings() -> None:
 
 def test_verify_tasks_check_preload_and_pgaudit_runtime_state() -> None:
     verify_tasks = load_yaml(VERIFY_PATH)
-    preload_task = next(task for task in verify_tasks if task.get("name") == "Verify configured PostgreSQL preload libraries are active")
+    preload_task = next(
+        task for task in verify_tasks if task.get("name") == "Verify configured PostgreSQL preload libraries are active"
+    )
     preload_assert = next(
         task for task in verify_tasks if task.get("name") == "Assert configured PostgreSQL preload libraries are active"
     )
-    log_task = next(task for task in verify_tasks if task.get("name") == "Verify PostgreSQL pgaudit session classes are configured")
-    connection_task = next(task for task in verify_tasks if task.get("name") == "Verify PostgreSQL connection logging is enabled")
+    log_task = next(
+        task for task in verify_tasks if task.get("name") == "Verify PostgreSQL pgaudit session classes are configured"
+    )
+    connection_task = next(
+        task for task in verify_tasks if task.get("name") == "Verify PostgreSQL connection logging is enabled"
+    )
 
     assert preload_task["ansible.builtin.command"]["argv"][-1] == "SHOW shared_preload_libraries"
     assert preload_assert["when"] == "postgres_vm_shared_preload_libraries | length > 0"

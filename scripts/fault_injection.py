@@ -72,17 +72,13 @@ def build_summary(report: dict[str, Any]) -> str:
         f"{report['duration_seconds']:.1f}s"
     ]
     for scenario in report.get("results", []):
-        lines.append(
-            f"- {scenario['name']}: {scenario['status']} "
-            f"({scenario['duration_seconds']:.1f}s)"
-        )
+        lines.append(f"- {scenario['name']}: {scenario['status']} ({scenario['duration_seconds']:.1f}s)")
     return "\n".join(lines)
 
 
 def publish_notifications(repo_root: Path, report: dict[str, Any]) -> None:
-    mattermost_url = (
-        os.environ.get("LV3_MATTERMOST_WEBHOOK_URL", "").strip()
-        or maybe_read_secret_path(repo_root, "mattermost_platform_findings_webhook_url")
+    mattermost_url = os.environ.get("LV3_MATTERMOST_WEBHOOK_URL", "").strip() or maybe_read_secret_path(
+        repo_root, "mattermost_platform_findings_webhook_url"
     )
     if mattermost_url:
         post_json_webhook(mattermost_url, {"text": build_summary(report)})
@@ -90,9 +86,8 @@ def publish_notifications(repo_root: Path, report: dict[str, Any]) -> None:
     if report["status"] in {"passed", "skipped"}:
         return
 
-    glitchtip_url = (
-        os.environ.get("LV3_GLITCHTIP_EVENT_URL", "").strip()
-        or maybe_read_secret_path(repo_root, "glitchtip_platform_findings_event_url")
+    glitchtip_url = os.environ.get("LV3_GLITCHTIP_EVENT_URL", "").strip() or maybe_read_secret_path(
+        repo_root, "glitchtip_platform_findings_event_url"
     )
     if glitchtip_url:
         emit_glitchtip_event(
@@ -107,9 +102,7 @@ def publish_notifications(repo_root: Path, report: dict[str, Any]) -> None:
                 "extra": {
                     "report_file": report.get("report_file"),
                     "failed_scenarios": [
-                        scenario["name"]
-                        for scenario in report.get("results", [])
-                        if scenario.get("status") != "passed"
+                        scenario["name"] for scenario in report.get("results", []) if scenario.get("status") != "passed"
                     ],
                 },
             },

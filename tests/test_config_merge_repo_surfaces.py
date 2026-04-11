@@ -41,7 +41,10 @@ def test_windmill_defaults_seed_config_merge_script_and_schedule() -> None:
 
     assert "f/lv3/config_merge/merge_config_changes" in script_paths
     assert "f/lv3/config_merge/merge_config_changes_every_minute" in schedule_map
-    assert schedule_map["f/lv3/config_merge/merge_config_changes_every_minute"]["args"]["dsn"] == "{{ windmill_database_dsn }}"
+    assert (
+        schedule_map["f/lv3/config_merge/merge_config_changes_every_minute"]["args"]["dsn"]
+        == "{{ windmill_database_dsn }}"
+    )
     assert len(script_paths) == len(seed_scripts)
     assert (
         script_map["f/lv3/scheduler_watchdog_loop"]["local_file"]
@@ -73,15 +76,15 @@ def test_windmill_script_sync_uses_manifest_helper() -> None:
     assert "--with" in tasks
     assert "pyyaml" in tasks
     assert "{{ windmill_seed_script_manifest_local.path }}" in tasks
-    assert '--max-attempts' in tasks
+    assert "--max-attempts" in tasks
     assert '"20"' in tasks
-    assert '--settle-interval' in tasks
+    assert "--settle-interval" in tasks
     assert '"2.0"' in tasks
     assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" in tasks
     assert tasks.count("pyyaml") >= 2
     assert "{{ windmill_seed_schedule_manifest_local.path }}" in tasks
-    assert tasks.count('{{ windmill_base_url }}') == 2
-    assert tasks.count('{{ windmill_private_base_url }}') == 5
+    assert tasks.count("{{ windmill_base_url }}") == 2
+    assert tasks.count("{{ windmill_private_base_url }}") == 5
 
 
 def test_make_converge_windmill_forwards_extra_args() -> None:
@@ -126,9 +129,15 @@ def test_windmill_defaults_use_git_common_dir_for_shared_local_artifacts() -> No
     expected_lookup = "rev-parse --path-format=absolute --git-common-dir"
     assert expected_lookup in runtime_defaults["windmill_controller_repo_common_root"]
     assert expected_lookup in postgres_defaults["windmill_local_artifact_dir"]
-    assert runtime_defaults["windmill_local_artifact_dir"] == "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
+    assert (
+        runtime_defaults["windmill_local_artifact_dir"]
+        == "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
+    )
     assert "/.local/windmill" in postgres_defaults["windmill_local_artifact_dir"]
-    assert runtime_defaults["windmill_database_password_local_file"] == "{{ windmill_local_artifact_dir }}/database-password.txt"
+    assert (
+        runtime_defaults["windmill_database_password_local_file"]
+        == "{{ windmill_local_artifact_dir }}/database-password.txt"
+    )
     assert runtime_defaults["windmill_database_dsn"].startswith("postgres://{{ windmill_database_user }}:")
 
 

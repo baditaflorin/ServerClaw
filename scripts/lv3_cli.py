@@ -22,7 +22,8 @@ import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Iterable
+from typing import Any
+from collections.abc import Iterable
 
 import yaml
 from script_bootstrap import ensure_repo_root_on_path
@@ -50,6 +51,7 @@ from platform.llm import PlatformContextRetriever
 from platform.memory import MemorySubstrateClient
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
+
 CLI_VERSION = "0.1.0"
 DEFAULT_RUN_ACTOR_ID = "operator:lv3-cli"
 DEFAULT_STATUS_TIMEOUT_SECONDS = 3.0
@@ -604,8 +606,8 @@ def resolve_diff_command(environment: str) -> CommandPlan:
         )
     return CommandPlan(
         label=f"diff --env {environment}",
-            route="controller -> build server OpenTofu drift check",
-            command=["make", "remote-exec", f"COMMAND={remote_tofu_shell(environment, 'drift')}"],
+        route="controller -> build server OpenTofu drift check",
+        command=["make", "remote-exec", f"COMMAND={remote_tofu_shell(environment, 'drift')}"],
     )
 
 
@@ -984,10 +986,7 @@ def print_semantic_diff(intent: ExecutionIntent) -> None:
         detail = item.notes or ""
         print(f"  {symbol} {item.surface}:{item.object_id} {item.change_kind} {detail}".rstrip())
     adapters = ", ".join(diff.adapters_used) if diff.adapters_used else "none"
-    print(
-        f"Irreversible: {diff.irreversible_count}   Unknown: {diff.unknown_count}   "
-        f"Adapters used: {adapters}"
-    )
+    print(f"Irreversible: {diff.irreversible_count}   Unknown: {diff.unknown_count}   Adapters used: {adapters}")
 
 
 def print_compiled_intent(intent: ExecutionIntent) -> None:
@@ -1041,10 +1040,7 @@ def print_batch_validation(result: Any) -> None:
             for intent_id in conflict.intent_ids:
                 entry = intent_map.get(intent_id)
                 labels.append(entry.instruction if entry is not None else intent_id)
-            print(
-                f"  - {conflict.conflict_type} on {conflict.resource}: "
-                f"{' ; '.join(labels)} -> {conflict.resolution}"
-            )
+            print(f"  - {conflict.conflict_type} on {conflict.resource}: {' ; '.join(labels)} -> {conflict.resolution}")
         print()
 
     print("Execution stages:")
@@ -1279,7 +1275,12 @@ def run_windmill_request(
             queue_expires_in_seconds=queue_expires_in_seconds,
             queue_notify_channel=queue_notify_channel,
         )
-    elif queue_if_conflicted or queue_priority is not None or queue_expires_in_seconds is not None or queue_notify_channel:
+    elif (
+        queue_if_conflicted
+        or queue_priority is not None
+        or queue_expires_in_seconds is not None
+        or queue_notify_channel
+    ):
         scheduler_intent = SimpleNamespace(
             **getattr(intent, "__dict__", {}),
             queue_if_conflicted=queue_if_conflicted,
@@ -1310,8 +1311,7 @@ def run_windmill_request(
         "rollback_depth_exceeded",
     }:
         print(
-            f"Scheduler rejected {workflow_name}: {result.status}"
-            + (f" ({result.reason})" if result.reason else ""),
+            f"Scheduler rejected {workflow_name}: {result.status}" + (f" ({result.reason})" if result.reason else ""),
             file=sys.stderr,
         )
         lane_budget = result.metadata.get("lane") if isinstance(result.metadata, dict) else None
@@ -1351,9 +1351,7 @@ def run_windmill_request(
         ):
             if key in result.metadata:
                 queued_payload[key] = result.metadata.get(key)
-        print(
-            json.dumps(queued_payload, indent=2, sort_keys=True)
-        )
+        print(json.dumps(queued_payload, indent=2, sort_keys=True))
         return 0
     warnings = result.metadata.get("conflict_warnings", []) if isinstance(result.metadata, dict) else []
     for warning in warnings:
@@ -1817,9 +1815,13 @@ def tcp_probe(host: str, port: int, *, timeout: float) -> ProbeResult:
     try:
         with socket.create_connection((host, port), timeout=timeout):
             elapsed = time.monotonic() - started
-            return ProbeResult(service_id="", url=f"tcp://{host}:{port}", healthy=True, health_text="OK tcp", latency_seconds=elapsed)
+            return ProbeResult(
+                service_id="", url=f"tcp://{host}:{port}", healthy=True, health_text="OK tcp", latency_seconds=elapsed
+            )
     except OSError as exc:
-        return ProbeResult(service_id="", url=f"tcp://{host}:{port}", healthy=False, health_text=str(exc), latency_seconds=None)
+        return ProbeResult(
+            service_id="", url=f"tcp://{host}:{port}", healthy=False, health_text=str(exc), latency_seconds=None
+        )
 
 
 def probe_one_service(
@@ -1851,7 +1853,9 @@ def probe_one_service(
             result = tcp_probe(str(readiness.get("host")), int(readiness.get("port")), timeout=timeout)
             url = f"tcp://{readiness.get('host')}:{readiness.get('port')}"
         else:
-            result = ProbeResult(service_id="", url=url, healthy=False, health_text="no reachable probe", latency_seconds=None)
+            result = ProbeResult(
+                service_id="", url=url, healthy=False, health_text="no reachable probe", latency_seconds=None
+            )
 
     return ProbeResult(
         service_id=service["id"],
@@ -1881,11 +1885,7 @@ def print_status_table(results: list[tuple[dict[str, Any], ProbeResult]], *, no_
         latency = "-" if result.latency_seconds is None else f"{result.latency_seconds:.2f}s"
         status_cell = plain_status if not enabled else status_label
         print(
-            f"{service['id']:<20} "
-            f"{str(service.get('vm', '-')):<20} "
-            f"{result.url[:34]:<34} "
-            f"{status_cell:<10} "
-            f"{latency:>7}"
+            f"{service['id']:<20} {service.get('vm', '-')!s:<20} {result.url[:34]:<34} {status_cell:<10} {latency:>7}"
         )
     latest = find_latest_receipt(None)
     if latest is not None:
@@ -2031,7 +2031,7 @@ def vm_list_command(environment: str) -> int:
     print("-" * 72)
     print(f"{'VM':<24} {'ADDRESS':<18} {'SERVICE'}")
     for vm_name, address, service_id in resolve_vm_inventory():
-        print(f"{vm_name:<24} {str(address or '-'):18} {service_id}")
+        print(f"{vm_name:<24} {address or '-'!s:18} {service_id}")
     return 0
 
 
@@ -2218,7 +2218,9 @@ def memory_put_command(
         emit_json(result)
         return 0
     entry = result["entry"]
-    print(f"Stored memory entry {entry['memory_id']} [{entry['scope_kind']}:{entry['scope_id']}] {entry['object_type']}")
+    print(
+        f"Stored memory entry {entry['memory_id']} [{entry['scope_kind']}:{entry['scope_id']}] {entry['object_type']}"
+    )
     print(f"{entry['title']}  provenance={entry['provenance']}  retention={entry['retention_class']}")
     return 0
 
@@ -2392,6 +2394,7 @@ def agent_state_verify_command(agent_id: str, task_id: str, *, digest: str, json
         print(f"Key count: {result.key_count}")
     return 0 if result.matched else 1
 
+
 def handoff_store() -> Any:
     dsn = os.environ.get("LV3_HANDOFF_DSN", "").strip() or default_handoff_dsn(REPO_ROOT)
     store = HandoffStore(dsn=dsn)
@@ -2428,7 +2431,9 @@ def format_handoff_age(sent_at: str) -> str:
 
 
 def print_handoff_table(transfers: list[Any]) -> None:
-    print("HANDOFF_ID                            FROM                   TO                     TYPE      STATUS      AGE")
+    print(
+        "HANDOFF_ID                            FROM                   TO                     TYPE      STATUS      AGE"
+    )
     for transfer in transfers:
         print(
             f"{transfer.handoff_id:<36} "
@@ -2530,8 +2535,9 @@ def handoff_complete_command(args: argparse.Namespace) -> int:
 def generate_completion_script(shell_name: str) -> str:
     function_name = "_lv3_completion"
     if shell_name == "bash":
-        return textwrap.dedent(
-            f"""
+        return (
+            textwrap.dedent(
+                f"""
             {COMPLETION_SENTINEL}
             {function_name}() {{
               local cur="${{COMP_WORDS[COMP_CWORD]}}"
@@ -2540,10 +2546,13 @@ def generate_completion_script(shell_name: str) -> str:
             complete -F {function_name} lv3
             # <<< lv3 completion <<<
             """
-        ).strip() + "\n"
+            ).strip()
+            + "\n"
+        )
     if shell_name == "zsh":
-        return textwrap.dedent(
-            f"""
+        return (
+            textwrap.dedent(
+                f"""
             {COMPLETION_SENTINEL}
             {function_name}() {{
               local -a reply
@@ -2553,7 +2562,9 @@ def generate_completion_script(shell_name: str) -> str:
             compdef {function_name} lv3
             # <<< lv3 completion <<<
             """
-        ).strip() + "\n"
+            ).strip()
+            + "\n"
+        )
     raise SystemExit("Completion shell must be one of: bash, zsh.")
 
 
@@ -2653,7 +2664,9 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] == "release" and len(words) == 3:
         return [action for action in ["status", "tag"] if action.startswith(current)]
     if words[1] == "handoff" and len(words) == 3:
-        return [action for action in ["send", "list", "view", "accept", "refuse", "complete"] if action.startswith(current)]
+        return [
+            action for action in ["send", "list", "view", "accept", "refuse", "complete"] if action.startswith(current)
+        ]
     return []
 
 
@@ -2694,7 +2707,9 @@ def loop_command(
                 payload["approved_instruction"] = instruction
             run = loop.start(
                 trigger_type=trigger,
-                trigger_ref=str(payload.get("incident_id") or payload.get("finding_id") or f"{trigger}:{resolved_service}"),
+                trigger_ref=str(
+                    payload.get("incident_id") or payload.get("finding_id") or f"{trigger}:{resolved_service}"
+                ),
                 service_id=resolved_service,
                 trigger_payload=payload,
                 state=state,
@@ -2736,7 +2751,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified operator CLI for the LV3 platform.")
     parser.add_argument("--version", action="store_true", help="Print the lv3 CLI version.")
     parser.add_argument("--no-color", action="store_true", help="Disable ANSI colors.")
-    parser.add_argument("--install-completion", choices=["bash", "zsh"], help="Install shell completion into the default rc file.")
+    parser.add_argument(
+        "--install-completion", choices=["bash", "zsh"], help="Install shell completion into the default rc file."
+    )
 
     subparsers = parser.add_subparsers(dest="command")
 
@@ -2758,7 +2775,9 @@ def build_parser() -> argparse.ArgumentParser:
     deploy.add_argument("--dry-run", action="store_true")
     deploy.add_argument("--explain", action="store_true")
 
-    deploy_repo = subparsers.add_parser("deploy-repo", help="Deploy one repository through the governed Coolify wrapper.")
+    deploy_repo = subparsers.add_parser(
+        "deploy-repo", help="Deploy one repository through the governed Coolify wrapper."
+    )
     deploy_repo.add_argument("--repo", required=True, help="Repository URL.")
     deploy_repo.add_argument("--branch", default="main", help="Repository branch.")
     deploy_repo.add_argument("--source", default="auto", choices=["auto", "public", "private-deploy-key"])
@@ -2768,7 +2787,9 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo.add_argument("--environment", default="production", help="Coolify environment name.")
     deploy_repo.add_argument("--domain", help="Full domain URL, for example http://apps.localhost.")
     deploy_repo.add_argument("--subdomain", help="Subdomain under apps.localhost, for example hello.")
-    deploy_repo.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
+    deploy_repo.add_argument(
+        "--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"]
+    )
     deploy_repo.add_argument("--ports", default="80", help="Comma-separated exposed ports.")
     deploy_repo.add_argument("--description", help="Optional Coolify application description.")
     deploy_repo.add_argument("--private-key-uuid", help="Existing Coolify private key UUID.")
@@ -2776,7 +2797,9 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo.add_argument("--deploy-key-path", help="Local SSH private key path used for deploy-key bootstrap.")
     deploy_repo.add_argument("--dockerfile-location", help="Repository-relative Dockerfile path.")
     deploy_repo.add_argument("--docker-compose-location", help="Repository-relative Docker Compose path.")
-    deploy_repo.add_argument("--compose-domain", action="append", help="Map one compose service to one domain using SERVICE=DOMAIN.")
+    deploy_repo.add_argument(
+        "--compose-domain", action="append", help="Map one compose service to one domain using SERVICE=DOMAIN."
+    )
     deploy_repo.add_argument("--publish-directory", help="Static publish directory for static builds.")
     deploy_repo.add_argument("--wait", action="store_true")
     deploy_repo.add_argument("--force", action="store_true")
@@ -2918,7 +2941,9 @@ def build_parser() -> argparse.ArgumentParser:
     fixture_create.add_argument("--extend", action="store_true")
     fixture_create.add_argument("--dry-run", action="store_true")
     fixture_create.add_argument("--explain", action="store_true")
-    fixture_destroy = fixture_subparsers.add_parser("destroy", aliases=["down"], help="Destroy one ephemeral fixture VM.")
+    fixture_destroy = fixture_subparsers.add_parser(
+        "destroy", aliases=["down"], help="Destroy one ephemeral fixture VM."
+    )
     fixture_destroy.add_argument("name", nargs="?")
     fixture_destroy.add_argument("--vmid", type=int)
     fixture_destroy.add_argument("--receipt-id")
@@ -2965,9 +2990,15 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--actor-id", default=DEFAULT_RUN_ACTOR_ID)
     run.add_argument("--autonomous", action="store_true", help="Apply autonomous agent policy bounds.")
     run.add_argument("--allow-speculative", action="store_true", help="Opt into speculative execution when eligible.")
-    run.add_argument("--queue-if-conflicted", action="store_true", help="Queue instead of failing when blocked by conflicts or workflow concurrency.")
+    run.add_argument(
+        "--queue-if-conflicted",
+        action="store_true",
+        help="Queue instead of failing when blocked by conflicts or workflow concurrency.",
+    )
     run.add_argument("--queue-priority", type=int, help="Explicit ADR 0155 queue priority (lower is higher priority).")
-    run.add_argument("--queue-expires-in", dest="queue_expires_in_seconds", type=int, help="ADR 0155 queue TTL in seconds.")
+    run.add_argument(
+        "--queue-expires-in", dest="queue_expires_in_seconds", type=int, help="ADR 0155 queue TTL in seconds."
+    )
     run.add_argument("--queue-notify-channel", help="Notification channel recorded on the queued intent.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
@@ -3043,7 +3074,9 @@ def build_parser() -> argparse.ArgumentParser:
     manifest_show = manifest_subparsers.add_parser("show", help="Show the generated platform manifest.")
     manifest_show.add_argument("--json", action="store_true")
     manifest_show.add_argument("--refresh", action="store_true", help="Regenerate before showing.")
-    manifest_refresh = manifest_subparsers.add_parser("refresh", help="Regenerate the committed platform manifest artifact.")
+    manifest_refresh = manifest_subparsers.add_parser(
+        "refresh", help="Regenerate the committed platform manifest artifact."
+    )
     manifest_refresh.add_argument("--json", action="store_true", help="Show the refreshed manifest after writing it.")
 
     release = subparsers.add_parser("release", help="Prepare repository releases and show readiness.")
@@ -3072,7 +3105,9 @@ def build_parser() -> argparse.ArgumentParser:
     handoff_send.add_argument("--subject", required=True)
     handoff_send.add_argument("--payload-json")
     handoff_send.add_argument("--payload-file")
-    handoff_send.add_argument("--type", dest="handoff_type", choices=["delegate", "escalate", "inform"], default="delegate")
+    handoff_send.add_argument(
+        "--type", dest="handoff_type", choices=["delegate", "escalate", "inform"], default="delegate"
+    )
     handoff_send.add_argument("--requires-accept", action="store_true")
     handoff_send.add_argument("--timeout-seconds", type=int, default=60)
     handoff_send.add_argument("--fallback", choices=["operator", "close", "retry_self"], default="operator")
@@ -3210,7 +3245,12 @@ def main(argv: list[str] | None = None) -> int:
         return auth_logout_command()
 
     if args.command == "deploy":
-        return run_plan(resolve_deploy_command(args.service, args.env), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+        return run_plan(
+            resolve_deploy_command(args.service, args.env),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "deploy-repo":
         return run_plan(
             resolve_deploy_repo_command(
@@ -3322,12 +3362,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "vm":
         if args.vm_action == "list":
             return vm_list_command(args.env)
-        plan = resolve_vm_command(args.vm_action, args.env, vm_name=getattr(args, "name", None), force=getattr(args, "force", False))
-        return run_plan(plan, dry_run=getattr(args, "dry_run", False), explain=getattr(args, "explain", False), no_color=no_color)
+        plan = resolve_vm_command(
+            args.vm_action, args.env, vm_name=getattr(args, "name", None), force=getattr(args, "force", False)
+        )
+        return run_plan(
+            plan, dry_run=getattr(args, "dry_run", False), explain=getattr(args, "explain", False), no_color=no_color
+        )
     if args.command == "secret":
         if args.secret_action == "get":
-            return run_plan(secret_get_command(args.path), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
-        return run_plan(secret_rotate_command(args.secret_id), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+            return run_plan(
+                secret_get_command(args.path), dry_run=args.dry_run, explain=args.explain, no_color=no_color
+            )
+        return run_plan(
+            secret_rotate_command(args.secret_id), dry_run=args.dry_run, explain=args.explain, no_color=no_color
+        )
     if args.command == "fixture":
         return run_plan(
             fixture_command(
@@ -3419,7 +3467,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.runbook_action == "approve":
             return runbook_approve_command(args.run_id, dry_run=args.dry_run, explain=args.explain)
     if args.command == "logs":
-        return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+        return logs_command(
+            args.service,
+            tail=args.tail,
+            since=args.since,
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "ssh":
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":

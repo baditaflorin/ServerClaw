@@ -45,7 +45,7 @@ def test_tasks_install_mc_and_manage_buckets_policies_and_lifecycle() -> None:
     assert "minio_managed_consumers_resolved" in tasks_text
     assert "minio_consumer_secret_generation.stdout" in tasks_text
     assert "admin\n      - info\n      - local" in tasks_text
-    assert "loop: \"{{ minio_user_info.results }}\"" in tasks_text
+    assert 'loop: "{{ minio_user_info.results }}"' in tasks_text
     assert "when: item.rc != 0" in tasks_text
 
 
@@ -57,7 +57,9 @@ def test_tasks_recover_stale_compose_network_during_startup() -> None:
         if task.get("name") == "Start the MinIO runtime and recover stale compose-network or task-state failures"
     )
     rescue_fact = next(
-        task for task in start_block["rescue"] if task["name"] == "Flag stale MinIO compose-network failures during startup"
+        task
+        for task in start_block["rescue"]
+        if task["name"] == "Flag stale MinIO compose-network failures during startup"
     )
     unexpected_failure = next(
         task for task in start_block["rescue"] if task["name"] == "Surface unexpected MinIO startup failures"
@@ -68,7 +70,9 @@ def test_tasks_recover_stale_compose_network_during_startup() -> None:
         if task["name"] == "Force-remove stale MinIO containers after task-state startup failure"
     )
     reset_task = next(
-        task for task in start_block["rescue"] if task["name"] == "Reset stale MinIO compose resources after startup failure"
+        task
+        for task in start_block["rescue"]
+        if task["name"] == "Reset stale MinIO compose resources after startup failure"
     )
     retry_task = next(
         task for task in start_block["rescue"] if task["name"] == "Retry MinIO startup after compose-network recovery"
@@ -81,7 +85,10 @@ def test_tasks_recover_stale_compose_network_during_startup() -> None:
     assert "Retry MinIO startup after compose-network recovery" in rescue_names
     assert "AlreadyExists: task" in rescue_fact["ansible.builtin.set_fact"]["minio_container_task_already_exists"]
     assert "already exists" in rescue_fact["ansible.builtin.set_fact"]["minio_container_task_already_exists"]
-    assert unexpected_failure["when"] == ["not minio_compose_network_missing", "not minio_container_task_already_exists"]
+    assert unexpected_failure["when"] == [
+        "not minio_compose_network_missing",
+        "not minio_container_task_already_exists",
+    ]
     assert 'docker rm -f "$container_name"' in cleanup_task["ansible.builtin.shell"]
     assert cleanup_task["when"] == "minio_container_task_already_exists"
     assert reset_task["when"] == "minio_compose_network_missing or minio_container_task_already_exists"
@@ -100,7 +107,7 @@ def test_templates_publish_public_server_and_console_urls() -> None:
     assert "condition: service_healthy" in compose
     assert "MINIO_SERVER_URL={{ minio_public_base_url }}" in env_template
     assert "MINIO_BROWSER_REDIRECT_URL={{ minio_console_public_url }}" in env_template
-    assert 'MINIO_ROOT_PASSWORD=[[ with secret ' in env_ctemplate
+    assert "MINIO_ROOT_PASSWORD=[[ with secret " in env_ctemplate
 
 
 def test_verify_tasks_probe_health_buckets_cors_and_lifecycle() -> None:

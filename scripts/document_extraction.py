@@ -95,8 +95,8 @@ def build_multipart_body(
     for key, value in fields.items():
         chunks.extend(
             [
-                f"--{boundary}\r\n".encode("utf-8"),
-                f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode("utf-8"),
+                f"--{boundary}\r\n".encode(),
+                f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode(),
                 value.encode("utf-8"),
                 b"\r\n",
             ]
@@ -104,14 +104,12 @@ def build_multipart_body(
 
     chunks.extend(
         [
-            f"--{boundary}\r\n".encode("utf-8"),
-            (
-                f'Content-Disposition: form-data; name="{file_field}"; filename="{filename}"\r\n'
-            ).encode("utf-8"),
-            f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"),
+            f"--{boundary}\r\n".encode(),
+            (f'Content-Disposition: form-data; name="{file_field}"; filename="{filename}"\r\n').encode(),
+            f"Content-Type: {content_type}\r\n\r\n".encode(),
             content,
             b"\r\n",
-            f"--{boundary}--\r\n".encode("utf-8"),
+            f"--{boundary}--\r\n".encode(),
         ]
     )
     return b"".join(chunks), boundary

@@ -233,7 +233,9 @@ def validate_sample_catalog(
                 f"{sample_path}.canonical_examples[{example_index}]",
             )
             if not (REPO_ROOT / example_path).is_file():
-                raise ValueError(f"{sample_path}.canonical_examples[{example_index}] references missing file '{example_path}'")
+                raise ValueError(
+                    f"{sample_path}.canonical_examples[{example_index}] references missing file '{example_path}'"
+                )
             canonical_examples.append(example_path)
 
         provider_ids: list[str] = []
@@ -245,7 +247,9 @@ def validate_sample_catalog(
                 f"{sample_path}.supported_provider_profiles[{provider_index}]",
             )
             if provider_id not in profile_index:
-                raise ValueError(f"{sample_path}.supported_provider_profiles references unknown profile '{provider_id}'")
+                raise ValueError(
+                    f"{sample_path}.supported_provider_profiles references unknown profile '{provider_id}'"
+                )
             provider_ids.append(provider_id)
 
         render_files = require_list(sample.get("render_files"), f"{sample_path}.render_files")
@@ -275,9 +279,7 @@ def validate_sample_catalog(
                 placeholders - set(REQUIRED_PROFILE_VALUE_KEYS) - {"sample_id", "sample_title", "provider_profile_id"}
             )
             if unknown_placeholders:
-                raise ValueError(
-                    f"{render_path}.source uses unknown placeholders: {', '.join(unknown_placeholders)}"
-                )
+                raise ValueError(f"{render_path}.source uses unknown placeholders: {', '.join(unknown_placeholders)}")
             normalized_render_files.append(
                 {
                     "source": source,
@@ -287,9 +289,7 @@ def validate_sample_catalog(
             )
 
         if {"inventory", "config", ".local"} - destination_roots:
-            raise ValueError(
-                f"{sample_path}.render_files must cover inventory/, config/, and .local/ starter outputs"
-            )
+            raise ValueError(f"{sample_path}.render_files must cover inventory/, config/, and .local/ starter outputs")
 
         normalized_samples.append(
             {
@@ -400,7 +400,10 @@ def _validate_rendered_inventory(path: Path, profile: dict[str, Any]) -> None:
 
 def _validate_rendered_host_vars(path: Path, profile: dict[str, Any]) -> None:
     payload = load_yaml_file(path)
-    if require_str(payload.get("proxmox_node_name"), f"{path}.proxmox_node_name") != profile["values"]["sample_proxmox_node_name"]:
+    if (
+        require_str(payload.get("proxmox_node_name"), f"{path}.proxmox_node_name")
+        != profile["values"]["sample_proxmox_node_name"]
+    ):
         raise ValueError(f"{path}.proxmox_node_name does not match the provider profile")
     for key in (
         "management_ipv4",
@@ -453,7 +456,9 @@ def _validate_rendered_api_publication(path: Path) -> None:
             raise ValueError(f"{surface_path}.public_hostnames must stay empty unless publication_tier is public-edge")
         for hostname_index, hostname in enumerate(hostnames):
             hostname = require_str(hostname, f"{surface_path}.public_hostnames[{hostname_index}]")
-            _validate_example_scalar("sample_public_hostname", hostname, f"{surface_path}.public_hostnames[{hostname_index}]")
+            _validate_example_scalar(
+                "sample_public_hostname", hostname, f"{surface_path}.public_hostnames[{hostname_index}]"
+            )
 
 
 def _validate_rendered_secret_overlay(path: Path) -> None:
@@ -484,8 +489,12 @@ def validate_reference_deployment_sources(
     sample_catalog_path: Path = SAMPLE_CATALOG_PATH,
     provider_profiles_path: Path = PROVIDER_PROFILES_PATH,
 ) -> None:
-    provider_index = validate_provider_profile_catalog(load_provider_profiles(provider_profiles_path), path=provider_profiles_path)
-    samples = validate_sample_catalog(load_sample_catalog(sample_catalog_path), provider_index, path=sample_catalog_path)
+    provider_index = validate_provider_profile_catalog(
+        load_provider_profiles(provider_profiles_path), path=provider_profiles_path
+    )
+    samples = validate_sample_catalog(
+        load_sample_catalog(sample_catalog_path), provider_index, path=sample_catalog_path
+    )
 
     for sample in samples:
         for profile_id in sample["supported_provider_profiles"]:
@@ -530,9 +539,7 @@ def _list_payload() -> dict[str, Any]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Render and validate ADR 0339 reference deployment samples."
-    )
+    parser = argparse.ArgumentParser(description="Render and validate ADR 0339 reference deployment samples.")
     subparsers = parser.add_subparsers(dest="action", required=True)
 
     subparsers.add_parser("validate", help="Validate the committed sample and provider-profile sources.")
@@ -540,8 +547,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     render = subparsers.add_parser("render", help="Render one sample for one provider profile.")
     render.add_argument("--sample", required=True, help="Sample id from reference-deployments/catalog.yaml.")
-    render.add_argument("--profile", required=True, help="Provider profile id from config/reference-provider-profiles.yaml.")
-    render.add_argument("--output-dir", type=Path, required=True, help="Output directory for the rendered starter files.")
+    render.add_argument(
+        "--profile", required=True, help="Provider profile id from config/reference-provider-profiles.yaml."
+    )
+    render.add_argument(
+        "--output-dir", type=Path, required=True, help="Output directory for the rendered starter files."
+    )
     return parser
 
 

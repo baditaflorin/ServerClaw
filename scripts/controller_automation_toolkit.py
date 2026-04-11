@@ -16,7 +16,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.repo import *  # noqa: F401,F403
+from platform.repo import *  # noqa: F403
 from platform.repo import _load_yaml_without_pyyaml as repo_load_yaml_without_pyyaml
 
 
@@ -31,7 +31,6 @@ def _load_yaml_without_pyyaml(path: Path):
 import json as _json
 import sys as _sys
 from pathlib import Path as _Path
-from typing import Any as _Any, Optional as _Optional
 
 # ---- Auth loading -----------------------------------------------------------
 
@@ -57,9 +56,7 @@ def load_proxmox_auth(auth_file) -> dict:
         raise SystemExit(1)
     missing = _PROXMOX_AUTH_REQUIRED_KEYS - set(data)
     if missing:
-        _sys.stderr.write(
-            f"ERROR: Auth file '{auth_file}' missing required keys: {', '.join(sorted(missing))}\n"
-        )
+        _sys.stderr.write(f"ERROR: Auth file '{auth_file}' missing required keys: {', '.join(sorted(missing))}\n")
         raise SystemExit(1)
     return data
 
@@ -83,6 +80,7 @@ def load_operator_auth(auth_file) -> dict:
 
 
 # ---- JSON stdout output helpers (ADR 0343 exit code contract) ---------------
+
 
 def tool_output(status: str, **fields) -> None:
     """Write a JSON object to stdout with a 'status' key. All kwargs are included."""
@@ -113,6 +111,7 @@ def tool_exit_error(message: str, **fields) -> None:
 
 # ---- Topology loading (ADR 0344 snapshot format) ---------------------------
 
+
 def load_topology_snapshot(snapshot_path, env: str) -> dict:
     """
     Load per-environment topology from a JSON snapshot file (ADR 0344).
@@ -141,6 +140,7 @@ def load_topology_snapshot(snapshot_path, env: str) -> dict:
 
 
 # ---- Guest exec via Proxmox QAPI (ADR 0342) --------------------------------
+
 
 def proxmox_guest_exec(client, vmid: int, command, timeout: int = 60):
     """

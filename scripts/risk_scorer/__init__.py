@@ -1,4 +1,10 @@
-from .context import ScoringContext, assemble_context, compile_workflow_intent, load_risk_scoring_overrides, load_risk_scoring_weights
+from .context import (
+    ScoringContext,
+    assemble_context,
+    compile_workflow_intent,
+    load_risk_scoring_overrides,
+    load_risk_scoring_weights,
+)
 from .engine import approval_gate, classify, score_intent
 from .models import ExecutionIntent, RiskClass, RiskScore, max_risk_class
 

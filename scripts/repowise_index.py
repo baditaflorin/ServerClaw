@@ -22,14 +22,12 @@ import json
 import os
 import sys
 import time
-import uuid
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Inline OllamaEmbedder (no import from platform_context_service needed)
 # ---------------------------------------------------------------------------
 
-import math
 import urllib.error
 import urllib.request
 
@@ -48,7 +46,7 @@ class OllamaEmbedder:
             data=json.dumps(payload).encode(),
             headers={"Content-Type": "application/json"},
         )
-        with urllib.request.urlopen(req, timeout=300) as resp:  # noqa: S310
+        with urllib.request.urlopen(req, timeout=300) as resp:
             return json.loads(resp.read().decode())
 
     @staticmethod
@@ -67,14 +65,20 @@ class OllamaEmbedder:
                 return self._extract(self._request("/api/embed", {"model": self.model_name, "input": texts}))
             except Exception:
                 if attempt < 4:
-                    import time as _t; _t.sleep(10 * (attempt + 1))
+                    import time as _t
+
+                    _t.sleep(10 * (attempt + 1))
         if len(texts) == 1:
             for attempt in range(3):
                 try:
-                    return self._extract(self._request("/api/embeddings", {"model": self.model_name, "prompt": texts[0]}))
+                    return self._extract(
+                        self._request("/api/embeddings", {"model": self.model_name, "prompt": texts[0]})
+                    )
                 except Exception:
                     if attempt < 2:
-                        import time as _t; _t.sleep(15)
+                        import time as _t
+
+                        _t.sleep(15)
             raise RuntimeError("Ollama embed failed after retries for single text")
         mid = max(1, len(texts) // 2)
         return self._embed_batch(texts[:mid]) + self._embed_batch(texts[mid:])
@@ -113,7 +117,7 @@ class QdrantHTTP:
             headers={"Content-Type": "application/json"} if data else {},
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 return json.loads(resp.read().decode())
         except urllib.error.HTTPError as exc:
             body = exc.read().decode(errors="replace")
@@ -130,20 +134,28 @@ class QdrantHTTP:
         self._request("DELETE", f"/collections/{name}")
 
     def create_collection(self, name: str, dimension: int) -> None:
-        self._request("PUT", f"/collections/{name}", {
-            "vectors": {"size": dimension, "distance": "Cosine"},
-        })
+        self._request(
+            "PUT",
+            f"/collections/{name}",
+            {
+                "vectors": {"size": dimension, "distance": "Cosine"},
+            },
+        )
 
     def upsert(self, collection: str, points: list[dict]) -> None:
         self._request("PUT", f"/collections/{collection}/points", {"points": points})
 
     def search(self, collection: str, vector: list[float], top_k: int = 8) -> list[dict]:
-        resp = self._request("POST", f"/collections/{collection}/points/search", {
-            "vector": vector,
-            "limit": top_k,
-            "with_payload": True,
-            "with_vector": False,
-        })
+        resp = self._request(
+            "POST",
+            f"/collections/{collection}/points/search",
+            {
+                "vector": vector,
+                "limit": top_k,
+                "with_payload": True,
+                "with_vector": False,
+            },
+        )
         return resp.get("result", [])
 
     def count(self, collection: str) -> int:
@@ -172,8 +184,7 @@ def build_index(
     chunks = build_chunks(repo_root)
     manifest = build_manifest(repo_root, chunks)
     print(
-        f"  {manifest['total_chunks']} chunks from {manifest['total_files']} files "
-        f"in {time.time() - t0:.1f}s",
+        f"  {manifest['total_chunks']} chunks from {manifest['total_files']} files in {time.time() - t0:.1f}s",
         flush=True,
     )
     print(f"  By language: {manifest['by_language']}", flush=True)
@@ -219,7 +230,7 @@ def build_index(
                     "start_line": c["start_line"],
                 },
             }
-            for c, vec in zip(batch, vectors)
+            for c, vec in zip(batch, vectors, strict=False)
         ]
         qdrant.upsert(collection, points)
         done = min(batch_start + UPSERT_BATCH, total)

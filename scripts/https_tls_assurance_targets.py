@@ -249,7 +249,9 @@ def determine_probe_module(*, expected_issuer: str, host: str) -> str:
     return "http_2xx_follow_redirects"
 
 
-def preferred_probe_url(service: dict[str, Any], *, service_url: str, scope: str, health_probe: dict[str, Any] | None) -> str:
+def preferred_probe_url(
+    service: dict[str, Any], *, service_url: str, scope: str, health_probe: dict[str, Any] | None
+) -> str:
     service_id = require_str(service.get("id"), "service.id")
     if scope == "public":
         monitor_url = public_monitor_url(service_url, health_probe)
@@ -292,13 +294,17 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
             continue
 
         environment_entry = require_mapping(
-            require_mapping(service.get("environments", {}), f"service[{service_id}].environments").get(environment, {}),
+            require_mapping(service.get("environments", {}), f"service[{service_id}].environments").get(
+                environment, {}
+            ),
             f"service[{service_id}].environments.{environment}",
         )
         candidate_urls: list[tuple[str, str]] = []
         environment_url = environment_entry.get("url")
         if environment_entry.get("status") == "active" and is_https_url(environment_url):
-            candidate_urls.append(("environment", require_str(environment_url, f"service[{service_id}].environments.{environment}.url")))
+            candidate_urls.append(
+                ("environment", require_str(environment_url, f"service[{service_id}].environments.{environment}.url"))
+            )
         internal_url = service.get("internal_url")
         if is_https_url(internal_url):
             normalized_internal = normalize_url(require_str(internal_url, f"service[{service_id}].internal_url"))
@@ -319,7 +325,11 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
             host = require_str(parsed.hostname, f"{normalized_url}.hostname")
             port = parsed.port or 443
             subdomain_entry = subdomains.get(host)
-            exposure = str(subdomain_entry.get("exposure")) if subdomain_entry else str(service.get("exposure", "private-only"))
+            exposure = (
+                str(subdomain_entry.get("exposure"))
+                if subdomain_entry
+                else str(service.get("exposure", "private-only"))
+            )
             auth_requirement = (
                 str(subdomain_entry.get("auth_requirement"))
                 if subdomain_entry
@@ -332,7 +342,9 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
             if certificate is not None:
                 tls_provider = str(certificate["expected_issuer"])
             elif subdomain_entry:
-                tls_provider = str(require_mapping(subdomain_entry.get("tls", {}), f"subdomain[{host}].tls").get("provider", "any"))
+                tls_provider = str(
+                    require_mapping(subdomain_entry.get("tls", {}), f"subdomain[{host}].tls").get("provider", "any")
+                )
 
             preferred_public_url = preferred_probe_url(
                 service,
@@ -353,7 +365,9 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
                 )
             if certificate is not None:
                 endpoint = require_mapping(certificate.get("endpoint"), f"certificate[{certificate['id']}].endpoint")
-                server_name = require_str(endpoint.get("server_name"), f"certificate[{certificate['id']}].endpoint.server_name")
+                server_name = require_str(
+                    endpoint.get("server_name"), f"certificate[{certificate['id']}].endpoint.server_name"
+                )
                 if is_ip_address(host) and server_name != host:
                     probe_hostname = server_name
                     testssl_url = url_with_host(normalized_url, server_name)
@@ -443,12 +457,12 @@ def build_prometheus_alert_rules(targets: list[dict[str, Any]]) -> dict[str, Any
         rules.append(
             {
                 "alert": alert_name("HTTPSProbeFailed", target["id"]),
-                "expr": f'probe_success{{{selector}}} == 0',
+                "expr": f"probe_success{{{selector}}} == 0",
                 "for": "5m",
                 "labels": {**labels, "severity": "critical"},
                 "annotations": {
-                    "summary": f'{target["id"]} HTTPS probe is failing.',
-                    "description": f'{target["display_url"]} is no longer completing a healthy HTTPS probe through blackbox exporter.',
+                    "summary": f"{target['id']} HTTPS probe is failing.",
+                    "description": f"{target['display_url']} is no longer completing a healthy HTTPS probe through blackbox exporter.",
                     "runbook_url": runbook_url,
                 },
             }
@@ -457,14 +471,14 @@ def build_prometheus_alert_rules(targets: list[dict[str, Any]]) -> dict[str, Any
             {
                 "alert": alert_name("TLSCertificateExpiringWarning", target["id"]),
                 "expr": (
-                    f'((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_warn}'
+                    f"((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_warn}"
                 ),
                 "for": "15m",
                 "labels": {**labels, "severity": "warning"},
                 "annotations": {
-                    "summary": f'{target["id"]} TLS certificate is approaching expiry.',
+                    "summary": f"{target['id']} TLS certificate is approaching expiry.",
                     "description": (
-                        f'{target["display_url"]} has less than {threshold_warn} {target["policy"]["unit"]} '
+                        f"{target['display_url']} has less than {threshold_warn} {target['policy']['unit']} "
                         "remaining before certificate expiry."
                     ),
                     "runbook_url": runbook_url,
@@ -475,14 +489,14 @@ def build_prometheus_alert_rules(targets: list[dict[str, Any]]) -> dict[str, Any
             {
                 "alert": alert_name("TLSCertificateExpiringCritical", target["id"]),
                 "expr": (
-                    f'((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_critical}'
+                    f"((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_critical}"
                 ),
                 "for": "15m",
                 "labels": {**labels, "severity": "critical"},
                 "annotations": {
-                    "summary": f'{target["id"]} TLS certificate is within the critical expiry window.',
+                    "summary": f"{target['id']} TLS certificate is within the critical expiry window.",
                     "description": (
-                        f'{target["display_url"]} has less than {threshold_critical} {target["policy"]["unit"]} '
+                        f"{target['display_url']} has less than {threshold_critical} {target['policy']['unit']} "
                         "remaining before certificate expiry."
                     ),
                     "runbook_url": runbook_url,

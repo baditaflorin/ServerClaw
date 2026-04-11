@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import argparse
-import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 
 import yaml
 
@@ -37,7 +36,7 @@ class AuditResult:
 
 
 class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
 
 
@@ -89,7 +88,7 @@ def fetch_headers(url: str, timeout: float) -> tuple[int, dict[str, str]]:
     opener = urllib.request.build_opener(NoRedirectHandler)
     request = urllib.request.Request(url, method="GET")
     try:
-        with opener.open(request, timeout=timeout) as response:  # noqa: S310
+        with opener.open(request, timeout=timeout) as response:
             return response.getcode(), {key.lower(): value.strip() for key, value in response.headers.items()}
     except urllib.error.HTTPError as exc:
         return exc.code, {key.lower(): value.strip() for key, value in exc.headers.items()}

@@ -201,8 +201,12 @@ class DocsSiteTests(unittest.TestCase):
     def test_mkdocs_build_uses_global_robots_override(self) -> None:
         mkdocs_config = (REPO_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
         override_template = (REPO_ROOT / "docs" / "theme-overrides" / "main.html").read_text(encoding="utf-8")
-        header_override = (REPO_ROOT / "docs" / "theme-overrides" / "partials" / "header.html").read_text(encoding="utf-8")
-        search_override = (REPO_ROOT / "docs" / "theme-overrides" / "partials" / "search.html").read_text(encoding="utf-8")
+        header_override = (REPO_ROOT / "docs" / "theme-overrides" / "partials" / "header.html").read_text(
+            encoding="utf-8"
+        )
+        search_override = (REPO_ROOT / "docs" / "theme-overrides" / "partials" / "search.html").read_text(
+            encoding="utf-8"
+        )
 
         self.assertIn("custom_dir: docs/theme-overrides", mkdocs_config)
         self.assertIn("validation:\n  nav:\n    omitted_files: ignore", mkdocs_config)

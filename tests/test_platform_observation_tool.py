@@ -8,9 +8,7 @@ import platform_observation_tool as tool
 
 
 def test_parse_not_after_reads_subject_and_expiry():
-    subject, expires = tool.parse_not_after(
-        "subject=CN=example\nnotAfter=Mar 23 20:32:11 2026 GMT\n"
-    )
+    subject, expires = tool.parse_not_after("subject=CN=example\nnotAfter=Mar 23 20:32:11 2026 GMT\n")
     assert subject == "CN=example"
     assert expires is not None
     assert expires.year == 2026
@@ -432,7 +430,9 @@ def test_build_service_probes_retains_full_service_definition() -> None:
     }
 
     probes = tool.build_service_probes(catalog)
-    readiness_probe = next(probe for probe in probes if probe["service_id"] == "coolify" and probe["phase"] == "readiness")
+    readiness_probe = next(
+        probe for probe in probes if probe["service_id"] == "coolify" and probe["phase"] == "readiness"
+    )
 
     assert readiness_probe["service_definition"] == catalog["services"]["coolify"]
 

@@ -29,7 +29,9 @@ def prepare_repo(tmp_path: Path) -> Path:
         json.dumps({"services": [{"id": "netbox", "name": "NetBox", "lifecycle_status": "active"}]}) + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "versions" / "stack.yaml").write_text("repo_version: 0.1.0\nplatform_version: 0.1.0\n", encoding="utf-8")
+    (tmp_path / "versions" / "stack.yaml").write_text(
+        "repo_version: 0.1.0\nplatform_version: 0.1.0\n", encoding="utf-8"
+    )
     (tmp_path / ".local" / "triage" / "reports" / "inc-1.json").write_text(
         json.dumps({"incident_id": "inc-1", "affected_service": "netbox", "status": "firing"}) + "\n",
         encoding="utf-8",

@@ -65,7 +65,9 @@ def build_plan() -> dict[str, Any]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Generate the current renewal execution plan from the certificate catalog.")
+    parser = argparse.ArgumentParser(
+        description="Generate the current renewal execution plan from the certificate catalog."
+    )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
     return parser
 

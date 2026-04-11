@@ -145,15 +145,9 @@ def resolve_scope(
     in the rule table.  The target resolution (``resolve_target``) adds the hosts
     and VMIDs that are known from the service catalog at compile time.
     """
-    allowed_hosts = list(dict.fromkeys(
-        rule_scope_defaults.get("allowed_hosts", []) + target.hosts
-    ))
-    allowed_services = list(dict.fromkeys(
-        rule_scope_defaults.get("allowed_services", []) + target.services
-    ))
-    allowed_vmids = list(dict.fromkeys(
-        rule_scope_defaults.get("allowed_vmids", []) + target.vmids
-    ))
+    allowed_hosts = list(dict.fromkeys(rule_scope_defaults.get("allowed_hosts", []) + target.hosts))
+    allowed_services = list(dict.fromkeys(rule_scope_defaults.get("allowed_services", []) + target.services))
+    allowed_vmids = list(dict.fromkeys(rule_scope_defaults.get("allowed_vmids", []) + target.vmids))
     return IntentScope(
         allowed_hosts=allowed_hosts,
         allowed_services=allowed_services,

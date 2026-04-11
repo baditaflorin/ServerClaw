@@ -20,6 +20,7 @@ Examples
   python scripts/command_catalog_tool.py check --command converge-gitea --requester-class agent
   python scripts/command_catalog_tool.py policies
 """
+
 from __future__ import annotations
 
 import argparse
@@ -41,6 +42,7 @@ def _load() -> dict:
 # ---------------------------------------------------------------------------
 # commands
 # ---------------------------------------------------------------------------
+
 
 def cmd_list(args: argparse.Namespace) -> int:
     data = _load()
@@ -162,6 +164,7 @@ def cmd_policies(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(

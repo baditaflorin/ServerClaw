@@ -12,7 +12,9 @@ def load_yaml(path: Path) -> list[dict] | dict:
     return yaml.safe_load(path.read_text())
 
 
-def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_services_edge_refresh_and_retirement() -> None:
+def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_services_edge_refresh_and_retirement() -> (
+    None
+):
     playbook = load_yaml(PLAYBOOK_PATH)
     play_names = [play["name"] for play in playbook]
 
@@ -57,9 +59,7 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "lv3.platform.nomad_cluster_member",
         "lv3.platform.runtime_pool_substrate",
     ]
-    assert playbook[1]["roles"][0]["vars"] == {
-        "linux_guest_firewall_recover_missing_docker_bridge_chains": True
-    }
+    assert playbook[1]["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
 
     assert playbook[3]["hosts"] == "monitoring-lv3"
     assert [role["role"] for role in playbook[3]["roles"]] == ["lv3.platform.nomad_namespace"]
@@ -82,9 +82,7 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "lv3.platform.mailpit_runtime",
     ]
     post_task_urls = [
-        task["ansible.builtin.uri"]["url"]
-        for task in playbook[4]["post_tasks"]
-        if "ansible.builtin.uri" in task
+        task["ansible.builtin.uri"]["url"] for task in playbook[4]["post_tasks"] if "ansible.builtin.uri" in task
     ]
     assert "http://127.0.0.1:9080/uptime-kuma" in post_task_urls
     assert "http://127.0.0.1:9080/homepage" in post_task_urls

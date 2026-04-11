@@ -47,10 +47,7 @@ def validate_all() -> int:
 
 def check_live_apply(target: str) -> int:
     result = check_live_apply_target(target)
-    print(
-        f"Live apply contract OK: {result['target']} -> "
-        f"{Path(result['playbook']).relative_to(Path.cwd())}"
-    )
+    print(f"Live apply contract OK: {result['target']} -> {Path(result['playbook']).relative_to(Path.cwd())}")
     return 0
 
 

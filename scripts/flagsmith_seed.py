@@ -229,7 +229,9 @@ def ensure_feature(
     desired_type = spec.get("type", "STANDARD")
     desired_initial_value = str(spec.get("initial_value", ""))
     desired_default_enabled = bool(spec.get("default_enabled", False))
-    feature = next((item for item in list_project_features(base_url, token, project_id) if item.get("name") == name), None)
+    feature = next(
+        (item for item in list_project_features(base_url, token, project_id) if item.get("name") == name), None
+    )
     changed = False
     if feature is None:
         feature = http_json(
@@ -385,7 +387,9 @@ def get_server_api_key(
             token=token,
         )
     )
-    api_key = next((item for item in api_keys if item.get("name") == key_name and item.get("active") is not False), None)
+    api_key = next(
+        (item for item in api_keys if item.get("name") == key_name and item.get("active") is not False), None
+    )
     if api_key is None:
         raise RuntimeError(f"active server API key {key_name!r} was not found")
     return api_key
@@ -420,7 +424,9 @@ def sdk_get_environment_document(base_url: str, environment_key: str) -> dict[st
     return payload
 
 
-def build_openbao_payload(organisation: dict[str, Any], project: dict[str, Any], environment_keys_bundle: dict[str, Any]) -> dict[str, Any]:
+def build_openbao_payload(
+    organisation: dict[str, Any], project: dict[str, Any], environment_keys_bundle: dict[str, Any]
+) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "organisation_id": str(organisation["id"]),
         "organisation_name": organisation["name"],
@@ -520,7 +526,11 @@ def verify(args: argparse.Namespace) -> int:
 
     projects = list_projects(base_url, token)
     project = next(
-        (item for item in projects if item.get("name") == args.project_name and item.get("organisation") == organisation["id"]),
+        (
+            item
+            for item in projects
+            if item.get("name") == args.project_name and item.get("organisation") == organisation["id"]
+        ),
         None,
     )
     if project is None:

@@ -46,7 +46,13 @@ def prepare_world_state_db(path: Path) -> Path:
     connection.executemany(
         "INSERT INTO world_state_current_view (surface, data, collected_at, stale, is_expired) VALUES (?, ?, ?, ?, ?)",
         [
-            ("service_health", json.dumps({"services": [{"service_id": "windmill"}]}), "2026-03-24T09:05:00+00:00", 0, 0),
+            (
+                "service_health",
+                json.dumps({"services": [{"service_id": "windmill"}]}),
+                "2026-03-24T09:05:00+00:00",
+                0,
+                0,
+            ),
             ("dns_records", json.dumps([{"fqdn": "grafana.lv3.org"}]), "2026-03-24T09:10:00+00:00", 1, 1),
         ],
     )

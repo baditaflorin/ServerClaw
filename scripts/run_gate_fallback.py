@@ -21,9 +21,7 @@ DEFAULT_MANIFEST = Path("config/validation-gate.json")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Rerun only unresolved gate checks after a remote gate fallback."
-    )
+    parser = argparse.ArgumentParser(description="Rerun only unresolved gate checks after a remote gate fallback.")
     parser.add_argument(
         "checks",
         nargs="*",
@@ -113,9 +111,7 @@ def is_remote_gate_payload(payload: dict[str, Any] | None) -> bool:
 def unresolved_checks(payload: dict[str, Any]) -> list[str]:
     checks = payload.get("checks", [])
     return [
-        str(check["id"])
-        for check in checks
-        if isinstance(check, dict) and str(check.get("status", "")) != "passed"
+        str(check["id"]) for check in checks if isinstance(check, dict) and str(check.get("status", "")) != "passed"
     ]
 
 
@@ -190,11 +186,7 @@ def merge_lane_results(
             continue
 
         selected_checks = [str(item) for item in updated_lane.get("selected_checks", [])]
-        statuses = [
-            merged_statuses[check_id]
-            for check_id in selected_checks
-            if check_id in merged_statuses
-        ]
+        statuses = [merged_statuses[check_id] for check_id in selected_checks if check_id in merged_statuses]
         status = lane_status(statuses)
         updated_lane["status"] = status
         if status == "passed":
@@ -202,8 +194,7 @@ def merge_lane_results(
             title = str(updated_lane.get("title", "Validation lane"))
             if matched_files:
                 updated_lane["green_path_summary"] = (
-                    f"{title} passed for {len(matched_files)} changed file(s) via "
-                    f"{', '.join(selected_checks)}."
+                    f"{title} passed for {len(matched_files)} changed file(s) via {', '.join(selected_checks)}."
                 )
             else:
                 updated_lane["green_path_summary"] = (
@@ -244,50 +235,28 @@ def merge_status_payloads(
     remote_payload: dict[str, Any],
     local_payload: dict[str, Any],
 ) -> dict[str, Any]:
-    remote_checks = [
-        check for check in remote_payload.get("checks", []) if isinstance(check, dict)
-    ]
-    local_checks = [
-        check for check in local_payload.get("checks", []) if isinstance(check, dict)
-    ]
+    remote_checks = [check for check in remote_payload.get("checks", []) if isinstance(check, dict)]
+    local_checks = [check for check in local_payload.get("checks", []) if isinstance(check, dict)]
     local_by_id = {str(check["id"]): check for check in local_checks if "id" in check}
     remote_ids = [str(check["id"]) for check in remote_checks if "id" in check]
 
-    merged_checks = [
-        local_by_id.get(str(check["id"]), check)
-        for check in remote_checks
-        if "id" in check
-    ]
-    merged_checks.extend(
-        check for check_id, check in local_by_id.items() if check_id not in remote_ids
-    )
+    merged_checks = [local_by_id.get(str(check["id"]), check) for check in remote_checks if "id" in check]
+    merged_checks.extend(check for check_id, check in local_by_id.items() if check_id not in remote_ids)
 
-    merged_statuses = {
-        str(check["id"]): str(check.get("status", "failed"))
-        for check in merged_checks
-        if "id" in check
-    }
-    merged_returncodes = {
-        str(check["id"]): int(check.get("returncode", 1))
-        for check in merged_checks
-        if "id" in check
-    }
+    merged_statuses = {str(check["id"]): str(check.get("status", "failed")) for check in merged_checks if "id" in check}
+    merged_returncodes = {str(check["id"]): int(check.get("returncode", 1)) for check in merged_checks if "id" in check}
 
     merged_payload = dict(remote_payload)
     merged_payload.update(
         {
             "status": (
                 "passed"
-                if merged_checks and all(
-                    str(check.get("status", "")) == "passed" for check in merged_checks
-                )
+                if merged_checks and all(str(check.get("status", "")) == "passed" for check in merged_checks)
                 else "failed"
             ),
             "source": local_payload.get("source", remote_payload.get("source", "local-fallback")),
             "workspace": local_payload.get("workspace", remote_payload.get("workspace")),
-            "session_workspace": local_payload.get(
-                "session_workspace", remote_payload.get("session_workspace")
-            ),
+            "session_workspace": local_payload.get("session_workspace", remote_payload.get("session_workspace")),
             "manifest": local_payload.get("manifest", remote_payload.get("manifest")),
             "executed_at": local_payload.get("executed_at", remote_payload.get("executed_at")),
             "runner": local_payload.get("runner", remote_payload.get("runner")),
@@ -296,12 +265,8 @@ def merge_status_payloads(
                 "requested_checks",
                 local_payload.get("requested_checks", [check["id"] for check in merged_checks]),
             ),
-            "lane_catalog": remote_payload.get(
-                "lane_catalog", local_payload.get("lane_catalog")
-            ),
-            "lane_selection": remote_payload.get(
-                "lane_selection", local_payload.get("lane_selection")
-            ),
+            "lane_catalog": remote_payload.get("lane_catalog", local_payload.get("lane_catalog")),
+            "lane_selection": remote_payload.get("lane_selection", local_payload.get("lane_selection")),
             "lane_results": merge_lane_results(
                 remote_lane_results=remote_payload.get("lane_results"),
                 local_lane_results=local_payload.get("lane_results"),
@@ -349,22 +314,11 @@ def run_fallback_gate(argv: list[str] | None = None) -> int:
     rerun_checks = unresolved_checks(prior_payload) if use_remote_payload else []
 
     if rerun_checks:
-        print(
-            "run_gate_fallback: rerunning unresolved remote checks locally: "
-            + ", ".join(rerun_checks)
-        )
+        print("run_gate_fallback: rerunning unresolved remote checks locally: " + ", ".join(rerun_checks))
     elif prior_payload is not None and not use_remote_payload:
-        print(
-            "run_gate_fallback: ignoring stale non-remote gate status and running the "
-            "requested local checks."
-        )
+        print("run_gate_fallback: ignoring stale non-remote gate status and running the requested local checks.")
 
-    python_binary = (
-        os.environ.get("LV3_VALIDATE_PYTHON_BIN")
-        or sys.executable
-        or shutil.which("python3")
-        or "python3"
-    )
+    python_binary = os.environ.get("LV3_VALIDATE_PYTHON_BIN") or sys.executable or shutil.which("python3") or "python3"
     checks_to_run = rerun_checks or list(args.checks)
 
     with tempfile.NamedTemporaryFile(
@@ -414,10 +368,7 @@ def run_fallback_gate(argv: list[str] | None = None) -> int:
     temp_status_path.unlink(missing_ok=True)
 
     if use_remote_payload and rerun_checks:
-        print(
-            "run_gate_fallback: merged local rerun with synced remote gate status at "
-            f"{status_file}"
-        )
+        print(f"run_gate_fallback: merged local rerun with synced remote gate status at {status_file}")
 
     return 0 if final_payload.get("status") == "passed" else (completed.returncode or 1)
 

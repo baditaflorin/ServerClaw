@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import html
 import re
-from urllib.parse import quote
 
 
 def escape(value: object) -> str:
@@ -21,9 +20,7 @@ def render_badge(label: str, tone: str) -> str:
 
 
 def render_external_link(href: str, label: str) -> str:
-    return (
-        f'<a class="chip-link" href="{escape(href)}" target="_blank" rel="noreferrer">{escape(label)}</a>'
-    )
+    return f'<a class="chip-link" href="{escape(href)}" target="_blank" rel="noreferrer">{escape(label)}</a>'
 
 
 ROBOTS_META_CONTENT = "noindex, nofollow"
@@ -37,7 +34,7 @@ def _render_help_sections(sections: list[dict[str, str]]) -> str:
         items.append(
             '<li class="contextual-help-list-item">'
             f'<a href="{escape(item["href"])}">{escape(item["label"])}</a>'
-            f'<span>{escape(item["summary"])}</span>'
+            f"<span>{escape(item['summary'])}</span>"
             "</li>"
         )
     return (
@@ -55,8 +52,8 @@ def _render_help_glossary(glossary: list[dict[str, str]]) -> str:
     for item in glossary:
         items.append(
             '<li class="contextual-help-list-item">'
-            f'<strong>{escape(item["term"])}</strong>'
-            f'<span>{escape(item["definition"])}</span>'
+            f"<strong>{escape(item['term'])}</strong>"
+            f"<span>{escape(item['definition'])}</span>"
             "</li>"
         )
     return (
@@ -75,7 +72,7 @@ def _render_help_references(references: list[dict[str, str]]) -> str:
         links.append(
             '<li class="contextual-help-link-row">'
             f'<a href="{escape(item["href"])}" target="_blank" rel="noreferrer">{escape(item["label"])}</a>'
-            f'<span>{escape(item["kind"])}</span>'
+            f"<span>{escape(item['kind'])}</span>"
             "</li>"
         )
     return (
@@ -94,7 +91,7 @@ def _render_help_escalation(escalation: dict[str, object] | None) -> str:
     if isinstance(runbook, dict):
         runbook_html = (
             '<div class="contextual-help-escalation-row">'
-            '<strong>Owning runbook</strong>'
+            "<strong>Owning runbook</strong>"
             f'<a href="{escape(runbook.get("href", ""))}" target="_blank" rel="noreferrer">{escape(runbook.get("label", "Runbook"))}</a>'
             "</div>"
         )
@@ -102,13 +99,13 @@ def _render_help_escalation(escalation: dict[str, object] | None) -> str:
         '<section class="contextual-help-block contextual-help-block-accent">'
         '<h2 class="contextual-help-title">Escalation Path</h2>'
         '<div class="contextual-help-escalation-row">'
-        '<strong>Back out safely</strong>'
-        f'<span>{escape(escalation.get("backout", ""))}</span>'
+        "<strong>Back out safely</strong>"
+        f"<span>{escape(escalation.get('backout', ''))}</span>"
         "</div>"
         f"{runbook_html}"
         '<div class="contextual-help-escalation-row">'
-        '<strong>Handoff</strong>'
-        f'<span>{escape(escalation.get("handoff", ""))}</span>'
+        "<strong>Handoff</strong>"
+        f"<span>{escape(escalation.get('handoff', ''))}</span>"
         "</div>"
         "</section>"
     )
@@ -122,10 +119,7 @@ def render_contextual_help(contextual_help: dict[str, object] | None) -> str:
     if isinstance(audience, list) and audience:
         chips = "".join(f'<span class="tag">{escape(item)}</span>' for item in audience)
         audience_html = (
-            '<div class="contextual-help-audience">'
-            '<strong>Audience</strong>'
-            f'<div class="chip-row">{chips}</div>'
-            "</div>"
+            f'<div class="contextual-help-audience"><strong>Audience</strong><div class="chip-row">{chips}</div></div>'
         )
     sections = contextual_help.get("sections")
     glossary = contextual_help.get("glossary")
@@ -186,7 +180,7 @@ def page_template(
         {help_html}
       </header>
       <nav class="nav-bar">
-        {''.join(nav_html)}
+        {"".join(nav_html)}
       </nav>
       <main class="page-content">
         {body}

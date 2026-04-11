@@ -85,9 +85,9 @@ class ValidateServiceCatalogTest(unittest.TestCase):
                                 {
                                     "id": "broken-suite",
                                     "name": "Broken suite",
-                                    "description": "Missing both receipt keywords and verification tokens."
+                                    "description": "Missing both receipt keywords and verification tokens.",
                                 }
-                            ]
+                            ],
                         }
                     },
                     "uptime_monitor_name": "Grafana Public",
@@ -99,7 +99,9 @@ class ValidateServiceCatalogTest(unittest.TestCase):
             ],
         }
 
-        with self.assertRaisesRegex(ValueError, "must declare at least one receipt keyword or verification check token"):
+        with self.assertRaisesRegex(
+            ValueError, "must declare at least one receipt keyword or verification check token"
+        ):
             service_catalog.validate_service_catalog(catalog)
 
     def test_stage_ready_environment_requires_smoke_suite_ids(self) -> None:

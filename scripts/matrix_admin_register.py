@@ -184,7 +184,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--shared-secret-file", required=True, type=Path)
     parser.add_argument("--username", required=True, help="Localpart or full MXID to register and verify")
     parser.add_argument("--password-file", required=True, type=Path)
-    parser.add_argument("--access-token-file", type=Path, help="Optional local file used to persist a verified Matrix access token")
+    parser.add_argument(
+        "--access-token-file", type=Path, help="Optional local file used to persist a verified Matrix access token"
+    )
     parser.add_argument("--admin", action="store_true", help="Register the user as a Synapse admin")
     return parser.parse_args()
 

@@ -38,7 +38,9 @@ def test_wrapper_processes_actionable_findings(tmp_path: Path) -> None:
         json.dumps({"workflows": {"converge-netbox": {"description": "Converge", "live_impact": "guest_live"}}}) + "\n",
         encoding="utf-8",
     )
-    (repo_root / "config" / "controller-local-secrets.json").write_text(json.dumps({"secrets": {}}) + "\n", encoding="utf-8")
+    (repo_root / "config" / "controller-local-secrets.json").write_text(
+        json.dumps({"secrets": {}}) + "\n", encoding="utf-8"
+    )
     (repo_root / "scripts" / "incident_triage.py").write_text(
         """
 def build_report(payload):

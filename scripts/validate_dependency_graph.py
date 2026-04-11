@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
         load_dependency_graph(validate_schema=True)
         print("Dependency graph OK")
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("dependency graph", exc)
 
 

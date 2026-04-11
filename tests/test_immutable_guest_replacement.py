@@ -157,20 +157,20 @@ def test_validate_catalog_requires_r2_for_warm_standby(
     )
     _write_yaml(
         host_vars_path,
-        "proxmox_guests:\n"
-        "  - name: alpha-vm\n"
-        "    vmid: 210\n"
-        "    role: alpha\n"
-        "    template_key: alpha-template\n",
+        "proxmox_guests:\n  - name: alpha-vm\n    vmid: 210\n    role: alpha\n    template_key: alpha-template\n",
     )
 
     monkeypatch.setattr(immutable_guest_replacement, "IMMUTABLE_GUEST_REPLACEMENT_PATH", guest_catalog_path)
     monkeypatch.setattr(immutable_guest_replacement, "HOST_VARS_PATH", host_vars_path)
     monkeypatch.setattr(immutable_guest_replacement.service_redundancy, "SERVICE_CATALOG_PATH", service_catalog_path)
-    monkeypatch.setattr(immutable_guest_replacement.service_redundancy, "SERVICE_REDUNDANCY_PATH", redundancy_catalog_path)
+    monkeypatch.setattr(
+        immutable_guest_replacement.service_redundancy, "SERVICE_REDUNDANCY_PATH", redundancy_catalog_path
+    )
 
     catalog = immutable_guest_replacement.load_guest_replacement_catalog()
-    with pytest.raises(ValueError, match="warm_standby requires at least one hosted service at redundancy tier R2 or higher"):
+    with pytest.raises(
+        ValueError, match="warm_standby requires at least one hosted service at redundancy tier R2 or higher"
+    ):
         immutable_guest_replacement.validate_guest_replacement_catalog(catalog)
 
 

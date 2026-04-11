@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0.0",
-  "generated_at": "2026-04-08T00:45:00Z",
+  "created_at": "2026-04-08T00:45:00Z",
   "branch": "main",
   "commit": "273f798b3",
   "bypass": "skip_remote_gate",

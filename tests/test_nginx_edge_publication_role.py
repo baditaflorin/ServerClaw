@@ -62,7 +62,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             "{{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages",
         )
         self.assertEqual(self.defaults["public_edge_apex_hostname"], "lv3.org")
-        self.assertEqual(self.defaults["public_edge_additional_certificate_domains"], ["{{ public_edge_apex_hostname }}"])
+        self.assertEqual(
+            self.defaults["public_edge_additional_certificate_domains"], ["{{ public_edge_apex_hostname }}"]
+        )
         self.assertEqual(self.defaults["public_edge_certbot_retries"], 6)
         self.assertEqual(self.defaults["public_edge_certbot_delay_seconds"], 15)
         self.assertEqual(self.defaults["public_edge_robots_meta_content"], "noindex, nofollow")
@@ -150,6 +152,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("unauthenticated_paths", protected_sites["logs.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["home.lv3.org"])
         self.assertEqual(protected_sites["tasks.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
 
@@ -168,9 +171,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             task_names,
         )
         self.assertIn("Render the crawl policy robots.txt", task_names)
-        publish_task = next(
-            task for task in self.tasks if task["name"] == "Publish generated static site directories"
-        )
+        publish_task = next(task for task in self.tasks if task["name"] == "Publish generated static site directories")
         self.assertIn("ansible.builtin.command", publish_task)
         self.assertEqual(publish_task["delegate_to"], "localhost")
         self.assertFalse(publish_task["become"])
@@ -189,7 +190,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         site_local_task = next(
             task
             for task in self.tasks
-            if task["name"] == "Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate"
+            if task["name"]
+            == "Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate"
         )
         self.assertEqual(obtain_task["register"], "public_edge_certbot_issue")
         self.assertEqual(obtain_task["retries"], "{{ public_edge_certbot_retries }}")
@@ -213,9 +215,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_certificate_san_regex_preserves_domains_with_s_characters(self) -> None:
         derive_task = next(
-            task
-            for task in self.tasks
-            if task["name"] == "Derive current and missing public edge certificate domains"
+            task for task in self.tasks if task["name"] == "Derive current and missing public edge certificate domains"
         )
         current_domains_expr = derive_task["ansible.builtin.set_fact"]["public_edge_current_certificate_domains"]
 
@@ -253,8 +253,13 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
         self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.lv3.org"]["content_security_policy"])
         self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
-        self.assertIn("style-src 'self' 'unsafe-inline' https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
-        self.assertIn("font-src 'self' data: https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+        self.assertIn(
+            "style-src 'self' 'unsafe-inline' https://unpkg.com",
+            security_overrides["ops.lv3.org"]["content_security_policy"],
+        )
+        self.assertIn(
+            "font-src 'self' data: https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"]
+        )
         self.assertIn("wiki.lv3.org", security_overrides)
         self.assertIn("'unsafe-inline'", security_overrides["wiki.lv3.org"]["content_security_policy"])
         self.assertIn("https://wiki.lv3.org", security_overrides["wiki.lv3.org"]["content_security_policy"])
@@ -303,14 +308,19 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.proxy_read_timeout_seconds | default(300)", self.template)
         self.assertIn("site.proxy_send_timeout_seconds | default(proxy_read_timeout_seconds)", self.template)
         self.assertIn("location = {{ redirect.path }} {", self.template)
-        self.assertIn("return {{ redirect.status | default(301) }} {{ redirect.target | default(redirect.location) }};", self.template)
+        self.assertIn(
+            "return {{ redirect.status | default(301) }} {{ redirect.target | default(redirect.location) }};",
+            self.template,
+        )
         self.assertIn("proxy_hide_header {{ header_name }};", self.template)
         self.assertIn("protected_site.unauthenticated_prefix_paths | default([])", self.template)
         self.assertIn("location ^~ {{ path }} {", self.template)
         self.assertIn("location ^~ {{ route.path }} {", self.template)
         self.assertIn("proxy_buffering off;", self.template)
         self.assertIn("site_tls_enabled = public_edge_tls_enabled or", self.template)
-        self.assertIn("ssl_certificate /etc/letsencrypt/live/{{ site_tls_certificate_name(site) }}/fullchain.pem;", self.template)
+        self.assertIn(
+            "ssl_certificate /etc/letsencrypt/live/{{ site_tls_certificate_name(site) }}/fullchain.pem;", self.template
+        )
 
     def test_template_supports_plausible_tracker_injection(self) -> None:
         plausible_mapping_expr = self.defaults["public_edge_plausible_tracked_sites"]
@@ -329,14 +339,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
     def test_template_renders_security_headers_from_default_and_override_maps(self) -> None:
         self.assertIn("site.security_headers_enabled | default(true)", self.template)
         self.assertIn("public_edge_security_headers_default | combine(", self.template)
-        self.assertIn('add_header Strict-Transport-Security', self.template)
-        self.assertIn('add_header Cross-Origin-Resource-Policy', self.template)
-        self.assertIn('add_header Content-Security-Policy', self.template)
-        self.assertIn('add_header Permissions-Policy', self.template)
+        self.assertIn("add_header Strict-Transport-Security", self.template)
+        self.assertIn("add_header Cross-Origin-Resource-Policy", self.template)
+        self.assertIn("add_header Content-Security-Policy", self.template)
+        self.assertIn("add_header Permissions-Policy", self.template)
         self.assertIn("site.preserve_upstream_security_headers | default(false)", self.template)
         self.assertIn("site.crawl_policy_enabled | default(true)", self.template)
-        self.assertIn('proxy_hide_header Cross-Origin-Resource-Policy;', self.template)
-        self.assertIn('proxy_hide_header Content-Security-Policy;', self.template)
+        self.assertIn("proxy_hide_header Cross-Origin-Resource-Policy;", self.template)
+        self.assertIn("proxy_hide_header Content-Security-Policy;", self.template)
 
     def test_template_renders_shared_session_logout_contract(self) -> None:
         self.assertIn("public_edge_session_authority.shared_logout_path", self.template)

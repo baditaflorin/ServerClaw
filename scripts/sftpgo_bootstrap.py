@@ -40,8 +40,8 @@ def request_json(
     payload = None
     request_headers = dict(headers or {})
     if body is not None:
-      payload = json.dumps(body).encode("utf-8")
-      request_headers.setdefault("Content-Type", "application/json")
+        payload = json.dumps(body).encode("utf-8")
+        request_headers.setdefault("Content-Type", "application/json")
     request = urllib.request.Request(url, data=payload, headers=request_headers, method=method)
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -63,7 +63,7 @@ def request_json(
 
 
 def basic_headers(username: str, password: str) -> dict[str, str]:
-    token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+    token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
     return {"Authorization": f"Basic {token}"}
 
 
@@ -208,11 +208,7 @@ def ensure_api_key(
     local_key = local_key_path.read_text(encoding="utf-8").strip() if local_key_path.exists() else ""
 
     recreate = False
-    if len(matching) > 1:
-        recreate = True
-    elif matching and not local_key:
-        recreate = True
-    elif not matching:
+    if len(matching) > 1 or (matching and not local_key) or not matching:
         recreate = True
 
     if recreate:
@@ -403,7 +399,7 @@ def command_verify(args: argparse.Namespace) -> int:
 
 def command_smoke_webdav(args: argparse.Namespace) -> int:
     password = read_text(args.password_file)
-    auth = base64.b64encode(f"{args.username}:{password}".encode("utf-8")).decode("ascii")
+    auth = base64.b64encode(f"{args.username}:{password}".encode()).decode("ascii")
     headers = {"Authorization": f"Basic {auth}"}
     remote_path = "/" + args.remote_path.lstrip("/")
     remote_url = args.base_url.rstrip("/") + urllib.parse.quote(remote_path)
@@ -420,7 +416,9 @@ def command_smoke_webdav(args: argparse.Namespace) -> int:
             if response.status not in (200, 201, 204):
                 raise RuntimeError(f"WebDAV PUT returned {response.status}")
     except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"WebDAV PUT failed with {exc.code}: {exc.read().decode('utf-8', errors='replace')}") from exc
+        raise RuntimeError(
+            f"WebDAV PUT failed with {exc.code}: {exc.read().decode('utf-8', errors='replace')}"
+        ) from exc
 
     get_request = urllib.request.Request(remote_url, headers=headers, method="GET")
     with urllib.request.urlopen(get_request, timeout=30) as response:

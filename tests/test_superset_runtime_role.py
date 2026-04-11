@@ -36,7 +36,10 @@ def load_bootstrap_module():
 def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract() -> None:
     defaults = load_yaml(ROLE_DEFAULTS)
 
-    assert defaults["superset_service_topology"] == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('superset') }}"
+    assert (
+        defaults["superset_service_topology"]
+        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('superset') }}"
+    )
     assert defaults["superset_site_dir"] == "/opt/superset"
     assert defaults["superset_build_dir"] == "{{ superset_site_dir }}/build"
     assert defaults["superset_data_dir"] == "{{ superset_site_dir }}/data"
@@ -45,8 +48,13 @@ def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract()
     assert defaults["superset_static_env_file"] == "{{ superset_site_dir }}/runtime.env"
     assert defaults["superset_public_base_url"] == "https://{{ superset_service_topology.public_hostname }}"
     assert defaults["superset_image_name"] == "lv3/superset"
-    assert defaults["superset_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.superset_port }}"
-    assert defaults["superset_controller_bootstrap_script_local_path"] == "{{ inventory_dir ~ '/../scripts/superset_bootstrap.py' }}"
+    assert (
+        defaults["superset_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.superset_port }}"
+    )
+    assert (
+        defaults["superset_controller_bootstrap_script_local_path"]
+        == "{{ inventory_dir ~ '/../scripts/superset_bootstrap.py' }}"
+    )
     assert defaults["superset_keycloak_client_id"] == "superset"
     assert defaults["superset_landing_dataset_name"] == "platform_database_inventory"
     assert defaults["superset_landing_chart_title"] == "PostgreSQL Databases"
@@ -86,7 +94,9 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
     assert "Bootstrap the Superset datasource inventory and landing dashboard" in names
     assert "Verify the Superset runtime" in names
 
-    bootstrap_task = next(task for task in tasks if task["name"] == "Bootstrap the Superset datasource inventory and landing dashboard")
+    bootstrap_task = next(
+        task for task in tasks if task["name"] == "Bootstrap the Superset datasource inventory and landing dashboard"
+    )
     assert bootstrap_task["ansible.builtin.command"]["argv"] == [
         "docker",
         "exec",
@@ -114,7 +124,9 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
         "upgrade",
     ]
 
-    admin_check_task = next(task for task in tasks if task["name"] == "Check whether the Superset admin user already exists")
+    admin_check_task = next(
+        task for task in tasks if task["name"] == "Check whether the Superset admin user already exists"
+    )
     admin_check_script = admin_check_task["ansible.builtin.command"]["argv"][5]
     assert "with app.app_context():" in admin_check_script
     assert "app = create_app()" in admin_check_script
@@ -127,7 +139,11 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
         "create-admin",
     ]
 
-    force_recreate = next(task for task in tasks if task["name"] == "Force-recreate the Superset runtime stack after Docker networking recovery")
+    force_recreate = next(
+        task
+        for task in tasks
+        if task["name"] == "Force-recreate the Superset runtime stack after Docker networking recovery"
+    )
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["until"] == "superset_force_recreate_up.rc == 0"
 
@@ -135,7 +151,11 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
 def test_verify_tasks_cover_local_health_and_managed_contract() -> None:
     verify = load_yaml(ROLE_VERIFY)
     health_task = next(task for task in verify if task["name"] == "Verify the Superset health endpoint locally")
-    contract_task = next(task for task in verify if task["name"] == "Verify the managed Superset datasources and landing dashboard locally")
+    contract_task = next(
+        task
+        for task in verify
+        if task["name"] == "Verify the managed Superset datasources and landing dashboard locally"
+    )
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ superset_internal_base_url }}/health"
     assert contract_task["ansible.builtin.command"]["argv"] == [
@@ -159,7 +179,11 @@ def test_verify_tasks_cover_local_health_and_managed_contract() -> None:
 def test_publish_tasks_verify_public_health_redirect_and_api_contract() -> None:
     publish = load_yaml(ROLE_PUBLISH)
     health_task = next(task for task in publish if task["name"] == "Wait for the Superset public health endpoint")
-    verify_task = next(task for task in publish if task["name"] == "Verify the public Superset publication and Keycloak redirect contract")
+    verify_task = next(
+        task
+        for task in publish
+        if task["name"] == "Verify the public Superset publication and Keycloak redirect contract"
+    )
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ superset_public_base_url }}/health"
     assert verify_task["ansible.builtin.command"]["argv"][0:5] == [
@@ -193,12 +217,12 @@ def test_templates_define_openbao_envs_compose_and_bootstrap_contract() -> None:
     assert "SUPERSET_KEYCLOAK_CLIENT_ID={{ superset_keycloak_client_id }}" in env_template
     assert "SUPERSET_AUTH_ROLES_MAPPING_JSON={{ superset_auth_roles_mapping | to_json }}" in env_template
 
-    assert 'kv/data/{{ superset_openbao_secret_path }}' in env_ctemplate
+    assert "kv/data/{{ superset_openbao_secret_path }}" in env_ctemplate
     assert "SUPERSET_DATABASE_URI" in env_ctemplate
     assert "SUPERSET_KEYCLOAK_CLIENT_SECRET" in env_ctemplate
 
     assert "AUTH_API_LOGIN_ALLOW_MULTIPLE_PROVIDERS = True" in config_template
-    assert 'AUTH_TYPE = AUTH_OAUTH' in config_template
+    assert "AUTH_TYPE = AUTH_OAUTH" in config_template
     assert '"name": "keycloak"' in config_template
     assert "AUTH_ROLES_MAPPING = json.loads" in config_template
 

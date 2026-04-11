@@ -22,7 +22,17 @@ def test_network_impairment_matrix_workflow_is_cataloged() -> None:
 
 def test_network_impairment_matrix_windmill_surface_is_seeded() -> None:
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "windmill_runtime" / "defaults" / "main.yml").read_text()
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "defaults"
+            / "main.yml"
+        ).read_text()
     )
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
 

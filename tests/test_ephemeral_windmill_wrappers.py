@@ -46,7 +46,9 @@ def test_ephemeral_windmill_wrappers_load_repo_fixture_manager_even_with_conflic
 
     (repo_root / "config" / "controller-local-secrets.json").write_text('{"secrets": {}}\n', encoding="utf-8")
     (repo_root / "config" / "vm-template-manifest.json").write_text('{"templates": {}}\n', encoding="utf-8")
-    (repo_root / "config" / "capacity-model.json").write_text('{"schema_version": "1.0.0", "reservations": []}\n', encoding="utf-8")
+    (repo_root / "config" / "capacity-model.json").write_text(
+        '{"schema_version": "1.0.0", "reservations": []}\n', encoding="utf-8"
+    )
     (repo_root / "config" / "ephemeral-capacity-pools.json").write_text(
         '{"schema_version": "1.0.0", "defaults": {"max_local_active_leases": 3, "protected_capacity_class": "ephemeral-burst-local", "spillover_domain": "hetzner-cloud-burst", "warm_lifetime_minutes": 1440}, "pools": []}\n',
         encoding="utf-8",
@@ -81,7 +83,9 @@ def test_ephemeral_windmill_wrappers_load_repo_fixture_manager_even_with_conflic
     (repo_root / "scripts" / "vmid_allocator.py").write_text("MARKER = 'repo-sibling-import'\n", encoding="utf-8")
 
     conflicting_module = types.ModuleType("fixture_manager")
-    conflicting_module.vmid_allocator = types.SimpleNamespace(read_api_credentials=lambda **kwargs: ("conflict", "conflict"))
+    conflicting_module.vmid_allocator = types.SimpleNamespace(
+        read_api_credentials=lambda **kwargs: ("conflict", "conflict")
+    )
     monkeypatch.setitem(sys.modules, "fixture_manager", conflicting_module)
 
     wrapper = _load_module(
@@ -105,7 +109,9 @@ def test_ephemeral_pool_reconciler_uses_worker_local_bootstrap_key(tmp_path: Pat
 
     (repo_root / "config" / "controller-local-secrets.json").write_text('{"secrets": {}}\n', encoding="utf-8")
     (repo_root / "config" / "vm-template-manifest.json").write_text('{"templates": {}}\n', encoding="utf-8")
-    (repo_root / "config" / "capacity-model.json").write_text('{"schema_version": "1.0.0", "reservations": []}\n', encoding="utf-8")
+    (repo_root / "config" / "capacity-model.json").write_text(
+        '{"schema_version": "1.0.0", "reservations": []}\n', encoding="utf-8"
+    )
     (repo_root / "config" / "ephemeral-capacity-pools.json").write_text(
         '{"schema_version": "1.0.0", "defaults": {"max_local_active_leases": 3, "protected_capacity_class": "ephemeral-burst-local", "spillover_domain": "hetzner-cloud-burst", "warm_lifetime_minutes": 1440}, "pools": []}\n',
         encoding="utf-8",

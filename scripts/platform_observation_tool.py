@@ -135,14 +135,9 @@ def load_observation_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
-    bootstrap_key = resolve_repo_local_path(
-        secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]
-    )
+    bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])
 
-    guests = {
-        guest["name"]: guest["ipv4"]
-        for guest in host_vars["proxmox_guests"]
-    }
+    guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     return {
         "host_vars": host_vars,
         "group_vars": group_vars,
@@ -196,7 +191,7 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, remote_command
     guest_ip = context["guests"][target]
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 -o LogLevel=ERROR "
-        f"{shlex.quote(f'{context['host_user']}@{context['host_addr']}')} -W %h:%p"
+        f"{shlex.quote(f'{context["host_user"]}@{context["host_addr"]}')} -W %h:%p"
     )
     return [
         "ssh",
@@ -657,12 +652,17 @@ def check_service_health(context: dict[str, Any], run_id: str) -> dict[str, Any]
         "startup": sum(1 for item in details if item["runtime_state"] == RUNTIME_STATE_STARTUP),
         "degraded": sum(1 for item in details if item["runtime_state"] == RUNTIME_STATE_DEGRADED),
         "ready": sum(1 for item in details if item["runtime_state"] == RUNTIME_STATE_READY),
-        "unknown": sum(1 for item in details if item["runtime_state"] not in {
-            RUNTIME_STATE_FAILED,
-            RUNTIME_STATE_STARTUP,
-            RUNTIME_STATE_DEGRADED,
-            RUNTIME_STATE_READY,
-        }),
+        "unknown": sum(
+            1
+            for item in details
+            if item["runtime_state"]
+            not in {
+                RUNTIME_STATE_FAILED,
+                RUNTIME_STATE_STARTUP,
+                RUNTIME_STATE_DEGRADED,
+                RUNTIME_STATE_READY,
+            }
+        ),
     }
     if counts["failed"]:
         severity = "critical"
@@ -694,10 +694,7 @@ def check_service_health(context: dict[str, Any], run_id: str) -> dict[str, Any]
 
 
 def check_vm_state(context: dict[str, Any], run_id: str) -> dict[str, Any]:
-    desired_guests = {
-        guest["vmid"]: guest["name"]
-        for guest in context["host_vars"]["proxmox_guests"]
-    }
+    desired_guests = {guest["vmid"]: guest["name"] for guest in context["host_vars"]["proxmox_guests"]}
     result = execute_runner(
         context,
         "host_ssh",
@@ -739,8 +736,10 @@ def check_vm_state(context: dict[str, Any], run_id: str) -> dict[str, Any]:
             )
 
     severity = "ok" if not details else "critical"
-    summary = "All managed guests are running with the expected identity." if not details else (
-        f"{len(details)} guest state mismatches detected."
+    summary = (
+        "All managed guests are running with the expected identity."
+        if not details
+        else (f"{len(details)} guest state mismatches detected.")
     )
     return make_finding(
         check="check-vm-state",
@@ -759,9 +758,8 @@ def check_image_freshness(context: dict[str, Any], run_id: str) -> dict[str, Any
     severity = "ok"
 
     def inspect_image(image: dict[str, Any]) -> tuple[dict[str, Any], CommandResult]:
-        inspect_command = (
-            "docker inspect --format '{{.Config.Image}}|{{.Image}}' "
-            + shlex.quote(image["container_name"])
+        inspect_command = "docker inspect --format '{{.Config.Image}}|{{.Image}}' " + shlex.quote(
+            image["container_name"]
         )
         return image, execute_runner(context, "guest_jump", image["runtime_host"], inspect_command)
 
@@ -923,7 +921,16 @@ def check_certificate_expiry(context: dict[str, Any], run_id: str) -> dict[str, 
             "certificate_id": result["certificate_id"],
             "status": result["status"],
         }
-        for field in ("subject", "issuer", "not_after", "days_remaining", "hours_remaining", "policy_unit", "expected_issuer", "error"):
+        for field in (
+            "subject",
+            "issuer",
+            "not_after",
+            "days_remaining",
+            "hours_remaining",
+            "policy_unit",
+            "expected_issuer",
+            "error",
+        ):
             if field in result:
                 detail[field] = result[field]
         details.append(detail)

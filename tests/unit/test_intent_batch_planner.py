@@ -224,8 +224,12 @@ def test_planner_orders_restart_after_config(tmp_path: Path, monkeypatch: pytest
     result = planner.plan(batch)
 
     assert [stage.parallelism for stage in result.execution_plan.stages] == ["sequential", "sequential"]
-    first_stage_entry = next(entry for entry in result.dry_runs if entry.intent_id == result.execution_plan.stages[0].intent_ids[0])
-    second_stage_entry = next(entry for entry in result.dry_runs if entry.intent_id == result.execution_plan.stages[1].intent_ids[0])
+    first_stage_entry = next(
+        entry for entry in result.dry_runs if entry.intent_id == result.execution_plan.stages[0].intent_ids[0]
+    )
+    second_stage_entry = next(
+        entry for entry in result.dry_runs if entry.intent_id == result.execution_plan.stages[1].intent_ids[0]
+    )
     assert first_stage_entry.instruction == "deploy netbox"
     assert second_stage_entry.instruction == "restart-netbox"
     assert any(item.conflict_type == "restart_during_config" for item in result.execution_plan.conflicts)

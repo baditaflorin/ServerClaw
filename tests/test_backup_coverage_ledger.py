@@ -59,7 +59,9 @@ def test_evaluate_asset_marks_uncovered_when_offsite_storage_is_missing() -> Non
             "error": "storage 'lv3-backup-offsite' does not exist",
             "rows": [],
         },
-        restore_evidence={160: {"recorded_at": "2026-03-28T04:00:00Z", "path": "receipts/restore-verifications/2026-03-28.json"}},
+        restore_evidence={
+            160: {"recorded_at": "2026-03-28T04:00:00Z", "path": "receipts/restore-verifications/2026-03-28.json"}
+        },
         dr_targets={"offsite_backup": {"retention": {"keep_daily": 7}}},
         now=datetime(2026, 3, 29, 10, 0, tzinfo=UTC),
     )

@@ -37,6 +37,7 @@ if PLATFORM_PACKAGE_DIR.exists():
 # Identity fixtures (ADR 0385) — single source for all test assertions
 # ---------------------------------------------------------------------------
 
+
 def _load_identity() -> dict:
     """Load identity.yml and return plain scalar variables."""
     identity_path = REPO_ROOT / "inventory" / "group_vars" / "all" / "identity.yml"

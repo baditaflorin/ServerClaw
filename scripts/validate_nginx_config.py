@@ -34,8 +34,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import yaml  # noqa: E402 — after sys.path adjustment
-from validation_toolkit import load_yaml_with_identity, require_int, require_list, require_mapping, require_str  # noqa: E402
+import yaml
+from validation_toolkit import load_yaml_with_identity, require_int, require_list, require_mapping
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
@@ -74,7 +74,7 @@ def validate(registry: dict, upstreams: list[dict], subdomain_catalog: dict[str,
     issues: list[str] = []
 
     # --- Build expected state from registry ---
-    expected_upstreams: dict[str, dict] = {}   # service_name -> proxy_config + internal_port
+    expected_upstreams: dict[str, dict] = {}  # service_name -> proxy_config + internal_port
     for service_name, service_config in registry.items():
         proxy_config = service_config.get("proxy")
         if proxy_config is None:
@@ -109,8 +109,7 @@ def validate(registry: dict, upstreams: list[dict], subdomain_catalog: dict[str,
                 continue
             if fqdn in seen_fqdns:
                 issues.append(
-                    f"ERROR: FQDN '{fqdn}' appears in upstreams for both "
-                    f"'{seen_fqdns[fqdn]}' and '{service_name}'"
+                    f"ERROR: FQDN '{fqdn}' appears in upstreams for both '{seen_fqdns[fqdn]}' and '{service_name}'"
                 )
             else:
                 seen_fqdns[fqdn] = service_name
@@ -173,10 +172,7 @@ def validate(registry: dict, upstreams: list[dict], subdomain_catalog: dict[str,
         path_prefix = expected.get("path_prefix", "/")
         if path_prefix is not None:
             if not isinstance(path_prefix, str) or not path_prefix.startswith("/"):
-                issues.append(
-                    f"ERROR: '{service_name}'.proxy.path_prefix must start with / "
-                    f"(got: {path_prefix!r})"
-                )
+                issues.append(f"ERROR: '{service_name}'.proxy.path_prefix must start with / (got: {path_prefix!r})")
 
     # --- Check 6: Subdomain catalog coverage ---
     for service_name, generated in generated_by_service.items():
@@ -186,10 +182,7 @@ def validate(registry: dict, upstreams: list[dict], subdomain_catalog: dict[str,
                 continue
             catalog_entry = subdomain_catalog.get(fqdn)
             if catalog_entry is None:
-                issues.append(
-                    f"WARNING: '{service_name}' proxy FQDN '{fqdn}' is not in "
-                    f"config/subdomain-catalog.json"
-                )
+                issues.append(f"WARNING: '{service_name}' proxy FQDN '{fqdn}' is not in config/subdomain-catalog.json")
             elif catalog_entry.get("exposure") != "edge-published":
                 exposure = catalog_entry.get("exposure", "unknown")
                 issues.append(
@@ -220,7 +213,7 @@ Exits 0 if all checks pass, 1 if any errors are found.
     )
     args = parser.parse_args(argv)  # noqa: F841 — parsed for --help
 
-    print(f"Validating nginx upstreams...")
+    print("Validating nginx upstreams...")
     print(f"  Registry:         {REGISTRY_PATH.relative_to(REPO_ROOT)}")
     print(f"  Generated config: {NGINX_UPSTREAMS_YAML.relative_to(REPO_ROOT)}")
     print(f"  Subdomain catalog: {SUBDOMAIN_CATALOG_PATH.relative_to(REPO_ROOT)}")

@@ -8,7 +8,13 @@ import pytest
 
 import platform.scheduler.windmill_client as windmill_client_module
 import runbook_executor as executor_module
-from platform.circuit import CircuitBreaker, CircuitOpenError, CircuitPolicy, MemoryCircuitStateBackend, should_count_urllib_exception
+from platform.circuit import (
+    CircuitBreaker,
+    CircuitOpenError,
+    CircuitPolicy,
+    MemoryCircuitStateBackend,
+    should_count_urllib_exception,
+)
 from platform.retry import RetryPolicy
 from platform.scheduler import HttpWindmillClient
 
@@ -130,7 +136,10 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
         "running": True,
     }
     assert calls == [
-        ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer stale-session-token"),
+        (
+            "https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote",
+            "Bearer stale-session-token",
+        ),
         ("https://windmill.example.test/api/auth/login", None),
         ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer session-token"),
         ("https://windmill.example.test/api/w/lv3/jobs/run/h/hash-123", "Bearer session-token"),

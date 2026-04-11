@@ -18,7 +18,9 @@ def test_outline_playbook_converges_only_the_outline_dns_record() -> None:
     assert dns_play["vars"]["subdomain_fqdn"] == "wiki.lv3.org"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Outline subdomain entry")
-    assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    assert (
+        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    )
 
     converge_task = next(task for task in tasks if task.get("name") == "Converge the Outline Hetzner DNS record")
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"

@@ -119,8 +119,8 @@ class NetBoxClient:
 
         data = None
         headers = {
-          "Accept": "application/json",
-          "Authorization": f"Bearer {self.token}",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {self.token}",
         }
         if payload is not None:
             data = json.dumps(payload).encode()

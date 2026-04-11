@@ -19,7 +19,17 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from validation_toolkit import require_bool, require_enum, require_identifier, require_int, require_list, require_mapping, require_semver, require_str, require_string_list
+from validation_toolkit import (
+    require_bool,
+    require_enum,
+    require_identifier,
+    require_int,
+    require_list,
+    require_mapping,
+    require_semver,
+    require_str,
+    require_string_list,
+)
 from command_catalog import load_command_catalog, validate_command_catalog
 from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
@@ -33,7 +43,6 @@ from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, 
 from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
-from data_catalog import load_data_catalog, validate_data_catalog
 from failure_domain_policy import validate_failure_domain_policy
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
@@ -259,9 +268,7 @@ def require_network(value: Any, path: str) -> str:
 def validate_placeholder_free(value: Any, path: str) -> None:
     if isinstance(value, str):
         if SCAFFOLD_PLACEHOLDER_MARKER in value:
-            raise ValueError(
-                f"{path} contains scaffold placeholder marker '{SCAFFOLD_PLACEHOLDER_MARKER}'"
-            )
+            raise ValueError(f"{path} contains scaffold placeholder marker '{SCAFFOLD_PLACEHOLDER_MARKER}'")
         return
     if isinstance(value, list):
         for index, item in enumerate(value):
@@ -311,33 +318,21 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "capability-contract-catalog.json"): load_json(
             repo_path("config", "capability-contract-catalog.json")
         ),
-        repo_path("config", "persona-catalog.json"): load_json(
-            repo_path("config", "persona-catalog.json")
-        ),
+        repo_path("config", "persona-catalog.json"): load_json(repo_path("config", "persona-catalog.json")),
         repo_path("config", "service-redundancy-catalog.json"): load_json(
             repo_path("config", "service-redundancy-catalog.json")
         ),
         SHARED_POLICY_PACKS_PATH: load_json(SHARED_POLICY_PACKS_PATH),
-        repo_path("config", "api-gateway-catalog.json"): load_json(
-            repo_path("config", "api-gateway-catalog.json")
-        ),
-        repo_path("config", "subdomain-catalog.json"): load_json(
-            repo_path("config", "subdomain-catalog.json")
-        ),
+        repo_path("config", "api-gateway-catalog.json"): load_json(repo_path("config", "api-gateway-catalog.json")),
+        repo_path("config", "subdomain-catalog.json"): load_json(repo_path("config", "subdomain-catalog.json")),
         repo_path("config", "controller-local-secrets.json"): load_json(
             repo_path("config", "controller-local-secrets.json")
         ),
-        repo_path("config", "api-gateway-catalog.json"): load_json(
-            repo_path("config", "api-gateway-catalog.json")
-        ),
-        repo_path("config", "dependency-graph.json"): load_json(
-            repo_path("config", "dependency-graph.json")
-        ),
+        repo_path("config", "api-gateway-catalog.json"): load_json(repo_path("config", "api-gateway-catalog.json")),
+        repo_path("config", "dependency-graph.json"): load_json(repo_path("config", "dependency-graph.json")),
         repo_path("config", "slo-catalog.json"): load_json(repo_path("config", "slo-catalog.json")),
         repo_path("config", "data-catalog.json"): load_json(repo_path("config", "data-catalog.json")),
-        repo_path("config", "service-completeness.json"): load_json(
-            repo_path("config", "service-completeness.json")
-        ),
+        repo_path("config", "service-completeness.json"): load_json(repo_path("config", "service-completeness.json")),
         HOST_VARS_PATH: load_yaml(HOST_VARS_PATH),
     }
     for path, payload in structured_paths.items():
@@ -411,16 +406,10 @@ def validate_service_topology_entry(
 ) -> tuple[str, str | None]:
     service = require_mapping(service, f"lv3_service_topology.{service_id}")
     require_identifier(service_id, f"lv3_service_topology key '{service_id}'")
-    service_name = require_identifier(
-        service.get("service_name"), f"lv3_service_topology.{service_id}.service_name"
-    )
-    owning_vm = require_identifier(
-        service.get("owning_vm"), f"lv3_service_topology.{service_id}.owning_vm"
-    )
+    service_name = require_identifier(service.get("service_name"), f"lv3_service_topology.{service_id}.service_name")
+    owning_vm = require_identifier(service.get("owning_vm"), f"lv3_service_topology.{service_id}.owning_vm")
     if owning_vm not in guest_names and owning_vm != host_id:
-        raise ValueError(
-            f"lv3_service_topology.{service_id}.owning_vm must reference a known guest or host id"
-        )
+        raise ValueError(f"lv3_service_topology.{service_id}.owning_vm must reference a known guest or host id")
 
     require_str(service.get("private_ip"), f"lv3_service_topology.{service_id}.private_ip")
     require_enum(
@@ -431,13 +420,9 @@ def validate_service_topology_entry(
 
     public_hostname = service.get("public_hostname")
     if public_hostname is not None:
-        public_hostname = require_hostname(
-            public_hostname, f"lv3_service_topology.{service_id}.public_hostname"
-        )
+        public_hostname = require_hostname(public_hostname, f"lv3_service_topology.{service_id}.public_hostname")
 
-    observability = require_mapping(
-        service.get("observability"), f"lv3_service_topology.{service_id}.observability"
-    )
+    observability = require_mapping(service.get("observability"), f"lv3_service_topology.{service_id}.observability")
     require_bool(
         observability.get("guest_dashboard"),
         f"lv3_service_topology.{service_id}.observability.guest_dashboard",
@@ -488,20 +473,14 @@ def validate_service_topology_entry(
     if edge is not None:
         edge = require_mapping(edge, f"lv3_service_topology.{service_id}.edge")
         enabled = require_bool(edge.get("enabled"), f"lv3_service_topology.{service_id}.edge.enabled")
-        aliases = require_string_list(
-            edge.get("aliases", []), f"lv3_service_topology.{service_id}.edge.aliases"
-        )
+        aliases = require_string_list(edge.get("aliases", []), f"lv3_service_topology.{service_id}.edge.aliases")
         for index, alias in enumerate(aliases):
             alias = require_str(alias, f"lv3_service_topology.{service_id}.edge.aliases[{index}]")
             if "{{" in alias:
                 continue  # Jinja2 template — resolved at Ansible runtime
             if not (
                 HOSTNAME_PATTERN.match(alias)
-                or (
-                    alias.startswith("*.")
-                    and HOSTNAME_PATTERN.match(alias[2:])
-                    and "." in alias[2:]
-                )
+                or (alias.startswith("*.") and HOSTNAME_PATTERN.match(alias[2:]) and "." in alias[2:])
             ):
                 raise ValueError(
                     f"lv3_service_topology.{service_id}.edge.aliases[{index}] must be a lowercase hostname or wildcard hostname"
@@ -510,9 +489,7 @@ def validate_service_topology_entry(
             if public_hostname is None:
                 raise ValueError(f"lv3_service_topology.{service_id} enables edge without public_hostname")
             require_bool(edge.get("tls"), f"lv3_service_topology.{service_id}.edge.tls")
-            kind = require_enum(
-                edge.get("kind"), f"lv3_service_topology.{service_id}.edge.kind", EDGE_KINDS
-            )
+            kind = require_enum(edge.get("kind"), f"lv3_service_topology.{service_id}.edge.kind", EDGE_KINDS)
             if kind == "static":
                 require_hostname(edge.get("slug"), f"lv3_service_topology.{service_id}.edge.slug")
                 require_str(edge.get("title"), f"lv3_service_topology.{service_id}.edge.title")
@@ -536,9 +513,7 @@ def validate_service_topology_entry(
                         f"lv3_service_topology.{service_id}.edge.root_proxy_path",
                     )
                     if not root_proxy_path.startswith("/"):
-                        raise ValueError(
-                            f"lv3_service_topology.{service_id}.edge.root_proxy_path must start with '/'"
-                        )
+                        raise ValueError(f"lv3_service_topology.{service_id}.edge.root_proxy_path must start with '/'")
 
     return service_name, public_hostname
 
@@ -590,7 +565,9 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
     allowed_source_tokens = {"management", "host", "public", "all_guests"}
     for guest_name in sorted(guest_names):
         guest_policy = require_mapping(guest_policies.get(guest_name), f"{path}.guests.{guest_name}")
-        allowed_inbound = require_list(guest_policy.get("allowed_inbound"), f"{path}.guests.{guest_name}.allowed_inbound")
+        allowed_inbound = require_list(
+            guest_policy.get("allowed_inbound"), f"{path}.guests.{guest_name}.allowed_inbound"
+        )
         if not allowed_inbound:
             raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound must not be empty")
         for index, rule in enumerate(allowed_inbound):
@@ -643,17 +620,27 @@ def validate_host_vars() -> dict[str, Any]:
             public_ingress_ports,
         )
 
-    proxmox_vm_templates = require_mapping(global_vars.get("proxmox_vm_templates"), "inventory/group_vars/all.yml.proxmox_vm_templates")
+    proxmox_vm_templates = require_mapping(
+        global_vars.get("proxmox_vm_templates"), "inventory/group_vars/all.yml.proxmox_vm_templates"
+    )
     template_vmids: set[int] = set()
     template_names: set[str] = set()
     for template_key, template in proxmox_vm_templates.items():
-        template_key = require_identifier(template_key, f"inventory/group_vars/all.yml.proxmox_vm_templates key '{template_key}'")
+        template_key = require_identifier(
+            template_key, f"inventory/group_vars/all.yml.proxmox_vm_templates key '{template_key}'"
+        )
         template = require_mapping(template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}")
-        template_vmid = require_int(template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1)
-        template_name = require_hostname(template.get("name"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.name")
+        template_vmid = require_int(
+            template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1
+        )
+        template_name = require_hostname(
+            template.get("name"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.name"
+        )
         source_template = template.get("source_template")
         if source_template is not None:
-            require_str(source_template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.source_template")
+            require_str(
+                source_template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.source_template"
+            )
         if template_vmid in template_vmids:
             raise ValueError(f"duplicate proxmox template vmid: {template_vmid}")
         if template_name in template_names:
@@ -726,8 +713,7 @@ def validate_host_vars() -> dict[str, Any]:
     missing_port_keys = sorted(set(PORT_KEYS) - set(platform_port_assignments.keys()))
     if missing_port_keys:
         raise ValueError(
-            "host_vars.platform_port_assignments is missing required keys: "
-            + ", ".join(missing_port_keys)
+            "host_vars.platform_port_assignments is missing required keys: " + ", ".join(missing_port_keys)
         )
     validate_network_policy(host_vars.get("network_policy"), "host_vars.network_policy", guest_names)
 
@@ -738,9 +724,7 @@ def validate_host_vars() -> dict[str, Any]:
     service_names: set[str] = set()
     public_hostnames: set[str] = set()
     for service_id, service in topology.items():
-        service_name, public_hostname = validate_service_topology_entry(
-            service_id, service, guest_names, host_id
-        )
+        service_name, public_hostname = validate_service_topology_entry(service_id, service, guest_names, host_id)
         if service_name in service_names:
             raise ValueError(f"duplicate service_name in service topology: {service_name}")
         service_names.add(service_name)
@@ -776,19 +760,31 @@ def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
 
     for template_key, template in template_catalog.items():
         template = require_mapping(template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}")
-        manifest_entry = require_mapping(templates.get(template_key), f"config/vm-template-manifest.json.templates.{template_key}")
-        manifest_vmid = require_int(manifest_entry.get("vmid"), f"config/vm-template-manifest.json.templates.{template_key}.vmid", 1)
-        inventory_vmid = require_int(template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1)
+        manifest_entry = require_mapping(
+            templates.get(template_key), f"config/vm-template-manifest.json.templates.{template_key}"
+        )
+        manifest_vmid = require_int(
+            manifest_entry.get("vmid"), f"config/vm-template-manifest.json.templates.{template_key}.vmid", 1
+        )
+        inventory_vmid = require_int(
+            template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1
+        )
         if manifest_vmid != inventory_vmid:
-            raise ValueError(f"config/vm-template-manifest.json.templates.{template_key}.vmid must match inventory template vmid")
+            raise ValueError(
+                f"config/vm-template-manifest.json.templates.{template_key}.vmid must match inventory template vmid"
+            )
 
         manifest_name = require_hostname(
             manifest_entry.get("name"),
             f"config/vm-template-manifest.json.templates.{template_key}.name",
         )
-        inventory_name = require_hostname(template.get("name"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.name")
+        inventory_name = require_hostname(
+            template.get("name"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.name"
+        )
         if manifest_name != inventory_name:
-            raise ValueError(f"config/vm-template-manifest.json.templates.{template_key}.name must match inventory template name")
+            raise ValueError(
+                f"config/vm-template-manifest.json.templates.{template_key}.name must match inventory template name"
+            )
 
         source_template = manifest_entry.get("source_template")
         if source_template is not None:
@@ -797,7 +793,9 @@ def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
         build_date = manifest_entry.get("build_date")
         if build_date is not None:
             dt.datetime.fromisoformat(
-                require_str(build_date, f"config/vm-template-manifest.json.templates.{template_key}.build_date").replace("Z", "+00:00")
+                require_str(
+                    build_date, f"config/vm-template-manifest.json.templates.{template_key}.build_date"
+                ).replace("Z", "+00:00")
             )
 
         version = manifest_entry.get("version")
@@ -817,9 +815,7 @@ def validate_platform_vars() -> None:
     platform_vars = require_mapping(load_yaml(PLATFORM_VARS_PATH), str(PLATFORM_VARS_PATH))
     expected_platform_vars = build_platform_vars()
     if platform_vars != expected_platform_vars:
-        raise ValueError(
-            "inventory/group_vars/platform.yml must match scripts/generate_platform_vars.py output"
-        )
+        raise ValueError("inventory/group_vars/platform.yml must match scripts/generate_platform_vars.py output")
 
 
 def validate_monitor(monitor: Any, path: str) -> str:
@@ -907,7 +903,9 @@ def validate_probe_definition(probe: Any, path: str) -> None:
         docker_publication = require_mapping(probe.get("docker_publication"), f"{path}.docker_publication")
         require_str(docker_publication.get("container_name"), f"{path}.docker_publication.container_name")
         if "required_networks" in docker_publication:
-            require_string_list(docker_publication.get("required_networks"), f"{path}.docker_publication.required_networks")
+            require_string_list(
+                docker_publication.get("required_networks"), f"{path}.docker_publication.required_networks"
+            )
         if "bindings" in docker_publication:
             bindings = require_list(docker_publication.get("bindings"), f"{path}.docker_publication.bindings")
             for index, binding in enumerate(bindings):
@@ -915,11 +913,16 @@ def validate_probe_definition(probe: Any, path: str) -> None:
                 require_str(binding.get("host"), f"{path}.docker_publication.bindings[{index}].host")
                 require_int(binding.get("port"), f"{path}.docker_publication.bindings[{index}].port", 1)
         if "derive_bindings_from_probes" in docker_publication:
-            require_bool(docker_publication.get("derive_bindings_from_probes"), f"{path}.docker_publication.derive_bindings_from_probes")
+            require_bool(
+                docker_publication.get("derive_bindings_from_probes"),
+                f"{path}.docker_publication.derive_bindings_from_probes",
+            )
         if "require_nat_chain" in docker_publication:
             require_bool(docker_publication.get("require_nat_chain"), f"{path}.docker_publication.require_nat_chain")
         if "require_forward_chain" in docker_publication:
-            require_bool(docker_publication.get("require_forward_chain"), f"{path}.docker_publication.require_forward_chain")
+            require_bool(
+                docker_publication.get("require_forward_chain"), f"{path}.docker_publication.require_forward_chain"
+            )
         if "working_directory" in docker_publication:
             require_str(docker_publication.get("working_directory"), f"{path}.docker_publication.working_directory")
         if "compose_files" in docker_publication:
@@ -935,9 +938,13 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
     services = require_mapping(catalog.get("services"), "config/health-probe-catalog.json.services")
     topology = host_vars_context["topology"]
     certificate_catalog = require_mapping(load_json(CERTIFICATE_CATALOG_PATH), str(CERTIFICATE_CATALOG_PATH))
-    certificate_entries = require_list(certificate_catalog.get("certificates"), "config/certificate-catalog.json.certificates")
+    certificate_entries = require_list(
+        certificate_catalog.get("certificates"), "config/certificate-catalog.json.certificates"
+    )
     certificate_service_map = {
-        require_identifier(entry.get("id"), f"config/certificate-catalog.json.certificates[{index}].id"): require_identifier(
+        require_identifier(
+            entry.get("id"), f"config/certificate-catalog.json.certificates[{index}].id"
+        ): require_identifier(
             entry.get("service_id"),
             f"config/certificate-catalog.json.certificates[{index}].service_id",
         )
@@ -974,7 +981,9 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
         validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
         validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
         if "tls_certificate_ids" in service:
-            certificate_ids = require_string_list(service.get("tls_certificate_ids"), f"{service_path}.tls_certificate_ids")
+            certificate_ids = require_string_list(
+                service.get("tls_certificate_ids"), f"{service_path}.tls_certificate_ids"
+            )
             for index, certificate_id in enumerate(certificate_ids):
                 if certificate_id not in certificate_service_map:
                     raise ValueError(
@@ -1061,7 +1070,9 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
 
         require_enum(item.get("status"), f"{path}.status", {"active", "planned", "lan_only", "tls_pending"})
         require_str(item.get("summary"), f"{path}.summary")
-        require_enum(item.get("expected_issuer"), f"{path}.expected_issuer", {"any", "letsencrypt", "self-signed", "step-ca"})
+        require_enum(
+            item.get("expected_issuer"), f"{path}.expected_issuer", {"any", "letsencrypt", "self-signed", "step-ca"}
+        )
 
         endpoint = require_mapping(item.get("endpoint"), f"{path}.endpoint")
         require_str(endpoint.get("host"), f"{path}.endpoint.host")
@@ -1229,15 +1240,11 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
         apply_target = require_enum(secret.get("apply_target"), f"{path}.apply_target", allowed_apply_targets)
 
         apply_field = secret.get("apply_field")
-        if apply_target in {"mail_platform_profile_field", "mail_platform_runtime_field"}:
-            require_identifier(apply_field, f"{path}.apply_field")
-        elif apply_field is not None:
+        if apply_target in {"mail_platform_profile_field", "mail_platform_runtime_field"} or apply_field is not None:
             require_identifier(apply_field, f"{path}.apply_field")
 
         profile_id = secret.get("profile_id")
-        if apply_target == "mail_platform_profile_field":
-            require_identifier(profile_id, f"{path}.profile_id")
-        elif profile_id is not None:
+        if apply_target == "mail_platform_profile_field" or profile_id is not None:
             require_identifier(profile_id, f"{path}.profile_id")
 
         compatibility_mirror = secret.get("compatibility_mirror")
@@ -1274,7 +1281,9 @@ def validate_seed_data_catalog(secret_manifest: dict[str, Any]) -> None:
     require_identifier(remote_store.get("host"), f"{SEED_DATA_CATALOG_PATH}.remote_store.host")
     require_str(remote_store.get("base_path"), f"{SEED_DATA_CATALOG_PATH}.remote_store.base_path")
     require_str(remote_store.get("directory_mode"), f"{SEED_DATA_CATALOG_PATH}.remote_store.directory_mode")
-    databases = require_list(payload.get("managed_postgres_databases"), f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases")
+    databases = require_list(
+        payload.get("managed_postgres_databases"), f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases"
+    )
     if not databases:
         raise ValueError(f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases must not be empty")
     for index, item in enumerate(databases):
@@ -1288,7 +1297,9 @@ def validate_seed_data_catalog(secret_manifest: dict[str, Any]) -> None:
         require_identifier(class_name, f"{SEED_DATA_CATALOG_PATH}.classes key '{class_name}'")
         class_payload = require_mapping(class_payload, f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}")
         require_str(class_payload.get("description"), f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.description")
-        datasets = require_mapping(class_payload.get("datasets"), f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets")
+        datasets = require_mapping(
+            class_payload.get("datasets"), f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets"
+        )
         if set(datasets.keys()) != expected_datasets:
             raise ValueError(
                 f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets must define exactly {sorted(expected_datasets)}"
@@ -1451,9 +1462,7 @@ def validate_maintenance_window_schema() -> None:
     require_str(schema.get("$id"), "docs/schema/maintenance-window.json.$id")
     if schema.get("type") != "object":
         raise ValueError("docs/schema/maintenance-window.json.type must be object")
-    required_fields = set(
-        require_string_list(schema.get("required"), "docs/schema/maintenance-window.json.required")
-    )
+    required_fields = set(require_string_list(schema.get("required"), "docs/schema/maintenance-window.json.required"))
     expected_fields = {
         "window_id",
         "service_id",
@@ -1507,9 +1516,7 @@ def validate_runtime_pool_autoscaling_schema() -> None:
     )
     for field in ("$schema", "schema_version", "controller", "policies"):
         if field not in properties:
-            raise ValueError(
-                f"docs/schema/runtime-pool-autoscaling.schema.json.properties must include '{field}'"
-            )
+            raise ValueError(f"docs/schema/runtime-pool-autoscaling.schema.json.properties must include '{field}'")
 
 
 def validate_runtime_pool_autoscaling_catalog() -> None:
@@ -1615,7 +1622,9 @@ def validate_restore_readiness_profiles() -> None:
         require_int(profile.get("initial_wait_seconds"), f"{path}.initial_wait_seconds", 0)
         require_int(profile.get("max_attempts"), f"{path}.max_attempts", 1)
         require_int(profile.get("retry_delay_seconds"), f"{path}.retry_delay_seconds", 0)
-        network_checks = require_string_list(profile.get("network_dependency_checks"), f"{path}.network_dependency_checks")
+        network_checks = require_string_list(
+            profile.get("network_dependency_checks"), f"{path}.network_dependency_checks"
+        )
         if not network_checks:
             raise ValueError(f"{path}.network_dependency_checks must not be empty")
         require_identifier(profile.get("service_class"), f"{path}.service_class")
@@ -1626,9 +1635,7 @@ def validate_restore_readiness_profiles() -> None:
         if enabled:
             target_id = require_str(target_id, f"{path}.synthetic_replay.target_id")
             if target_id not in synthetic_targets:
-                raise ValueError(
-                    f"{path}.synthetic_replay.target_id references unknown target '{target_id}'"
-                )
+                raise ValueError(f"{path}.synthetic_replay.target_id references unknown target '{target_id}'")
         elif target_id is not None:
             require_str(target_id, f"{path}.synthetic_replay.target_id")
 
@@ -1761,7 +1768,9 @@ def validate_version_semantics() -> None:
         "config/version-semantics.json.readiness_targets.1.0.0.required_services",
     )
     for index, service in enumerate(services):
-        service = require_mapping(service, f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}]")
+        service = require_mapping(
+            service, f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}]"
+        )
         require_str(
             service.get("id"),
             f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}].id",
@@ -1775,7 +1784,9 @@ def validate_version_semantics() -> None:
             f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}].url",
         )
 
-    slos = require_list(readiness.get("required_slos"), "config/version-semantics.json.readiness_targets.1.0.0.required_slos")
+    slos = require_list(
+        readiness.get("required_slos"), "config/version-semantics.json.readiness_targets.1.0.0.required_slos"
+    )
     for index, slo in enumerate(slos):
         slo = require_mapping(slo, f"config/version-semantics.json.readiness_targets.1.0.0.required_slos[{index}]")
         require_identifier(
@@ -1835,13 +1846,16 @@ def validate_workstreams_release_policy() -> None:
         "workstreams.yaml.release_policy.breaking_change_criteria",
     )
     if breaking_change_path not in {"config/version-semantics.json", "./config/version-semantics.json"}:
-        raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
+        raise ValueError(
+            "workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json"
+        )
     delivery_model = require_mapping(registry.get("delivery_model"), "workstreams.yaml.delivery_model")
     require_repo_relative_path(
         delivery_model.get("workstream_doc_root"),
         "workstreams.yaml.delivery_model.workstream_doc_root",
     )
     validate_workstream_surface_ownership_registry(registry)
+
 
 def validate_workstream_canonical_truth_metadata() -> None:
     workstreams = load_workstream_registry_entries(repo_root=REPO_ROOT, include_archive=True)
@@ -1889,6 +1903,7 @@ def validate_workstream_canonical_truth_metadata() -> None:
                 receipt_id,
                 f"{workstream_path}.canonical_truth.latest_receipts[{capability}]",
             )
+
 
 def validate_workstream_live_apply_contracts() -> None:
     workstreams = load_workstream_registry_entries(repo_root=REPO_ROOT, include_archive=True)
@@ -1996,7 +2011,9 @@ def validate_service_partition_classification() -> None:
     partition_membership: dict[str, set[str]] = {}
 
     for partition_id, payload in partitions.items():
-        payload = require_mapping(payload, f"config/contracts/service-partitions/catalog.json.partitions.{partition_id}")
+        payload = require_mapping(
+            payload, f"config/contracts/service-partitions/catalog.json.partitions.{partition_id}"
+        )
         partition_membership[partition_id] = set(
             require_string_list(
                 payload.get("services"),
@@ -2039,14 +2056,14 @@ def validate_service_partition_classification() -> None:
     extra_services = sorted(declared_services - service_ids)
     if extra_services:
         raise ValueError(
-            "config/contracts/service-partitions/catalog.json lists unknown services: "
-            + ", ".join(extra_services)
+            "config/contracts/service-partitions/catalog.json lists unknown services: " + ", ".join(extra_services)
         )
 
 
 def validate_validation_runner_contracts() -> None:
     catalog = load_validation_runner_contract_catalog(VALIDATION_RUNNER_CONTRACTS_PATH)
     validate_validation_runner_contract_catalog(catalog)
+
 
 def validate_interface_contracts() -> None:
     validate_contracts()
@@ -2072,7 +2089,9 @@ def validate_triage_rule_contracts() -> None:
             if isinstance(check, dict) and isinstance(check.get("type"), str)
         ]
         if not check_types:
-            raise ValueError(f"config/triage-rules.yaml.rules[{index}] auto_check rule must define at least one check type")
+            raise ValueError(
+                f"config/triage-rules.yaml.rules[{index}] auto_check rule must define at least one check type"
+            )
         if check_types[0] not in allowlist:
             raise ValueError(
                 f"config/triage-rules.yaml.rules[{index}] first auto_check type '{check_types[0]}' must be allowlisted"
@@ -2081,6 +2100,7 @@ def validate_triage_rule_contracts() -> None:
 
 def validate_changelog_redaction_contract() -> None:
     validate_redaction_policy(load_redaction_policy(CHANGELOG_REDACTION_PATH), path=CHANGELOG_REDACTION_PATH)
+
 
 def validate_agent_policies(workflow_catalog: dict[str, Any]) -> None:
     payload = load_yaml(AGENT_POLICIES_PATH)
@@ -2108,7 +2128,9 @@ def validate_agent_policies(workflow_catalog: dict[str, Any]) -> None:
             raise ValueError(f"{path}.agent_id duplicates '{agent_id}'")
         seen_ids.add(agent_id)
         require_str(entry.get("description"), f"{path}.description")
-        identity_class = require_enum(entry.get("identity_class"), f"{path}.identity_class", AGENT_POLICY_IDENTITY_CLASSES)
+        identity_class = require_enum(
+            entry.get("identity_class"), f"{path}.identity_class", AGENT_POLICY_IDENTITY_CLASSES
+        )
         trust_tier = require_enum(entry.get("trust_tier"), f"{path}.trust_tier", TRUST_TIERS)
         read_surfaces = require_string_list(entry.get("read_surfaces"), f"{path}.read_surfaces")
         unknown_surfaces = sorted(set(read_surfaces) - allowed_surfaces)
@@ -2133,7 +2155,9 @@ def validate_agent_policies(workflow_catalog: dict[str, Any]) -> None:
         )
         for workflow_id in disallowed_workflow_ids:
             if workflow_id not in workflows:
-                raise ValueError(f"{path}.autonomous_actions.disallowed_workflow_ids references unknown workflow '{workflow_id}'")
+                raise ValueError(
+                    f"{path}.autonomous_actions.disallowed_workflow_ids references unknown workflow '{workflow_id}'"
+                )
         require_int(
             autonomous_actions.get("max_daily_autonomous_executions"),
             f"{path}.autonomous_actions.max_daily_autonomous_executions",
@@ -2141,7 +2165,9 @@ def validate_agent_policies(workflow_catalog: dict[str, Any]) -> None:
         )
 
         escalation = require_mapping(entry.get("escalation"), f"{path}.escalation")
-        require_enum(escalation.get("on_risk_above"), f"{path}.escalation.on_risk_above", {"LOW", "MEDIUM", "HIGH", "CRITICAL"})
+        require_enum(
+            escalation.get("on_risk_above"), f"{path}.escalation.on_risk_above", {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
+        )
         require_str(escalation.get("escalation_target"), f"{path}.escalation.escalation_target")
         require_str(escalation.get("escalation_event"), f"{path}.escalation.escalation_event")
 
@@ -2197,9 +2223,7 @@ def validate_identity_taxonomy(
         "versions/stack.yaml.desired_state.identity_taxonomy.managed_identities",
     )
     if not managed_identities:
-        raise ValueError(
-            "versions/stack.yaml.desired_state.identity_taxonomy.managed_identities must not be empty"
-        )
+        raise ValueError("versions/stack.yaml.desired_state.identity_taxonomy.managed_identities must not be empty")
 
     identity_ids: set[str] = set()
     principals: set[str] = set()
@@ -2328,9 +2352,7 @@ def validate_identity_taxonomy(
 def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
     repo_version = require_semver(stack.get("repo_version"), "versions/stack.yaml.repo_version")
-    platform_version = require_semver(
-        stack.get("platform_version"), "versions/stack.yaml.platform_version"
-    )
+    platform_version = require_semver(stack.get("platform_version"), "versions/stack.yaml.platform_version")
     require_semver(stack.get("schema_version"), "versions/stack.yaml.schema_version")
 
     receipt_ids = {path.stem for path in iter_receipt_paths()}
@@ -2389,9 +2411,13 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     )
     if versions_stack_enforces_canonical_guest_fleet():
         if set(guest_network_plan.keys()) != host_vars_context["guest_plan_keys"]:
-            raise ValueError("versions/stack.yaml.desired_state.guest_network_plan keys must match the managed guest fleet")
+            raise ValueError(
+                "versions/stack.yaml.desired_state.guest_network_plan keys must match the managed guest fleet"
+            )
         if set(guest_vmids.keys()) != host_vars_context["guest_plan_keys"]:
-            raise ValueError("versions/stack.yaml.desired_state.guest_provisioning.guest_vmids keys must match the managed guest fleet")
+            raise ValueError(
+                "versions/stack.yaml.desired_state.guest_provisioning.guest_vmids keys must match the managed guest fleet"
+            )
         for key in host_vars_context["guest_plan_keys"]:
             if (
                 require_ipv4(guest_network_plan.get(key), f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
@@ -2443,9 +2469,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         traffic_model.get("guest_outbound_via_host_nat"),
         "versions/stack.yaml.desired_state.traffic_model.guest_outbound_via_host_nat",
     )
-    require_ipv4(
-        traffic_model.get("public_edge_vm"), "versions/stack.yaml.desired_state.traffic_model.public_edge_vm"
-    )
+    require_ipv4(traffic_model.get("public_edge_vm"), "versions/stack.yaml.desired_state.traffic_model.public_edge_vm")
     require_bool(
         traffic_model.get("public_edge_forwarding_enabled"),
         "versions/stack.yaml.desired_state.traffic_model.public_edge_forwarding_enabled",
@@ -2504,11 +2528,13 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     )
 
     security = require_mapping(desired_state.get("security"), "versions/stack.yaml.desired_state.security")
-    for index, source in enumerate(require_string_list(security.get("management_sources"), "versions/stack.yaml.desired_state.security.management_sources")):
+    for index, source in enumerate(
+        require_string_list(
+            security.get("management_sources"), "versions/stack.yaml.desired_state.security.management_sources"
+        )
+    ):
         require_network(source, f"versions/stack.yaml.desired_state.security.management_sources[{index}]")
-    require_str(
-        security.get("proxmox_tfa_user"), "versions/stack.yaml.desired_state.security.proxmox_tfa_user"
-    )
+    require_str(security.get("proxmox_tfa_user"), "versions/stack.yaml.desired_state.security.proxmox_tfa_user")
     require_hostname(
         security.get("proxmox_tls_hostname"),
         "versions/stack.yaml.desired_state.security.proxmox_tls_hostname",
@@ -2521,7 +2547,9 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     dns = require_mapping(desired_state.get("dns"), "versions/stack.yaml.desired_state.dns")
     require_hostname(dns.get("zone"), "versions/stack.yaml.desired_state.dns.zone")
     require_ipv4(dns.get("public_ipv4_target"), "versions/stack.yaml.desired_state.dns.public_ipv4_target")
-    for index, hostname in enumerate(require_string_list(dns.get("initial_subdomains"), "versions/stack.yaml.desired_state.dns.initial_subdomains")):
+    for index, hostname in enumerate(
+        require_string_list(dns.get("initial_subdomains"), "versions/stack.yaml.desired_state.dns.initial_subdomains")
+    ):
         require_hostname(hostname, f"versions/stack.yaml.desired_state.dns.initial_subdomains[{index}]")
     require_bool(
         dns.get("publish_aaaa_initially"),
@@ -2539,7 +2567,12 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         public_publication.get("tls_termination"),
         "versions/stack.yaml.desired_state.public_publication.tls_termination",
     )
-    for index, hostname in enumerate(require_string_list(public_publication.get("published_hostnames"), "versions/stack.yaml.desired_state.public_publication.published_hostnames")):
+    for index, hostname in enumerate(
+        require_string_list(
+            public_publication.get("published_hostnames"),
+            "versions/stack.yaml.desired_state.public_publication.published_hostnames",
+        )
+    ):
         require_hostname(hostname, f"versions/stack.yaml.desired_state.public_publication.published_hostnames[{index}]")
 
     observed_state = require_mapping(stack.get("observed_state"), "versions/stack.yaml.observed_state")
@@ -2571,9 +2604,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     require_str(proxmox_state.get("version"), "versions/stack.yaml.observed_state.proxmox.version")
     require_str(proxmox_state.get("ve_version"), "versions/stack.yaml.observed_state.proxmox.ve_version")
     require_int(proxmox_state.get("api_ui_port"), "versions/stack.yaml.observed_state.proxmox.api_ui_port", 1)
-    require_hostname(
-        proxmox_state.get("tls_hostname"), "versions/stack.yaml.observed_state.proxmox.tls_hostname"
-    )
+    require_hostname(proxmox_state.get("tls_hostname"), "versions/stack.yaml.observed_state.proxmox.tls_hostname")
 
     network_state = require_mapping(observed_state.get("network"), "versions/stack.yaml.observed_state.network")
     require_hostname(network_state.get("wan_bridge"), "versions/stack.yaml.observed_state.network.wan_bridge")
@@ -2598,7 +2629,11 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         network_state.get("public_ingress_forwarded_ports"),
         "versions/stack.yaml.observed_state.network.public_ingress_forwarded_ports",
     )
-    for index, source in enumerate(require_string_list(network_state.get("management_sources"), "versions/stack.yaml.observed_state.network.management_sources")):
+    for index, source in enumerate(
+        require_string_list(
+            network_state.get("management_sources"), "versions/stack.yaml.observed_state.network.management_sources"
+        )
+    ):
         require_network(source, f"versions/stack.yaml.observed_state.network.management_sources[{index}]")
     require_bool(
         network_state.get("tailscale_host_admin_path_working"),
@@ -2619,15 +2654,9 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     for index, guest in enumerate(instances):
         guest = require_mapping(guest, f"versions/stack.yaml.observed_state.guests.instances[{index}]")
         require_int(guest.get("vmid"), f"versions/stack.yaml.observed_state.guests.instances[{index}].vmid", 1)
-        name = require_hostname(
-            guest.get("name"), f"versions/stack.yaml.observed_state.guests.instances[{index}].name"
-        )
-        require_ipv4(
-            guest.get("ipv4"), f"versions/stack.yaml.observed_state.guests.instances[{index}].ipv4"
-        )
-        require_bool(
-            guest.get("running"), f"versions/stack.yaml.observed_state.guests.instances[{index}].running"
-        )
+        name = require_hostname(guest.get("name"), f"versions/stack.yaml.observed_state.guests.instances[{index}].name")
+        require_ipv4(guest.get("ipv4"), f"versions/stack.yaml.observed_state.guests.instances[{index}].ipv4")
+        require_bool(guest.get("running"), f"versions/stack.yaml.observed_state.guests.instances[{index}].running")
         instance_names.add(name)
     if versions_stack_enforces_canonical_guest_fleet():
         if instance_names != host_vars_context["guest_names"]:
@@ -2675,9 +2704,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         "versions/stack.yaml.observed_state.docker_runtime.docker_compose_plugin_version",
     )
 
-    uptime_kuma = require_mapping(
-        observed_state.get("uptime_kuma"), "versions/stack.yaml.observed_state.uptime_kuma"
-    )
+    uptime_kuma = require_mapping(observed_state.get("uptime_kuma"), "versions/stack.yaml.observed_state.uptime_kuma")
     require_ipv4(uptime_kuma.get("vm"), "versions/stack.yaml.observed_state.uptime_kuma.vm")
     require_str(uptime_kuma.get("public_url"), "versions/stack.yaml.observed_state.uptime_kuma.public_url")
     require_bool(
@@ -2702,8 +2729,15 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         publication_state.get("edge_configured"),
         "versions/stack.yaml.observed_state.public_publication.edge_configured",
     )
-    for index, hostname in enumerate(require_string_list(publication_state.get("published_hostnames"), "versions/stack.yaml.observed_state.public_publication.published_hostnames")):
-        require_hostname(hostname, f"versions/stack.yaml.observed_state.public_publication.published_hostnames[{index}]")
+    for index, hostname in enumerate(
+        require_string_list(
+            publication_state.get("published_hostnames"),
+            "versions/stack.yaml.observed_state.public_publication.published_hostnames",
+        )
+    ):
+        require_hostname(
+            hostname, f"versions/stack.yaml.observed_state.public_publication.published_hostnames[{index}]"
+        )
 
     postgres = require_mapping(observed_state.get("postgres"), "versions/stack.yaml.observed_state.postgres")
     require_ipv4(postgres.get("vm"), "versions/stack.yaml.observed_state.postgres.vm")
@@ -2742,21 +2776,23 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     repo_versioning = require_mapping(
         release_tracks.get("repo_versioning"), "versions/stack.yaml.release_tracks.repo_versioning"
     )
-    if require_semver(
-        repo_versioning.get("current"), "versions/stack.yaml.release_tracks.repo_versioning.current"
-    ) != repo_version:
+    if (
+        require_semver(repo_versioning.get("current"), "versions/stack.yaml.release_tracks.repo_versioning.current")
+        != repo_version
+    ):
         raise ValueError("versions/stack.yaml.release_tracks.repo_versioning.current must match repo_version")
     platform_versioning = require_mapping(
         release_tracks.get("platform_versioning"),
         "versions/stack.yaml.release_tracks.platform_versioning",
     )
-    if require_semver(
-        platform_versioning.get("current"),
-        "versions/stack.yaml.release_tracks.platform_versioning.current",
-    ) != platform_version:
-        raise ValueError(
-            "versions/stack.yaml.release_tracks.platform_versioning.current must match platform_version"
+    if (
+        require_semver(
+            platform_versioning.get("current"),
+            "versions/stack.yaml.release_tracks.platform_versioning.current",
         )
+        != platform_version
+    ):
+        raise ValueError("versions/stack.yaml.release_tracks.platform_versioning.current must match platform_version")
 
 
 def validate_slo_catalog_assets() -> None:
@@ -3016,9 +3052,7 @@ def validate_activation_checklist_catalog() -> None:
         "config/activation-checklist.json.progressive_reveal.locked_runbook_execution_classes",
     ):
         if execution_class not in ACTIVATION_RUNBOOK_EXECUTION_CLASSES:
-            raise ValueError(
-                f"unsupported runbook execution class in activation checklist: '{execution_class}'"
-            )
+            raise ValueError(f"unsupported runbook execution class in activation checklist: '{execution_class}'")
 
 
 def validate_runtime_assurance_matrix_data() -> None:
@@ -3145,9 +3179,7 @@ def validate_repository_data_models() -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate the repository's canonical machine-readable data models."
-    )
+    parser = argparse.ArgumentParser(description="Validate the repository's canonical machine-readable data models.")
     parser.add_argument("--validate", action="store_true", help="Validate the repository data models.")
     args = parser.parse_args()
 

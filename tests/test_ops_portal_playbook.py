@@ -6,14 +6,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "ops-portal.yml"
 ROLE_TASKS_PATH = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "roles"
-    / "ops_portal_runtime"
-    / "tasks"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ops_portal_runtime" / "tasks"
 )
 
 
@@ -67,12 +60,18 @@ def test_ops_portal_runtime_removes_macos_metadata_sidecars_after_sync() -> None
 def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     tasks = yaml.safe_load((ROLE_TASKS_PATH / "verify.yml").read_text())
     running_task = next(task for task in tasks if task["name"] == "Verify the ops portal container is running")
-    health_task = next(task for task in tasks if task["name"] == "Verify the ops portal health endpoint responds locally")
+    health_task = next(
+        task for task in tasks if task["name"] == "Verify the ops portal health endpoint responds locally"
+    )
     root_task = next(task for task in tasks if task["name"] == "Verify the ops portal root page renders locally")
     root_assert = next(
-        task for task in tasks if task["name"] == "Assert the contextual help drawer is present on the ops portal root page"
+        task
+        for task in tasks
+        if task["name"] == "Assert the contextual help drawer is present on the ops portal root page"
     )
-    attention_task = next(task for task in tasks if task["name"] == "Verify the attention center partial renders locally")
+    attention_task = next(
+        task for task in tasks if task["name"] == "Verify the attention center partial renders locally"
+    )
 
     assert running_task["retries"] == 20
     assert running_task["delay"] == 3
@@ -94,6 +93,7 @@ def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     assert attention_task["delay"] == 5
     assert attention_task["until"] == "ops_portal_verify_attention.status == 200"
 
+
 def test_ops_portal_runtime_syncs_activation_catalog_and_partial() -> None:
     defaults = (ROLE_TASKS_PATH.parent / "defaults" / "main.yml").read_text()
     verify = (ROLE_TASKS_PATH / "verify.yml").read_text()
@@ -109,7 +109,9 @@ def test_ops_portal_runtime_prunes_stale_excluded_data_dirs_before_receipt_sync(
         task for task in tasks if task["name"] == "Remove stale excluded ops portal data directories before sync"
     )
     find_task = next(
-        task for task in tasks if task["name"] == "Discover the ops portal directory-backed data files on the controller"
+        task
+        for task in tasks
+        if task["name"] == "Discover the ops portal directory-backed data files on the controller"
     )
 
     assert prune_task["ansible.builtin.file"]["state"] == "absent"

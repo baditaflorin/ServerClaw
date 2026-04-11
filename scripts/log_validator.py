@@ -8,7 +8,8 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
+from collections.abc import Iterable
 
 
 ALLOWED_LEVELS = {"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}

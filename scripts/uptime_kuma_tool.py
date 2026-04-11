@@ -3,7 +3,6 @@
 import argparse
 import json
 import secrets
-import sys
 import threading
 import time
 from pathlib import Path
@@ -11,7 +10,7 @@ from pathlib import Path
 import requests
 import socketio
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json, load_operator_auth
+from controller_automation_toolkit import emit_cli_error, repo_path, write_json, load_operator_auth
 
 
 DEFAULT_AUTH_FILE = repo_path(".local", "uptime-kuma", "admin-session.json")
@@ -233,7 +232,7 @@ class UptimeKumaClient:
             try:
                 self.connect()
                 return
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 last_error = exc
                 time.sleep(2)
         raise RuntimeError(f"Timed out waiting for Uptime Kuma main server: {last_error}")
@@ -462,9 +461,7 @@ def upsert_status_page_maintenance(
         raise RuntimeError(monitor_result.get("msg", f"Unable to bind monitors for maintenance '{title}'"))
     status_page_result = client.add_maintenance_status_page(maintenance_id, [{"id": status_page["id"]}])
     if not status_page_result.get("ok"):
-        raise RuntimeError(
-            status_page_result.get("msg", f"Unable to bind status page for maintenance '{title}'")
-        )
+        raise RuntimeError(status_page_result.get("msg", f"Unable to bind status page for maintenance '{title}'"))
     return {"action": action, "maintenance_id": maintenance_id}
 
 
@@ -620,7 +617,7 @@ def main() -> int:
 
     try:
         return args.func(args)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return emit_cli_error("Uptime Kuma", exc, exit_code=1)
 
 

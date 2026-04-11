@@ -8,14 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "flagsmith.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "flagsmith.yml"
 COLLECTION_SERVICE_WRAPPER_PATH = (
-    REPO_ROOT
-    / "collections"
-    / "ansible_collections"
-    / "lv3"
-    / "platform"
-    / "playbooks"
-    / "services"
-    / "flagsmith.yml"
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "flagsmith.yml"
 )
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
@@ -35,7 +28,9 @@ def test_flagsmith_dns_stage_converges_only_the_flags_subdomain_record() -> None
     assert dns_play["vars"]["inventory_defaults_path"] == "{{ playbook_dir }}/../inventory/group_vars/all.yml"
 
     select_task = next(task for task in tasks if task["name"] == "Select the Flagsmith subdomain entry")
-    assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    assert (
+        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    )
 
     converge_task = next(task for task in tasks if task["name"] == "Converge the Flagsmith Hetzner DNS record")
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"

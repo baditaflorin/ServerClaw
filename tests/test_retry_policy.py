@@ -23,7 +23,9 @@ def test_with_retry_escalates_transient_failures_to_backoff() -> None:
 
     result = with_retry(
         flaky,
-        policy=RetryPolicy(max_attempts=5, base_delay_s=1.0, max_delay_s=5.0, multiplier=2.0, jitter=False, transient_max=2),
+        policy=RetryPolicy(
+            max_attempts=5, base_delay_s=1.0, max_delay_s=5.0, multiplier=2.0, jitter=False, transient_max=2
+        ),
         error_context="transient escalation test",
         sleep_fn=sleeps.append,
     )
@@ -40,7 +42,9 @@ def test_with_retry_raises_max_retries_with_last_error() -> None:
     with pytest.raises(MaxRetriesExceeded) as exc_info:
         with_retry(
             always_timeout,
-            policy=RetryPolicy(max_attempts=3, base_delay_s=0.0, max_delay_s=0.0, multiplier=2.0, jitter=False, transient_max=0),
+            policy=RetryPolicy(
+                max_attempts=3, base_delay_s=0.0, max_delay_s=0.0, multiplier=2.0, jitter=False, transient_max=0
+            ),
             error_context="always timeout",
             sleep_fn=lambda _seconds: None,
         )
@@ -60,7 +64,9 @@ def test_with_retry_retries_connection_reset_errors() -> None:
 
     result = with_retry(
         flaky,
-        policy=RetryPolicy(max_attempts=3, base_delay_s=0.25, max_delay_s=1.0, multiplier=2.0, jitter=False, transient_max=0),
+        policy=RetryPolicy(
+            max_attempts=3, base_delay_s=0.25, max_delay_s=1.0, multiplier=2.0, jitter=False, transient_max=0
+        ),
         error_context="connection reset",
         sleep_fn=sleeps.append,
     )
@@ -85,7 +91,9 @@ def test_async_with_retry_honours_retry_after() -> None:
     result = asyncio.run(
         async_with_retry(
             flaky,
-            policy=RetryPolicy(max_attempts=4, base_delay_s=0.1, max_delay_s=1.0, multiplier=2.0, jitter=False, transient_max=0),
+            policy=RetryPolicy(
+                max_attempts=4, base_delay_s=0.1, max_delay_s=1.0, multiplier=2.0, jitter=False, transient_max=0
+            ),
             error_context="retry-after",
             sleep_fn=lambda seconds: _async_record_sleep(seconds, sleeps),
         )

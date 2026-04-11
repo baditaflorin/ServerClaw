@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from platform.faults import (  # noqa: E402
+from platform.faults import (
     build_network_impairment_report,
     load_network_impairment_matrix,
     render_network_impairment_report,
@@ -42,7 +42,9 @@ def main(
         service=service.strip() or None,
     )
     report["matrix_path"] = str(matrix_path)
-    report_path = Path(report_file) if report_file else repo_root / ".local" / "network-impairment-matrix" / "latest.json"
+    report_path = (
+        Path(report_file) if report_file else repo_root / ".local" / "network-impairment-matrix" / "latest.json"
+    )
     report["report_file"] = str(report_path)
     _write_json(report_path, report)
     report["rendered_output"] = render_network_impairment_report(report, output_format=output_format)

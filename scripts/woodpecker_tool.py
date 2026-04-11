@@ -12,14 +12,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json, load_operator_auth
+from controller_automation_toolkit import emit_cli_error, repo_path, write_json, load_operator_auth
 from platform.ansible.woodpecker import (
     GiteaClient,
     GiteaError,
     WoodpeckerClient,
     WoodpeckerError,
     WoodpeckerSessionClient,
-    split_repository_full_name,
 )
 
 
@@ -193,19 +192,13 @@ def _discover_triggered_pipeline(
     baseline: list[dict],
 ) -> dict:
     known_numbers = {
-        int(item["number"])
-        for item in baseline
-        if isinstance(item, dict) and item.get("number") is not None
+        int(item["number"]) for item in baseline if isinstance(item, dict) and item.get("number") is not None
     }
     deadline = time.monotonic() + timeout_seconds
     latest: list[dict] = list(baseline)
     while time.monotonic() < deadline:
         latest = client.list_pipelines(repo_id, branch=branch)
-        candidates = [
-            item
-            for item in latest
-            if isinstance(item, dict) and item.get("number") is not None
-        ]
+        candidates = [item for item in latest if isinstance(item, dict) and item.get("number") is not None]
         unseen = [item for item in candidates if int(item["number"]) not in known_numbers]
         if unseen:
             return max(unseen, key=lambda item: int(item["number"]))
@@ -267,12 +260,16 @@ def build_parser() -> argparse.ArgumentParser:
     whoami = subparsers.add_parser("whoami", help="Show the configured Woodpecker identity.")
     whoami.set_defaults(func=command_whoami)
 
-    list_repos = subparsers.add_parser("list-repos", help="List Woodpecker repositories visible to the configured user.")
+    list_repos = subparsers.add_parser(
+        "list-repos", help="List Woodpecker repositories visible to the configured user."
+    )
     list_repos.add_argument("--all", action="store_true", help="Include inactive repositories.")
     list_repos.add_argument("--name", help="Optional repository-name filter.")
     list_repos.set_defaults(func=command_list_repos)
 
-    activate = subparsers.add_parser("activate-repo", help="Activate one repository in Woodpecker using the configured Gitea admin token.")
+    activate = subparsers.add_parser(
+        "activate-repo", help="Activate one repository in Woodpecker using the configured Gitea admin token."
+    )
     activate.add_argument("--name", help="Repository in owner/name form.")
     activate.set_defaults(func=command_activate_repo)
 
@@ -285,7 +282,9 @@ def build_parser() -> argparse.ArgumentParser:
     upsert_secret.add_argument("--name", required=True, help="Secret name.")
     upsert_secret.add_argument("--value", help="Secret value.")
     upsert_secret.add_argument("--value-file", help="Path to the secret value file.")
-    upsert_secret.add_argument("--events", default="push,pull_request,manual", help="Comma-separated Woodpecker secret event list.")
+    upsert_secret.add_argument(
+        "--events", default="push,pull_request,manual", help="Comma-separated Woodpecker secret event list."
+    )
     upsert_secret.add_argument("--images", default="", help="Optional comma-separated image selector list.")
     upsert_secret.set_defaults(func=command_upsert_secret)
 
@@ -297,7 +296,9 @@ def build_parser() -> argparse.ArgumentParser:
     trigger = subparsers.add_parser("trigger-pipeline", help="Trigger one manual pipeline and optionally wait for it.")
     trigger.add_argument("--repo", help="Repository in owner/name form.")
     trigger.add_argument("--branch", required=True, help="Branch to run.")
-    trigger.add_argument("--variable", action="append", default=[], help="Optional key=value variable passed to the pipeline.")
+    trigger.add_argument(
+        "--variable", action="append", default=[], help="Optional key=value variable passed to the pipeline."
+    )
     trigger.add_argument("--wait", action="store_true", help="Wait for the pipeline to finish.")
     trigger.add_argument("--timeout", type=int, default=900, help="Maximum wait time in seconds.")
     trigger.add_argument("--poll-interval", type=int, default=5, help="Polling interval in seconds.")

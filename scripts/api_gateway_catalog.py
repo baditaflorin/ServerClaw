@@ -75,9 +75,7 @@ def validate_api_gateway_catalog(
     service_catalog_path: Any = SERVICE_CATALOG_PATH,
 ) -> list[dict[str, Any]]:
     if require_str(catalog.get("schema_version"), "api-gateway-catalog.schema_version") != SUPPORTED_SCHEMA_VERSION:
-        raise ValueError(
-            f"api-gateway-catalog.schema_version must be '{SUPPORTED_SCHEMA_VERSION}'"
-        )
+        raise ValueError(f"api-gateway-catalog.schema_version must be '{SUPPORTED_SCHEMA_VERSION}'")
 
     known_service_ids = load_service_catalog_ids(service_catalog_path)
     services = require_list(catalog.get("services"), "api-gateway-catalog.services")
@@ -132,9 +130,7 @@ def validate_api_gateway_catalog(
 
         healthcheck_path = service.get("healthcheck_path")
         if healthcheck_path is not None:
-            normalized_service["healthcheck_path"] = require_path_prefix(
-                healthcheck_path, f"{path}.healthcheck_path"
-            )
+            normalized_service["healthcheck_path"] = require_path_prefix(healthcheck_path, f"{path}.healthcheck_path")
 
         openapi_path = service.get("openapi_path")
         if openapi_path is not None:
@@ -187,9 +183,7 @@ def list_catalog(normalized: list[dict[str, Any]]) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Inspect or validate the canonical platform API gateway catalog."
-    )
+    parser = argparse.ArgumentParser(description="Inspect or validate the canonical platform API gateway catalog.")
     parser.add_argument("--validate", action="store_true", help="Validate the API gateway catalog.")
     args = parser.parse_args()
 

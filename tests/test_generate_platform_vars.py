@@ -194,6 +194,7 @@ def test_build_platform_vars_includes_temporal_private_loopback_topology() -> No
     assert temporal["access"]["url"] == "grpc://127.0.0.1:7233"
     assert "urls" not in temporal or temporal["urls"] == {}
 
+
 def test_build_platform_vars_includes_openbao_extra_bind_addresses() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
 
@@ -296,6 +297,7 @@ def test_build_platform_vars_includes_piper_private_topology() -> None:
     assert piper["urls"]["internal"] == "http://10.10.10.20:8100"
     assert piper["exposure_model"] == "private-only"
     assert platform_vars["piper_port"] == 8100
+
 
 def test_build_platform_vars_includes_redpanda_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
@@ -598,7 +600,9 @@ def test_build_platform_vars_renders_service_topology_without_unresolved_templat
 
 
 def test_tika_network_policy_allows_proxmox_host_private_probe() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8"))
+    host_vars = yaml.safe_load(
+        (REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8")
+    )
     allowed_inbound = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
 
     assert any(rule["source"] == "host" and 9998 in rule["ports"] for rule in allowed_inbound)
@@ -629,7 +633,9 @@ def test_build_platform_vars_includes_woodpecker_publication_topology() -> None:
 
 
 def test_woodpecker_network_policy_allows_host_and_edge_access() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8"))
+    host_vars = yaml.safe_load(
+        (REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8")
+    )
     allowed_inbound = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
 
     assert any(rule["source"] == "host" and 8102 in rule["ports"] for rule in allowed_inbound)
@@ -697,9 +703,7 @@ def test_build_service_urls_include_coolify_controller_and_apps_endpoints() -> N
 def test_build_platform_vars_includes_coolify_wildcard_dns_record() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
 
-    wildcard_record = next(
-        record for record in platform_vars["hetzner_dns_records"] if record["name"] == "*.apps"
-    )
+    wildcard_record = next(record for record in platform_vars["hetzner_dns_records"] if record["name"] == "*.apps")
 
     assert wildcard_record == {
         "name": "*.apps",
@@ -707,7 +711,6 @@ def test_build_platform_vars_includes_coolify_wildcard_dns_record() -> None:
         "value": "65.108.75.123",
         "ttl": 60,
     }
-
 
 
 def test_build_platform_vars_includes_glitchtip_publication_topology() -> None:

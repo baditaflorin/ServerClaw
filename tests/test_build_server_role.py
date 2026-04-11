@@ -43,7 +43,7 @@ def test_buildkit_config_template_enables_gc_policy() -> None:
     template = BUILDKIT_TEMPLATE.read_text()
     assert "keepDuration" in template
     assert "keepBytes" in template
-    assert "root = \"{{ build_server_buildkit_cache_dir }}\"" in template
+    assert 'root = "{{ build_server_buildkit_cache_dir }}"' in template
 
 
 def test_buildkit_service_template_mounts_host_cache_and_socket() -> None:

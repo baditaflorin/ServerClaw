@@ -44,12 +44,10 @@ def test_edge_publication_playbooks_load_canonical_platform_vars() -> None:
     for playbook_path in EDGE_PLAYBOOKS:
         plays = yaml.safe_load(playbook_path.read_text())
         edge_plays = [
-            play
-            for play in plays
-            if {"role": "lv3.platform.nginx_edge_publication"} in play.get("roles", [])
+            play for play in plays if {"role": "lv3.platform.nginx_edge_publication"} in play.get("roles", [])
         ]
 
         assert edge_plays, f"{playbook_path} should publish through lv3.platform.nginx_edge_publication"
-        assert all(
-            play.get("vars_files") == expected_platform_vars(playbook_path) for play in edge_plays
-        ), f"{playbook_path} must load the canonical platform vars before republishing the shared edge"
+        assert all(play.get("vars_files") == expected_platform_vars(playbook_path) for play in edge_plays), (
+            f"{playbook_path} must load the canonical platform vars before republishing the shared edge"
+        )

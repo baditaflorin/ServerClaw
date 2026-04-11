@@ -57,14 +57,17 @@ def test_semaphore_role_recovers_stale_admin_password_before_bootstrap() -> None
 
     assert "Wait for the controller-facing Semaphore API to answer" in names
     assert "Check whether the controller-facing Semaphore login already accepts the desired admin password" in names
-    assert "Reconcile the persisted Semaphore admin password when controller login rejects the desired password" in names
+    assert (
+        "Reconcile the persisted Semaphore admin password when controller login rejects the desired password" in names
+    )
     assert "Recheck the controller-facing Semaphore login after reconciling the persisted admin password" in names
     assert "Bootstrap the Semaphore project and controller auth artifacts" in names
 
     preflight_task = next(
         task
         for task in tasks
-        if task["name"] == "Check whether the controller-facing Semaphore login already accepts the desired admin password"
+        if task["name"]
+        == "Check whether the controller-facing Semaphore login already accepts the desired admin password"
     )
     recovery_task = next(
         task
@@ -75,7 +78,8 @@ def test_semaphore_role_recovers_stale_admin_password_before_bootstrap() -> None
     recheck_task = next(
         task
         for task in tasks
-        if task["name"] == "Recheck the controller-facing Semaphore login after reconciling the persisted admin password"
+        if task["name"]
+        == "Recheck the controller-facing Semaphore login after reconciling the persisted admin password"
     )
 
     assert preflight_task["ansible.builtin.uri"]["url"] == "{{ semaphore_controller_url }}/api/auth/login"

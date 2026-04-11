@@ -11,6 +11,7 @@ Output:
     Lists templates missing headers.
     With --strict, exits non-zero if any are missing.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -31,10 +32,7 @@ def check_template(path: Path) -> bool:
 
 
 def find_templates(roles_dir: Path) -> list[Path]:
-    return sorted(
-        p for p in roles_dir.glob("*/templates/*.j2")
-        if p.name not in SKIP_PATTERNS
-    )
+    return sorted(p for p in roles_dir.glob("*/templates/*.j2") if p.name not in SKIP_PATTERNS)
 
 
 def main() -> int:

@@ -23,6 +23,7 @@ Examples
   python scripts/validation_gate_tool.py simulate
   python scripts/validation_gate_tool.py simulate --skip-checks ansible-lint,packer-validate
 """
+
 from __future__ import annotations
 
 import argparse
@@ -64,6 +65,7 @@ def _bypass_files() -> list[Path]:
 # commands
 # ---------------------------------------------------------------------------
 
+
 def cmd_list_checks(args: argparse.Namespace) -> int:
     checks = _load_checks()
     if not checks:
@@ -75,7 +77,7 @@ def cmd_list_checks(args: argparse.Namespace) -> int:
         desc = cfg.get("description", "")[:55]
         sev = cfg.get("severity", "")
         timeout = cfg.get("timeout_seconds", "?")
-        print(f"{name:<35}  {sev:<10}  {str(timeout):>9}  {desc}")
+        print(f"{name:<35}  {sev:<10}  {timeout!s:>9}  {desc}")
     print(f"\n{len(checks)} check(s)")
     return 0
 
@@ -168,6 +170,7 @@ def cmd_simulate(args: argparse.Namespace) -> int:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="validation_gate_tool.py",
@@ -187,7 +190,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     simp = sub.add_parser("simulate", help="Simulate gate execution")
     simp.add_argument(
-        "--skip-checks", metavar="NAMES",
+        "--skip-checks",
+        metavar="NAMES",
         help="Comma-separated list of check names to skip in simulation",
     )
     return p

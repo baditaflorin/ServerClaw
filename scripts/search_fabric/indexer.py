@@ -73,16 +73,11 @@ class SearchIndexer:
         selected = collections or available_collections()
         existing = self.load_index()
         existing_documents = {
-            (item["collection"], item["doc_id"]): SearchDocument(**item)
-            for item in existing.get("documents", [])
+            (item["collection"], item["doc_id"]): SearchDocument(**item) for item in existing.get("documents", [])
         }
         existing_hashes = {key: document.content_hash for key, document in existing_documents.items()}
 
-        retained_documents = {
-            key: document
-            for key, document in existing_documents.items()
-            if key[0] not in selected
-        }
+        retained_documents = {key: document for key, document in existing_documents.items() if key[0] not in selected}
         updated_count = 0
         skipped_count = 0
         collection_counts: dict[str, int] = {}
@@ -97,7 +92,9 @@ class SearchIndexer:
                 else:
                     skipped_count += 1
 
-        ordered = sorted(retained_documents.values(), key=lambda item: (item.collection, item.title.lower(), item.doc_id))
+        ordered = sorted(
+            retained_documents.values(), key=lambda item: (item.collection, item.title.lower(), item.doc_id)
+        )
         stats = {
             "repo_root": str(self.repo_root),
             "index_path": str(self.index_path),

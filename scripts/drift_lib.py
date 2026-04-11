@@ -9,11 +9,11 @@ import shlex
 import socket
 import subprocess
 import time
-import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
+from collections.abc import Iterator
 
 from script_bootstrap import ensure_repo_root_on_path
 
@@ -93,11 +93,7 @@ def load_controller_context() -> dict[str, Any]:
         prefer_internal_host = False
     host_addr = (
         os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
-        or (
-            host_vars.get("proxmox_internal_ipv4")
-            if prefer_internal_host
-            else host_vars["management_tailscale_ipv4"]
-        )
+        or (host_vars.get("proxmox_internal_ipv4") if prefer_internal_host else host_vars["management_tailscale_ipv4"])
         or host_vars["management_tailscale_ipv4"]
     )
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
@@ -256,9 +252,7 @@ def workstream_suppression(shared_surfaces: list[str]) -> tuple[bool, list[str]]
         if workstream.get("status") != "in_progress":
             continue
         candidate_surfaces = {
-            str(surface)
-            for surface in workstream.get("shared_surfaces", [])
-            if isinstance(surface, str) and surface
+            str(surface) for surface in workstream.get("shared_surfaces", []) if isinstance(surface, str) and surface
         }
         if surfaces.intersection(candidate_surfaces):
             matches.append(str(workstream.get("id", "")))
@@ -385,7 +379,10 @@ async def publish_nats_events_async(
                 payload,
                 actor_id=str(record.get("actor_id") or "").strip() or None,
                 context_id=str(record.get("context_id") or "").strip() or None,
-                ts=record.get("ts") or record.get("generated_at") or record.get("occurred_at") or record.get("collected_at"),
+                ts=record.get("ts")
+                or record.get("generated_at")
+                or record.get("occurred_at")
+                or record.get("collected_at"),
             )
 
             async def publish_current() -> None:

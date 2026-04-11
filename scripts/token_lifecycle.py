@@ -27,7 +27,7 @@ from controller_automation_toolkit import load_yaml
 from platform.ledger import LedgerWriter
 
 
-UTC = dt.timezone.utc
+UTC = dt.UTC
 DEFAULT_POLICY_PATH = REPO_ROOT / "config" / "token-policy.yaml"
 DEFAULT_INVENTORY_PATH = REPO_ROOT / "config" / "token-inventory.yaml"
 DEFAULT_AUDIT_RECEIPT_DIR = REPO_ROOT / "receipts" / "token-lifecycle"
@@ -468,7 +468,9 @@ def default_exposure_window(token: dict[str, Any]) -> dict[str, Any]:
     first_possible_use = token.get("last_used_at") or token["issued_at"]
     return {
         "status": "derived",
-        "earliest_use": isoformat(parse_timestamp(first_possible_use) or parse_timestamp(token["issued_at"]) or utc_now()),
+        "earliest_use": isoformat(
+            parse_timestamp(first_possible_use) or parse_timestamp(token["issued_at"]) or utc_now()
+        ),
         "latest_known_use": token.get("last_used_at"),
     }
 
@@ -546,7 +548,10 @@ def run_exposure_response(
             dry_run=dry_run,
         )
         if invalidate_result["status"] == "missing":
-            invalidate_result = {"status": "blocked" if not dry_run else "planned", "reason": "session invalidation hook is not configured"}
+            invalidate_result = {
+                "status": "blocked" if not dry_run else "planned",
+                "reason": "session invalidation hook is not configured",
+            }
     else:
         invalidate_result = {"status": "skipped", "reason": "token class does not require session invalidation"}
     steps.append({"id": "session-invalidation", "result": invalidate_result})

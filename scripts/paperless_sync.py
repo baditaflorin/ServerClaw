@@ -149,18 +149,16 @@ class PaperlessClient:
         boundary = f"paperless-sync-{uuid.uuid4().hex}"
         body = bytearray()
         for key, value in fields:
-            body.extend(f"--{boundary}\r\n".encode("utf-8"))
-            body.extend(f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode("utf-8"))
+            body.extend(f"--{boundary}\r\n".encode())
+            body.extend(f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode())
             body.extend(value.encode("utf-8"))
             body.extend(b"\r\n")
-        body.extend(f"--{boundary}\r\n".encode("utf-8"))
-        body.extend(
-            f'Content-Disposition: form-data; name="document"; filename="{filename}"\r\n'.encode("utf-8")
-        )
+        body.extend(f"--{boundary}\r\n".encode())
+        body.extend(f'Content-Disposition: form-data; name="document"; filename="{filename}"\r\n'.encode())
         body.extend(b"Content-Type: application/pdf\r\n\r\n")
         body.extend(content)
         body.extend(b"\r\n")
-        body.extend(f"--{boundary}--\r\n".encode("utf-8"))
+        body.extend(f"--{boundary}--\r\n".encode())
         return self._request(
             "POST",
             "/api/documents/post_document/",
@@ -315,9 +313,14 @@ def extract_document_id(payload: Any) -> int | None:
 
 
 def pdf_literal_string(text: str) -> bytes:
-    return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)").encode(
-        "ascii",
-        errors="backslashreplace",
+    return (
+        text.replace("\\", "\\\\")
+        .replace("(", "\\(")
+        .replace(")", "\\)")
+        .encode(
+            "ascii",
+            errors="backslashreplace",
+        )
     )
 
 
@@ -346,11 +349,7 @@ def tiny_pdf_bytes(label: str) -> bytes:
     pdf.extend(b"0000000000 65535 f \n")
     for offset in offsets[1:]:
         pdf.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
-    pdf.extend(
-        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode(
-            "ascii"
-        )
-    )
+    pdf.extend(f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode("ascii"))
     return bytes(pdf)
 
 

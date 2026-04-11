@@ -17,13 +17,10 @@ DEFAULT_HTTP_TIMEOUT_S = 10.0
 def resolve_repo_root(script_path: Path | None = None) -> Path:
     candidate = (script_path or Path(__file__)).resolve()
     for parent in (candidate.parent, *candidate.parents):
-        if (
-            (parent / "platform" / "__init__.py").exists()
-            and (
-                (parent / "platform" / "retry.py").exists()
-                or (parent / "platform" / "retry").is_dir()
-                or (parent / "platform" / "retry" / "__init__.py").exists()
-            )
+        if (parent / "platform" / "__init__.py").exists() and (
+            (parent / "platform" / "retry.py").exists()
+            or (parent / "platform" / "retry").is_dir()
+            or (parent / "platform" / "retry" / "__init__.py").exists()
         ):
             return parent
     raise RuntimeError(f"Unable to resolve repository root from {candidate}")

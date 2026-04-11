@@ -37,6 +37,7 @@ def test_load_event_type_registry_reads_packaged_sibling_config(monkeypatch, tmp
 
     monkeypatch.setattr(repo_module, "REPO_ROOT", service_root)
 
-    assert ledger_common.load_event_type_registry(
-        repo_module.repo_path("config", "ledger-event-types.yaml")
-    ) == ["execution.completed", "execution.failed"]
+    assert ledger_common.load_event_type_registry(repo_module.repo_path("config", "ledger-event-types.yaml")) == [
+        "execution.completed",
+        "execution.failed",
+    ]

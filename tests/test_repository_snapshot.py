@@ -25,7 +25,9 @@ def load_module():
 def init_git_repo(path: Path) -> None:
     subprocess.run(["git", "init", "-b", "main"], cwd=path, check=True, capture_output=True, text=True)
     subprocess.run(["git", "config", "user.name", "Codex"], cwd=path, check=True, capture_output=True, text=True)
-    subprocess.run(["git", "config", "user.email", "codex@example.com"], cwd=path, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "config", "user.email", "codex@example.com"], cwd=path, check=True, capture_output=True, text=True
+    )
 
 
 def commit_all(path: Path, message: str) -> None:

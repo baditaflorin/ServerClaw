@@ -29,13 +29,13 @@ EXCLUDED_PATHS = {
     ".claude",
     ".worktrees",
     "build",
-    "config",                 # data catalogs describe the live deployment — resolved values expected
+    "config",  # data catalogs describe the live deployment — resolved values expected
     "docs",
     "receipts",
     "reference-deployments",
-    "scripts",                # standalone tooling scripts — not Ansible templates
-    "tests",                  # tests can reference the concrete domain
-    "versions",               # protected integration surface
+    "scripts",  # standalone tooling scripts — not Ansible templates
+    "tests",  # tests can reference the concrete domain
+    "versions",  # protected integration surface
     "workstreams",
     ".local",
     ".ansible",
@@ -43,7 +43,7 @@ EXCLUDED_PATHS = {
 
 EXCLUDED_FILES = {
     "inventory/group_vars/all/identity.yml",  # the source of truth itself
-    "inventory/group_vars/platform.yml",      # deployment data (neko_instances, etc.)
+    "inventory/group_vars/platform.yml",  # deployment data (neko_instances, etc.)
     "inventory/group_vars/platform_hairpin.yml",  # hairpin NAT config — deployment data
     "changelog.md",
     "RELEASE.md",
@@ -90,7 +90,14 @@ def _is_excluded(path: Path) -> bool:
 # ---------------------------------------------------------------------------
 
 SCANNABLE_EXTENSIONS = {
-    ".yml", ".yaml", ".j2", ".py", ".conf", ".json", ".toml", ".sh",
+    ".yml",
+    ".yaml",
+    ".j2",
+    ".py",
+    ".conf",
+    ".json",
+    ".toml",
+    ".sh",
 }
 
 
@@ -238,8 +245,7 @@ class TestNoHardcodedPaths:
         if violations:
             pytest.fail(
                 f"Found {len(violations)} hardcoded developer-machine path(s) in role code.\n"
-                "Use '{{ repo_shared_local_root }}' or '{{ repo_shared_root }}' instead:\n"
-                + "\n".join(violations[:20])
+                "Use '{{ repo_shared_local_root }}' or '{{ repo_shared_root }}' instead:\n" + "\n".join(violations[:20])
             )
 
     def test_no_developer_machine_paths_in_playbooks(self):
@@ -249,8 +255,7 @@ class TestNoHardcodedPaths:
         if violations:
             pytest.fail(
                 f"Found {len(violations)} hardcoded developer-machine path(s) in playbooks.\n"
-                "Use '{{ repo_shared_local_root }}' or '{{ repo_shared_root }}' instead:\n"
-                + "\n".join(violations[:20])
+                "Use '{{ repo_shared_local_root }}' or '{{ repo_shared_root }}' instead:\n" + "\n".join(violations[:20])
             )
 
     def test_no_hardcoded_hostname_in_role_defaults(self):
@@ -263,8 +268,7 @@ class TestNoHardcodedPaths:
         if violations:
             pytest.fail(
                 f"Found {len(violations)} hardcoded 'proxmox_florin' hostname(s) in role defaults.\n"
-                "Use '{{ platform_topology_host }}' instead:\n"
-                + "\n".join(violations[:20])
+                "Use '{{ platform_topology_host }}' instead:\n" + "\n".join(violations[:20])
             )
 
     def test_no_hardcoded_repo_checkout_path_in_role_defaults(self):
@@ -277,6 +281,5 @@ class TestNoHardcodedPaths:
         if violations:
             pytest.fail(
                 f"Found {len(violations)} hardcoded '/srv/proxmox_florin_server' path(s) in role defaults.\n"
-                "Use '{{ platform_repo_checkout_path }}' instead:\n"
-                + "\n".join(violations[:20])
+                "Use '{{ platform_repo_checkout_path }}' instead:\n" + "\n".join(violations[:20])
             )
