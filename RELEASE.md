@@ -1,10 +1,11 @@
-# Release 0.178.113
+# Release 0.178.114
 
 - Date: 2026-04-11
 
 ## Summary
-- [adr-0410] Docker isolation testing and IoC completion — proposed architecture for parallel test topologies (micro/minimal/standard/extended profiles), subnet isolation (172.30.x.0/24 replacing 10.10.10.0/24), Docker-native CA/TLS via step-ca + Pebble, cert validator identity awareness, generator identity overlay, test scenario catalog with CI integration; ~41h estimated across 8 phases
-- fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars; postmortem documents 6 findings from Docker inception IoC test
+- fix: Docker dev end-to-end tested — 7 bugs found and fixed: subnet changed to 10.99.10.0/24 (Tailscale + Docker IPAM collision), SSH port mappings added for macOS (bridge IPs unreachable), base image switched from Ubuntu to Debian Bookworm (playbook assertion), SSH key path fixed (inventory_dir), all 7 containers verified with Ansible ping; convergence blocked by playbook host pattern mismatch (documented, P1 fix needed)
+- [adr-0410] Docker isolation testing and IoC completion — proposed architecture for parallel test topologies (micro/minimal/standard/extended profiles), subnet isolation, Docker-native CA/TLS via step-ca + Pebble, cert validator identity awareness, generator identity overlay, test scenario catalog with CI integration; ~41h estimated across 8 phases
+- fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars
 - [docs] IoC value-flow architecture diagrams — 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline
 - [adr-0409] Zero-sanitization publication — committed code fully generic; 129 files, 2,581 replacements; identity.yml uses example.com (real values in .local/identity.yml); topology host renamed to proxmox-host; public IPs→RFC 5737; 6 generated files gitignored; publication Tier C sanitization reduced from 128 to **0 files**
 - [adr-0408] Remove -lv3 suffix from 24 inventory hostnames — 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config

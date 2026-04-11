@@ -1,117 +1,173 @@
-# Postmortem: Docker Inception Test — IoC Value Flow Validation
+# Postmortem: Docker Inception Test — End-to-End IoC Validation
 
 | Field | Value |
 |---|---|
 | **Date** | 2026-04-11 |
 | **Scope** | Docker dev environment + ADR 0409 IoC override validation |
-| **Outcome** | Partial success: IoC mechanism verified correct; Docker dev infra has 3 bugs |
+| **Profiles tested** | Minimal (3 containers), Full (7 containers) |
+| **Outcome** | SSH + Ansible ping working; convergence blocked by host pattern mismatch |
 
 ## Objective
 
-Test the generic-by-default codebase (ADR 0409) end-to-end using the Docker dev
-environment. Verify that:
-1. Containers start from the generic committed code
+Test the generic-by-default codebase (ADR 0409) end-to-end using Docker dev.
+Validate that:
+1. Containers start and are reachable from the host
 2. `.local/identity.yml` correctly overrides generic values at runtime
-3. The bootstrap sequence works for a fresh fork operator
+3. Ansible convergence works against Docker containers
+4. Both Minimal (3-container) and Full (7-container) profiles work
 
-## Test Environment
+## Test Results Summary
 
-- Host: macOS (Apple Silicon) with Docker Desktop 29.1.3
-- Docker dev tier: Minimal (Tier 1) — 4 containers
-- Active VPN: Tailscale connected to production 10.10.10.0/24 network
+| Test | Minimal (3) | Full (7) | Notes |
+|------|-------------|----------|-------|
+| Container startup | PASS (30s) | PASS (31s) | Cached image; clean build ~130s |
+| SSH connectivity | PASS 3/3 | PASS 7/7 | Via localhost port mappings |
+| Ansible ping | PASS 3/3 | PASS 7/7 | `inventory_dir` path fix needed |
+| Ansible fact gathering | PASS | PASS | Debian 12 Bookworm confirmed |
+| IoC variable override | PASS | PASS | All 6 key values overridden |
+| Ansible convergence | BLOCKED | BLOCKED | Playbook host patterns don't match Docker inventory names |
+| Resource usage | ~15 MB | ~35 MB | ~5 MB per container (SSH only) |
 
-## Findings
+## Findings (in discovery order)
 
-### Finding 1: `/run/sshd` Missing — Container SSH Fails on Start
+### Finding 1: `/run/sshd` Missing — tmpfs Wipes Build-Time Directories
 
-**Severity**: Critical (blocks all testing)
+**Severity**: Critical — blocks all containers from starting
 
-**Root cause**: The Dockerfile creates `/run/sshd` during image build (`mkdir -p /run/sshd`),
-but the `docker-compose.yml` mounts a tmpfs at `/run`, which wipes the directory at container
-start. The SSH server then fails with:
-
+The Dockerfile creates `/run/sshd` during build, but `docker-compose.yml`
+mounts tmpfs at `/run`, erasing the directory. SSH fails:
 ```
 Missing privilege separation directory: /run/sshd
 ```
 
-**Fix applied**: Added `mkdir -p /run/sshd` to `entrypoint.sh` before `ssh-keygen -A`.
-This runs at container start, after the tmpfs is mounted.
-
-**Lesson**: Any directory under a tmpfs mount must be created at runtime, not build time.
-This is a common Docker antipattern when tmpfs is used for `/run` or `/tmp`.
+**Fix**: Added `mkdir -p /run/sshd` to `entrypoint.sh` (runs after tmpfs mount).
 
 ### Finding 2: Port 8080 Conflict
 
-**Severity**: Medium (blocks container startup on some developer machines)
+**Severity**: Medium — blocks startup on developer machines with busy ports
 
-**Root cause**: The compose file hardcodes `8080:80` and `8443:443` port mappings.
-Port 8080 was already in use by another Docker container (mapbond project).
+Default `8080:80` and `8443:443` port mappings conflict with other containers.
 
-**Fix applied**: Made ports configurable via environment variables with defaults:
+**Fix**: Made ports configurable via `EDGE_HTTP_PORT` / `EDGE_HTTPS_PORT`
+environment variables. Default HTTP changed to 9080 to avoid common conflicts.
+
+### Finding 3: Tailscale/VPN Subnet Collision (10.10.10.0/24)
+
+**Severity**: Critical — silently routes traffic to production VMs
+
+Docker dev used 10.10.10.0/24 — same as production. When Tailscale is active:
+- `ssh ops@10.10.10.10` → reaches **real nginx-lv3 production VM**
+- `ssh ops@10.10.10.50` → times out (production firewall blocks)
+- SSH "successes" to Docker containers were false positives
+
+**Fix**: Changed subnet to 10.99.10.0/24. The entire 172.16.0.0/12 range was
+consumed by other Docker networks on this machine (/16 allocations).
+
+**Lesson**: Docker Desktop's default IPAM aggressively consumes /16 blocks.
+The 172.x range is unreliable for custom subnets on machines with many Docker
+projects. The 10.x range (outside Tailscale routes) is safer.
+
+### Finding 4: macOS Docker Desktop Cannot Route to Container Bridge IPs
+
+**Severity**: Critical — Ansible cannot reach containers by bridge IP
+
+On macOS Docker Desktop, container IPs on custom bridge networks are
+**unreachable from the host**. Unlike Linux (where bridge IPs are routable),
+macOS runs Docker in a hidden Linux VM:
+
+```
+$ ping -c 1 10.99.10.10
+100.0% packet loss
+```
+
+This means the entire Docker dev design (which assumed direct IP access)
+is non-functional on macOS.
+
+**Fix**: Added SSH port mappings to all containers:
 ```yaml
 ports:
-  - "${EDGE_HTTPS_PORT:-8443}:443"
-  - "${EDGE_HTTP_PORT:-8080}:80"
+  - "2210:22"   # nginx-edge
+  - "2220:22"   # docker-runtime
+  - "2230:22"   # docker-build
+  - "2240:22"   # monitoring-vm
+  - "2250:22"   # postgres-vm
+  - "2260:22"   # backup-vm
+  - "2292:22"   # runtime-control
 ```
 
-Operators with conflicts can now run:
-```bash
-EDGE_HTTP_PORT=9080 EDGE_HTTPS_PORT=9443 make docker-dev-up
+Port scheme: `22xx` where `xx` = last octet of container IP.
+
+Updated `hosts-docker.yml` to use `ansible_host: 127.0.0.1` with
+`ansible_port: 22xx` instead of direct bridge IPs.
+
+### Finding 5: SSH Key Path Resolution — `playbook_dir` vs `inventory_dir`
+
+**Severity**: Medium — Ansible ping fails until fixed
+
+The inventory used `playbook_dir ~ '/../.local'` for the SSH key path.
+When running `ansible` (not `ansible-playbook`), `playbook_dir` resolves
+to the current working directory's parent, producing an invalid path.
+
+**Fix**: Changed to `inventory_dir ~ '/../.local'` which always resolves
+relative to the inventory file's location.
+
+### Finding 6: Ubuntu Base Image — Playbooks Require Debian
+
+**Severity**: Critical — all convergence fails immediately
+
+The Dockerfile used `ubuntu:24.04` but playbooks assert
+`ansible_distribution == "Debian"`. Production VMs run Debian Bookworm.
+
+```
+fatal: [nginx-docker]: FAILED! => {
+    "assertion": "ansible_distribution == \"Debian\"",
+    "msg": "This playbook only supports Debian targets."
+}
 ```
 
-**Lesson**: Developer machines have unpredictable port allocations. Always make
-host-side port mappings configurable.
+**Fix**: Changed base image to `debian:bookworm-slim`. Also updated Docker
+CLI apt repository from `download.docker.com/linux/ubuntu` to
+`download.docker.com/linux/debian`.
 
-### Finding 3: Tailscale/VPN Route Collision with Container Network
+### Finding 7: Playbook Host Patterns Don't Match Docker Inventory
 
-**Severity**: Critical (blocks Ansible convergence from macOS)
+**Severity**: Critical — convergence cannot proceed
 
-**Root cause**: The Docker dev containers use the same IP range (10.10.10.0/24) as
-the production VMs. When the operator has Tailscale/VPN active, the host routing
-table sends traffic to the real production network instead of Docker containers:
+Playbooks like `public-edge.yml` target `hosts: nginx` but the Docker
+inventory names the host `nginx-docker`. The `playbook_execution_host_patterns`
+system exists but playbooks don't consistently use it:
 
+```yaml
+# public-edge.yml — uses direct host name
+hosts: "{{ 'nginx-staging' if env == 'staging' else 'nginx' }}"
+
+# Docker inventory has:
+nginx-docker:
+  ansible_host: 127.0.0.1
+  ansible_port: 2210
 ```
-10.10.10/24    link#25    UCS    utun4    (Tailscale)
-```
 
-SSH to `10.10.10.10` connected to the **real production nginx-lv3 VM**, not the
-Docker container. SSH to `10.10.10.50` and `10.10.10.92` timed out because those
-real VMs have firewall rules blocking this developer's IP.
+This means **convergence cannot proceed** until either:
+1. Playbooks are updated to use the pattern system for all host references
+2. The Docker inventory adds aliases matching production host names
+3. A host_vars shim maps `nginx` to `nginx-docker` in docker-dev mode
 
-**Inter-container networking works perfectly** — containers can reach each other
-at 10.10.10.x. The issue is only host-to-container routing on macOS.
+**Status**: Open — requires architectural decision
 
-**Workarounds** (not yet implemented):
-1. Disconnect Tailscale before running Docker dev
-2. Use a different subnet for Docker dev (e.g., 172.30.10.0/24) — requires
-   updating `hosts-docker.yml` and compose files
-3. Use `docker exec` instead of SSH for Ansible (connection plugin change)
-4. Use SSH port-forwarding through Docker: map each container's SSH port to
-   a unique localhost port
+### Finding 8: IoC Identity Override — Fully Functional
 
-**Lesson**: Docker dev environments MUST NOT use the same subnet as production
-when operators may have VPN/Tailscale routes to production. This is a fundamental
-architectural flaw in the current Docker dev design.
+**Severity**: Positive
 
-### Finding 4: IoC Identity Override — Fully Functional
+The Ansible extra-vars override mechanism works exactly as designed:
 
-**Severity**: Positive finding
-
-The identity override mechanism works exactly as designed:
-
-| Layer | Variable | Value |
-|-------|----------|-------|
-| Committed `identity.yml` | `platform_domain` | `example.com` |
-| `.local/identity.yml` | `platform_domain` | `lv3.org` |
-| Ansible runtime | `platform_domain` | `lv3.org` (override wins) |
-
-All 6 key variables are correctly overridden:
-- `platform_domain`: `example.com` -> real domain
-- `platform_operator_email`: `operator@example.com` -> real email
-- `platform_operator_name`: `Platform Operator` -> real name
-- `management_ipv4`: committed as RFC 5737 `203.0.113.1` -> real public IP
-- `management_gateway4`: not in committed code -> injected from `.local/`
-- `management_ipv6`: not in committed code -> injected from `.local/`
+| Variable | Committed | Local Override | Result |
+|----------|-----------|---------------|--------|
+| `platform_domain` | `example.com` | `lv3.org` | Override wins |
+| `platform_operator_email` | `operator@example.com` | real email | Override wins |
+| `platform_operator_name` | `Platform Operator` | real name | Override wins |
+| `management_ipv4` | not in committed | real IP | Injected |
+| `management_gateway4` | not in committed | real gateway | Injected |
+| `management_ipv6` | not in committed | real IPv6 | Injected |
 
 The injection mechanism in `platform/ansible/execution_scopes.py`:
 ```python
@@ -122,74 +178,106 @@ def _resolve_identity_override(repo_root: Path) -> list[str]:
     return []
 ```
 
-This is called by `run_planned_playbook()` and automatically appends
-`-e @.local/identity.yml` to every `ansible-playbook` invocation.
+### Finding 9: Certificate Validator Blocks Push on Generic Domains
 
-### Finding 5: Generator Scripts Use Generic Values Correctly
+**Severity**: Medium — blocks git push
 
-`generate_platform_vars.py --dry-run` produces output with generic values
-from committed code (`203.0.113.1`, `proxmox-host`, `2001:db8::2`). These
-are correctly overridden at Ansible runtime, not at generation time.
+The pre-push hook validates TLS certificates for committed domains.
+After ADR 0409, this means validating `proxmox.example.com` which has
+no real certificate, producing `cert_mismatch` and blocking push.
 
-The 7 extra variables in `.local/identity.yml` (not present in committed code)
-are host-specific overrides added by ADR 0409:
-- `host_public_hostname`, `proxmox_node_name`
-- `management_ipv4`, `management_gateway4`, `management_ipv6`
-- `management_interface`, `hetzner_ipv4_route_network`
+**Workaround**: `SKIP_REMOTE_GATE=1` with bypass waiver.
+**Fix needed**: Skip validation when domain is `example.com`.
 
-### Finding 6: Certificate Validator Needs ADR 0409 Awareness
+## Timing Data
 
-The pre-push hook's certificate validator tries to check TLS certificates for
-`proxmox.example.com` — the generic domain committed after ADR 0409. This
-obviously has no real certificate and fails with `cert_mismatch`, blocking
-all pushes. This is a pre-existing issue that needs a separate fix:
+| Operation | Minimal (3) | Full (7) |
+|-----------|-------------|----------|
+| Clean build + start | 130s | ~135s |
+| Cached start | 30s | 31s |
+| SSH verify (all hosts) | 3s | 7s |
+| Ansible ping (all hosts) | 2s | 3s |
+| Ansible check mode (site.yml) | 8s | — |
+| RAM usage (idle) | 15 MB | 35 MB |
+| Per-container RAM | 5 MB | 5 MB |
 
-Options:
-1. Skip certificate validation for `example.com` domains
-2. Only validate certificates listed in `.local/identity.yml`'s domain
-3. Make the validator identity-aware (resolve real domain before checking)
+## User Journey Gaps
 
-## Metrics
+What an operator actually experiences trying Docker dev today:
 
-| Metric | Value |
-|--------|-------|
-| Containers started | 3 of 3 (after entrypoint fix) |
-| SSH from host | 1 of 3 (Tailscale collision) |
-| Inter-container SSH | Working (verified via `docker exec`) |
-| IoC variables overridden | 6 of 6 |
-| Generator scripts | Correct output with generic values |
-| Ansible convergence | Not tested (SSH routing blocked) |
+### Step 1: `make docker-dev-up`
+- **Undocumented**: Must have `.local/ssh/bootstrap.id_ed25519.pub` (run `make init-local` first)
+- **Undocumented**: Port 8080 may be in use; no error guidance
+- **Missing**: No `--help` or preflight check output
+
+### Step 2: `make docker-dev-verify`
+- **Broken on macOS**: Verifies using bridge IPs which are unreachable
+- **Missing**: Should tell user which ports to use for SSH
+
+### Step 3: `make docker-dev-converge`
+- **Broken**: Uses `site.yml` which hits host pattern mismatch immediately
+- **Missing**: No guidance on which individual playbooks to try
+- **Missing**: No `--check` (dry-run) mode in the Makefile target
+- **Missing**: No `.local/identity.yml` injection in the converge target
+
+### Step 4: Debugging failures
+- **Missing**: No `make docker-dev-logs` target
+- **Missing**: No `make docker-dev-ssh <container>` helper
+- **Missing**: No `make docker-dev-status` showing all container states
+
+### Recommended Makefile Additions
+
+```makefile
+docker-dev-status:     ## Show container status and port mappings
+docker-dev-logs:       ## Show logs from all containers
+docker-dev-ssh:        ## SSH to a specific container (usage: make docker-dev-ssh VM=postgres)
+docker-dev-converge-check: ## Dry-run convergence (check mode)
+```
 
 ## Action Items
 
-| Priority | Item | Status |
-|----------|------|--------|
-| P0 | Fix `/run/sshd` in entrypoint.sh | Done |
-| P0 | Make edge ports configurable | Done |
-| P1 | Fix Tailscale/Docker subnet collision | Open |
-| P1 | Fix certificate validator for generic domains | Open |
-| P2 | Add Docker dev network documentation | Open |
-| P2 | Test Ansible convergence without Tailscale | Open |
+| # | Priority | Item | Status |
+|---|----------|------|--------|
+| 1 | P0 | Fix `/run/sshd` in entrypoint | Done |
+| 2 | P0 | Make edge ports configurable | Done |
+| 3 | P0 | Change subnet to 10.99.10.0/24 | Done |
+| 4 | P0 | Add SSH port mappings for macOS | Done |
+| 5 | P0 | Fix SSH key path (`inventory_dir`) | Done |
+| 6 | P0 | Switch base image to Debian | Done |
+| 7 | P0 | Update full compose with SSH ports | Done |
+| 8 | P1 | Fix playbook host pattern mismatch | Open |
+| 9 | P1 | Fix cert validator for generic domains | Open |
+| 10 | P1 | Add helper Makefile targets (logs, ssh, status) | Open |
+| 11 | P2 | Test actual service convergence (post host fix) | Open |
+| 12 | P2 | Document Docker dev user journey end-to-end | Open |
 
 ## Key Learnings
 
-1. **The IoC pattern works**: The Ansible extra-vars override mechanism is
-   correctly implemented and functional. A fork operator who edits only
-   `.local/identity.yml` will get a fully customized deployment.
+1. **Never trust "works" without ping -c1**: The earlier SSH test showed "OK"
+   because the sandbox masked timeouts. Only `ansible -m ping` gives a
+   reliable connectivity signal.
 
-2. **Docker dev needs a different subnet**: Using the same IP range as
-   production is a design flaw when operators have VPN access. This is
-   particularly insidious because it silently routes to production VMs
-   instead of failing visibly.
+2. **macOS Docker Desktop is fundamentally different from Linux Docker**:
+   Bridge network IPs are unreachable from the host. Any Docker dev
+   environment that assumes direct bridge IP access is Linux-only.
+   Port mappings are the only reliable cross-platform approach.
 
-3. **tmpfs and build-time directories don't mix**: Any path under a tmpfs
-   mount must be created at container start, not during image build.
+3. **Test with the distribution you deploy**: Using Ubuntu in dev when
+   production runs Debian catches zero real issues and adds false failures.
 
-4. **Generic domains break TLS validators**: After ADR 0409, any tool that
-   attempts real network validation against committed generic values will
-   fail. These tools need to be identity-aware or skip generic domains.
+4. **Docker's IPAM consumes /16 blocks**: On a machine with many Docker
+   projects, the entire 172.16.0.0/12 private range can be consumed.
+   Use the 10.0.0.0/8 range (avoiding Tailscale subnets) instead.
 
-5. **The 8-value operator edit is genuinely minimal**: The committed code
-   has 43 variables in `identity.yml`, plus 7 host-specific variables added
-   by `.local/identity.yml`. A fork operator truly only needs to edit 8
-   values (the rest are derived via Jinja2 expressions).
+5. **Host pattern indirection is incomplete**: The `playbook_execution_host_patterns`
+   system handles some playbooks but not all. Playbooks that use direct
+   `hosts:` references bypass it entirely. This creates a gap between
+   "Ansible can reach the host" and "Ansible can run plays against it."
+
+6. **The IoC pattern works perfectly**: The identity override via `-e @.local/identity.yml`
+   is correctly implemented and all values override as expected. The
+   infrastructure layer (Docker) has the bugs, not the IoC architecture.
+
+7. **5 MB per container is great**: The vm-base image (Debian + SSH) uses
+   almost no resources. Even 12 containers would only use ~60 MB RAM idle.
+   Resource limits in ADR 0410 were overestimated.

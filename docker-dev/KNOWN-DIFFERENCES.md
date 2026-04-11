@@ -47,7 +47,7 @@ Roles check `platform_environment` to adapt behavior:
 ## What Works Well in Docker Dev
 
 - Ansible convergence of Docker Compose services
-- Service-to-service communication over the 10.10.10.0/24 network
+- Service-to-service communication over the 10.99.10.0/24 network
 - PostgreSQL database operations
 - Keycloak SSO (with self-signed certs)
 - OpenBao secret management

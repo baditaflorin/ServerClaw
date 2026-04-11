@@ -1,13 +1,16 @@
 # ServerClaw VM-as-Container base image
-# Simulates what Ansible expects from a freshly provisioned Ubuntu VM:
+# Simulates what Ansible expects from a freshly provisioned Debian VM:
 #   - SSH server on port 22
 #   - ops user with passwordless sudo
 #   - Python 3 for Ansible
 #   - Docker for service convergence (DinD via socket bind-mount)
 #
+# IMPORTANT: Must use Debian (not Ubuntu) — playbooks assert
+# ansible_distribution == "Debian". Production VMs run Debian Bookworm.
+#
 # See ADR 0387: ServerClaw-in-Docker
 
-FROM ubuntu:24.04
+FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -30,9 +33,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Docker CLI (for Docker-in-Docker via socket mount)
 RUN install -m 0755 -d /etc/apt/keyrings \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
     && chmod a+r /etc/apt/keyrings/docker.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
        > /etc/apt/sources.list.d/docker.list \
     && apt-get update && apt-get install -y --no-install-recommends \
        docker-ce-cli \

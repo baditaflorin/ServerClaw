@@ -2,13 +2,18 @@
 # ServerClaw — Docker Development Inventory
 # =============================================================================
 # Targets the Docker containers started by docker-dev/ compose files.
-# Same IPs as production, containers replace VMs.
+#
+# On macOS Docker Desktop, container bridge IPs are NOT routable from the
+# host. SSH is exposed via localhost port mappings: port 22xx maps to
+# container with last-octet xx (e.g., 2250 -> postgres-vm at .50).
+#
+# On Linux, set DOCKER_DEV_USE_BRIDGE=true to use direct bridge IPs instead.
 #
 # Usage:
 #   ansible-playbook -i inventory/hosts-docker.yml playbooks/site.yml
 #   make docker-dev-converge
 #
-# See ADR 0387: ServerClaw-in-Docker
+# See ADR 0387: ServerClaw-in-Docker, ADR 0410: Docker Isolation Testing
 # =============================================================================
 
 all:
@@ -20,7 +25,7 @@ all:
     platform_environment: docker-dev
     platform_skip_proxmox_api: true
     ansible_user: ops
-    ansible_ssh_private_key_file: "{{ lookup('env', 'LOCAL_OVERLAY_ROOT') | default(playbook_dir ~ '/../.local', true) }}/ssh/bootstrap.id_ed25519"
+    ansible_ssh_private_key_file: "{{ lookup('env', 'LOCAL_OVERLAY_ROOT') | default(inventory_dir ~ '/../.local', true) }}/ssh/bootstrap.id_ed25519"
     ansible_python_interpreter: /usr/bin/python3
     ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
     playbook_execution_host_patterns:
@@ -75,25 +80,32 @@ all:
     lv3_guests:
       hosts:
         nginx-docker:
-          ansible_host: 10.10.10.10
+          ansible_host: 127.0.0.1
+          ansible_port: 2210
           deployment_environment: production
         docker-runtime-docker:
-          ansible_host: 10.10.10.20
+          ansible_host: 127.0.0.1
+          ansible_port: 2220
           deployment_environment: production
         docker-build-docker:
-          ansible_host: 10.10.10.30
+          ansible_host: 127.0.0.1
+          ansible_port: 2230
           deployment_environment: production
         monitoring-docker:
-          ansible_host: 10.10.10.40
+          ansible_host: 127.0.0.1
+          ansible_port: 2240
           deployment_environment: production
         postgres-docker:
-          ansible_host: 10.10.10.50
+          ansible_host: 127.0.0.1
+          ansible_port: 2250
           deployment_environment: production
         backup-docker:
-          ansible_host: 10.10.10.60
+          ansible_host: 127.0.0.1
+          ansible_port: 2260
           deployment_environment: production
         runtime-control-docker:
-          ansible_host: 10.10.10.92
+          ansible_host: 127.0.0.1
+          ansible_port: 2292
           deployment_environment: production
 
     postgres_guests:
@@ -103,4 +115,5 @@ all:
     backup_guests:
       hosts:
         backup-docker:
-          ansible_host: 10.10.10.60
+          ansible_host: 127.0.0.1
+          ansible_port: 2260

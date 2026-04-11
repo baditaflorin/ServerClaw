@@ -1770,13 +1770,14 @@ docker-dev-down: ## Stop Docker dev environment
 	docker compose -f $(REPO_ROOT)/docker-dev/full/docker-compose.yml down 2>/dev/null || true
 
 docker-dev-verify: ## Verify Docker dev containers are SSH-reachable
-	@echo "Checking SSH access to containers..."
-	@for host in 10.10.10.10 10.10.10.50 10.10.10.92; do \
+	@echo "Checking SSH access to containers via localhost port mappings..."
+	@for mapping in nginx-edge:2210 postgres-vm:2250 runtime-control:2292; do \
+		name=$${mapping%%:*}; port=$${mapping##*:}; \
 		if ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 \
-			-i $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519 ops@$$host "echo OK" 2>/dev/null; then \
-			echo "  OK $$host"; \
+			-p $$port -i $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519 ops@127.0.0.1 "hostname" 2>/dev/null; then \
+			echo "  OK $$name (127.0.0.1:$$port)"; \
 		else \
-			echo "  FAIL $$host"; \
+			echo "  FAIL $$name (127.0.0.1:$$port)"; \
 		fi; \
 	done
 
