@@ -81,40 +81,18 @@
     owner: root
     group: root
     mode: "0644"
+  register: portainer_compose_template
 
-- name: Pull the Portainer image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ portainer_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ portainer_site_dir }}"
-  register: portainer_pull
-  changed_when: >-
-    'Pulling' in portainer_pull.stdout
-    or 'Downloaded newer image' in portainer_pull.stdout
-    or 'Pull complete' in portainer_pull.stdout
-
-- name: Start the Portainer stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ portainer_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ portainer_site_dir }}"
-  register: portainer_up
-  changed_when: >-
-    'Creating' in portainer_up.stdout
-    or 'Recreating' in portainer_up.stdout
-    or 'Starting' in portainer_up.stdout
+- name: Converge the Portainer stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ portainer_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ portainer_site_dir }}"
+    common_docker_compose_converge_service_name: portainer
+    common_docker_compose_converge_template_results:
+      - "{{ portainer_compose_template }}"
 
 - name: Wait for Portainer to listen on the private runtime IP
   ansible.builtin.wait_for:

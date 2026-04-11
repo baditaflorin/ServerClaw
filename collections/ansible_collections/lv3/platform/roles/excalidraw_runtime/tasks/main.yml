@@ -47,6 +47,7 @@
     owner: root
     group: root
     mode: "0755"
+  register: excalidraw_runtime_bootstrap_template
 
 - name: Render the Excalidraw compose file
   ansible.builtin.template:
@@ -55,40 +56,20 @@
     owner: root
     group: root
     mode: "0644"
+  register: excalidraw_runtime_compose_template
 
-- name: Pull the Excalidraw images
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ excalidraw_runtime_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ excalidraw_runtime_site_dir }}"
-  register: excalidraw_runtime_pull
-  changed_when: >-
-    'Pulling' in excalidraw_runtime_pull.stdout
-    or 'Downloaded newer image' in excalidraw_runtime_pull.stdout
-    or 'Pull complete' in excalidraw_runtime_pull.stdout
-
-- name: Start the Excalidraw runtime stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ excalidraw_runtime_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ excalidraw_runtime_site_dir }}"
-  register: excalidraw_runtime_up
-  changed_when: >-
-    'Creating' in excalidraw_runtime_up.stdout
-    or 'Recreating' in excalidraw_runtime_up.stdout
-    or 'Starting' in excalidraw_runtime_up.stdout
+- name: Converge the Excalidraw runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ excalidraw_runtime_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ excalidraw_runtime_site_dir }}"
+    common_docker_compose_converge_service_name: excalidraw
+    common_docker_compose_converge_template_results:
+      - "{{ excalidraw_runtime_bootstrap_template }}"
+      - "{{ excalidraw_runtime_compose_template }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
 
 - name: Wait for the Excalidraw frontend listener
   ansible.builtin.wait_for:

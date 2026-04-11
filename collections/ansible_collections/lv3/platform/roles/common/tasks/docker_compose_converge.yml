@@ -8,6 +8,7 @@
 #   common_docker_compose_converge_health_port (int, optional): Port to probe before deciding on force-recreate. 0 = skip.
 #   common_docker_compose_converge_health_url (str, optional): URL to probe before deciding on force-recreate.
 #   common_docker_compose_converge_force_recreate_service (str, optional): Service name to force-recreate (defaults to service_name).
+#   common_docker_compose_converge_force_recreate_entire_stack (bool, optional): Force-recreate the full compose stack instead of a single service.
 #   common_docker_compose_converge_pull_retries (int, optional): Number of pull retries. Default: 5.
 #   common_docker_compose_converge_pull_delay (int, optional): Seconds between pull retries. Default: 5.
 # Outputs: Running compose stack. Sets common_dcc_force_recreate fact with the computed force-recreate decision.
@@ -166,6 +167,28 @@
     or 'Starting' in common_dcc_up.stdout
   when: not common_dcc_force_recreate
 
+- name: "Force-recreate the full {{ common_docker_compose_converge_service_name }} stack after drift or Docker recovery"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ common_docker_compose_converge_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ common_docker_compose_converge_site_dir }}"
+  register: common_dcc_force_up
+  changed_when: >-
+    'Creating' in common_dcc_force_up.stdout
+    or 'Recreating' in common_dcc_force_up.stdout
+    or 'Starting' in common_dcc_force_up.stdout
+  when:
+    - common_dcc_force_recreate
+    - common_docker_compose_converge_force_recreate_entire_stack | bool
+
 - name: "Force-recreate {{ common_docker_compose_converge_service_name }} after drift or Docker recovery"
   ansible.builtin.command:
     argv:
@@ -176,6 +199,7 @@
       - up
       - -d
       - --force-recreate
+      - --remove-orphans
       - --no-deps
       - "{{ common_docker_compose_converge_force_recreate_service | default(common_docker_compose_converge_service_name) }}"
   args:
@@ -185,4 +209,6 @@
     'Creating' in common_dcc_force_up.stdout
     or 'Recreating' in common_dcc_force_up.stdout
     or 'Starting' in common_dcc_force_up.stdout
-  when: common_dcc_force_recreate
+  when:
+    - common_dcc_force_recreate
+    - not (common_docker_compose_converge_force_recreate_entire_stack | bool)

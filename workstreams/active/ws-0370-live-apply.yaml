@@ -1,0 +1,82 @@
+id: ws-0370-live-apply
+adr: '0370'
+title: Complete ADR 0370 shared lifecycle adoption and live-apply it from latest origin/main
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/ws-0370-live-apply
+worktree_path: .worktrees/ws-0370-live-apply
+doc: docs/workstreams/ws-0370-live-apply.md
+depends_on:
+- adr-0021-docker-runtime
+- adr-0063-openbao-integration
+- adr-0165-playbook-and-role-metadata-standard
+- adr-0370-service-lifecycle-task-includes
+- adr-0371-parameterized-verify-tasks
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0370-live-apply.yaml
+- docs/workstreams/ws-0370-live-apply.md
+- docs/adr/0370-service-lifecycle-task-includes.md
+- docs/adr/implementation-status/adr-0370.yaml
+- docs/runbooks/validate-repository-automation.md
+- collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/check_local_secrets.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/manage_service_secrets.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_compose_converge.yml
+- collections/ansible_collections/lv3/platform/roles/*_runtime/tasks/main.yml
+- scripts/validate_repo.sh
+- receipts/live-applies/2026-04-11-adr-0370-*.json
+- receipts/live-applies/evidence/2026-04-11-ws-0370-*
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0370_registry_source
+    paths:
+    - workstreams/active/ws-0370-live-apply.yaml
+    mode: exclusive
+  - id: ws_0370_workstream_doc
+    paths:
+    - docs/workstreams/ws-0370-live-apply.md
+    mode: exclusive
+  - id: ws_0370_adr_metadata
+    paths:
+    - docs/adr/0370-service-lifecycle-task-includes.md
+    - docs/adr/implementation-status/adr-0370.yaml
+    mode: exclusive
+  - id: ws_0370_common_lifecycle_tasks
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/check_local_secrets.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/manage_service_secrets.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_compose_converge.yml
+    mode: exclusive
+  - id: ws_0370_runtime_role_migrations
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/*_runtime/tasks/main.yml
+    mode: exclusive
+  - id: ws_0370_validation_surface
+    paths:
+    - docs/runbooks/validate-repository-automation.md
+    - scripts/validate_repo.sh
+    mode: shared_contract
+    contract: validation-pipeline-v1
+  - id: ws_0370_live_apply_receipts
+    paths:
+    - receipts/live-applies/2026-04-11-adr-0370-*.json
+    - receipts/live-applies/evidence/2026-04-11-ws-0370-*
+    mode: exclusive
+notes: 'Complete the remaining ADR 0370 runtime-role migration work, validate the
+
+  shared lifecycle helper behavior against the repo automation gates, and then
+
+  perform the exact-main live apply plus canonical metadata closeout.
+
+  '
+plane_issue_id: e934a859-18fc-44f0-a67b-6e9d87d20209

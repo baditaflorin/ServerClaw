@@ -52,40 +52,19 @@
     owner: root
     group: root
     mode: "0644"
+  register: dozzle_runtime_compose_template
 
-- name: Pull the Dozzle image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ dozzle_runtime_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ dozzle_runtime_site_dir }}"
-  register: dozzle_runtime_pull
-  changed_when: >-
-    'Pulling' in dozzle_runtime_pull.stdout
-    or 'Downloaded newer image' in dozzle_runtime_pull.stdout
-    or 'Pull complete' in dozzle_runtime_pull.stdout
-
-- name: Start the Dozzle runtime stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ dozzle_runtime_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ dozzle_runtime_site_dir }}"
-  register: dozzle_runtime_up
-  changed_when: >-
-    'Creating' in dozzle_runtime_up.stdout
-    or 'Recreating' in dozzle_runtime_up.stdout
-    or 'Starting' in dozzle_runtime_up.stdout
+- name: Converge the Dozzle runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ dozzle_runtime_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ dozzle_runtime_site_dir }}"
+    common_docker_compose_converge_service_name: dozzle
+    common_docker_compose_converge_template_results:
+      - "{{ dozzle_runtime_compose_template }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
 
 - name: Wait for the Dozzle agent listener
   ansible.builtin.wait_for:

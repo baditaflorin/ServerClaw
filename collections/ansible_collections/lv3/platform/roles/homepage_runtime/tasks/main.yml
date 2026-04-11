@@ -72,6 +72,7 @@
     - services.yaml
     - settings.yaml
     - widgets.yaml
+  register: homepage_config_copy
 
 - name: Remove the temporary local Homepage config directory
   ansible.builtin.file:
@@ -88,40 +89,19 @@
     owner: root
     group: root
     mode: "0644"
+  register: homepage_compose_template
 
-- name: Pull the Homepage image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ homepage_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ homepage_site_dir }}"
-  register: homepage_pull
-  changed_when: >-
-    'Pulling' in homepage_pull.stdout
-    or 'Downloaded newer image' in homepage_pull.stdout
-    or 'Pull complete' in homepage_pull.stdout
-
-- name: Start the Homepage stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ homepage_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ homepage_site_dir }}"
-  register: homepage_up
-  changed_when: >-
-    'Creating' in homepage_up.stdout
-    or 'Recreating' in homepage_up.stdout
-    or 'Starting' in homepage_up.stdout
+- name: Converge the Homepage stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ homepage_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ homepage_site_dir }}"
+    common_docker_compose_converge_service_name: homepage
+    common_docker_compose_converge_template_results:
+      - "{{ homepage_config_copy }}"
+      - "{{ homepage_compose_template }}"
 
 - name: Wait for Homepage to listen locally
   ansible.builtin.wait_for:

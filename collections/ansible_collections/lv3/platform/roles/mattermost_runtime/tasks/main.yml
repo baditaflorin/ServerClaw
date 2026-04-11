@@ -175,6 +175,7 @@
     group: root
     mode: "0600"
   no_log: true
+  register: mattermost_env_template
 
 - name: Render the Mattermost compose file
   ansible.builtin.template:
@@ -185,6 +186,7 @@
     mode: "0644"
   vars:
     ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
+  register: mattermost_compose_template
 
 - name: Render the Mattermost bootstrap script
   ansible.builtin.template:
@@ -195,39 +197,17 @@
     mode: "0750"
   no_log: true
 
-- name: Pull the Mattermost image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ mattermost_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ mattermost_site_dir }}"
-  register: mattermost_pull
-  changed_when: >-
-    'Pulling' in mattermost_pull.stdout
-    or 'Downloaded newer image' in mattermost_pull.stdout
-    or 'Pull complete' in mattermost_pull.stdout
-
-- name: Start the Mattermost stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ mattermost_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ mattermost_site_dir }}"
-  register: mattermost_up
-  changed_when: >-
-    'Creating' in mattermost_up.stdout
-    or 'Recreating' in mattermost_up.stdout
-    or 'Starting' in mattermost_up.stdout
+- name: Converge the Mattermost stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ mattermost_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ mattermost_site_dir }}"
+    common_docker_compose_converge_service_name: mattermost
+    common_docker_compose_converge_template_results:
+      - "{{ mattermost_env_template }}"
+      - "{{ mattermost_compose_template }}"
 
 - name: Wait for Mattermost to listen locally
   ansible.builtin.wait_for:

@@ -84,6 +84,7 @@ common_docker_compose_converge_template_results: []
 common_docker_compose_converge_health_port: 0
 common_docker_compose_converge_health_url: ""
 common_docker_compose_converge_force_recreate_service: ""
+common_docker_compose_converge_force_recreate_entire_stack: false
 common_docker_compose_converge_pull_retries: 5
 common_docker_compose_converge_pull_delay: 5
 common_docker_compose_converge_force_pull: false
