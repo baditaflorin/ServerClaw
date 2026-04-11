@@ -1,0 +1,6 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+ENABLE_OPENAI_API=True
+ENABLE_OLLAMA_API=False
+DEFAULT_MODELS=gpt-4o-mini
+DEFAULT_PINNED_MODELS=gpt-4o-mini
+OPENAI_API_BASE_URL=http://host.docker.internal:8101/v1

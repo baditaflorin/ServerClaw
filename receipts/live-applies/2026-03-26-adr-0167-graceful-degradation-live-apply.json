@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0167-graceful-degradation-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "1e5527a9665155f0bcad4c59c48733dcf4f60363",
+  "repo_version_context": "0.164.0",
+  "workflow_id": "converge-api-gateway",
+  "adr": "0167",
+  "summary": "Completed the first merged-main live rollout for ADR 0167 by replaying the API gateway converge from release `0.164.0`, then verifying that the public degradation surfaces were empty and the guest runtime had cleared its durable degraded-state artifacts.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "api_gateway_degradations",
+      "address": "https://api.lv3.org/v1/platform/degradations"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "api_gateway_services",
+      "address": "https://api.lv3.org/v1/platform/services"
+    }
+  ],
+  "verification": [
+    {
+      "check": "API gateway converge from merged main",
+      "result": "pass",
+      "observed": "Replaying `playbooks/api-gateway.yml` from merged `main` finished with `docker-runtime-lv3 : ok=125 changed=25 unreachable=0 failed=0 skipped=24`, and the runtime verification step passed the authenticated service-catalog probe plus the anonymous aggregate-health canonical-error assertion."
+    },
+    {
+      "check": "Public degradation endpoint",
+      "result": "pass",
+      "observed": "`curl https://api.lv3.org/v1/platform/degradations` with a fresh Keycloak client-credentials bearer token returned `{\"degradation_count\":0,\"services\":{}}` after the replay."
+    },
+    {
+      "check": "Public platform services endpoint",
+      "result": "pass",
+      "observed": "`curl https://api.lv3.org/v1/platform/services` with the same bearer token reported `api_gateway.active_degradations: []` with a service count of `32`."
+    },
+    {
+      "check": "Guest degradation-state file",
+      "result": "pass",
+      "observed": "`/opt/api-gateway/data/degradation-state.json` on `docker-runtime-lv3` contained `{\"schema_version\":\"1.0.0\",\"services\":{}}`, matching the cleared public degraded-state view."
+    },
+    {
+      "check": "Guest durable outbox cleared",
+      "result": "pass",
+      "observed": "`/opt/api-gateway/data/nats-outbox.jsonl` was absent after the replay, confirming the recovered NATS path no longer had buffered request events to flush."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0167-graceful-degradation-mode-declarations.md",
+    "docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md",
+    "docs/runbooks/graceful-degradation-modes.md",
+    "scripts/api_gateway/main.py",
+    "platform/degradation/state.py",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The final live apply used Tailscale host access to `ops@100.64.0.1` and the governed Proxmox guest jump because the public SSH path to `65.108.75.123:22` remained unavailable from this controller.",
+    "This receipt supersedes the previous API gateway live-state reference from ADR 0166 for the degraded-state surfaces because ADR 0167 is the first rollout that declares and verifies `/v1/platform/degradations` directly."
+  ]
+}

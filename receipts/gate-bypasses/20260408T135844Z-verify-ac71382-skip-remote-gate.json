@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-08T13:58:44Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "verify",
+  "commit": "ac713823c534c58540ad00db339c62f945a4dedc",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Adding ports 8081-8088 to Proxmox VM firewall for runtime-comms-lv3 multi-instance Neko",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "firewall rule change only - no code execution paths affected"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "docs/adr/0380-neko-for-operator-remote-browser-access.md"
+  }
+}

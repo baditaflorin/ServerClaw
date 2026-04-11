@@ -1,0 +1,4 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+CATALOG_COUNT 52
+LATEST_COUNT 29
+MISSING ["open_webui_runtime", "openbao_runtime", "openfga_runtime", "outline_runtime", "plane_admin_runtime", "plane_backend_runtime", "plane_frontend_runtime", "plane_live_runtime", "plane_proxy_runtime", "plane_rabbitmq_runtime", "plane_space_runtime", "plausible_clickhouse_runtime", "plausible_postgres_runtime", "plausible_runtime", "portainer_runtime", "searxng_runtime", "searxng_valkey_runtime", "semaphore_runtime", "step_ca_runtime", "uptime_kuma_runtime", "vaultwarden_runtime", "windmill_extra_runtime", "windmill_runtime"]

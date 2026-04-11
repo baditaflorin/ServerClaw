@@ -1,0 +1,21 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-main/scripts/remote_exec.sh remote-validate --local-fallback
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.69
+alert-rule-validation passed 1.18
+ansible-syntax        passed 84.20
+dependency-graph      failed 0.97
+policy-validation     passed 0.93
+schema-validation     passed 11.47
+type-check            passed 2.59
+workstream-surfaces   passed 2.48
+
+[dependency-graph] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0283-main-43464957ce/repo/.lv3-runs/20260330T095304Z-f2a4b8687c21/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=f2a4b8687c2198e9683a608129c9f8174f4ca72042f5e078fd280421cec8b8ba -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T09:52:59.109795+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=f8bd6088817ecd676f9c59f17f52e9cf0dd20b56 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+[dependency-graph] stderr
+dependency diagram error: /workspace/docs/site-generated/architecture/dependency-graph.md is stale. Run 'python3 scripts/generate_dependency_diagram.py --write'.

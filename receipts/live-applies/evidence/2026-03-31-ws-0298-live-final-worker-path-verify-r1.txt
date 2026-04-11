@@ -1,0 +1,10 @@
+docker-runtime-lv3 | FAILED | rc=2 >>
+ls: cannot access '/srv/proxmox_florin_server/config/sbom-scanner.json': No such file or directory
+ls: cannot access '/srv/proxmox_florin_server/receipts/sbom': No such file or directory
+ls: cannot access '/srv/proxmox_florin_server/receipts/cve': No such file or directory
+drwxr-xr-x 22 root root 4096 Mar 31 09:03 /srv/proxmox_florin_server/receipts
+---
+ls: cannot access '/srv/proxmox_florin_server/config/sbom-scanner.json': No such file or directory
+ls: cannot access '/srv/proxmox_florin_server/receipts/sbom': No such file or directory
+ls: cannot access '/srv/proxmox_florin_server/receipts/cve': No such file or directory
+drwxr-xr-x 22 root root 4096 Mar 31 09:03 /srv/proxmox_florin_server/receiptsnon-zero return code

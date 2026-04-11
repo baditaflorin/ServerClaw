@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-07T21:01:32Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/happy-johnson",
+  "commit": "a0c1cb1a3e0f9f43cfd678ecf3ce623afc4a447a",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "registry.lv3.org returning 502",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local-pre-commit-passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-09",
+    "remediation_ref": "investigate-registry-502"
+  }
+}

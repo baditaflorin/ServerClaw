@@ -1,0 +1,2 @@
+uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate
+Repository data models OK

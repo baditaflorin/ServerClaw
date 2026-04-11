@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T03:34:33Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "61eebb4c3d408056aabaaca7944454a6c86803b7",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Build server gate unreliable; local Docker images missing",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "pre-commit hooks passed (YAML+JSON+secrets+patterns)",
+      "all active open_webui refs verified removed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-11",
+    "remediation_ref": "rebuild check-runner images"
+  }
+}

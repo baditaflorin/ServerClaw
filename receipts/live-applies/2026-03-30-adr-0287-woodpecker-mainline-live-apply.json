@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0287-woodpecker-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T22:27:05Z",
+  "recorded_by": "codex",
+  "source_commit": "cbc004fd0ae22cb6ed692430438ad5f31c24458b",
+  "repo_version_context": "0.177.110",
+  "platform_version_context": "0.130.73",
+  "workflow_id": "adr-0287-woodpecker-mainline-live-apply",
+  "adr": "0287",
+  "summary": "Repaired the exact-main Woodpecker catalog drift that the rebase onto the latest origin/main exposed, reverified the repo-managed Woodpecker runtime and controller-local bootstrap path from committed source `cbc004fd0ae22cb6ed692430438ad5f31c24458b`, and carried ADR 0287 onto the `0.177.110 / 0.130.73` mainline closeout now published on origin/main at `f9bc208e7930a3b93abda8206c48fb718232e2a4`. The published-main Woodpecker trigger endpoint accepts manual `main` runs, but no pipeline becomes visible through the Woodpecker API yet, so the canonical receipt records that post-push verification gap explicitly.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Woodpecker public hostname",
+      "address": "https://ci.lv3.org/healthz"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Woodpecker controller path",
+      "address": "http://100.64.0.1:8017/healthz"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact-main correction loop recovery",
+      "result": "pass",
+      "observed": "The first rebased exact-main replay dropped Woodpecker's controller-local secret manifest and several catalog entries during conflict resolution, which surfaced immediately in `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r2-live-apply-service-0.177.110.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r4-targeted-checks-0.177.110.txt`. Commit `cbc004fd0ae22cb6ed692430438ad5f31c24458b` restored the missing Woodpecker catalog and controller-secret surfaces, refreshed the generated Uptime Kuma monitor catalog, and added the already-merged Directus roles to `config/ansible-role-idempotency.yml` so the exact-main validation lane matched the real repo tree again."
+    },
+    {
+      "check": "Exact-main focused Woodpecker regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_generate_platform_vars.py tests/test_postgres_vm_access_policy.py tests/test_woodpecker_playbook.py tests/test_woodpecker_runtime_role.py tests/test_woodpecker_client.py tests/test_woodpecker_tool.py tests/test_validate_service_catalog.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_service_redundancy.py tests/test_workstream_surface_ownership.py tests/test_ansible_execution_scopes.py tests/test_ansible_role_idempotency.py tests/test_data_catalog.py tests/test_subdomain_exposure_audit.py -q` returned `123 passed in 9.24s` in `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r5-targeted-checks-0.177.110.txt`."
+    },
+    {
+      "check": "Exact-main Woodpecker syntax coverage",
+      "result": "pass",
+      "observed": "`make syntax-check-woodpecker` passed in `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r4-syntax-check-0.177.110.txt`."
+    },
+    {
+      "check": "Authoritative exact-main service replay",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=woodpecker env=production EXTRA_ARGS='-e bypass_promotion=true'` succeeded in `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-live-apply-service-0.177.110.txt` with final recaps `docker-runtime-lv3 : ok=157 changed=4 unreachable=0 failed=0 skipped=44 rescued=0 ignored=0`, `localhost : ok=4 changed=0 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0`, `nginx-lv3 : ok=47 changed=6 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`, `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`, and `proxmox_florin : ok=277 changed=1 unreachable=0 failed=0 skipped=140 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Public, private, and controller API proofs",
+      "result": "pass",
+      "observed": "`curl -fsSI https://ci.lv3.org/healthz` returned `HTTP/2 200` with `x-woodpecker-version: 3.13.0`, `curl -fsSI http://100.64.0.1:8017/healthz` returned `HTTP/1.1 200 OK`, `openssl s_client -connect ci.lv3.org:443 -servername ci.lv3.org | openssl x509 -noout -subject -issuer -ext subjectAltName` reported `subject=CN=ci.lv3.org`, issuer `CN=E7`, and SAN `DNS:ci.lv3.org`, `make woodpecker-manage ACTION=whoami` resolved to admin `ops-gitea`, and `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'` confirmed the seeded `LV3_WOODPECKER_SECRET_SMOKE` repository secret."
+    },
+    {
+      "check": "Exact-main repository validation bundle",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `git diff --check`, and `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes generated-docs data-models` all passed after the final generated-truth refresh, including the regenerated subdomain exposure registry, in the `r6` evidence bundle."
+    },
+    {
+      "check": "Remote validation and pre-push automation",
+      "result": "pass",
+      "observed": "`make remote-validate` passed on the build-server validation lane with `agent-standards`, `workstream-surfaces`, `ansible-syntax`, `schema-validation`, `policy-validation`, `alert-rule-validation`, `type-check`, and `dependency-graph`, and `make pre-push-gate` passed the full primary-branch gate with `generated-docs`, `generated-portals`, `security-scan`, `semgrep-sast`, and `integration-tests` included in the same `r6` evidence set."
+    },
+    {
+      "check": "Published origin/main closeout",
+      "result": "pass",
+      "observed": "`git push --no-verify origin HEAD:main` published commit `f9bc208e7930a3b93abda8206c48fb718232e2a4` onto `origin/main`, and a follow-up `git fetch origin && git rev-parse origin/main` confirmed the remote main branch now resolves to that exact closeout commit."
+    },
+    {
+      "check": "Post-push Woodpecker main trigger visibility",
+      "result": "partial",
+      "observed": "After `origin/main` moved to `f9bc208e7930a3b93abda8206c48fb718232e2a4`, `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'` returned `{\\\"accepted\\\": true, \\\"branch\\\": \\\"main\\\", \\\"repo_id\\\": 1, \\\"status\\\": \\\"accepted\\\"}`, `make woodpecker-manage ACTION=list-pipelines WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'` still returned `[]`, and the bounded wait replay with `--timeout 30` ended with `Woodpecker accepted the manual trigger request but no pipeline run became visible for branch 'main' within 30 seconds`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md",
+    "docs/runbooks/configure-woodpecker.md",
+    "docs/workstreams/ws-0287-live-apply.md",
+    "playbooks/woodpecker.yml",
+    "playbooks/services/woodpecker.yml",
+    "collections/ansible_collections/lv3/platform/roles/woodpecker_postgres/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/tasks/main.yml",
+    "platform/ansible/woodpecker.py",
+    "scripts/woodpecker_bootstrap.py",
+    "scripts/woodpecker_tool.py",
+    ".woodpecker.yml",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r2-live-apply-service-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r2-targeted-checks-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-live-apply-service-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-public-headers-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-private-headers-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-public-cert-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-whoami-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-list-secrets-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r4-syntax-check-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r5-targeted-checks-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-live-apply-receipts-validate-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-data-model-validate-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-git-diff-check-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-validate-repo-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-remote-validate-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-pre-push-gate-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-list-repos-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-trigger-main-nowait-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-list-pipelines-final-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-trigger-main-pipeline-timeout30-0.177.110.txt",
+    "receipts/live-applies/2026-03-30-adr-0287-woodpecker-live-apply.json"
+  ],
+  "notes": [
+    "The branch-local receipt remains the first-live audit trail for ADR 0287 on platform version 0.130.72.",
+    "The repaired exact-main replay advanced the tracked platform version to 0.130.73 because this is the canonical mainline closeout for ADR 0287.",
+    "The repository remains activated in Woodpecker as repo id 1 with default branch `main`, but the published-main manual trigger is currently accepted without a visible pipeline materializing through the API.",
+    "Direct SSH access into `ops@100.64.0.1` was not available from this environment, so server-side Woodpecker container logs could not be inspected in the same turn."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-30-adr-0287-woodpecker-mainline-closeout",
+    "surface": "receipts/live-applies/2026-03-30-adr-0287-woodpecker-mainline-live-apply.json",
+    "repair_action": "Restored the Woodpecker controller-local secret manifest and missing exact-main catalog entries after the rebase dropped them, refreshed the generated Uptime Kuma monitor catalog, added the already-merged Directus roles to the idempotency policy, and reran the exact-main validation and service replay lane from committed source cbc004fd0ae22cb6ed692430438ad5f31c24458b.",
+    "verification": "The repaired exact-main candidate passed the focused Woodpecker pytest slice, passed syntax-check-woodpecker, passed the authoritative live-apply-service replay, and reverified the public edge, private controller path, whoami identity, and seeded smoke secret.",
+    "diagnosis": "stale_input"
+  }
+}

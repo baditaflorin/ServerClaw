@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0011-monitoring-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99",
+  "repo_version_context": "0.18.0",
+  "workflow_id": "converge-monitoring",
+  "adr": "0011",
+  "summary": "Applied the monitoring VM stack live and verified Grafana, InfluxDB, and Proxmox metric ingestion.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring-lv3",
+      "vmid": "140",
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "host_service",
+      "name": "Proxmox metric server influxdb-http"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Monitoring services active",
+      "result": "pass",
+      "observed": "Grafana and InfluxDB were active on monitoring-lv3 after convergence."
+    },
+    {
+      "check": "Dashboard availability",
+      "result": "pass",
+      "observed": "Grafana contained the managed LV3 Platform Overview dashboard."
+    },
+    {
+      "check": "Proxmox metrics flowing",
+      "result": "pass",
+      "observed": "The Proxmox host metric server wrote into the InfluxDB proxmox bucket."
+    }
+  ],
+  "evidence_refs": [
+    "docs/runbooks/monitoring-stack.md",
+    "docs/adr/0011-monitoring-vm-with-grafana-and-proxmox-metrics.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "This receipt was backfilled from repository history and the current recorded platform state.",
+    "The source commit records the live apply and remaining blockers observed that day."
+  ]
+}

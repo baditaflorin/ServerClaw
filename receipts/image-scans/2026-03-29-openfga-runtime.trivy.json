@@ -1,0 +1,126 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-29T11:50:52.406562258Z",
+  "ArtifactName": "docker.io/openfga/openfga:v1.13.1@sha256:d099cc8ab01f5411434cbb8f005a4a89ea72222a5301277b7b079b8a6258b1c8",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 78824960,
+    "OS": {
+      "Family": "wolfi",
+      "Name": "20230201"
+    },
+    "ImageID": "sha256:e7bcab22efa7fb135f4fe10dbf99f1930e3fab988074907143eb92f49de967f6",
+    "DiffIDs": [
+      "sha256:b1db3f9e6a882026beff94f931aed029b0bfa2e95f6dcf79148804851405b7df",
+      "sha256:3cf7de8d235d61c93bf352d50d0c083f531b6b4826aa1b82ddeaae77892d1160",
+      "sha256:2800d2702571ceb399a92d13b561b460fc18300c244af0b9f1a1ba2c50b5f0cb",
+      "sha256:aae4e3e3d8f3bfb7761acbec3fe1224c3b4ebdcd7b0c05456f3ce449192c8361"
+    ],
+    "RepoDigests": [
+      "openfga/openfga@sha256:d099cc8ab01f5411434cbb8f005a4a89ea72222a5301277b7b079b8a6258b1c8"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "author": "github.com/chainguard-dev/apko",
+      "created": "2026-03-24T15:25:45.639625087Z",
+      "history": [
+        {
+          "author": "apko",
+          "created": "2026-03-10T16:59:21Z",
+          "created_by": "apko",
+          "comment": "static by Chainguard"
+        },
+        {
+          "created": "2026-03-24T15:25:45.02857565Z",
+          "created_by": "COPY assets /assets # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-24T15:25:45.1482575Z",
+          "created_by": "COPY openfga / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-24T15:25:45.639625087Z",
+          "created_by": "COPY /ko-app/grpc-health-probe /usr/local/bin/grpc_health_probe # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-24T15:25:45.639625087Z",
+          "created_by": "ENTRYPOINT [\"/openfga\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:b1db3f9e6a882026beff94f931aed029b0bfa2e95f6dcf79148804851405b7df",
+          "sha256:3cf7de8d235d61c93bf352d50d0c083f531b6b4826aa1b82ddeaae77892d1160",
+          "sha256:2800d2702571ceb399a92d13b561b460fc18300c244af0b9f1a1ba2c50b5f0cb",
+          "sha256:aae4e3e3d8f3bfb7761acbec3fe1224c3b4ebdcd7b0c05456f3ce449192c8361"
+        ]
+      },
+      "config": {
+        "Entrypoint": [
+          "/openfga"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin",
+          "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt"
+        ],
+        "Labels": {
+          "dev.chainguard.image.title": "static",
+          "dev.chainguard.package.main": "",
+          "org.opencontainers.image.authors": "Chainguard Team https://www.chainguard.dev/",
+          "org.opencontainers.image.created": "2026-03-10T16:59:21Z",
+          "org.opencontainers.image.source": "https://github.com/chainguard-images/images/tree/main/images/static",
+          "org.opencontainers.image.title": "static",
+          "org.opencontainers.image.url": "https://images.chainguard.dev/directory/image/static/overview",
+          "org.opencontainers.image.vendor": "Chainguard"
+        },
+        "User": "65532"
+      }
+    },
+    "Layers": [
+      {
+        "Size": 3125760,
+        "Digest": "sha256:c225cb25257883dbe610bfcff7dfdeb9b43b39f87221b98888036fc895579d18",
+        "DiffID": "sha256:b1db3f9e6a882026beff94f931aed029b0bfa2e95f6dcf79148804851405b7df"
+      },
+      {
+        "Size": 378880,
+        "Digest": "sha256:398264d8e61c6ca3215feb9a7f45bd2c709799b99f469c80deb7b67af3ca24ab",
+        "DiffID": "sha256:3cf7de8d235d61c93bf352d50d0c083f531b6b4826aa1b82ddeaae77892d1160"
+      },
+      {
+        "Size": 61761536,
+        "Digest": "sha256:2f5ac926f959765407f09c0c3c796f47aef2710ae3a07ed00220b4314f0c12f3",
+        "DiffID": "sha256:2800d2702571ceb399a92d13b561b460fc18300c244af0b9f1a1ba2c50b5f0cb"
+      },
+      {
+        "Size": 13558784,
+        "Digest": "sha256:bc56ad544641d75ff9e5a820bec5e291a29975d69b6e422dc44d95cb89cf2999",
+        "DiffID": "sha256:aae4e3e3d8f3bfb7761acbec3fe1224c3b4ebdcd7b0c05456f3ce449192c8361"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/openfga/openfga:v1.13.1@sha256:d099cc8ab01f5411434cbb8f005a4a89ea72222a5301277b7b079b8a6258b1c8 (wolfi 20230201)",
+      "Class": "os-pkgs",
+      "Type": "wolfi"
+    },
+    {
+      "Target": "openfga",
+      "Class": "lang-pkgs",
+      "Type": "gobinary"
+    },
+    {
+      "Target": "usr/local/bin/grpc_health_probe",
+      "Class": "lang-pkgs",
+      "Type": "gobinary"
+    }
+  ]
+}

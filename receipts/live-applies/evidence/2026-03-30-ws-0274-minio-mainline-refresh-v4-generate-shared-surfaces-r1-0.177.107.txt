@@ -1,0 +1,11 @@
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v4/scripts/generate_slo_rules.py --write
+Using CPython 3.13.7 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
+Creating virtual environment at: .venv
+   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v4
+      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v4
+Installed 2 packages in 3ms
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v4/scripts/generate_status_docs.py --write
+Updated generated status docs: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v4/README.md
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v4/scripts/generate_changelog_portal.py --write
+changelog portal error: services[53].adr_file is required because ADR 0286 resolves to multiple files
+make: *** [generate-changelog-portal] Error 2

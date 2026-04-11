@@ -1,0 +1,5 @@
+Current version: 0.177.153
+Next version: 0.178.0
+Unreleased notes: 0
+Platform impact: no live platform version bump; this release records the verified ADR 0300 Falco latest-main replay while the integrated platform baseline remains 0.130.97 after the current exact-main merges
+Release notes index: docs/release-notes/README.md

@@ -1,0 +1,23 @@
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+HOST=docker-runtime-lv3
+UTC=2026-04-02T01:10:21Z
+DOCKER=active
+NAMES                                    STATUS                             PORTS
+ops-portal                               Up 5 minutes (healthy)
+lv3-control-plane-backup-openbao-agent   Up 44 minutes
+api-gateway                              Up 46 minutes (healthy)
+lv3-restic-config-backup-openbao-agent   Up 47 minutes
+windmill-windmill_worker-1               Up About an hour
+windmill-windmill_worker_native-1        Up About an hour
+windmill-windmill_server-1               Up About an hour
+windmill-windmill_extra-1                Up About an hour                   3000-3003/tcp, 8000/tcp
+windmill-openbao-agent                   Up 46 minutes (healthy)
+lv3-openbao                              Up 9 minutes                       0.0.0.0:8200->8200/tcp, 10.10.10.20:8201->8201/tcp, 127.0.0.1:8201->8201/tcp
+typesense                                Up About an hour                   0.0.0.0:8108->8108/tcp, [::]:8108->8108/tcp
+HEALTH={"status":"ok"}
+MARKER Contextual Help: present
+MARKER Escalation Path: present
+MARKER Live apply: present
+MARKER Runtime Assurance: present
+MARKER Application Launcher: present
+ops-portal-runtime-help-ok

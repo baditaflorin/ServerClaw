@@ -1,0 +1,11 @@
+FILE
+160:    ip saddr 10.10.10.40/32 tcp dport { 2586 } accept
+162:    ip saddr 10.10.10.40/32 tcp dport { 4222 } accept
+164:    ip saddr 10.10.10.40/32 tcp dport { 4647 } accept
+---
+RULESET
+102:		ip saddr 10.10.10.40 tcp dport 2586 accept
+103:		ip saddr 10.10.10.40 tcp dport 4222 accept
+104:		ip saddr 10.10.10.40 tcp dport 4647 accept
+265:		iifname != "br-d74e4749d195" tcp dport 2586 counter packets 0 bytes 0 dnat to 10.200.29.2:2586
+363:		ip daddr 10.200.29.2 iifname != "br-d74e4749d195" oifname "br-d74e4749d195" tcp dport 2586 counter packets 0 bytes 0 accept

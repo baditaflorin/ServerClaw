@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-05T20:19:15Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "b9d7049a2c465b3cc62cdb68712d72d393c1e7eb",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Remote gate SSH stalled: SSH connects to 10.10.10.30 but remote gate script hangs (no output after 4+ minutes). Build server reachable but gate unresponsive.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "cherry-pick of validated commit a69d9f9a4 (Phase 2 sync script and PlaneClient extensions",
+      "already validated in prior push session)"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-07",
+    "remediation_ref": "docs/runbooks/pre-push-gate.md"
+  }
+}

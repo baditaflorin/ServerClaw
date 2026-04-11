@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "grist_runtime",
+  "image_ref": "docker.io/gristlabs/grist:1.7.11@sha256:abb5270d518c2e8659cc19ca9f0d5b9fd903396c732328b316b4f8a30a4e5008",
+  "scanner": "trivy",
+  "scanner_version": "0.69.3",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 10,
+    "high": 95
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/gristlabs/grist:1.7.11@sha256:abb5270d518c2e8659cc19ca9f0d5b9fd903396c732328b316b4f8a30a4e5008 (debian 13.3)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 0,
+      "high": 3
+    },
+    {
+      "target": "Node.js",
+      "class": "lang-pkgs",
+      "type": "node-pkg",
+      "critical": 5,
+      "high": 48
+    },
+    {
+      "target": "Python",
+      "class": "lang-pkgs",
+      "type": "python-pkg",
+      "critical": 0,
+      "high": 3
+    },
+    {
+      "target": "usr/bin/runsc",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 5,
+      "high": 41
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-grist-runtime.trivy.json"
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T14:43:16Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "521686e99c8e45c665720cddd08dae692f386b3b",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "Committing bypass receipts from previous push",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "receipt commit only",
+      "no code changes"
+    ],
+    "owner": "Florin Badita-Nistor",
+    "expires_on": "2026-04-11",
+    "remediation_ref": "docs/adr/0386-reproducible-zero-to-platform-bootstrap.md"
+  }
+}

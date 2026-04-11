@@ -1,0 +1,12 @@
+Validation lane selection
+  mode: explicit_checks
+  branch: codex/ws-0304-mainline
+  selected lanes: generated-artifact-and-canonical-truth
+  blocking checks: workstream-surfaces, agent-standards, dependency-graph, generated-docs
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK              STATUS DURATION(s)
+agent-standards     passed 10.71
+dependency-graph    passed 8.96
+generated-docs      passed 20.77
+workstream-surfaces passed 38.27

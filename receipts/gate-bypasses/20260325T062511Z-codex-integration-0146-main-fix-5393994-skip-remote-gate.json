@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-25T06:25:11.809081+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "Release 0.135.1 main push; remote pre-push gate still depends on build-worker cleanup permissions under scripts/cases even after the remote worktree sync fixes in this change. Focused remote_exec and Windmill regression tests passed locally.",
+  "source": "pre-push-hook",
+  "branch": "codex/integration-0146-main-fix",
+  "commit": "53939940b3fcc8e28cd462d7c9d24e1d73480e6b"
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-07T04:47:26Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/happy-johnson",
+  "commit": "bf88c2360ed6cb47b779794397675b29c180454d",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Docker registry and/or build server unavailable",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local-pre-commit-passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-09",
+    "remediation_ref": "ADR-0375"
+  }
+}

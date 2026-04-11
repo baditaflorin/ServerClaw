@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0346-compose-dependency-health-gates-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T14:11:55Z",
+  "recorded_by": "codex",
+  "source_commit": "abe565d063e0c5959a9e1e16e66a03384b016242",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0346-compose-dependency-health-gates-live-apply",
+  "adr": "0346",
+  "summary": "Recorded the successful 2026-04-04 production live apply of ADR 0346 from the latest realistic `origin/main` commit `20a66bbf088d1aa456d34f173fd8e2c8664f4c20`. The repo now enforces health-gated local compose dependencies through service completeness, and the updated Dozzle, MinIO, and SearXNG runtime contracts were replayed and verified from current platform state without requiring a new numbered release.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Dozzle",
+      "address": "https://logs.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "MinIO API",
+      "address": "https://minio.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "MinIO console",
+      "address": "https://minio-console.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "SearXNG tailnet hostname",
+      "address": "http://search.lv3.org/search?q=proxmox%20ve&format=json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "The rebased branch passed `python3 scripts/validate_service_completeness.py --validate`, the targeted Dozzle/MinIO/platform_context_api/SearXNG slice, the focused pytest bundle with `22 passed`, `make syntax-check-dozzle`, `make syntax-check-minio`, `make syntax-check-searxng`, `python3 scripts/workstream_registry.py --check`, both workstream-surface ownership checks, `scripts/generate_discovery_artifacts.py --check`, and `scripts/validate_public_entrypoints.py --check`."
+    },
+    {
+      "check": "MinIO runtime and public edge replay",
+      "result": "pass",
+      "observed": "After a fresh-worktree `make generate-edge-static-sites` and a bounded resume past the already-satisfied `nftables` step on the memory-pressured runtime host, the MinIO runtime replay converged successfully and `https://minio.lv3.org/minio/health/live` returned `200` while `https://minio-console.lv3.org/` returned the expected `302` authentication redirect."
+    },
+    {
+      "check": "Dozzle runtime, remote agents, and authenticated edge",
+      "result": "pass",
+      "observed": "The final Dozzle proof set verified the local hub healthcheck, the local agent, and remote agent reachability for `10.10.10.30:7007` and `10.10.10.40:7007`; explicit edge checks also confirmed `https://logs.lv3.org/` and the local host-header path both returned `HTTP/2 302` into the shared OIDC flow."
+    },
+    {
+      "check": "SearXNG runtime, host proxy, DNS publication, and Open WebUI search wiring",
+      "result": "pass",
+      "observed": "The bounded runtime replay succeeded through the SearXNG service verification tasks, and the final explicit checks confirmed the local compose services were up, `http://100.64.0.1/search?q=proxmox%20ve&format=json` and `http://search.lv3.org/search?q=proxmox%20ve&format=json` returned structured JSON, `dig +short @1.1.1.1 search.lv3.org` returned `100.64.0.1`, and the Open WebUI environment still declares `WEB_SEARCH_ENGINE=searxng` with the managed query URL."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0346-compose-dependency-health-gates-as-a-repo-enforced-resilience-baseline.md",
+    "docs/runbooks/compose-runtime-resilience.md",
+    "docs/workstreams/ws-0332-resilience-predictability.md",
+    "workstreams.yaml",
+    "workstreams/archive/2026/ws-0332-resilience-predictability.yaml",
+    "config/service-completeness.json",
+    "scripts/service_completeness.py",
+    "collections/ansible_collections/lv3/platform/roles/dozzle_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/searxng_runtime/templates/docker-compose.yml.j2",
+    "tests/test_validate_service_completeness.py",
+    "tests/test_dozzle_runtime_role.py",
+    "tests/test_minio_runtime_role.py",
+    "tests/test_searxng_runtime_role.py",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-service-completeness-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-service-completeness-targeted-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-pytest-slice-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-syntax-dozzle-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-syntax-minio-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-syntax-searxng-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-workstream-registry-check-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-workstream-surfaces-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-validate-branch-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-discovery-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-public-entrypoints-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-generate-edge-static-sites-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-minio-edge-public-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-minio-runtime-resume-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-minio-edge-public-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-runtime-resume-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-verification-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-runtime-check-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-verification-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-searxng-proxy-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-searxng-runtime-resume-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-searxng-runtime-resume-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-searxng-runtime-resume-r4.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0332-searxng-verification-r2.txt"
+  ],
+  "notes": [
+    "This receipt records the first verified live apply of ADR 0346 from the latest realistic `origin/main` base commit `20a66bbf088d1aa456d34f173fd8e2c8664f4c20` while the repository remains on exact-main version `0.178.3`.",
+    "A fresh exact-main worktree needed generated docs and changelog portal assets before the shared `nginx_edge_publication` role could converge cleanly; the committed `make generate-edge-static-sites` step is preserved as evidence instead of being hidden as a manual prerequisite.",
+    "The initial full MinIO converge stalled under shared `docker-runtime-lv3` memory pressure even though `nftables` was already installed and active. The final proof set resumes from the first safe service-local task instead of implying a clean first pass.",
+    "Dozzle's shared post-verify Syft SBOM refresh was intentionally stopped after the core runtime and public-edge checks were already green because the host-wide scan was starving unrelated replays on `docker-runtime-lv3`; the explicit Dozzle verification rerun is therefore the final proof surface.",
+    "A mid-play resume into the downstream `open_webui_runtime` role is not restart-safe for the SearXNG play because earlier registered variables are skipped. The final proof set preserves the successful SearXNG runtime verification and the explicit Open WebUI environment check instead of masking that bounded limitation."
+  ]
+}

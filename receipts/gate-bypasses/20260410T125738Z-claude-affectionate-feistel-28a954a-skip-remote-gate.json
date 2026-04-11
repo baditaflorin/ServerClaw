@@ -1,0 +1,27 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T12:57:38Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/affectionate-feistel",
+  "commit": "28a954a11f33f4bffb135080499b2e064cca92d2",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Build server 10.10.10.30 SSH timeout during remote gate; pre-commit hooks all passed locally (check yaml, check json, detect private key, hardcoded secrets, validation_toolkit)",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Local pre-commit: check yaml PASS",
+      "check json PASS",
+      "detect private key PASS",
+      "Detect hardcoded secrets PASS",
+      "Enforce validation_toolkit PASS",
+      "uv run pytest tests/test_https_tls_assurance_targets.py tests/test_generate_slo_rules.py tests/test_subdomain_catalog.py: 18 passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "ADR-0396-amendments-build-server-unreachable"
+  }
+}

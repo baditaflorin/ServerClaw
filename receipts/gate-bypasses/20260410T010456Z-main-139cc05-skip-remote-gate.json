@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T01:04:56Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "139cc0517bdd619c7e8192f0f83c0715e99fd201",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "Docker check-runner image unavailable locally",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "adr-0388-9-services-converged-production"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "ADR-0388-live-apply"
+  }
+}

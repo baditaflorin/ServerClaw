@@ -1,0 +1,42 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply-r3/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 1.58
+alert-rule-validation passed 1.75
+ansible-lint          passed 169.74
+ansible-syntax        passed 101.58
+artifact-secret-scan  passed 3.33
+dependency-direction  passed 1.84
+dependency-graph      passed 2.60
+documentation-index   passed 1.64
+generated-docs        passed 7.44
+generated-portals     passed 28.65
+integration-tests     passed 1.36
+packer-validate       passed 5.60
+policy-validation     passed 1.94
+schema-validation     passed 15.52
+security-scan         passed 13.64
+service-completeness  passed 1.23
+tofu-validate         passed 1.48
+type-check            passed 4.64
+workstream-surfaces   failed 3.28
+yaml-lint             passed 13.67
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0286-live-apply-r3-b7796906bb/repo/.lv3-runs/20260330T174840Z-ddb48509d450/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=ddb48509d450b09a4c86aa0ac83d4c1c89411e42c551e80a0700328e16f12bfa -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T17:48:35.493183+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=e025bcd0ca04905b75d8f2ea4c2754744e3b6416 -e LV3_SNAPSHOT_BRANCH=codex/ws-0286-live-apply-r3 -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["Makefile", "README.md", "RELEASE.md", "VERSION", "build/platform-manifest.json", "changelog.md", "collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml", "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/defaults/main.yml", "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png", "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/meta/argument_specs.yml", "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/tasks/main.yml", "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/tasks/verify.yml", "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/templates/Dockerfile.j2", "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/templates/docker-compose.yml.j2", "collections/ansible_collections/lv3/platform/roles/tika_runtime/tasks/main.yml", "collections/ansible_collections/lv3/platform/roles/tika_runtime/tasks/verify.yml", "config/ansible-execution-scopes.yaml", "config/ansible-role-idempotency.yml", "config/command-catalog.json", "config/data-catalog.json", "config/dependency-graph.json", "config/grafana/dashboards/slo-overview.json", "config/health-probe-catalog.json", "config/prometheus/file_sd/slo_targets.yml", "config/prometheus/rules/slo_alerts.yml", "config/prometheus/rules/slo_rules.yml", "config/service-capability-catalog.json", "config/service-completeness.json", "config/service-redundancy-catalog.json", "config/slo-catalog.json", "config/workflow-catalog.json", "docs/adr/.index.yaml", "docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/diagrams/service-dependency-graph.excalidraw", "docs/release-notes/0.177.107.md", "docs/release-notes/README.md", "docs/runbooks/configure-tesseract-ocr.md", "docs/site-generated/architecture/dependency-graph.md", "docs/workstreams/ws-0286-live-apply.md", "inventory/group_vars/platform.yml", "inventory/host_vars/proxmox_florin.yml", "platform/repo.py", "playbooks/services/tesseract-ocr.yml", "playbooks/tesseract-ocr.yml", "receipts/live-applies/2026-03-30-adr-0286-tesseract-ocr-live-apply.json", "receipts/live-applies/evidence/2026-03-30-adr-0286-check-build-server-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-dependency-check-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-endpoint-verify-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-generate-adr-index-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-generate-dependency-diagram-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-generate-dependency-diagram-r2-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-generate-diagrams-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-generate-ops-portal-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-generate-status-docs-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-git-diff-check-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-helper-verify-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-live-apply-receipts-validate-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-live-apply-run.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-pre-push-gate-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-release-dry-run-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-release-status-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-release-write-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-remote-validate-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-remote-validate-r2-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-targeted-checks-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-targeted-validate-lanes-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-tesseract-ocr-live-apply.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-tika-prereq-replay.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-type-check-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-validate-generated-docs-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-validate-generated-portals-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-validate-r1-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-validate-r2-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-validate-r3-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-validate-r4-0.177.107.txt", "receipts/live-applies/evidence/2026-03-30-adr-0286-workstream-surfaces-r1-0.177.107.txt", "receipts/ops-portal-snapshot.html", "requirements/tesseract-ocr.txt", "scripts/document_extraction.py", "scripts/generate_platform_vars.py", "scripts/tesseract_ocr_service.py", "scripts/validate_repo.sh", "tests/test_document_extraction.py", "tests/test_generate_platform_vars.py", "tests/test_service_id_resolver.py", "tests/test_tesseract_ocr_runtime_role.py", "tests/test_tika_runtime_role.py", "versions/stack.yaml", "workstreams.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+Workstream surface ownership validation failed: branch 'codex/ws-0286-live-apply-r3' maps to terminal workstream 'ws-0286-live-apply'
+remote_exec: remote command failed, falling back locally for pre-push-gate
+remote_exec: running local fallback for pre-push-gate

@@ -1,0 +1,95 @@
+[
+  {
+    "action": "none",
+    "desired": {
+      "description": "Canonical platform control-plane and mutation events.",
+      "discard": "old",
+      "duplicate_window_seconds": 120,
+      "max_age_seconds": 7776000,
+      "name": "PLATFORM_EVENTS",
+      "replicas": 1,
+      "retention": "limits",
+      "storage": "file",
+      "subjects": [
+        "platform.>"
+      ]
+    },
+    "diff": {},
+    "live": {
+      "description": "Canonical platform control-plane and mutation events.",
+      "discard": "old",
+      "duplicate_window_seconds": 120,
+      "max_age_seconds": 7776000,
+      "name": "PLATFORM_EVENTS",
+      "replicas": 1,
+      "retention": "limits",
+      "storage": "file",
+      "subjects": [
+        "platform.>"
+      ]
+    },
+    "name": "PLATFORM_EVENTS"
+  },
+  {
+    "action": "none",
+    "desired": {
+      "description": "RAG document staging and extraction lifecycle events.",
+      "discard": "old",
+      "duplicate_window_seconds": 120,
+      "max_age_seconds": 2592000,
+      "name": "RAG_DOCUMENT",
+      "replicas": 1,
+      "retention": "limits",
+      "storage": "file",
+      "subjects": [
+        "rag.document.>"
+      ]
+    },
+    "diff": {},
+    "live": {
+      "description": "RAG document staging and extraction lifecycle events.",
+      "discard": "old",
+      "duplicate_window_seconds": 120,
+      "max_age_seconds": 2592000,
+      "name": "RAG_DOCUMENT",
+      "replicas": 1,
+      "retention": "limits",
+      "storage": "file",
+      "subjects": [
+        "rag.document.>"
+      ]
+    },
+    "name": "RAG_DOCUMENT"
+  },
+  {
+    "action": "none",
+    "desired": {
+      "description": "Secret rotation lifecycle events for downstream reload consumers.",
+      "discard": "old",
+      "duplicate_window_seconds": 120,
+      "max_age_seconds": 7776000,
+      "name": "SECRET_ROTATION",
+      "replicas": 1,
+      "retention": "limits",
+      "storage": "file",
+      "subjects": [
+        "secret.rotation.>"
+      ]
+    },
+    "diff": {},
+    "live": {
+      "description": "Secret rotation lifecycle events for downstream reload consumers.",
+      "discard": "old",
+      "duplicate_window_seconds": 120,
+      "max_age_seconds": 7776000,
+      "name": "SECRET_ROTATION",
+      "replicas": 1,
+      "retention": "limits",
+      "storage": "file",
+      "subjects": [
+        "secret.rotation.>"
+      ]
+    },
+    "name": "SECRET_ROTATION"
+  }
+]

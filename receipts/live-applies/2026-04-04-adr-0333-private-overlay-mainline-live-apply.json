@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0333-private-overlay-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T15:51:26Z",
+  "recorded_by": "codex",
+  "source_commit": "32b853f302f714e405f90c82c6c2d63331ca32de",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0333-private-overlay-mainline-live-apply",
+  "adr": "0333",
+  "summary": "Replayed ADR 0333 from the latest realistic origin/main tip by preserving the shared `.local` bootstrap alias contract on exact main, refreshing canonical truth and generated status surfaces around that contract, and re-verifying the controller-local and repo-automation paths without recording a new platform-version bump because the bootstrap overlay capability was already proven live on platform version 0.130.98.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/build-server.json"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/worktree-bootstrap-manifests.json"
+    },
+    {
+      "kind": "artifact",
+      "name": "versions/stack.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "build/platform-manifest.json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused exact-main compatibility slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_materialize_bootstrap_key_alias.py tests/test_controller_automation_toolkit.py tests/test_preflight_controller_local.py tests/test_remote_exec.py tests/test_ephemeral_windmill_wrappers.py tests/test_provision_operator.py tests/test_validation_runner_contracts.py tests/test_atlas_schema.py -q` returned `80 passed in 19.41s` on the latest `origin/main` base, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-targeted-tests-r4.txt`."
+    },
+    {
+      "check": "Dependency-graph and receipt integrity",
+      "result": "pass",
+      "observed": "`uv run --with jsonschema --with pyyaml python3 scripts/validate_dependency_graph.py`, `uv run --with jsonschema --with pyyaml python3 scripts/generate_dependency_diagram.py --check`, `python3 scripts/generate_diagrams.py --check`, and `python3 scripts/live_apply_receipts.py --validate` all passed on the exact-main replay, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-dependency-graph-r3.txt` and `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-live-apply-receipts-r3.txt`."
+    },
+    {
+      "check": "Exact-main bookkeeping and canonical truth refresh",
+      "result": "pass",
+      "observed": "`python3 scripts/workstream_registry.py --write`, `uv run --with pyyaml python3 scripts/canonical_truth.py --write`, `uv run --with pyyaml python3 scripts/generate_status_docs.py --write`, and `uv run --with jsonschema --with pyyaml python3 scripts/platform_manifest.py --write` refreshed the merged workstream registry, root summaries, and platform manifest from source, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-workstream-registry-r3.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-canonical-truth-r2.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-status-docs-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-platform-manifest-r2.txt`."
+    },
+    {
+      "check": "Release-readiness snapshot",
+      "result": "partial",
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, `0 workstreams in progress`, and a blocked numbered release cut only because unrelated `controller_dependency_gap` waiver blockers remain open through `2026-04-06`; `LV3_SKIP_OUTLINE_SYNC=1 python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate repository version would be `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-release-status-r3.json` and `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-release-dry-run-r1.txt`."
+    },
+    {
+      "check": "Repo automation and latest-main gate replay",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals` and `make pre-push-gate` both passed on the refreshed exact-main tree after the latest `origin/main` delta landed; the remote build-server run timed out only inside `atlas-lint` when Atlas attempted to reach the ephemeral Postgres host-gateway address, and the governed local fallback reran only `atlas-lint` successfully before merging the final gate status, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-validate-repo-r10.txt` and `receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-pre-push-gate-r3.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md",
+    "docs/adr/.index.yaml",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "docs/runbooks/controller-local-secrets-and-preflight.md",
+    "docs/runbooks/initial-access.md",
+    "docs/runbooks/operator-onboarding.md",
+    "docs/status/history/live-apply-evidence.md",
+    "docs/status/history/merged-workstreams.md",
+    "docs/workstreams/adr-0333-private-overlay-live-apply.md",
+    "platform/repo.py",
+    "scripts/controller_automation_toolkit.py",
+    "scripts/drift_lib.py",
+    "scripts/materialize_bootstrap_key_alias.py",
+    "scripts/remote_exec.sh",
+    "scripts/resolve_local_overlay_root.sh",
+    "scripts/validation_runner_contracts.py",
+    "config/build-server.json",
+    "config/controller-local-secrets.json",
+    "config/workflow-catalog.json",
+    "config/worktree-bootstrap-manifests.json",
+    "inventory/build_server.yml",
+    "inventory/group_vars/all.yml",
+    "tests/test_materialize_bootstrap_key_alias.py",
+    "tests/test_controller_automation_toolkit.py",
+    "tests/test_preflight_controller_local.py",
+    "tests/test_remote_exec.py",
+    "tests/test_ephemeral_windmill_wrappers.py",
+    "tests/test_provision_operator.py",
+    "tests/test_validation_runner_contracts.py",
+    "workstreams.yaml",
+    "workstreams/archive/2026/adr-0333-private-overlay-live-apply.yaml",
+    "versions/stack.yaml",
+    "receipts/live-applies/2026-04-04-adr-0333-private-overlay-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-targeted-tests-r4.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-dependency-graph-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-live-apply-receipts-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-workstream-registry-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-canonical-truth-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-status-docs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-platform-manifest-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-release-status-r3.json",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-validate-repo-r10.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-mainline-pre-push-gate-r3.txt",
+    "receipts/live-applies/2026-04-04-adr-0333-private-overlay-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt becomes the canonical exact-main audit trail for ADR 0333 while preserving the earlier branch-local live-apply receipt as the first proof that the shared bootstrap alias contract was already live on platform version 0.130.98.",
+    "The merged exact-main replay keeps `Implemented In Repo Version` and `Included In Repo Version` at `not yet` because the repository-wide release manager remains blocked by unrelated open waiver receipts outside this workstream.",
+    "The final exact-main gate passed after the controlled local fallback reran only `atlas-lint`, so this receipt captures the completed merge-ready state that can be committed and pushed to `origin/main`."
+  ]
+}

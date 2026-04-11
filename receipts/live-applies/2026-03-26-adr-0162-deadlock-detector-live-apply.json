@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0162-deadlock-detector-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "5f9ddf354ba425324fd4fc9b09490eca96d36d31",
+  "repo_version_context": "0.160.0",
+  "workflow_id": "adr-0162-deadlock-detector-live-apply",
+  "adr": "0162",
+  "summary": "Completed the ADR 0162 production live apply on current main by reconciling the Windmill PostgreSQL credential path, correcting the deadlock detector worker import resolution, seeding the `f/lv3/detect_deadlocks` script, enabling the 30-second schedule, and verifying a successful manual detector run in workspace `lv3`.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "100.64.0.1:8005"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "postgres",
+      "address": "10.10.10.50:5432"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "Focused ADR 0162 validation passed with `python3 -m py_compile config/windmill/scripts/detect-deadlocks.py` and `uv run --with pytest --with pyyaml python -m pytest tests/test_deadlock_detector.py tests/test_deadlock_repo_surfaces.py -q` returning `6 passed`."
+    },
+    {
+      "check": "Windmill PostgreSQL credential alignment",
+      "result": "pass",
+      "observed": "After the production PostgreSQL converge left the live `windmill_admin` role on the previous password, an explicit `ALTER ROLE windmill_admin ... PASSWORD 'yyYsgNxg_vTCNpA3F_HJcg2Gs4oGWgCH'` on `postgres-lv3` restored TCP authentication for the managed credential."
+    },
+    {
+      "check": "ADR 0162 Windmill surfaces",
+      "result": "pass",
+      "observed": "Windmill workspace `lv3` now contains script `f/lv3/detect_deadlocks` with hash `69d87a3323b44ce3`, schedule `f/lv3/detect_deadlocks_every_30s` is present and enabled, and `POST /api/w/lv3/jobs/run_wait_result/p/f/lv3/detect_deadlocks` returned zero detected deadlocks and livelocks."
+    }
+  ],
+  "evidence_refs": [
+    "config/windmill/scripts/detect-deadlocks.py",
+    "docs/adr/0153-distributed-resource-lock-registry.md",
+    "docs/adr/0161-real-time-agent-coordination-map.md",
+    "docs/adr/0162-distributed-deadlock-detection-and-resolution.md",
+    "docs/workstreams/adr-0162-deadlock-detector.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The controller could not reach `docker-runtime-lv3` or `postgres-lv3` directly during live apply, so production converges used a temporary jump-based inventory through `ops@100.64.0.1`.",
+    "The corrected Windmill wrapper now resolves repo imports from the mounted checkout default `/srv/proxmox_florin_server`, which was required for the detector job to execute successfully inside the worker sandbox.",
+    "The broader Windmill converge remained noisy and partially manual during recovery, but the ADR 0162 script, enabled schedule, and live manual detector execution were all verified before this receipt was recorded."
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0163-retry-taxonomy-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "4e080ab031aa822760f0979a4a653ef1da97a1d9",
+  "repo_version_context": "0.164.0",
+  "workflow_id": "converge-api-gateway",
+  "adr": "0163",
+  "summary": "Completed the ADR 0163 production live replay from the merged current-mainline `0.164.0` tree by reconverging the API gateway, then verifying both the public and guest-local gateway paths plus the mounted shared retry-policy bundle on docker-runtime-lv3.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "api_gateway_public",
+      "address": "https://api.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "API gateway live replay",
+      "result": "pass",
+      "observed": "The successful 2026-03-26 replay from merged `main` finished with `docker-runtime-lv3 : ok=125 changed=25 unreachable=0 failed=0 skipped=24`, and the role verify phase passed its local health and anonymous-auth checks."
+    },
+    {
+      "check": "Public gateway health and protected aggregate health behavior",
+      "result": "pass",
+      "observed": "`curl https://api.lv3.org/healthz` returned HTTP `200` with `{\"status\":\"ok\"}`, and `https://api.lv3.org/v1/health` returned HTTP `401` with the canonical `AUTH_TOKEN_MISSING` envelope after the replay."
+    },
+    {
+      "check": "Guest-local gateway health and protected aggregate health behavior",
+      "result": "pass",
+      "observed": "On `docker-runtime-lv3`, `http://127.0.0.1:8083/healthz` returned `{\"status\":\"ok\"}` and `http://127.0.0.1:8083/v1/health` returned HTTP `401` with the canonical `AUTH_TOKEN_MISSING` envelope."
+    },
+    {
+      "check": "Deployed retry bundle wiring",
+      "result": "pass",
+      "observed": "On `docker-runtime-lv3`, `/opt/api-gateway/api-gateway.env` exports `LV3_RETRY_POLICY_CONFIG=/config/retry-policies.yaml`, `/opt/api-gateway/config/retry-policies.yaml` exists on disk, `/config/retry-policies.yaml` exists in the running `api-gateway` container, and the mounted bundle contains the shared `external_api`, `internal_api`, and `ansible_ssh` surface policies."
+    }
+  ],
+  "evidence_refs": [
+    "config/retry-policies.yaml",
+    "docs/adr/0163-platform-wide-retry-taxonomy-and-exponential-backoff.md",
+    "docs/workstreams/adr-0163-retry-taxonomy.md",
+    "docs/runbooks/retry-taxonomy.md",
+    "docs/runbooks/configure-api-gateway.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The controller used the steady-state Tailscale host path to `ops@100.64.0.1` plus the governed Proxmox guest jump for `docker-runtime-lv3`; direct public SSH to `65.108.75.123:22` was still not the reliable management path during this replay.",
+    "The first replay attempt after merging `origin/main` into the live-apply branch hit a transient Ansible SSH transport drop during the no-op `docker_runtime` section. A follow-up connectivity check (`ansible -m ping`) succeeded immediately, and the second replay completed cleanly from the same merged tree.",
+    "The live verification intentionally did not inject transient upstream or NATS faults into production. The production evidence for ADR 0163 is the successful replay plus confirmation that the running gateway is loading the repo-managed retry-policy bundle that controls the safe-read retry behavior."
+  ]
+}

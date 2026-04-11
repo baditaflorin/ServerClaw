@@ -1,0 +1,95 @@
+{
+  "parsed": {
+    "command": "python3 /srv/proxmox_florin_server/scripts/journey_scorecards.py report --repo-root /srv/proxmox_florin_server --window-days 30 --write-latest",
+    "report": {
+      "failure_signals": {
+        "glitchtip_events": 0
+      },
+      "generated_at": "2026-04-02T06:16:42Z",
+      "population": {
+        "events": 34,
+        "sessions": 2,
+        "visitors": 2
+      },
+      "route_aggregates": {
+        "pageviews": {
+          "/journeys/operator-access-admin/alert": 1,
+          "/journeys/operator-access-admin/checklist": 1,
+          "/journeys/operator-access-admin/help": 1,
+          "/journeys/operator-access-admin/help-success": 1,
+          "/journeys/operator-access-admin/resume": 1,
+          "/journeys/operator-access-admin/safe-task": 1,
+          "/journeys/operator-access-admin/search": 1,
+          "/journeys/operator-access-admin/search-result": 1,
+          "/journeys/operator-access-admin/start": 1
+        },
+        "site_domain": "ops.lv3.org",
+        "status": "ok",
+        "window_days": 30
+      },
+      "scorecards": {
+        "alert_handoffs": {
+          "acknowledged_alerts": 2,
+          "alerts_emitted": 2,
+          "median_acknowledgement_seconds": 15,
+          "median_resolution_seconds": 45,
+          "resolved_alerts": 2,
+          "status": "ok"
+        },
+        "help_to_successful_recovery": {
+          "help_opens": 2,
+          "median_success_seconds": 30,
+          "status": "ok",
+          "success_rate": 100.0,
+          "successful_help_flows": 2
+        },
+        "onboarding_checklist_completion": {
+          "completed_visitors": 2,
+          "completion_rate": 100.0,
+          "median_completion_seconds": 240,
+          "started_visitors": 2,
+          "status": "ok"
+        },
+        "resumable_task_completion": {
+          "completed_after_resume": 2,
+          "completion_rate": 100.0,
+          "interrupted_flows": 2,
+          "resumed_flows": 2,
+          "status": "ok"
+        },
+        "search_to_destination_success": {
+          "median_success_seconds": 30,
+          "started_searches": 2,
+          "status": "ok",
+          "success_rate": 100.0,
+          "successful_searches": 2
+        },
+        "time_to_first_safe_action": {
+          "median_seconds": 720,
+          "sample_size": 2,
+          "status": "ok"
+        }
+      },
+      "sources": {
+        "latest_report_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json",
+        "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+        "plausible_site_domain": "ops.lv3.org"
+      },
+      "status": "ok",
+      "surface": "windmill.operator_access_admin",
+      "window_days": 30
+    },
+    "returncode": 0,
+    "status": "ok",
+    "stderr": "",
+    "stdout": "{\n  \"failure_signals\": {\n    \"glitchtip_events\": 0\n  },\n  \"generated_at\": \"2026-04-02T06:16:42Z\",\n  \"population\": {\n    \"events\": 34,\n    \"sessions\": 2,\n    \"visitors\": 2\n  },\n  \"route_aggregates\": {\n    \"pageviews\": {\n      \"/journeys/operator-access-admin/alert\": 1,\n      \"/journeys/operator-access-admin/checklist\": 1,\n      \"/journeys/operator-access-admin/help\": 1,\n      \"/journeys/operator-access-admin/help-success\": 1,\n      \"/journeys/operator-access-admin/resume\": 1,\n      \"/journeys/operator-access-admin/safe-task\": 1,\n      \"/journeys/operator-access-admin/search\": 1,\n      \"/journeys/operator-access-admin/search-result\": 1,\n      \"/journeys/operator-access-admin/start\": 1\n    },\n    \"site_domain\": \"ops.lv3.org\",\n    \"status\": \"ok\",\n    \"window_days\": 30\n  },\n  \"scorecards\": {\n    \"alert_handoffs\": {\n      \"acknowledged_alerts\": 2,\n      \"alerts_emitted\": 2,\n      \"median_acknowledgement_seconds\": 15,\n      \"median_resolution_seconds\": 45,\n      \"resolved_alerts\": 2,\n      \"status\": \"ok\"\n    },\n    \"help_to_successful_recovery\": {\n      \"help_opens\": 2,\n      \"median_success_seconds\": 30,\n      \"status\": \"ok\",\n      \"success_rate\": 100.0,\n      \"successful_help_flows\": 2\n    },\n    \"onboarding_checklist_completion\": {\n      \"completed_visitors\": 2,\n      \"completion_rate\": 100.0,\n      \"median_completion_seconds\": 240,\n      \"started_visitors\": 2,\n      \"status\": \"ok\"\n    },\n    \"resumable_task_completion\": {\n      \"completed_after_resume\": 2,\n      \"completion_rate\": 100.0,\n      \"interrupted_flows\": 2,\n      \"resumed_flows\": 2,\n      \"status\": \"ok\"\n    },\n    \"search_to_destination_success\": {\n      \"median_success_seconds\": 30,\n      \"started_searches\": 2,\n      \"status\": \"ok\",\n      \"success_rate\": 100.0,\n      \"successful_searches\": 2\n    },\n    \"time_to_first_safe_action\": {\n      \"median_seconds\": 720,\n      \"sample_size\": 2,\n      \"status\": \"ok\"\n    }\n  },\n  \"sources\": {\n    \"latest_report_path\": \"/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json\",\n    \"ledger_path\": \"/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl\",\n    \"plausible_site_domain\": \"ops.lv3.org\"\n  },\n  \"status\": \"ok\",\n  \"surface\": \"windmill.operator_access_admin\",\n  \"window_days\": 30\n}"
+  },
+  "path": "f/lv3/operator_journey_scorecards",
+  "payload": {
+    "window_days": 30,
+    "write_latest": true
+  },
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "{\"report\": {\"status\": \"ok\", \"sources\": {\"ledger_path\": \"/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl\", \"latest_report_path\": \"/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json\", \"plausible_site_domain\": \"ops.lv3.org\"}, \"surface\": \"windmill.operator_access_admin\", \"population\": {\"events\": 34, \"sessions\": 2, \"visitors\": 2}, \"scorecards\": {\"alert_handoffs\": {\"status\": \"ok\", \"alerts_emitted\": 2, \"resolved_alerts\": 2, \"acknowledged_alerts\": 2, \"median_resolution_seconds\": 45, \"median_acknowledgement_seconds\": 15}, \"resumable_task_completion\": {\"status\": \"ok\", \"resumed_flows\": 2, \"completion_rate\": 100.0, \"interrupted_flows\": 2, \"completed_after_resume\": 2}, \"time_to_first_safe_action\": {\"status\": \"ok\", \"sample_size\": 2, \"median_seconds\": 720}, \"help_to_successful_recovery\": {\"status\": \"ok\", \"help_opens\": 2, \"success_rate\": 100.0, \"successful_help_flows\": 2, \"median_success_seconds\": 30}, \"search_to_destination_success\": {\"status\": \"ok\", \"success_rate\": 100.0, \"started_searches\": 2, \"successful_searches\": 2, \"median_success_seconds\": 30}, \"onboarding_checklist_completion\": {\"status\": \"ok\", \"completion_rate\": 100.0, \"started_visitors\": 2, \"completed_visitors\": 2, \"median_completion_seconds\": 240}}, \"window_days\": 30, \"generated_at\": \"2026-04-02T06:16:42Z\", \"failure_signals\": {\"glitchtip_events\": 0}, \"route_aggregates\": {\"status\": \"ok\", \"pageviews\": {\"/journeys/operator-access-admin/help\": 1, \"/journeys/operator-access-admin/alert\": 1, \"/journeys/operator-access-admin/start\": 1, \"/journeys/operator-access-admin/resume\": 1, \"/journeys/operator-access-admin/search\": 1, \"/journeys/operator-access-admin/checklist\": 1, \"/journeys/operator-access-admin/safe-task\": 1, \"/journeys/operator-access-admin/help-success\": 1, \"/journeys/operator-access-admin/search-result\": 1}, \"site_domain\": \"ops.lv3.org\", \"window_days\": 30}}, \"status\": \"ok\", \"stderr\": \"\", \"stdout\": \"{\\n  \\\"failure_signals\\\": {\\n    \\\"glitchtip_events\\\": 0\\n  },\\n  \\\"generated_at\\\": \\\"2026-04-02T06:16:42Z\\\",\\n  \\\"population\\\": {\\n    \\\"events\\\": 34,\\n    \\\"sessions\\\": 2,\\n    \\\"visitors\\\": 2\\n  },\\n  \\\"route_aggregates\\\": {\\n    \\\"pageviews\\\": {\\n      \\\"/journeys/operator-access-admin/alert\\\": 1,\\n      \\\"/journeys/operator-access-admin/checklist\\\": 1,\\n      \\\"/journeys/operator-access-admin/help\\\": 1,\\n      \\\"/journeys/operator-access-admin/help-success\\\": 1,\\n      \\\"/journeys/operator-access-admin/resume\\\": 1,\\n      \\\"/journeys/operator-access-admin/safe-task\\\": 1,\\n      \\\"/journeys/operator-access-admin/search\\\": 1,\\n      \\\"/journeys/operator-access-admin/search-result\\\": 1,\\n      \\\"/journeys/operator-access-admin/start\\\": 1\\n    },\\n    \\\"site_domain\\\": \\\"ops.lv3.org\\\",\\n    \\\"status\\\": \\\"ok\\\",\\n    \\\"window_days\\\": 30\\n  },\\n  \\\"scorecards\\\": {\\n    \\\"alert_handoffs\\\": {\\n      \\\"acknowledged_alerts\\\": 2,\\n      \\\"alerts_emitted\\\": 2,\\n      \\\"median_acknowledgement_seconds\\\": 15,\\n      \\\"median_resolution_seconds\\\": 45,\\n      \\\"resolved_alerts\\\": 2,\\n      \\\"status\\\": \\\"ok\\\"\\n    },\\n    \\\"help_to_successful_recovery\\\": {\\n      \\\"help_opens\\\": 2,\\n      \\\"median_success_seconds\\\": 30,\\n      \\\"status\\\": \\\"ok\\\",\\n      \\\"success_rate\\\": 100.0,\\n      \\\"successful_help_flows\\\": 2\\n    },\\n    \\\"onboarding_checklist_completion\\\": {\\n      \\\"completed_visitors\\\": 2,\\n      \\\"completion_rate\\\": 100.0,\\n      \\\"median_completion_seconds\\\": 240,\\n      \\\"started_visitors\\\": 2,\\n      \\\"status\\\": \\\"ok\\\"\\n    },\\n    \\\"resumable_task_completion\\\": {\\n      \\\"completed_after_resume\\\": 2,\\n      \\\"completion_rate\\\": 100.0,\\n      \\\"interrupted_flows\\\": 2,\\n      \\\"resumed_flows\\\": 2,\\n      \\\"status\\\": \\\"ok\\\"\\n    },\\n    \\\"search_to_destination_success\\\": {\\n      \\\"median_success_seconds\\\": 30,\\n      \\\"started_searches\\\": 2,\\n      \\\"status\\\": \\\"ok\\\",\\n      \\\"success_rate\\\": 100.0,\\n      \\\"successful_searches\\\": 2\\n    },\\n    \\\"time_to_first_safe_action\\\": {\\n      \\\"median_seconds\\\": 720,\\n      \\\"sample_size\\\": 2,\\n      \\\"status\\\": \\\"ok\\\"\\n    }\\n  },\\n  \\\"sources\\\": {\\n    \\\"latest_report_path\\\": \\\"/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json\\\",\\n    \\\"ledger_path\\\": \\\"/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl\\\",\\n    \\\"plausible_site_domain\\\": \\\"ops.lv3.org\\\"\\n  },\\n  \\\"status\\\": \\\"ok\\\",\\n  \\\"surface\\\": \\\"windmill.operator_access_admin\\\",\\n  \\\"window_days\\\": 30\\n}\", \"command\": \"python3 /srv/proxmox_florin_server/scripts/journey_scorecards.py report --repo-root /srv/proxmox_florin_server --window-days 30 --write-latest\", \"returncode\": 0}"
+}

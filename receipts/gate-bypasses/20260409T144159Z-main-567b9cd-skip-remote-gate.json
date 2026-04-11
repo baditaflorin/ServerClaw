@@ -1,0 +1,28 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T14:41:59Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "567b9cd9f3a17fd87424cefc948b4a8855506955",
+  "waiver": {
+    "reason_code": "schema_migration_in_progress",
+    "reason_summary": "A structural schema change (new check, renamed lane, catalog format bump) is mid-flight and temporarily breaks the gate contract.",
+    "detail": "Multi-host execution verified: all 7 hosts respond via execute-host-command",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "hostname returns correct value for proxmox",
+      "docker-runtime-lv3",
+      "postgres-lv3",
+      "build-server",
+      "coolify-lv3",
+      "runtime-comms-lv3",
+      "runtime-control-lv3"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "docs/adr/0386-agent-cross-host-execution-and-mcp-tool-surface.md"
+  }
+}

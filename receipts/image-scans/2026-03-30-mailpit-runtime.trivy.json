@@ -1,0 +1,2380 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.3"
+  },
+  "ReportID": "019d3bbd-ba71-7386-8838-e41bb1b47501",
+  "CreatedAt": "2026-03-30T01:36:23.025234+03:00",
+  "ArtifactID": "sha256:02a9f99345b4e1cd0e9f28da0039ba0777cdf25bb0f425ba692e1ab5fd47ea1f",
+  "ArtifactName": "docker.io/axllent/mailpit:v1.29.5@sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 37480960,
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.23.3"
+    },
+    "ImageID": "sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf",
+    "DiffIDs": [
+      "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+      "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97",
+      "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+    ],
+    "RepoTags": [
+      "axllent/mailpit@sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf"
+    ],
+    "RepoDigests": [
+      "axllent/mailpit@sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf"
+    ],
+    "Reference": "axllent/mailpit@sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf",
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2026-03-29T04:51:47.730014558Z",
+      "history": [
+        {
+          "created": "2026-01-28T01:18:04Z",
+          "created_by": "ADD alpine-minirootfs-3.23.3-x86_64.tar.gz / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-01-28T01:18:04Z",
+          "created_by": "CMD [\"/bin/sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-29T04:51:45Z",
+          "created_by": "LABEL org.opencontainers.image.title=Mailpit org.opencontainers.image.description=An email and SMTP testing tool with API for developers org.opencontainers.image.source=https://github.com/axllent/mailpit org.opencontainers.image.url=https://mailpit.axllent.org org.opencontainers.image.documentation=https://mailpit.axllent.org/docs/ org.opencontainers.image.licenses=MIT",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-29T04:51:45Z",
+          "created_by": "COPY /mailpit /mailpit # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-29T04:51:47Z",
+          "created_by": "RUN /bin/sh -c apk upgrade --no-cache \u0026\u0026 apk add --no-cache tzdata # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-29T04:51:47Z",
+          "created_by": "EXPOSE [1025/tcp 1110/tcp 8025/tcp]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-29T04:51:47Z",
+          "created_by": "HEALTHCHECK \u0026{[\"CMD\" \"/mailpit\" \"readyz\"] \"15s\" \"0s\" \"10s\" \"1s\" '\\x00'}",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-29T04:51:47Z",
+          "created_by": "ENTRYPOINT [\"/mailpit\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+          "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97",
+          "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+        ]
+      },
+      "config": {
+        "Healthcheck": {
+          "Test": [
+            "CMD",
+            "/mailpit",
+            "readyz"
+          ],
+          "Interval": 15000000000,
+          "StartPeriod": 10000000000
+        },
+        "Entrypoint": [
+          "/mailpit"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ],
+        "Labels": {
+          "org.opencontainers.image.description": "An email and SMTP testing tool with API for developers",
+          "org.opencontainers.image.documentation": "https://mailpit.axllent.org/docs/",
+          "org.opencontainers.image.licenses": "MIT",
+          "org.opencontainers.image.source": "https://github.com/axllent/mailpit",
+          "org.opencontainers.image.title": "Mailpit",
+          "org.opencontainers.image.url": "https://mailpit.axllent.org"
+        },
+        "WorkingDir": "/",
+        "ExposedPorts": {
+          "1025/tcp": {},
+          "1110/tcp": {},
+          "8025/tcp": {}
+        }
+      }
+    },
+    "Layers": [
+      {
+        "Size": 8724480,
+        "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+        "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+      },
+      {
+        "Size": 27281408,
+        "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+        "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+      },
+      {
+        "Size": 1475072,
+        "Digest": "sha256:77b9d8a6fa46620e95420b091574481dc55d00b1ca1b991d812dc9e0edb4c0cc",
+        "DiffID": "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/axllent/mailpit:v1.29.5@sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf (alpine 3.23.3)",
+      "Class": "os-pkgs",
+      "Type": "alpine",
+      "Packages": [
+        {
+          "ID": "alpine-baselayout@3.7.2-r0",
+          "Name": "alpine-baselayout",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/alpine-baselayout@3.7.2-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "ff3090489ca40326"
+          },
+          "Version": "3.7.2-r0",
+          "Arch": "x86_64",
+          "SrcName": "alpine-baselayout",
+          "SrcVersion": "3.7.2-r0",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "alpine-baselayout-data@3.7.2-r0",
+            "busybox-binsh@1.37.0-r30"
+          ],
+          "Layer": {
+            "Digest": "sha256:77b9d8a6fa46620e95420b091574481dc55d00b1ca1b991d812dc9e0edb4c0cc",
+            "DiffID": "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+          },
+          "Digest": "sha1:545aa6f291209af89932b761d9e422c2778596cc",
+          "InstalledFiles": [
+            "etc/motd",
+            "etc/crontabs/root",
+            "etc/modprobe.d/aliases.conf",
+            "etc/modprobe.d/blacklist.conf",
+            "etc/modprobe.d/i386.conf",
+            "etc/profile.d/20locale.sh",
+            "etc/profile.d/README",
+            "etc/profile.d/color_prompt.sh.disabled",
+            "usr/lib/sysctl.d/00-alpine.conf",
+            "var/lock",
+            "var/run",
+            "var/spool/mail",
+            "var/spool/cron/crontabs"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "alpine-baselayout-data@3.7.2-r0",
+          "Name": "alpine-baselayout-data",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/alpine-baselayout-data@3.7.2-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "78c0ed61d7df9a7e"
+          },
+          "Version": "3.7.2-r0",
+          "Arch": "x86_64",
+          "SrcName": "alpine-baselayout",
+          "SrcVersion": "3.7.2-r0",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "Layer": {
+            "Digest": "sha256:77b9d8a6fa46620e95420b091574481dc55d00b1ca1b991d812dc9e0edb4c0cc",
+            "DiffID": "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+          },
+          "Digest": "sha1:85816632dbce07ba7e9e7a629fa59eddbd1687fb",
+          "InstalledFiles": [
+            "etc/fstab",
+            "etc/group",
+            "etc/hostname",
+            "etc/hosts",
+            "etc/inittab",
+            "etc/modules",
+            "etc/mtab",
+            "etc/nsswitch.conf",
+            "etc/passwd",
+            "etc/profile",
+            "etc/protocols",
+            "etc/services",
+            "etc/shadow",
+            "etc/shells",
+            "etc/sysctl.conf"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "alpine-keys@2.6-r0",
+          "Name": "alpine-keys",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/alpine-keys@2.6-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "2c7cb90de388aa7d"
+          },
+          "Version": "2.6-r0",
+          "Arch": "x86_64",
+          "SrcName": "alpine-keys",
+          "SrcVersion": "2.6-r0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:5c45a821cd6b84d543bbd7ff12a7de1855c5cd13",
+          "InstalledFiles": [
+            "etc/apk/keys/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+            "etc/apk/keys/alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub",
+            "etc/apk/keys/alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-5243ef4b.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-524d27bb.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58199dcc.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58e4f17d.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-5e69ca50.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-60ac2099.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-61666e3f.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616a9724.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616abc23.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616ac3bc.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616adfeb.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616ae350.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616db30d.rsa.pub",
+            "usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-66ba20fe.rsa.pub",
+            "usr/share/apk/keys/aarch64/alpine-devel@lists.alpinelinux.org-58199dcc.rsa.pub",
+            "usr/share/apk/keys/aarch64/alpine-devel@lists.alpinelinux.org-616ae350.rsa.pub",
+            "usr/share/apk/keys/armhf/alpine-devel@lists.alpinelinux.org-524d27bb.rsa.pub",
+            "usr/share/apk/keys/armhf/alpine-devel@lists.alpinelinux.org-616a9724.rsa.pub",
+            "usr/share/apk/keys/armv7/alpine-devel@lists.alpinelinux.org-524d27bb.rsa.pub",
+            "usr/share/apk/keys/armv7/alpine-devel@lists.alpinelinux.org-616adfeb.rsa.pub",
+            "usr/share/apk/keys/loongarch64/alpine-devel@lists.alpinelinux.org-66ba20fe.rsa.pub",
+            "usr/share/apk/keys/mips64/alpine-devel@lists.alpinelinux.org-5e69ca50.rsa.pub",
+            "usr/share/apk/keys/ppc64le/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub",
+            "usr/share/apk/keys/ppc64le/alpine-devel@lists.alpinelinux.org-616abc23.rsa.pub",
+            "usr/share/apk/keys/riscv64/alpine-devel@lists.alpinelinux.org-60ac2099.rsa.pub",
+            "usr/share/apk/keys/riscv64/alpine-devel@lists.alpinelinux.org-616db30d.rsa.pub",
+            "usr/share/apk/keys/s390x/alpine-devel@lists.alpinelinux.org-58e4f17d.rsa.pub",
+            "usr/share/apk/keys/s390x/alpine-devel@lists.alpinelinux.org-616ac3bc.rsa.pub",
+            "usr/share/apk/keys/x86/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+            "usr/share/apk/keys/x86/alpine-devel@lists.alpinelinux.org-5243ef4b.rsa.pub",
+            "usr/share/apk/keys/x86/alpine-devel@lists.alpinelinux.org-61666e3f.rsa.pub",
+            "usr/share/apk/keys/x86_64/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+            "usr/share/apk/keys/x86_64/alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub",
+            "usr/share/apk/keys/x86_64/alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "alpine-release@3.23.3-r0",
+          "Name": "alpine-release",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/alpine-release@3.23.3-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "4820d6f0afb6a834"
+          },
+          "Version": "3.23.3-r0",
+          "Arch": "x86_64",
+          "SrcName": "alpine-base",
+          "SrcVersion": "3.23.3-r0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "alpine-keys@2.6-r0"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:e71144a1a35c4844507cd1a3281a7189049f3522",
+          "InstalledFiles": [
+            "etc/alpine-release",
+            "etc/issue",
+            "etc/os-release",
+            "etc/secfixes.d/alpine",
+            "usr/lib/os-release"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "apk-tools@3.0.5-r0",
+          "Name": "apk-tools",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/apk-tools@3.0.5-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "96bad97d1b87b13c"
+          },
+          "Version": "3.0.5-r0",
+          "Arch": "x86_64",
+          "SrcName": "apk-tools",
+          "SrcVersion": "3.0.5-r0",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "ca-certificates-bundle@20251003-r0",
+            "libapk@3.0.5-r0",
+            "libcrypto3@3.5.5-r0",
+            "musl@1.2.5-r21",
+            "zlib@1.3.2-r0"
+          ],
+          "Layer": {
+            "Digest": "sha256:77b9d8a6fa46620e95420b091574481dc55d00b1ca1b991d812dc9e0edb4c0cc",
+            "DiffID": "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+          },
+          "Digest": "sha1:122484a978318edb198f42c16229593b19c3ce27",
+          "InstalledFiles": [
+            "sbin/apk"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "busybox@1.37.0-r30",
+          "Name": "busybox",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/busybox@1.37.0-r30?arch=x86_64\u0026distro=3.23.3",
+            "UID": "1701a73d4be0e35a"
+          },
+          "Version": "1.37.0-r30",
+          "Arch": "x86_64",
+          "SrcName": "busybox",
+          "SrcVersion": "1.37.0-r30",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Sören Tempel \u003csoeren+alpine@soeren-tempel.net\u003e",
+          "DependsOn": [
+            "musl@1.2.5-r21"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:f1347801bb96b1aa40d17f82237c3f4ff02a4725",
+          "InstalledFiles": [
+            "bin/busybox",
+            "etc/securetty",
+            "etc/busybox-paths.d/busybox",
+            "etc/logrotate.d/acpid",
+            "etc/network/if-up.d/dad",
+            "etc/udhcpc/udhcpc.conf",
+            "usr/share/udhcpc/default.script"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "busybox-binsh@1.37.0-r30",
+          "Name": "busybox-binsh",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/busybox-binsh@1.37.0-r30?arch=x86_64\u0026distro=3.23.3",
+            "UID": "3e18d05d46a6f46f"
+          },
+          "Version": "1.37.0-r30",
+          "Arch": "x86_64",
+          "SrcName": "busybox",
+          "SrcVersion": "1.37.0-r30",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Sören Tempel \u003csoeren+alpine@soeren-tempel.net\u003e",
+          "DependsOn": [
+            "busybox@1.37.0-r30"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:188d2d0110afa58e8a3e3e5fd424b2d996df7a09",
+          "InstalledFiles": [
+            "bin/sh"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "ca-certificates-bundle@20251003-r0",
+          "Name": "ca-certificates-bundle",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/ca-certificates-bundle@20251003-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "f667a2210d1d97c1"
+          },
+          "Version": "20251003-r0",
+          "Arch": "x86_64",
+          "SrcName": "ca-certificates",
+          "SrcVersion": "20251003-r0",
+          "Licenses": [
+            "MPL-2.0",
+            "MIT"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:63ebe72ba79f548b6cdc8a9894e16a90d80f42b0",
+          "InstalledFiles": [
+            "etc/ssl/cert.pem",
+            "etc/ssl/certs/ca-certificates.crt",
+            "etc/ssl1.1/cert.pem",
+            "etc/ssl1.1/certs"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "libapk@3.0.5-r0",
+          "Name": "libapk",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/libapk@3.0.5-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "fda86d162f9d3f5e"
+          },
+          "Version": "3.0.5-r0",
+          "Arch": "x86_64",
+          "SrcName": "apk-tools",
+          "SrcVersion": "3.0.5-r0",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "libcrypto3@3.5.5-r0",
+            "libssl3@3.5.5-r0",
+            "musl@1.2.5-r21",
+            "zlib@1.3.2-r0"
+          ],
+          "Layer": {
+            "Digest": "sha256:77b9d8a6fa46620e95420b091574481dc55d00b1ca1b991d812dc9e0edb4c0cc",
+            "DiffID": "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+          },
+          "Digest": "sha1:ae5f08299ecd23b11b5e7a1347be2a2f7b705bdf",
+          "InstalledFiles": [
+            "usr/lib/libapk.so.3.0.0"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "libcrypto3@3.5.5-r0",
+          "Name": "libcrypto3",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/libcrypto3@3.5.5-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "6778a588f2cebd48"
+          },
+          "Version": "3.5.5-r0",
+          "Arch": "x86_64",
+          "SrcName": "openssl",
+          "SrcVersion": "3.5.5-r0",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "musl@1.2.5-r21"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:9ebf6995e814bacff0c04a868b0b27c3e82090f4",
+          "InstalledFiles": [
+            "etc/ssl/ct_log_list.cnf",
+            "etc/ssl/ct_log_list.cnf.dist",
+            "etc/ssl/openssl.cnf",
+            "etc/ssl/openssl.cnf.dist",
+            "usr/lib/libcrypto.so.3",
+            "usr/lib/engines-3/afalg.so",
+            "usr/lib/engines-3/capi.so",
+            "usr/lib/engines-3/loader_attic.so",
+            "usr/lib/engines-3/padlock.so",
+            "usr/lib/ossl-modules/legacy.so"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "libssl3@3.5.5-r0",
+          "Name": "libssl3",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/libssl3@3.5.5-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "bca2260902e2ef48"
+          },
+          "Version": "3.5.5-r0",
+          "Arch": "x86_64",
+          "SrcName": "openssl",
+          "SrcVersion": "3.5.5-r0",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "libcrypto3@3.5.5-r0",
+            "musl@1.2.5-r21"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:12234895b6577cddcbe3450406f357600e8a6951",
+          "InstalledFiles": [
+            "usr/lib/libssl.so.3"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "musl@1.2.5-r21",
+          "Name": "musl",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/musl@1.2.5-r21?arch=x86_64\u0026distro=3.23.3",
+            "UID": "750ab06f52f2bfe9"
+          },
+          "Version": "1.2.5-r21",
+          "Arch": "x86_64",
+          "SrcName": "musl",
+          "SrcVersion": "1.2.5-r21",
+          "Licenses": [
+            "MIT"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:d05a75ec13e1a7a8bab56ce7cd3dc79bd727e698",
+          "InstalledFiles": [
+            "lib/ld-musl-x86_64.so.1",
+            "lib/libc.musl-x86_64.so.1"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "musl-utils@1.2.5-r21",
+          "Name": "musl-utils",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/musl-utils@1.2.5-r21?arch=x86_64\u0026distro=3.23.3",
+            "UID": "9dadd6d4093981ad"
+          },
+          "Version": "1.2.5-r21",
+          "Arch": "x86_64",
+          "SrcName": "musl",
+          "SrcVersion": "1.2.5-r21",
+          "Licenses": [
+            "MIT",
+            "BSD-2-Clause",
+            "GPL-2.0-or-later"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "musl@1.2.5-r21",
+            "scanelf@1.3.8-r2"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:daa79528d2cf877f6d656207a818d43c8dea9a30",
+          "InstalledFiles": [
+            "sbin/ldconfig",
+            "usr/bin/getconf",
+            "usr/bin/getent",
+            "usr/bin/iconv",
+            "usr/bin/ldd"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "scanelf@1.3.8-r2",
+          "Name": "scanelf",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/scanelf@1.3.8-r2?arch=x86_64\u0026distro=3.23.3",
+            "UID": "948b35f6525ae462"
+          },
+          "Version": "1.3.8-r2",
+          "Arch": "x86_64",
+          "SrcName": "pax-utils",
+          "SrcVersion": "1.3.8-r2",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "musl@1.2.5-r21"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:6ea36dd44ef9f6364f0cdfabe09ea15d2fdbe229",
+          "InstalledFiles": [
+            "usr/bin/scanelf"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "ssl_client@1.37.0-r30",
+          "Name": "ssl_client",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/ssl_client@1.37.0-r30?arch=x86_64\u0026distro=3.23.3",
+            "UID": "260f15056a81cadb"
+          },
+          "Version": "1.37.0-r30",
+          "Arch": "x86_64",
+          "SrcName": "busybox",
+          "SrcVersion": "1.37.0-r30",
+          "Licenses": [
+            "GPL-2.0-only"
+          ],
+          "Maintainer": "Sören Tempel \u003csoeren+alpine@soeren-tempel.net\u003e",
+          "DependsOn": [
+            "libcrypto3@3.5.5-r0",
+            "libssl3@3.5.5-r0",
+            "musl@1.2.5-r21"
+          ],
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "Digest": "sha1:5b6ec0939cfc9be47d9677a3152c547cc18b5edd",
+          "InstalledFiles": [
+            "usr/bin/ssl_client"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "tzdata@2026a-r0",
+          "Name": "tzdata",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/tzdata@2026a-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "a7ad329b0644c5d6"
+          },
+          "Version": "2026a-r0",
+          "Arch": "x86_64",
+          "SrcName": "tzdata",
+          "SrcVersion": "2026a-r0",
+          "Licenses": [
+            "Public-Domain"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "Layer": {
+            "Digest": "sha256:77b9d8a6fa46620e95420b091574481dc55d00b1ca1b991d812dc9e0edb4c0cc",
+            "DiffID": "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+          },
+          "Digest": "sha1:82f6ca3f827e313572fc0cd15bed4a040f7d515c",
+          "InstalledFiles": [
+            "usr/share/zoneinfo/CET",
+            "usr/share/zoneinfo/CST6CDT",
+            "usr/share/zoneinfo/Cuba",
+            "usr/share/zoneinfo/EET",
+            "usr/share/zoneinfo/EST",
+            "usr/share/zoneinfo/EST5EDT",
+            "usr/share/zoneinfo/Egypt",
+            "usr/share/zoneinfo/Eire",
+            "usr/share/zoneinfo/Factory",
+            "usr/share/zoneinfo/GB",
+            "usr/share/zoneinfo/GB-Eire",
+            "usr/share/zoneinfo/GMT",
+            "usr/share/zoneinfo/GMT+0",
+            "usr/share/zoneinfo/GMT-0",
+            "usr/share/zoneinfo/GMT0",
+            "usr/share/zoneinfo/Greenwich",
+            "usr/share/zoneinfo/HST",
+            "usr/share/zoneinfo/Hongkong",
+            "usr/share/zoneinfo/Iceland",
+            "usr/share/zoneinfo/Iran",
+            "usr/share/zoneinfo/Israel",
+            "usr/share/zoneinfo/Jamaica",
+            "usr/share/zoneinfo/Japan",
+            "usr/share/zoneinfo/Kwajalein",
+            "usr/share/zoneinfo/Libya",
+            "usr/share/zoneinfo/MET",
+            "usr/share/zoneinfo/MST",
+            "usr/share/zoneinfo/MST7MDT",
+            "usr/share/zoneinfo/NZ",
+            "usr/share/zoneinfo/NZ-CHAT",
+            "usr/share/zoneinfo/Navajo",
+            "usr/share/zoneinfo/PRC",
+            "usr/share/zoneinfo/PST8PDT",
+            "usr/share/zoneinfo/Poland",
+            "usr/share/zoneinfo/Portugal",
+            "usr/share/zoneinfo/ROC",
+            "usr/share/zoneinfo/ROK",
+            "usr/share/zoneinfo/Singapore",
+            "usr/share/zoneinfo/Turkey",
+            "usr/share/zoneinfo/UCT",
+            "usr/share/zoneinfo/UTC",
+            "usr/share/zoneinfo/Universal",
+            "usr/share/zoneinfo/W-SU",
+            "usr/share/zoneinfo/WET",
+            "usr/share/zoneinfo/Zulu",
+            "usr/share/zoneinfo/iso3166.tab",
+            "usr/share/zoneinfo/leap-seconds.list",
+            "usr/share/zoneinfo/posixrules",
+            "usr/share/zoneinfo/zone.tab",
+            "usr/share/zoneinfo/zone1970.tab",
+            "usr/share/zoneinfo/Africa/Abidjan",
+            "usr/share/zoneinfo/Africa/Accra",
+            "usr/share/zoneinfo/Africa/Addis_Ababa",
+            "usr/share/zoneinfo/Africa/Algiers",
+            "usr/share/zoneinfo/Africa/Asmara",
+            "usr/share/zoneinfo/Africa/Asmera",
+            "usr/share/zoneinfo/Africa/Bamako",
+            "usr/share/zoneinfo/Africa/Bangui",
+            "usr/share/zoneinfo/Africa/Banjul",
+            "usr/share/zoneinfo/Africa/Bissau",
+            "usr/share/zoneinfo/Africa/Blantyre",
+            "usr/share/zoneinfo/Africa/Brazzaville",
+            "usr/share/zoneinfo/Africa/Bujumbura",
+            "usr/share/zoneinfo/Africa/Cairo",
+            "usr/share/zoneinfo/Africa/Casablanca",
+            "usr/share/zoneinfo/Africa/Ceuta",
+            "usr/share/zoneinfo/Africa/Conakry",
+            "usr/share/zoneinfo/Africa/Dakar",
+            "usr/share/zoneinfo/Africa/Dar_es_Salaam",
+            "usr/share/zoneinfo/Africa/Djibouti",
+            "usr/share/zoneinfo/Africa/Douala",
+            "usr/share/zoneinfo/Africa/El_Aaiun",
+            "usr/share/zoneinfo/Africa/Freetown",
+            "usr/share/zoneinfo/Africa/Gaborone",
+            "usr/share/zoneinfo/Africa/Harare",
+            "usr/share/zoneinfo/Africa/Johannesburg",
+            "usr/share/zoneinfo/Africa/Juba",
+            "usr/share/zoneinfo/Africa/Kampala",
+            "usr/share/zoneinfo/Africa/Khartoum",
+            "usr/share/zoneinfo/Africa/Kigali",
+            "usr/share/zoneinfo/Africa/Kinshasa",
+            "usr/share/zoneinfo/Africa/Lagos",
+            "usr/share/zoneinfo/Africa/Libreville",
+            "usr/share/zoneinfo/Africa/Lome",
+            "usr/share/zoneinfo/Africa/Luanda",
+            "usr/share/zoneinfo/Africa/Lubumbashi",
+            "usr/share/zoneinfo/Africa/Lusaka",
+            "usr/share/zoneinfo/Africa/Malabo",
+            "usr/share/zoneinfo/Africa/Maputo",
+            "usr/share/zoneinfo/Africa/Maseru",
+            "usr/share/zoneinfo/Africa/Mbabane",
+            "usr/share/zoneinfo/Africa/Mogadishu",
+            "usr/share/zoneinfo/Africa/Monrovia",
+            "usr/share/zoneinfo/Africa/Nairobi",
+            "usr/share/zoneinfo/Africa/Ndjamena",
+            "usr/share/zoneinfo/Africa/Niamey",
+            "usr/share/zoneinfo/Africa/Nouakchott",
+            "usr/share/zoneinfo/Africa/Ouagadougou",
+            "usr/share/zoneinfo/Africa/Porto-Novo",
+            "usr/share/zoneinfo/Africa/Sao_Tome",
+            "usr/share/zoneinfo/Africa/Timbuktu",
+            "usr/share/zoneinfo/Africa/Tripoli",
+            "usr/share/zoneinfo/Africa/Tunis",
+            "usr/share/zoneinfo/Africa/Windhoek",
+            "usr/share/zoneinfo/America/Adak",
+            "usr/share/zoneinfo/America/Anchorage",
+            "usr/share/zoneinfo/America/Anguilla",
+            "usr/share/zoneinfo/America/Antigua",
+            "usr/share/zoneinfo/America/Araguaina",
+            "usr/share/zoneinfo/America/Aruba",
+            "usr/share/zoneinfo/America/Asuncion",
+            "usr/share/zoneinfo/America/Atikokan",
+            "usr/share/zoneinfo/America/Atka",
+            "usr/share/zoneinfo/America/Bahia",
+            "usr/share/zoneinfo/America/Bahia_Banderas",
+            "usr/share/zoneinfo/America/Barbados",
+            "usr/share/zoneinfo/America/Belem",
+            "usr/share/zoneinfo/America/Belize",
+            "usr/share/zoneinfo/America/Blanc-Sablon",
+            "usr/share/zoneinfo/America/Boa_Vista",
+            "usr/share/zoneinfo/America/Bogota",
+            "usr/share/zoneinfo/America/Boise",
+            "usr/share/zoneinfo/America/Buenos_Aires",
+            "usr/share/zoneinfo/America/Cambridge_Bay",
+            "usr/share/zoneinfo/America/Campo_Grande",
+            "usr/share/zoneinfo/America/Cancun",
+            "usr/share/zoneinfo/America/Caracas",
+            "usr/share/zoneinfo/America/Catamarca",
+            "usr/share/zoneinfo/America/Cayenne",
+            "usr/share/zoneinfo/America/Cayman",
+            "usr/share/zoneinfo/America/Chicago",
+            "usr/share/zoneinfo/America/Chihuahua",
+            "usr/share/zoneinfo/America/Ciudad_Juarez",
+            "usr/share/zoneinfo/America/Coral_Harbour",
+            "usr/share/zoneinfo/America/Cordoba",
+            "usr/share/zoneinfo/America/Costa_Rica",
+            "usr/share/zoneinfo/America/Coyhaique",
+            "usr/share/zoneinfo/America/Creston",
+            "usr/share/zoneinfo/America/Cuiaba",
+            "usr/share/zoneinfo/America/Curacao",
+            "usr/share/zoneinfo/America/Danmarkshavn",
+            "usr/share/zoneinfo/America/Dawson",
+            "usr/share/zoneinfo/America/Dawson_Creek",
+            "usr/share/zoneinfo/America/Denver",
+            "usr/share/zoneinfo/America/Detroit",
+            "usr/share/zoneinfo/America/Dominica",
+            "usr/share/zoneinfo/America/Edmonton",
+            "usr/share/zoneinfo/America/Eirunepe",
+            "usr/share/zoneinfo/America/El_Salvador",
+            "usr/share/zoneinfo/America/Ensenada",
+            "usr/share/zoneinfo/America/Fort_Nelson",
+            "usr/share/zoneinfo/America/Fort_Wayne",
+            "usr/share/zoneinfo/America/Fortaleza",
+            "usr/share/zoneinfo/America/Glace_Bay",
+            "usr/share/zoneinfo/America/Godthab",
+            "usr/share/zoneinfo/America/Goose_Bay",
+            "usr/share/zoneinfo/America/Grand_Turk",
+            "usr/share/zoneinfo/America/Grenada",
+            "usr/share/zoneinfo/America/Guadeloupe",
+            "usr/share/zoneinfo/America/Guatemala",
+            "usr/share/zoneinfo/America/Guayaquil",
+            "usr/share/zoneinfo/America/Guyana",
+            "usr/share/zoneinfo/America/Halifax",
+            "usr/share/zoneinfo/America/Havana",
+            "usr/share/zoneinfo/America/Hermosillo",
+            "usr/share/zoneinfo/America/Indianapolis",
+            "usr/share/zoneinfo/America/Inuvik",
+            "usr/share/zoneinfo/America/Iqaluit",
+            "usr/share/zoneinfo/America/Jamaica",
+            "usr/share/zoneinfo/America/Jujuy",
+            "usr/share/zoneinfo/America/Juneau",
+            "usr/share/zoneinfo/America/Knox_IN",
+            "usr/share/zoneinfo/America/Kralendijk",
+            "usr/share/zoneinfo/America/La_Paz",
+            "usr/share/zoneinfo/America/Lima",
+            "usr/share/zoneinfo/America/Los_Angeles",
+            "usr/share/zoneinfo/America/Louisville",
+            "usr/share/zoneinfo/America/Lower_Princes",
+            "usr/share/zoneinfo/America/Maceio",
+            "usr/share/zoneinfo/America/Managua",
+            "usr/share/zoneinfo/America/Manaus",
+            "usr/share/zoneinfo/America/Marigot",
+            "usr/share/zoneinfo/America/Martinique",
+            "usr/share/zoneinfo/America/Matamoros",
+            "usr/share/zoneinfo/America/Mazatlan",
+            "usr/share/zoneinfo/America/Mendoza",
+            "usr/share/zoneinfo/America/Menominee",
+            "usr/share/zoneinfo/America/Merida",
+            "usr/share/zoneinfo/America/Metlakatla",
+            "usr/share/zoneinfo/America/Mexico_City",
+            "usr/share/zoneinfo/America/Miquelon",
+            "usr/share/zoneinfo/America/Moncton",
+            "usr/share/zoneinfo/America/Monterrey",
+            "usr/share/zoneinfo/America/Montevideo",
+            "usr/share/zoneinfo/America/Montreal",
+            "usr/share/zoneinfo/America/Montserrat",
+            "usr/share/zoneinfo/America/Nassau",
+            "usr/share/zoneinfo/America/New_York",
+            "usr/share/zoneinfo/America/Nipigon",
+            "usr/share/zoneinfo/America/Nome",
+            "usr/share/zoneinfo/America/Noronha",
+            "usr/share/zoneinfo/America/Nuuk",
+            "usr/share/zoneinfo/America/Ojinaga",
+            "usr/share/zoneinfo/America/Panama",
+            "usr/share/zoneinfo/America/Pangnirtung",
+            "usr/share/zoneinfo/America/Paramaribo",
+            "usr/share/zoneinfo/America/Phoenix",
+            "usr/share/zoneinfo/America/Port-au-Prince",
+            "usr/share/zoneinfo/America/Port_of_Spain",
+            "usr/share/zoneinfo/America/Porto_Acre",
+            "usr/share/zoneinfo/America/Porto_Velho",
+            "usr/share/zoneinfo/America/Puerto_Rico",
+            "usr/share/zoneinfo/America/Punta_Arenas",
+            "usr/share/zoneinfo/America/Rainy_River",
+            "usr/share/zoneinfo/America/Rankin_Inlet",
+            "usr/share/zoneinfo/America/Recife",
+            "usr/share/zoneinfo/America/Regina",
+            "usr/share/zoneinfo/America/Resolute",
+            "usr/share/zoneinfo/America/Rio_Branco",
+            "usr/share/zoneinfo/America/Rosario",
+            "usr/share/zoneinfo/America/Santa_Isabel",
+            "usr/share/zoneinfo/America/Santarem",
+            "usr/share/zoneinfo/America/Santiago",
+            "usr/share/zoneinfo/America/Santo_Domingo",
+            "usr/share/zoneinfo/America/Sao_Paulo",
+            "usr/share/zoneinfo/America/Scoresbysund",
+            "usr/share/zoneinfo/America/Shiprock",
+            "usr/share/zoneinfo/America/Sitka",
+            "usr/share/zoneinfo/America/St_Barthelemy",
+            "usr/share/zoneinfo/America/St_Johns",
+            "usr/share/zoneinfo/America/St_Kitts",
+            "usr/share/zoneinfo/America/St_Lucia",
+            "usr/share/zoneinfo/America/St_Thomas",
+            "usr/share/zoneinfo/America/St_Vincent",
+            "usr/share/zoneinfo/America/Swift_Current",
+            "usr/share/zoneinfo/America/Tegucigalpa",
+            "usr/share/zoneinfo/America/Thule",
+            "usr/share/zoneinfo/America/Thunder_Bay",
+            "usr/share/zoneinfo/America/Tijuana",
+            "usr/share/zoneinfo/America/Toronto",
+            "usr/share/zoneinfo/America/Tortola",
+            "usr/share/zoneinfo/America/Vancouver",
+            "usr/share/zoneinfo/America/Virgin",
+            "usr/share/zoneinfo/America/Whitehorse",
+            "usr/share/zoneinfo/America/Winnipeg",
+            "usr/share/zoneinfo/America/Yakutat",
+            "usr/share/zoneinfo/America/Yellowknife",
+            "usr/share/zoneinfo/America/Argentina/Buenos_Aires",
+            "usr/share/zoneinfo/America/Argentina/Catamarca",
+            "usr/share/zoneinfo/America/Argentina/ComodRivadavia",
+            "usr/share/zoneinfo/America/Argentina/Cordoba",
+            "usr/share/zoneinfo/America/Argentina/Jujuy",
+            "usr/share/zoneinfo/America/Argentina/La_Rioja",
+            "usr/share/zoneinfo/America/Argentina/Mendoza",
+            "usr/share/zoneinfo/America/Argentina/Rio_Gallegos",
+            "usr/share/zoneinfo/America/Argentina/Salta",
+            "usr/share/zoneinfo/America/Argentina/San_Juan",
+            "usr/share/zoneinfo/America/Argentina/San_Luis",
+            "usr/share/zoneinfo/America/Argentina/Tucuman",
+            "usr/share/zoneinfo/America/Argentina/Ushuaia",
+            "usr/share/zoneinfo/America/Indiana/Indianapolis",
+            "usr/share/zoneinfo/America/Indiana/Knox",
+            "usr/share/zoneinfo/America/Indiana/Marengo",
+            "usr/share/zoneinfo/America/Indiana/Petersburg",
+            "usr/share/zoneinfo/America/Indiana/Tell_City",
+            "usr/share/zoneinfo/America/Indiana/Vevay",
+            "usr/share/zoneinfo/America/Indiana/Vincennes",
+            "usr/share/zoneinfo/America/Indiana/Winamac",
+            "usr/share/zoneinfo/America/Kentucky/Louisville",
+            "usr/share/zoneinfo/America/Kentucky/Monticello",
+            "usr/share/zoneinfo/America/North_Dakota/Beulah",
+            "usr/share/zoneinfo/America/North_Dakota/Center",
+            "usr/share/zoneinfo/America/North_Dakota/New_Salem",
+            "usr/share/zoneinfo/Antarctica/Casey",
+            "usr/share/zoneinfo/Antarctica/Davis",
+            "usr/share/zoneinfo/Antarctica/DumontDUrville",
+            "usr/share/zoneinfo/Antarctica/Macquarie",
+            "usr/share/zoneinfo/Antarctica/Mawson",
+            "usr/share/zoneinfo/Antarctica/McMurdo",
+            "usr/share/zoneinfo/Antarctica/Palmer",
+            "usr/share/zoneinfo/Antarctica/Rothera",
+            "usr/share/zoneinfo/Antarctica/South_Pole",
+            "usr/share/zoneinfo/Antarctica/Syowa",
+            "usr/share/zoneinfo/Antarctica/Troll",
+            "usr/share/zoneinfo/Antarctica/Vostok",
+            "usr/share/zoneinfo/Arctic/Longyearbyen",
+            "usr/share/zoneinfo/Asia/Aden",
+            "usr/share/zoneinfo/Asia/Almaty",
+            "usr/share/zoneinfo/Asia/Amman",
+            "usr/share/zoneinfo/Asia/Anadyr",
+            "usr/share/zoneinfo/Asia/Aqtau",
+            "usr/share/zoneinfo/Asia/Aqtobe",
+            "usr/share/zoneinfo/Asia/Ashgabat",
+            "usr/share/zoneinfo/Asia/Ashkhabad",
+            "usr/share/zoneinfo/Asia/Atyrau",
+            "usr/share/zoneinfo/Asia/Baghdad",
+            "usr/share/zoneinfo/Asia/Bahrain",
+            "usr/share/zoneinfo/Asia/Baku",
+            "usr/share/zoneinfo/Asia/Bangkok",
+            "usr/share/zoneinfo/Asia/Barnaul",
+            "usr/share/zoneinfo/Asia/Beirut",
+            "usr/share/zoneinfo/Asia/Bishkek",
+            "usr/share/zoneinfo/Asia/Brunei",
+            "usr/share/zoneinfo/Asia/Calcutta",
+            "usr/share/zoneinfo/Asia/Chita",
+            "usr/share/zoneinfo/Asia/Choibalsan",
+            "usr/share/zoneinfo/Asia/Chongqing",
+            "usr/share/zoneinfo/Asia/Chungking",
+            "usr/share/zoneinfo/Asia/Colombo",
+            "usr/share/zoneinfo/Asia/Dacca",
+            "usr/share/zoneinfo/Asia/Damascus",
+            "usr/share/zoneinfo/Asia/Dhaka",
+            "usr/share/zoneinfo/Asia/Dili",
+            "usr/share/zoneinfo/Asia/Dubai",
+            "usr/share/zoneinfo/Asia/Dushanbe",
+            "usr/share/zoneinfo/Asia/Famagusta",
+            "usr/share/zoneinfo/Asia/Gaza",
+            "usr/share/zoneinfo/Asia/Harbin",
+            "usr/share/zoneinfo/Asia/Hebron",
+            "usr/share/zoneinfo/Asia/Ho_Chi_Minh",
+            "usr/share/zoneinfo/Asia/Hong_Kong",
+            "usr/share/zoneinfo/Asia/Hovd",
+            "usr/share/zoneinfo/Asia/Irkutsk",
+            "usr/share/zoneinfo/Asia/Istanbul",
+            "usr/share/zoneinfo/Asia/Jakarta",
+            "usr/share/zoneinfo/Asia/Jayapura",
+            "usr/share/zoneinfo/Asia/Jerusalem",
+            "usr/share/zoneinfo/Asia/Kabul",
+            "usr/share/zoneinfo/Asia/Kamchatka",
+            "usr/share/zoneinfo/Asia/Karachi",
+            "usr/share/zoneinfo/Asia/Kashgar",
+            "usr/share/zoneinfo/Asia/Kathmandu",
+            "usr/share/zoneinfo/Asia/Katmandu",
+            "usr/share/zoneinfo/Asia/Khandyga",
+            "usr/share/zoneinfo/Asia/Kolkata",
+            "usr/share/zoneinfo/Asia/Krasnoyarsk",
+            "usr/share/zoneinfo/Asia/Kuala_Lumpur",
+            "usr/share/zoneinfo/Asia/Kuching",
+            "usr/share/zoneinfo/Asia/Kuwait",
+            "usr/share/zoneinfo/Asia/Macao",
+            "usr/share/zoneinfo/Asia/Macau",
+            "usr/share/zoneinfo/Asia/Magadan",
+            "usr/share/zoneinfo/Asia/Makassar",
+            "usr/share/zoneinfo/Asia/Manila",
+            "usr/share/zoneinfo/Asia/Muscat",
+            "usr/share/zoneinfo/Asia/Nicosia",
+            "usr/share/zoneinfo/Asia/Novokuznetsk",
+            "usr/share/zoneinfo/Asia/Novosibirsk",
+            "usr/share/zoneinfo/Asia/Omsk",
+            "usr/share/zoneinfo/Asia/Oral",
+            "usr/share/zoneinfo/Asia/Phnom_Penh",
+            "usr/share/zoneinfo/Asia/Pontianak",
+            "usr/share/zoneinfo/Asia/Pyongyang",
+            "usr/share/zoneinfo/Asia/Qatar",
+            "usr/share/zoneinfo/Asia/Qostanay",
+            "usr/share/zoneinfo/Asia/Qyzylorda",
+            "usr/share/zoneinfo/Asia/Rangoon",
+            "usr/share/zoneinfo/Asia/Riyadh",
+            "usr/share/zoneinfo/Asia/Saigon",
+            "usr/share/zoneinfo/Asia/Sakhalin",
+            "usr/share/zoneinfo/Asia/Samarkand",
+            "usr/share/zoneinfo/Asia/Seoul",
+            "usr/share/zoneinfo/Asia/Shanghai",
+            "usr/share/zoneinfo/Asia/Singapore",
+            "usr/share/zoneinfo/Asia/Srednekolymsk",
+            "usr/share/zoneinfo/Asia/Taipei",
+            "usr/share/zoneinfo/Asia/Tashkent",
+            "usr/share/zoneinfo/Asia/Tbilisi",
+            "usr/share/zoneinfo/Asia/Tehran",
+            "usr/share/zoneinfo/Asia/Tel_Aviv",
+            "usr/share/zoneinfo/Asia/Thimbu",
+            "usr/share/zoneinfo/Asia/Thimphu",
+            "usr/share/zoneinfo/Asia/Tokyo",
+            "usr/share/zoneinfo/Asia/Tomsk",
+            "usr/share/zoneinfo/Asia/Ujung_Pandang",
+            "usr/share/zoneinfo/Asia/Ulaanbaatar",
+            "usr/share/zoneinfo/Asia/Ulan_Bator",
+            "usr/share/zoneinfo/Asia/Urumqi",
+            "usr/share/zoneinfo/Asia/Ust-Nera",
+            "usr/share/zoneinfo/Asia/Vientiane",
+            "usr/share/zoneinfo/Asia/Vladivostok",
+            "usr/share/zoneinfo/Asia/Yakutsk",
+            "usr/share/zoneinfo/Asia/Yangon",
+            "usr/share/zoneinfo/Asia/Yekaterinburg",
+            "usr/share/zoneinfo/Asia/Yerevan",
+            "usr/share/zoneinfo/Atlantic/Azores",
+            "usr/share/zoneinfo/Atlantic/Bermuda",
+            "usr/share/zoneinfo/Atlantic/Canary",
+            "usr/share/zoneinfo/Atlantic/Cape_Verde",
+            "usr/share/zoneinfo/Atlantic/Faeroe",
+            "usr/share/zoneinfo/Atlantic/Faroe",
+            "usr/share/zoneinfo/Atlantic/Jan_Mayen",
+            "usr/share/zoneinfo/Atlantic/Madeira",
+            "usr/share/zoneinfo/Atlantic/Reykjavik",
+            "usr/share/zoneinfo/Atlantic/South_Georgia",
+            "usr/share/zoneinfo/Atlantic/St_Helena",
+            "usr/share/zoneinfo/Atlantic/Stanley",
+            "usr/share/zoneinfo/Australia/ACT",
+            "usr/share/zoneinfo/Australia/Adelaide",
+            "usr/share/zoneinfo/Australia/Brisbane",
+            "usr/share/zoneinfo/Australia/Broken_Hill",
+            "usr/share/zoneinfo/Australia/Canberra",
+            "usr/share/zoneinfo/Australia/Currie",
+            "usr/share/zoneinfo/Australia/Darwin",
+            "usr/share/zoneinfo/Australia/Eucla",
+            "usr/share/zoneinfo/Australia/Hobart",
+            "usr/share/zoneinfo/Australia/LHI",
+            "usr/share/zoneinfo/Australia/Lindeman",
+            "usr/share/zoneinfo/Australia/Lord_Howe",
+            "usr/share/zoneinfo/Australia/Melbourne",
+            "usr/share/zoneinfo/Australia/NSW",
+            "usr/share/zoneinfo/Australia/North",
+            "usr/share/zoneinfo/Australia/Perth",
+            "usr/share/zoneinfo/Australia/Queensland",
+            "usr/share/zoneinfo/Australia/South",
+            "usr/share/zoneinfo/Australia/Sydney",
+            "usr/share/zoneinfo/Australia/Tasmania",
+            "usr/share/zoneinfo/Australia/Victoria",
+            "usr/share/zoneinfo/Australia/West",
+            "usr/share/zoneinfo/Australia/Yancowinna",
+            "usr/share/zoneinfo/Brazil/Acre",
+            "usr/share/zoneinfo/Brazil/DeNoronha",
+            "usr/share/zoneinfo/Brazil/East",
+            "usr/share/zoneinfo/Brazil/West",
+            "usr/share/zoneinfo/Canada/Atlantic",
+            "usr/share/zoneinfo/Canada/Central",
+            "usr/share/zoneinfo/Canada/Eastern",
+            "usr/share/zoneinfo/Canada/Mountain",
+            "usr/share/zoneinfo/Canada/Newfoundland",
+            "usr/share/zoneinfo/Canada/Pacific",
+            "usr/share/zoneinfo/Canada/Saskatchewan",
+            "usr/share/zoneinfo/Canada/Yukon",
+            "usr/share/zoneinfo/Chile/Continental",
+            "usr/share/zoneinfo/Chile/EasterIsland",
+            "usr/share/zoneinfo/Etc/GMT",
+            "usr/share/zoneinfo/Etc/GMT+0",
+            "usr/share/zoneinfo/Etc/GMT+1",
+            "usr/share/zoneinfo/Etc/GMT+10",
+            "usr/share/zoneinfo/Etc/GMT+11",
+            "usr/share/zoneinfo/Etc/GMT+12",
+            "usr/share/zoneinfo/Etc/GMT+2",
+            "usr/share/zoneinfo/Etc/GMT+3",
+            "usr/share/zoneinfo/Etc/GMT+4",
+            "usr/share/zoneinfo/Etc/GMT+5",
+            "usr/share/zoneinfo/Etc/GMT+6",
+            "usr/share/zoneinfo/Etc/GMT+7",
+            "usr/share/zoneinfo/Etc/GMT+8",
+            "usr/share/zoneinfo/Etc/GMT+9",
+            "usr/share/zoneinfo/Etc/GMT-0",
+            "usr/share/zoneinfo/Etc/GMT-1",
+            "usr/share/zoneinfo/Etc/GMT-10",
+            "usr/share/zoneinfo/Etc/GMT-11",
+            "usr/share/zoneinfo/Etc/GMT-12",
+            "usr/share/zoneinfo/Etc/GMT-13",
+            "usr/share/zoneinfo/Etc/GMT-14",
+            "usr/share/zoneinfo/Etc/GMT-2",
+            "usr/share/zoneinfo/Etc/GMT-3",
+            "usr/share/zoneinfo/Etc/GMT-4",
+            "usr/share/zoneinfo/Etc/GMT-5",
+            "usr/share/zoneinfo/Etc/GMT-6",
+            "usr/share/zoneinfo/Etc/GMT-7",
+            "usr/share/zoneinfo/Etc/GMT-8",
+            "usr/share/zoneinfo/Etc/GMT-9",
+            "usr/share/zoneinfo/Etc/GMT0",
+            "usr/share/zoneinfo/Etc/Greenwich",
+            "usr/share/zoneinfo/Etc/UCT",
+            "usr/share/zoneinfo/Etc/UTC",
+            "usr/share/zoneinfo/Etc/Universal",
+            "usr/share/zoneinfo/Etc/Zulu",
+            "usr/share/zoneinfo/Europe/Amsterdam",
+            "usr/share/zoneinfo/Europe/Andorra",
+            "usr/share/zoneinfo/Europe/Astrakhan",
+            "usr/share/zoneinfo/Europe/Athens",
+            "usr/share/zoneinfo/Europe/Belfast",
+            "usr/share/zoneinfo/Europe/Belgrade",
+            "usr/share/zoneinfo/Europe/Berlin",
+            "usr/share/zoneinfo/Europe/Bratislava",
+            "usr/share/zoneinfo/Europe/Brussels",
+            "usr/share/zoneinfo/Europe/Bucharest",
+            "usr/share/zoneinfo/Europe/Budapest",
+            "usr/share/zoneinfo/Europe/Busingen",
+            "usr/share/zoneinfo/Europe/Chisinau",
+            "usr/share/zoneinfo/Europe/Copenhagen",
+            "usr/share/zoneinfo/Europe/Dublin",
+            "usr/share/zoneinfo/Europe/Gibraltar",
+            "usr/share/zoneinfo/Europe/Guernsey",
+            "usr/share/zoneinfo/Europe/Helsinki",
+            "usr/share/zoneinfo/Europe/Isle_of_Man",
+            "usr/share/zoneinfo/Europe/Istanbul",
+            "usr/share/zoneinfo/Europe/Jersey",
+            "usr/share/zoneinfo/Europe/Kaliningrad",
+            "usr/share/zoneinfo/Europe/Kiev",
+            "usr/share/zoneinfo/Europe/Kirov",
+            "usr/share/zoneinfo/Europe/Kyiv",
+            "usr/share/zoneinfo/Europe/Lisbon",
+            "usr/share/zoneinfo/Europe/Ljubljana",
+            "usr/share/zoneinfo/Europe/London",
+            "usr/share/zoneinfo/Europe/Luxembourg",
+            "usr/share/zoneinfo/Europe/Madrid",
+            "usr/share/zoneinfo/Europe/Malta",
+            "usr/share/zoneinfo/Europe/Mariehamn",
+            "usr/share/zoneinfo/Europe/Minsk",
+            "usr/share/zoneinfo/Europe/Monaco",
+            "usr/share/zoneinfo/Europe/Moscow",
+            "usr/share/zoneinfo/Europe/Nicosia",
+            "usr/share/zoneinfo/Europe/Oslo",
+            "usr/share/zoneinfo/Europe/Paris",
+            "usr/share/zoneinfo/Europe/Podgorica",
+            "usr/share/zoneinfo/Europe/Prague",
+            "usr/share/zoneinfo/Europe/Riga",
+            "usr/share/zoneinfo/Europe/Rome",
+            "usr/share/zoneinfo/Europe/Samara",
+            "usr/share/zoneinfo/Europe/San_Marino",
+            "usr/share/zoneinfo/Europe/Sarajevo",
+            "usr/share/zoneinfo/Europe/Saratov",
+            "usr/share/zoneinfo/Europe/Simferopol",
+            "usr/share/zoneinfo/Europe/Skopje",
+            "usr/share/zoneinfo/Europe/Sofia",
+            "usr/share/zoneinfo/Europe/Stockholm",
+            "usr/share/zoneinfo/Europe/Tallinn",
+            "usr/share/zoneinfo/Europe/Tirane",
+            "usr/share/zoneinfo/Europe/Tiraspol",
+            "usr/share/zoneinfo/Europe/Ulyanovsk",
+            "usr/share/zoneinfo/Europe/Uzhgorod",
+            "usr/share/zoneinfo/Europe/Vaduz",
+            "usr/share/zoneinfo/Europe/Vatican",
+            "usr/share/zoneinfo/Europe/Vienna",
+            "usr/share/zoneinfo/Europe/Vilnius",
+            "usr/share/zoneinfo/Europe/Volgograd",
+            "usr/share/zoneinfo/Europe/Warsaw",
+            "usr/share/zoneinfo/Europe/Zagreb",
+            "usr/share/zoneinfo/Europe/Zaporozhye",
+            "usr/share/zoneinfo/Europe/Zurich",
+            "usr/share/zoneinfo/Indian/Antananarivo",
+            "usr/share/zoneinfo/Indian/Chagos",
+            "usr/share/zoneinfo/Indian/Christmas",
+            "usr/share/zoneinfo/Indian/Cocos",
+            "usr/share/zoneinfo/Indian/Comoro",
+            "usr/share/zoneinfo/Indian/Kerguelen",
+            "usr/share/zoneinfo/Indian/Mahe",
+            "usr/share/zoneinfo/Indian/Maldives",
+            "usr/share/zoneinfo/Indian/Mauritius",
+            "usr/share/zoneinfo/Indian/Mayotte",
+            "usr/share/zoneinfo/Indian/Reunion",
+            "usr/share/zoneinfo/Mexico/BajaNorte",
+            "usr/share/zoneinfo/Mexico/BajaSur",
+            "usr/share/zoneinfo/Mexico/General",
+            "usr/share/zoneinfo/Pacific/Apia",
+            "usr/share/zoneinfo/Pacific/Auckland",
+            "usr/share/zoneinfo/Pacific/Bougainville",
+            "usr/share/zoneinfo/Pacific/Chatham",
+            "usr/share/zoneinfo/Pacific/Chuuk",
+            "usr/share/zoneinfo/Pacific/Easter",
+            "usr/share/zoneinfo/Pacific/Efate",
+            "usr/share/zoneinfo/Pacific/Enderbury",
+            "usr/share/zoneinfo/Pacific/Fakaofo",
+            "usr/share/zoneinfo/Pacific/Fiji",
+            "usr/share/zoneinfo/Pacific/Funafuti",
+            "usr/share/zoneinfo/Pacific/Galapagos",
+            "usr/share/zoneinfo/Pacific/Gambier",
+            "usr/share/zoneinfo/Pacific/Guadalcanal",
+            "usr/share/zoneinfo/Pacific/Guam",
+            "usr/share/zoneinfo/Pacific/Honolulu",
+            "usr/share/zoneinfo/Pacific/Johnston",
+            "usr/share/zoneinfo/Pacific/Kanton",
+            "usr/share/zoneinfo/Pacific/Kiritimati",
+            "usr/share/zoneinfo/Pacific/Kosrae",
+            "usr/share/zoneinfo/Pacific/Kwajalein",
+            "usr/share/zoneinfo/Pacific/Majuro",
+            "usr/share/zoneinfo/Pacific/Marquesas",
+            "usr/share/zoneinfo/Pacific/Midway",
+            "usr/share/zoneinfo/Pacific/Nauru",
+            "usr/share/zoneinfo/Pacific/Niue",
+            "usr/share/zoneinfo/Pacific/Norfolk",
+            "usr/share/zoneinfo/Pacific/Noumea",
+            "usr/share/zoneinfo/Pacific/Pago_Pago",
+            "usr/share/zoneinfo/Pacific/Palau",
+            "usr/share/zoneinfo/Pacific/Pitcairn",
+            "usr/share/zoneinfo/Pacific/Pohnpei",
+            "usr/share/zoneinfo/Pacific/Ponape",
+            "usr/share/zoneinfo/Pacific/Port_Moresby",
+            "usr/share/zoneinfo/Pacific/Rarotonga",
+            "usr/share/zoneinfo/Pacific/Saipan",
+            "usr/share/zoneinfo/Pacific/Samoa",
+            "usr/share/zoneinfo/Pacific/Tahiti",
+            "usr/share/zoneinfo/Pacific/Tarawa",
+            "usr/share/zoneinfo/Pacific/Tongatapu",
+            "usr/share/zoneinfo/Pacific/Truk",
+            "usr/share/zoneinfo/Pacific/Wake",
+            "usr/share/zoneinfo/Pacific/Wallis",
+            "usr/share/zoneinfo/Pacific/Yap",
+            "usr/share/zoneinfo/US/Alaska",
+            "usr/share/zoneinfo/US/Aleutian",
+            "usr/share/zoneinfo/US/Arizona",
+            "usr/share/zoneinfo/US/Central",
+            "usr/share/zoneinfo/US/East-Indiana",
+            "usr/share/zoneinfo/US/Eastern",
+            "usr/share/zoneinfo/US/Hawaii",
+            "usr/share/zoneinfo/US/Indiana-Starke",
+            "usr/share/zoneinfo/US/Michigan",
+            "usr/share/zoneinfo/US/Mountain",
+            "usr/share/zoneinfo/US/Pacific",
+            "usr/share/zoneinfo/US/Samoa"
+          ],
+          "AnalyzedBy": "apk"
+        },
+        {
+          "ID": "zlib@1.3.2-r0",
+          "Name": "zlib",
+          "Identifier": {
+            "PURL": "pkg:apk/alpine/zlib@1.3.2-r0?arch=x86_64\u0026distro=3.23.3",
+            "UID": "e0a250c2c0d9f392"
+          },
+          "Version": "1.3.2-r0",
+          "Arch": "x86_64",
+          "SrcName": "zlib",
+          "SrcVersion": "1.3.2-r0",
+          "Licenses": [
+            "Zlib"
+          ],
+          "Maintainer": "Natanael Copa \u003cncopa@alpinelinux.org\u003e",
+          "DependsOn": [
+            "musl@1.2.5-r21"
+          ],
+          "Layer": {
+            "Digest": "sha256:77b9d8a6fa46620e95420b091574481dc55d00b1ca1b991d812dc9e0edb4c0cc",
+            "DiffID": "sha256:9f182d06f4523d4059e94d383745073535abd9f516ee060f00d3b77ef59c515a"
+          },
+          "Digest": "sha1:68bb97ea5255e77aa974e65476d64832ad56288a",
+          "InstalledFiles": [
+            "usr/lib/libz.so.1",
+            "usr/lib/libz.so.1.3.2"
+          ],
+          "AnalyzedBy": "apk"
+        }
+      ]
+    },
+    {
+      "Target": "mailpit",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Packages": [
+        {
+          "ID": "github.com/axllent/mailpit@v1.29.5",
+          "Name": "github.com/axllent/mailpit",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/axllent/mailpit@v1.29.5",
+            "UID": "8fea1a1296142f96"
+          },
+          "Version": "v1.29.5",
+          "Relationship": "root",
+          "DependsOn": [
+            "github.com/GehirnInc/crypt@v0.0.0-20230320061759-8cc1b52080c5",
+            "github.com/PuerkitoBio/goquery@v1.12.0",
+            "github.com/andybalholm/cascadia@v1.3.3",
+            "github.com/araddon/dateparse@v0.0.0-20210429162001-6b43995a97de",
+            "github.com/axllent/ghru/v2@v2.2.0",
+            "github.com/axllent/semver@v1.0.0",
+            "github.com/beorn7/perks@v1.0.1",
+            "github.com/cention-sany/utf7@v0.0.0-20170124080048-26cad61bd60a",
+            "github.com/cespare/xxhash/v2@v2.3.0",
+            "github.com/clipperhouse/displaywidth@v0.11.0",
+            "github.com/clipperhouse/uax29/v2@v2.7.0",
+            "github.com/dustin/go-humanize@v1.0.1",
+            "github.com/fatih/color@v1.19.0",
+            "github.com/goccy/go-json@v0.10.6",
+            "github.com/goccy/go-yaml@v1.19.2",
+            "github.com/gogs/chardet@v0.0.0-20211120154057-b7413eaefb8f",
+            "github.com/gomarkdown/markdown@v0.0.0-20260217112301-37c66b85d6ab",
+            "github.com/google/uuid@v1.6.0",
+            "github.com/gorilla/css@v1.0.1",
+            "github.com/gorilla/mux@v1.8.1",
+            "github.com/gorilla/websocket@v1.5.3",
+            "github.com/inbucket/html2text@v1.0.0",
+            "github.com/jhillyerd/enmime/v2@v2.3.0",
+            "github.com/klauspost/compress@v1.18.5",
+            "github.com/kovidgoyal/go-parallel@v1.1.1",
+            "github.com/kovidgoyal/go-shm@v1.0.0",
+            "github.com/kovidgoyal/imaging@v1.8.20",
+            "github.com/leporo/sqlf@v1.4.0",
+            "github.com/lithammer/shortuuid/v4@v4.2.0",
+            "github.com/mattn/go-colorable@v0.1.14",
+            "github.com/mattn/go-isatty@v0.0.20",
+            "github.com/mattn/go-runewidth@v0.0.21",
+            "github.com/mneis/go-telnet@v0.0.0-20221017141824-6f643e477c62",
+            "github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822",
+            "github.com/olekukonko/cat@v0.0.0-20250911104152-50322a0618f6",
+            "github.com/olekukonko/errors@v1.2.0",
+            "github.com/olekukonko/ll@v0.1.8",
+            "github.com/olekukonko/tablewriter@v1.1.4",
+            "github.com/pkg/errors@v0.9.1",
+            "github.com/prometheus/client_golang@v1.23.2",
+            "github.com/prometheus/client_model@v0.6.2",
+            "github.com/prometheus/common@v0.67.5",
+            "github.com/prometheus/procfs@v0.20.1",
+            "github.com/reiver/go-oi@v1.0.0",
+            "github.com/remyoudompheng/bigfft@v0.0.0-20230129092748-24d4a6f8daec",
+            "github.com/rqlite/gorqlite@v0.0.0-20250609141355-ac86a4a1c9a8",
+            "github.com/rwcarlsen/goexif@v0.0.0-20190401172101-9e8deecbddbd",
+            "github.com/sirupsen/logrus@v1.9.4",
+            "github.com/spf13/cobra@v1.10.2",
+            "github.com/spf13/pflag@v1.0.10",
+            "github.com/ssor/bom@v0.0.0-20170718123548-6386211fdfcf",
+            "github.com/tg123/go-htpasswd@v1.2.4",
+            "github.com/valyala/bytebufferpool@v1.0.0",
+            "github.com/vanng822/css@v1.0.1",
+            "github.com/vanng822/go-premailer@v1.33.0",
+            "go.yaml.in/yaml/v2@v2.4.4",
+            "golang.org/x/crypto@v0.49.0",
+            "golang.org/x/image@v0.38.0",
+            "golang.org/x/mod@v0.34.0",
+            "golang.org/x/net@v0.52.0",
+            "golang.org/x/sys@v0.42.0",
+            "golang.org/x/text@v0.35.0",
+            "golang.org/x/time@v0.15.0",
+            "google.golang.org/protobuf@v1.36.11",
+            "modernc.org/libc@v1.70.0",
+            "modernc.org/mathutil@v1.7.1",
+            "modernc.org/memory@v1.11.0",
+            "modernc.org/sqlite@v1.48.0",
+            "stdlib@v1.26.1"
+          ],
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "stdlib@v1.26.1",
+          "Name": "stdlib",
+          "Identifier": {
+            "PURL": "pkg:golang/stdlib@v1.26.1",
+            "UID": "490e41a4558000d1"
+          },
+          "Version": "v1.26.1",
+          "Relationship": "direct",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/GehirnInc/crypt@v0.0.0-20230320061759-8cc1b52080c5",
+          "Name": "github.com/GehirnInc/crypt",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/gehirninc/crypt@v0.0.0-20230320061759-8cc1b52080c5",
+            "UID": "f7aa33ccabb54735"
+          },
+          "Version": "v0.0.0-20230320061759-8cc1b52080c5",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/PuerkitoBio/goquery@v1.12.0",
+          "Name": "github.com/PuerkitoBio/goquery",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/puerkitobio/goquery@v1.12.0",
+            "UID": "cd38f7418a43e076"
+          },
+          "Version": "v1.12.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/andybalholm/cascadia@v1.3.3",
+          "Name": "github.com/andybalholm/cascadia",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/andybalholm/cascadia@v1.3.3",
+            "UID": "9657b76406746d86"
+          },
+          "Version": "v1.3.3",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/araddon/dateparse@v0.0.0-20210429162001-6b43995a97de",
+          "Name": "github.com/araddon/dateparse",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/araddon/dateparse@v0.0.0-20210429162001-6b43995a97de",
+            "UID": "c353697edfe2880c"
+          },
+          "Version": "v0.0.0-20210429162001-6b43995a97de",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/axllent/ghru/v2@v2.2.0",
+          "Name": "github.com/axllent/ghru/v2",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/axllent/ghru/v2@v2.2.0",
+            "UID": "a5c55aacdf306965"
+          },
+          "Version": "v2.2.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/axllent/semver@v1.0.0",
+          "Name": "github.com/axllent/semver",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/axllent/semver@v1.0.0",
+            "UID": "5a1a4bd699b63a5a"
+          },
+          "Version": "v1.0.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/beorn7/perks@v1.0.1",
+          "Name": "github.com/beorn7/perks",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/beorn7/perks@v1.0.1",
+            "UID": "6368b51da76e6bd1"
+          },
+          "Version": "v1.0.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/cention-sany/utf7@v0.0.0-20170124080048-26cad61bd60a",
+          "Name": "github.com/cention-sany/utf7",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/cention-sany/utf7@v0.0.0-20170124080048-26cad61bd60a",
+            "UID": "d355766a6633637d"
+          },
+          "Version": "v0.0.0-20170124080048-26cad61bd60a",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/cespare/xxhash/v2@v2.3.0",
+          "Name": "github.com/cespare/xxhash/v2",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/cespare/xxhash/v2@v2.3.0",
+            "UID": "7726f580dac821e8"
+          },
+          "Version": "v2.3.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/clipperhouse/displaywidth@v0.11.0",
+          "Name": "github.com/clipperhouse/displaywidth",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/clipperhouse/displaywidth@v0.11.0",
+            "UID": "7d5ef70406b37425"
+          },
+          "Version": "v0.11.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/clipperhouse/uax29/v2@v2.7.0",
+          "Name": "github.com/clipperhouse/uax29/v2",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/clipperhouse/uax29/v2@v2.7.0",
+            "UID": "344462b22449c92e"
+          },
+          "Version": "v2.7.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/dustin/go-humanize@v1.0.1",
+          "Name": "github.com/dustin/go-humanize",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/dustin/go-humanize@v1.0.1",
+            "UID": "5dc5c3b02176e6df"
+          },
+          "Version": "v1.0.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/fatih/color@v1.19.0",
+          "Name": "github.com/fatih/color",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/fatih/color@v1.19.0",
+            "UID": "26f2bcab244bda3d"
+          },
+          "Version": "v1.19.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/goccy/go-json@v0.10.6",
+          "Name": "github.com/goccy/go-json",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/goccy/go-json@v0.10.6",
+            "UID": "292b0d2dd5db0736"
+          },
+          "Version": "v0.10.6",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/goccy/go-yaml@v1.19.2",
+          "Name": "github.com/goccy/go-yaml",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/goccy/go-yaml@v1.19.2",
+            "UID": "babf5eab41358542"
+          },
+          "Version": "v1.19.2",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/gogs/chardet@v0.0.0-20211120154057-b7413eaefb8f",
+          "Name": "github.com/gogs/chardet",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/gogs/chardet@v0.0.0-20211120154057-b7413eaefb8f",
+            "UID": "8d8d00cbe57228f9"
+          },
+          "Version": "v0.0.0-20211120154057-b7413eaefb8f",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/gomarkdown/markdown@v0.0.0-20260217112301-37c66b85d6ab",
+          "Name": "github.com/gomarkdown/markdown",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/gomarkdown/markdown@v0.0.0-20260217112301-37c66b85d6ab",
+            "UID": "41d5764cb3dc0e4e"
+          },
+          "Version": "v0.0.0-20260217112301-37c66b85d6ab",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/google/uuid@v1.6.0",
+          "Name": "github.com/google/uuid",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/google/uuid@v1.6.0",
+            "UID": "59e8c44d1ad488e3"
+          },
+          "Version": "v1.6.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/gorilla/css@v1.0.1",
+          "Name": "github.com/gorilla/css",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/gorilla/css@v1.0.1",
+            "UID": "b254e3c0f9afdce4"
+          },
+          "Version": "v1.0.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/gorilla/mux@v1.8.1",
+          "Name": "github.com/gorilla/mux",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/gorilla/mux@v1.8.1",
+            "UID": "79d315f0cab03a24"
+          },
+          "Version": "v1.8.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/gorilla/websocket@v1.5.3",
+          "Name": "github.com/gorilla/websocket",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/gorilla/websocket@v1.5.3",
+            "UID": "daf2a8c8fad2a781"
+          },
+          "Version": "v1.5.3",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/inbucket/html2text@v1.0.0",
+          "Name": "github.com/inbucket/html2text",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/inbucket/html2text@v1.0.0",
+            "UID": "712a144f9943de78"
+          },
+          "Version": "v1.0.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/jhillyerd/enmime/v2@v2.3.0",
+          "Name": "github.com/jhillyerd/enmime/v2",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/jhillyerd/enmime/v2@v2.3.0",
+            "UID": "5fcec1a1aa79d6d8"
+          },
+          "Version": "v2.3.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/klauspost/compress@v1.18.5",
+          "Name": "github.com/klauspost/compress",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/klauspost/compress@v1.18.5",
+            "UID": "2198442230dcb7ee"
+          },
+          "Version": "v1.18.5",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/kovidgoyal/go-parallel@v1.1.1",
+          "Name": "github.com/kovidgoyal/go-parallel",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/kovidgoyal/go-parallel@v1.1.1",
+            "UID": "44207bafa3d1d8d5"
+          },
+          "Version": "v1.1.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/kovidgoyal/go-shm@v1.0.0",
+          "Name": "github.com/kovidgoyal/go-shm",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/kovidgoyal/go-shm@v1.0.0",
+            "UID": "78f6b447e6a36ca0"
+          },
+          "Version": "v1.0.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/kovidgoyal/imaging@v1.8.20",
+          "Name": "github.com/kovidgoyal/imaging",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/kovidgoyal/imaging@v1.8.20",
+            "UID": "68e63c2a9c1afb80"
+          },
+          "Version": "v1.8.20",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/leporo/sqlf@v1.4.0",
+          "Name": "github.com/leporo/sqlf",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/leporo/sqlf@v1.4.0",
+            "UID": "612bd2e6054e911c"
+          },
+          "Version": "v1.4.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/lithammer/shortuuid/v4@v4.2.0",
+          "Name": "github.com/lithammer/shortuuid/v4",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/lithammer/shortuuid/v4@v4.2.0",
+            "UID": "84039706f435cdb"
+          },
+          "Version": "v4.2.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/mattn/go-colorable@v0.1.14",
+          "Name": "github.com/mattn/go-colorable",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/mattn/go-colorable@v0.1.14",
+            "UID": "5dc7b445b16e5cce"
+          },
+          "Version": "v0.1.14",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/mattn/go-isatty@v0.0.20",
+          "Name": "github.com/mattn/go-isatty",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/mattn/go-isatty@v0.0.20",
+            "UID": "f732dacaad43fbea"
+          },
+          "Version": "v0.0.20",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/mattn/go-runewidth@v0.0.21",
+          "Name": "github.com/mattn/go-runewidth",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/mattn/go-runewidth@v0.0.21",
+            "UID": "974b34ea2d08ce0f"
+          },
+          "Version": "v0.0.21",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/mneis/go-telnet@v0.0.0-20221017141824-6f643e477c62",
+          "Name": "github.com/mneis/go-telnet",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/mneis/go-telnet@v0.0.0-20221017141824-6f643e477c62",
+            "UID": "c97c1ad6fb9473fa"
+          },
+          "Version": "v0.0.0-20221017141824-6f643e477c62",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822",
+          "Name": "github.com/munnerz/goautoneg",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822",
+            "UID": "f805b6a3654a0351"
+          },
+          "Version": "v0.0.0-20191010083416-a7dc8b61c822",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/olekukonko/cat@v0.0.0-20250911104152-50322a0618f6",
+          "Name": "github.com/olekukonko/cat",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/olekukonko/cat@v0.0.0-20250911104152-50322a0618f6",
+            "UID": "3fe3dec79a63383f"
+          },
+          "Version": "v0.0.0-20250911104152-50322a0618f6",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/olekukonko/errors@v1.2.0",
+          "Name": "github.com/olekukonko/errors",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/olekukonko/errors@v1.2.0",
+            "UID": "b4fcfa7427753f4f"
+          },
+          "Version": "v1.2.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/olekukonko/ll@v0.1.8",
+          "Name": "github.com/olekukonko/ll",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/olekukonko/ll@v0.1.8",
+            "UID": "25f2d6acf708ddff"
+          },
+          "Version": "v0.1.8",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/olekukonko/tablewriter@v1.1.4",
+          "Name": "github.com/olekukonko/tablewriter",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/olekukonko/tablewriter@v1.1.4",
+            "UID": "d0c9337a3875f1f8"
+          },
+          "Version": "v1.1.4",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/pkg/errors@v0.9.1",
+          "Name": "github.com/pkg/errors",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/pkg/errors@v0.9.1",
+            "UID": "6c0a336134852b3b"
+          },
+          "Version": "v0.9.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/prometheus/client_golang@v1.23.2",
+          "Name": "github.com/prometheus/client_golang",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/prometheus/client_golang@v1.23.2",
+            "UID": "34e766236394eaf8"
+          },
+          "Version": "v1.23.2",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/prometheus/client_model@v0.6.2",
+          "Name": "github.com/prometheus/client_model",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/prometheus/client_model@v0.6.2",
+            "UID": "4ea3d2d5668909a9"
+          },
+          "Version": "v0.6.2",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/prometheus/common@v0.67.5",
+          "Name": "github.com/prometheus/common",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/prometheus/common@v0.67.5",
+            "UID": "8c44b6e280f68168"
+          },
+          "Version": "v0.67.5",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/prometheus/procfs@v0.20.1",
+          "Name": "github.com/prometheus/procfs",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/prometheus/procfs@v0.20.1",
+            "UID": "558e4b4e08e41bb9"
+          },
+          "Version": "v0.20.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/reiver/go-oi@v1.0.0",
+          "Name": "github.com/reiver/go-oi",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/reiver/go-oi@v1.0.0",
+            "UID": "7d4db627e5b35b1b"
+          },
+          "Version": "v1.0.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/remyoudompheng/bigfft@v0.0.0-20230129092748-24d4a6f8daec",
+          "Name": "github.com/remyoudompheng/bigfft",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/remyoudompheng/bigfft@v0.0.0-20230129092748-24d4a6f8daec",
+            "UID": "c386463185a18442"
+          },
+          "Version": "v0.0.0-20230129092748-24d4a6f8daec",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/rqlite/gorqlite@v0.0.0-20250609141355-ac86a4a1c9a8",
+          "Name": "github.com/rqlite/gorqlite",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/rqlite/gorqlite@v0.0.0-20250609141355-ac86a4a1c9a8",
+            "UID": "5ebcb03cf64f2353"
+          },
+          "Version": "v0.0.0-20250609141355-ac86a4a1c9a8",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/rwcarlsen/goexif@v0.0.0-20190401172101-9e8deecbddbd",
+          "Name": "github.com/rwcarlsen/goexif",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/rwcarlsen/goexif@v0.0.0-20190401172101-9e8deecbddbd",
+            "UID": "3567a073b9415776"
+          },
+          "Version": "v0.0.0-20190401172101-9e8deecbddbd",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/sirupsen/logrus@v1.9.4",
+          "Name": "github.com/sirupsen/logrus",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/sirupsen/logrus@v1.9.4",
+            "UID": "83b645a6838eb51b"
+          },
+          "Version": "v1.9.4",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/spf13/cobra@v1.10.2",
+          "Name": "github.com/spf13/cobra",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/spf13/cobra@v1.10.2",
+            "UID": "e9c365e76f5188ef"
+          },
+          "Version": "v1.10.2",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/spf13/pflag@v1.0.10",
+          "Name": "github.com/spf13/pflag",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/spf13/pflag@v1.0.10",
+            "UID": "1147c820a9ac369b"
+          },
+          "Version": "v1.0.10",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/ssor/bom@v0.0.0-20170718123548-6386211fdfcf",
+          "Name": "github.com/ssor/bom",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/ssor/bom@v0.0.0-20170718123548-6386211fdfcf",
+            "UID": "45bfcc9dfe129abe"
+          },
+          "Version": "v0.0.0-20170718123548-6386211fdfcf",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/tg123/go-htpasswd@v1.2.4",
+          "Name": "github.com/tg123/go-htpasswd",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/tg123/go-htpasswd@v1.2.4",
+            "UID": "d31d052221187227"
+          },
+          "Version": "v1.2.4",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/valyala/bytebufferpool@v1.0.0",
+          "Name": "github.com/valyala/bytebufferpool",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/valyala/bytebufferpool@v1.0.0",
+            "UID": "df4fc3d3664a97d9"
+          },
+          "Version": "v1.0.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/vanng822/css@v1.0.1",
+          "Name": "github.com/vanng822/css",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/vanng822/css@v1.0.1",
+            "UID": "11b17cf61d720af5"
+          },
+          "Version": "v1.0.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "github.com/vanng822/go-premailer@v1.33.0",
+          "Name": "github.com/vanng822/go-premailer",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/vanng822/go-premailer@v1.33.0",
+            "UID": "7429abed41579663"
+          },
+          "Version": "v1.33.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "go.yaml.in/yaml/v2@v2.4.4",
+          "Name": "go.yaml.in/yaml/v2",
+          "Identifier": {
+            "PURL": "pkg:golang/go.yaml.in/yaml/v2@v2.4.4",
+            "UID": "3815d6bd081ee670"
+          },
+          "Version": "v2.4.4",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "golang.org/x/crypto@v0.49.0",
+          "Name": "golang.org/x/crypto",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/crypto@v0.49.0",
+            "UID": "4433e3de4ca2d4cb"
+          },
+          "Version": "v0.49.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "golang.org/x/image@v0.38.0",
+          "Name": "golang.org/x/image",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/image@v0.38.0",
+            "UID": "c2c6b64b4f67f76f"
+          },
+          "Version": "v0.38.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "golang.org/x/mod@v0.34.0",
+          "Name": "golang.org/x/mod",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/mod@v0.34.0",
+            "UID": "aa60cfe514c3140f"
+          },
+          "Version": "v0.34.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "golang.org/x/net@v0.52.0",
+          "Name": "golang.org/x/net",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/net@v0.52.0",
+            "UID": "3e2c69be9b5da740"
+          },
+          "Version": "v0.52.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "golang.org/x/sys@v0.42.0",
+          "Name": "golang.org/x/sys",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/sys@v0.42.0",
+            "UID": "d3ebaea4322f0da0"
+          },
+          "Version": "v0.42.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "golang.org/x/text@v0.35.0",
+          "Name": "golang.org/x/text",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/text@v0.35.0",
+            "UID": "32eef8471119d55f"
+          },
+          "Version": "v0.35.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "golang.org/x/time@v0.15.0",
+          "Name": "golang.org/x/time",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/time@v0.15.0",
+            "UID": "5cd179728602602e"
+          },
+          "Version": "v0.15.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "google.golang.org/protobuf@v1.36.11",
+          "Name": "google.golang.org/protobuf",
+          "Identifier": {
+            "PURL": "pkg:golang/google.golang.org/protobuf@v1.36.11",
+            "UID": "60a1031b5edc7471"
+          },
+          "Version": "v1.36.11",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "modernc.org/libc@v1.70.0",
+          "Name": "modernc.org/libc",
+          "Identifier": {
+            "PURL": "pkg:golang/modernc.org/libc@v1.70.0",
+            "UID": "bb927ce516414e8"
+          },
+          "Version": "v1.70.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "modernc.org/mathutil@v1.7.1",
+          "Name": "modernc.org/mathutil",
+          "Identifier": {
+            "PURL": "pkg:golang/modernc.org/mathutil@v1.7.1",
+            "UID": "9517a19b431eefbd"
+          },
+          "Version": "v1.7.1",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "modernc.org/memory@v1.11.0",
+          "Name": "modernc.org/memory",
+          "Identifier": {
+            "PURL": "pkg:golang/modernc.org/memory@v1.11.0",
+            "UID": "463ffc018dbe4795"
+          },
+          "Version": "v1.11.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        },
+        {
+          "ID": "modernc.org/sqlite@v1.48.0",
+          "Name": "modernc.org/sqlite",
+          "Identifier": {
+            "PURL": "pkg:golang/modernc.org/sqlite@v1.48.0",
+            "UID": "2c548304511b02cd"
+          },
+          "Version": "v1.48.0",
+          "Layer": {
+            "Digest": "sha256:9f633581b01406b33763f0116b26a4a52a1d58a16443f2d758f0532e90aaeb03",
+            "DiffID": "sha256:a93cab31cff103804d77f1d8c0f1216f55d38050f40b9afb73116b5c9bf6cd97"
+          },
+          "AnalyzedBy": "gobinary"
+        }
+      ]
+    }
+  ]
+}

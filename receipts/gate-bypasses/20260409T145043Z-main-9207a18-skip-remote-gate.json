@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T14:50:43Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "9207a184c59691663823c67538638d93376c6355",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Remote gate SSH hangs",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Revert aggressive cleanup",
+      "restore 494 role-specific variables",
+      "convergence test validates"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-11",
+    "remediation_ref": "monitoring convergence fix"
+  }
+}

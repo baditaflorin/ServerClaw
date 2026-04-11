@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-26T14:36:17.389108+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "remote gate schema-validation git metadata bug after ADR-0113 evidence captured",
+  "source": "pre-push-hook",
+  "branch": "codex/ws-0113-live-apply",
+  "commit": "8c014cc4887508c15302c520e4b9f21d18fcc8ef"
+}

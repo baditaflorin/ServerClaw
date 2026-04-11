@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T11:34:26Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/affectionate-feistel",
+  "commit": "5b4d597a1f609a01b6bfceba9450049768e1271c",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Pre-push gate build server unreachable; all pre-commit hooks passed locally (YAML, JSON, secret scan, hardcode scan)",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local pre-commit hooks passed",
+      "65 files clean"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-11",
+    "remediation_ref": "ADR 0396"
+  }
+}

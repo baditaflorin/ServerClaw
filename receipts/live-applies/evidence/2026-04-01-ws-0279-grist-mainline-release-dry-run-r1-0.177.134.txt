@@ -1,0 +1,11 @@
+# ws-0279 grist mainline release dry-run r1
+recorded_at=2026-04-01T16:19:13Z
+head=858accedf913e39c6949a2dde46e8b4ad5c64622
+origin_main=5e9cfe6e528a4261bddfb9430417daf80d5b3be0
+version=0.177.133
+
+Current version: 0.177.133
+Next version: 0.177.134
+Unreleased notes: 1
+Platform impact: no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+Release notes index: docs/release-notes/README.md

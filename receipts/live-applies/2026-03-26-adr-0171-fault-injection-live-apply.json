@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0171-fault-injection-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "fd622b1936941b886d616d8b3c7bd6bea04db29b",
+  "repo_version_context": "0.166.0",
+  "workflow_id": "fault-injection",
+  "adr": "0171",
+  "summary": "Completed the first current-mainline ADR 0171 live rollout on docker-runtime-lv3 by shipping the repo-managed fault-injection workflow and guarded schedule, restoring the missing Windmill script path from the synced guest checkout, and verifying the governed OpenBao and Keycloak drills end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "http://100.64.0.1:8005"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "openbao",
+      "address": "https://100.64.0.1:8200"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "keycloak",
+      "address": "https://keycloak.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0171 validation",
+      "result": "pass",
+      "observed": "`python3 -m py_compile scripts/fault_injection.py config/windmill/scripts/fault-injection.py platform/faults/injector.py`, `uv run --with pytest --with pyyaml python -m pytest tests/test_fault_injection.py tests/test_fault_injection_repo_surfaces.py tests/test_fault_injection_windmill.py tests/test_windmill_operator_admin_app.py -q`, `make syntax-check-windmill`, and `uv run --with pyyaml python scripts/workflow_catalog.py --validate` all completed successfully before the live drill."
+    },
+    {
+      "check": "Windmill script and schedule availability",
+      "result": "pass",
+      "observed": "After the guest-local script seed, `GET /api/w/lv3/scripts/get/p/f%2Flv3%2Ffault-injection` returned HTTP 200 and `GET /api/w/lv3/schedules/exists/f/lv3/fault-injection-first-sunday` returned `true` from the Windmill API on docker-runtime-lv3."
+    },
+    {
+      "check": "Combined governed drill from current mainline worktree",
+      "result": "pass",
+      "observed": "`make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:keycloak-unavailable,fault:openbao-unavailable'` ran from 2026-03-26T10:23:50Z through 2026-03-26T10:24:43Z with `status: passed`; Keycloak failed both the local readiness probe and the published discovery probe during the bounded stop/start outage and then recovered, while OpenBao became unreachable during the bounded pause window and returned successfully after the managed unpause."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0171-controlled-fault-injection-for-resilience-validation.md",
+    "docs/workstreams/adr-0171-controlled-fault-injection.md",
+    "docs/runbooks/fault-injection.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The limited `playbooks/windmill.yml` replay synced the released repo checkout and runtime dependencies onto docker-runtime-lv3 but failed later in the unrelated raw-app export path with `password authentication failed for user \"windmill_admin\"`.",
+    "Because the `f/lv3/fault-injection` path was still missing after that partial replay, the script was seeded directly through the guest-local Windmill API using `/srv/proxmox_florin_server/config/windmill/scripts/fault-injection.py` and the local superadmin token before rerunning the official `make fault-injection` entrypoint.",
+    "The production OpenBao scenario intentionally uses pause/unpause rather than stop/start so the singleton secret authority keeps its seal state intact during routine resilience validation."
+  ]
+}

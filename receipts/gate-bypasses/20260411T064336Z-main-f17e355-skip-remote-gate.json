@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-11T06:43:36Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "f17e3554c0da3e00a24e24676dc92211de767c53",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "cert catalog tls_pending fix and hook uv-run fix",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "pre-commit hooks passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-13",
+    "remediation_ref": "ADR-0375"
+  }
+}

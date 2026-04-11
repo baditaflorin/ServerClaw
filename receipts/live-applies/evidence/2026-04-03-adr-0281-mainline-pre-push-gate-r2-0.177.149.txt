@@ -1,0 +1,30 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/scripts/remote_exec.sh pre-push-gate --local-fallback
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 4.14
+alert-rule-validation passed 2.83
+ansible-lint          passed 251.16
+ansible-syntax        passed 159.55
+artifact-secret-scan  passed 5.30
+dependency-direction  passed 3.95
+dependency-graph      passed 3.67
+documentation-index   passed 3.50
+generated-docs        passed 8.89
+generated-portals     passed 36.37
+iac-policy-scan       passed 39.67
+integration-tests     passed 2.90
+packer-validate       passed 5.66
+policy-validation     passed 1.83
+schema-validation     passed 19.41
+security-scan         passed 40.40
+semgrep-sast          passed 64.17
+service-completeness  passed 1.82
+tofu-validate         passed 3.19
+type-check            passed 4.59
+workstream-surfaces   passed 4.48
+yaml-lint             passed 20.06

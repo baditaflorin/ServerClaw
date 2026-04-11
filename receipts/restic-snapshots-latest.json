@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0.0",
+  "recorded_at": "2026-04-05T10:36:25Z",
+  "recorded_on": "2026-04-05",
+  "recorded_by": "codex",
+  "repository": {
+    "bucket": "restic-config-backup",
+    "endpoint": "http://10.200.25.3:9000"
+  },
+  "summary": {
+    "governed_sources": 5,
+    "protected": 4,
+    "uncovered": 0,
+    "inactive": 1,
+    "uncovered_sources": [],
+    "inactive_sources": [
+      "falco_overrides"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "receipts",
+      "label": "receipts",
+      "paths": [
+        "receipts"
+      ],
+      "state": "protected",
+      "expected_schedule": "every_6_hours",
+      "freshness_minutes": 360,
+      "freshness_policy": "interval",
+      "retention": {
+        "keep_daily": 90,
+        "keep_monthly": 12
+      },
+      "latest_snapshot": {
+        "snapshot_id": "29b31242d1579b85dbd2f26f195041f19cfa6dfac1b7dc7a71bd10a68e13e552",
+        "recorded_at": "2026-04-04T14:00:06Z",
+        "host": "docker-runtime-lv3",
+        "paths": [
+          "receipts"
+        ],
+        "files": 4612
+      },
+      "last_restore_verification": {
+        "recorded_at": "2026-03-31T22:43:48Z",
+        "path": "receipts/restic-restore-verifications/20260331T224348Z.json",
+        "result": "pass"
+      },
+      "reasons": [
+        "Latest snapshot is 0 minutes old and within the 390 minute freshness window."
+      ]
+    },
+    {
+      "source_id": "config",
+      "label": "config",
+      "paths": [
+        "config"
+      ],
+      "state": "protected",
+      "expected_schedule": "successful_live_apply",
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "retention": {
+        "keep_daily": 30,
+        "keep_monthly": 6
+      },
+      "latest_snapshot": {
+        "snapshot_id": "385419411a3302902d2e810720a6ae6316d4cb80255f74083871a9f08278e1d1",
+        "recorded_at": "2026-04-05T10:36:25Z",
+        "host": "docker-runtime-lv3",
+        "paths": [
+          "config"
+        ],
+        "files": 291
+      },
+      "last_restore_verification": null,
+      "reasons": [
+        "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
+      ]
+    },
+    {
+      "source_id": "versions_stack",
+      "label": "versions_stack",
+      "paths": [
+        "versions/stack.yaml"
+      ],
+      "state": "protected",
+      "expected_schedule": "successful_live_apply",
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "retention": {
+        "keep_daily": 30
+      },
+      "latest_snapshot": {
+        "snapshot_id": "908061f9627acfad55a1641cf231e945a6145dc0fb8ece984014f35877961221",
+        "recorded_at": "2026-04-05T10:36:25Z",
+        "host": "docker-runtime-lv3",
+        "paths": [
+          "versions/stack.yaml"
+        ],
+        "files": 1
+      },
+      "last_restore_verification": null,
+      "reasons": [
+        "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
+      ]
+    },
+    {
+      "source_id": "controller_secret_manifest",
+      "label": "controller_secret_manifest",
+      "paths": [
+        "config/controller-local-secrets.json"
+      ],
+      "state": "protected",
+      "expected_schedule": "daily",
+      "freshness_minutes": 1440,
+      "freshness_policy": "interval",
+      "retention": {
+        "keep_daily": 90
+      },
+      "latest_snapshot": {
+        "snapshot_id": "cb77f7dc400f40a6cc11c3a2d332c575fa209fbda338c870b5dd39e6cede7c7b",
+        "recorded_at": "2026-04-04T14:00:12Z",
+        "host": "docker-runtime-lv3",
+        "paths": [
+          "config/controller-local-secrets.json"
+        ],
+        "files": 1
+      },
+      "last_restore_verification": null,
+      "reasons": [
+        "Latest snapshot is 0 minutes old and within the 1470 minute freshness window."
+      ]
+    },
+    {
+      "source_id": "falco_overrides",
+      "label": "falco_overrides",
+      "paths": [
+        "config/falco"
+      ],
+      "state": "inactive",
+      "expected_schedule": "successful_live_apply",
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "retention": {
+        "keep_daily": 30
+      },
+      "latest_snapshot": null,
+      "last_restore_verification": null,
+      "reasons": [
+        "No live path currently exists for optional source falco_overrides backup path."
+      ]
+    }
+  ]
+}

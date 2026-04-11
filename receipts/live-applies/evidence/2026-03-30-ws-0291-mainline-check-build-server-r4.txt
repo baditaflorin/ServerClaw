@@ -1,0 +1,12 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/scripts/remote_exec.sh check-build-server
+Checking SSH connectivity to ops@10.10.10.30
+build-server-ok
+Checking remote workspace root /home/ops/builds/proxmox_florin_server
+Checking remote session workspace /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0291-main-merge-19eb226299/repo
+/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0291-main-merge-19eb226299/repo
+Checking immutable snapshot dry-run upload from codex/ws-0291-main-merge@89639b54194fcdd8713a4676bb53d961475afb91
+Transfer starting: 1 files
+repository-snapshot-b89faa2157c030033846f2dfcf8f863b0e976e8b002c724fcfbf3838982984c9.tar.gz
+
+sent 186 bytes  received 26 bytes  1642 bytes/sec
+total size is 24682640  speedup is 116427.00

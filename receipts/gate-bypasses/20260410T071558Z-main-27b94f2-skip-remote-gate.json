@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T07:15:58Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "27b94f233f26c6aa83b526af3bef37e4b09b6cf0",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Build server 10.10.10.30 unreachable (SSH timeout). All 64 modified files passed pre-commit YAML validation.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "yaml-lint-passed-pre-commit",
+      "all-role-defaults-validated-by-check-yaml-hook"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "docs/adr/0385-operator-identity-separation.md"
+  }
+}

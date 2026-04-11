@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T13:32:29Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "42197640550ff4eb17e6462cd0f887ffc6d50ab4",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "YAML quoting fix for ADR 0385 \u2014 build server unreachable",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "syntax-check-monitoring-passed",
+      "syntax-check-keycloak-passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-11",
+    "remediation_ref": "retry-when-build-server-online"
+  }
+}

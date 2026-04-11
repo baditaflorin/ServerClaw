@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-06T13:44:26Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "90b1e6180cc408d12a40fd8ebbaabda477be44e6",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "Registry 502 blocks gate runner; rag-context converge succeeded, open-webui 422 fix is pure API payload correction",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "rag-context-deployed-ok manual-test-passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-08",
+    "remediation_ref": "ADR-0377 open-webui deployment"
+  }
+}

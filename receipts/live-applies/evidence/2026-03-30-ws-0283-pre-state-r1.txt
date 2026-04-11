@@ -1,0 +1,21 @@
+== controller ==
+2026-03-30T11:26:40+03:00
+
+== host ==
+Warning: Identity file .local/ssh/hetzner_llm_agents_ed25519 not accessible: No such file or directory.
+ops@100.64.0.1: Permission denied (publickey).
+
+== nginx edge ==
+Warning: Identity file .local/ssh/hetzner_llm_agents_ed25519 not accessible: No such file or directory.
+Warning: Identity file .local/ssh/hetzner_llm_agents_ed25519 not accessible: No such file or directory.
+ops@100.64.0.1: Permission denied (publickey).
+Connection closed by UNKNOWN port 65535
+
+== docker runtime ==
+Warning: Identity file .local/ssh/hetzner_llm_agents_ed25519 not accessible: No such file or directory.
+Warning: Identity file .local/ssh/hetzner_llm_agents_ed25519 not accessible: No such file or directory.
+ops@100.64.0.1: Permission denied (publickey).
+Connection closed by UNKNOWN port 65535
+
+== public analytics ==
+curl: (6) Could not resolve host: analytics.lv3.org

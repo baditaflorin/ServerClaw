@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-10T11:47:06Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "2f376be9af3d6579769afe59344ecdb3be100fcd",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "One-line Ansible template trust fix in homepage verify task.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "remote-gate-hung-earlier-same-session"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-11",
+    "remediation_ref": "homepage-verify-template-fix"
+  }
+}

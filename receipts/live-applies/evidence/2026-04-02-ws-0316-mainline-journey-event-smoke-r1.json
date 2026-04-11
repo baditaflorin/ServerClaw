@@ -1,0 +1,20 @@
+{
+  "event_count": 1,
+  "events": [
+    {
+      "parsed": {
+        "expected_script_path": "/srv/proxmox_florin_server/scripts/journey_scorecards.py",
+        "reason": "journey analytics script is missing from the worker checkout",
+        "status": "blocked"
+      },
+      "path": "f/lv3/operator_journey_event",
+      "payload": {
+        "event_json": "{\"event_type\":\"session_started\",\"visitor_id\":\"ws0316-verify-v1\",\"session_id\":\"ws0316-session-v1\",\"occurred_at\":\"2026-04-02T05:18:07Z\",\"route\":\"/journeys/operator-access-admin/start\"}"
+      },
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"reason\": \"journey analytics script is missing from the worker checkout\", \"status\": \"blocked\", \"expected_script_path\": \"/srv/proxmox_florin_server/scripts/journey_scorecards.py\"}"
+    }
+  ],
+  "recorded_at": "2026-04-02T05:38:09Z"
+}

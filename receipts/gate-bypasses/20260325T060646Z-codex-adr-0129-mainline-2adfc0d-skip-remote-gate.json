@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-25T06:06:46.780306+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "ADR 0129 mainline push after release 0.132.0; remote pre-push gate failed on unrelated build-worker cleanup (cannot delete non-empty directory scripts/cases), unrelated ansible-lint and packer gate failures, and remote schema-validation worktree-path resolution. Focused ADR 0129 tests and CLI smoke checks passed locally on the integrated branch.",
+  "source": "git-push-main",
+  "branch": "codex/adr-0129-mainline",
+  "commit": "2adfc0d0a969956fb2965db80277bb071c798221"
+}

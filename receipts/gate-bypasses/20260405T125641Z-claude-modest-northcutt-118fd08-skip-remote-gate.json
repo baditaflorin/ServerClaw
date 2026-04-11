@@ -1,0 +1,26 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-05T12:56:41Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "claude/modest-northcutt",
+  "commit": "118fd08a2b504fa191a49c65526228b0c5d476c0",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "remote gate SSH timeout; all local checks pass",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local generator",
+      "service catalog",
+      "platform manifest",
+      "ADR index",
+      "release notes checks all OK"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-07",
+    "remediation_ref": "adr-0346-centralized-port-registry"
+  }
+}

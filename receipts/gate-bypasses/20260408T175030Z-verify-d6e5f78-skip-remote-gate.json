@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-08T17:50:30Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "verify",
+  "commit": "d6e5f78c9f6b5a1358bfcecd64ab0eb83acc5b80",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Build server unreachable",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "pre-commit passed",
+      "URLs verified"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "restore build server"
+  }
+}

@@ -1,0 +1,18 @@
+........................................................................ [ 82%]
+..............F                                                          [100%]
+=================================== FAILURES ===================================
+_________ test_postgres_vm_refreshes_apt_cache_before_package_installs _________
+
+    def test_postgres_vm_refreshes_apt_cache_before_package_installs() -> None:
+        tasks = POSTGRES_VM_TASKS_PATH.read_text()
+
+        assert 'argv:\n      - apt-get\n      - update' in tasks
+>       assert tasks.count("update_cache: true") == 0
+E       AssertionError: assert 2 == 0
+E        +  where 2 = <built-in method count of str object at 0xa58d81000>('update_cache: true')
+E        +    where <built-in method count of str object at 0xa58d81000> = '---\n- name: Validate PostgreSQL role inputs\n  ansible.builtin.assert:\n    that:\n      - postgres_vm_packages | le...res_vm_pgaudit_enabled | bool\n\n- name: Verify PostgreSQL health probes\n  ansible.builtin.import_tasks: verify.yml\n'.count
+
+tests/test_postgres_vm_config.py:79: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_postgres_vm_config.py::test_postgres_vm_refreshes_apt_cache_before_package_installs
+1 failed, 86 passed in 7.29s

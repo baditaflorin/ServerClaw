@@ -1,0 +1,5 @@
+Agent standards validation (ADR 0163-0168)
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml: outside declared owned surfaces for ws-0289-label-studio-live-apply
+- config/capacity-model.json: outside declared owned surfaces for ws-0289-label-studio-live-apply

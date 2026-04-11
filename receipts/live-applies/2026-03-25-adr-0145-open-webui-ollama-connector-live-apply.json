@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0145-open-webui-ollama-connector-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_by": "codex",
+  "source_commit": "0ebd893da396e3d4aeab588b23a258b9a75a84f1",
+  "repo_version_context": "0.142.0",
+  "workflow_id": "converge-open-webui",
+  "adr": "0145",
+  "summary": "Re-converged Open WebUI from the integrated 0.142.0 mainline with the private Ollama connector enabled, verified operator sign-in, and confirmed in-container reachability to `host.docker.internal:11434`.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "open-webui",
+      "address": "100.118.189.95:8008"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repo-managed Open WebUI converge",
+      "result": "pass",
+      "observed": "`make converge-open-webui` completed successfully on 2026-03-25, including the docker-runtime stack, the Open WebUI runtime, and the Proxmox-host Tailscale proxy tasks."
+    },
+    {
+      "check": "Bootstrap admin sign-in",
+      "result": "pass",
+      "observed": "POST to `http://100.118.189.95:8008/api/v1/auths/signin` returned the repo-managed `ops@lv3.org` admin identity after the connector-enabled re-converge."
+    },
+    {
+      "check": "In-container Ollama connector reachability",
+      "result": "pass",
+      "observed": "An Ansible probe on docker-runtime-lv3 returned `{\"version\":\"0.18.2\"}` from `sudo docker exec open-webui curl -fsS http://host.docker.internal:11434/api/version`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0145-ollama-for-local-llm-inference.md",
+    "docs/runbooks/configure-open-webui.md",
+    "docs/workstreams/adr-0145-ollama.md",
+    "docs/release-notes/0.142.0.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The connector remains private-only: Open WebUI reaches Ollama through `host.docker.internal:11434`, and Ollama is not published on the nginx edge."
+  ]
+}

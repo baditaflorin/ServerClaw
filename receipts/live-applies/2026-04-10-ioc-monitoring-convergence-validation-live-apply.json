@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-10-ioc-monitoring-convergence-validation-live-apply",
+  "applied_on": "2026-04-10",
+  "recorded_on": "2026-04-10",
+  "recorded_by": "claude",
+  "source_commit": "71170ddc47b99ab7fae99fe1ff4cd49291be2cc2",
+  "repo_version_context": "0.178.81",
+  "workflow_id": "converge-monitoring",
+  "summary": "IoC refactor convergence validation: monitoring stack verified in production after elimination of 122+ hardcoded paths and hostnames from role defaults.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "runtime-control-lv3",
+      "address": "10.10.10.92"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Monitoring converged after IoC refactor",
+      "result": "pass",
+      "observed": "Monitoring stack converged successfully; all hardcoded paths replaced with derive_service_defaults pattern."
+    }
+  ],
+  "evidence_refs": [
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "IoC refactor: 122+ hardcoded values replaced across role defaults. Monitoring validated as first production convergence post-refactor."
+  ]
+}

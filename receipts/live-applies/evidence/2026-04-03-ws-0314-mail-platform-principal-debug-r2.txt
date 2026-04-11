@@ -1,0 +1,7 @@
+runtime-control-lv3 | CHANGED | rc=0 >>
+[
+  "agents",
+  "alerts",
+  "platform",
+  "server"
+]

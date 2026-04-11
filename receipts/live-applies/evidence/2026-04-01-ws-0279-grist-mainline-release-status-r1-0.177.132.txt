@@ -1,0 +1,7 @@
+# ws-0279 grist mainline release status r1
+recorded_at=2026-04-01T16:17:25Z
+head=ec7d485f7893cfd042fa3f315fc55275d4bc1c5f
+origin_main=5e9cfe6e528a4261bddfb9430417daf80d5b3be0
+version=0.177.132
+
+release manager error: Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'.

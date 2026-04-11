@@ -1,0 +1,24 @@
+........................................................................ [ 27%]
+........................................................................ [ 55%]
+.........................................................F.............. [ 83%]
+..........................................                               [100%]
+=================================== FAILURES ===================================
+_ test_openbao_inventory_exports_controller_local_artifact_paths_used_outside_role_scope _
+
+    def test_openbao_inventory_exports_controller_local_artifact_paths_used_outside_role_scope() -> None:
+        group_vars = yaml.safe_load(GROUP_VARS_PATH.read_text(encoding="utf-8"))
+
+        assert group_vars["openbao_postgres_connect_role"] == "lv3_openbao_connect_all"
+>       assert (
+            group_vars["openbao_controller_approle_local_file"]
+            == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json"
+        )
+E       AssertionError: assert '{{ repo_shar...-approle.json' == '/Users/live/...-approle.json'
+E
+E         - /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
+E         + {{ repo_shared_local_root }}/openbao/controller-automation-approle.json
+
+tests/test_openbao_runtime_role.py:677: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_openbao_runtime_role.py::test_openbao_inventory_exports_controller_local_artifact_paths_used_outside_role_scope
+1 failed, 257 passed in 49.19s

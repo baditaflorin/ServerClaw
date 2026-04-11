@@ -1,0 +1,29 @@
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, build/platform-manifest.json, collections/ansible_collections/lv3/platform/playbooks/directus.yml, collections/ansible_collections/lv3/platform/playbooks/services/directus.yml, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 12.38
+alert-rule-validation passed 9.69
+ansible-lint          passed 570.15
+ansible-syntax        passed 384.80
+artifact-secret-scan  passed 23.88
+dependency-direction  passed 16.75
+dependency-graph      passed 17.79
+documentation-index   passed 15.72
+generated-docs        passed 45.53
+generated-portals     passed 179.19
+integration-tests     passed 5.70
+packer-validate       passed 61.08
+policy-validation     passed 21.76
+schema-validation     passed 304.51
+security-scan         passed 149.90
+semgrep-sast          passed 221.91
+service-completeness  passed 10.48
+tofu-validate         passed 6.50
+type-check            passed 23.25
+workstream-surfaces   passed 19.75
+yaml-lint             passed 69.02

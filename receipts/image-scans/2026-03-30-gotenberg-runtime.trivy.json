@@ -1,0 +1,3234 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-29T22:24:56.825866005Z",
+  "ArtifactName": "docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 1871586816,
+    "OS": {
+      "Family": "debian",
+      "Name": "13.4"
+    },
+    "ImageID": "sha256:f70dca64fec5f193e0c17083f149e5bb7f993c4d1134e3f7d6cb3791d6824ba4",
+    "DiffIDs": [
+      "sha256:188c9b34dfbe022075d01fc4f5a305412909ef97de440783c15043e68e1b1913",
+      "sha256:5cf33d26909c49b0b6b9f438aac75280efda14f019c8b35f3cc1aca1cd63547b",
+      "sha256:730e91a95ce187c192934530ebbb0272a818f4e0bdff0b7b93f7efdaf27a8cef",
+      "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c",
+      "sha256:5a9187da77a7806e28ea3353fe074fc2a3d20ace42771d6935a3c9777bd134b7",
+      "sha256:2506ea0093cfe6047abd5d59f927ffe22dc685ceb48835134142f6bb53152b49",
+      "sha256:e7ed9794b1e7c999625042eae045b02b60a6a11ae97a4862d5269ea08849a236",
+      "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428",
+      "sha256:99a68c0d15444972231114e7b2432b650a3d2618f73688db17e527f05a95e4ef",
+      "sha256:1244de60d0ff79225abaff75eef8ad49c578c88b992605e8a8acbd3189f6ef48",
+      "sha256:bb48a7e8e301051805dac423a3909d4690845289b3461031889c63f76d91e577",
+      "sha256:30b2e5bd43891588cd102d565642bb5dd3e53b7d6e604c428e817af092b505ff",
+      "sha256:0d68e84069c69211ebb532f625a47614dd009878d6b575a0ab31f44f6a6cacc2",
+      "sha256:1983043f699d1d168d28af573a7dbb53d9b75961a508ecbf68da30d5a49a4a91",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+    ],
+    "RepoDigests": [
+      "gotenberg/gotenberg@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2026-03-28T21:21:45.123562315Z",
+      "history": [
+        {
+          "created": "2026-03-16T00:00:00Z",
+          "created_by": "# debian.sh --arch 'amd64' out/ 'trixie' '@1773619200'",
+          "comment": "debuerreotype 0.17"
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ARG TIMEZONE=UTC",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ENV TZ=UTC",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "COPY /custom-jre /opt/java # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ENV PATH=/opt/java/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ARG GOTENBERG_VERSION=8.29.0",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ARG GOTENBERG_USER_GID=1001",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ARG GOTENBERG_USER_UID=1001",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ARG NOTO_COLOR_EMOJI_VERSION=v2.051",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "ARG PDFTK_VERSION=v3.3.3",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.13357245Z",
+          "created_by": "LABEL org.opencontainers.image.title=Gotenberg org.opencontainers.image.description=A containerized API for seamless PDF conversion. org.opencontainers.image.version=8.29.0 org.opencontainers.image.authors=Julien Neuhart \u003cneuhart.julien@gmail.com\u003e org.opencontainers.image.documentation=https://gotenberg.dev org.opencontainers.image.source=https://github.com/gotenberg/gotenberg",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:19:49.234797915Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c groupadd --gid \"$GOTENBERG_USER_GID\" gotenberg \u0026\u0026    useradd --uid \"$GOTENBERG_USER_UID\" --gid gotenberg --shell /bin/bash --home /home/gotenberg --no-create-home gotenberg \u0026\u0026    mkdir /home/gotenberg \u0026\u0026    chown gotenberg: /home/gotenberg # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:20:36.105106809Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c apt-get update -qq \u0026\u0026    apt-get upgrade -yqq \u0026\u0026    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends curl gnupg tini python3 python3-distutils-extra \u0026\u0026    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:02.155049627Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c curl -o ./ttf-mscorefonts-installer_3.8.1_all.deb http://httpredir.debian.org/debian/pool/contrib/m/msttcorefonts/ttf-mscorefonts-installer_3.8.1_all.deb \u0026\u0026    apt-get update -qq \u0026\u0026    apt-get upgrade -yqq \u0026\u0026    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends     ./ttf-mscorefonts-installer_3.8.1_all.deb     culmus     fonts-beng     fonts-hosny-amiri     fonts-lklug-sinhala     fonts-lohit-guru     fonts-lohit-knda     fonts-samyak-gujr     fonts-samyak-mlym     fonts-samyak-taml     fonts-sarai     fonts-sil-abyssinica     fonts-sil-padauk     fonts-telu     fonts-thai-tlwg     ttf-wqy-zenhei     fonts-arphic-ukai     fonts-arphic-uming     fonts-ipafont-mincho     fonts-ipafont-gothic     fonts-unfonts-core     fonts-crosextra-caladea     fonts-crosextra-carlito     fonts-dejavu     fonts-liberation     fonts-liberation2     fonts-linuxlibertine     fonts-noto-cjk     fonts-noto-core     fonts-noto-mono     fonts-noto-ui-core     fonts-sil-gentium     fonts-sil-gentium-basic \u0026\u0026    rm -f ./ttf-mscorefonts-installer_3.8.1_all.deb \u0026\u0026    curl -Ls \"https://github.com/googlefonts/noto-emoji/raw/$NOTO_COLOR_EMOJI_VERSION/fonts/NotoColorEmoji.ttf\" -o /usr/local/share/fonts/NotoColorEmoji.ttf \u0026\u0026    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:07.703127192Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c apt-get update -qq \u0026\u0026    apt-get upgrade -yqq \u0026\u0026    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends         hyphen-af hyphen-as hyphen-be hyphen-bg hyphen-bn hyphen-ca hyphen-cs hyphen-da hyphen-de hyphen-el         hyphen-en-gb hyphen-en-us hyphen-eo hyphen-es hyphen-fr hyphen-gl hyphen-gu hyphen-hi hyphen-hr hyphen-hu         hyphen-id hyphen-is hyphen-it hyphen-kn hyphen-lt hyphen-lv hyphen-ml hyphen-mn hyphen-mr hyphen-nl         hyphen-no hyphen-or hyphen-pa hyphen-pl hyphen-pt-br hyphen-pt-pt hyphen-ro hyphen-ru hyphen-sk hyphen-sl         hyphen-sr hyphen-sv hyphen-ta hyphen-te hyphen-th hyphen-uk hyphen-zu \u0026\u0026    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:23.801958689Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c apt-get update -qq \u0026\u0026    apt-get upgrade -yqq \u0026\u0026    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends chromium \u0026\u0026    chromium --version \u0026\u0026    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:23.801958689Z",
+          "created_by": "ENV LANG=C.UTF-8",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:23.801958689Z",
+          "created_by": "ENV LC_ALL=C.UTF-8",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:40.452317789Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c echo \"deb http://deb.debian.org/debian trixie-backports main\" \u003e\u003e /etc/apt/sources.list \u0026\u0026    apt-get update -qq \u0026\u0026    apt-get upgrade -yqq \u0026\u0026    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends -t trixie-backports libreoffice \u0026\u0026    curl -Ls https://raw.githubusercontent.com/gotenberg/unoconverter/v0.2.0/unoconv -o /usr/bin/unoconverter \u0026\u0026    chmod +x /usr/bin/unoconverter \u0026\u0026    ln -s /usr/bin/python3 /usr/bin/python \u0026\u0026    libreoffice --version \u0026\u0026    unoconverter --version \u0026\u0026    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:44.97024503Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c curl -o /usr/bin/pdftk-all.jar \"https://gitlab.com/api/v4/projects/5024297/packages/generic/pdftk-java/$PDFTK_VERSION/pdftk-all.jar\" \u0026\u0026    chmod a+x /usr/bin/pdftk-all.jar \u0026\u0026    printf '#!/bin/bash\\n\\nexec java -jar /usr/bin/pdftk-all.jar \"$@\"' \u003e /usr/bin/pdftk \u0026\u0026     chmod +x /usr/bin/pdftk \u0026\u0026    apt-get update -qq \u0026\u0026    apt-get upgrade -yqq \u0026\u0026    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends qpdf exiftool \u0026\u0026    mkdir -p /usr/share/man/man1 \u0026\u0026    pdftk --version \u0026\u0026    qpdf --version \u0026\u0026    exiftool --version \u0026\u0026    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:45.035122254Z",
+          "created_by": "RUN |6 TIMEZONE=UTC GOTENBERG_VERSION=8.29.0 GOTENBERG_USER_GID=1001 GOTENBERG_USER_UID=1001 NOTO_COLOR_EMOJI_VERSION=v2.051 PDFTK_VERSION=v3.3.3 /bin/sh -c usermod -aG root gotenberg \u0026\u0026    chgrp -R 0 /home/gotenberg \u0026\u0026    chmod -R g=u /home/gotenberg # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:45.044966118Z",
+          "created_by": "COPY build/fonts.conf /etc/fonts/conf.d/100-gotenberg.conf # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:45.064329813Z",
+          "created_by": "COPY --chown=gotenberg:gotenberg build/chromium-hyphen-data /opt/gotenberg/chromium-hyphen-data # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:45.087123417Z",
+          "created_by": "COPY /home/pdfcpu /usr/bin/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "COPY /home/gotenberg /usr/bin/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV CHROMIUM_BIN_PATH=/usr/bin/chromium",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV CHROMIUM_HYPHEN_DATA_DIR_PATH=/opt/gotenberg/chromium-hyphen-data",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV LIBREOFFICE_BIN_PATH=/usr/lib/libreoffice/program/soffice.bin",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV UNOCONVERTER_BIN_PATH=/usr/bin/unoconverter",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV PDFTK_BIN_PATH=/usr/bin/pdftk",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV QPDF_BIN_PATH=/usr/bin/qpdf",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV EXIFTOOL_BIN_PATH=/usr/bin/exiftool",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV PDFCPU_BIN_PATH=/usr/bin/pdfcpu",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV OTEL_TRACES_EXPORTER=none",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV OTEL_METRICS_EXPORTER=none",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "ENV OTEL_LOGS_EXPORTER=none",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.112968025Z",
+          "created_by": "USER gotenberg",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.123562315Z",
+          "created_by": "WORKDIR /home/gotenberg",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-28T21:21:45.123562315Z",
+          "created_by": "EXPOSE [3000/tcp]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.123562315Z",
+          "created_by": "ENTRYPOINT [\"/usr/bin/tini\" \"--\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-28T21:21:45.123562315Z",
+          "created_by": "CMD [\"gotenberg\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:188c9b34dfbe022075d01fc4f5a305412909ef97de440783c15043e68e1b1913",
+          "sha256:5cf33d26909c49b0b6b9f438aac75280efda14f019c8b35f3cc1aca1cd63547b",
+          "sha256:730e91a95ce187c192934530ebbb0272a818f4e0bdff0b7b93f7efdaf27a8cef",
+          "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c",
+          "sha256:5a9187da77a7806e28ea3353fe074fc2a3d20ace42771d6935a3c9777bd134b7",
+          "sha256:2506ea0093cfe6047abd5d59f927ffe22dc685ceb48835134142f6bb53152b49",
+          "sha256:e7ed9794b1e7c999625042eae045b02b60a6a11ae97a4862d5269ea08849a236",
+          "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428",
+          "sha256:99a68c0d15444972231114e7b2432b650a3d2618f73688db17e527f05a95e4ef",
+          "sha256:1244de60d0ff79225abaff75eef8ad49c578c88b992605e8a8acbd3189f6ef48",
+          "sha256:bb48a7e8e301051805dac423a3909d4690845289b3461031889c63f76d91e577",
+          "sha256:30b2e5bd43891588cd102d565642bb5dd3e53b7d6e604c428e817af092b505ff",
+          "sha256:0d68e84069c69211ebb532f625a47614dd009878d6b575a0ab31f44f6a6cacc2",
+          "sha256:1983043f699d1d168d28af573a7dbb53d9b75961a508ecbf68da30d5a49a4a91",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "gotenberg"
+        ],
+        "Entrypoint": [
+          "/usr/bin/tini",
+          "--"
+        ],
+        "Env": [
+          "PATH=/opt/java/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "TZ=UTC",
+          "LANG=C.UTF-8",
+          "LC_ALL=C.UTF-8",
+          "CHROMIUM_BIN_PATH=/usr/bin/chromium",
+          "CHROMIUM_HYPHEN_DATA_DIR_PATH=/opt/gotenberg/chromium-hyphen-data",
+          "LIBREOFFICE_BIN_PATH=/usr/lib/libreoffice/program/soffice.bin",
+          "UNOCONVERTER_BIN_PATH=/usr/bin/unoconverter",
+          "PDFTK_BIN_PATH=/usr/bin/pdftk",
+          "QPDF_BIN_PATH=/usr/bin/qpdf",
+          "EXIFTOOL_BIN_PATH=/usr/bin/exiftool",
+          "PDFCPU_BIN_PATH=/usr/bin/pdfcpu",
+          "OTEL_TRACES_EXPORTER=none",
+          "OTEL_METRICS_EXPORTER=none",
+          "OTEL_LOGS_EXPORTER=none"
+        ],
+        "Labels": {
+          "org.opencontainers.image.authors": "Julien Neuhart \u003cneuhart.julien@gmail.com\u003e",
+          "org.opencontainers.image.description": "A containerized API for seamless PDF conversion.",
+          "org.opencontainers.image.documentation": "https://gotenberg.dev",
+          "org.opencontainers.image.source": "https://github.com/gotenberg/gotenberg",
+          "org.opencontainers.image.title": "Gotenberg",
+          "org.opencontainers.image.version": "8.29.0"
+        },
+        "User": "gotenberg",
+        "WorkingDir": "/home/gotenberg",
+        "ExposedPorts": {
+          "3000/tcp": {}
+        },
+        "ArgsEscaped": true
+      }
+    },
+    "Layers": [
+      {
+        "Size": 81039360,
+        "Digest": "sha256:3dc06da507ff4043f96b1cde3154ecac1fe08379e12779138a246654721952db",
+        "DiffID": "sha256:188c9b34dfbe022075d01fc4f5a305412909ef97de440783c15043e68e1b1913"
+      },
+      {
+        "Size": 56716800,
+        "Digest": "sha256:4323144cab6f299d1e695cdbf0f517d5eaaf5d73d4b8c8fb057fff093c92f08e",
+        "DiffID": "sha256:5cf33d26909c49b0b6b9f438aac75280efda14f019c8b35f3cc1aca1cd63547b"
+      },
+      {
+        "Size": 14848,
+        "Digest": "sha256:25184e19745a1209d7196838aeb843201a903951aa73a1518eb54228bbcbf3ff",
+        "DiffID": "sha256:730e91a95ce187c192934530ebbb0272a818f4e0bdff0b7b93f7efdaf27a8cef"
+      },
+      {
+        "Size": 147842048,
+        "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+        "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+      },
+      {
+        "Size": 343588352,
+        "Digest": "sha256:fbb3f68867e14d95733664b88b853f7bffa07ec080dc743c60474638762dc933",
+        "DiffID": "sha256:5a9187da77a7806e28ea3353fe074fc2a3d20ace42771d6935a3c9777bd134b7"
+      },
+      {
+        "Size": 14442496,
+        "Digest": "sha256:0ff78446fed2fbbf58fc4f9d5b05e84b119a1b17d21072f27733b6bc5bee6784",
+        "DiffID": "sha256:2506ea0093cfe6047abd5d59f927ffe22dc685ceb48835134142f6bb53152b49"
+      },
+      {
+        "Size": 672756224,
+        "Digest": "sha256:229039db264c05a23705f4995b0eb86ecc2970af325c4e05735822751ec0a8e0",
+        "DiffID": "sha256:e7ed9794b1e7c999625042eae045b02b60a6a11ae97a4862d5269ea08849a236"
+      },
+      {
+        "Size": 475182080,
+        "Digest": "sha256:6a7b19158fc6bc79ff59f60b775bb76a090290f50e200b20b0ff5ebab07c35bb",
+        "DiffID": "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428"
+      },
+      {
+        "Size": 31963648,
+        "Digest": "sha256:b5796b1375892f43ab0176907d5cea9ef89d6ac37166d16b94e47c79c8719b6c",
+        "DiffID": "sha256:99a68c0d15444972231114e7b2432b650a3d2618f73688db17e527f05a95e4ef"
+      },
+      {
+        "Size": 7680,
+        "Digest": "sha256:d54f4969abde3fa4c18aced9d69df9047c163f50611c18c966a159ff4f1683de",
+        "DiffID": "sha256:1244de60d0ff79225abaff75eef8ad49c578c88b992605e8a8acbd3189f6ef48"
+      },
+      {
+        "Size": 4096,
+        "Digest": "sha256:fa4935e93ebd4ede2e3b11aa295a3256caf12edc8b277ac2eaa2defa5d7dafe4",
+        "DiffID": "sha256:bb48a7e8e301051805dac423a3909d4690845289b3461031889c63f76d91e577"
+      },
+      {
+        "Size": 1815040,
+        "Digest": "sha256:8304d5ba2b7f857cdb5f2360d528ba21502995f551a0bc07bcc9c71785ecfeb5",
+        "DiffID": "sha256:30b2e5bd43891588cd102d565642bb5dd3e53b7d6e604c428e817af092b505ff"
+      },
+      {
+        "Size": 19405824,
+        "Digest": "sha256:9eb831f0bb7c47228ea0aec56559c602c7a8adb9256761703ec14cc9bf369b50",
+        "DiffID": "sha256:0d68e84069c69211ebb532f625a47614dd009878d6b575a0ab31f44f6a6cacc2"
+      },
+      {
+        "Size": 26807296,
+        "Digest": "sha256:f4b8cc7e55a0a5fa22ca8e0afa62f74c2c68397092c6c050df0b8520978b175c",
+        "DiffID": "sha256:1983043f699d1d168d28af573a7dbb53d9b75961a508ecbf68da30d5a49a4a91"
+      },
+      {
+        "Size": 1024,
+        "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "DiffID": "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5 (debian 13.4)",
+      "Class": "os-pkgs",
+      "Type": "debian",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-24882",
+          "PkgID": "dirmngr@2.4.7-21+deb13u1+b2",
+          "PkgName": "dirmngr",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/dirmngr@2.4.7-21%2Bdeb13u1%2Bb2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "d6a5d77856facd4"
+          },
+          "InstalledVersion": "2.4.7-21+deb13u1+b2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24882",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Stack-based buffer overflow in tpm2daemon allows arbitrary code execution",
+          "Description": "In GnuPG before 2.5.17, a stack-based buffer overflow exists in tpm2daemon during handling of the PKDECRYPT command for TPM-backed RSA and ECC keys.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-121"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:2719",
+            "https://access.redhat.com/security/cve/CVE-2026-24882",
+            "https://bugzilla.redhat.com/2433464",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433464",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-24882",
+            "https://dev.gnupg.org/T8045",
+            "https://errata.almalinux.org/10/ALSA-2026-2719.html",
+            "https://errata.rockylinux.org/RLSA-2026:2719",
+            "https://linux.oracle.com/cve/CVE-2026-24882.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2719.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24882",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24882",
+            "https://www.openwall.com/lists/oss-security/2026/01/27/8"
+          ],
+          "PublishedDate": "2026-01-27T19:16:16.67Z",
+          "LastModifiedDate": "2026-02-06T17:50:53.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24882",
+          "PkgID": "gnupg@2.4.7-21+deb13u1",
+          "PkgName": "gnupg",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/gnupg@2.4.7-21%2Bdeb13u1?arch=all\u0026distro=debian-13.4",
+            "UID": "2a5b5aeb33236"
+          },
+          "InstalledVersion": "2.4.7-21+deb13u1",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24882",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Stack-based buffer overflow in tpm2daemon allows arbitrary code execution",
+          "Description": "In GnuPG before 2.5.17, a stack-based buffer overflow exists in tpm2daemon during handling of the PKDECRYPT command for TPM-backed RSA and ECC keys.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-121"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:2719",
+            "https://access.redhat.com/security/cve/CVE-2026-24882",
+            "https://bugzilla.redhat.com/2433464",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433464",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-24882",
+            "https://dev.gnupg.org/T8045",
+            "https://errata.almalinux.org/10/ALSA-2026-2719.html",
+            "https://errata.rockylinux.org/RLSA-2026:2719",
+            "https://linux.oracle.com/cve/CVE-2026-24882.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2719.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24882",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24882",
+            "https://www.openwall.com/lists/oss-security/2026/01/27/8"
+          ],
+          "PublishedDate": "2026-01-27T19:16:16.67Z",
+          "LastModifiedDate": "2026-02-06T17:50:53.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24882",
+          "PkgID": "gnupg-l10n@2.4.7-21+deb13u1",
+          "PkgName": "gnupg-l10n",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/gnupg-l10n@2.4.7-21%2Bdeb13u1?arch=all\u0026distro=debian-13.4",
+            "UID": "7c8c8c8328e69db6"
+          },
+          "InstalledVersion": "2.4.7-21+deb13u1",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24882",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Stack-based buffer overflow in tpm2daemon allows arbitrary code execution",
+          "Description": "In GnuPG before 2.5.17, a stack-based buffer overflow exists in tpm2daemon during handling of the PKDECRYPT command for TPM-backed RSA and ECC keys.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-121"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:2719",
+            "https://access.redhat.com/security/cve/CVE-2026-24882",
+            "https://bugzilla.redhat.com/2433464",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433464",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-24882",
+            "https://dev.gnupg.org/T8045",
+            "https://errata.almalinux.org/10/ALSA-2026-2719.html",
+            "https://errata.rockylinux.org/RLSA-2026:2719",
+            "https://linux.oracle.com/cve/CVE-2026-24882.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2719.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24882",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24882",
+            "https://www.openwall.com/lists/oss-security/2026/01/27/8"
+          ],
+          "PublishedDate": "2026-01-27T19:16:16.67Z",
+          "LastModifiedDate": "2026-02-06T17:50:53.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24882",
+          "PkgID": "gpg@2.4.7-21+deb13u1+b2",
+          "PkgName": "gpg",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/gpg@2.4.7-21%2Bdeb13u1%2Bb2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "ea92f75d2d4542f9"
+          },
+          "InstalledVersion": "2.4.7-21+deb13u1+b2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24882",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Stack-based buffer overflow in tpm2daemon allows arbitrary code execution",
+          "Description": "In GnuPG before 2.5.17, a stack-based buffer overflow exists in tpm2daemon during handling of the PKDECRYPT command for TPM-backed RSA and ECC keys.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-121"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:2719",
+            "https://access.redhat.com/security/cve/CVE-2026-24882",
+            "https://bugzilla.redhat.com/2433464",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433464",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-24882",
+            "https://dev.gnupg.org/T8045",
+            "https://errata.almalinux.org/10/ALSA-2026-2719.html",
+            "https://errata.rockylinux.org/RLSA-2026:2719",
+            "https://linux.oracle.com/cve/CVE-2026-24882.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2719.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24882",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24882",
+            "https://www.openwall.com/lists/oss-security/2026/01/27/8"
+          ],
+          "PublishedDate": "2026-01-27T19:16:16.67Z",
+          "LastModifiedDate": "2026-02-06T17:50:53.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24882",
+          "PkgID": "gpg-agent@2.4.7-21+deb13u1+b2",
+          "PkgName": "gpg-agent",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/gpg-agent@2.4.7-21%2Bdeb13u1%2Bb2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "a0d69883fb2875f"
+          },
+          "InstalledVersion": "2.4.7-21+deb13u1+b2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24882",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Stack-based buffer overflow in tpm2daemon allows arbitrary code execution",
+          "Description": "In GnuPG before 2.5.17, a stack-based buffer overflow exists in tpm2daemon during handling of the PKDECRYPT command for TPM-backed RSA and ECC keys.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-121"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:2719",
+            "https://access.redhat.com/security/cve/CVE-2026-24882",
+            "https://bugzilla.redhat.com/2433464",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433464",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-24882",
+            "https://dev.gnupg.org/T8045",
+            "https://errata.almalinux.org/10/ALSA-2026-2719.html",
+            "https://errata.rockylinux.org/RLSA-2026:2719",
+            "https://linux.oracle.com/cve/CVE-2026-24882.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2719.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24882",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24882",
+            "https://www.openwall.com/lists/oss-security/2026/01/27/8"
+          ],
+          "PublishedDate": "2026-01-27T19:16:16.67Z",
+          "LastModifiedDate": "2026-02-06T17:50:53.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24882",
+          "PkgID": "gpgconf@2.4.7-21+deb13u1+b2",
+          "PkgName": "gpgconf",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/gpgconf@2.4.7-21%2Bdeb13u1%2Bb2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "178590de78be9867"
+          },
+          "InstalledVersion": "2.4.7-21+deb13u1+b2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24882",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Stack-based buffer overflow in tpm2daemon allows arbitrary code execution",
+          "Description": "In GnuPG before 2.5.17, a stack-based buffer overflow exists in tpm2daemon during handling of the PKDECRYPT command for TPM-backed RSA and ECC keys.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-121"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:2719",
+            "https://access.redhat.com/security/cve/CVE-2026-24882",
+            "https://bugzilla.redhat.com/2433464",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433464",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-24882",
+            "https://dev.gnupg.org/T8045",
+            "https://errata.almalinux.org/10/ALSA-2026-2719.html",
+            "https://errata.rockylinux.org/RLSA-2026:2719",
+            "https://linux.oracle.com/cve/CVE-2026-24882.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2719.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24882",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24882",
+            "https://www.openwall.com/lists/oss-security/2026/01/27/8"
+          ],
+          "PublishedDate": "2026-01-27T19:16:16.67Z",
+          "LastModifiedDate": "2026-02-06T17:50:53.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24882",
+          "PkgID": "gpgsm@2.4.7-21+deb13u1+b2",
+          "PkgName": "gpgsm",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/gpgsm@2.4.7-21%2Bdeb13u1%2Bb2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "b6449c57b5f73fc7"
+          },
+          "InstalledVersion": "2.4.7-21+deb13u1+b2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24882",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Stack-based buffer overflow in tpm2daemon allows arbitrary code execution",
+          "Description": "In GnuPG before 2.5.17, a stack-based buffer overflow exists in tpm2daemon during handling of the PKDECRYPT command for TPM-backed RSA and ECC keys.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-121"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:2719",
+            "https://access.redhat.com/security/cve/CVE-2026-24882",
+            "https://bugzilla.redhat.com/2433464",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433464",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-24882",
+            "https://dev.gnupg.org/T8045",
+            "https://errata.almalinux.org/10/ALSA-2026-2719.html",
+            "https://errata.rockylinux.org/RLSA-2026:2719",
+            "https://linux.oracle.com/cve/CVE-2026-24882.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2719.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24882",
+            "https://www.cve.org/CVERecord?id=CVE-2026-24882",
+            "https://www.openwall.com/lists/oss-security/2026/01/27/8"
+          ],
+          "PublishedDate": "2026-01-27T19:16:16.67Z",
+          "LastModifiedDate": "2026-02-06T17:50:53.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-25210",
+          "PkgID": "libexpat1@2.7.1-2",
+          "PkgName": "libexpat1",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libexpat1@2.7.1-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "c2e467a61b1e160e"
+          },
+          "InstalledVersion": "2.7.1-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25210",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "libexpat: libexpat: Information disclosure and data integrity issues due to integer overflow in buffer reallocation",
+          "Description": "In libexpat before 2.7.4, the doContent function does not properly determine the buffer size bufSize because there is no integer overflow check for tag buffer reallocation.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-190"
+          ],
+          "VendorSeverity": {
+            "amazon": 2,
+            "azure": 2,
+            "cbl-mariner": 2,
+            "nvd": 3,
+            "photon": 2,
+            "redhat": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:L",
+              "V3Score": 6.9
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-25210",
+            "https://github.com/libexpat/libexpat/pull/1075",
+            "https://github.com/libexpat/libexpat/pull/1075/commits/9c2d990389e6abe2e44527eeaa8b39f16fe859c7",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25210",
+            "https://ubuntu.com/security/notices/USN-8022-1",
+            "https://ubuntu.com/security/notices/USN-8022-2",
+            "https://ubuntu.com/security/notices/USN-8023-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25210"
+          ],
+          "PublishedDate": "2026-01-30T07:16:15.57Z",
+          "LastModifiedDate": "2026-03-10T18:17:12.78Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-13836",
+          "PkgID": "libpython3.13@3.13.5-2",
+          "PkgName": "libpython3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "ef4a81cbb47bb555"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:6a7b19158fc6bc79ff59f60b775bb76a090290f50e200b20b0ff5ebab07c35bb",
+            "DiffID": "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-13836",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Excessive read buffering DoS in http.client",
+          "Description": "When reading an HTTP response from a server, if no read amount is specified, the default behavior will be to use Content-Length. This allows a malicious server to cause the client to read large amounts of data into memory, potentially causing OOM or other DoS.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:L",
+              "V40Score": 6.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:N/A:H",
+              "V3Score": 6.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:1410",
+            "https://access.redhat.com/security/cve/CVE-2025-13836",
+            "https://bugzilla.redhat.com/2418078",
+            "https://bugzilla.redhat.com/2418655",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418078",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418655",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-12084",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-13836",
+            "https://errata.almalinux.org/9/ALSA-2026-1410.html",
+            "https://errata.rockylinux.org/RLSA-2026:1410",
+            "https://github.com/python/cpython/commit/14b1fdb0a94b96f86fc7b86671ea9582b8676628",
+            "https://github.com/python/cpython/commit/289f29b0fe38baf2d7cb5854f4bb573cc34a6a15",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155 (3.14 branch)",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5 (main)",
+            "https://github.com/python/cpython/commit/5dc101675fd22918facbbe0fecdc821502beaaf0",
+            "https://github.com/python/cpython/commit/afc40bdd3dd71f343fd9016f6d8eebbacbd6587c",
+            "https://github.com/python/cpython/issues/119451",
+            "https://github.com/python/cpython/pull/119454",
+            "https://linux.oracle.com/cve/CVE-2025-13836.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2419.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/OQ6G7MKRQIS3OAREC3HNG3D2DPOU34XO/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-13836",
+            "https://ubuntu.com/security/notices/USN-7951-1",
+            "https://www.cve.org/CVERecord?id=CVE-2025-13836"
+          ],
+          "PublishedDate": "2025-12-01T18:16:04.2Z",
+          "LastModifiedDate": "2026-02-10T19:58:12.13Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15366",
+          "PkgID": "libpython3.13@3.13.5-2",
+          "PkgName": "libpython3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "ef4a81cbb47bb555"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:6a7b19158fc6bc79ff59f60b775bb76a090290f50e200b20b0ff5ebab07c35bb",
+            "DiffID": "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15366",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: IMAP command injection in user-controlled commands",
+          "Description": "The imaplib module, when passed a user-controlled command, can have additional commands injected using newlines. Mitigation rejects commands containing control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15366",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/6262704b134db2a4ba12e85ecfbd968534f28b45",
+            "https://github.com/python/cpython/issues/143921",
+            "https://github.com/python/cpython/pull/143922",
+            "https://linux.oracle.com/cve/CVE-2025-15366.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/DD7C7JZJYTBXMDOWKCEIEBJLBRU64OMR/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15366",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15366"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.023Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15367",
+          "PkgID": "libpython3.13@3.13.5-2",
+          "PkgName": "libpython3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "ef4a81cbb47bb555"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:6a7b19158fc6bc79ff59f60b775bb76a090290f50e200b20b0ff5ebab07c35bb",
+            "DiffID": "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15367",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: POP3 command injection in user-controlled commands",
+          "Description": "The poplib module, when passed a user-controlled command, can have\nadditional commands injected using newlines. Mitigation rejects commands\ncontaining control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15367",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/b234a2b67539f787e191d2ef19a7cbdce32874e7",
+            "https://github.com/python/cpython/issues/143923",
+            "https://github.com/python/cpython/pull/143924",
+            "https://linux.oracle.com/cve/CVE-2025-15367.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/CBFBOWVGGUJFSGITQCCBZS4GEYYZ7ZNE/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15367",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15367"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.153Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-8194",
+          "PkgID": "libpython3.13@3.13.5-2",
+          "PkgName": "libpython3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "ef4a81cbb47bb555"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:6a7b19158fc6bc79ff59f60b775bb76a090290f50e200b20b0ff5ebab07c35bb",
+            "DiffID": "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-8194",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Cpython infinite loop when parsing a tarfile",
+          "Description": "There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \n\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 3,
+            "bitnami": 3,
+            "cbl-mariner": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/07/28/1",
+            "http://www.openwall.com/lists/oss-security/2025/07/28/2",
+            "https://access.redhat.com/errata/RHSA-2025:15019",
+            "https://access.redhat.com/security/cve/CVE-2025-8194",
+            "https://bugzilla.redhat.com/2384043",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2384043",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-8194",
+            "https://errata.almalinux.org/9/ALSA-2025-15019.html",
+            "https://errata.rockylinux.org/RLSA-2025:15019",
+            "https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+            "https://github.com/python/cpython/commit/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/commit/7040aa54f14676938970e10c5f74ea93cd56aa38",
+            "https://github.com/python/cpython/commit/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/commit/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/commit/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/commit/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/commit/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://github.com/python/cpython/issues/130577",
+            "https://github.com/python/cpython/pull/137027",
+            "https://github.com/python/cpython/pull/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/pull/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/pull/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/pull/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/pull/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/pull/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://linux.oracle.com/cve/CVE-2025-8194.html",
+            "https://linux.oracle.com/errata/ELSA-2025-16117.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/ZULLF3IZ726XP5EY7XJ7YIN3K5MDYR2D/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-8194",
+            "https://ubuntu.com/security/notices/USN-7710-1",
+            "https://ubuntu.com/security/notices/USN-7710-2",
+            "https://www.cve.org/CVERecord?id=CVE-2025-8194"
+          ],
+          "PublishedDate": "2025-07-28T19:15:43.793Z",
+          "LastModifiedDate": "2025-11-04T22:16:44.687Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-1299",
+          "PkgID": "libpython3.13@3.13.5-2",
+          "PkgName": "libpython3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "ef4a81cbb47bb555"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:6a7b19158fc6bc79ff59f60b775bb76a090290f50e200b20b0ff5ebab07c35bb",
+            "DiffID": "sha256:ae81f5a2899a4e0b2e6744e6f338c04886c8e17c5be74758396518003f682428"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-1299",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: email header injection due to unquoted newlines",
+          "Description": "The \nemail module, specifically the \"BytesGenerator\" class, didn’t properly quote newlines for email headers when \nserializing an email message allowing for header injection when an email\n is serialized. This is only applicable if using \"LiteralHeader\" writing headers that don't respect email folding rules, the new behavior will reject the incorrectly folded headers in \"BytesGenerator\".",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-93"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2026-1299",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://cve.org/CVERecord?id=CVE-2024-6923",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/052e55e7d44718fe46cbba0ca995cb8fcc359413",
+            "https://github.com/python/cpython/commit/0a925ab591c45d6638f37b5e57796f36fa0e56d8",
+            "https://github.com/python/cpython/commit/7877fe424415bc4a13045e62a90a7277413d8cb9",
+            "https://github.com/python/cpython/commit/842ce19a0c0b58d61591e8f6a708c38db1fb94e4",
+            "https://github.com/python/cpython/commit/8cdf6204f4ae821f32993f8fc6bad0d318f95f36",
+            "https://github.com/python/cpython/commit/e417f05ad77a4c30ddc07f99e90fc0cef43e831a",
+            "https://github.com/python/cpython/issues/144125",
+            "https://github.com/python/cpython/pull/144126",
+            "https://linux.oracle.com/cve/CVE-2026-1299.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/6ZZULGALJTITEAGEXLDJE2C6FORDXPBT/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-1299",
+            "https://www.cve.org/CVERecord?id=CVE-2026-1299"
+          ],
+          "PublishedDate": "2026-01-23T17:16:12.977Z",
+          "LastModifiedDate": "2026-02-13T17:16:12.943Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-13836",
+          "PkgID": "libpython3.13-minimal@3.13.5-2",
+          "PkgName": "libpython3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "2a0a5e2166be13c3"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-13836",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Excessive read buffering DoS in http.client",
+          "Description": "When reading an HTTP response from a server, if no read amount is specified, the default behavior will be to use Content-Length. This allows a malicious server to cause the client to read large amounts of data into memory, potentially causing OOM or other DoS.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:L",
+              "V40Score": 6.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:N/A:H",
+              "V3Score": 6.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:1410",
+            "https://access.redhat.com/security/cve/CVE-2025-13836",
+            "https://bugzilla.redhat.com/2418078",
+            "https://bugzilla.redhat.com/2418655",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418078",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418655",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-12084",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-13836",
+            "https://errata.almalinux.org/9/ALSA-2026-1410.html",
+            "https://errata.rockylinux.org/RLSA-2026:1410",
+            "https://github.com/python/cpython/commit/14b1fdb0a94b96f86fc7b86671ea9582b8676628",
+            "https://github.com/python/cpython/commit/289f29b0fe38baf2d7cb5854f4bb573cc34a6a15",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155 (3.14 branch)",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5 (main)",
+            "https://github.com/python/cpython/commit/5dc101675fd22918facbbe0fecdc821502beaaf0",
+            "https://github.com/python/cpython/commit/afc40bdd3dd71f343fd9016f6d8eebbacbd6587c",
+            "https://github.com/python/cpython/issues/119451",
+            "https://github.com/python/cpython/pull/119454",
+            "https://linux.oracle.com/cve/CVE-2025-13836.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2419.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/OQ6G7MKRQIS3OAREC3HNG3D2DPOU34XO/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-13836",
+            "https://ubuntu.com/security/notices/USN-7951-1",
+            "https://www.cve.org/CVERecord?id=CVE-2025-13836"
+          ],
+          "PublishedDate": "2025-12-01T18:16:04.2Z",
+          "LastModifiedDate": "2026-02-10T19:58:12.13Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15366",
+          "PkgID": "libpython3.13-minimal@3.13.5-2",
+          "PkgName": "libpython3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "2a0a5e2166be13c3"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15366",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: IMAP command injection in user-controlled commands",
+          "Description": "The imaplib module, when passed a user-controlled command, can have additional commands injected using newlines. Mitigation rejects commands containing control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15366",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/6262704b134db2a4ba12e85ecfbd968534f28b45",
+            "https://github.com/python/cpython/issues/143921",
+            "https://github.com/python/cpython/pull/143922",
+            "https://linux.oracle.com/cve/CVE-2025-15366.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/DD7C7JZJYTBXMDOWKCEIEBJLBRU64OMR/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15366",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15366"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.023Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15367",
+          "PkgID": "libpython3.13-minimal@3.13.5-2",
+          "PkgName": "libpython3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "2a0a5e2166be13c3"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15367",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: POP3 command injection in user-controlled commands",
+          "Description": "The poplib module, when passed a user-controlled command, can have\nadditional commands injected using newlines. Mitigation rejects commands\ncontaining control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15367",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/b234a2b67539f787e191d2ef19a7cbdce32874e7",
+            "https://github.com/python/cpython/issues/143923",
+            "https://github.com/python/cpython/pull/143924",
+            "https://linux.oracle.com/cve/CVE-2025-15367.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/CBFBOWVGGUJFSGITQCCBZS4GEYYZ7ZNE/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15367",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15367"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.153Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-8194",
+          "PkgID": "libpython3.13-minimal@3.13.5-2",
+          "PkgName": "libpython3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "2a0a5e2166be13c3"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-8194",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Cpython infinite loop when parsing a tarfile",
+          "Description": "There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \n\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 3,
+            "bitnami": 3,
+            "cbl-mariner": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/07/28/1",
+            "http://www.openwall.com/lists/oss-security/2025/07/28/2",
+            "https://access.redhat.com/errata/RHSA-2025:15019",
+            "https://access.redhat.com/security/cve/CVE-2025-8194",
+            "https://bugzilla.redhat.com/2384043",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2384043",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-8194",
+            "https://errata.almalinux.org/9/ALSA-2025-15019.html",
+            "https://errata.rockylinux.org/RLSA-2025:15019",
+            "https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+            "https://github.com/python/cpython/commit/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/commit/7040aa54f14676938970e10c5f74ea93cd56aa38",
+            "https://github.com/python/cpython/commit/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/commit/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/commit/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/commit/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/commit/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://github.com/python/cpython/issues/130577",
+            "https://github.com/python/cpython/pull/137027",
+            "https://github.com/python/cpython/pull/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/pull/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/pull/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/pull/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/pull/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/pull/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://linux.oracle.com/cve/CVE-2025-8194.html",
+            "https://linux.oracle.com/errata/ELSA-2025-16117.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/ZULLF3IZ726XP5EY7XJ7YIN3K5MDYR2D/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-8194",
+            "https://ubuntu.com/security/notices/USN-7710-1",
+            "https://ubuntu.com/security/notices/USN-7710-2",
+            "https://www.cve.org/CVERecord?id=CVE-2025-8194"
+          ],
+          "PublishedDate": "2025-07-28T19:15:43.793Z",
+          "LastModifiedDate": "2025-11-04T22:16:44.687Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-1299",
+          "PkgID": "libpython3.13-minimal@3.13.5-2",
+          "PkgName": "libpython3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "2a0a5e2166be13c3"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-1299",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: email header injection due to unquoted newlines",
+          "Description": "The \nemail module, specifically the \"BytesGenerator\" class, didn’t properly quote newlines for email headers when \nserializing an email message allowing for header injection when an email\n is serialized. This is only applicable if using \"LiteralHeader\" writing headers that don't respect email folding rules, the new behavior will reject the incorrectly folded headers in \"BytesGenerator\".",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-93"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2026-1299",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://cve.org/CVERecord?id=CVE-2024-6923",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/052e55e7d44718fe46cbba0ca995cb8fcc359413",
+            "https://github.com/python/cpython/commit/0a925ab591c45d6638f37b5e57796f36fa0e56d8",
+            "https://github.com/python/cpython/commit/7877fe424415bc4a13045e62a90a7277413d8cb9",
+            "https://github.com/python/cpython/commit/842ce19a0c0b58d61591e8f6a708c38db1fb94e4",
+            "https://github.com/python/cpython/commit/8cdf6204f4ae821f32993f8fc6bad0d318f95f36",
+            "https://github.com/python/cpython/commit/e417f05ad77a4c30ddc07f99e90fc0cef43e831a",
+            "https://github.com/python/cpython/issues/144125",
+            "https://github.com/python/cpython/pull/144126",
+            "https://linux.oracle.com/cve/CVE-2026-1299.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/6ZZULGALJTITEAGEXLDJE2C6FORDXPBT/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-1299",
+            "https://www.cve.org/CVERecord?id=CVE-2026-1299"
+          ],
+          "PublishedDate": "2026-01-23T17:16:12.977Z",
+          "LastModifiedDate": "2026-02-13T17:16:12.943Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-13836",
+          "PkgID": "libpython3.13-stdlib@3.13.5-2",
+          "PkgName": "libpython3.13-stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-stdlib@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9c093477b460d4c5"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-13836",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Excessive read buffering DoS in http.client",
+          "Description": "When reading an HTTP response from a server, if no read amount is specified, the default behavior will be to use Content-Length. This allows a malicious server to cause the client to read large amounts of data into memory, potentially causing OOM or other DoS.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:L",
+              "V40Score": 6.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:N/A:H",
+              "V3Score": 6.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:1410",
+            "https://access.redhat.com/security/cve/CVE-2025-13836",
+            "https://bugzilla.redhat.com/2418078",
+            "https://bugzilla.redhat.com/2418655",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418078",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418655",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-12084",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-13836",
+            "https://errata.almalinux.org/9/ALSA-2026-1410.html",
+            "https://errata.rockylinux.org/RLSA-2026:1410",
+            "https://github.com/python/cpython/commit/14b1fdb0a94b96f86fc7b86671ea9582b8676628",
+            "https://github.com/python/cpython/commit/289f29b0fe38baf2d7cb5854f4bb573cc34a6a15",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155 (3.14 branch)",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5 (main)",
+            "https://github.com/python/cpython/commit/5dc101675fd22918facbbe0fecdc821502beaaf0",
+            "https://github.com/python/cpython/commit/afc40bdd3dd71f343fd9016f6d8eebbacbd6587c",
+            "https://github.com/python/cpython/issues/119451",
+            "https://github.com/python/cpython/pull/119454",
+            "https://linux.oracle.com/cve/CVE-2025-13836.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2419.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/OQ6G7MKRQIS3OAREC3HNG3D2DPOU34XO/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-13836",
+            "https://ubuntu.com/security/notices/USN-7951-1",
+            "https://www.cve.org/CVERecord?id=CVE-2025-13836"
+          ],
+          "PublishedDate": "2025-12-01T18:16:04.2Z",
+          "LastModifiedDate": "2026-02-10T19:58:12.13Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15366",
+          "PkgID": "libpython3.13-stdlib@3.13.5-2",
+          "PkgName": "libpython3.13-stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-stdlib@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9c093477b460d4c5"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15366",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: IMAP command injection in user-controlled commands",
+          "Description": "The imaplib module, when passed a user-controlled command, can have additional commands injected using newlines. Mitigation rejects commands containing control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15366",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/6262704b134db2a4ba12e85ecfbd968534f28b45",
+            "https://github.com/python/cpython/issues/143921",
+            "https://github.com/python/cpython/pull/143922",
+            "https://linux.oracle.com/cve/CVE-2025-15366.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/DD7C7JZJYTBXMDOWKCEIEBJLBRU64OMR/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15366",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15366"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.023Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15367",
+          "PkgID": "libpython3.13-stdlib@3.13.5-2",
+          "PkgName": "libpython3.13-stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-stdlib@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9c093477b460d4c5"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15367",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: POP3 command injection in user-controlled commands",
+          "Description": "The poplib module, when passed a user-controlled command, can have\nadditional commands injected using newlines. Mitigation rejects commands\ncontaining control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15367",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/b234a2b67539f787e191d2ef19a7cbdce32874e7",
+            "https://github.com/python/cpython/issues/143923",
+            "https://github.com/python/cpython/pull/143924",
+            "https://linux.oracle.com/cve/CVE-2025-15367.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/CBFBOWVGGUJFSGITQCCBZS4GEYYZ7ZNE/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15367",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15367"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.153Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-8194",
+          "PkgID": "libpython3.13-stdlib@3.13.5-2",
+          "PkgName": "libpython3.13-stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-stdlib@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9c093477b460d4c5"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-8194",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Cpython infinite loop when parsing a tarfile",
+          "Description": "There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \n\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 3,
+            "bitnami": 3,
+            "cbl-mariner": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/07/28/1",
+            "http://www.openwall.com/lists/oss-security/2025/07/28/2",
+            "https://access.redhat.com/errata/RHSA-2025:15019",
+            "https://access.redhat.com/security/cve/CVE-2025-8194",
+            "https://bugzilla.redhat.com/2384043",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2384043",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-8194",
+            "https://errata.almalinux.org/9/ALSA-2025-15019.html",
+            "https://errata.rockylinux.org/RLSA-2025:15019",
+            "https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+            "https://github.com/python/cpython/commit/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/commit/7040aa54f14676938970e10c5f74ea93cd56aa38",
+            "https://github.com/python/cpython/commit/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/commit/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/commit/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/commit/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/commit/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://github.com/python/cpython/issues/130577",
+            "https://github.com/python/cpython/pull/137027",
+            "https://github.com/python/cpython/pull/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/pull/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/pull/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/pull/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/pull/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/pull/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://linux.oracle.com/cve/CVE-2025-8194.html",
+            "https://linux.oracle.com/errata/ELSA-2025-16117.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/ZULLF3IZ726XP5EY7XJ7YIN3K5MDYR2D/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-8194",
+            "https://ubuntu.com/security/notices/USN-7710-1",
+            "https://ubuntu.com/security/notices/USN-7710-2",
+            "https://www.cve.org/CVERecord?id=CVE-2025-8194"
+          ],
+          "PublishedDate": "2025-07-28T19:15:43.793Z",
+          "LastModifiedDate": "2025-11-04T22:16:44.687Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-1299",
+          "PkgID": "libpython3.13-stdlib@3.13.5-2",
+          "PkgName": "libpython3.13-stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libpython3.13-stdlib@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9c093477b460d4c5"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-1299",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: email header injection due to unquoted newlines",
+          "Description": "The \nemail module, specifically the \"BytesGenerator\" class, didn’t properly quote newlines for email headers when \nserializing an email message allowing for header injection when an email\n is serialized. This is only applicable if using \"LiteralHeader\" writing headers that don't respect email folding rules, the new behavior will reject the incorrectly folded headers in \"BytesGenerator\".",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-93"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2026-1299",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://cve.org/CVERecord?id=CVE-2024-6923",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/052e55e7d44718fe46cbba0ca995cb8fcc359413",
+            "https://github.com/python/cpython/commit/0a925ab591c45d6638f37b5e57796f36fa0e56d8",
+            "https://github.com/python/cpython/commit/7877fe424415bc4a13045e62a90a7277413d8cb9",
+            "https://github.com/python/cpython/commit/842ce19a0c0b58d61591e8f6a708c38db1fb94e4",
+            "https://github.com/python/cpython/commit/8cdf6204f4ae821f32993f8fc6bad0d318f95f36",
+            "https://github.com/python/cpython/commit/e417f05ad77a4c30ddc07f99e90fc0cef43e831a",
+            "https://github.com/python/cpython/issues/144125",
+            "https://github.com/python/cpython/pull/144126",
+            "https://linux.oracle.com/cve/CVE-2026-1299.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/6ZZULGALJTITEAGEXLDJE2C6FORDXPBT/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-1299",
+            "https://www.cve.org/CVERecord?id=CVE-2026-1299"
+          ],
+          "PublishedDate": "2026-01-23T17:16:12.977Z",
+          "LastModifiedDate": "2026-02-13T17:16:12.943Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-23949",
+          "PkgID": "python3-pkg-resources@78.1.1-0.1",
+          "PkgName": "python3-pkg-resources",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3-pkg-resources@78.1.1-0.1?arch=all\u0026distro=debian-13.4",
+            "UID": "7b4019562cca991e"
+          },
+          "InstalledVersion": "78.1.1-0.1",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-23949",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "jaraco.context: jaraco.context: Path traversal via malicious tar archives",
+          "Description": "jaraco.context, an open-source software package that provides some useful decorators and context managers, has a Zip Slip path traversal vulnerability in the `jaraco.context.tarball()` function starting in version 5.2.0 and prior to version 6.1.0. The vulnerability may allow attackers to extract files outside the intended extraction directory when malicious tar archives are processed. The strip_first_component filter splits the path on the first `/` and extracts the second component, while allowing `../` sequences. Paths like `dummy_dir/../../etc/passwd` become `../../etc/passwd`. Note that this suffers from a nested tarball attack as well with multi-level tar files such as `dummy_dir/inner.tar.gz`, where the inner.tar.gz includes a traversal `dummy_dir/../../config/.env` that also gets translated to `../../config/.env`. Version 6.1.0 contains a patch for the issue.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-22"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N",
+              "V3Score": 8.6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N",
+              "V3Score": 8.6
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-23949",
+            "https://github.com/jaraco/jaraco.context",
+            "https://github.com/jaraco/jaraco.context/blob/main/jaraco/context/__init__.py#L74-L91",
+            "https://github.com/jaraco/jaraco.context/commit/7b26a42b525735e4085d2e994e13802ea339d5f9",
+            "https://github.com/jaraco/jaraco.context/security/advisories/GHSA-58pv-8j8x-9vj2",
+            "https://github.com/pypa/setuptools/blob/main/setuptools/_vendor/jaraco/context.py#L55-L76",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-23949",
+            "https://ubuntu.com/security/notices/USN-7979-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-23949"
+          ],
+          "PublishedDate": "2026-01-20T01:15:57.723Z",
+          "LastModifiedDate": "2026-03-11T23:12:19.323Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-23949",
+          "PkgID": "python3-setuptools@78.1.1-0.1",
+          "PkgName": "python3-setuptools",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3-setuptools@78.1.1-0.1?arch=all\u0026distro=debian-13.4",
+            "UID": "758aad1b9006e32a"
+          },
+          "InstalledVersion": "78.1.1-0.1",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-23949",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "jaraco.context: jaraco.context: Path traversal via malicious tar archives",
+          "Description": "jaraco.context, an open-source software package that provides some useful decorators and context managers, has a Zip Slip path traversal vulnerability in the `jaraco.context.tarball()` function starting in version 5.2.0 and prior to version 6.1.0. The vulnerability may allow attackers to extract files outside the intended extraction directory when malicious tar archives are processed. The strip_first_component filter splits the path on the first `/` and extracts the second component, while allowing `../` sequences. Paths like `dummy_dir/../../etc/passwd` become `../../etc/passwd`. Note that this suffers from a nested tarball attack as well with multi-level tar files such as `dummy_dir/inner.tar.gz`, where the inner.tar.gz includes a traversal `dummy_dir/../../config/.env` that also gets translated to `../../config/.env`. Version 6.1.0 contains a patch for the issue.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-22"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N",
+              "V3Score": 8.6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N",
+              "V3Score": 8.6
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-23949",
+            "https://github.com/jaraco/jaraco.context",
+            "https://github.com/jaraco/jaraco.context/blob/main/jaraco/context/__init__.py#L74-L91",
+            "https://github.com/jaraco/jaraco.context/commit/7b26a42b525735e4085d2e994e13802ea339d5f9",
+            "https://github.com/jaraco/jaraco.context/security/advisories/GHSA-58pv-8j8x-9vj2",
+            "https://github.com/pypa/setuptools/blob/main/setuptools/_vendor/jaraco/context.py#L55-L76",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-23949",
+            "https://ubuntu.com/security/notices/USN-7979-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-23949"
+          ],
+          "PublishedDate": "2026-01-20T01:15:57.723Z",
+          "LastModifiedDate": "2026-03-11T23:12:19.323Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-13836",
+          "PkgID": "python3.13@3.13.5-2",
+          "PkgName": "python3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9f8d0f47ef418f53"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-13836",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Excessive read buffering DoS in http.client",
+          "Description": "When reading an HTTP response from a server, if no read amount is specified, the default behavior will be to use Content-Length. This allows a malicious server to cause the client to read large amounts of data into memory, potentially causing OOM or other DoS.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:L",
+              "V40Score": 6.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:N/A:H",
+              "V3Score": 6.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:1410",
+            "https://access.redhat.com/security/cve/CVE-2025-13836",
+            "https://bugzilla.redhat.com/2418078",
+            "https://bugzilla.redhat.com/2418655",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418078",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418655",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-12084",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-13836",
+            "https://errata.almalinux.org/9/ALSA-2026-1410.html",
+            "https://errata.rockylinux.org/RLSA-2026:1410",
+            "https://github.com/python/cpython/commit/14b1fdb0a94b96f86fc7b86671ea9582b8676628",
+            "https://github.com/python/cpython/commit/289f29b0fe38baf2d7cb5854f4bb573cc34a6a15",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155 (3.14 branch)",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5 (main)",
+            "https://github.com/python/cpython/commit/5dc101675fd22918facbbe0fecdc821502beaaf0",
+            "https://github.com/python/cpython/commit/afc40bdd3dd71f343fd9016f6d8eebbacbd6587c",
+            "https://github.com/python/cpython/issues/119451",
+            "https://github.com/python/cpython/pull/119454",
+            "https://linux.oracle.com/cve/CVE-2025-13836.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2419.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/OQ6G7MKRQIS3OAREC3HNG3D2DPOU34XO/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-13836",
+            "https://ubuntu.com/security/notices/USN-7951-1",
+            "https://www.cve.org/CVERecord?id=CVE-2025-13836"
+          ],
+          "PublishedDate": "2025-12-01T18:16:04.2Z",
+          "LastModifiedDate": "2026-02-10T19:58:12.13Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15366",
+          "PkgID": "python3.13@3.13.5-2",
+          "PkgName": "python3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9f8d0f47ef418f53"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15366",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: IMAP command injection in user-controlled commands",
+          "Description": "The imaplib module, when passed a user-controlled command, can have additional commands injected using newlines. Mitigation rejects commands containing control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15366",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/6262704b134db2a4ba12e85ecfbd968534f28b45",
+            "https://github.com/python/cpython/issues/143921",
+            "https://github.com/python/cpython/pull/143922",
+            "https://linux.oracle.com/cve/CVE-2025-15366.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/DD7C7JZJYTBXMDOWKCEIEBJLBRU64OMR/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15366",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15366"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.023Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15367",
+          "PkgID": "python3.13@3.13.5-2",
+          "PkgName": "python3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9f8d0f47ef418f53"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15367",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: POP3 command injection in user-controlled commands",
+          "Description": "The poplib module, when passed a user-controlled command, can have\nadditional commands injected using newlines. Mitigation rejects commands\ncontaining control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15367",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/b234a2b67539f787e191d2ef19a7cbdce32874e7",
+            "https://github.com/python/cpython/issues/143923",
+            "https://github.com/python/cpython/pull/143924",
+            "https://linux.oracle.com/cve/CVE-2025-15367.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/CBFBOWVGGUJFSGITQCCBZS4GEYYZ7ZNE/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15367",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15367"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.153Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-8194",
+          "PkgID": "python3.13@3.13.5-2",
+          "PkgName": "python3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9f8d0f47ef418f53"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-8194",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Cpython infinite loop when parsing a tarfile",
+          "Description": "There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \n\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 3,
+            "bitnami": 3,
+            "cbl-mariner": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/07/28/1",
+            "http://www.openwall.com/lists/oss-security/2025/07/28/2",
+            "https://access.redhat.com/errata/RHSA-2025:15019",
+            "https://access.redhat.com/security/cve/CVE-2025-8194",
+            "https://bugzilla.redhat.com/2384043",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2384043",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-8194",
+            "https://errata.almalinux.org/9/ALSA-2025-15019.html",
+            "https://errata.rockylinux.org/RLSA-2025:15019",
+            "https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+            "https://github.com/python/cpython/commit/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/commit/7040aa54f14676938970e10c5f74ea93cd56aa38",
+            "https://github.com/python/cpython/commit/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/commit/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/commit/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/commit/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/commit/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://github.com/python/cpython/issues/130577",
+            "https://github.com/python/cpython/pull/137027",
+            "https://github.com/python/cpython/pull/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/pull/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/pull/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/pull/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/pull/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/pull/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://linux.oracle.com/cve/CVE-2025-8194.html",
+            "https://linux.oracle.com/errata/ELSA-2025-16117.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/ZULLF3IZ726XP5EY7XJ7YIN3K5MDYR2D/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-8194",
+            "https://ubuntu.com/security/notices/USN-7710-1",
+            "https://ubuntu.com/security/notices/USN-7710-2",
+            "https://www.cve.org/CVERecord?id=CVE-2025-8194"
+          ],
+          "PublishedDate": "2025-07-28T19:15:43.793Z",
+          "LastModifiedDate": "2025-11-04T22:16:44.687Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-1299",
+          "PkgID": "python3.13@3.13.5-2",
+          "PkgName": "python3.13",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "9f8d0f47ef418f53"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-1299",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: email header injection due to unquoted newlines",
+          "Description": "The \nemail module, specifically the \"BytesGenerator\" class, didn’t properly quote newlines for email headers when \nserializing an email message allowing for header injection when an email\n is serialized. This is only applicable if using \"LiteralHeader\" writing headers that don't respect email folding rules, the new behavior will reject the incorrectly folded headers in \"BytesGenerator\".",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-93"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2026-1299",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://cve.org/CVERecord?id=CVE-2024-6923",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/052e55e7d44718fe46cbba0ca995cb8fcc359413",
+            "https://github.com/python/cpython/commit/0a925ab591c45d6638f37b5e57796f36fa0e56d8",
+            "https://github.com/python/cpython/commit/7877fe424415bc4a13045e62a90a7277413d8cb9",
+            "https://github.com/python/cpython/commit/842ce19a0c0b58d61591e8f6a708c38db1fb94e4",
+            "https://github.com/python/cpython/commit/8cdf6204f4ae821f32993f8fc6bad0d318f95f36",
+            "https://github.com/python/cpython/commit/e417f05ad77a4c30ddc07f99e90fc0cef43e831a",
+            "https://github.com/python/cpython/issues/144125",
+            "https://github.com/python/cpython/pull/144126",
+            "https://linux.oracle.com/cve/CVE-2026-1299.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/6ZZULGALJTITEAGEXLDJE2C6FORDXPBT/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-1299",
+            "https://www.cve.org/CVERecord?id=CVE-2026-1299"
+          ],
+          "PublishedDate": "2026-01-23T17:16:12.977Z",
+          "LastModifiedDate": "2026-02-13T17:16:12.943Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-13836",
+          "PkgID": "python3.13-minimal@3.13.5-2",
+          "PkgName": "python3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "bb898697d4ca51ce"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-13836",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Excessive read buffering DoS in http.client",
+          "Description": "When reading an HTTP response from a server, if no read amount is specified, the default behavior will be to use Content-Length. This allows a malicious server to cause the client to read large amounts of data into memory, potentially causing OOM or other DoS.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:L",
+              "V40Score": 6.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:N/A:H",
+              "V3Score": 6.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:1410",
+            "https://access.redhat.com/security/cve/CVE-2025-13836",
+            "https://bugzilla.redhat.com/2418078",
+            "https://bugzilla.redhat.com/2418655",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418078",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418655",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-12084",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-13836",
+            "https://errata.almalinux.org/9/ALSA-2026-1410.html",
+            "https://errata.rockylinux.org/RLSA-2026:1410",
+            "https://github.com/python/cpython/commit/14b1fdb0a94b96f86fc7b86671ea9582b8676628",
+            "https://github.com/python/cpython/commit/289f29b0fe38baf2d7cb5854f4bb573cc34a6a15",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155",
+            "https://github.com/python/cpython/commit/4ce27904b597c77d74dd93f2c912676021a99155 (3.14 branch)",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5",
+            "https://github.com/python/cpython/commit/5a4c4a033a4a54481be6870aa1896fad732555b5 (main)",
+            "https://github.com/python/cpython/commit/5dc101675fd22918facbbe0fecdc821502beaaf0",
+            "https://github.com/python/cpython/commit/afc40bdd3dd71f343fd9016f6d8eebbacbd6587c",
+            "https://github.com/python/cpython/issues/119451",
+            "https://github.com/python/cpython/pull/119454",
+            "https://linux.oracle.com/cve/CVE-2025-13836.html",
+            "https://linux.oracle.com/errata/ELSA-2026-2419.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/OQ6G7MKRQIS3OAREC3HNG3D2DPOU34XO/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-13836",
+            "https://ubuntu.com/security/notices/USN-7951-1",
+            "https://www.cve.org/CVERecord?id=CVE-2025-13836"
+          ],
+          "PublishedDate": "2025-12-01T18:16:04.2Z",
+          "LastModifiedDate": "2026-02-10T19:58:12.13Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15366",
+          "PkgID": "python3.13-minimal@3.13.5-2",
+          "PkgName": "python3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "bb898697d4ca51ce"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15366",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: IMAP command injection in user-controlled commands",
+          "Description": "The imaplib module, when passed a user-controlled command, can have additional commands injected using newlines. Mitigation rejects commands containing control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15366",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/6262704b134db2a4ba12e85ecfbd968534f28b45",
+            "https://github.com/python/cpython/issues/143921",
+            "https://github.com/python/cpython/pull/143922",
+            "https://linux.oracle.com/cve/CVE-2025-15366.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/DD7C7JZJYTBXMDOWKCEIEBJLBRU64OMR/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15366",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15366"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.023Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15367",
+          "PkgID": "python3.13-minimal@3.13.5-2",
+          "PkgName": "python3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "bb898697d4ca51ce"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15367",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: POP3 command injection in user-controlled commands",
+          "Description": "The poplib module, when passed a user-controlled command, can have\nadditional commands injected using newlines. Mitigation rejects commands\ncontaining control characters.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2025-15367",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/b234a2b67539f787e191d2ef19a7cbdce32874e7",
+            "https://github.com/python/cpython/issues/143923",
+            "https://github.com/python/cpython/pull/143924",
+            "https://linux.oracle.com/cve/CVE-2025-15367.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/CBFBOWVGGUJFSGITQCCBZS4GEYYZ7ZNE/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15367",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15367"
+          ],
+          "PublishedDate": "2026-01-20T22:15:51.153Z",
+          "LastModifiedDate": "2026-01-26T15:05:23.427Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-8194",
+          "PkgID": "python3.13-minimal@3.13.5-2",
+          "PkgName": "python3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "bb898697d4ca51ce"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-8194",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: Cpython infinite loop when parsing a tarfile",
+          "Description": "There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \n\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 3,
+            "bitnami": 3,
+            "cbl-mariner": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/07/28/1",
+            "http://www.openwall.com/lists/oss-security/2025/07/28/2",
+            "https://access.redhat.com/errata/RHSA-2025:15019",
+            "https://access.redhat.com/security/cve/CVE-2025-8194",
+            "https://bugzilla.redhat.com/2384043",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2384043",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-8194",
+            "https://errata.almalinux.org/9/ALSA-2025-15019.html",
+            "https://errata.rockylinux.org/RLSA-2025:15019",
+            "https://gist.github.com/sethmlarson/1716ac5b82b73dbcbf23ad2eff8b33e1",
+            "https://github.com/python/cpython/commit/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/commit/7040aa54f14676938970e10c5f74ea93cd56aa38",
+            "https://github.com/python/cpython/commit/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/commit/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/commit/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/commit/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/commit/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://github.com/python/cpython/issues/130577",
+            "https://github.com/python/cpython/pull/137027",
+            "https://github.com/python/cpython/pull/57f5981d6260ed21266e0c26951b8564cc252bc2",
+            "https://github.com/python/cpython/pull/73f03e4808206f71eb6b92c579505a220942ef19",
+            "https://github.com/python/cpython/pull/b4ec17488eedec36d3c05fec127df71c0071f6cb",
+            "https://github.com/python/cpython/pull/c9d9f78feb1467e73fd29356c040bde1c104f29f",
+            "https://github.com/python/cpython/pull/cdae923ffe187d6ef916c0f665a31249619193fe",
+            "https://github.com/python/cpython/pull/fbc2a0ca9ac8aff6887f8ddf79b87b4510277227",
+            "https://linux.oracle.com/cve/CVE-2025-8194.html",
+            "https://linux.oracle.com/errata/ELSA-2025-16117.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/ZULLF3IZ726XP5EY7XJ7YIN3K5MDYR2D/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-8194",
+            "https://ubuntu.com/security/notices/USN-7710-1",
+            "https://ubuntu.com/security/notices/USN-7710-2",
+            "https://www.cve.org/CVERecord?id=CVE-2025-8194"
+          ],
+          "PublishedDate": "2025-07-28T19:15:43.793Z",
+          "LastModifiedDate": "2025-11-04T22:16:44.687Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-1299",
+          "PkgID": "python3.13-minimal@3.13.5-2",
+          "PkgName": "python3.13-minimal",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/python3.13-minimal@3.13.5-2?arch=amd64\u0026distro=debian-13.4",
+            "UID": "bb898697d4ca51ce"
+          },
+          "InstalledVersion": "3.13.5-2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:e3f611c390fed330c1acb08bcb3114bb175955cd18418d7fb223c54aa693b5a3",
+            "DiffID": "sha256:1441e003bcb4ca50e5d2ab08ffc2d55f9f8d42406b70728315d280916542896c"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-1299",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "cpython: email header injection due to unquoted newlines",
+          "Description": "The \nemail module, specifically the \"BytesGenerator\" class, didn’t properly quote newlines for email headers when \nserializing an email message allowing for header injection when an email\n is serialized. This is only applicable if using \"LiteralHeader\" writing headers that don't respect email folding rules, the new behavior will reject the incorrectly folded headers in \"BytesGenerator\".",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-93"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4216",
+            "https://access.redhat.com/security/cve/CVE-2026-1299",
+            "https://bugzilla.redhat.com/2431368",
+            "https://bugzilla.redhat.com/2431373",
+            "https://bugzilla.redhat.com/2432437",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431367",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431368",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2431373",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2432437",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15366",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-15367",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-0865",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-1299",
+            "https://cve.org/CVERecord?id=CVE-2024-6923",
+            "https://errata.almalinux.org/9/ALSA-2026-4216.html",
+            "https://errata.rockylinux.org/RLSA-2026:4168",
+            "https://github.com/python/cpython/commit/052e55e7d44718fe46cbba0ca995cb8fcc359413",
+            "https://github.com/python/cpython/commit/0a925ab591c45d6638f37b5e57796f36fa0e56d8",
+            "https://github.com/python/cpython/commit/7877fe424415bc4a13045e62a90a7277413d8cb9",
+            "https://github.com/python/cpython/commit/842ce19a0c0b58d61591e8f6a708c38db1fb94e4",
+            "https://github.com/python/cpython/commit/8cdf6204f4ae821f32993f8fc6bad0d318f95f36",
+            "https://github.com/python/cpython/commit/e417f05ad77a4c30ddc07f99e90fc0cef43e831a",
+            "https://github.com/python/cpython/issues/144125",
+            "https://github.com/python/cpython/pull/144126",
+            "https://linux.oracle.com/cve/CVE-2026-1299.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4713.html",
+            "https://mail.python.org/archives/list/security-announce@python.org/thread/6ZZULGALJTITEAGEXLDJE2C6FORDXPBT/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-1299",
+            "https://www.cve.org/CVERecord?id=CVE-2026-1299"
+          ],
+          "PublishedDate": "2026-01-23T17:16:12.977Z",
+          "LastModifiedDate": "2026-02-13T17:16:12.943Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2022-4055",
+          "PkgID": "xdg-utils@1.2.1-2",
+          "PkgName": "xdg-utils",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/xdg-utils@1.2.1-2?arch=all\u0026distro=debian-13.4",
+            "UID": "cf1423da2c390770"
+          },
+          "InstalledVersion": "1.2.1-2",
+          "Status": "fix_deferred",
+          "Layer": {
+            "Digest": "sha256:229039db264c05a23705f4995b0eb86ecc2970af325c4e05735822751ec0a8e0",
+            "DiffID": "sha256:e7ed9794b1e7c999625042eae045b02b60a6a11ae97a4862d5269ea08849a236"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-4055",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "xdg-utils: improper parse of mailto URIs allows bypass of Thunderbird security mechanism for attachments",
+          "Description": "When xdg-mail is configured to use thunderbird for mailto URLs, improper parsing of the URL can lead to additional headers being passed to thunderbird that should not be included per RFC 2368. An attacker can use this method to create a mailto URL that looks safe to users, but will actually attach files when clicked.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-146"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 1
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:N/I:H/A:N",
+              "V3Score": 7.4
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:N/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2025:7672",
+            "https://access.redhat.com/security/cve/CVE-2022-4055",
+            "https://bugzilla.redhat.com/2143792",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2143792",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-4055",
+            "https://errata.almalinux.org/9/ALSA-2025-7672.html",
+            "https://errata.rockylinux.org/RLSA-2025:7672",
+            "https://gitlab.freedesktop.org/xdg/xdg-utils/-/issues/205",
+            "https://gitlab.freedesktop.org/xdg/xdg-utils/-/issues/205#note_1494267",
+            "https://linux.oracle.com/cve/CVE-2022-4055.html",
+            "https://linux.oracle.com/errata/ELSA-2025-7672.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-4055",
+            "https://www.cve.org/CVERecord?id=CVE-2022-4055"
+          ],
+          "PublishedDate": "2022-11-19T00:15:31.003Z",
+          "LastModifiedDate": "2025-04-29T19:15:53.337Z"
+        }
+      ]
+    },
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar"
+    },
+    {
+      "Target": "usr/bin/gotenberg",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-25679",
+          "PkgID": "stdlib@v1.26.0",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.26.0",
+            "UID": "4450f1cf391c3237"
+          },
+          "InstalledVersion": "v1.26.0",
+          "FixedVersion": "1.25.8, 1.26.1",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:f4b8cc7e55a0a5fa22ca8e0afa62f74c2c68397092c6c050df0b8520978b175c",
+            "DiffID": "sha256:1983043f699d1d168d28af573a7dbb53d9b75961a508ecbf68da30d5a49a4a91"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25679",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "net/url: Incorrect parsing of IPv6 host literals in net/url",
+          "Description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "bitnami": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-25679",
+            "https://go.dev/cl/752180",
+            "https://go.dev/issue/77578",
+            "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25679",
+            "https://pkg.go.dev/vuln/GO-2026-4601",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25679"
+          ],
+          "PublishedDate": "2026-03-06T22:16:00.72Z",
+          "LastModifiedDate": "2026-03-10T18:18:37.74Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-27137",
+          "PkgID": "stdlib@v1.26.0",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.26.0",
+            "UID": "4450f1cf391c3237"
+          },
+          "InstalledVersion": "v1.26.0",
+          "FixedVersion": "1.26.1",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:f4b8cc7e55a0a5fa22ca8e0afa62f74c2c68397092c6c050df0b8520978b175c",
+            "DiffID": "sha256:1983043f699d1d168d28af573a7dbb53d9b75961a508ecbf68da30d5a49a4a91"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27137",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "crypto/x509: Incorrect enforcement of email constraints in crypto/x509",
+          "Description": "When verifying a certificate chain which contains a certificate containing multiple email address constraints which share common local portions but different domain portions, these constraints will not be properly applied, and only the last constraint will be considered.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "azure": 2,
+            "bitnami": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-27137",
+            "https://go.dev/cl/752182",
+            "https://go.dev/issue/77952",
+            "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-27137",
+            "https://pkg.go.dev/vuln/GO-2026-4599",
+            "https://www.cve.org/CVERecord?id=CVE-2026-27137"
+          ],
+          "PublishedDate": "2026-03-06T22:16:00.85Z",
+          "LastModifiedDate": "2026-03-10T18:18:44.163Z"
+        }
+      ]
+    },
+    {
+      "Target": "usr/bin/pdfcpu",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-25679",
+          "PkgID": "stdlib@v1.26.0",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.26.0",
+            "UID": "f6d732f1e4849ca2"
+          },
+          "InstalledVersion": "v1.26.0",
+          "FixedVersion": "1.25.8, 1.26.1",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:9eb831f0bb7c47228ea0aec56559c602c7a8adb9256761703ec14cc9bf369b50",
+            "DiffID": "sha256:0d68e84069c69211ebb532f625a47614dd009878d6b575a0ab31f44f6a6cacc2"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25679",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "net/url: Incorrect parsing of IPv6 host literals in net/url",
+          "Description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "bitnami": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-25679",
+            "https://go.dev/cl/752180",
+            "https://go.dev/issue/77578",
+            "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25679",
+            "https://pkg.go.dev/vuln/GO-2026-4601",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25679"
+          ],
+          "PublishedDate": "2026-03-06T22:16:00.72Z",
+          "LastModifiedDate": "2026-03-10T18:18:37.74Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-27137",
+          "PkgID": "stdlib@v1.26.0",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.26.0",
+            "UID": "f6d732f1e4849ca2"
+          },
+          "InstalledVersion": "v1.26.0",
+          "FixedVersion": "1.26.1",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:9eb831f0bb7c47228ea0aec56559c602c7a8adb9256761703ec14cc9bf369b50",
+            "DiffID": "sha256:0d68e84069c69211ebb532f625a47614dd009878d6b575a0ab31f44f6a6cacc2"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27137",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "crypto/x509: Incorrect enforcement of email constraints in crypto/x509",
+          "Description": "When verifying a certificate chain which contains a certificate containing multiple email address constraints which share common local portions but different domain portions, these constraints will not be properly applied, and only the last constraint will be considered.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "azure": 2,
+            "bitnami": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-27137",
+            "https://go.dev/cl/752182",
+            "https://go.dev/issue/77952",
+            "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-27137",
+            "https://pkg.go.dev/vuln/GO-2026-4599",
+            "https://www.cve.org/CVERecord?id=CVE-2026-27137"
+          ],
+          "PublishedDate": "2026-03-06T22:16:00.85Z",
+          "LastModifiedDate": "2026-03-10T18:18:44.163Z"
+        }
+      ]
+    }
+  ]
+}

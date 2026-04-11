@@ -1,0 +1,237 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-30T12:39:56.034169843Z",
+  "ArtifactName": "docker.io/valkey/valkey:9.0.3-alpine@sha256:f42ba740748f48bb79cf1b3a96dd688f2dfe374c687d350377c00927fcb39c2b",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 44207104,
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.23.3"
+    },
+    "ImageID": "sha256:fc369b73d7dad2bab9b52f37c1a7ad8b62ff7345862333bb367a6b4a740cd604",
+    "DiffIDs": [
+      "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+      "sha256:0e3498e32defc248010c0b95bfb1a18eeb6e6d67ac6e4fc48f073c3b685d872d",
+      "sha256:f55eda28f9c49cb65f0a0a961c12814d5b358982bad5da71b963b6a28a55f15c",
+      "sha256:eac17267b8ff41beb5422e859493aad442b10cbea9b5db9c555e752c28c009dd",
+      "sha256:d218b950003218a5ccb0975d34d6b9bc23603ca19a6755de459da2e87d557ef1",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:3575d385f5631cf079c2a0a27ca1009cc9563d1fa721ef9850cb96f8b060c02d"
+    ],
+    "RepoDigests": [
+      "valkey/valkey@sha256:f42ba740748f48bb79cf1b3a96dd688f2dfe374c687d350377c00927fcb39c2b"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2026-03-09T20:07:57.639145629Z",
+      "history": [
+        {
+          "created": "2026-01-28T01:18:04.977843834Z",
+          "created_by": "ADD alpine-minirootfs-3.23.3-x86_64.tar.gz / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-01-28T01:18:04.977843834Z",
+          "created_by": "CMD [\"/bin/sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-09T19:57:51.7833444Z",
+          "created_by": "ENV VALKEY_VERSION=9.0.3",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-09T19:57:51.7833444Z",
+          "created_by": "LABEL org.opencontainers.image.source=https://github.com/valkey-io/valkey",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-09T19:57:51.7833444Z",
+          "created_by": "RUN /bin/sh -c set -eux; \taddgroup -S -g 1000 valkey; \tadduser -S -G valkey -u 999 valkey # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-09T19:57:52.519303412Z",
+          "created_by": "RUN /bin/sh -c set -eux; \tapk add --no-cache \t\ttzdata \t\tsetpriv \t\topenssl \t\tlibgcc \t; # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-09T20:07:57.511383178Z",
+          "created_by": "COPY /usr/local /usr/local # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-09T20:07:57.610208179Z",
+          "created_by": "RUN /bin/sh -c mkdir /data \u0026\u0026 \tchown valkey:valkey /data \u0026\u0026 \tmkdir -p /run/valkey \u0026\u0026 \tchown valkey:valkey /run/valkey \u0026\u0026 \tvalkey-cli --version \u0026\u0026 \tvalkey-server --version # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-09T20:07:57.624217129Z",
+          "created_by": "WORKDIR /data",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-09T20:07:57.639145629Z",
+          "created_by": "COPY docker-entrypoint.sh /usr/local/bin/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-09T20:07:57.639145629Z",
+          "created_by": "ENTRYPOINT [\"docker-entrypoint.sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-09T20:07:57.639145629Z",
+          "created_by": "EXPOSE [6379/tcp]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-09T20:07:57.639145629Z",
+          "created_by": "CMD [\"valkey-server\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+          "sha256:0e3498e32defc248010c0b95bfb1a18eeb6e6d67ac6e4fc48f073c3b685d872d",
+          "sha256:f55eda28f9c49cb65f0a0a961c12814d5b358982bad5da71b963b6a28a55f15c",
+          "sha256:eac17267b8ff41beb5422e859493aad442b10cbea9b5db9c555e752c28c009dd",
+          "sha256:d218b950003218a5ccb0975d34d6b9bc23603ca19a6755de459da2e87d557ef1",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+          "sha256:3575d385f5631cf079c2a0a27ca1009cc9563d1fa721ef9850cb96f8b060c02d"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "valkey-server"
+        ],
+        "Entrypoint": [
+          "docker-entrypoint.sh"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "VALKEY_VERSION=9.0.3"
+        ],
+        "Labels": {
+          "org.opencontainers.image.source": "https://github.com/valkey-io/valkey"
+        },
+        "WorkingDir": "/data",
+        "ExposedPorts": {
+          "6379/tcp": {}
+        },
+        "ArgsEscaped": true
+      }
+    },
+    "Layers": [
+      {
+        "Size": 8724480,
+        "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+        "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+      },
+      {
+        "Size": 10752,
+        "Digest": "sha256:242569103c81eeda343f25355ce6abe870e5f4090e6fc226abca4187a8f25813",
+        "DiffID": "sha256:0e3498e32defc248010c0b95bfb1a18eeb6e6d67ac6e4fc48f073c3b685d872d"
+      },
+      {
+        "Size": 1995776,
+        "Digest": "sha256:fe6447b1cf393eab5e9830b383549199626d9d4c76cdce66e4f3ecd0d7a6690d",
+        "DiffID": "sha256:f55eda28f9c49cb65f0a0a961c12814d5b358982bad5da71b963b6a28a55f15c"
+      },
+      {
+        "Size": 33468416,
+        "Digest": "sha256:f83e78026bc1bfac311233098d327c1a1b718fa94712d5842e35daf7e10ddb49",
+        "DiffID": "sha256:eac17267b8ff41beb5422e859493aad442b10cbea9b5db9c555e752c28c009dd"
+      },
+      {
+        "Size": 2560,
+        "Digest": "sha256:9d35542429bdb5a94cb396363e9babaa9e53bbe234af0760af1192ae5d42b33b",
+        "DiffID": "sha256:d218b950003218a5ccb0975d34d6b9bc23603ca19a6755de459da2e87d557ef1"
+      },
+      {
+        "Size": 1024,
+        "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "DiffID": "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      },
+      {
+        "Size": 4096,
+        "Digest": "sha256:8dd53b0e82b7ddb5037ac174ae6146652e07b07fd8dfa38404b785b31c057b72",
+        "DiffID": "sha256:3575d385f5631cf079c2a0a27ca1009cc9563d1fa721ef9850cb96f8b060c02d"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/valkey/valkey:9.0.3-alpine@sha256:f42ba740748f48bb79cf1b3a96dd688f2dfe374c687d350377c00927fcb39c2b (alpine 3.23.3)",
+      "Class": "os-pkgs",
+      "Type": "alpine",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-22184",
+          "PkgID": "zlib@1.3.1-r2",
+          "PkgName": "zlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:apk/alpine/zlib@1.3.1-r2?arch=x86_64\u0026distro=3.23.3",
+            "UID": "4fcd0ec5030a15a0"
+          },
+          "InstalledVersion": "1.3.1-r2",
+          "FixedVersion": "1.3.2-r0",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+            "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-22184",
+          "DataSource": {
+            "ID": "alpine",
+            "Name": "Alpine Secdb",
+            "URL": "https://secdb.alpinelinux.org/"
+          },
+          "Title": "zlib: zlib: Arbitrary code execution via buffer overflow in untgz utility",
+          "Description": "zlib versions up to and including 1.3.1.2 include a global buffer overflow in the untgz utility located under contrib/untgz. The vulnerability is limited to the standalone demonstration utility and does not affect the core zlib compression library. The flaw occurs when a user executes the untgz command with an excessively long archive name supplied via the command line, leading to an out-of-bounds write in a fixed-size global buffer.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-787"
+          ],
+          "VendorSeverity": {
+            "nvd": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+              "V3Score": 8.6
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-22184",
+            "https://github.com/madler/zlib",
+            "https://github.com/madler/zlib/issues/1142",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-22184",
+            "https://seclists.org/fulldisclosure/2026/Jan/3",
+            "https://www.cve.org/CVERecord?id=CVE-2026-22184",
+            "https://www.vulncheck.com/advisories/zlib-untgz-global-buffer-overflow-in-tgzfname",
+            "https://zlib.net/"
+          ],
+          "PublishedDate": "2026-01-07T21:16:01.563Z",
+          "LastModifiedDate": "2026-03-18T16:26:31.14Z"
+        }
+      ]
+    }
+  ]
+}

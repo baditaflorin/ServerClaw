@@ -1,0 +1,37 @@
+{
+  "event_id": "58285bc1956f4a90a19fe3ea393f9f38",
+  "issue": {
+    "count": "1",
+    "culprit": "",
+    "firstRelease": null,
+    "firstSeen": "2026-04-03T01:11:49.028Z",
+    "id": "11",
+    "lastRelease": null,
+    "lastSeen": "2026-04-03T01:11:49.028Z",
+    "level": "error",
+    "logger": null,
+    "matchingEventId": null,
+    "metadata": {},
+    "numComments": 0,
+    "permalink": "https://errors.lv3.org/platform-findings/issues/11",
+    "project": {
+      "id": "3",
+      "name": "Platform Findings",
+      "platform": null,
+      "slug": "platform-findings"
+    },
+    "shareId": null,
+    "shortId": "PLATFORM-FINDINGS-B",
+    "stats": {
+      "24h": []
+    },
+    "status": "unresolved",
+    "statusDetails": {},
+    "subscriptionDetails": null,
+    "title": "ADR 0281 GlitchTip smoke adr-0281-smoke-30eddb7b253c",
+    "type": "default",
+    "userCount": 0
+  },
+  "marker": "adr-0281-smoke-30eddb7b253c",
+  "status": "ok"
+}

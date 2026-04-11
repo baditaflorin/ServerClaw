@@ -1,0 +1,15 @@
+python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/scripts/resource_lock_tool.py acquire --resource "vm:120/service:api_gateway" --holder "agent:ws-0314-live-apply" --lock-type "exclusive" --ttl-seconds 7200  --context-id "ws-0314-mainline-r2"
+{
+  "lock": {
+    "acquired_at": "2026-04-03T06:44:52Z",
+    "context_id": "ws-0314-mainline-r2",
+    "expires_at": "2026-04-03T08:44:52Z",
+    "holder": "agent:ws-0314-live-apply",
+    "lock_id": "7ce264d1ba72de86dda0",
+    "lock_type": "exclusive",
+    "metadata": {},
+    "resource_path": "vm:120/service:api_gateway"
+  },
+  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/lv3-concurrency/lock-registry.json",
+  "status": "acquired"
+}

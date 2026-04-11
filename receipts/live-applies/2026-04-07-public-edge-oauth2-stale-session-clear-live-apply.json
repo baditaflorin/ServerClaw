@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-07-public-edge-oauth2-stale-session-clear-live-apply",
+  "applied_on": "2026-04-07",
+  "recorded_on": "2026-04-07",
+  "recorded_by": "claude",
+  "source_commit": "7ca1b60698236dbb126ec47aeb06fcf9afe24f94",
+  "repo_version_context": "0.178.47",
+  "workflow_id": "converge-api-gateway",
+  "summary": "Deployed public-edge NGINX configuration with oauth2-proxy stale session cookie auto-clear on 302 redirect detection.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "nginx-lv3",
+      "address": "65.108.75.123"
+    }
+  ],
+  "verification": [
+    {
+      "check": "oauth2 stale session handling active",
+      "result": "pass",
+      "observed": "NGINX edge updated with stale oauth2 session cookie clearing on 302 redirect."
+    }
+  ],
+  "evidence_refs": [
+    "versions/stack.yaml"
+  ],
+  "notes": []
+}

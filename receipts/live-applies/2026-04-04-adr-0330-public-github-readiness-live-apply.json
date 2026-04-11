@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0330-public-github-readiness-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T13:27:00Z",
+  "recorded_by": "codex",
+  "source_commit": "edf5cbd0499d95303203ce24bdba35d314acab19",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0330-public-github-readiness-live-apply",
+  "adr": "0330",
+  "summary": "Live-applied ADR 0330 on `codex/ws-0330-main-closeout` by making the committed controller-local secret contract repo-relative, teaching repo automation to resolve `.local/...` paths correctly from a worktree or the shared repo root, adding fork-first example inventory/provider/publication/controller-secret surfaces plus public reference documentation, regenerating the ADR and discovery entrypoints, and re-verifying the branch-local exact-main tree while deliberately deferring protected canonical-truth surfaces to the final mainline integration step.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/controller-local-secrets.json"
+    },
+    {
+      "kind": "artifact",
+      "name": "inventory/examples/reference-platform"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/examples"
+    },
+    {
+      "kind": "artifact",
+      "name": "docs/reference-deployments/README.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "workstreams.yaml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repo-relative secret and public reference regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_controller_automation_toolkit.py tests/test_config_merge_windmill.py tests/test_ntfy_publish.py tests/test_public_reference_samples.py` returned `64 passed in 6.07s`, covering repo-relative controller-secret resolution plus public reference sample parsing and leak guards, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-targeted-tests-r1-0.178.3.txt`."
+    },
+    {
+      "check": "Registry, discovery, ADR, and topology generator refresh",
+      "result": "pass",
+      "observed": "`python3 scripts/workstream_registry.py --write`, `uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write`, `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`, and `python3 scripts/generate_topology_snapshot.py --write` all completed successfully after the active workstream metadata was corrected to claim the generated ADR shards and topology snapshot, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-workstream-registry-r2.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-workstream-registry-r3.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-discovery-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-adr-index-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-topology-snapshot-r1.txt`."
+    },
+    {
+      "check": "Branch-local ownership and agent standards",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces` passed after the workstream ownership manifest was expanded to include the ADR shard outputs and topology snapshot freshness surface, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-branch-validate-r1.txt`."
+    },
+    {
+      "check": "Release readiness snapshot",
+      "result": "partial",
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because unrelated `controller_dependency_gap` waivers remain open through `2026-04-06`; `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch --dry-run` shows the next candidate version would be `0.178.4`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0330-release-dry-run-r1.txt`."
+    },
+    {
+      "check": "Protected-surface handoff into exact-main integration",
+      "result": "partial",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces generated-docs` reduced to the expected integration-only drift on `changelog.md`, because canonical truth must be assembled from the protected exact-main tree after the workstream is merged rather than from the branch-local live-apply branch, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-validate-repo-r2.txt`."
+    },
+    {
+      "check": "Patch cleanliness",
+      "result": "pass",
+      "observed": "`git diff --check` passed on the receiptless implementation tree before the receipt commit, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-git-diff-check-r2.txt`."
+    },
+    {
+      "check": "Receipt corpus validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate` passed after adding the ADR 0330 branch-local receipt, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-branch-live-apply-receipts-r1.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "config/controller-local-secrets.json",
+    "config/examples/reference-controller-local-secrets.json",
+    "config/examples/reference-provider-profile.yaml",
+    "config/examples/reference-publication-profile.json",
+    "inventory/examples/reference-platform/README.md",
+    "inventory/examples/reference-platform/hosts.yml",
+    "inventory/examples/reference-platform/group_vars/platform.yml",
+    "inventory/examples/reference-platform/host_vars/proxmox_reference.yml",
+    "docs/reference-deployments/README.md",
+    "docs/runbooks/controller-local-secrets-and-preflight.md",
+    "docs/runbooks/fork-reference-platform.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/workstreams/ws-0330-main-closeout.md",
+    "docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md",
+    "docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md",
+    "docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md",
+    "docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md",
+    "docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md",
+    "docs/adr/.index.yaml",
+    "docs/adr/index/by-range/0300-0399.yaml",
+    "docs/adr/index/by-concern/documentation.yaml",
+    "docs/adr/index/by-concern/security.yaml",
+    "docs/adr/index/by-concern/vm-topology.yaml",
+    "docs/adr/index/by-status/implemented.yaml",
+    "docs/adr/index/by-status/not-implemented.yaml",
+    "docs/adr/index/by-status/partial.yaml",
+    ".repo-structure.yaml",
+    ".config-locations.yaml",
+    "build/onboarding/agent-core.yaml",
+    "build/onboarding/automation.yaml",
+    "build/onboarding/service-catalog.yaml",
+    "platform/repo.py",
+    "platform/agent/coordination.py",
+    "platform/maintenance/windows.py",
+    "scripts/controller_automation_toolkit.py",
+    "scripts/drift_lib.py",
+    "scripts/intent_queue_dispatcher.py",
+    "scripts/ntfy_publish.py",
+    "scripts/seed_data_snapshots.py",
+    "scripts/uptime_robot_tool.py",
+    "scripts/topology-snapshot.json",
+    "tests/test_config_merge_windmill.py",
+    "tests/test_ntfy_publish.py",
+    "tests/test_public_reference_samples.py",
+    "workstreams.yaml",
+    "workstreams/archive/2026/ws-0330-main-closeout.yaml",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-targeted-tests-r1-0.178.3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-workstream-registry-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-workstream-registry-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-discovery-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-adr-index-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-topology-snapshot-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-branch-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-release-status-r1.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-validate-repo-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-git-diff-check-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-branch-live-apply-receipts-r1.txt"
+  ],
+  "notes": [
+    "This is a branch-local live-apply receipt for a repo-only ADR closeout; it intentionally leaves `README.md`, `changelog.md`, `VERSION`, and `versions/stack.yaml` untouched until the protected exact-main integration step.",
+    "Because ADR 0330 and its follow-on ADRs are repository-only control-plane changes, the live platform version remains `0.130.98` and no platform version bump should accompany this branch-local implementation commit.",
+    "Exact-main integration should start with a fresh `git fetch origin main` because concurrent work may advance `origin/main` before the protected canonical-truth refresh and push."
+  ]
+}

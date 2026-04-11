@@ -1,0 +1,5 @@
+Current version: 0.177.115
+Next version: 0.177.116
+Unreleased notes: 1
+Platform impact: Platform version remains 0.130.75 while release 0.177.116 records the already-verified ADR 0290 Redpanda runtime and canonical mainline receipt on top of the current origin/main baseline.
+Release notes index: docs/release-notes/README.md

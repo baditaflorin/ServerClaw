@@ -1,0 +1,3 @@
+Workstream surface ownership validation
+Generated status document validation
+Agent standards validation (ADR 0163-0168)

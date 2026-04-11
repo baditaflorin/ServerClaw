@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0303-pgaudit-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T19:39:24Z",
+  "recorded_by": "codex",
+  "source_commit": "99b51ba1572be6df3411d4b4ef499e660a1dd7e0",
+  "repo_version_context": "0.177.121",
+  "platform_version_context": "0.130.78",
+  "integrated_repo_version": "0.177.122",
+  "integrated_platform_version": "0.130.78",
+  "workflow_id": "adr-0303-pgaudit-mainline-live-apply",
+  "adr": "0303",
+  "summary": "Integrated ADR 0303 onto latest `origin/main` baseline `dc3a969e7c8de8fd727cca034418a4b49d6e2b64` as repository version `0.177.122` while preserving the already-current platform baseline `0.130.78`. The final exact-main closeout records the repo-managed PostgreSQL pgaudit rollout, the stabilized guest-log-shipping verification contract, the repaired unknown-role alert relay plus JetStream publication path, and the refreshed release, remote validation, and pre-push evidence from committed source `99b51ba1572be6df3411d4b4ef499e660a1dd7e0`.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository tests",
+      "result": "pass",
+      "observed": "The targeted ADR 0303 test bundle `tests/test_guest_log_shipping_playbook.py`, `tests/test_monitoring_vm_role.py`, `tests/unit/test_event_taxonomy.py`, and `tests/test_service_id_resolver.py` passed with `29 passed in 0.75s`, preserving the stabilized guest-log-shipping metrics verification contract after the latest `origin/main` integration."
+    },
+    {
+      "check": "Exact-main live apply evidence",
+      "result": "pass",
+      "observed": "The released `0.177.122` candidate passed `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=guest-log-shipping env=production`, re-verifying the guarded wrapper path, the Prometheus scrape assertions, and the post-apply Restic trigger. The final recap reported `docker-runtime-lv3 : ok=17 changed=2 unreachable=0 failed=0`, and the backup trigger recorded `receipts/restic-backups/20260331T192735Z.json` with config snapshot `1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78` plus `versions/stack.yaml` snapshot `68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c`."
+    },
+    {
+      "check": "Release and canonical-truth closeout",
+      "result": "pass",
+      "observed": "The repository release cut advanced `VERSION` to `0.177.122`, refreshed the canonical truth surfaces, updated ADR/workstream metadata, and recorded ADR 0303 as implemented on `main` while preserving the already-current platform version `0.130.78`."
+    },
+    {
+      "check": "Repo automation and validation paths",
+      "result": "pass",
+      "observed": "`make check-build-server`, `make remote-validate`, and `make pre-push-gate` all passed on the released candidate. The remote pre-push lane truthfully recorded transient `502 Bad Gateway` pulls for `registry.lv3.org/check-runner/infra:2026.03.23`, then `run_gate_fallback` reran only `packer-validate` and `tofu-validate` locally and merged the passing result back into `.local/validation-gate/last-run.json`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "docs/adr/0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md",
+    "docs/release-notes/0.177.122.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/postgres-audit.md",
+    "docs/workstreams/ws-0303-live-apply.md",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-03-31-adr-0303-pgaudit-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-release-write-r2-0.177.122.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-targeted-pytest-r4-0.177.122.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-live-apply-service-guest-log-shipping-r5-0.177.122.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-check-build-server-r2-0.177.122.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-remote-validate-r2-0.177.122.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-pre-push-gate-r3-0.177.122.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-converge-guest-network-policy-postgres-r2-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0303-mainline-final-pgaudit-unknown-role-smoke-r11-0.177.120.txt"
+  ],
+  "notes": [
+    "ADR 0303 is first implemented in repository version `0.177.122` and first verified live on platform version `0.130.77`.",
+    "This canonical mainline closeout preserves the already-current platform baseline `0.130.78` rather than advancing it again, because the PostgreSQL pgaudit capability was already live before the newer exact-main release cut.",
+    "The earlier final smoke proved the alert relay and NATS publication path after repairing a missing live guest-firewall allow on `docker-runtime-lv3`.",
+    "The broad guest-network-policy replay still surfaced an unrelated `postgres-replica-lv3` SSH reachability failure; that residual issue is preserved as evidence but does not block ADR 0303 itself because the repaired runtime path now functions end to end."
+  ]
+}

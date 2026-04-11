@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0115-mutation-ledger-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "1e8aec2c",
+  "repo_version_context": "0.177.0",
+  "workflow_id": "adr-0115-mutation-ledger-mainline-live-apply",
+  "adr": "0115",
+  "summary": "Replayed ADR 0115 from the latest origin/main integration branch, re-projected the ledger DSN and NATS URL into the live Windmill runtime on docker-runtime-lv3, recovered the Windmill worker containers after a startup race, and verified a fresh guest-side mutation write through both ledger.events and the compatibility audit_log view.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "100.64.0.1:8005"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "postgres",
+      "address": "10.10.10.50:5432"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "nats",
+      "address": "10.10.10.20:4222"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "Focused ADR 0115 validation passed on the mainline integration worktree with `uv run --with pytest --with pyyaml python -m pytest tests/test_compose_runtime_secret_injection.py tests/unit/test_ledger_writer.py -q` returning `20 passed`, plus `make syntax-check-windmill` and `make preflight WORKFLOW=converge-windmill` completing successfully."
+    },
+    {
+      "check": "Mainline Windmill runtime projection",
+      "result": "pass",
+      "observed": "The 2026-03-27 replay projected `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` into `/run/lv3-secrets/windmill/runtime.env` on `docker-runtime-lv3`, and `docker exec windmill-windmill_worker-1 env` showed both variables inside the live worker container after targeted worker recovery."
+    },
+    {
+      "check": "Windmill service health",
+      "result": "pass",
+      "observed": "The mainline replay left the operator entrypoint healthy with `curl -fsS http://100.64.0.1:8005/api/version` returning `CE v1.662.0`, and `docker compose -f /opt/windmill/docker-compose.yml ps` showed `windmill_server`, `windmill_worker`, `windmill_worker_native`, `windmill_extra`, and `openbao-agent` up."
+    },
+    {
+      "check": "Guest-side ledger dual-write",
+      "result": "pass",
+      "observed": "A guest-local `scripts/mutation_audit.py --emit` on `docker-runtime-lv3` with explicit exported `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` wrote `2|execution.completed|operator:ops|host|proxmox_florin|ws0115-main-ledger-emit-20260327T044831Z` into `ledger.events`, and the compatibility `audit_log` view exposed `2|2026-03-27 04:48:32+00:00|operator|ops|windmill|execution.completed|proxmox_florin|success|ws0115-main-ledger-emit-20260327T044831Z|receipts/live-applies/2026-03-27-adr-0115-mutation-ledger-mainline-live-apply.json`."
+    },
+    {
+      "check": "Append-only enforcement",
+      "result": "pass",
+      "observed": "The tamper probe `UPDATE ledger.events SET event_type='tampered' WHERE id = (SELECT max(id) FROM ledger.events)` failed with `ledger.events is append-only`."
+    },
+    {
+      "check": "Broad repository validation",
+      "result": "partial",
+      "observed": "`make validate` was exercised from the same integration worktree, progressed through the full tracked playbook syntax sweep after excluding `playbooks/.metadata-template.yml`, and then stopped in `yamllint` on the pre-existing indentation damage in `docs/adr/.index.yaml`."
+    },
+    {
+      "check": "Windmill converge automation",
+      "result": "partial",
+      "observed": "The replayed `make converge-windmill` recovered from a Windmill container startup race and successfully updated the runtime env projection, but the full automation later failed in `sync_windmill_seed_scripts.py` on `f/lv3/operator_onboard` with `Remote end closed connection without response`; a targeted `docker compose -f /opt/windmill/docker-compose.yml up -d windmill_worker windmill_worker_native` restored the workers and allowed ADR 0115 verification to complete."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2",
+    "docs/adr/0115-event-sourced-mutation-ledger.md",
+    "docs/runbooks/mutation-ledger.md",
+    "docs/workstreams/adr-0115-mutation-ledger.md",
+    "scripts/validate_repo.sh",
+    "tests/test_compose_runtime_secret_injection.py",
+    "tests/unit/test_ledger_writer.py",
+    "versions/stack.yaml",
+    "windmill/ledger/migrate-audit-log.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt supplements the original 2026-03-26 ADR 0115 live-apply evidence by proving the Windmill runtime projection from the latest origin/main integration branch rather than the earlier workstream branch.",
+    "The ledger row written during this replay used `metadata.legacy_correlation_id`, because `scripts/mutation_audit.py` writes legacy mutation-audit events through `LedgerWriter.write_mutation_audit_event()`.",
+    "No new SQL legacy rows were migrated on 2026-03-27; the production compatibility view and append-only trigger from the 2026-03-26 rollout remained in place.",
+    "The remaining failure observed during the replay is broader than ADR 0115 itself: `sync_windmill_seed_scripts.py` intermittently loses the connection while syncing `f/lv3/operator_onboard` after Windmill restarts. The ADR 0115 surfaces were nevertheless verified end to end after targeted worker recovery."
+  ]
+}

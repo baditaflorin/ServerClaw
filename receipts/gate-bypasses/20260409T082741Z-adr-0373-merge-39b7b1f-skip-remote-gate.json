@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T08:27:41Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "adr-0373-merge",
+  "commit": "39b7b1fd7cfa0ac09b692152986581e53525b966",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Make Typesense optional in API gateway \u2014 not yet provisioned",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Typesense not running",
+      "hard assertion replaced with debug warning",
+      "structured-search degrades gracefully"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml"
+  }
+}

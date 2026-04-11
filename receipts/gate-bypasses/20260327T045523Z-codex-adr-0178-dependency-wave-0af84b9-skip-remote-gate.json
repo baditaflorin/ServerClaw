@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-27T04:55:23.512814+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "remote gate blocked by unrelated schema-validation .git-remote error and current-main docs/adr/.index.yaml yamllint noise during ADR 0178 push",
+  "source": "pre-push-hook",
+  "branch": "codex/adr-0178-dependency-wave",
+  "commit": "0af84b92c903a2d27758760a48e4d3a696b65c32"
+}

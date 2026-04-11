@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "dozzle_runtime",
+  "image_ref": "docker.io/amir20/dozzle:v10.2.0@sha256:35da6eb0ce33dc413d85017877121e82b1626f9247c4fb2acf1f19427cbf47c7",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-25",
+  "summary": {
+    "critical": 0,
+    "high": 0
+  },
+  "targets_with_findings": [],
+  "raw_report": "receipts/image-scans/2026-03-25-dozzle-runtime.trivy.json"
+}

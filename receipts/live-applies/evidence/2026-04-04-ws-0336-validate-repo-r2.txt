@@ -1,0 +1,4 @@
+Agent standards validation (ADR 0163-0168)
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- docs/diagrams/agent-coordination-map.excalidraw: outside declared owned surfaces for ws-0336-live-apply

@@ -1,0 +1,328 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=converge-ntfy
+Preflight workflow: converge-ntfy
+Description: Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.
+INFO no bootstrap manifest configured for this workflow
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+INFO generated ntfy_alertmanager_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
+Result: PASS (converge-ntfy)
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=58d76d93fbf74a53a1597c369b4596eb ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2/inventory/hosts.yml --run-id 4b91d7e9ef93435eadb9d12ff5a85f99 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2/playbooks/ntfy.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+PLAY [Converge ntfy runtime] ***************************************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:36.220Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:41.667Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:41.681Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:41.697Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:41.712Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:41.753Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:41.768Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:41.789Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:41.818Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => (item=docker-runtime-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "docker-runtime-lv3",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:41.847Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:41.869Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:41.884Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:41.899Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => (item=docker-runtime-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:41.922Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:41.937Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=docker-runtime-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:44.136Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:44.151Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:44.193Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:44.210Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:44.491Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:44.507Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook start audit event","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:44.877Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Validating arguments against arg spec 'main' - Converge the ntfy runtime used for ADR 0097 critical paging.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Validating arguments against arg spec 'main' - Converge the ntfy runtime used for ADR 0097 critical paging.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:44.893Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Validating arguments against arg spec 'main' - Converge the ntfy runtime used for ADR 0097 critical paging.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:44.927Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Validate ntfy runtime inputs] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Validate ntfy runtime inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:44.941Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Validate ntfy runtime inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:44.986Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Ensure python bcrypt support is present] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Ensure python bcrypt support is present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:45.000Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Ensure python bcrypt support is present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:46.764Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Ensure controller-local ntfy artifact directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Ensure controller-local ntfy artifact directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:46.779Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Ensure controller-local ntfy artifact directory exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:47.071Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Ensure controller-local ntfy password exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Ensure controller-local ntfy password exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:47.087Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Ensure controller-local ntfy password exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:47.312Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Read controller-local ntfy password] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Read controller-local ntfy password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:47.327Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Read controller-local ntfy password","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:47.601Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Record ntfy password fact] *******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Record ntfy password fact","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:47.616Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Record ntfy password fact","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:47.659Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Ensure ntfy directories exist] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Ensure ntfy directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:47.673Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=/opt/ntfy)
+ok: [docker-runtime-lv3] => (item=/var/lib/ntfy)
+ok: [docker-runtime-lv3] => (item=/var/lib/ntfy/attachments)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Ensure ntfy directories exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:49.091Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Generate ntfy password hash] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Generate ntfy password hash","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:49.106Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Generate ntfy password hash","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:49.848Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Read ntfy password hash] *********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Read ntfy password hash","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:49.863Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Read ntfy password hash","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:50.378Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Record ntfy password hash fact] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Record ntfy password hash fact","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:50.401Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Record ntfy password hash fact","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:50.439Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Render ntfy server config] *******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Render ntfy server config","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:50.455Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Render ntfy server config","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:52.899Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Render ntfy compose file] ********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Render ntfy compose file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:52.914Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Render ntfy compose file","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:54.360Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Pull the ntfy image] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Pull the ntfy image","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:54.374Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Pull the ntfy image","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:55.526Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Start the ntfy stack] ************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Start the ntfy stack","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:55.556Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Start the ntfy stack","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:56.167Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Verify ntfy health endpoint responds] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Verify ntfy health endpoint responds","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:56.182Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Verify ntfy health endpoint responds","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:57.284Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Verify the ntfy container is running] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Verify the ntfy container is running","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:57.298Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Verify the ntfy container is running","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:57.797Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.ntfy_runtime : Assert the ntfy container is running] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ntfy_runtime : Assert the ntfy container is running","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:57.813Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ntfy_runtime : Assert the ntfy container is running","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:57.861Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the health probe catalog] *******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the health probe catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:57.889Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the health probe catalog","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:57.962Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested service health probe exists] ************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested service health probe exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:57.981Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested service health probe exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:58.028Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Record the active service health probe contract] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Record the active service health probe contract","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:58.043Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Record the active service health probe contract","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:58.079Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run startup verification] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:58.093Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run startup verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:40:58.109Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run liveness verification] ***********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:58.123Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:58.134Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+
+TASK [Run HTTP probe liveness] *************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:58.170Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run HTTP probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:59.207Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run TCP probe liveness] **************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run TCP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:59.221Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run TCP probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:40:59.234Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run command probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run command probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:59.249Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run command probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:40:59.261Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run systemd probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run systemd probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:59.276Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run systemd probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:40:59.288Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Repair Docker publication before readiness verification] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Repair Docker publication before readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:59.303Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Repair Docker publication before readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:40:59.319Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run readiness verification] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:59.333Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:40:59.345Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+
+TASK [Run HTTP probe readiness] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:40:59.383Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run HTTP probe readiness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:00.448Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run TCP probe readiness] *************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run TCP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:00.463Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run TCP probe readiness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:00.477Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run command probe readiness] *********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run command probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:00.493Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run command probe readiness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:00.506Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run systemd probe readiness] *********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run systemd probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:00.522Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run systemd probe readiness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:00.537Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the shared SBOM scanner config] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the shared SBOM scanner config","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:00.552Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the shared SBOM scanner config","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:00.615Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the remote SBOM working directory exists] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the remote SBOM working directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:00.630Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the remote SBOM working directory exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:01.130Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Check the installed Syft version] ****************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Check the installed Syft version","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:01.145Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Check the installed Syft version","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:01.649Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Create a temporary directory for the Syft archive] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Create a temporary directory for the Syft archive","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:01.663Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Create a temporary directory for the Syft archive","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:01.677Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Download and unpack the pinned Syft archive] *****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Download and unpack the pinned Syft archive","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:01.692Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Download and unpack the pinned Syft archive","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:01.705Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Install the pinned Syft binary] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Install the pinned Syft binary","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:01.720Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Install the pinned Syft binary","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:01.734Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Remove the temporary Syft archive directory] *****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Remove the temporary Syft archive directory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:01.755Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Remove the temporary Syft archive directory","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:01.768Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Generate the host CycloneDX SBOM] ****************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Generate the host CycloneDX SBOM","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:01.783Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Generate the host CycloneDX SBOM","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:22.648Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the local SBOM receipt directory exists] **************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the local SBOM receipt directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:22.668Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the local SBOM receipt directory exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:22.902Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Fetch the generated host SBOM] *******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Fetch the generated host SBOM","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:22.917Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Fetch the generated host SBOM","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:25.472Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook completion audit event] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:25.498Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:25.827Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Build the shared playbook notification payload] **************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Build the shared playbook notification payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:25.841Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Build the shared playbook notification payload","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T16:41:25.862Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort Mattermost completion notification] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:25.876Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:25.893Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort NATS completion notification command] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T16:41:25.907Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T16:41:25.922Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-lv3         : ok=44   changed=3    unreachable=0    failed=0    skipped=14   rescued=0    ignored=0

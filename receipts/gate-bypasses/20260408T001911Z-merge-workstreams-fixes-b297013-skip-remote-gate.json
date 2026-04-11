@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-08T00:19:11Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "merge/workstreams-fixes",
+  "commit": "b297013f9af005f506654b5be4348090487ac03a",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "Workstreams status update",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Local pre-push validation passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "Workstreams catalog update"
+  }
+}

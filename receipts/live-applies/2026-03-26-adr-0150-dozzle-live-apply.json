@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0150-dozzle-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "8424d1bb7d08824b92e04d034daa977408ca24ac",
+  "repo_version_context": "0.166.0",
+  "workflow_id": "converge-dozzle",
+  "adr": "0150",
+  "summary": "Converged the repo-managed Dozzle hub on docker-runtime-lv3, joined the docker-build-lv3 and monitoring-lv3 agents over the guest network, updated the Proxmox guest firewall policy for agent reachability, and published logs.lv3.org through the shared Keycloak-authenticated NGINX edge.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "logs.lv3.org",
+      "address": "https://logs.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repo-managed live converge",
+      "result": "pass",
+      "observed": "The final production Dozzle playbook converge completed successfully across proxmox_florin, nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3 with no failed tasks after the Proxmox guest firewall policy was brought under the same workflow."
+    },
+    {
+      "check": "Private hub health and remote agent reachability",
+      "result": "pass",
+      "observed": "Controller-routed SSH verification over the Proxmox jump path reached docker-runtime-lv3, `curl -fsS http://127.0.0.1:8089/healthcheck` exited successfully, and `sudo docker exec dozzle /dozzle agent-test 10.10.10.30:7007` plus `10.10.10.40:7007` both connected successfully."
+    },
+    {
+      "check": "Public edge authentication path",
+      "result": "pass",
+      "observed": "`curl -Ik --resolve logs.lv3.org:443:65.108.75.123 https://logs.lv3.org/` returned `HTTP/2 302` to `/oauth2/sign_in` with the expected shared edge security headers."
+    },
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest python -m pytest tests/test_dozzle_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_post_verify_tasks.py tests/test_dozzle_playbook.py -q` passed with `18 passed`, and `make syntax-check-dozzle`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh health-probes`, and `./scripts/validate_repo.sh alert-rules` all passed."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0150-dozzle-for-real-time-container-log-access.md",
+    "docs/runbooks/configure-dozzle.md",
+    "docs/workstreams/adr-0150-dozzle.md",
+    "receipts/live-applies/2026-03-26-adr-0150-dozzle-live-apply.json",
+    "config/service-capability-catalog.json",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The verified controller path for private guest checks used a local SSH ProxyCommand through 100.64.0.1 because a direct ad-hoc Ansible invocation did not inherit the jump-host key path cleanly from this workstation session.",
+    "The Dozzle rollout required the playbook to converge the Proxmox guest firewall policy as part of the service workflow so remote agent traffic from docker-runtime-lv3 to ports 7007 on docker-build-lv3 and monitoring-lv3 is enforced from the repo."
+  ]
+}

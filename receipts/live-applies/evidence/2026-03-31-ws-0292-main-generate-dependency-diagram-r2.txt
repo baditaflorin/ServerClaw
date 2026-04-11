@@ -1,0 +1,1 @@
+Updated dependency diagram: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/docs/site-generated/architecture/dependency-graph.md

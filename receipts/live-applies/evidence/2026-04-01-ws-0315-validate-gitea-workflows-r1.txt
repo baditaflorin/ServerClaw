@@ -1,0 +1,2 @@
+uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_gitea_workflows.py tests/test_renovate_automation.py tests/test_gitea_runtime_role.py
+25 passed in 0.91s

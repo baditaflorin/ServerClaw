@@ -1,0 +1,125 @@
+NAMES                                            STATUS
+gitea                                            Up About an hour
+gitea-openbao-agent                              Up About an hour (healthy)
+
+--- logs ---
+2026/03/30 17:41:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:41:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:56766, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:41:42 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:41:42 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:60244, 200 OK in 0.7ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:41:49 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:41:49 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:60254, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:41:57 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:41:57 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:56054, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:04 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:04 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:39286, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:12 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:12 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:60200, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:19 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:19 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:60206, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:27 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:27 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:52528, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:60440, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:42 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:42 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:37394, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:49 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:49 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:37406, 200 OK in 0.8ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:42:57 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:42:57 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:57768, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:04 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:04 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:37952, 200 OK in 5.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:12 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:12 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:39122, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:19 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:19 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:39134, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:27 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:27 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:47492, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:38320, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:42 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:42 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:47446, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:49 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:49 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:47452, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:43:57 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:43:57 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:40830, 200 OK in 0.8ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:44:04 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:44:04 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:37350, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:44:12 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:44:12 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:34914, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:44:19 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:44:19 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:34930, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:44:27 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:44:27 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:51746, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:44:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:44:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:39022, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:45:14 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:45:14 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:41816, 200 OK in 0.6ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:45:19 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:45:19 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:41822, 200 OK in 0.6ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:45:23 models/db/list.go:210:FindAndCount() [W] [Slow SQL Query] SELECT "id", "repo_id", "schedule_id", "next", "prev", "spec", "created", "updated" FROM "action_schedule_spec" WHERE next<=$1 ORDER BY "id" DESC LIMIT 50 [1774892697] - 26.592239936s
+2026/03/30 17:45:27 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:45:27 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:56948, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:03 models/db/list.go:210:FindAndCount() [W] [Slow SQL Query] SELECT "id", "repo_id", "schedule_id", "next", "prev", "spec", "created", "updated" FROM "action_schedule_spec" WHERE next<=$1 ORDER BY "id" DESC LIMIT 50 [1774892757] - 6.775879616s
+2026/03/30 17:46:04 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:04 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:37116, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:05 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:05 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:52572, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:12 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:12 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:44068, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:19 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:19 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:44074, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:27 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:27 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:49340, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:58920, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:42 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:42 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:37488, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:46:49 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:46:49 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:37496, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:47:27 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:47:27 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:34326, 200 OK in 4.7ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:47:27 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:47:27 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:40580, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:47:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:47:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:42070, 200 OK in 1.0ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:47:42 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:47:42 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:51682, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:47:49 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:47:49 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:51684, 200 OK in 1.0ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:47:50 models/db/list.go:164:Find() [W] [Slow SQL Query] SELECT "id", "job_id", "attempt", "runner_id", "status", "started", "stopped", "repo_id", "owner_id", "commit_sha", "is_fork_pull_request", "token_hash", "token_salt", "token_last_eight", "log_filename", "log_in_storage", "log_length", "log_size", "log_indexes", "log_expired", "created", "updated" FROM "action_task" WHERE status=$1 AND updated<$2 ORDER BY "id" DESC [running 1774892217] - 53.786923757s
+2026/03/30 17:47:50 models/db/list.go:210:FindAndCount() [W] [Slow SQL Query] SELECT "id", "repo_id", "schedule_id", "next", "prev", "spec", "created", "updated" FROM "action_schedule_spec" WHERE next<=$1 ORDER BY "id" DESC LIMIT 50 [1774892817] - 53.786929798s
+2026/03/30 17:48:28 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:48:28 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:33544, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:48:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:48:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:42092, 200 OK in 0.3ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:48:42 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:48:42 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:58066, 200 OK in 0.7ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:48:49 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:48:49 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:58082, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:48:50 models/db/list.go:210:FindAndCount() [W] [Slow SQL Query] SELECT "id", "repo_id", "schedule_id", "next", "prev", "spec", "created", "updated" FROM "action_schedule_spec" WHERE next<=$1 ORDER BY "id" DESC LIMIT 50 [1774892877] - 53.186354285s
+2026/03/30 17:48:57 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:48:57 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:45410, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:49:04 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:49:04 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:34532, 200 OK in 0.5ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:49:12 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:49:12 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:40696, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:49:29 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:49:29 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:60650, 200 OK in 0.6ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:49:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:49:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:34592, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:49:50 HTTPRequest [W] router: slow      GET /ops/proxmox_florin_server.git/info/refs?service=git-receive-pack for 172.16.240.1:47592, elapsed 3543.4ms @ web/web.go:118(web.Routes.webAuth)
+2026/03/30 17:50:01 HTTPRequest [W] router: slow      GET /ops/proxmox_florin_server.git/info/refs?service=git-receive-pack for 172.16.240.1:38022, elapsed 3224.5ms @ web/web.go:118(web.Routes.webAuth)
+2026/03/30 17:50:14 models/user/user.go:1277:GetUser() [W] [Slow SQL Query] SELECT "id", "lower_name", "name", "full_name", "email", "keep_email_private", "email_notifications_preference", "passwd", "passwd_hash_algo", "must_change_password", "login_type", "login_source", "login_name", "type", "location", "website", "rands", "salt", "language", "description", "created_unix", "updated_unix", "last_login_unix", "last_repo_visibility", "max_repo_creation", "is_active", "is_admin", "is_restricted", "allow_git_hook", "allow_import_local", "allow_create_organization", "prohibit_login", "avatar", "avatar_email", "use_custom_avatar", "num_followers", "num_following", "num_stars", "num_repos", "num_teams", "num_members", "visibility", "repo_admin_change_team_access", "diff_view_style", "theme", "keep_activity_private" FROM "user" WHERE "lower_name"=$1 LIMIT 1 [ops-gitea] - 26.807153984s
+2026/03/30 17:50:14 services/auth/basic.go:136:(*Basic).Verify() [E] UserSignIn: context canceled
+2026/03/30 17:50:14 routers/web/web.go:121:Routes.webAuth.10() [E] Failed to verify user: context canceled
+2026/03/30 17:50:14 HTTPRequest [I] router: completed GET /ops/proxmox_florin_server.git/info/refs?service=git-receive-pack for 172.16.240.1:47592, 401 Unauthorized in 26807.6ms @ web/web.go:118(web.Routes.webAuth)
+2026/03/30 17:50:14 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
+2026/03/30 17:50:14 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:39000, 200 OK in 3.8ms @ healthcheck/check.go:67(healthcheck.Check)
+2026/03/30 17:50:37 HTTPRequest [I] router: completed GET /api/v1/version for 172.16.240.1:49936, 200 OK in 0.1ms @ misc/version.go:15(misc.Version)
+2026/03/30 17:50:40 HTTPRequest [W] router: slow      GET /user/login for 172.16.240.1:49950, elapsed 3237.2ms @ auth/auth.go:184(auth.SignIn)
+2026/03/30 17:50:40 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/proxmox_florin_server/branches/codex%2Fws-0297-live-apply for 172.16.240.1:49954, elapsed 3219.0ms @ v1/api.go:792(v1.Routes.apiAuth)
+2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/proxmox_florin_server/branches/codex%2Fws-0297-live-apply for 172.16.240.1:59680, elapsed 3373.9ms @ v1/api.go:792(v1.Routes.apiAuth)
+2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /user/login for 172.16.240.1:59694, elapsed 3350.8ms @ auth/auth.go:184(auth.SignIn)
+2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/proxmox_florin_server/actions/runs?limit=5 for 172.16.240.1:59696, elapsed 3350.0ms @ v1/api.go:792(v1.Routes.apiAuth)
+2026/03/30 17:51:45 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres

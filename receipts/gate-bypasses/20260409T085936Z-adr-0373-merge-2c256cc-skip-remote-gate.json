@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-09T08:59:36Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "adr-0373-merge",
+  "commit": "2c256cc8fd82e70a41dde02dd264a627aac30ee8",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Fix API gateway port conflict: 8080 used by Stalwart mail, gateway should be 8083",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "Verified port 8083 is free",
+      "port 8080 occupied by lv3-mail-stalwart",
+      "NGINX and LibreChat already point to 8083"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-10",
+    "remediation_ref": "inventory/group_vars/platform_services.yml"
+  }
+}

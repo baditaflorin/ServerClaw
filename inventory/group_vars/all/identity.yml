@@ -9,8 +9,8 @@
 # Core identity anchors — everything else in this file derives from these
 # ---------------------------------------------------------------------------
 platform_domain: lv3.org
-platform_operator_email: operator@lv3.org
-platform_operator_name: "Florin Badita"
+platform_operator_email: florin@lv3.org
+platform_operator_name: "Florin Badita-Nistor"
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 
 # ---------------------------------------------------------------------------

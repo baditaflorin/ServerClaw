@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0224-education-repo-profile-refresh-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_by": "codex",
+  "source_commit": "e1edc6e89bf4d9e7f7970cfaf7d23030bffe9785",
+  "repo_version_context": "0.177.87",
+  "platform_version_context": "0.130.59",
+  "workflow_id": "deploy-repo-profile",
+  "adr": "0224",
+  "summary": "Added a named repo-deploy profile for `education_wemeshup`, fixed the governed Coolify operator path to run with repo-managed Python dependencies, and refreshed production from upstream `main` commit `4d27ded77559269d1a5e05b3e3aaf9acd198a0ea` so the public taxonomy continues to serve `1056` activities.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "application",
+      "name": "education-wemeshup.apps.lv3.org",
+      "address": "https://education-wemeshup.apps.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repo regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_lv3_cli.py tests/test_repo_deploy_profiles.py -q` passed with `55 passed in 2.91s`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` returned `Repository data models OK`, and `./scripts/validate_repo.sh agent-standards` passed from this worktree."
+    },
+    {
+      "check": "Named profile operator path",
+      "result": "pass",
+      "observed": "`make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--dry-run --wait'` expanded the catalog entry into the governed Coolify command, and `make coolify-manage ACTION=whoami` confirmed the private controller path plus usable deployment server."
+    },
+    {
+      "check": "Upstream release target",
+      "result": "pass",
+      "observed": "`git ls-remote git@github.com:baditaflorin/education_wemeshup.git HEAD refs/heads/main` returned `4d27ded77559269d1a5e05b3e3aaf9acd198a0ea` for both `HEAD` and `refs/heads/main` immediately before the redeploy."
+    },
+    {
+      "check": "Governed production redeploy",
+      "result": "pass",
+      "observed": "`make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait --timeout 1800'` finished on attempt `1` with deployment `lwyww144yknn3fe524ou8pq7`, and the deployment payload showed the rebuilt `catalog-api` image tag `p10amt0lscl3upokas4mq45y_catalog-api:4d27ded77559269d1a5e05b3e3aaf9acd198a0ea`."
+    },
+    {
+      "check": "Public production verification",
+      "result": "pass",
+      "observed": "`curl -ksSI https://education-wemeshup.apps.lv3.org/ | head -n 1` returned `HTTP/2 200`, and `/api/v1/catalog/taxonomy` returned `catalogVersion: 2.0.0`, `activityCount: 1056`, and `categoryCount: 95` after the redeploy."
+    }
+  ],
+  "evidence_refs": [
+    "Makefile",
+    "config/repo-deploy-catalog.json",
+    "config/workflow-catalog.json",
+    "config/command-catalog.json",
+    "config/correction-loops.json",
+    "docs/runbooks/configure-coolify.md",
+    "docs/workstreams/ws-0296-education-refresh.md",
+    "scripts/repo_deploy_profiles.py",
+    "scripts/coolify_tool.py",
+    "scripts/lv3_cli.py",
+    "scripts/validate_repository_data_models.py",
+    "tests/test_lv3_cli.py",
+    "tests/test_repo_deploy_profiles.py",
+    "receipts/live-applies/2026-03-30-adr-0224-education-repo-profile-refresh-live-apply.json"
+  ],
+  "notes": [
+    "The preferred repeatable operator path is now the named profile wrapper: `make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait'`.",
+    "The underlying `coolify-manage` and profile wrapper now invoke their Python entrypoints through `uv run --with pyyaml python ...` so the governed path no longer depends on a pre-seeded global PyYAML install."
+  ]
+}

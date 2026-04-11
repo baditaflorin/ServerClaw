@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0029-backup-vm-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "4db86673a86b89f797bf5091db2c1d1be9508ecd",
+  "repo_version_context": "0.30.0",
+  "workflow_id": "configure-backup-vm",
+  "adr": "0029",
+  "summary": "Applied the dedicated backup VM live, created the PBS datastore, and verified the host backup target and nightly job.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "backup-lv3",
+      "vmid": "160",
+      "address": "10.10.10.60"
+    },
+    {
+      "kind": "host_storage",
+      "name": "lv3-backup-pbs"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Backup VM and PBS active",
+      "result": "pass",
+      "observed": "backup-lv3 ran Proxmox Backup Server with datastore proxmox mounted on the dedicated backup disk."
+    },
+    {
+      "check": "Host backup target configured",
+      "result": "pass",
+      "observed": "The Proxmox host used PBS storage lv3-backup-pbs pointing to 10.10.10.60:8007."
+    },
+    {
+      "check": "Nightly backup job present",
+      "result": "pass",
+      "observed": "backup-lv3-nightly protected VMIDs 110, 120, 130, 140, and 150 at 02:30."
+    }
+  ],
+  "evidence_refs": [
+    "docs/runbooks/configure-backup-vm.md",
+    "docs/adr/0029-dedicated-backup-vm-with-local-pbs.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "This receipt was backfilled from repository history and the current recorded platform state.",
+    "The platform still records platform_version 0.19.0 because the merged mainline re-apply has not been cut as a separate version milestone."
+  ]
+}

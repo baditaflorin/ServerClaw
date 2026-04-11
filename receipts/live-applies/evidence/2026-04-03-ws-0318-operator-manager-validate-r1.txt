@@ -1,0 +1,190 @@
+{
+  "$schema": "config/schemas/operators.schema.json",
+  "operators": [
+    {
+      "audit": {
+        "onboarded_at": "2026-03-23T00:00:00Z",
+        "onboarded_by": "adr-0108-bootstrap"
+      },
+      "email": "baditaflorin@gmail.com",
+      "id": "florin-badita",
+      "keycloak": {
+        "enabled": true,
+        "groups": [
+          "lv3-platform-admins",
+          "grafana-admins"
+        ],
+        "realm_roles": [
+          "platform-admin"
+        ],
+        "username": "florin.badita"
+      },
+      "name": "Florin Badita",
+      "notes": "Existing platform owner documented when ADR 0108 was implemented.",
+      "openbao": {
+        "entity_name": "florin.badita",
+        "policies": [
+          "platform-admin"
+        ]
+      },
+      "role": "admin",
+      "ssh": {
+        "certificate_ttl_hours": 24,
+        "principal": "florin.badita",
+        "public_keys": [
+          {
+            "fingerprint": "SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ",
+            "name": "bootstrap-ssh",
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server"
+          }
+        ]
+      },
+      "status": "active",
+      "tailscale": {
+        "login_email": "baditaflorin@gmail.com",
+        "tags": [
+          "tag:platform-operator"
+        ]
+      }
+    },
+    {
+      "audit": {
+        "onboarded_at": "2026-03-31T00:00:00Z",
+        "onboarded_by": "adr-0307-tmp-user"
+      },
+      "email": "florin@badita.org",
+      "id": "florin-tmp-001",
+      "keycloak": {
+        "enabled": true,
+        "groups": [
+          "lv3-platform-admins",
+          "grafana-admins"
+        ],
+        "realm_roles": [
+          "platform-admin"
+        ],
+        "username": "florin.badita-tmp"
+      },
+      "name": "Florin Badita (Temporary)",
+      "notes": "Temporary 72-hour admin account. Expires 2026-04-03T00:00:00Z.\nCreated per ADR 0307. Full service login access (Keycloak SSO, Grafana, OpenBao, Tailscale, SSH).\nMUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.\n",
+      "openbao": {
+        "entity_name": "florin.badita-tmp",
+        "policies": [
+          "platform-admin"
+        ]
+      },
+      "role": "admin",
+      "ssh": {
+        "certificate_ttl_hours": 24,
+        "principal": "florin.badita-tmp",
+        "public_keys": [
+          {
+            "fingerprint": "SHA256:KyWoKJK5IdVfFvKcgm0RflTeTnQNhwmYmRZnQNIE6VI",
+            "name": "florin-tmp-001-ephemeral",
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKP4RglsVhDD1m7PaeSkcePUR7wuJTlni5gsQ9AzNc6V florin-tmp-001@lv3 (expires 2026-04-03)"
+          }
+        ]
+      },
+      "status": "active",
+      "tailscale": {
+        "login_email": "florin@badita.org",
+        "tags": [
+          "tag:platform-operator"
+        ]
+      }
+    },
+    {
+      "audit": {
+        "onboarded_at": "2026-04-03T15:52:45Z",
+        "onboarded_by": "codex/ws-0318-live-apply"
+      },
+      "email": "baditaflorin+tmp002@gmail.com",
+      "id": "florin-tmp-002",
+      "keycloak": {
+        "enabled": true,
+        "groups": [
+          "lv3-platform-admins",
+          "grafana-admins"
+        ],
+        "realm_roles": [
+          "platform-admin"
+        ],
+        "username": "florin.badita-tmp-002"
+      },
+      "name": "Florin Badita Temporary",
+      "notes": "Temporary 1-week admin account for ADR 0318 live-apply verification. Expires 2026-04-10T00:00:00Z.\nCreated through the documented Keycloak direct-API fallback, Headscale bootstrap, and requester-CC onboarding mail replay.\nMUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.\n",
+      "openbao": {
+        "entity_name": "florin.badita-tmp-002",
+        "policies": [
+          "platform-admin"
+        ]
+      },
+      "role": "admin",
+      "ssh": {
+        "certificate_ttl_hours": 24,
+        "principal": "florin.badita-tmp-002",
+        "public_keys": [
+          {
+            "fingerprint": "SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ",
+            "name": "bootstrap-placeholder",
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server"
+          }
+        ]
+      },
+      "status": "active",
+      "tailscale": {
+        "login_email": "baditaflorin+tmp002@gmail.com",
+        "tags": [
+          "tag:platform-operator"
+        ]
+      }
+    },
+    {
+      "audit": {
+        "onboarded_at": "2026-04-01T00:00:00Z",
+        "onboarded_by": "claude-agent"
+      },
+      "email": "busui.matei1994@gmail.com",
+      "id": "matei-busui-tmp-001",
+      "keycloak": {
+        "enabled": true,
+        "groups": [
+          "lv3-platform-admins",
+          "grafana-admins"
+        ],
+        "realm_roles": [
+          "platform-admin"
+        ],
+        "username": "matei.busui-tmp"
+      },
+      "name": "Matei Busui",
+      "notes": "Temporary 1-week admin account for programmer onboarding. Expires 2026-04-08T00:00:00Z.\nCreated per ADR 0318. SSH access via step-ca + Tailscale (invite pending from Florin).\nMUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.\n",
+      "openbao": {
+        "entity_name": "matei.busui-tmp",
+        "policies": [
+          "platform-admin"
+        ]
+      },
+      "role": "admin",
+      "ssh": {
+        "certificate_ttl_hours": 24,
+        "principal": "matei.busui-tmp",
+        "public_keys": [
+          {
+            "fingerprint": "SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ",
+            "name": "bootstrap-placeholder",
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server"
+          }
+        ]
+      },
+      "status": "active",
+      "tailscale": {
+        "login_email": "busui.matei1994@gmail.com",
+        "tags": [
+          "tag:platform-operator"
+        ]
+      }
+    }
+  ],
+  "schema_version": "1.0.0"
+}

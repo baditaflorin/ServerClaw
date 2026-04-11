@@ -1,0 +1,10 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   164    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/2 308
+server: nginx
+date: Wed, 01 Apr 2026 19:37:33 GMT
+content-type: text/html
+content-length: 164
+location: https://nginx.lv3.org/health/
+x-robots-tag: noindex, nofollow
