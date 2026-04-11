@@ -955,7 +955,8 @@ validate-certificates:
 
 configure-edge-publication:
 	$(MAKE) preflight WORKFLOW=configure-edge-publication
-	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
+	$(MAKE) generate-platform-vars
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --write-registry --validate
 	$(MAKE) generate-changelog-portal docs
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/public-edge.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 	$(MAKE) validate-certificates

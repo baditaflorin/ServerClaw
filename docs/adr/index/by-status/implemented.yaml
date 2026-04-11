@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-10'
+generated: '2026-04-11'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 342
+total_adrs: 343
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6373,3 +6373,24 @@ adrs:
     path: docs/adr/0402-remove-jupyterhub.md
     implemented_in_repo_version: 0.178.95
     implemented_on: '2026-04-10'
+  - adr: '0406'
+    title: Automated DNS Propagation From Single IP Source of Truth
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-11'
+    concern: bootstrap
+    keywords:
+      - dns
+      - ioc
+      - automation
+      - platform-vars
+      - subdomain-catalog
+      - hetzner
+      - automated
+      - propagation
+      - from
+      - single
+    summary: generateplatformvars.py now loads inventory/groupvars/all/identity.yml in loadsources()
+    filename: 0406-automated-dns-propagation-from-single-ip-source-of-truth.md
+    path: docs/adr/0406-automated-dns-propagation-from-single-ip-source-of-truth.md
+    implemented_on: '2026-04-11'

@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-10'
+generated: '2026-04-11'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 24
+total_adrs: 25
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -414,3 +414,25 @@ adrs:
     summary: Plane becomes the primary human-visible and agent-visible surface for
     filename: 0360-plane-as-agent-task-hq.md
     path: docs/adr/0360-plane-as-agent-task-hq.md
+  - adr: '0405'
+    title: Emergency Credential Rotation After Public Release
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-11'
+    concern: security
+    keywords:
+      - security
+      - secrets
+      - rotation
+      - incident-response
+      - public-release
+      - emergency
+      - credential
+      - after
+      - public
+      - release
+    summary: We will perform a complete programmatic rotation of all 226 platform-generated
+    filename: 0405-emergency-credential-rotation-after-public-release.md
+    path: docs/adr/0405-emergency-credential-rotation-after-public-release.md
+    implemented_in_repo_version: 0.178.103
+    implemented_on: '2026-04-11'

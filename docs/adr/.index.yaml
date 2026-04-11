@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-10'
+generated: '2026-04-11'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 436
+total_adrs: 439
 adr_number_range:
   first: '0001'
-  last: '0403'
-  next_available: '0404'
+  last: '0406'
+  next_available: '0407'
 implementation_status_summary:
-  Implemented: 342
+  Implemented: 343
   Partial: 3
   Not Implemented: 33
   Deprecated: 5
-  Accepted: 24
-  Proposed: 29
+  Accepted: 25
+  Proposed: 30
 decision_status_summary:
-  Accepted: 338
-  Proposed: 35
+  Accepted: 340
+  Proposed: 36
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 4
+      count: 7
       first_adr: '0400'
-      last_adr: '0403'
+      last_adr: '0406'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -67,7 +67,7 @@ facets:
       count: 31
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
-      count: 6
+      count: 7
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
       count: 43
@@ -88,7 +88,7 @@ facets:
       count: 27
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 143
+      count: 144
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -97,7 +97,7 @@ facets:
       count: 6
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 37
+      count: 38
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -111,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 342
+      count: 343
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -127,18 +127,35 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 24
+      count: 25
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 29
+      count: 30
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0404'
+  next_available_adr: '0407'
 latest_adrs:
+  - adr: '0406'
+    title: Automated DNS Propagation From Single IP Source of Truth
+    implementation_status: Implemented
+    concern: bootstrap
+    path: docs/adr/0406-automated-dns-propagation-from-single-ip-source-of-truth.md
+    implemented_on: '2026-04-11'
+  - adr: '0405'
+    title: Emergency Credential Rotation After Public Release
+    implementation_status: Accepted
+    concern: security
+    path: docs/adr/0405-emergency-credential-rotation-after-public-release.md
+    implemented_on: '2026-04-11'
+  - adr: '0404'
+    title: Service Lifecycle Contract — BEGIN/END Markers as Platform Standard
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0404-service-lifecycle-contract.md
   - adr: '0403'
     title: Safe Password Alphabet Standard
     implementation_status: Partial
@@ -179,22 +196,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0397-managed-s3-bucket-consumer-pattern.md
-  - adr: 0396
-    title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
-    implementation_status: Implemented
-    concern: automation
-    path: docs/adr/0396-deterministic-service-decommissioning.md
-    implemented_on: '2026-04-10'
-  - adr: 0395
-    title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
-    implementation_status: Not Implemented
-    concern: agent-discovery
-    path: docs/adr/0395-agent-interface-abstraction-layer.md
-  - adr: 0394
-    title: Integrate LibreChat Agents API for Programmatic Agent Access
-    implementation_status: Not Implemented
-    concern: automation
-    path: docs/adr/0394-librechat-agents-api-integration.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

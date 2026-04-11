@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-10'
+generated: '2026-04-11'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 29
+total_adrs: 30
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -451,3 +451,22 @@ adrs:
       Consumer Pattern (ADR 0397).
     filename: 0398-outline-shared-s3-migration.md
     path: docs/adr/0398-outline-shared-s3-migration.md
+  - adr: '0404'
+    title: Service Lifecycle Contract — BEGIN/END Markers as Platform Standard
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - service
+      - lifecycle
+      - contract
+      - begin
+      - end
+      - markers
+      - as
+      - platform
+      - standard
+    summary: 'Every hand-authored YAML file that contains per-service blocks must wrap each block with:'
+    filename: 0404-service-lifecycle-contract.md
+    path: docs/adr/0404-service-lifecycle-contract.md

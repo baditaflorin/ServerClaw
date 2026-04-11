@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-10'
+generated: '2026-04-11'
 facet: concern
 concern: bootstrap
-total_adrs: 6
+total_adrs: 7
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -117,3 +117,24 @@ adrs:
     summary: Implement a four-layer bootstrap system that takes a fork operator from
     filename: 0386-reproducible-zero-to-platform-bootstrap.md
     path: docs/adr/0386-reproducible-zero-to-platform-bootstrap.md
+  - adr: '0406'
+    title: Automated DNS Propagation From Single IP Source of Truth
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-11'
+    concern: bootstrap
+    keywords:
+      - dns
+      - ioc
+      - automation
+      - platform-vars
+      - subdomain-catalog
+      - hetzner
+      - automated
+      - propagation
+      - from
+      - single
+    summary: generateplatformvars.py now loads inventory/groupvars/all/identity.yml in loadsources()
+    filename: 0406-automated-dns-propagation-from-single-ip-source-of-truth.md
+    path: docs/adr/0406-automated-dns-propagation-from-single-ip-source-of-truth.md
+    implemented_on: '2026-04-11'
