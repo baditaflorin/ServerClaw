@@ -162,7 +162,9 @@
   register: public_edge_generated_site_sync
   changed_when: "'<<CHANGED>>' in public_edge_generated_site_sync.stdout"
   loop: "{{ public_edge_extra_sites | selectattr('kind', 'equalto', 'static_dir') | list }}"
-  when: public_edge_sync_generated_static_dirs | bool
+  when:
+    - public_edge_sync_generated_static_dirs | bool
+    - platform_environment | default('production') != 'docker-dev'
 
 - name: Check whether the public edge certificate exists
   ansible.builtin.stat:

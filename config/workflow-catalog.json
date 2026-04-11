@@ -4602,7 +4602,7 @@
         "make syntax-check-excalidraw",
         "uv run --with pyyaml --with jsonschema python scripts/generate_diagrams.py --check",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3095/ >/dev/null && curl -fsS http://127.0.0.1:3096/'",
-        "dig +short draw.example.com @8.8.8.8 && curl -Ik --resolve draw.example.com:443:65.108.75.123 https://draw.example.com"
+        "dig +short draw.example.com @8.8.8.8 && curl -Ik --resolve draw.example.com:443:203.0.113.1 https://draw.example.com"
       ],
       "execution_class": "mutation",
       "budget": {

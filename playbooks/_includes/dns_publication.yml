@@ -3,6 +3,12 @@
 # Purpose: Converge a single Hetzner DNS A record from the subdomain catalog.
 # Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.{{ platform_domain }}")
 # Usage: import_playbook with -e service_dns_fqdn=data.{{ platform_domain }}, or set in a vars file.
+#
+# IP placeholder substitution (ADR 0407):
+# The committed subdomain-catalog.json stores the generic placeholder IP 203.0.113.1
+# for all public-ingress A records. At runtime this include loads .local/identity.yml
+# (gitignored) to resolve management_ipv4 to the real deployment IP, so DNS records
+# are always set to the actual server address without any real IP ever touching git.
 
 - name: Ensure Hetzner DNS publication for service subdomain
   hosts: localhost
@@ -11,11 +17,21 @@
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../config/subdomain-catalog.json"
     inventory_defaults_path: "{{ playbook_dir }}/../../inventory/group_vars/all/identity.yml"
+    local_identity_path: "{{ playbook_dir }}/../../.local/identity.yml"
+    # Sentinel: the placeholder stored in committed catalog files.
+    # Any catalog target equal to this value is replaced with management_ipv4 at runtime.
+    _dns_public_ip_placeholder: "203.0.113.1"
 
   tasks:
-    - name: Load controller defaults
+    - name: Load controller defaults (generic — example.com / placeholder IPs)
       ansible.builtin.include_vars:
         file: "{{ inventory_defaults_path }}"
+
+    - name: Load local identity overlay (real deployment values — gitignored)
+      ansible.builtin.include_vars:
+        file: "{{ local_identity_path }}"
+      when: local_identity_path is file
+      no_log: true
 
     - name: Load the subdomain catalog
       ansible.builtin.include_vars:
@@ -53,6 +69,15 @@
             )
           }}
 
+    - name: Resolve DNS target (substitute placeholder with real management IP from .local/)
+      ansible.builtin.set_fact:
+        resolved_dns_target: >-
+          {{
+            management_ipv4
+            if selected_subdomain.target == _dns_public_ip_placeholder
+            else selected_subdomain.target
+          }}
+
     - name: "Converge the {{ service_dns_fqdn }} Hetzner DNS record"
       ansible.builtin.include_role:
         name: lv3.platform.hetzner_dns_record
@@ -60,5 +85,5 @@
         hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
         hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
         hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_value: "{{ resolved_dns_target }}"
         hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"

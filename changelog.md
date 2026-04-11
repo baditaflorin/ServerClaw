@@ -12,7 +12,9 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- [fix] Replace fake IPs with real IPs in all tracked config/catalog files — config/environment-topology.json, config/subdomain-exposure-registry.json, config/subdomain-catalog.json, config/workflow-catalog.json, versions/stack.yaml all had 203.0.113.1 committed in the private repo; replaced with 65.108.75.123 (publish pipeline sanitises for public mirror); completes the fake-IP purge started in v0.178.118
+- [fix] Revert tracked catalog files to 203.0.113.1 placeholder (ADR 0407) — v0.178.119 incorrectly committed real IPs into config/subdomain-catalog.json, config/subdomain-exposure-registry.json, config/environment-topology.json, config/workflow-catalog.json, versions/stack.yaml; reverted to generic placeholder so real IPs never touch git; runtime substitution handles real IP resolution from .local/identity.yml
+
+- [fix] Runtime DNS placeholder substitution in dns_publication.yml and provision-subdomain.yml — both playbooks now load .local/identity.yml and substitute 203.0.113.1 catalog targets with real management_ipv4 at execution time; real IPs never written to any git-tracked file (ADR 0407)
 
 - [fix] Generator now loads `.local/identity.yml` as high-priority overlay — `make generate-platform-vars` bakes real IPs/domains into `platform.yml` instead of the sanitised `203.0.113.1`/`example.com` placeholders; Makefile target updated to use `PYTHONPATH=.`; AGENTS.md and CLAUDE.md updated with critical rule and incident reference (headscale DNS → wrong IP broke Tailscale VPN)
 

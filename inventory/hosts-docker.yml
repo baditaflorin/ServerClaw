@@ -160,6 +160,7 @@ all:
             semaphore_server_port: 3004
             semaphore_host_proxy_port: 8020
             homepage_port: 3090
+            headscale_http_port: 8080
 
     lv3_guests:
       hosts:
