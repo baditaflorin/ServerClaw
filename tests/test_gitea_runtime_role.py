@@ -36,9 +36,9 @@ def test_gitea_defaults_reference_private_service_topology() -> None:
 
 def test_gitea_compose_mounts_data_volume_and_openbao_env() -> None:
     template = COMPOSE_TEMPLATE.read_text()
+    assert "{% from 'compose_macros.j2' import openbao_sidecar %}" in template
     assert "gitea-openbao-agent" in template
-    assert 'user: "0:0"' in template
-    assert 'BAO_SKIP_DROP_ROOT: "true"' in template
+    assert 'openbao_sidecar("gitea", service_name="gitea-openbao-agent", healthcheck_timeout=5)' in template
     assert "/var/lib/gitea" in template
     assert "env_file:" in template
     assert "subnet: {{ gitea_network_subnet }}" in template

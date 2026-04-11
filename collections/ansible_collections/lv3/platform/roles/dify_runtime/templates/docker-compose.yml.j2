@@ -1,4 +1,4 @@
-{% from 'compose_macros.j2' import openbao_sidecar %}
+{% from 'compose_macros.j2' import openbao_sidecar, redis_service %}
 services:
 {{ openbao_sidecar("dify") }}
 
@@ -70,28 +70,7 @@ services:
     env_file:
       - {{ dify_env_file }}
 
-  redis:
-    image: {{ dify_redis_image }}
-    container_name: {{ dify_redis_container_name }}
-    restart: unless-stopped
-    user: "{{ dify_redis_uid }}:{{ dify_redis_gid }}"
-    env_file:
-      - {{ dify_env_file }}
-    command:
-      - redis-server
-      - --requirepass
-      - {{ dify_redis_password }}
-      - --appendonly
-      - "yes"
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - redis-cli -a "{{ dify_redis_password }}" ping | grep -q PONG
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - {{ dify_redis_dir }}:/data
+{{ redis_service("dify", user=dify_redis_uid ~ ":" ~ dify_redis_gid, env_file_key="env_file") }}
 
   qdrant:
     image: {{ dify_qdrant_image }}

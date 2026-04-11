@@ -1,7 +1,7 @@
 id: ws-0368-live-apply
 adr: 0368
 title: ADR 0368 Live Apply and Completion
-status: in_progress
+status: blocked
 ready_to_merge: false
 live_applied: false
 owner: codex
@@ -13,12 +13,13 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
-- collections/ansible_collections/lv3/platform/roles/directus_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/docker-compose.yml.j2
-- collections/ansible_collections/lv3/platform/roles/grist_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/compose_macros.j2
 - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/lago_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
@@ -30,15 +31,24 @@ shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/paperless_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/compose_macros.j2
-- collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/compose_macros.j2
-- collections/ansible_collections/lv3/platform/roles/sftpgo_runtime/templates/docker-compose.yml.j2
-- collections/ansible_collections/lv3/platform/roles/superset_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
+- docs/adr/.index.yaml
 - docs/adr/0368-docker-compose-jinja2-macro-library.md
 - docs/adr/implementation-status/adr-0368.yaml
+- docs/adr/index/by-concern/platform.yaml
+- docs/adr/index/by-concern/vm-topology.yaml
+- docs/adr/index/by-range/0300-0399.yaml
+- docs/adr/index/by-status/implemented.yaml
+- docs/adr/index/by-status/proposed.yaml
 - docs/workstreams/ws-0368-live-apply.md
-- scripts/generate_cross_cutting_artifacts.py
+- scripts/generate_platform_vars.py
+- tests/test_flagsmith_runtime_role.py
+- tests/test_gitea_runtime_role.py
+- tests/test_label_studio_runtime_role.py
+- tests/test_minio_runtime_role.py
 - workstreams/active/ws-0368-live-apply.yaml
 - workstreams.yaml
 ownership_manifest:
@@ -46,12 +56,13 @@ ownership_manifest:
   - id: adr_0368_compose_macros
     paths:
     - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
-    - collections/ansible_collections/lv3/platform/roles/directus_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/docker-compose.yml.j2
-    - collections/ansible_collections/lv3/platform/roles/grist_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/compose_macros.j2
     - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/lago_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
@@ -63,22 +74,31 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/paperless_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/compose_macros.j2
-    - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/compose_macros.j2
-    - collections/ansible_collections/lv3/platform/roles/sftpgo_runtime/templates/docker-compose.yml.j2
-    - collections/ansible_collections/lv3/platform/roles/superset_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
     mode: exclusive
   - id: adr_0368_hairpin_generator
     paths:
-    - scripts/generate_cross_cutting_artifacts.py
+    - scripts/generate_platform_vars.py
     mode: exclusive
   - id: adr_0368_docs
     paths:
+    - docs/adr/.index.yaml
     - docs/adr/0368-docker-compose-jinja2-macro-library.md
     - docs/adr/implementation-status/adr-0368.yaml
+    - docs/adr/index/by-concern/platform.yaml
+    - docs/adr/index/by-concern/vm-topology.yaml
+    - docs/adr/index/by-range/0300-0399.yaml
+    - docs/adr/index/by-status/implemented.yaml
+    - docs/adr/index/by-status/proposed.yaml
     - docs/workstreams/ws-0368-live-apply.md
     - workstreams/active/ws-0368-live-apply.yaml
+    - tests/test_flagsmith_runtime_role.py
+    - tests/test_gitea_runtime_role.py
+    - tests/test_label_studio_runtime_role.py
+    - tests/test_minio_runtime_role.py
     mode: shared_contract
     contract: workstream-registry-v1
   - id: workstream_registry
@@ -95,4 +115,10 @@ notes: 'Purpose-built closure workstream for ADR 0368. Scope includes completing
   final ADR metadata without touching release files on the workstream branch.
 
   '
+blockers:
+- Controller cannot reach the Proxmox Tailscale endpoint, affected guests, or the
+  remote build server from this machine, so the live apply cannot be completed
+  truthfully from the current worktree.
+- The governed live-apply wrapper is also blocked by unrelated baseline registry
+  drift in workstreams/active/ws-0377-repo-intake-subdomain.yaml (empty adr field).
 plane_issue_id: 5bd08ebb-7b42-4947-b3d1-bcb3d20fcd84

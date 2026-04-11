@@ -1,32 +1,21 @@
+{% from 'compose_macros.j2' import openbao_sidecar %}
 version: "3.9"
 
 services:
-  openbao-agent:
-    image: {{ minio_openbao_agent_image }}
-    container_name: {{ minio_openbao_agent_container_name }}
-    restart: unless-stopped
-    user: "0:0"
-    entrypoint:
-      - /bin/sh
-      - -lc
-      - >-
-        vault agent -config=/vault/agent.hcl
-    environment:
-      BAO_ADDR: http://host.docker.internal:{{ openbao_http_port }}
-      BAO_SKIP_VERIFY: "true"
-      BAO_SKIP_DROP_ROOT: "true"
-    volumes:
-      - {{ minio_openbao_agent_dir }}:/vault:rw
-      - {{ minio_env_file | dirname }}:{{ minio_env_file | dirname }}:rw
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - test -s {{ minio_env_file }}
-      interval: 10s
-      timeout: 3s
-      retries: 12
+{{ openbao_sidecar(
+  "minio",
+  network_mode=None,
+  agent_dir_mount_target="/vault",
+  agent_dir_mount_mode="rw",
+  env_dir_mount_mode="rw",
+  entrypoint=["/bin/sh", "-lc"],
+  command=["vault agent -config=/vault/agent.hcl"],
+  extra_environment={
+    "BAO_ADDR": "http://host.docker.internal:" ~ openbao_http_port,
+    "BAO_SKIP_VERIFY": "true"
+  },
+  extra_hosts=["host.docker.internal:host-gateway"]
+) }}
 
   minio:
     image: {{ minio_image }}
